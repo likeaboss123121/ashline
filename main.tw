@@ -1,0 +1,2343 @@
+:: StoryTitle {"position":"0,508"}
+Ashline
+
+:: StoryData {"position":"0,599"}
+{
+        "ifid": "4ADA4312-A7CC-4510-9A61-902F70FE704C",
+        "format": "SugarCube",
+        "format-version": "2.36.1"
+}
+
+:: Story JavaScript [script]
+
+// Renders the start/settings screen and seeds a random seed value if the player has not chosen one yet.
+Macro.add('settingsStart', {
+	handler: function() {
+		if (!State.variables.randomSeed) {
+			State.variables.randomSeed = String(Math.floor(Math.random() * 10000000000) + 1);
+		}
+		// Story mode is intentionally visible but disabled so the release build can advertise it without exposing dead paths.
+		new Wikifier(this.output, `
+			<h3>Game Settings</h3>
+			<label><input type="radio" name="mode" value="Story" disabled${State.variables.settingsMode === "Story" ? " checked" : ""}> Story Mode (Coming Soon)</label><br>
+			<label><<radiobutton "$settingsMode" "Infinite" autocheck>> Infinite Mode</label><br><br>
+			<label>Random Seed: <<textbox "$randomSeed" "${State.variables.randomSeed}">></label><br><br>
+			<label><<checkbox "$debugMode" false true autocheck>> Enable Debug Tools</label><br><br>
+			[[Continue|${State.variables.settingsExitPassage}]]
+		`);
+	}
+});
+
+// Small shared helpers used throughout initialization and shunting logic.
+setup.initializeStateVar = function(name, defaultValue) {
+	if (typeof State.variables[name] === 'undefined') {
+		State.variables[name] = typeof defaultValue === 'function' ? defaultValue() : defaultValue;
+	}
+};
+
+// Safely parses user-provided values and falls back to a known numeric default when parsing fails.
+setup.safeParseInt = function(value, fallback) {
+	var parsed = parseInt(value, 10);
+	return isNaN(parsed) ? (typeof fallback === 'number' ? fallback : 0) : parsed;
+};
+
+// Normalizes persistent settings variables so every new session starts from a known state.
+Macro.add('initsettings', {
+	handler: function() {
+		setup.initializeStateVar('settingsMode', 'Infinite');
+		if (State.variables.settingsMode === 'Story') {
+			State.variables.settingsMode = 'Infinite';
+		}
+		setup.initializeStateVar('randomSeed', '');
+		setup.initializeStateVar('debugMode', false);
+		setup.initializeStateVar('debugSelectedTrackIndex', 0);
+		setup.initializeStateVar('debugSelectedTrainIndex', 0);
+		setup.initializeStateVar('debugSelectedCarIndex', -1);
+	}
+});
+
+// Release metadata is used both for the title screen and build-integrity popup.
+setup.releaseVersion = '0.1.0';
+setup.buildCheckDone = false;
+setup.enableBuildChangeAlert = true;
+setup.buildCacheStorageKey = 'ashline.buildMeta';
+setup.currentBuildChecksum = '';
+setup.cachedBuildChecksum = '';
+
+// Build checksums warn players when a save is being opened against a newer story build.
+// Uses a lightweight FNV-style hash to fingerprint the current story source.
+setup.hashString = function(str) {
+	var h = 2166136261;
+	for (var i = 0; i < str.length; i++) {
+		h ^= str.charCodeAt(i);
+		h = Math.imul(h, 16777619);
+	}
+	return (h >>> 0).toString(16);
+};
+
+// Reads the current `tw-storydata` payload and hashes it so saves can detect source changes.
+setup.getBuildChecksum = function() {
+	var storyData = document.querySelector('tw-storydata');
+	if (!storyData) {
+		return 'unavailable';
+	}
+	var source = storyData.outerHTML || storyData.innerHTML || '';
+	return this.hashString(source);
+};
+
+// Reads cached build metadata from local storage if it exists and is structurally valid.
+setup.readCachedBuildMeta = function() {
+	try {
+		var raw = localStorage.getItem(this.buildCacheStorageKey);
+		if (!raw) {
+			return null;
+		}
+		var parsed = JSON.parse(raw);
+		if (!parsed || typeof parsed.checksum !== 'string') {
+			return null;
+		}
+		return parsed;
+	} catch (e) {
+		return null;
+	}
+};
+
+// Persists build metadata locally so future sessions can compare old and current builds.
+setup.writeCachedBuildMeta = function(meta) {
+	try {
+		localStorage.setItem(this.buildCacheStorageKey, JSON.stringify(meta));
+	} catch (e) {
+		// Ignore cache write failures (private mode/storage restrictions).
+	}
+};
+
+// Performs a one-time per-session build mismatch check and stores both warning and last-known build values.
+setup.runBuildIntegrityCheck = function() {
+	if (this.buildCheckDone) {
+		return State.variables.pendingBuildNotice || '';
+	}
+
+	this.buildCheckDone = true;
+	var currentChecksum = this.getBuildChecksum();
+	var currentVersion = this.releaseVersion;
+	var cachedMeta = this.readCachedBuildMeta();
+	this.currentBuildChecksum = currentChecksum;
+	this.cachedBuildChecksum = cachedMeta && cachedMeta.checksum ? cachedMeta.checksum : '';
+	if (typeof console !== 'undefined' && typeof console.log === 'function') {
+		console.log('[Ashline Build Check] Cached checksum:', this.cachedBuildChecksum || '(none)');
+		console.log('[Ashline Build Check] Detected checksum:', this.currentBuildChecksum || '(unavailable)');
+	}
+
+	var previousChecksum = State.variables.lastPlayedBuildChecksum;
+	var previousVersion = State.variables.lastPlayedReleaseVersion;
+	if (typeof previousChecksum !== 'string' && cachedMeta && typeof cachedMeta.checksum === 'string') {
+		previousChecksum = cachedMeta.checksum;
+		previousVersion = cachedMeta.version || previousVersion;
+	}
+
+	var notice = '';
+	if (typeof previousChecksum === 'string' && previousChecksum !== currentChecksum) {
+		var currentShort = currentChecksum.slice(0, 8);
+		var previousShort = previousChecksum.slice(0, 8);
+		notice = 'There have been changes made to the source file since you last played. Current version ' + currentVersion + ', version last played ' + (previousVersion || 'unknown') + '. Build checksums: ' + currentShort + ' (current) vs ' + previousShort + ' (last played). Unexpected behaviour may occur. If possible, create a new save file.';
+		if (this.enableBuildChangeAlert && typeof window !== 'undefined' && typeof window.alert === 'function') {
+			window.alert(notice);
+		}
+	}
+
+	State.variables.pendingBuildNotice = notice;
+	State.variables.lastPlayedBuildChecksum = currentChecksum;
+	State.variables.lastPlayedReleaseVersion = currentVersion;
+	this.writeCachedBuildMeta({ checksum: currentChecksum, version: currentVersion, checkedAt: Date.now() });
+
+	return notice;
+};
+
+// Runs the build check once the story is ready so warning state is available before gameplay passages.
+jQuery(document).one(':storyready', function () {
+	setup.runBuildIntegrityCheck();
+});
+
+// Forces the build-integrity check to run when a passage asks for it, but leaves the warning popup-only.
+Macro.add('buildIntegrityNotice', {
+	handler: function() {
+		var notice = setup.runBuildIntegrityCheck();
+		// The text is intentionally consumed here so passages do not render duplicate inline warnings.
+		if (notice) {
+			// Notice is intentionally popup-only; do not render inline on passages.
+			State.variables.pendingBuildNotice = '';
+		}
+	}
+});
+
+// Opens an external-links credits dialog from the story menu.
+setup.showCreditsDialog = function() {
+	if (typeof Dialog === 'undefined') {
+		return;
+	}
+	Dialog.setup('Credits');
+	Dialog.wiki('<p><strong>Created by:</strong> likea</p><p><a href="http://likeaserver.myddns.me/" target="_blank" rel="noopener noreferrer">Official Website</a></p><p><a href="https://github.com/likeaboss123121" target="_blank" rel="noopener noreferrer">GitHub</a></p><p><a href="https://discord.com/users/344492125687250944" target="_blank" rel="noopener noreferrer">Discord</a></p>');
+	Dialog.open();
+};
+
+// Default rolling-stock definitions.
+State.variables.defaultTrains = {
+	steamLoco: {
+		type: 'steam loco',
+		hasInterior: true,
+		cargo: [],
+		baseWeight: 50000, // kg
+		maxCargoCapacityKg: 11000,
+		maxCargoCapacityVolume: 3200, // liters
+		acceptedCargo: ['solid fuel', 'water'],
+		fuelConsumption: [{type: 'coal', amount: 0.1}, {type: 'water', amount: 0.5}], // per unit time
+		tractiveCapacity: 100, // kN
+		length: 15 // meters
+	},
+	dieselLoco: {
+		type: 'diesel loco',
+		hasInterior: true,
+		cargo: [],
+		baseWeight: 150000, // kg
+		maxCargoCapacityKg: 3200,
+		maxCargoCapacityVolume: 3200, // liters
+		acceptedCargo: ['liquid fuel'],
+		fuelConsumption: [{type: 'diesel', amount: 0.05}],
+		tractiveCapacity: 150,
+		length: 18
+	},
+	boxcar: {
+		type: 'boxcar',
+		hasInterior: true,
+		cargo: [],
+		baseWeight: 20000, // kg
+		maxCargoCapacityKg: 85000,
+		maxCargoCapacityVolume: 50000, // liters
+		acceptedCargo: ['rigid', 'aggregate'],
+		fuelConsumption: [],
+		tractiveCapacity: 0,
+		length: 12
+	},
+	flatcar: {
+		type: 'flatcar',
+		hasInterior: false,
+		cargo: [],
+		baseWeight: 15000, // kg
+		maxCargoCapacityKg: 85000,
+		maxCargoCapacityVolume: 60000, // liters
+		acceptedCargo: ['rigid'],
+		fuelConsumption: [],
+		tractiveCapacity: 0,
+		length: 14
+	},
+	tanker: {
+		type: 'tanker car',
+		hasInterior: false,
+		cargo: [],
+		baseWeight: 22000, // kg
+		maxCargoCapacityKg: 85000,
+		maxCargoCapacityVolume: 55000, // liters
+		acceptedCargo: ['liquid'],
+		fuelConsumption: [],
+		tractiveCapacity: 0,
+		length: 14
+	},
+	gondola: {
+		type: 'gondola',
+		hasInterior: false,
+		cargo: [],
+		baseWeight: 18000, // kg
+		maxCargoCapacityKg: 35000,
+		maxCargoCapacityVolume: 45000, // liters
+		acceptedCargo: ['aggregate', 'rigid'],
+		fuelConsumption: [],
+		tractiveCapacity: 0,
+		length: 13
+	}
+};
+
+// Default cargo definitions.
+// Tags: 'aggregate'=loose bulk, 'rigid'=discrete items, 'liquid'=fluids,
+//        'solid fuel'/'liquid fuel'=loco-specific fuels
+State.variables.cargoTypes = {
+	coal:          { density: 0.8,  rarity: 'common',   tags: ['aggregate', 'solid fuel'] },
+	water:         { density: 1.0,  rarity: 'common',   tags: ['liquid'] },
+	timber:        { density: 0.6,  rarity: 'common',   tags: ['rigid'] },
+	'scrap metal': { density: 2.0,  rarity: 'uncommon', tags: ['aggregate'] },
+	machinery:     { density: 1.5,  rarity: 'uncommon', tags: ['rigid'] },
+	food:          { density: 0.5,  rarity: 'rare',     tags: ['rigid'] },
+	diesel:        { density: 0.85, rarity: 'uncommon', tags: ['liquid', 'liquid fuel'] }
+};
+
+// Core railyard helpers power train generation, placement, shunting, and debug tooling.
+setup.railyard = {
+	locomotiveKeys: ['steamLoco', 'dieselLoco'],
+	carKeys: ['boxcar', 'flatcar', 'tanker', 'gondola'],
+	cargoPresets: [
+		{type: 'coal', amount: 25, rarity: 'common'},
+		{type: 'water', amount: 1200, rarity: 'common'},
+		{type: 'timber', amount: 35, rarity: 'common'},
+		{type: 'scrap metal', amount: 20, rarity: 'uncommon'},
+		{type: 'machinery', amount: 10, rarity: 'uncommon'},
+		{type: 'food', amount: 45, rarity: 'rare'}
+	],
+	// Deep-clones a car/template object so runtime edits do not mutate shared defaults.
+	cloneCar: function(car) {
+		return JSON.parse(JSON.stringify(car));
+	},
+	// Clamps a track index into a safe in-range value for the current station layout.
+	safeTrackIndex: function(index, maxIndex) {
+		return Math.max(0, Math.min(setup.safeParseInt(index, 0), maxIndex));
+	},
+	// Returns true for boundary tracks (entry/exit), which have special shunting and travel rules.
+	isBoundaryTrackIndex: function(stationTracks, index) {
+		return index === this.getEntryTrackIndex() || index === this.getExitTrackIndex(stationTracks);
+	},
+	// Computes remaining free length on a track, treating infinite tracks as effectively unbounded.
+	getTrackFreeLength: function(track) {
+		if (!track) {
+			return 0;
+		}
+		return track.infinite ? Number.MAX_SAFE_INTEGER : Math.max(0, track.length - this.getTrackOccupiedLength(track));
+	},
+	// Returns cargoType names accepted by this car.
+	// `acceptedCargo` can include tag names (e.g. "liquid") and/or exact cargo names (e.g. "water").
+	getAcceptedCargoTypes: function(car) {
+		var result = [];
+		var accepted = car.acceptedCargo || [];
+		var types = State.variables.cargoTypes;
+		var keys = Object.keys(types);
+		for (var k = 0; k < keys.length; k++) {
+			var name = keys[k];
+			if (accepted.indexOf(name) !== -1) {
+				result.push(name);
+				continue;
+			}
+			var tags = types[name].tags;
+			for (var t = 0; t < tags.length; t++) {
+				if (accepted.indexOf(tags[t]) !== -1) {
+					result.push(name);
+					break;
+				}
+			}
+		}
+		return result;
+	},
+	// Converts a string seed into a deterministic unsigned integer seed value.
+	seedFromString: function(str) {
+		var h = 2166136261;
+		for (var i = 0; i < str.length; i++) {
+			h = Math.imul(h ^ str.charCodeAt(i), 16777619);
+		}
+		return h >>> 0;
+	},
+	// Deterministic pseudo-random generator used for reproducible yard generation from a seed.
+	mulberry32: function(a) {
+		return function() {
+			a |= 0;
+			a = Math.imul(a + 0x6D2B79F5, 1);
+			var t = a ^ (a >>> 15);
+			t = Math.imul(t, t | 1);
+			t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+			return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+		};
+	},
+	// Inclusive integer random helper.
+	randomInt: function(rng, min, max) {
+		return Math.floor(rng() * (max - min + 1)) + min;
+	},
+	// Selects either uniformly or rarity-weighted, depending on whether the array items define rarity.
+	randomChoice: function(rng, array) {
+		if (array[0] && array[0].rarity) {
+			// Weighted by rarity
+			var weights = array.map(function(item) {
+				switch(item.rarity) {
+					case 'common': return 4;
+					case 'uncommon': return 2;
+					case 'rare': return 1;
+					default: return 1;
+				}
+			});
+			var total = weights.reduce(function(a, b) { return a + b; }, 0);
+			var r = rng() * total;
+			var sum = 0;
+			for (var i = 0; i < array.length; i++) {
+				sum += weights[i];
+				if (r < sum) return array[i];
+			}
+			return array[array.length - 1];
+		} else {
+			return array[this.randomInt(rng, 0, array.length - 1)];
+		}
+	},
+	// Generates initial cargo for a newly spawned car while respecting accepted cargo constraints.
+	generateCargoForCar: function(carKey, rng) {
+		if (carKey === 'steamLoco' || carKey === 'dieselLoco') {
+			return [];
+		}
+		// 20% chance to have cargo (for ~3 in 15 cars)
+		if (rng() > 0.2) {
+			return [];
+		}
+		var carDef = State.variables.defaultTrains[carKey];
+		var acceptedTypes = this.getAcceptedCargoTypes(carDef);
+		var filteredPresets = this.cargoPresets.filter(function(p) {
+			return acceptedTypes.indexOf(p.type) !== -1;
+		});
+		if (!filteredPresets.length) return [];
+		var count = carKey === 'boxcar' ? this.randomInt(rng, 1, 2) : 1;
+		var cargo = [];
+		for (var i = 0; i < count; i++) {
+			var item = this.randomChoice(rng, filteredPresets);
+			cargo.push({
+				type: item.type,
+				amount: this.randomInt(rng, Math.max(1, Math.floor(item.amount * 0.5)), item.amount)
+			});
+		}
+		return cargo;
+	},
+	// Creates a locomotive instance from defaults and guarantees it starts empty.
+	createLocomotiveCar: function(locoKey) {
+		var loco = this.cloneCar(State.variables.defaultTrains[locoKey]);
+		// Newly spawned locomotives should start empty.
+		loco.cargo = [];
+		return loco;
+	},
+	// Creates a one-car train from a preset key for debug placement tools.
+	createTrainFromPreset: function(presetKey) {
+		if (this.locomotiveKeys.indexOf(presetKey) !== -1) {
+			return [this.createLocomotiveCar(presetKey)];
+		}
+		var preset = State.variables.defaultTrains[presetKey];
+		if (!preset) {
+			return [];
+		}
+		var car = this.cloneCar(preset);
+		car.cargo = [];
+		return [car];
+	},
+	// Builds dropdown-friendly train type options for debug UI controls.
+	getDebugTrainTypeOptions: function() {
+		var options = [];
+		var presetKeys = this.locomotiveKeys.concat(this.carKeys);
+		for (var i = 0; i < presetKeys.length; i++) {
+			var presetKey = presetKeys[i];
+			var preset = State.variables.defaultTrains[presetKey];
+			if (!preset) {
+				continue;
+			}
+			var label = preset.type
+				.split(' ')
+				.map(function(word) {
+					return word.charAt(0).toUpperCase() + word.slice(1);
+				})
+				.join(' ');
+			options.push({ value: presetKey, label: label });
+		}
+		return options;
+	},
+	// Sums total train length in meters from all cars in the consist.
+	getTrainLength: function(train) {
+		var total = 0;
+		for (var i = 0; i < train.length; i++) {
+			total += train[i].length;
+		}
+		return total;
+	},
+	// Ensures a track has a valid `trains` array and filters out malformed entries.
+	ensureTrackTrainArray: function(stationTracks, trackIndex) {
+		if (!stationTracks || !stationTracks[trackIndex]) {
+			return null;
+		}
+		if (!Array.isArray(stationTracks[trackIndex].trains)) {
+			stationTracks[trackIndex].trains = [];
+		} else {
+			stationTracks[trackIndex].trains = stationTracks[trackIndex].trains.filter(function(train) {
+				return Array.isArray(train);
+			});
+		}
+		return stationTracks[trackIndex];
+	},
+	// Inserts a train into a track at a safe index and returns success/failure.
+	insertTrainIntoTrack: function(stationTracks, trackIndex, train, insertAt) {
+		var track = this.ensureTrackTrainArray(stationTracks, trackIndex);
+		if (!track || !Array.isArray(train)) {
+			return false;
+		}
+		var safeInsertAt = typeof insertAt === 'number'
+			? Math.max(0, Math.min(insertAt, track.trains.length))
+			: track.trains.length;
+		track.trains.splice(safeInsertAt, 0, train);
+		return true;
+	},
+	// Sums occupied length for all trains currently on a track.
+	getTrackOccupiedLength: function(track) {
+		if (!track || !Array.isArray(track.trains)) {
+			return 0;
+		}
+		var total = 0;
+		for (var i = 0; i < track.trains.length; i++) {
+			total += this.getTrainLength(track.trains[i]);
+		}
+		return total;
+	},
+	// Returns the canonical entry track index.
+	getEntryTrackIndex: function() {
+		return 0;
+	},
+	// Returns the canonical exit track index for a station layout.
+	getExitTrackIndex: function(stationTracks) {
+		return stationTracks.length - 1;
+	},
+	// Returns only yard (non-boundary) track indices.
+	getYardTrackIndices: function(stationTracks) {
+		var idx = [];
+		for (var i = 1; i < stationTracks.length - 1; i++) {
+			idx.push(i);
+		}
+		return idx;
+	},
+	// Boundary interactions unlock only when at least one middle track is empty.
+	hasEmptyMiddleTrack: function(stationTracks) {
+		if (!stationTracks || stationTracks.length < 3) {
+			return false;
+		}
+		for (var i = 1; i < stationTracks.length - 1; i++) {
+			if (!stationTracks[i].trains.length) {
+				return true;
+			}
+		}
+		return false;
+	},
+	// True when a track index is between entry and exit.
+	isYardTrackIndex: function(stationTracks, index) {
+		return index > 0 && index < stationTracks.length - 1;
+	},
+	// Produces player-facing track names.
+	getTrackLabel: function(stationTracks, index) {
+		if (index === 0) return 'Entry Track';
+		if (index === stationTracks.length - 1) return 'Exit Track';
+		return 'Yard Track ' + index;
+	},
+	// Returns track indices in current travel orientation order (forward or reversed).
+	getDirectionalTrackIndices: function(stationTracks, reverse) {
+		var order = [];
+		if (!stationTracks || !stationTracks.length) {
+			return order;
+		}
+		if (reverse) {
+			for (var r = stationTracks.length - 1; r >= 0; r--) {
+				order.push(r);
+			}
+		} else {
+			for (var i = 0; i < stationTracks.length; i++) {
+				order.push(i);
+			}
+		}
+		return order;
+	},
+	// Builds converters between oriented and actual indices for direction-aware shunting logic.
+	getDirectionalContext: function(stationTracks, playerTrackIndex) {
+		var exitIndex = this.getExitTrackIndex(stationTracks);
+		// The player reads the station left-to-right from Entry Track, but when positioned on
+		// the Exit Track the interaction order must be reversed so "front" and "rear" still
+		// mean "toward the current direction of travel".
+		var safeTrackIndex = this.safeTrackIndex(playerTrackIndex, exitIndex);
+		var reverse = safeTrackIndex === exitIndex;
+		var order = this.getDirectionalTrackIndices(stationTracks, reverse);
+		var actualToOriented = {};
+		for (var oi = 0; oi < order.length; oi++) {
+			actualToOriented[order[oi]] = oi;
+		}
+		return {
+			reverse: reverse,
+			order: order,
+			playerTrackIndex: safeTrackIndex,
+			playerOrientedIndex: actualToOriented[safeTrackIndex],
+			// Maps oriented (directional) index back to actual station array index.
+			toActualTrackIndex: function(orientedIndex) {
+				return order[orientedIndex];
+			},
+			// Maps actual station array index into oriented (directional) index.
+			toOrientedTrackIndex: function(actualIndex) {
+				return actualToOriented[actualIndex];
+			}
+		};
+	},
+	// Flattens all trains on a track into one ordered car list for mass-couple shove operations.
+	flattenTrackTrainsForDirection: function(trackTrains, reverse) {
+		var mergedCars = [];
+		if (reverse) {
+			for (var i = trackTrains.length - 1; i >= 0; i--) {
+				Array.prototype.push.apply(mergedCars, trackTrains[i]);
+			}
+		} else {
+			for (var j = 0; j < trackTrains.length; j++) {
+				Array.prototype.push.apply(mergedCars, trackTrains[j]);
+			}
+		}
+		return mergedCars;
+	},
+	// Couples one train into another, returning the front-insert delta for car index adjustments.
+	coupleTrainWithDirection: function(currentTrain, mergeTrain, reverse, toFrontInForward) {
+		if (toFrontInForward) {
+			Array.prototype.unshift.apply(currentTrain, mergeTrain);
+			return mergeTrain.length;
+		}
+		Array.prototype.push.apply(currentTrain, mergeTrain);
+		return 0;
+	},
+	// Checks whether a train can fit on a track under finite/infinite capacity rules.
+	canTrainFitOnTrack: function(track, train) {
+		if (!track) {
+			return false;
+		}
+		if (track.infinite) {
+			return true;
+		}
+		return this.getTrackOccupiedLength(track) + this.getTrainLength(train) <= track.length;
+	},
+	// Determines if any train blocks movement from the player's current gap in a chosen direction.
+	hasTrackObstructionInDirection: function(stationTracks, playerTrackIndex, enteredTrainIndex, towardExit) {
+		if (!stationTracks || !stationTracks.length) {
+			return false;
+		}
+		var exitIndex = this.getExitTrackIndex(stationTracks);
+		var safeIndex = this.safeTrackIndex(playerTrackIndex, exitIndex);
+		var currentTrack = this.ensureTrackTrainArray(stationTracks, safeIndex);
+		if (!currentTrack) {
+			return false;
+		}
+		if (typeof enteredTrainIndex !== 'undefined' && enteredTrainIndex !== null) {
+			var gap = parseInt(enteredTrainIndex, 10);
+			if (isNaN(gap)) {
+				gap = this.getDefaultEnteredTrainIndex(stationTracks, safeIndex);
+			}
+			gap = Math.max(0, Math.min(gap, currentTrack.trains.length));
+			return towardExit ? currentTrack.trains.length > gap : gap > 0;
+		}
+		return currentTrack.trains.length > 0;
+	},
+	// Convenience wrapper for "ahead" in current orientation, delegating to directional obstruction logic.
+	hasTrackObstructionAhead: function(stationTracks, playerTrackIndex) {
+		if (!stationTracks || !stationTracks.length) {
+			return false;
+		}
+		var exitIndex = this.getExitTrackIndex(stationTracks);
+		var safeIndex = this.safeTrackIndex(playerTrackIndex, exitIndex);
+		var reverseDir = safeIndex === exitIndex;
+		var enteredTrainIndex = arguments[2];
+		return this.hasTrackObstructionInDirection(stationTracks, safeIndex, enteredTrainIndex, !reverseDir);
+	},
+	// Checks that every track between two indices is empty, enabling cross-track routing.
+	hasClearPathBetweenTracks: function(stationTracks, fromTrackIndex, toTrackIndex) {
+		if (!stationTracks || !stationTracks.length) {
+			return false;
+		}
+		var lastIndex = stationTracks.length - 1;
+		var from = this.safeTrackIndex(fromTrackIndex, lastIndex);
+		var to = this.safeTrackIndex(toTrackIndex, lastIndex);
+		if (from === to) {
+			return true;
+		}
+		var start = Math.min(from, to) + 1;
+		var end = Math.max(from, to) - 1;
+		for (var i = start; i <= end; i++) {
+			var pathTrack = this.ensureTrackTrainArray(stationTracks, i);
+			if (!pathTrack) {
+				return false;
+			}
+			if (pathTrack.trains.length > 0) {
+				return false;
+			}
+		}
+		return true;
+	},
+	// Validates that the player is positioned at the departure edge of a boundary track.
+	isAtBoundaryDeparturePosition: function(stationTracks, playerTrackIndex, enteredTrainIndex, towardExit) {
+		if (!stationTracks || !stationTracks.length) {
+			return false;
+		}
+		var boundaryIndex = towardExit ? this.getExitTrackIndex(stationTracks) : this.getEntryTrackIndex();
+		var safeIndex = this.safeTrackIndex(playerTrackIndex, stationTracks.length - 1);
+		if (safeIndex !== boundaryIndex) {
+			return false;
+		}
+		var boundaryTrack = this.ensureTrackTrainArray(stationTracks, safeIndex);
+		if (!boundaryTrack) {
+			return false;
+		}
+		var gap = parseInt(enteredTrainIndex, 10);
+		if (isNaN(gap)) {
+			gap = this.getDefaultEnteredTrainIndex(stationTracks, safeIndex);
+		}
+		gap = Math.max(0, Math.min(gap, boundaryTrack.trains.length));
+		return towardExit ? gap === boundaryTrack.trains.length : gap === 0;
+	},
+	// Determines whether station-to-station forward travel is currently legal.
+	canAdvanceToNextStation: function(stationId, playerTrackIndex) {
+		var tracks = State.variables.stationTracks[stationId];
+		if (!tracks || tracks.length < 3) {
+			return false;
+		}
+		var enteredTrainIndex = State.variables.enteredTrainIndex;
+		playerTrackIndex = this.safeTrackIndex(playerTrackIndex, tracks.length - 1);
+		if (this.hasTrackObstructionInDirection(tracks, playerTrackIndex, enteredTrainIndex, true)) {
+			return false;
+		}
+		var entryIndex = this.getEntryTrackIndex();
+		var exitIndex = this.getExitTrackIndex(tracks);
+		var exitClear = tracks[exitIndex].trains.length === 0;
+		var exitReadyForDeparture = exitClear || this.isAtBoundaryDeparturePosition(tracks, playerTrackIndex, enteredTrainIndex, true);
+
+		if (playerTrackIndex === entryIndex) {
+			var yardIndices = this.getYardTrackIndices(tracks);
+			var hasClearYard = false;
+			for (var yi = 0; yi < yardIndices.length; yi++) {
+				if (tracks[yardIndices[yi]].trains.length === 0) {
+					hasClearYard = true;
+					break;
+				}
+			}
+			return hasClearYard && exitReadyForDeparture;
+		}
+
+		if (!this.isYardTrackIndex(tracks, playerTrackIndex)) {
+			return exitReadyForDeparture;
+		}
+
+		return exitReadyForDeparture;
+	},
+	// Returns a human-readable reason when forward travel is blocked.
+	getAdvanceBlockReason: function(stationId, playerTrackIndex) {
+		var tracks = State.variables.stationTracks[stationId];
+		if (!tracks || tracks.length < 3) {
+			return 'No valid station track layout.';
+		}
+		var enteredTrainIndex = State.variables.enteredTrainIndex;
+		playerTrackIndex = this.safeTrackIndex(playerTrackIndex, tracks.length - 1);
+		if (this.hasTrackObstructionInDirection(tracks, playerTrackIndex, enteredTrainIndex, true)) {
+			return 'Cannot leave current track toward the exit while a consist is ahead.';
+		}
+		var entryIndex = this.getEntryTrackIndex();
+		var exitIndex = this.getExitTrackIndex(tracks);
+		var exitClear = tracks[exitIndex].trains.length === 0;
+		var exitReadyForDeparture = exitClear || this.isAtBoundaryDeparturePosition(tracks, playerTrackIndex, enteredTrainIndex, true);
+		if (!exitReadyForDeparture) {
+			if (playerTrackIndex === exitIndex) {
+				return 'Your consist must be the last train on the exit track before leaving the station.';
+			}
+			return 'Exit track is blocked.';
+		}
+		if (playerTrackIndex === entryIndex) {
+			var yardIndices = this.getYardTrackIndices(tracks);
+			for (var yi = 0; yi < yardIndices.length; yi++) {
+				if (tracks[yardIndices[yi]].trains.length === 0) {
+					return '';
+				}
+			}
+			return 'No clear yard track between entry and exit.';
+		}
+		return '';
+	},
+	// Counts how many leading cars can fit inside a finite remaining track length.
+	getCarsFitCountForLength: function(train, maxLength) {
+		var used = 0;
+		var count = 0;
+		for (var i = 0; i < train.length; i++) {
+			if (used + train[i].length > maxLength) {
+				break;
+			}
+			used += train[i].length;
+			count++;
+		}
+		return count;
+	},
+	placeTrainInStationTracks: function(stationTracks, train, preferredTrackIndex, preferredTrainIndex, overflowTrackIndex) {
+		// Placement always tries the requested track first, then gracefully falls back through
+		// split-overflow, yard tracks, and finally the boundary tracks.
+		if (typeof preferredTrackIndex !== 'undefined' && stationTracks[preferredTrackIndex]) {
+			var preferredTrack = this.ensureTrackTrainArray(stationTracks, preferredTrackIndex);
+			if (this.canTrainFitOnTrack(preferredTrack, train)) {
+				var insertAt = Math.max(0, Math.min(preferredTrainIndex || 0, preferredTrack.trains.length));
+				this.insertTrainIntoTrack(stationTracks, preferredTrackIndex, train, insertAt);
+				return true;
+			}
+
+			// If the preferred track is a finite yard track, allow overflow into entry/exit.
+			if (this.isYardTrackIndex(stationTracks, preferredTrackIndex) && !preferredTrack.infinite) {
+				var availableLength = Math.max(0, preferredTrack.length - this.getTrackOccupiedLength(preferredTrack));
+				var fitCount = this.getCarsFitCountForLength(train, availableLength);
+				if (fitCount > 0 && fitCount < train.length) {
+					var primaryPart = train.slice(0, fitCount);
+					var overflowPart = train.slice(fitCount);
+					if (train.visited) {
+						primaryPart.visited = true;
+						overflowPart.visited = true;
+					}
+
+					var insertAtSplit = Math.max(0, Math.min(preferredTrainIndex || 0, preferredTrack.trains.length));
+					this.insertTrainIntoTrack(stationTracks, preferredTrackIndex, primaryPart, insertAtSplit);
+
+					var resolvedOverflowIndex;
+					if (typeof overflowTrackIndex === 'number' && stationTracks[overflowTrackIndex]) {
+						resolvedOverflowIndex = overflowTrackIndex;
+					} else {
+						var entryIndex = this.getEntryTrackIndex();
+						var exitIndex = this.getExitTrackIndex(stationTracks);
+						var distanceToEntry = preferredTrackIndex - entryIndex;
+						var distanceToExit = exitIndex - preferredTrackIndex;
+						resolvedOverflowIndex = distanceToEntry <= distanceToExit ? entryIndex : exitIndex;
+					}
+					if (!this.insertTrainIntoTrack(stationTracks, resolvedOverflowIndex, overflowPart)) {
+						return false;
+					}
+					return true;
+				}
+			}
+		}
+
+		var yardIndices = this.getYardTrackIndices(stationTracks);
+		for (var yi = 0; yi < yardIndices.length; yi++) {
+			var yardTrack = stationTracks[yardIndices[yi]];
+			if (this.canTrainFitOnTrack(yardTrack, train)) {
+				this.insertTrainIntoTrack(stationTracks, yardIndices[yi], train);
+				return true;
+			}
+		}
+
+		if (stationTracks[this.getEntryTrackIndex()]) {
+			this.insertTrainIntoTrack(stationTracks, this.getEntryTrackIndex(), train);
+			return true;
+		}
+		if (stationTracks[this.getExitTrackIndex(stationTracks)]) {
+			this.insertTrainIntoTrack(stationTracks, this.getExitTrackIndex(stationTracks), train);
+			return true;
+		}
+		return false;
+	},
+	placeDecoupledSplitFromCurrentTrain: function(stationId, drivingTrackIndex, splitTrain, isFrontSplit) {
+		if (!Array.isArray(splitTrain) || !splitTrain.length) {
+			return false;
+		}
+		if (typeof State.variables.stationTracks[stationId] === 'undefined') {
+			State.variables.stationTracks[stationId] = this.generateStationTracks(stationId, State.variables.randomSeed);
+		}
+		var tracks = State.variables.stationTracks[stationId];
+		if (!tracks || !tracks.length) {
+			return false;
+		}
+		var safeTrackIndex = this.safeTrackIndex(drivingTrackIndex, tracks.length - 1);
+		var track = this.ensureTrackTrainArray(tracks, safeTrackIndex);
+		if (!track) {
+			return false;
+		}
+		var rawGap = parseInt(State.variables.enteredTrainIndex, 10);
+		if (isNaN(rawGap)) {
+			rawGap = this.getDefaultEnteredTrainIndex(tracks, safeTrackIndex);
+		}
+		var gap = Math.max(0, Math.min(rawGap, track.trains.length));
+		// Front split goes after the player gap; rear split goes at the player gap.
+		var insertAt = isFrontSplit ? (gap + 1) : gap;
+		var placed = this.placeTrainInStationTracks(tracks, splitTrain, safeTrackIndex, insertAt);
+		if (!placed) {
+			return false;
+		}
+		var trackAfterPlacement = this.ensureTrackTrainArray(tracks, safeTrackIndex);
+		if (!trackAfterPlacement) {
+			return false;
+		}
+		State.variables.enteredTrainIndex = isFrontSplit
+			? Math.min(trackAfterPlacement.trains.length, gap)
+			: Math.min(trackAfterPlacement.trains.length, gap + 1);
+		return true;
+	},
+	// Deletes a selected debug target (either entire train or one car) and prunes empty trains afterward.
+	deleteDebugTarget: function(stationId, trackIndex, trainIndex, carIndex) {
+		var tracks = State.variables.stationTracks[stationId];
+		if (!tracks || !tracks[trackIndex] || !tracks[trackIndex].trains[trainIndex]) {
+			return;
+		}
+
+		if (carIndex === -1) {
+			tracks[trackIndex].trains.splice(trainIndex, 1);
+		} else {
+			tracks[trackIndex].trains[trainIndex].splice(carIndex, 1);
+		}
+
+		for (var i = 0; i < tracks.length; i++) {
+			tracks[i].trains = tracks[i].trains.filter(function(train) {
+				return train && train.length > 0;
+			});
+		}
+	},
+	// Inserts a new debug yard track immediately before exit, respecting yard track count limits.
+	addDebugTrack: function(stationId, length) {
+		var tracks = State.variables.stationTracks[stationId];
+		if (!tracks || tracks.length < 2) {
+			tracks = this.generateStationTracks(stationId, State.variables.randomSeed || 'ashline');
+			State.variables.stationTracks[stationId] = tracks;
+		}
+		if (this.getYardTrackIndices(tracks).length >= 15) {
+			return;
+		}
+		var trackLength = Math.max(1, Math.floor(length || 0));
+		var insertAt = this.getExitTrackIndex(tracks);
+		tracks.splice(insertAt, 0, { length: trackLength, trains: [] });
+		State.variables.debugSelectedTrackIndex = insertAt;
+		State.variables.debugSelectedTrainIndex = 0;
+		State.variables.debugSelectedCarIndex = -1;
+	},
+	// Removes a debug yard track while preserving boundary tracks and minimum yard count.
+	deleteDebugTrack: function(stationId, trackIndex) {
+		var tracks = State.variables.stationTracks[stationId];
+		if (!tracks || trackIndex < 0 || trackIndex >= tracks.length) {
+			return;
+		}
+		if (!this.isYardTrackIndex(tracks, trackIndex)) {
+			return;
+		}
+		if (this.getYardTrackIndices(tracks).length <= 1) {
+			return;
+		}
+		tracks.splice(trackIndex, 1);
+		State.variables.debugSelectedTrackIndex = Math.max(0, Math.min(State.variables.debugSelectedTrackIndex || 0, tracks.length - 1));
+		State.variables.debugSelectedTrainIndex = 0;
+		State.variables.debugSelectedCarIndex = -1;
+	},
+	// Swaps two trains when both destination tracks can still satisfy length constraints after swap.
+	swapDebugTrains: function(stationId, aTrackIndex, aTrainIndex, bTrackIndex, bTrainIndex) {
+		var tracks = State.variables.stationTracks[stationId];
+		if (!tracks) {
+			return { ok: false, reason: 'No station tracks available.' };
+		}
+
+		aTrackIndex = parseInt(aTrackIndex, 10);
+		aTrainIndex = parseInt(aTrainIndex, 10);
+		bTrackIndex = parseInt(bTrackIndex, 10);
+		bTrainIndex = parseInt(bTrainIndex, 10);
+
+		if (isNaN(aTrackIndex) || isNaN(aTrainIndex) || isNaN(bTrackIndex) || isNaN(bTrainIndex)) {
+			return { ok: false, reason: 'Invalid train selection.' };
+		}
+		if (!tracks[aTrackIndex] || !tracks[bTrackIndex]) {
+			return { ok: false, reason: 'Selected track does not exist.' };
+		}
+		if (!tracks[aTrackIndex].trains[aTrainIndex] || !tracks[bTrackIndex].trains[bTrainIndex]) {
+			return { ok: false, reason: 'Selected train does not exist.' };
+		}
+		if (aTrackIndex === bTrackIndex && aTrainIndex === bTrainIndex) {
+			return { ok: false, reason: 'Select two different trains.' };
+		}
+
+		var trainA = tracks[aTrackIndex].trains[aTrainIndex];
+		var trainB = tracks[bTrackIndex].trains[bTrainIndex];
+
+		var occupiedAWithoutA = this.getTrackOccupiedLength(tracks[aTrackIndex]) - this.getTrainLength(trainA);
+		var occupiedBWithoutB = this.getTrackOccupiedLength(tracks[bTrackIndex]) - this.getTrainLength(trainB);
+		var lengthA = this.getTrainLength(trainA);
+		var lengthB = this.getTrainLength(trainB);
+
+		if (!tracks[aTrackIndex].infinite && occupiedAWithoutA + lengthB > tracks[aTrackIndex].length) {
+			return { ok: false, reason: 'Train B does not fit on ' + this.getTrackLabel(tracks, aTrackIndex) + '.' };
+		}
+		if (!tracks[bTrackIndex].infinite && occupiedBWithoutB + lengthA > tracks[bTrackIndex].length) {
+			return { ok: false, reason: 'Train A does not fit on ' + this.getTrackLabel(tracks, bTrackIndex) + '.' };
+		}
+
+		tracks[aTrackIndex].trains[aTrainIndex] = trainB;
+		tracks[bTrackIndex].trains[bTrainIndex] = trainA;
+		return { ok: true };
+	},
+	// Generates one train candidate for a finite remaining length budget, with optional locomotive spawn.
+	buildTrainForRemainingTrack: function(rng, remainingLength, canSpawnLoco) {
+		var train = [];
+		var trainLength = 0;
+		var forcedTrackBreak = false;
+
+		if (canSpawnLoco && rng() < 1 / 15) {
+			var locoKey = this.randomChoice(rng, this.locomotiveKeys);
+			var loco = this.createLocomotiveCar(locoKey);
+			if (loco.length <= remainingLength) {
+				train.push(loco);
+				trainLength += loco.length;
+			}
+		}
+
+		var minCars = train.length ? 1 : 1;
+		var maxCars = this.randomInt(rng, 1, 3);
+		var carAttempts = 0;
+
+		while (carAttempts < maxCars) {
+			var carKey = this.randomChoice(rng, this.carKeys);
+			var car = this.cloneCar(State.variables.defaultTrains[carKey]);
+			car.cargo = this.generateCargoForCar(carKey, rng);
+			if (trainLength + car.length > remainingLength) {
+				forcedTrackBreak = true;
+				break;
+			}
+
+			train.push(car);
+			trainLength += car.length;
+			carAttempts++;
+
+			if (carAttempts >= minCars && rng() < 0.35) {
+				break;
+			}
+		}
+
+		if (!train.length) {
+			return null;
+		}
+
+		return {train: train, forceNextTrack: forcedTrackBreak};
+	},
+	// Procedurally generates middle-yard tracks and train placements from a deterministic seed.
+	generateRailyardTracks: function(seed) {
+		var rng = this.mulberry32(this.seedFromString(seed));
+		var trackCount = this.randomInt(rng, 1, 15);
+		var tracks = [];
+		var hasLoco = false;
+		var prevLength = this.randomInt(rng, 100, 1000);
+
+		// Weighted toward fewer trains: 0 and 1 are most common, 4 is rare.
+		var pickTrainCount = function(rngFn) {
+			var r = rngFn();
+			if (r < 0.30) return 0;
+			if (r < 0.60) return 1;
+			if (r < 0.80) return 2;
+			if (r < 0.93) return 3;
+			return 4;
+		};
+
+		for (var i = 0; i < trackCount; i++) {
+			var trackLength;
+			if (i === 0) {
+				trackLength = prevLength;
+			} else {
+				var minLen = Math.max(100, prevLength - 15);
+				var maxLen = Math.min(1000, prevLength + 15);
+				trackLength = this.randomInt(rng, minLen, maxLen);
+				prevLength = trackLength;
+			}
+			var track = {length: trackLength, trains: []};
+			var remaining = trackLength;
+			var trainsToGenerate = pickTrainCount(rng);
+
+			for (var t = 0; t < trainsToGenerate; t++) {
+				if (remaining < 12) {
+					break;
+				}
+
+				var train = [];
+				var trainLength = 0;
+				var carTarget = this.randomInt(rng, 1, 10);
+
+				// Occasional locomotive, or force one if none have spawned yet.
+				var shouldStartWithLoco = (!hasLoco && rng() < 0.45) || (hasLoco && rng() < 0.12);
+				if (shouldStartWithLoco) {
+					var locoKey = this.randomChoice(rng, this.locomotiveKeys);
+					var loco = this.createLocomotiveCar(locoKey);
+					if (loco.length <= remaining) {
+						train.push(loco);
+						trainLength += loco.length;
+						hasLoco = true;
+					}
+				}
+
+				for (var c = train.length; c < carTarget; c++) {
+					var carKey = this.randomChoice(rng, this.carKeys);
+					var car = this.cloneCar(State.variables.defaultTrains[carKey]);
+					car.cargo = this.generateCargoForCar(carKey, rng);
+					if (trainLength + car.length > remaining) {
+						break;
+					}
+					train.push(car);
+					trainLength += car.length;
+				}
+
+				if (train.length) {
+					track.trains.push(train);
+					remaining -= trainLength;
+				}
+			}
+
+			tracks.push(track);
+		}
+
+		if (!hasLoco) {
+			for (var ti = 0; ti < tracks.length; ti++) {
+				var locoKey = this.randomChoice(rng, this.locomotiveKeys);
+				var fallbackLoco = this.createLocomotiveCar(locoKey);
+				if (this.getTrackOccupiedLength(tracks[ti]) + fallbackLoco.length <= tracks[ti].length) {
+					tracks[ti].trains.unshift([fallbackLoco]);
+					hasLoco = true;
+					break;
+				}
+			}
+		}
+
+		return tracks;
+	},
+	// Builds a full station layout (entry + generated yard + exit), with a fixed tutorial station at id 1.
+	generateStationTracks: function(stationId, baseSeed) {
+		if (stationId === 1) {
+			// Station 1 is a fixed tutorial layout.
+			var tutorialLoco = this.createLocomotiveCar('dieselLoco');
+			tutorialLoco.cargo = [{ type: 'diesel', amount: 400 }];
+			return [
+				{ length: 999999, infinite: true, trains: [] },
+				{ length: 120, trains: [[tutorialLoco]] },
+				{ length: 999999, infinite: true, trains: [] }
+			];
+		}
+
+		var yardTracks = this.generateRailyardTracks(baseSeed + stationId);
+		var tracks = [{ length: 999999, infinite: true, trains: [] }]
+			.concat(yardTracks)
+			.concat([{ length: 999999, infinite: true, trains: [] }]);
+
+		return tracks;
+	},
+	// Chooses the preferred car index to board when entering a train (locomotive first, then interior car).
+	getBoardingCarIndex: function(train) {
+		for (var i = 0; i < train.length; i++) {
+			if (train[i].tractiveCapacity > 0) {
+				return i;
+			}
+		}
+
+		for (var j = 0; j < train.length; j++) {
+			if (train[j].hasInterior) {
+				return j;
+			}
+		}
+
+		return 0;
+	},
+	// Returns a grammatically correct location string for the current car.
+	getCarLocationText: function(car) {
+		return (car.hasInterior ? 'in the ' : 'on the ') + car.type;
+	},
+	// Serializes car type names for compact consist labels.
+	getTrainCarListText: function(train) {
+		var names = [];
+		for (var i = 0; i < train.length; i++) {
+			names.push(train[i].type);
+		}
+		return names.join(', ');
+	},
+	// Computes global train display numbering across all tracks, accounting for the player's removed train gap.
+	getTrainDisplayNumber: function(stationTracks, trackIndex, trainIndex) {
+		if (!stationTracks || !stationTracks.length) {
+			return 0;
+		}
+		var playerTrackIndex = arguments[3];
+		var enteredTrainIndex = arguments[4];
+		var number = 1;
+		var playerTrainAlreadyAdded = false;
+		for (var i = 0; i < stationTracks.length; i++) {
+			var track = stationTracks[i];
+			if (!track || !track.trains) {
+				continue;
+			}
+			for (var j = 0; j < track.trains.length; j++) {
+				// If we're on the player's track and we've reached the gap position, count the player's removed train
+				if (i === playerTrackIndex && !playerTrainAlreadyAdded && j === enteredTrainIndex) {
+					number++;
+					playerTrainAlreadyAdded = true;
+				}
+				if (i === trackIndex && j === trainIndex) {
+					return number;
+				}
+				number++;
+			}
+		}
+		return 0;
+	},
+	// Provides default player gap index based on boundary/yard track semantics.
+	getDefaultEnteredTrainIndex: function(stationTracks, trackIndex) {
+		if (!stationTracks || !stationTracks.length) {
+			return 0;
+		}
+		var safeTrackIndex = this.safeTrackIndex(trackIndex, stationTracks.length - 1);
+		var track = stationTracks[safeTrackIndex];
+		if (!track || !track.trains) {
+			return 0;
+		}
+		var entryIndex = this.getEntryTrackIndex();
+		var exitIndex = this.getExitTrackIndex(stationTracks);
+		if (safeTrackIndex === entryIndex) {
+			return track.trains.length;
+		}
+		if (safeTrackIndex === exitIndex) {
+			return 0;
+		}
+		return 0;
+	},
+	// Builds the visible station inventory: track headers, train summaries, and boarding links.
+	trainSummaryHtml: function(train, index) {
+		var trainLength = this.getTrainLength(train);
+		var html = '<div class="railyard-train">';
+		html += '<h3>Train ' + (index + 1) + ' (' + trainLength + 'm)</h3>';
+		html += '<ol>';
+		for (var j = 0; j < train.length; j++) {
+			var car = train[j];
+			html += '<li><strong>' + car.type + '</strong> (' + car.length + 'm, ' + car.baseWeight + 'kg base';
+			if (car.maxCargoCapacityKg > 0) {
+				html += ', ' + car.maxCargoCapacityKg + 'kg capacity';
+			}
+			html += ')';
+			if (train.visited && car.cargo && car.cargo.length) {
+				html += '<ul>';
+				for (var k = 0; k < car.cargo.length; k++) {
+					var cargo = car.cargo[k];
+					html += '<li>' + cargo.type + ': ' + cargo.amount + '</li>';
+				}
+				html += '</ul>';
+			} else if (train.visited) {
+				html += ' — Empty';
+			}
+			html += '</li>';
+		}
+		html += '</ol>';
+		html += '</div>';
+		return html;
+	}
+};
+
+// Presents the current station as a browseable list of tracks and trains, and lets the player board one.
+Macro.add('railyardButtons', {
+	handler: function() {
+		// Count trains up front so the station header can summarize how busy the yard is before listing details.
+		var tracks = State.variables.stationTracks[State.variables.currentStation];
+		var totalTrains = 0;
+		for (var t = 0; t < tracks.length; t++) {
+			totalTrains += tracks[t].trains.length;
+		}
+		var output = '<h2>Station ' + State.variables.currentStation + '</h2>';
+		output += '<p>There ' + (totalTrains === 1 ? 'is ' : 'are ') + totalTrains + ' train' + (totalTrains === 1 ? '' : 's') + ' staged across ' + tracks.length + ' track' + (tracks.length === 1 ? '' : 's') + '.</p>';
+		var displayNumber = 1;
+		// Each track is rendered independently so empty tracks, finite length, and train numbering stay readable.
+		for (var i = 0; i < tracks.length; i++) {
+			var occupied = setup.railyard.getTrackOccupiedLength(tracks[i]);
+			var remaining = tracks[i].infinite ? 'infinite' : Math.max(0, tracks[i].length - occupied) + 'm';
+			var trackLabel = setup.railyard.getTrackLabel(tracks, i);
+			output += '<h3>' + trackLabel + ' (' + (tracks[i].infinite ? 'Infinite' : tracks[i].length + 'm') + ' long, ' + remaining + ' free)</h3>';
+			if (!tracks[i].trains.length) {
+				output += '<p><em>Empty track (' + remaining + ' free).</em></p>';
+				continue;
+			}
+
+			// Boarding removes the selected train from the yard and turns it into the player's active consist.
+			for (var j = 0; j < tracks[i].trains.length; j++) {
+				output += setup.railyard.trainSummaryHtml(tracks[i].trains[j], displayNumber - 1);
+				output += '<<link "Board Train ' + displayNumber + '">><<set $enteredStation = $currentStation>><<set $enteredTrackIndex = ' + i + '>><<set $drivingTrackIndex = ' + i + '>><<set $enteredTrainIndex = ' + j + '>><<set $currentTrain = $stationTracks[$currentStation][' + i + '].trains.splice(' + j + ', 1)[0]>><<set $currentTrain.visited = true>><<set $trains.unshift($currentTrain)>><<set $currentCarIndex = setup.railyard.getBoardingCarIndex($currentTrain)>><<goto "TrainInterior">><</link>><br><br>';
+				displayNumber++;
+			}
+		}
+		new Wikifier(this.output, output);
+	}
+});
+
+// Builds the full shunting UI from the player's current gap: cross-track moves, coupling, and push options.
+Macro.add('drivingMergeButtons', {
+	handler: function() {
+		// Shunting is the densest interaction surface in the game: it merges movement,
+		// coupling, pushing, and accessibility rules into a single UI for the current gap.
+		var stationId = State.variables.currentStation;
+		if (typeof State.variables.stationTracks[stationId] === 'undefined') {
+			State.variables.stationTracks[stationId] = setup.railyard.generateStationTracks(stationId, State.variables.randomSeed);
+		}
+
+		var tracks = State.variables.stationTracks[stationId];
+		if (!tracks || !tracks.length) {
+			new Wikifier(this.output, '<p><em>No tracks available at this station.</em></p>');
+			return;
+		}
+
+		// Normalize the player's current gap before computing any accessibility or movement rules.
+		var direction = setup.railyard.getDirectionalContext(tracks, State.variables.drivingTrackIndex);
+		var playerTrackIndex = direction.playerTrackIndex;
+		var playerOrientedIndex = direction.playerOrientedIndex;
+		var reverse = direction.reverse;
+		var orientedLastIndex = tracks.length - 1;
+		var entryTrackIndex = setup.railyard.getEntryTrackIndex();
+		var exitTrackIndex = setup.railyard.getExitTrackIndex(tracks);
+		var canAccessBoundaryTracks = setup.railyard.hasEmptyMiddleTrack(tracks);
+		var rawGapIndex = parseInt(State.variables.enteredTrainIndex, 10);
+		if (isNaN(rawGapIndex)) {
+			rawGapIndex = setup.railyard.getDefaultEnteredTrainIndex(tracks, playerTrackIndex);
+		}
+		var currentTrackForGap = tracks[playerTrackIndex];
+		var maxGap = (currentTrackForGap && currentTrackForGap.trains) ? currentTrackForGap.trains.length : 0;
+		var playerGapIndex = Math.max(0, Math.min(rawGapIndex, maxGap));
+		State.variables.enteredTrainIndex = playerGapIndex;
+		// These booleans describe whether the current consist can reach the station boundaries from its present position.
+		var blockedTowardEntryOnCurrentTrack = setup.railyard.hasTrackObstructionInDirection(tracks, playerTrackIndex, playerGapIndex, false);
+		var blockedTowardExitOnCurrentTrack = setup.railyard.hasTrackObstructionInDirection(tracks, playerTrackIndex, playerGapIndex, true);
+		var blockedAheadOnCurrentTrack = setup.railyard.hasTrackObstructionAhead(tracks, playerTrackIndex, playerGapIndex);
+		var blockedBehindOnCurrentTrack = reverse ? blockedTowardExitOnCurrentTrack : blockedTowardEntryOnCurrentTrack;
+		var clearPathToEntryTrack = (playerTrackIndex === exitTrackIndex)
+			? canAccessBoundaryTracks
+			: setup.railyard.hasClearPathBetweenTracks(tracks, playerTrackIndex, entryTrackIndex);
+		var clearPathToExitTrack = (playerTrackIndex === entryTrackIndex)
+			? canAccessBoundaryTracks
+			: setup.railyard.hasClearPathBetweenTracks(tracks, playerTrackIndex, exitTrackIndex);
+		State.variables.drivingTrackIndex = playerTrackIndex;
+
+		var totalTrains = 0;
+		for (var t = 0; t < tracks.length; t++) {
+			totalTrains += tracks[t].trains.length;
+		}
+		var playerConsistLength = setup.railyard.getTrainLength(State.variables.currentTrain);
+
+		// The top section always shows the player's current shunting context before any actionable links.
+		var output = '<h3>Shunting</h3>';
+		output += '<p><strong>Current track:</strong> ' + setup.railyard.getTrackLabel(tracks, playerTrackIndex) + '</p>';
+		output += '<p><strong>Direction:</strong> ' + (reverse ? 'Reversing from Exit side' : 'Forward from Entry side') + '</p>';
+		output += '<p><strong>Current consist:</strong> ' + setup.railyard.getTrainCarListText(State.variables.currentTrain) + '</p>';
+		if (!canAccessBoundaryTracks) {
+			output += '<p class="small-description"><em>Entry Track and Exit Track remain locked until at least one yard track is empty.</em></p>';
+		}
+
+		// Boundary-track moves are handled first because they change the player's travel direction context.
+		if (playerTrackIndex !== entryTrackIndex && !blockedTowardEntryOnCurrentTrack && clearPathToEntryTrack) {
+			output += '<<link "Reverse consist to Entry Track">><<set $drivingTrackIndex = ' + entryTrackIndex + '>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</link>><br>';
+		} else if (playerTrackIndex !== entryTrackIndex && blockedTowardEntryOnCurrentTrack) {
+			output += '<span class="small-description"><em>Cannot reverse toward Entry Track while a consist is behind you on this track.</em></span><br>';
+		} else if (playerTrackIndex !== entryTrackIndex && !clearPathToEntryTrack) {
+			output += '<span class="small-description"><em>Cannot reverse to Entry Track while another track between here and entry is occupied.</em></span><br>';
+		}
+
+		if (playerTrackIndex !== exitTrackIndex && !blockedTowardExitOnCurrentTrack && clearPathToExitTrack) {
+			output += '<<link "Drive consist to Exit Track">><<set $drivingTrackIndex = ' + exitTrackIndex + '>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</link>><br>';
+		} else if (playerTrackIndex !== exitTrackIndex && !clearPathToExitTrack) {
+			output += '<span class="small-description"><em>Cannot drive to Exit Track while another track between here and exit is occupied.</em></span><br>';
+		}
+
+		// When a target track is full, these fallback actions let the player absorb that track and shove it elsewhere.
+		var appendPushOptions = function(orientedTargetIndex) {
+			var targetTrackIndex = direction.toActualTrackIndex(orientedTargetIndex);
+			var targetTrack = tracks[targetTrackIndex];
+			if (!targetTrack || !targetTrack.trains.length) {
+				return;
+			}
+
+			var occupiedLength = setup.railyard.getTrackOccupiedLength(targetTrack);
+			var destinationIndex = direction.toActualTrackIndex(orientedLastIndex);
+			var destinationLabel = setup.railyard.getTrackLabel(tracks, destinationIndex);
+			output += '<span class="small-description"><em>' + setup.railyard.getTrackLabel(tracks, targetTrackIndex) + ' currently holds ' + targetTrack.trains.length + ' train' + (targetTrack.trains.length === 1 ? '' : 's') + ' totaling ' + occupiedLength + 'm. Pushing here will couple the entire occupied track onto your consist.</em></span><br>';
+			var actionLabel = reverse
+				? 'Couple to entire track, shove to ' + destinationLabel + ', and reverse into ' + setup.railyard.getTrackLabel(tracks, targetTrackIndex)
+				: 'Couple to entire track, shove to ' + destinationLabel + ', and enter ' + setup.railyard.getTrackLabel(tracks, targetTrackIndex);
+			output += '<<link "' + actionLabel + '">><<run (function () { var trackTrains = State.variables.stationTracks[State.variables.currentStation][' + targetTrackIndex + '].trains.splice(0); var mergedCars = setup.railyard.flattenTrackTrainsForDirection(trackTrains, ' + (reverse ? 'true' : 'false') + '); setup.railyard.coupleTrainWithDirection(State.variables.currentTrain, mergedCars, ' + (reverse ? 'true' : 'false') + ', true); })()>><<set $drivingTrackIndex = ' + targetTrackIndex + '>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</link>><br>';
+		};
+
+		// If the player is at the leading boundary in the current orientation, offer direct moves into open yard tracks.
+		if (playerOrientedIndex === 0) {
+			if (orientedLastIndex > 1) {
+				var moveLabel = reverse ? 'Reverse consist into ' : 'Drive consist into ';
+				if (blockedAheadOnCurrentTrack) {
+					output += '<span class="small-description"><em>Cannot leave current track while a consist is ahead.</em></span><br>';
+				} else {
+					for (var yoi = 1; yoi < orientedLastIndex; yoi++) {
+						var mt = direction.toActualTrackIndex(yoi);
+						var yardTrack = setup.railyard.ensureTrackTrainArray(tracks, mt);
+						if (!yardTrack) {
+							continue;
+						}
+						var yardAvail = setup.railyard.getTrackFreeLength(yardTrack);
+						var targetLabel = setup.railyard.getTrackLabel(tracks, mt);
+						var moveEnteredIndexExpr = reverse ? ('$stationTracks[$currentStation][' + mt + '].trains.length') : '0';
+						if (playerConsistLength <= yardAvail) {
+							output += '<<link "' + moveLabel + targetLabel + '">><<set $drivingTrackIndex = ' + mt + '>><<set $enteredTrainIndex = ' + moveEnteredIndexExpr + '>><<goto "DrivingMode">><</link>><br>';
+						} else {
+							output += '<span class="small-description"><em>' + targetLabel + ' is blocked: requires ' + playerConsistLength + 'm, free ' + yardAvail + 'm.</em></span><br>';
+							appendPushOptions(yoi);
+						}
+					}
+				}
+			}
+		}
+
+		// The coupling section finds every train that can be reached from the current gap and explains why others cannot.
+		if (!totalTrains) {
+			output += '<p>No parked trains are available to couple at this station.</p>';
+		} else {
+			output += '<p>Select a parked train to couple to the front or rear of your current consist.</p>';
+			// Keep candidate collection separate from rendering so the same accessibility rules feed both same-track and cross-track cases.
+			var candidates = [];
+			var seen = {};
+			var addCandidate = function(candidate) {
+				var key = candidate.trackIndex + ':' + candidate.trainIndex;
+				if (seen[key]) return;
+				seen[key] = true;
+				candidates.push(candidate);
+			};
+			// This helper translates raw spatial relationships into coupling and push permissions for one candidate train.
+			var addEdgeCandidate = function(trackIndex, trainIndex, relation, blockedByBoundary, boundaryReason, orientedTrackIndex) {
+				if (!tracks[trackIndex] || !tracks[trackIndex].trains[trainIndex]) return;
+
+				var canCoupleFront = reverse ? relation === 'back' : relation === 'front';
+				var canCoupleRear = reverse ? relation === 'front' : relation === 'back';
+				var frontReason = canCoupleFront ? '' : 'Train is behind your consist.';
+				var rearReason = canCoupleRear ? '' : 'Train is in front of your consist.';
+				var pushOptions = [];
+				var pushFallbackReason = '';
+
+				if (blockedByBoundary) {
+					canCoupleFront = false;
+					canCoupleRear = false;
+					frontReason = boundaryReason;
+					rearReason = boundaryReason;
+					pushFallbackReason = boundaryReason;
+				} else if (relation === 'front') {
+					var sourceTrack = tracks[trackIndex];
+					var sourceIsBoundaryTrack = setup.railyard.isBoundaryTrackIndex(tracks, trackIndex);
+					var isSameTrackCandidate = trackIndex === playerTrackIndex;
+					var isLeadingEdgeTrain = reverse
+						? trainIndex === 0
+						: trainIndex === sourceTrack.trains.length - 1;
+					if (isSameTrackCandidate && !isLeadingEdgeTrain) {
+						pushFallbackReason = 'Only the leading train ahead of your consist can be pushed.';
+					} else if (!isSameTrackCandidate && sourceTrack.trains.length !== 1) {
+						pushFallbackReason = 'Target train is adjacent to other trains on its track.';
+					} else if (orientedTrackIndex + 1 > orientedLastIndex) {
+						pushFallbackReason = 'No next track ahead.';
+					} else {
+						var frontInsertAtExpr = reverse ? 'destinationTrack.trains.length' : '0';
+						var frontExitPathBlocked = false;
+						for (var fpi = orientedTrackIndex + 1; fpi <= orientedLastIndex; fpi++) {
+							var fpiActual = direction.toActualTrackIndex(fpi);
+							var fpiTrack = setup.railyard.ensureTrackTrainArray(tracks, fpiActual);
+							if (!fpiTrack) break;
+							var destinationIsBoundaryTrack = setup.railyard.isBoundaryTrackIndex(tracks, fpiActual);
+							if (!sourceIsBoundaryTrack && !destinationIsBoundaryTrack) {
+								continue;
+							}
+							if (fpiActual === exitTrackIndex && !canAccessBoundaryTracks) {
+								frontExitPathBlocked = true;
+								continue;
+							}
+							if (setup.railyard.canTrainFitOnTrack(fpiTrack, sourceTrack.trains[trainIndex])) {
+								pushOptions.push({ destinationIndex: fpiActual, insertAtExpression: frontInsertAtExpr, label: 'Push train into ' + setup.railyard.getTrackLabel(tracks, fpiActual) });
+							}
+						}
+						if (!pushOptions.length) {
+							pushFallbackReason = frontExitPathBlocked
+								? 'Exit track push is unavailable: no clear path between entry and exit.'
+								: 'No tracks ahead have enough free length.';
+						}
+					}
+				} else if (relation === 'back') {
+					var rearSourceTrack = tracks[trackIndex];
+					var rearSourceIsBoundaryTrack = setup.railyard.isBoundaryTrackIndex(tracks, trackIndex);
+					var isSameTrackRearCandidate = trackIndex === playerTrackIndex;
+					var isTrailingEdgeTrain = reverse
+						? trainIndex === rearSourceTrack.trains.length - 1
+						: trainIndex === 0;
+					if (isSameTrackRearCandidate && !isTrailingEdgeTrain) {
+						pushFallbackReason = 'Only the trailing train behind your consist can be pushed.';
+					} else if (!isSameTrackRearCandidate && rearSourceTrack.trains.length !== 1) {
+						pushFallbackReason = 'Target train is adjacent to other trains on its track.';
+					} else if (orientedTrackIndex - 1 < 0) {
+						pushFallbackReason = 'No previous track behind.';
+					} else {
+						var backInsertAtExpr = reverse ? '0' : 'destinationTrack.trains.length';
+						var backExitPathBlocked = false;
+						for (var bpi = orientedTrackIndex - 1; bpi >= 0; bpi--) {
+							var bpiActual = direction.toActualTrackIndex(bpi);
+							var bpiTrack = setup.railyard.ensureTrackTrainArray(tracks, bpiActual);
+							if (!bpiTrack) break;
+							var backDestinationIsBoundaryTrack = setup.railyard.isBoundaryTrackIndex(tracks, bpiActual);
+							if (!rearSourceIsBoundaryTrack && !backDestinationIsBoundaryTrack) {
+								continue;
+							}
+							if (bpiActual === exitTrackIndex && !canAccessBoundaryTracks) {
+								backExitPathBlocked = true;
+								continue;
+							}
+							if (setup.railyard.canTrainFitOnTrack(bpiTrack, rearSourceTrack.trains[trainIndex])) {
+								pushOptions.push({ destinationIndex: bpiActual, insertAtExpression: backInsertAtExpr, label: 'Push train into ' + setup.railyard.getTrackLabel(tracks, bpiActual) });
+							}
+						}
+						if (!pushOptions.length) {
+							pushFallbackReason = backExitPathBlocked
+								? 'Exit track push is unavailable: no clear path between entry and exit.'
+								: 'No tracks behind have enough free length.';
+						}
+					}
+				} else {
+					pushFallbackReason = 'Only trains directly in front of or behind your consist can be pushed.';
+				}
+
+				addCandidate({
+					trackIndex: trackIndex,
+					trainIndex: trainIndex,
+					relation: relation,
+					canCoupleFront: canCoupleFront,
+					canCoupleRear: canCoupleRear,
+					frontReason: frontReason,
+					rearReason: rearReason,
+					pushOptions: pushOptions,
+					pushFallbackReason: pushFallbackReason
+				});
+			};
+			// Boundary tracks can be intentionally hidden from the shunting UI until a middle track opens up.
+			var isBoundaryOriented = function(orientedTrackIndex) {
+				return orientedTrackIndex === 0 || orientedTrackIndex === orientedLastIndex;
+			};
+			var canReadOrientedTrack = function(orientedTrackIndex) {
+				if (!isBoundaryOriented(orientedTrackIndex)) {
+					return true;
+				}
+				if (orientedTrackIndex === playerOrientedIndex) {
+					return true;
+				}
+				return canAccessBoundaryTracks;
+			};
+			var addEdgeFromOriented = function(orientedTrackIndex, pickNearEdge) {
+				var blockedByBoundary = !canReadOrientedTrack(orientedTrackIndex);
+				var boundaryReason = 'Boundary tracks are inaccessible until at least one middle track is empty.';
+				var blockedByCurrentTrack = false;
+				var currentTrackBlockReason = '';
+				if (orientedTrackIndex > playerOrientedIndex && blockedAheadOnCurrentTrack) {
+					blockedByCurrentTrack = true;
+					currentTrackBlockReason = 'A train on your current track blocks access toward this side.';
+				} else if (orientedTrackIndex < playerOrientedIndex && blockedBehindOnCurrentTrack) {
+					blockedByCurrentTrack = true;
+					currentTrackBlockReason = 'A train on your current track blocks access toward this side.';
+				}
+				var trackIndex = direction.toActualTrackIndex(orientedTrackIndex);
+				var track = tracks[trackIndex];
+				if (!track || !track.trains.length) return;
+				var playerIsBoundary = isBoundaryOriented(playerOrientedIndex);
+				var targetIsBoundary = isBoundaryOriented(orientedTrackIndex);
+				var blockedByRoute = (playerIsBoundary && targetIsBoundary)
+					? !canAccessBoundaryTracks
+					: !setup.railyard.hasClearPathBetweenTracks(tracks, playerTrackIndex, trackIndex);
+				var routeBlockReason = 'Another occupied track blocks access to this track.';
+				var trainIndex;
+				if (pickNearEdge) {
+					trainIndex = reverse ? track.trains.length - 1 : 0;
+				} else {
+					trainIndex = reverse ? 0 : track.trains.length - 1;
+				}
+				var relation;
+				if (orientedTrackIndex > playerOrientedIndex) {
+					relation = 'front';
+				} else if (orientedTrackIndex < playerOrientedIndex) {
+					relation = 'back';
+				} else {
+					relation = pickNearEdge ? 'front' : 'back';
+				}
+				addEdgeCandidate(
+					trackIndex,
+					trainIndex,
+					relation,
+					blockedByBoundary || blockedByCurrentTrack || blockedByRoute,
+					blockedByBoundary ? boundaryReason : (blockedByCurrentTrack ? currentTrackBlockReason : routeBlockReason),
+					orientedTrackIndex
+				);
+			};
+
+			// Same-track access only exposes trains touching the player's current gap.
+			// Same-track access is gap-based: only trains touching the player's current gap are immediately interactable.
+			var currentTrackAccess = tracks[playerTrackIndex];
+			if (currentTrackAccess && currentTrackAccess.trains.length) {
+				var sameTrackBlocked = !canReadOrientedTrack(playerOrientedIndex);
+				var sameTrackBoundaryReason = 'Boundary tracks are inaccessible until at least one middle track is empty.';
+				// In forward mode, ahead = higher index (toward exit); behind = lower index (toward entry).
+				// In reverse mode, ahead = lower index (toward entry); behind = higher index (toward exit).
+				var frontAdjIdx = reverse ? (playerGapIndex - 1) : playerGapIndex;
+				var backAdjIdx = reverse ? playerGapIndex : (playerGapIndex - 1);
+				if (frontAdjIdx >= 0 && frontAdjIdx < currentTrackAccess.trains.length) {
+					addEdgeCandidate(playerTrackIndex, frontAdjIdx, 'front', sameTrackBlocked, sameTrackBoundaryReason, playerOrientedIndex);
+				}
+				if (backAdjIdx >= 0 && backAdjIdx < currentTrackAccess.trains.length) {
+					addEdgeCandidate(playerTrackIndex, backAdjIdx, 'back', sameTrackBlocked, sameTrackBoundaryReason, playerOrientedIndex);
+				}
+			}
+
+			for (var oti = 0; oti <= orientedLastIndex; oti++) {
+				if (oti === playerOrientedIndex) {
+					continue;
+				}
+				addEdgeFromOriented(oti, oti > playerOrientedIndex);
+			}
+
+			// Everything else is rendered as either actionable coupling/push choices or as blocked informational entries.
+			if (!candidates.length) {
+				output += '<p><em>No trains are currently accessible from this position.</em></p>';
+			} else {
+				for (var ai = 0; ai < candidates.length; ai++) {
+					var candidate = candidates[ai];
+					var i = candidate.trackIndex;
+					var j = candidate.trainIndex;
+					var parkedTrain = tracks[i].trains[j];
+					if (!parkedTrain) {
+						continue;
+					}
+					var parkedTrainNumber = setup.railyard.getTrainDisplayNumber(tracks, i, j, playerTrackIndex, playerGapIndex);
+					output += '<div class="railyard-train">';
+					output += '<strong>Accessible Train ' + parkedTrainNumber + '</strong> (' + setup.railyard.getTrackLabel(tracks, i) + ', ' + parkedTrain.length + ' car' + (parkedTrain.length === 1 ? '' : 's') + ')<br>';
+					output += '<span>Consist: ' + setup.railyard.getTrainCarListText(parkedTrain) + '</span><br>';
+					var enteredDecrement = (i === playerTrackIndex) ? '<<if $enteredTrainIndex > ' + j + '>><<set $enteredTrainIndex -= 1>><</if>>' : '';
+					if (candidate.canCoupleFront) {
+						output += '<<link "Couple to Front">><<set _mergeTrain = $stationTracks[$currentStation][' + i + '].trains.splice(' + j + ', 1)[0]>><<set _carDelta = setup.railyard.coupleTrainWithDirection($currentTrain, _mergeTrain, ' + (reverse ? 'true' : 'false') + ', true)>><<set $drivingTrackIndex = ' + playerTrackIndex + '>><<if typeof $currentCarIndex !== "undefined">><<set $currentCarIndex += _carDelta>><</if>>' + enteredDecrement + '<<goto "DrivingMode">><</link>>';
+					} else {
+							output += '<span class="small-description"><em>Front coupling unavailable: ' + candidate.frontReason + '</em></span>';
+					}
+					output += ' | ';
+					if (candidate.canCoupleRear) {
+							output += '<<link "Couple to Rear">><<set _mergeTrain = $stationTracks[$currentStation][' + i + '].trains.splice(' + j + ', 1)[0]>><<run setup.railyard.coupleTrainWithDirection($currentTrain, _mergeTrain, ' + (reverse ? 'true' : 'false') + ', false)>><<set $drivingTrackIndex = ' + playerTrackIndex + '>>' + enteredDecrement + '<<goto "DrivingMode">><</link>>';
+					} else {
+							output += '<span class="small-description"><em>Rear coupling unavailable: ' + candidate.rearReason + '</em></span>';
+					}
+					output += '<br>';
+					if (candidate.pushOptions && candidate.pushOptions.length) {
+						for (var poi = 0; poi < candidate.pushOptions.length; poi++) {
+							var po = candidate.pushOptions[poi];
+							output += '<<link "' + po.label + '">><<run (function () { var stationTracks = State.variables.stationTracks[State.variables.currentStation]; var sourceTrack = setup.railyard.ensureTrackTrainArray(stationTracks, ' + i + '); if (!sourceTrack) { return; } var pushedTrain = sourceTrack.trains.splice(' + j + ', 1)[0]; if (!Array.isArray(pushedTrain)) { return; } var destinationTrack = setup.railyard.ensureTrackTrainArray(stationTracks, ' + po.destinationIndex + '); if (!destinationTrack) { setup.railyard.insertTrainIntoTrack(stationTracks, ' + i + ', pushedTrain, ' + j + '); return; } var insertAt = ' + po.insertAtExpression + '; if (!setup.railyard.insertTrainIntoTrack(stationTracks, ' + po.destinationIndex + ', pushedTrain, insertAt)) { setup.railyard.insertTrainIntoTrack(stationTracks, ' + i + ', pushedTrain, ' + j + '); } })()>><<set $drivingTrackIndex = ' + playerTrackIndex + '>>' + enteredDecrement + '<<goto "DrivingMode">><</link>><br>';
+						}
+					} else {
+						output += '<span class="small-description"><em>Push unavailable: ' + candidate.pushFallbackReason + '</em></span>';
+					}
+					output += '</div>';
+				}
+			}
+
+			// Show trains on the current track that are not directly reachable (blocked by adjacent trains).
+			// Trains left out of the candidate list are shown separately so blocked consists still remain visible to the player.
+			var inaccessibleTrains = [];
+			var currentTrackChecked = setup.railyard.ensureTrackTrainArray(tracks, playerTrackIndex);
+			if (currentTrackChecked) {
+				for (var inacI = 0; inacI < currentTrackChecked.trains.length; inacI++) {
+					if (!currentTrackChecked.trains[inacI]) {
+						continue;
+					}
+					var inacKey = playerTrackIndex + ':' + inacI;
+					if (!seen[inacKey]) {
+						inaccessibleTrains.push(inacI);
+					}
+				}
+			}
+			if (inaccessibleTrains.length) {
+				output += '<p><strong>Blocked Trains on Current Track:</strong></p>';
+				for (var inacAi = 0; inacAi < inaccessibleTrains.length; inacAi++) {
+					var inacIdx = inaccessibleTrains[inacAi];
+					var inacTrain = currentTrackChecked.trains[inacIdx];
+					if (!inacTrain) {
+						continue;
+					}
+					var inacTrainNumber = setup.railyard.getTrainDisplayNumber(tracks, playerTrackIndex, inacIdx, playerTrackIndex, playerGapIndex);
+					output += '<div class="railyard-train">';
+					output += '<strong>Inaccessible Train ' + inacTrainNumber + '</strong> (' + setup.railyard.getTrackLabel(tracks, playerTrackIndex) + ', ' + inacTrain.length + ' car' + (inacTrain.length === 1 ? '' : 's') + ')<br>';
+					output += '<span>Consist: ' + setup.railyard.getTrainCarListText(inacTrain) + '</span><br>';
+					output += '<span class="small-description"><em>This train is blocked by adjacent trains on the same track.</em></span>';
+					output += '</div>';
+				}
+			}
+		}
+
+		new Wikifier(this.output, output);
+	}
+});
+
+// Ensures driving mode always has a valid station, track, and player gap before any driving UI renders.
+Macro.add('initDrivingModeState', {
+	handler: function() {
+		State.variables.currentStation = State.variables.currentStation > 1 ? State.variables.currentStation : 1;
+		if (typeof State.variables.stationTracks[State.variables.currentStation] === 'undefined') {
+			State.variables.stationTracks[State.variables.currentStation] = setup.railyard.generateStationTracks(State.variables.currentStation, State.variables.randomSeed);
+		}
+		if (typeof State.variables.drivingTrackIndex === 'undefined') {
+			if (typeof State.variables.enteredTrackIndex !== 'undefined' && State.variables.enteredStation === State.variables.currentStation) {
+				State.variables.drivingTrackIndex = State.variables.enteredTrackIndex;
+			} else {
+				State.variables.drivingTrackIndex = setup.railyard.getEntryTrackIndex();
+			}
+		}
+		if (typeof State.variables.enteredTrainIndex === 'undefined') {
+			State.variables.enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex(
+				State.variables.stationTracks[State.variables.currentStation],
+				State.variables.drivingTrackIndex
+			);
+		}
+	}
+});
+
+// Renders inter-station travel controls and explains why departure is blocked when the yard state forbids it.
+Macro.add('drivingTravelButtons', {
+	handler: function() {
+		// Travel rules reuse the same gap-aware obstruction checks as shunting so station exits behave consistently.
+		var stationId = State.variables.currentStation;
+		var trackIndex = State.variables.drivingTrackIndex;
+		var canAdvance = setup.railyard.canAdvanceToNextStation(stationId, trackIndex);
+		var blockReason = setup.railyard.getAdvanceBlockReason(stationId, trackIndex);
+		var output = '';
+		var tracks = State.variables.stationTracks[stationId];
+		var travelGapIndex = (typeof State.variables.enteredTrainIndex !== 'undefined')
+			? State.variables.enteredTrainIndex
+			: setup.railyard.getDefaultEnteredTrainIndex(tracks, trackIndex);
+		var blockedTowardEntryOnCurrentTrack = setup.railyard.hasTrackObstructionInDirection(tracks, trackIndex, travelGapIndex, false);
+		// Left available for future travel gating refinements that may depend on "ahead" checks.
+		var blockedAheadOnCurrentTrack = setup.railyard.hasTrackObstructionAhead(tracks, trackIndex, travelGapIndex);
+
+		// Going backward re-enters the previous station from its exit side; going forward enters from the entry side.
+		if (stationId > 1) {
+			if (!blockedTowardEntryOnCurrentTrack) {
+				output += '<<link "Travel to Previous Station">><<set $currentStation -= 1>><<if typeof $stationTracks[$currentStation] === \"undefined\">><<set $stationTracks[$currentStation] = setup.railyard.generateStationTracks($currentStation, $randomSeed)>><</if>><<set $drivingTrackIndex = setup.railyard.getExitTrackIndex($stationTracks[$currentStation])>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</link>><br><br>';
+			} else {
+				output += '<span class="small-description"><em>Cannot travel to the previous station while a consist is behind you on this track.</em></span><br><br>';
+			}
+		}
+
+		if (canAdvance) {
+			output += '<<link "Travel to Next Station">><<set $currentStation += 1>><<set $drivingTrackIndex = setup.railyard.getEntryTrackIndex()>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</link>>';
+		} else {
+			output += '<span class="small-description"><em>Cannot travel to the next station: ' + blockReason + '</em></span>';
+		}
+
+		new Wikifier(this.output, output);
+	}
+});
+
+// Lets the player split their current consist around the occupied car/gap and leave each section on the track layout.
+Macro.add('drivingShuntingControls', {
+	handler: function() {
+		if (!State.variables.currentTrain || State.variables.currentTrain.length <= 1) {
+			return;
+		}
+
+		// The player occupies a gap in the consist. Front and rear splits are described in terms
+		// of that gap rather than absolute array orientation so the UI stays intuitive.
+		// Precompute both split previews before rendering links so the UI can show the exact front/rear sections.
+		var output = '<h4>Shunting</h4>';
+		output += '<<set _frontSplitLength = $currentCarIndex>>';
+		output += '<<set _rearSplitLength = $currentTrain.length - ($currentCarIndex + 1)>>';
+		output += '<<set _frontSplitTrain = $currentTrain.slice(0, $currentCarIndex)>>';
+		output += '<<set _rearSplitTrain = $currentTrain.slice($currentCarIndex + 1)>>';
+		output += '<<set _frontSplitLabel = "Decouple Front Section (" + _frontSplitLength + " car" + (_frontSplitLength === 1 ? "" : "s") + ")">>';
+		output += '<<if $currentCarIndex > 0>><<link _frontSplitLabel>><<set _splitTrain = $currentTrain.splice(0, $currentCarIndex)>><<set _splitTrain.visited = true>><<run setup.railyard.placeDecoupledSplitFromCurrentTrain($currentStation, $drivingTrackIndex, _splitTrain, true)>><<set $currentCarIndex -= _splitTrain.length>><<goto "DrivingMode">><</link>><br><span class="small-description">Front section: <<print setup.railyard.getTrainCarListText(_frontSplitTrain)>></span><</if>>';
+		output += '<<if $currentCarIndex > 0 && $currentCarIndex < $currentTrain.length - 1>> | <</if>>';
+		output += '<<set _rearSplitLabel = "Decouple Rear Section (" + _rearSplitLength + " car" + (_rearSplitLength === 1 ? "" : "s") + ")">>';
+		output += '<<if $currentCarIndex < $currentTrain.length - 1>><<link _rearSplitLabel>><<set _splitTrain = $currentTrain.splice($currentCarIndex + 1)>><<set _splitTrain.visited = true>><<run setup.railyard.placeDecoupledSplitFromCurrentTrain($currentStation, $drivingTrackIndex, _splitTrain, false)>><<goto "DrivingMode">><</link>><br><span class="small-description">Rear section: <<print setup.railyard.getTrainCarListText(_rearSplitTrain)>></span><</if>>';
+
+		new Wikifier(this.output, output);
+	}
+});
+
+// Debug tools are passage-aware: each passage gets only the controls that make sense for its current state.
+Macro.add('debugTools', {
+	handler: function() {
+		if (!State.variables.debugMode) return;
+
+		// This wrapper keeps all debug DOM isolated from story markup and makes it easy to rebuild on passage refresh.
+		var currentPassage = State.passage;
+		var wrapper = document.createElement('div');
+		wrapper.className = 'debug-container';
+		wrapper.style.color = '#ad3d3d';
+		this.output.appendChild(wrapper);
+		var wiki = function (markup) {
+			jQuery(wrapper).wiki(markup);
+		};
+		// Cargo helpers centralize weight/volume math so every debug cargo editor uses the same capacity rules.
+		var getCurrentCargoLoad = function (car) {
+			var weightUsed = 0, volumeUsed = 0;
+			for (var ci = 0; ci < car.cargo.length; ci++) {
+				var cd = (State.variables.cargoTypes[car.cargo[ci].type] || { density: 1 }).density;
+				weightUsed += car.cargo[ci].amount * cd; // liters * kg/L = kg
+				volumeUsed += car.cargo[ci].amount;      // already in liters
+			}
+			return { weightUsed: weightUsed, volumeUsed: volumeUsed };
+		};
+
+		var getMaxAmountForCargo = function (car, cargoType) {
+			var limits = getCapacityLimitsForCargo(car, cargoType);
+			return limits.max;
+		};
+
+		var getCapacityLimitsForCargo = function (car, cargoType) {
+			var load = getCurrentCargoLoad(car);
+			var density = (State.variables.cargoTypes[cargoType] || { density: 1 }).density;
+			var remainingWeightKg = car.maxCargoCapacityKg > 0
+				? Math.max(0, car.maxCargoCapacityKg - load.weightUsed)
+				: 999999;
+			var remainingVolumeL = car.maxCargoCapacityVolume > 0
+				? Math.max(0, car.maxCargoCapacityVolume - load.volumeUsed)
+				: 999999;
+			var maxByWeightL = Math.floor(remainingWeightKg / density);
+			var maxByVolumeL = Math.floor(remainingVolumeL);
+			// Allowed amount is the lesser of the selected cargo's weight-limited and volume-limited space.
+			return {
+				weight: Math.max(0, maxByWeightL),
+				volume: Math.max(0, maxByVolumeL),
+				max: Math.max(0, Math.min(maxByWeightL, maxByVolumeL))
+			};
+		};
+
+		// Builds an interactive cargo editor for the selected car, including dynamic capacity limits and validation.
+		var buildAddCargoSection = function (car) {
+			if (!car || !car.acceptedCargo || !car.acceptedCargo.length) return;
+			var acceptedTypes = setup.railyard.getAcceptedCargoTypes(car);
+			if (!acceptedTypes.length) return;
+			var h4 = document.createElement('h4');
+			h4.textContent = 'Add Cargo';
+			wrapper.appendChild(h4);
+
+			var typeLabel = document.createElement('label');
+			typeLabel.textContent = 'Type: ';
+			var typeSelect = document.createElement('select');
+			for (var aci = 0; aci < acceptedTypes.length; aci++) {
+				var ct = acceptedTypes[aci];
+				var ctOpt = document.createElement('option');
+				ctOpt.value = ct;
+				ctOpt.textContent = ct;
+				typeSelect.appendChild(ctOpt);
+			}
+			typeLabel.appendChild(typeSelect);
+			wrapper.appendChild(typeLabel);
+
+			var qtyLabel = document.createElement('label');
+			qtyLabel.textContent = ' Amount: ';
+			var qtyInput = document.createElement('input');
+			qtyInput.type = 'number';
+			qtyInput.min = '1';
+			var initLimits = typeSelect.value ? getCapacityLimitsForCargo(car, typeSelect.value) : { weight: 0, volume: 0, max: 0 };
+			var initMax = initLimits.max;
+			qtyInput.max = String(initMax);
+			qtyInput.value = String(Math.min(1, initMax));
+			qtyInput.style.width = '80px';
+			var maxSpan = document.createElement('span');
+			maxSpan.textContent = ' (max: ' + initMax + ')';
+			var breakdown = document.createElement('div');
+			breakdown.style.fontSize = '0.9em';
+			breakdown.style.opacity = '0.9';
+			breakdown.textContent = 'Weight limit: ' + initLimits.weight + 'L | Volume limit: ' + initLimits.volume + 'L | Applied max: ' + initLimits.max + 'L';
+
+			typeSelect.addEventListener('change', function () {
+				var limits = getCapacityLimitsForCargo(car, this.value);
+				var newMax = limits.max;
+				qtyInput.max = String(newMax);
+				maxSpan.textContent = ' (max: ' + newMax + ')';
+				breakdown.textContent = 'Weight limit: ' + limits.weight + 'L | Volume limit: ' + limits.volume + 'L | Applied max: ' + limits.max + 'L';
+				if (parseInt(qtyInput.value, 10) > newMax) {
+					qtyInput.value = String(Math.max(0, newMax));
+				}
+			});
+
+			qtyLabel.appendChild(qtyInput);
+			wrapper.appendChild(qtyLabel);
+			wrapper.appendChild(maxSpan);
+			wrapper.appendChild(document.createElement('br'));
+			wrapper.appendChild(breakdown);
+			wrapper.appendChild(document.createElement('br'));
+
+			var addBtn = document.createElement('button');
+			addBtn.textContent = 'Add Cargo';
+			addBtn.addEventListener('click', function () {
+				var cargoType = typeSelect.value;
+				var amount = parseInt(qtyInput.value, 10);
+				if (!cargoType || isNaN(amount) || amount <= 0) return;
+				var maxNow = getMaxAmountForCargo(car, cargoType);
+				if (amount > maxNow) amount = maxNow;
+				if (amount <= 0) return;
+				var existing = null;
+				for (var ei = 0; ei < car.cargo.length; ei++) {
+					if (car.cargo[ei].type === cargoType) { existing = car.cargo[ei]; break; }
+				}
+				if (existing) {
+					existing.amount += amount;
+				} else {
+					car.cargo.push({ type: cargoType, amount: amount });
+				}
+				Engine.play(State.passage);
+			});
+			wrapper.appendChild(addBtn);
+			wrapper.appendChild(document.createElement('br'));
+		};
+		if (!document.getElementById('debug-tools-style')) {
+			var styleEl = document.createElement('style');
+			styleEl.id = 'debug-tools-style';
+			styleEl.textContent = '.debug-container a { color: #a43dad; }';
+			document.head.appendChild(styleEl);
+		}
+
+		// Shared top-level debug info is shown in every supported passage before passage-specific tools are added.
+		wiki('<hr><h3>DEBUG TOOLS</h3>');
+		var passageInfo = document.createElement('p');
+		passageInfo.textContent = 'Current passage: ' + currentPassage;
+		wrapper.appendChild(passageInfo);
+		var seedInfo = document.createElement('p');
+		var seedValue = typeof State.variables.randomSeed !== 'undefined' ? String(State.variables.randomSeed) : 'not set';
+		seedInfo.textContent = 'RNG Seed: ' + seedValue;
+		wrapper.appendChild(seedInfo);
+		var buildInfo = document.createElement('p');
+		var cachedBuild = setup.readCachedBuildMeta ? setup.readCachedBuildMeta() : null;
+		var currentBuildChecksum = setup.getBuildChecksum ? setup.getBuildChecksum() : 'unavailable';
+		var cachedBuildChecksum = cachedBuild && cachedBuild.checksum ? cachedBuild.checksum : 'none';
+		buildInfo.textContent = 'Build checksum (current/cached): ' + currentBuildChecksum.slice(0, 8) + ' / ' + cachedBuildChecksum.slice(0, 8) + ' | Version: ' + (setup.releaseVersion || 'unknown');
+		wrapper.appendChild(buildInfo);
+
+		// TrainInterior debug mode focuses on cargo editing for the active consist and current car.
+		if (currentPassage === 'TrainInterior') {
+			var currentTrain = State.variables.currentTrain;
+			if (!currentTrain || !currentTrain.length) {
+				wiki('<p><em>No active train available.</em></p><hr>');
+				return;
+			}
+
+			var currentCarIndex = State.variables.currentCarIndex;
+			if (typeof currentCarIndex === 'undefined' || currentCarIndex < 0 || currentCarIndex >= currentTrain.length) {
+				currentCarIndex = setup.railyard.getBoardingCarIndex(currentTrain);
+				State.variables.currentCarIndex = currentCarIndex;
+			}
+
+			var currentCar = currentTrain[currentCarIndex];
+			var interiorInfo = document.createElement('p');
+			interiorInfo.textContent = 'Current car: ' + currentCar.type + ' (car ' + (currentCarIndex + 1) + ' of ' + currentTrain.length + ')';
+			wrapper.appendChild(interiorInfo);
+
+			wiki('<<link "Clear Current Car Cargo">><<run State.variables.currentTrain[State.variables.currentCarIndex].cargo = []>><<goto "TrainInterior">><</link>><br>');
+			wiki('<<link "Clear Current Train Cargo">><<run (function() { for (var i = 0; i < State.variables.currentTrain.length; i++) { State.variables.currentTrain[i].cargo = []; } })()>><<goto "TrainInterior">><</link>><br>');
+			buildAddCargoSection(currentCar);
+			wiki('<hr>');
+			return;
+		}
+
+		// DrivingMode debug output is intentionally read-only for now so shunting logic is not bypassed accidentally.
+		if (currentPassage === 'DrivingMode') {
+			var drivingTrain = State.variables.currentTrain;
+			var drivingInfo = document.createElement('p');
+			drivingInfo.textContent = 'Driving track: ' + (typeof State.variables.drivingTrackIndex !== 'undefined' ? setup.railyard.getTrackLabel(State.variables.stationTracks[State.variables.currentStation] || [], State.variables.drivingTrackIndex) : 'unknown');
+			wrapper.appendChild(drivingInfo);
+			if (drivingTrain && drivingTrain.length) {
+				var consistInfo = document.createElement('p');
+				consistInfo.textContent = 'Current consist: ' + setup.railyard.getTrainCarListText(drivingTrain);
+				wrapper.appendChild(consistInfo);
+			}
+			wiki('<hr>');
+			return;
+		}
+
+		// The railyard debug panel is the full editor: selection, deletion, cargo editing, swapping, and track management.
+		if (currentPassage !== 'Railyard') {
+			wiki('<p><em>No debug tools are available in this passage yet.</em></p><hr>');
+			return;
+		}
+
+		var stationId = State.variables.currentStation;
+		if (typeof State.variables.stationTracks[stationId] === 'undefined') {
+			wiki('<p><em>No station track data available.</em></p><hr>');
+			return;
+		}
+
+		var tracks = State.variables.stationTracks[stationId];
+
+		// Count total trains
+		var totalTrains = 0;
+		for (var t = 0; t < tracks.length; t++) {
+			totalTrains += tracks[t].trains.length;
+		}
+
+		if (!totalTrains) {
+			wiki('<p><em>No trains to debug.</em></p>');
+		}
+
+		// Build the train/car selectors first so every later debug action has a stable target.
+		if (totalTrains > 0) {
+			wiki('<h4>Train & Car Selection</h4>');
+
+			// Build train dropdown
+			var trainEntries = [];
+			var trainNumber = 1;
+			for (var i = 0; i < tracks.length; i++) {
+				for (var j = 0; j < tracks[i].trains.length; j++) {
+					var trainLength = setup.railyard.getTrainLength(tracks[i].trains[j]);
+					trainEntries.push({
+						trackIndex: i,
+						trainIndex: j,
+						label: 'Train ' + trainNumber + ' (' + trainLength + 'm, Track ' + (i + 1) + ')'
+					});
+					trainNumber++;
+				}
+			}
+
+			var selectedTrackIndex = Math.max(0, Math.min(State.variables.debugSelectedTrackIndex || 0, tracks.length - 1));
+			var selectedTrack = tracks[selectedTrackIndex];
+			var selectedTrainIndex = selectedTrack && selectedTrack.trains.length > 0
+				? Math.max(0, Math.min(State.variables.debugSelectedTrainIndex || 0, selectedTrack.trains.length - 1))
+				: 0;
+
+			State.variables.debugSelectedTrackIndex = selectedTrackIndex;
+			State.variables.debugSelectedTrainIndex = selectedTrainIndex;
+
+			var trainLabel = document.createElement('label');
+			trainLabel.textContent = 'Select Train: ';
+			var trainSelect = document.createElement('select');
+			trainSelect.id = 'debugTrainSelect';
+			for (var trainEntryIndex = 0; trainEntryIndex < trainEntries.length; trainEntryIndex++) {
+				var trainEntry = trainEntries[trainEntryIndex];
+				var trainOption = document.createElement('option');
+				trainOption.value = trainEntry.trackIndex + ':' + trainEntry.trainIndex;
+				trainOption.textContent = trainEntry.label;
+				if (trainEntry.trackIndex === selectedTrackIndex && trainEntry.trainIndex === selectedTrainIndex) {
+					trainOption.selected = true;
+				}
+				trainSelect.appendChild(trainOption);
+			}
+			trainSelect.addEventListener('change', function () {
+				var parts = this.value.split(':');
+				State.variables.debugSelectedTrackIndex = parseInt(parts[0], 10);
+				State.variables.debugSelectedTrainIndex = parseInt(parts[1], 10);
+				State.variables.debugSelectedCarIndex = -1;
+				Engine.play(State.passage);
+			});
+			trainLabel.appendChild(trainSelect);
+			wrapper.appendChild(trainLabel);
+			wrapper.appendChild(document.createElement('br'));
+			wrapper.appendChild(document.createElement('br'));
+
+			// Re-resolve selected references after dropdown normalization to avoid stale indices.
+			selectedTrack = tracks[State.variables.debugSelectedTrackIndex];
+			var selectedTrain = selectedTrack && selectedTrack.trains[State.variables.debugSelectedTrainIndex];
+
+			if (selectedTrain) {
+				// Car-level targeting supports both whole-train and single-car actions.
+				var selectedCarIndex = State.variables.debugSelectedCarIndex;
+			if (selectedCarIndex < -1 || selectedCarIndex >= selectedTrain.length) {
+				selectedCarIndex = -1;
+				State.variables.debugSelectedCarIndex = -1;
+			}
+
+			var carLabel = document.createElement('label');
+			carLabel.textContent = 'Select Target: ';
+			var carSelect = document.createElement('select');
+			carSelect.id = 'debugCarSelect';
+			var entireTrainOption = document.createElement('option');
+			entireTrainOption.value = '-1';
+			entireTrainOption.textContent = 'Entire Train';
+			entireTrainOption.selected = selectedCarIndex === -1;
+			carSelect.appendChild(entireTrainOption);
+			for (var c = 0; c < selectedTrain.length; c++) {
+				var car = selectedTrain[c];
+				var carOption = document.createElement('option');
+				carOption.value = String(c);
+				carOption.textContent = car.type + ' (Car ' + (c + 1) + ')';
+				carOption.selected = c === selectedCarIndex;
+				carSelect.appendChild(carOption);
+			}
+			carSelect.addEventListener('change', function () {
+				State.variables.debugSelectedCarIndex = parseInt(this.value, 10);
+				Engine.play(State.passage);
+			});
+			carLabel.appendChild(carSelect);
+			wrapper.appendChild(carLabel);
+			wrapper.appendChild(document.createElement('br'));
+			wrapper.appendChild(document.createElement('br'));
+
+			var targetName = State.variables.debugSelectedCarIndex === -1 ? 'Train' : 'Car ' + (State.variables.debugSelectedCarIndex + 1);
+
+				wiki('<h4>Actions</h4>');
+				wiki('<<link "Delete ' + targetName + '">><<run setup.railyard.deleteDebugTarget(State.variables.currentStation, State.variables.debugSelectedTrackIndex, State.variables.debugSelectedTrainIndex, State.variables.debugSelectedCarIndex)>><<goto "Railyard">><</link>><br>');
+				wiki('<<link "Clear Cargo of ' + targetName + '">><<run (function() { if (State.variables.debugSelectedCarIndex === -1) { var train = State.variables.stationTracks[State.variables.currentStation][State.variables.debugSelectedTrackIndex].trains[State.variables.debugSelectedTrainIndex]; for (var i = 0; i < train.length; i++) { train[i].cargo = []; } } else { State.variables.stationTracks[State.variables.currentStation][State.variables.debugSelectedTrackIndex].trains[State.variables.debugSelectedTrainIndex][State.variables.debugSelectedCarIndex].cargo = []; } })()>><<goto "Railyard">><</link>><br><br>');
+				if (selectedCarIndex !== -1) {
+					buildAddCargoSection(selectedTrain[selectedCarIndex]);
+				}
+			}
+		}
+
+		// Swapping is separated from deletion/editing because it needs two train selections and fit validation.
+		if (totalTrains >= 2) {
+			wiki('<h4>Swap Two Trains</h4>');
+			var swapEntries = [];
+			var swapNumber = 1;
+			for (var sti = 0; sti < tracks.length; sti++) {
+				for (var stj = 0; stj < tracks[sti].trains.length; stj++) {
+					var swapLen = setup.railyard.getTrainLength(tracks[sti].trains[stj]);
+					swapEntries.push({
+						trackIndex: sti,
+						trainIndex: stj,
+						label: 'Train ' + swapNumber + ' (' + swapLen + 'm, ' + setup.railyard.getTrackLabel(tracks, sti) + ')'
+					});
+					swapNumber++;
+				}
+			}
+
+			var swapALabel = document.createElement('label');
+			swapALabel.textContent = 'Train A: ';
+			var swapASelect = document.createElement('select');
+			swapASelect.id = 'debugSwapTrainASelect';
+			for (var sae = 0; sae < swapEntries.length; sae++) {
+				var saOpt = document.createElement('option');
+				saOpt.value = swapEntries[sae].trackIndex + ':' + swapEntries[sae].trainIndex;
+				saOpt.textContent = swapEntries[sae].label;
+				swapASelect.appendChild(saOpt);
+			}
+			swapALabel.appendChild(swapASelect);
+			wrapper.appendChild(swapALabel);
+			wrapper.appendChild(document.createElement('br'));
+
+			var swapBLabel = document.createElement('label');
+			swapBLabel.textContent = 'Train B: ';
+			var swapBSelect = document.createElement('select');
+			swapBSelect.id = 'debugSwapTrainBSelect';
+			for (var sbe = 0; sbe < swapEntries.length; sbe++) {
+				var sbOpt = document.createElement('option');
+				sbOpt.value = swapEntries[sbe].trackIndex + ':' + swapEntries[sbe].trainIndex;
+				sbOpt.textContent = swapEntries[sbe].label;
+				swapBSelect.appendChild(sbOpt);
+			}
+			if (swapBSelect.options.length > 1) {
+				swapBSelect.selectedIndex = 1;
+			}
+			swapBLabel.appendChild(swapBSelect);
+			wrapper.appendChild(swapBLabel);
+			wrapper.appendChild(document.createElement('br'));
+
+			var swapStatus = document.createElement('div');
+			swapStatus.className = 'small-description';
+			swapStatus.style.margin = '6px 0';
+			wrapper.appendChild(swapStatus);
+
+			var swapBtn = document.createElement('button');
+			swapBtn.textContent = 'Swap Selected Trains';
+			swapBtn.addEventListener('click', function () {
+				var aParts = swapASelect.value.split(':');
+				var bParts = swapBSelect.value.split(':');
+				var result = setup.railyard.swapDebugTrains(
+					State.variables.currentStation,
+					aParts[0],
+					aParts[1],
+					bParts[0],
+					bParts[1]
+				);
+				if (!result.ok) {
+					swapStatus.textContent = 'Swap failed: ' + result.reason;
+					return;
+				}
+				Engine.play(State.passage);
+			});
+			wrapper.appendChild(swapBtn);
+			wrapper.appendChild(document.createElement('br'));
+			wrapper.appendChild(document.createElement('br'));
+		}
+
+		// Placement and track management live at the end because they mutate the yard layout itself.
+		wiki('<h4>Place New Train on Track</h4>');
+		var placeTrackLabel = document.createElement('label');
+		placeTrackLabel.textContent = 'Select Track: ';
+		var placeTrackSelect = document.createElement('select');
+		placeTrackSelect.id = 'debugPlaceTrackSelect';
+		for (var i = 0; i < tracks.length; i++) {
+			var occupied = setup.railyard.getTrackOccupiedLength(tracks[i]);
+			var remaining = tracks[i].infinite ? 'infinite' : (Math.max(0, tracks[i].length - occupied) + 'm');
+			var trackOption = document.createElement('option');
+			trackOption.value = String(i);
+			trackOption.textContent = setup.railyard.getTrackLabel(tracks, i) + ' (' + remaining + ' free)';
+			placeTrackSelect.appendChild(trackOption);
+		}
+		placeTrackLabel.appendChild(placeTrackSelect);
+		wrapper.appendChild(placeTrackLabel);
+		wrapper.appendChild(document.createElement('br'));
+
+		var trainTypeLabel = document.createElement('label');
+		trainTypeLabel.textContent = 'Select Car Type: ';
+		var trainTypeSelect = document.createElement('select');
+		trainTypeSelect.id = 'debugTrainTypeSelect';
+		var trainTypeValues = setup.railyard.getDebugTrainTypeOptions();
+		for (var typeIndex = 0; typeIndex < trainTypeValues.length; typeIndex++) {
+			var typeOption = document.createElement('option');
+			typeOption.value = trainTypeValues[typeIndex].value;
+			typeOption.textContent = trainTypeValues[typeIndex].label;
+			trainTypeSelect.appendChild(typeOption);
+		}
+		trainTypeLabel.appendChild(trainTypeSelect);
+		wrapper.appendChild(trainTypeLabel);
+		wrapper.appendChild(document.createElement('br'));
+
+		wiki('<<link "Place Train">><<run (function() { var trackIdx = parseInt(document.getElementById("debugPlaceTrackSelect").value, 10); var carType = document.getElementById("debugTrainTypeSelect").value; var newTrain = setup.railyard.createTrainFromPreset(carType); if (!newTrain.length) { return; } setup.railyard.placeTrainInStationTracks(State.variables.stationTracks[State.variables.currentStation], newTrain, trackIdx); })()>><<goto "Railyard">><</link>><br>');
+
+		wiki('<h4>Track Management</h4>');
+		var deleteTrackLabel = document.createElement('label');
+		deleteTrackLabel.textContent = 'Delete Yard Track: ';
+		var deleteTrackSelect = document.createElement('select');
+		deleteTrackSelect.id = 'debugDeleteTrackSelect';
+		for (var deleteTrackIndex = 1; deleteTrackIndex < tracks.length - 1; deleteTrackIndex++) {
+			var deleteTrack = tracks[deleteTrackIndex];
+			var deleteOccupied = setup.railyard.getTrackOccupiedLength(deleteTrack);
+			var deleteOption = document.createElement('option');
+			deleteOption.value = String(deleteTrackIndex);
+			deleteOption.textContent = setup.railyard.getTrackLabel(tracks, deleteTrackIndex) + ' (' + deleteTrack.length + 'm, ' + deleteOccupied + 'm occupied)';
+			deleteTrackSelect.appendChild(deleteOption);
+		}
+		deleteTrackLabel.appendChild(deleteTrackSelect);
+		wrapper.appendChild(deleteTrackLabel);
+		wrapper.appendChild(document.createElement('br'));
+
+		var deleteTrackBtn = document.createElement('button');
+		deleteTrackBtn.textContent = 'Delete Track';
+		deleteTrackBtn.disabled = deleteTrackSelect.options.length === 0;
+		deleteTrackBtn.addEventListener('click', function () {
+			var selected = parseInt(deleteTrackSelect.value, 10);
+			if (isNaN(selected)) return;
+			setup.railyard.deleteDebugTrack(State.variables.currentStation, selected);
+			Engine.play(State.passage);
+		});
+		wrapper.appendChild(deleteTrackBtn);
+		wrapper.appendChild(document.createElement('br'));
+		wrapper.appendChild(document.createElement('br'));
+
+		var addTrackLabel = document.createElement('label');
+		addTrackLabel.textContent = 'New Track Length (m): ';
+		var addTrackInput = document.createElement('input');
+		addTrackInput.type = 'number';
+		addTrackInput.min = '1';
+		addTrackInput.step = '1';
+		addTrackInput.value = '120';
+		addTrackInput.style.width = '90px';
+		addTrackLabel.appendChild(addTrackInput);
+		wrapper.appendChild(addTrackLabel);
+		wrapper.appendChild(document.createElement('br'));
+
+		var addTrackBtn = document.createElement('button');
+		addTrackBtn.textContent = 'Add Track';
+		addTrackBtn.disabled = setup.railyard.getYardTrackIndices(tracks).length >= 15;
+		addTrackBtn.addEventListener('click', function () {
+			var length = parseInt(addTrackInput.value, 10);
+			if (isNaN(length) || length <= 0) return;
+			setup.railyard.addDebugTrack(State.variables.currentStation, length);
+			Engine.play(State.passage);
+		});
+		wrapper.appendChild(addTrackBtn);
+		wrapper.appendChild(document.createElement('br'));
+		wrapper.appendChild(document.createElement('hr'));
+	}
+});
+
+
+
+:: Start {"position":"101,100"}
+/% Entry splash and pre-game setup passage: initializes settings state and renders the settings macro UI. %/
+<h2>Welcome to Ashline v0.1.0.</h2>
+
+<div class="small-description">
+- Save files are stored in your browser cache. Use the Export/Import tab in Saves to avoid losing them.
+<br>
+- Please report bugs directly to likea.
+
+<br><br></div>
+
+<<set $settingsExitPassage to "StoryInit">>
+<<initsettings>>
+<div id="settingsStart">
+	<<settingsStart>>
+</div>
+
+:: StoryInit {"position":"201,199"}
+/% Core game-state bootstrap passage: initializes player stats, starter train, and station state before entering gameplay. %/
+<<if $settingsMode is "Story">>
+You are a lone train engineer in a world where dangerous zombies called Foamers endlessly expand the railroad. Your goal is to travel from Punta Arenas, Chile, to Cape Town, South Africa, while surviving on your train.
+<<else>>
+You are a lone train engineer in a world where dangerous zombies called Foamers endlessly expand the railroad. Your goal is to simply survive, looting the landscape and traveling until you either become a mindless foamer or die an engineer.
+<</if>>
+
+<<set $player to {
+fatigue: 0,
+physicalDamage: 0,
+immunity: 100,
+mentalHealth: 100,
+hunger: 0,
+thirst: 0
+}>>
+
+<<set $trains to [ [$defaultTrains.steamLoco, $defaultTrains.boxcar] ]>>
+
+<<set $currentStation to 1>>
+
+<<set $stationTracks to {}>>
+
+[[Begin Your Journey|Railyard]]
+
+
+:: StoryMenu
+/% Sidebar menu extension passage: keeps utility links (currently Credits dialog) out of gameplay passages. %/
+<<link "Credits">><<run setup.showCreditsDialog()>><</link>>
+
+
+:: Railyard {"position":"402,201"}
+/% Station hub passage: resolves returning train placement, generates station tracks when needed, and renders yard interaction UI. %/
+<<buildIntegrityNotice>>
+<<if typeof $stationTracks[$currentStation] === 'undefined'>>
+	<<set $stationTracks[$currentStation] = setup.railyard.generateStationTracks($currentStation, $randomSeed)>>
+<</if>>
+<<if $leavingTrain>>
+	<<set $leavingTrain.visited = true>>
+	<<if $currentStation === $enteredStation && typeof $enteredTrackIndex !== 'undefined' && typeof $enteredTrainIndex !== 'undefined'>>
+	<<run setup.railyard.placeTrainInStationTracks($stationTracks[$currentStation], $leavingTrain, $enteredTrackIndex, $enteredTrainIndex)>>
+	<<else>>
+	<<run setup.railyard.placeTrainInStationTracks($stationTracks[$currentStation], $leavingTrain)>>
+	<</if>>
+  <<set $leavingTrain = null>>
+<</if>>
+<<if $debugMode>><<run (function () { if (typeof console !== 'undefined' && typeof console.log === 'function') { console.log('[Ashline Debug] Station ' + State.variables.currentStation + ' railyard tracks:', State.variables.stationTracks[State.variables.currentStation]); } })()>><</if>>
+You step into the railyard. Several trains are parked here, each with its own mix of cars and cargo.
+
+<<railyardButtons>>
+
+<<debugTools>>
+
+
+
+:: TrainInterior
+/% On-board navigation passage: tracks current car position, movement through consist, and transition into driving mode. %/
+<<buildIntegrityNotice>>
+<<if typeof $currentCarIndex === 'undefined'>>
+	<<set $currentCarIndex = setup.railyard.getBoardingCarIndex($currentTrain)>>
+<</if>>
+<<if $currentCarIndex < 0 || $currentCarIndex >= $currentTrain.length>>
+	<<set $currentCarIndex = setup.railyard.getBoardingCarIndex($currentTrain)>>
+<</if>>
+<<set $currentCar to $currentTrain[$currentCarIndex]>>
+You are <<print setup.railyard.getCarLocationText($currentCar)>> of your consist.
+<br>
+Car <<print $currentCarIndex + 1>> of <<print $currentTrain.length>>.
+
+<<if $currentCarIndex > 0>><<link "Move Toward Front">><<set $currentCarIndex -= 1>><<goto "TrainInterior">><</link>><</if>>
+<<if $currentCarIndex > 0 && $currentCarIndex < $currentTrain.length - 1>> | <</if>>
+<<if $currentCarIndex < $currentTrain.length - 1>><<link "Move Toward Rear">><<set $currentCarIndex += 1>><<goto "TrainInterior">><</link>><</if>>
+
+<<if $currentCar.tractiveCapacity > 0>>
+This is the locomotive. From here, you can start your journey.
+<<else>>
+This car does not have the controls needed to drive the train.
+<</if>>
+
+<<link "Leave Train">><<set $currentTrain.visited = true>><<set $enteredStation = $currentStation>><<if typeof $drivingTrackIndex !== 'undefined'>><<set $enteredTrackIndex = $drivingTrackIndex>><</if>><<set $leavingTrain = $currentTrain>><<set $trains.splice($trains.indexOf($currentTrain), 1)>><<goto "Railyard">><</link>>
+
+<<if $currentCar.tractiveCapacity > 0>><<link "Start Driving">><<goto "DrivingMode">><</link>><</if>>
+
+<<debugTools>>
+
+
+:: DrivingMode
+/% Active driving/shunting passage: composes merge, travel, and decoupling controls for the current consist and station context. %/
+<<buildIntegrityNotice>>
+<<initDrivingModeState>>
+You are driving your consist. Current station: <<print $currentStation>>.
+
+<<drivingMergeButtons>>
+
+<<drivingTravelButtons>>
+
+<<drivingShuntingControls>>
+
+<<link "Stop Driving">><<goto "TrainInterior">><</link>>
+
+<<debugTools>>
+
+
+
+
