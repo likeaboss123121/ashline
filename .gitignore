@@ -1,0 +1,23 @@
+node_modules/
+.review/
+.vs/
+tests/
+test-results/
+playwright-report/
+
+
+# Third-party tooling and docs: installed locally, not distributed
+tweego-*/
+tool docs/
+
+# Compiled build output: published on the Releases page
+index.html
+
+# Local notes and editor settings
+REVIEW.md
+.vscode/
+
+# Local build and test tooling
+scripts/
+package.json
+package-lock.json

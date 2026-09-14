@@ -1,15 +1,3 @@
-:: StoryTitle {"position":"0,508"}
-Ashline
-
-:: StoryData {"position":"0,599"}
-{
-        "ifid": "4ADA4312-A7CC-4510-9A61-902F70FE704C",
-        "format": "SugarCube",
-        "format-version": "2.36.1"
-}
-
-:: Story JavaScript [script]
-
 // Renders the start/settings screen and seeds a random seed value if the player has not chosen one yet.
 Macro.add('settingsStart', {
 	handler: function() {
@@ -21,7 +9,7 @@ Macro.add('settingsStart', {
 			<h3>Game Settings</h3>
 			<label><input type="radio" name="mode" value="Story" disabled${State.variables.settingsMode === "Story" ? " checked" : ""}> Story Mode (Coming Soon)</label><br>
 			<label><<radiobutton "$settingsMode" "Infinite" autocheck>> Infinite Mode</label><br><br>
-			<label>Random Seed: <<textbox "$randomSeed" "${State.variables.randomSeed}">></label><br><br>
+			<label>Random Seed: <<textbox "$randomSeed" $randomSeed>></label><br><br>
 			<label><<checkbox "$debugMode" false true autocheck>> Enable Debug Tools</label><br><br>
 			[[Continue|${State.variables.settingsExitPassage}]]
 		`);
@@ -41,6 +29,159 @@ setup.safeParseInt = function(value, fallback) {
 	return isNaN(parsed) ? (typeof fallback === 'number' ? fallback : 0) : parsed;
 };
 
+// Centralized time utilities for clock state, formatting, and reusable time-cost UI labels.
+setup.time = {
+	startTimestampMs: Date.UTC(2000, 6, 24, 9, 0, 0, 0),
+	monthNames: [
+		'January', 'February', 'March', 'April', 'May', 'June',
+		'July', 'August', 'September', 'October', 'November', 'December'
+	],
+	getCurrentTimestampMs: function() {
+		if (typeof State.variables.gameTimeTimestampMs !== 'number' || !isFinite(State.variables.gameTimeTimestampMs)) {
+			State.variables.gameTimeTimestampMs = this.startTimestampMs;
+		}
+		return State.variables.gameTimeTimestampMs;
+	},
+	setCurrentTimestampMs: function(timestampMs) {
+		if (typeof timestampMs !== 'number' || !isFinite(timestampMs)) {
+			return;
+		}
+		State.variables.gameTimeTimestampMs = Math.floor(timestampMs);
+	},
+	resolveMinutes: function(value) {
+		var minutes = setup.safeParseInt(value, 0);
+		return Math.max(0, minutes);
+	},
+	incrementMinutes: function(minutes) {
+		var delta = this.resolveMinutes(minutes);
+		if (!delta) {
+			return;
+		}
+		this.setCurrentTimestampMs(this.getCurrentTimestampMs() + (delta * 60000));
+	},
+	getTrackedTrains: function() {
+		var tracked = [];
+		var addTrain = function(train) {
+			if (!Array.isArray(train)) {
+				return;
+			}
+			if (tracked.indexOf(train) === -1) {
+				tracked.push(train);
+			}
+		};
+		var stationTracksByStation = State.variables.stationTracks || {};
+		for (var stationKey in stationTracksByStation) {
+			if (!Object.prototype.hasOwnProperty.call(stationTracksByStation, stationKey)) {
+				continue;
+			}
+			var stationTracks = stationTracksByStation[stationKey];
+			if (!Array.isArray(stationTracks)) {
+				continue;
+			}
+			for (var ti = 0; ti < stationTracks.length; ti++) {
+				var track = stationTracks[ti];
+				if (!track || !Array.isArray(track.trains)) {
+					continue;
+				}
+				for (var tr = 0; tr < track.trains.length; tr++) {
+					addTrain(track.trains[tr]);
+				}
+			}
+		}
+		// SugarCube clones aliases separately; $trains may contain stale copies.
+		addTrain(State.variables.currentTrain);
+		return tracked;
+	},
+	processSteamFireboxesMinute: function() {
+		var trains = this.getTrackedTrains();
+		for (var i = 0; i < trains.length; i++) {
+			var train = trains[i];
+			for (var ci = 0; ci < train.length; ci++) {
+				setup.railyard.processSteamFireboxMinuteForCar(train[ci]);
+			}
+		}
+	},
+	advanceMinutesWithSystems: function(minutes, actionType) {
+		var delta = this.resolveMinutes(minutes);
+		var mode = typeof actionType === 'string' ? actionType : 'generic';
+		State.variables.timedActionFailure = '';
+		// Moves have no intermediate position: check the full cost on a copy first.
+		if (mode === 'shunting' || mode === 'travel') {
+			var simulation = JSON.parse(JSON.stringify(State.variables.currentTrain || []));
+			for (var step = 0; step < delta; step++) {
+				for (var ci = 0; ci < simulation.length; ci++) {
+					setup.railyard.processSteamFireboxMinuteForCar(simulation[ci]);
+				}
+				if (!setup.railyard.consumeShuntingResourcesForMinute(simulation)) {
+					State.variables.timedActionFailure = 'Not enough fuel or steam to complete this action. No time or fuel was spent.';
+					return false;
+				}
+			}
+		}
+		for (var m = 0; m < delta; m++) {
+			this.processSteamFireboxesMinute();
+			if (mode === 'shunting' || mode === 'travel') {
+				setup.railyard.consumeShuntingResourcesForMinute(State.variables.currentTrain);
+			}
+			this.setCurrentTimestampMs(this.getCurrentTimestampMs() + 60000);
+		}
+		return true;
+	},
+	formatDuration: function(minutes) {
+		var totalMinutes = this.resolveMinutes(minutes);
+		var hours = Math.floor(totalMinutes / 60);
+		var remainder = totalMinutes % 60;
+		return hours + ':' + String(remainder).padStart(2, '0');
+	},
+	getCurrentDateParts: function() {
+		var current = new Date(this.getCurrentTimestampMs());
+		var rawHour = current.getUTCHours();
+		var use24Hour = !!State.variables.use24HourTime;
+		var displayHour = use24Hour ? rawHour : ((rawHour % 12) || 12);
+		return {
+			day: current.getUTCDate(),
+			month: this.monthNames[current.getUTCMonth()],
+			year: current.getUTCFullYear(),
+			hours: String(displayHour),
+			minutes: String(current.getUTCMinutes()).padStart(2, '0'),
+			meridiem: use24Hour ? '' : (rawHour >= 12 ? 'PM' : 'AM')
+		};
+	},
+	formatLinkLabel: function(baseLabel, minutes) {
+		return String(baseLabel) + ' (' + this.formatDuration(minutes) + ')';
+	}
+};
+
+// Container macro for clickable actions with a visible time cost and automatic clock increment.
+// Example: <<timedlink "Board Train 1" 1>>...actions...<</timedlink>>
+// Example: <<timedlink "Reverse Consist" Math.ceil($currentTrain.length / 2)>>...<</timedlink>>
+Macro.add('timedlink', {
+	tags: null,
+	handler: function() {
+		if (this.args.length < 2) {
+			return this.error('timedlink requires a label and a minute cost.');
+		}
+		if (!this.payload || !this.payload.length) {
+			return this.error('timedlink must wrap link content.');
+		}
+
+		var label = String(this.args[0]);
+		var minutes = setup.time.resolveMinutes(this.args[1]);
+		var actionType = this.args.length > 2 ? String(this.args[2]) : 'generic';
+		var renderedLabel = setup.time.formatLinkLabel(label, minutes)
+			.replace(/\\/g, '\\\\')
+			.replace(/"/g, '\\"');
+		var safeActionType = actionType
+			.replace(/\\/g, '\\\\')
+			.replace(/"/g, '\\"');
+
+		new Wikifier(
+			this.output,
+			'<<link "' + renderedLabel + '">><<set _timedActionAllowed = setup.time.advanceMinutesWithSystems(' + minutes + ', "' + safeActionType + '")>><<if _timedActionAllowed>>' + this.payload[0].contents + '<<else>><<run Dialog.setup("Action unavailable")>><<run Dialog.wiki(State.variables.timedActionFailure)>><<run Dialog.open()>><</if>><</link>>'
+		);
+	}
+});
+
 // Normalizes persistent settings variables so every new session starts from a known state.
 Macro.add('initsettings', {
 	handler: function() {
@@ -49,6 +190,8 @@ Macro.add('initsettings', {
 			State.variables.settingsMode = 'Infinite';
 		}
 		setup.initializeStateVar('randomSeed', '');
+		setup.initializeStateVar('gameTimeTimestampMs', function() { return setup.time.startTimestampMs; });
+		setup.initializeStateVar('use24HourTime', false);
 		setup.initializeStateVar('debugMode', false);
 		setup.initializeStateVar('debugSelectedTrackIndex', 0);
 		setup.initializeStateVar('debugSelectedTrainIndex', 0);
@@ -57,7 +200,7 @@ Macro.add('initsettings', {
 });
 
 // Release metadata is used both for the title screen and build-integrity popup.
-setup.releaseVersion = '0.1.0';
+setup.releaseVersion = '0.2.0';
 setup.buildCheckDone = false;
 setup.enableBuildChangeAlert = true;
 setup.buildCacheStorageKey = 'ashline.buildMeta';
@@ -158,6 +301,22 @@ jQuery(document).one(':storyready', function () {
 	setup.runBuildIntegrityCheck();
 });
 
+// Loading another save in the same tab must compare that save's build metadata too.
+Save.onLoad.add(function (save) {
+	setup.buildCheckDone = false;
+	// Migrate the old playable StoryInit passage and discard obsolete state aliases.
+	if (save.state && Array.isArray(save.state.history)) {
+		save.state.history.forEach(function(moment) {
+			if (moment.title === 'StoryInit') moment.title = 'Introduction';
+			var variables = moment.variables;
+			variables.trains = [];
+			delete variables.currentCar;
+			if (moment.title === 'Railyard') variables.currentTrain = null;
+			if (variables.settingsExitPassage === 'StoryInit') variables.settingsExitPassage = 'Introduction';
+		});
+	}
+});
+
 // Forces the build-integrity check to run when a passage asks for it, but leaves the warning popup-only.
 Macro.add('buildIntegrityNotice', {
 	handler: function() {
@@ -180,12 +339,27 @@ setup.showCreditsDialog = function() {
 	Dialog.open();
 };
 
+// Opens gameplay options currently focused on time-display preferences.
+setup.showOptionsDialog = function() {
+	if (typeof Dialog === 'undefined') {
+		return;
+	}
+	Dialog.setup('Options');
+	Dialog.wiki('<p><strong>Time Display</strong></p><label><<checkbox "$use24HourTime" false true autocheck>> Use 24-hour time</label>');
+	jQuery('#ui-dialog-body input').on('change', function() { UIBar.update(); });
+	Dialog.open();
+};
+
 // Default rolling-stock definitions.
 State.variables.defaultTrains = {
 	steamLoco: {
 		type: 'steam loco',
 		hasInterior: true,
 		cargo: [],
+		fireboxEnabled: false,
+		steamStoredLiters: 0,
+		boilerSteamVolumeLiters: 300000, // liters at 1 bar equivalent
+		maxSteamPressureBar: 14.5,
 		baseWeight: 50000, // kg
 		maxCargoCapacityKg: 11000,
 		maxCargoCapacityVolume: 3200, // liters
@@ -285,6 +459,39 @@ setup.railyard = {
 	cloneCar: function(car) {
 		return JSON.parse(JSON.stringify(car));
 	},
+	// Array custom properties are not preserved by JSON saves. Store discovery on cars.
+	markTrainVisited: function(train) {
+		for (var i = 0; i < train.length; i++) {
+			train[i].visited = true;
+		}
+	},
+	isTrainVisited: function(train) {
+		return !!train.visited || train.some(function(car) { return !!car.visited; });
+	},
+	boardTrain: function(stationId, trackIndex, trainIndex) {
+		var variables = State.variables;
+		var train = variables.stationTracks[stationId][trackIndex].trains.splice(trainIndex, 1)[0];
+		variables.enteredStation = stationId;
+		variables.enteredTrackIndex = trackIndex;
+		variables.drivingTrackIndex = trackIndex;
+		variables.enteredTrainIndex = trainIndex;
+		variables.currentTrain = train;
+		variables.currentCarIndex = this.getBoardingCarIndex(train);
+		this.markTrainVisited(train);
+	},
+	leaveCurrentTrain: function() {
+		var variables = State.variables;
+		this.markTrainVisited(variables.currentTrain);
+		var placed = this.placeTrainInStationTracks(variables.stationTracks[variables.currentStation],
+			variables.currentTrain, variables.drivingTrackIndex, variables.enteredTrainIndex);
+		if (placed) {
+			variables.currentTrain = null;
+			variables.leavingTrain = null;
+			variables.trains = [];
+			delete variables.currentCar;
+		}
+		return placed;
+	},
 	// Clamps a track index into a safe in-range value for the current station layout.
 	safeTrackIndex: function(index, maxIndex) {
 		return Math.max(0, Math.min(setup.safeParseInt(index, 0), maxIndex));
@@ -322,6 +529,249 @@ setup.railyard = {
 			}
 		}
 		return result;
+	},
+	// Returns cargo density in kg/L, defaulting to 1 for unknown types.
+	getCargoDensityKgPerLiter: function(cargoType) {
+		var cargoDef = State.variables.cargoTypes[cargoType];
+		return cargoDef && typeof cargoDef.density === 'number' ? cargoDef.density : 1;
+	},
+	// Reads the current quantity of a cargo type on a car (in liters).
+	getCargoAmount: function(car, cargoType) {
+		if (!car || !Array.isArray(car.cargo)) {
+			return 0;
+		}
+		var total = 0;
+		for (var i = 0; i < car.cargo.length; i++) {
+			if (car.cargo[i].type === cargoType) {
+				total += Math.max(0, Number(car.cargo[i].amount) || 0);
+			}
+		}
+		return total;
+	},
+	// Consumes a cargo volume from a car when enough is available.
+	consumeCargoAmount: function(car, cargoType, amountLiters) {
+		if (!car || !Array.isArray(car.cargo)) {
+			return false;
+		}
+		var required = Math.max(0, Number(amountLiters) || 0);
+		if (!required) {
+			return true;
+		}
+		if (!isFinite(required) || this.getCargoAmount(car, cargoType) + 1e-9 < required) {
+			return false;
+		}
+		for (var i = 0; i < car.cargo.length && required > 0; i++) {
+			if (car.cargo[i].type === cargoType) {
+				var available = Math.max(0, Number(car.cargo[i].amount) || 0);
+				var consumed = Math.min(available, required);
+				car.cargo[i].amount = available - consumed;
+				required -= consumed;
+			}
+		}
+		return true;
+	},
+	// Identifies steam locomotives by type.
+	isSteamLocomotiveCar: function(car) {
+		return !!car && car.type === 'steam loco';
+	},
+	// Identifies diesel locomotives by type.
+	isDieselLocomotiveCar: function(car) {
+		return !!car && car.type === 'diesel loco';
+	},
+	// Ensures all steam-locomotive runtime state fields exist for both new and old saves.
+	ensureSteamLocomotiveState: function(car) {
+		if (!this.isSteamLocomotiveCar(car)) {
+			return;
+		}
+		if (typeof car.fireboxEnabled !== 'boolean') {
+			car.fireboxEnabled = false;
+		}
+		if (typeof car.steamStoredLiters !== 'number' || !isFinite(car.steamStoredLiters)) {
+			car.steamStoredLiters = 0;
+		}
+		if (typeof car.boilerSteamVolumeLiters !== 'number' || !isFinite(car.boilerSteamVolumeLiters) || car.boilerSteamVolumeLiters <= 0 || car.boilerSteamVolumeLiters === 3000) {
+			// Migrate old saves that still use the previous 3,000 L default.
+			car.boilerSteamVolumeLiters = 300000;
+		}
+		if (typeof car.maxSteamPressureBar !== 'number' || !isFinite(car.maxSteamPressureBar) || car.maxSteamPressureBar <= 0) {
+			car.maxSteamPressureBar = 14.5;
+		}
+		// Public getters call this initializer, so use the normalized fields directly.
+		var maxStored = car.boilerSteamVolumeLiters * car.maxSteamPressureBar;
+		car.steamStoredLiters = Math.max(0, Math.min(car.steamStoredLiters, maxStored));
+	},
+	// Returns the max configured boiler pressure.
+	getSteamMaxPressureBar: function(car) {
+		this.ensureSteamLocomotiveState(car);
+		return car.maxSteamPressureBar;
+	},
+	// Returns the effective boiler volume used for pressure/storage conversion.
+	getSteamBoilerVolumeLiters: function(car) {
+		this.ensureSteamLocomotiveState(car);
+		return car.boilerSteamVolumeLiters;
+	},
+	// Returns max storable steam (in liters at 1 bar equivalent) at relief-valve pressure.
+	getSteamMaxStoredLiters: function(car) {
+		return this.getSteamBoilerVolumeLiters(car) * this.getSteamMaxPressureBar(car);
+	},
+	// Returns current stored steam quantity.
+	getSteamStoredLiters: function(car) {
+		this.ensureSteamLocomotiveState(car);
+		return car.steamStoredLiters;
+	},
+	// Returns current boiler pressure in bar.
+	getSteamPressureBar: function(car) {
+		var volume = this.getSteamBoilerVolumeLiters(car);
+		if (volume <= 0) {
+			return 0;
+		}
+		return Math.max(0, Math.min(this.getSteamStoredLiters(car) / volume, this.getSteamMaxPressureBar(car)));
+	},
+	// Adds steam to the boiler, discarding overflow via safety valve behavior.
+	addSteamLiters: function(car, amountLiters) {
+		this.ensureSteamLocomotiveState(car);
+		var delta = Math.max(0, Number(amountLiters) || 0);
+		if (!delta) {
+			return;
+		}
+		car.steamStoredLiters = Math.min(this.getSteamMaxStoredLiters(car), car.steamStoredLiters + delta);
+	},
+	// Consumes steam from the boiler when enough is available.
+	consumeSteamLiters: function(car, amountLiters) {
+		this.ensureSteamLocomotiveState(car);
+		var required = Math.max(0, Number(amountLiters) || 0);
+		if (!required) {
+			return true;
+		}
+		if (car.steamStoredLiters + 1e-9 < required) {
+			return false;
+		}
+		car.steamStoredLiters = Math.max(0, car.steamStoredLiters - required);
+		return true;
+	},
+	// Sets steam firebox state for a specific locomotive.
+	setSteamFireboxEnabled: function(car, enabled) {
+		if (!this.isSteamLocomotiveCar(car)) {
+			return;
+		}
+		this.ensureSteamLocomotiveState(car);
+		car.fireboxEnabled = !!enabled;
+	},
+	// Toggles steam firebox state by index in the current consist.
+	toggleSteamFireboxByIndex: function(train, index) {
+		if (!Array.isArray(train) || typeof index !== 'number' || !train[index]) {
+			return;
+		}
+		if (!this.isSteamLocomotiveCar(train[index])) {
+			return;
+		}
+		this.ensureSteamLocomotiveState(train[index]);
+		train[index].fireboxEnabled = !train[index].fireboxEnabled;
+	},
+	// Steam production slows at higher pressure while still consuming fuel whenever the firebox is on.
+	getSteamProductionLitersPerMinute: function(car) {
+		var pressure = this.getSteamPressureBar(car);
+		var maxPressure = this.getSteamMaxPressureBar(car);
+		var pressureFactor = Math.max(0.25, 1 - ((pressure / maxPressure) * 0.75));
+		return 1750 * pressureFactor;
+	},
+	// Computes shunting steam use per minute from pressure with piecewise exponential anchors.
+	getSteamShuntingCostPerMinute: function(car) {
+		var pressure = this.getSteamPressureBar(car);
+		var base = 3000;
+		if (pressure >= 10) {
+			var highRate = Math.log(3000 / 2250) / 5;
+			return Math.round(base * Math.exp(highRate * (10 - pressure)));
+		}
+		var lowRate = Math.log(6000 / 3000) / 5;
+		return Math.round(base * Math.exp(lowRate * (10 - pressure)));
+	},
+	// Runs one minute of steam-firebox simulation and handles auto-shutdown on missing fuel/water.
+	processSteamFireboxMinuteForCar: function(car) {
+		if (!this.isSteamLocomotiveCar(car)) {
+			return;
+		}
+		this.ensureSteamLocomotiveState(car);
+		if (!car.fireboxEnabled) {
+			return;
+		}
+		var coalLitersRequired = 1 / this.getCargoDensityKgPerLiter('coal');
+		var waterLitersRequired = 3;
+		if (this.getCargoAmount(car, 'coal') + 1e-9 < coalLitersRequired || this.getCargoAmount(car, 'water') + 1e-9 < waterLitersRequired) {
+			car.fireboxEnabled = false;
+			return;
+		}
+		if (!this.consumeCargoAmount(car, 'coal', coalLitersRequired) || !this.consumeCargoAmount(car, 'water', waterLitersRequired)) {
+			car.fireboxEnabled = false;
+			return;
+		}
+		this.addSteamLiters(car, this.getSteamProductionLitersPerMinute(car));
+	},
+	// Returns true when at least one locomotive in the train can currently provide traction.
+	isTrainDriveCapable: function(train) {
+		if (!Array.isArray(train) || !train.length) {
+			return false;
+		}
+		for (var i = 0; i < train.length; i++) {
+			var car = train[i];
+			if (!car || !(car.tractiveCapacity > 0)) {
+				continue;
+			}
+			if (this.isDieselLocomotiveCar(car) && this.getCargoAmount(car, 'diesel') >= 1) {
+				return true;
+			}
+			if (this.isSteamLocomotiveCar(car) && this.getSteamPressureBar(car) >= 10) {
+				return true;
+			}
+		}
+		return false;
+	},
+	// Consumes per-minute shunting resources from locomotives and returns whether traction remains available.
+	consumeShuntingResourcesForMinute: function(train) {
+		if (!Array.isArray(train) || !train.length) {
+			return false;
+		}
+		if (!this.isTrainDriveCapable(train)) {
+			return false;
+		}
+		var powered = false;
+		for (var i = 0; i < train.length; i++) {
+			var car = train[i];
+			if (!car || !(car.tractiveCapacity > 0)) {
+				continue;
+			}
+			if (this.isDieselLocomotiveCar(car)) {
+				if (this.getCargoAmount(car, 'diesel') >= 1) {
+					this.consumeCargoAmount(car, 'diesel', 1);
+					powered = true;
+				}
+				continue;
+			}
+			if (this.isSteamLocomotiveCar(car) && this.getSteamPressureBar(car) >= 10) {
+				powered = this.consumeSteamLiters(car, this.getSteamShuntingCostPerMinute(car)) || powered;
+			}
+		}
+		return powered;
+	},
+	// Estimates wait time to reach usable steam pressure (10 bar) for any firing steam locomotive.
+	estimateMinutesUntilSteamUsable: function(train, maxMinutes) {
+		if (!Array.isArray(train) || !train.length) {
+			return -1;
+		}
+		if (this.isTrainDriveCapable(train)) {
+			return 0;
+		}
+		var limit = Math.max(1, setup.safeParseInt(maxMinutes, 720));
+		var sim = train.filter(function(car) { return this.isSteamLocomotiveCar(car); }, this)
+			.map(function(car) { return this.cloneCar(car); }, this);
+		for (var minute = 1; minute <= limit; minute++) {
+			for (var si = 0; si < sim.length; si++) {
+				this.processSteamFireboxMinuteForCar(sim[si]);
+			}
+			if (this.isTrainDriveCapable(sim)) return minute;
+			if (!sim.some(function(car) { return car.fireboxEnabled; })) break;
+		}
+		return -1;
 	},
 	// Converts a string seed into a deterministic unsigned integer seed value.
 	seedFromString: function(str) {
@@ -567,14 +1017,9 @@ setup.railyard = {
 	// Flattens all trains on a track into one ordered car list for mass-couple shove operations.
 	flattenTrackTrainsForDirection: function(trackTrains, reverse) {
 		var mergedCars = [];
-		if (reverse) {
-			for (var i = trackTrains.length - 1; i >= 0; i--) {
-				Array.prototype.push.apply(mergedCars, trackTrains[i]);
-			}
-		} else {
-			for (var j = 0; j < trackTrains.length; j++) {
-				Array.prototype.push.apply(mergedCars, trackTrains[j]);
-			}
+		// Tracks run entry-to-exit; car arrays run front-to-rear (exit-to-entry).
+		for (var i = trackTrains.length - 1; i >= 0; i--) {
+			Array.prototype.push.apply(mergedCars, trackTrains[i]);
 		}
 		return mergedCars;
 	},
@@ -674,71 +1119,51 @@ setup.railyard = {
 		gap = Math.max(0, Math.min(gap, boundaryTrack.trains.length));
 		return towardExit ? gap === boundaryTrack.trains.length : gap === 0;
 	},
-	// Determines whether station-to-station forward travel is currently legal.
-	canAdvanceToNextStation: function(stationId, playerTrackIndex) {
-		var tracks = State.variables.stationTracks[stationId];
-		if (!tracks || tracks.length < 3) {
-			return false;
-		}
-		var enteredTrainIndex = State.variables.enteredTrainIndex;
-		playerTrackIndex = this.safeTrackIndex(playerTrackIndex, tracks.length - 1);
-		if (this.hasTrackObstructionInDirection(tracks, playerTrackIndex, enteredTrainIndex, true)) {
-			return false;
-		}
-		var entryIndex = this.getEntryTrackIndex();
-		var exitIndex = this.getExitTrackIndex(tracks);
-		var exitClear = tracks[exitIndex].trains.length === 0;
-		var exitReadyForDeparture = exitClear || this.isAtBoundaryDeparturePosition(tracks, playerTrackIndex, enteredTrainIndex, true);
-
-		if (playerTrackIndex === entryIndex) {
-			var yardIndices = this.getYardTrackIndices(tracks);
-			var hasClearYard = false;
-			for (var yi = 0; yi < yardIndices.length; yi++) {
-				if (tracks[yardIndices[yi]].trains.length === 0) {
-					hasClearYard = true;
-					break;
-				}
-			}
-			return hasClearYard && exitReadyForDeparture;
-		}
-
-		if (!this.isYardTrackIndex(tracks, playerTrackIndex)) {
-			return exitReadyForDeparture;
-		}
-
-		return exitReadyForDeparture;
-	},
-	// Returns a human-readable reason when forward travel is blocked.
-	getAdvanceBlockReason: function(stationId, playerTrackIndex) {
+	// Both travel directions use the same obstruction and route checks as shunting.
+	getDepartureBlockReason: function(stationId, playerTrackIndex, towardExit) {
 		var tracks = State.variables.stationTracks[stationId];
 		if (!tracks || tracks.length < 3) {
 			return 'No valid station track layout.';
 		}
-		var enteredTrainIndex = State.variables.enteredTrainIndex;
+		var gap = State.variables.enteredTrainIndex;
 		playerTrackIndex = this.safeTrackIndex(playerTrackIndex, tracks.length - 1);
-		if (this.hasTrackObstructionInDirection(tracks, playerTrackIndex, enteredTrainIndex, true)) {
-			return 'Cannot leave current track toward the exit while a consist is ahead.';
+		if (this.hasTrackObstructionInDirection(tracks, playerTrackIndex, gap, towardExit)) {
+			return 'A consist on your current track blocks departure in this direction.';
 		}
-		var entryIndex = this.getEntryTrackIndex();
-		var exitIndex = this.getExitTrackIndex(tracks);
-		var exitClear = tracks[exitIndex].trains.length === 0;
-		var exitReadyForDeparture = exitClear || this.isAtBoundaryDeparturePosition(tracks, playerTrackIndex, enteredTrainIndex, true);
-		if (!exitReadyForDeparture) {
-			if (playerTrackIndex === exitIndex) {
-				return 'Your consist must be the last train on the exit track before leaving the station.';
-			}
-			return 'Exit track is blocked.';
+		var boundaryIndex = towardExit ? this.getExitTrackIndex(tracks) : this.getEntryTrackIndex();
+		var boundary = tracks[boundaryIndex];
+		if (boundary.trains.length && !this.isAtBoundaryDeparturePosition(tracks, playerTrackIndex, gap, towardExit)) {
+			return this.getTrackLabel(tracks, boundaryIndex) + ' is blocked.';
 		}
-		if (playerTrackIndex === entryIndex) {
-			var yardIndices = this.getYardTrackIndices(tracks);
-			for (var yi = 0; yi < yardIndices.length; yi++) {
-				if (tracks[yardIndices[yi]].trains.length === 0) {
-					return '';
-				}
-			}
-			return 'No clear yard track between entry and exit.';
+		if (playerTrackIndex === boundaryIndex) {
+			return '';
 		}
-		return '';
+		if (this.isBoundaryTrackIndex(tracks, playerTrackIndex)) {
+			return this.hasEmptyMiddleTrack(tracks) ? '' : 'No clear yard track between entry and exit.';
+		}
+		return this.hasClearPathBetweenTracks(tracks, playerTrackIndex, boundaryIndex)
+			? '' : 'Another occupied track blocks the departure route.';
+	},
+	canAdvanceToNextStation: function(stationId, playerTrackIndex) {
+		return this.getDepartureBlockReason(stationId, playerTrackIndex, true) === '';
+	},
+	getAdvanceBlockReason: function(stationId, playerTrackIndex) {
+		return this.getDepartureBlockReason(stationId, playerTrackIndex, true);
+	},
+	travelToStation: function(towardExit) {
+		var variables = State.variables;
+		var destination = variables.currentStation + (towardExit ? 1 : -1);
+		if (destination < 1 || this.getDepartureBlockReason(variables.currentStation, variables.drivingTrackIndex, towardExit)) {
+			return false;
+		}
+		if (!variables.stationTracks[destination]) {
+			variables.stationTracks[destination] = this.generateStationTracks(destination, variables.randomSeed);
+		}
+		var tracks = variables.stationTracks[destination];
+		variables.currentStation = destination;
+		variables.drivingTrackIndex = towardExit ? this.getEntryTrackIndex() : this.getExitTrackIndex(tracks);
+		variables.enteredTrainIndex = this.getDefaultEnteredTrainIndex(tracks, variables.drivingTrackIndex);
+		return true;
 	},
 	// Counts how many leading cars can fit inside a finite remaining track length.
 	getCarsFitCountForLength: function(train, maxLength) {
@@ -771,9 +1196,9 @@ setup.railyard = {
 				if (fitCount > 0 && fitCount < train.length) {
 					var primaryPart = train.slice(0, fitCount);
 					var overflowPart = train.slice(fitCount);
-					if (train.visited) {
-						primaryPart.visited = true;
-						overflowPart.visited = true;
+					if (this.isTrainVisited(train)) {
+						this.markTrainVisited(primaryPart);
+						this.markTrainVisited(overflowPart);
 					}
 
 					var insertAtSplit = Math.max(0, Math.min(preferredTrainIndex || 0, preferredTrack.trains.length));
@@ -837,8 +1262,8 @@ setup.railyard = {
 			rawGap = this.getDefaultEnteredTrainIndex(tracks, safeTrackIndex);
 		}
 		var gap = Math.max(0, Math.min(rawGap, track.trains.length));
-		// Front split goes after the player gap; rear split goes at the player gap.
-		var insertAt = isFrontSplit ? (gap + 1) : gap;
+		// The player is absent from track.trains; both adjacent sides insert at the gap.
+		var insertAt = gap;
 		var placed = this.placeTrainInStationTracks(tracks, splitTrain, safeTrackIndex, insertAt);
 		if (!placed) {
 			return false;
@@ -932,6 +1357,11 @@ setup.railyard = {
 
 		var trainA = tracks[aTrackIndex].trains[aTrainIndex];
 		var trainB = tracks[bTrackIndex].trains[bTrainIndex];
+		if (aTrackIndex === bTrackIndex) {
+			tracks[aTrackIndex].trains[aTrainIndex] = trainB;
+			tracks[aTrackIndex].trains[bTrainIndex] = trainA;
+			return { ok: true };
+		}
 
 		var occupiedAWithoutA = this.getTrackOccupiedLength(tracks[aTrackIndex]) - this.getTrainLength(trainA);
 		var occupiedBWithoutB = this.getTrackOccupiedLength(tracks[bTrackIndex]) - this.getTrainLength(trainB);
@@ -1152,6 +1582,10 @@ setup.railyard = {
 				}
 				number++;
 			}
+			if (i === playerTrackIndex && !playerTrainAlreadyAdded) {
+				number++;
+				playerTrainAlreadyAdded = true;
+			}
 		}
 		return 0;
 	},
@@ -1188,14 +1622,14 @@ setup.railyard = {
 				html += ', ' + car.maxCargoCapacityKg + 'kg capacity';
 			}
 			html += ')';
-			if (train.visited && car.cargo && car.cargo.length) {
+			if (this.isTrainVisited(train) && car.cargo && car.cargo.length) {
 				html += '<ul>';
 				for (var k = 0; k < car.cargo.length; k++) {
 					var cargo = car.cargo[k];
 					html += '<li>' + cargo.type + ': ' + cargo.amount + '</li>';
 				}
 				html += '</ul>';
-			} else if (train.visited) {
+			} else if (this.isTrainVisited(train)) {
 				html += ' — Empty';
 			}
 			html += '</li>';
@@ -1232,7 +1666,7 @@ Macro.add('railyardButtons', {
 			// Boarding removes the selected train from the yard and turns it into the player's active consist.
 			for (var j = 0; j < tracks[i].trains.length; j++) {
 				output += setup.railyard.trainSummaryHtml(tracks[i].trains[j], displayNumber - 1);
-				output += '<<link "Board Train ' + displayNumber + '">><<set $enteredStation = $currentStation>><<set $enteredTrackIndex = ' + i + '>><<set $drivingTrackIndex = ' + i + '>><<set $enteredTrainIndex = ' + j + '>><<set $currentTrain = $stationTracks[$currentStation][' + i + '].trains.splice(' + j + ', 1)[0]>><<set $currentTrain.visited = true>><<set $trains.unshift($currentTrain)>><<set $currentCarIndex = setup.railyard.getBoardingCarIndex($currentTrain)>><<goto "TrainInterior">><</link>><br><br>';
+				output += '<<timedlink "Board Train ' + displayNumber + '" 1>><<run setup.railyard.boardTrain($currentStation, ' + i + ', ' + j + ')>><<goto "TrainInterior">><</timedlink>><br><br>';
 				displayNumber++;
 			}
 		}
@@ -1297,13 +1731,20 @@ Macro.add('drivingMergeButtons', {
 		output += '<p><strong>Current track:</strong> ' + setup.railyard.getTrackLabel(tracks, playerTrackIndex) + '</p>';
 		output += '<p><strong>Direction:</strong> ' + (reverse ? 'Reversing from Exit side' : 'Forward from Entry side') + '</p>';
 		output += '<p><strong>Current consist:</strong> ' + setup.railyard.getTrainCarListText(State.variables.currentTrain) + '</p>';
+		var driveCapableNow = setup.railyard.isTrainDriveCapable(State.variables.currentTrain);
+		if (!driveCapableNow) {
+			output += '<p class="small-description"><em>Your train is currently not drivable due to insufficient diesel or steam pressure. Use Stop Driving and manage the firebox from Train Interior.</em></p>';
+			new Wikifier(this.output, output);
+			return;
+		}
 		if (!canAccessBoundaryTracks) {
 			output += '<p class="small-description"><em>Entry Track and Exit Track remain locked until at least one yard track is empty.</em></p>';
 		}
 
 		// Boundary-track moves are handled first because they change the player's travel direction context.
 		if (playerTrackIndex !== entryTrackIndex && !blockedTowardEntryOnCurrentTrack && clearPathToEntryTrack) {
-			output += '<<link "Reverse consist to Entry Track">><<set $drivingTrackIndex = ' + entryTrackIndex + '>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</link>><br>';
+			var reverseToEntryMinutes = Math.max(1, Math.ceil(playerConsistLength / 25));
+			output += '<<timedlink "Reverse consist to Entry Track" ' + reverseToEntryMinutes + ' "shunting">><<set $drivingTrackIndex = ' + entryTrackIndex + '>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</timedlink>><br>';
 		} else if (playerTrackIndex !== entryTrackIndex && blockedTowardEntryOnCurrentTrack) {
 			output += '<span class="small-description"><em>Cannot reverse toward Entry Track while a consist is behind you on this track.</em></span><br>';
 		} else if (playerTrackIndex !== entryTrackIndex && !clearPathToEntryTrack) {
@@ -1311,7 +1752,8 @@ Macro.add('drivingMergeButtons', {
 		}
 
 		if (playerTrackIndex !== exitTrackIndex && !blockedTowardExitOnCurrentTrack && clearPathToExitTrack) {
-			output += '<<link "Drive consist to Exit Track">><<set $drivingTrackIndex = ' + exitTrackIndex + '>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</link>><br>';
+			var driveToExitMinutes = Math.max(1, Math.ceil(playerConsistLength / 25));
+			output += '<<timedlink "Drive consist to Exit Track" ' + driveToExitMinutes + ' "shunting">><<set $drivingTrackIndex = ' + exitTrackIndex + '>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</timedlink>><br>';
 		} else if (playerTrackIndex !== exitTrackIndex && !clearPathToExitTrack) {
 			output += '<span class="small-description"><em>Cannot drive to Exit Track while another track between here and exit is occupied.</em></span><br>';
 		}
@@ -1327,11 +1769,14 @@ Macro.add('drivingMergeButtons', {
 			var occupiedLength = setup.railyard.getTrackOccupiedLength(targetTrack);
 			var destinationIndex = direction.toActualTrackIndex(orientedLastIndex);
 			var destinationLabel = setup.railyard.getTrackLabel(tracks, destinationIndex);
+			var shoveMinutes = Math.max(1, Math.ceil(occupiedLength / 25));
 			output += '<span class="small-description"><em>' + setup.railyard.getTrackLabel(tracks, targetTrackIndex) + ' currently holds ' + targetTrack.trains.length + ' train' + (targetTrack.trains.length === 1 ? '' : 's') + ' totaling ' + occupiedLength + 'm. Pushing here will couple the entire occupied track onto your consist.</em></span><br>';
-			var actionLabel = reverse
-				? 'Couple to entire track, shove to ' + destinationLabel + ', and reverse into ' + setup.railyard.getTrackLabel(tracks, targetTrackIndex)
-				: 'Couple to entire track, shove to ' + destinationLabel + ', and enter ' + setup.railyard.getTrackLabel(tracks, targetTrackIndex);
-			output += '<<link "' + actionLabel + '">><<run (function () { var trackTrains = State.variables.stationTracks[State.variables.currentStation][' + targetTrackIndex + '].trains.splice(0); var mergedCars = setup.railyard.flattenTrackTrainsForDirection(trackTrains, ' + (reverse ? 'true' : 'false') + '); setup.railyard.coupleTrainWithDirection(State.variables.currentTrain, mergedCars, ' + (reverse ? 'true' : 'false') + ', true); })()>><<set $drivingTrackIndex = ' + targetTrackIndex + '>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</link>><br>';
+			if (!setup.railyard.hasClearPathBetweenTracks(tracks, targetTrackIndex, destinationIndex)) {
+				output += '<span class="small-description"><em>Another occupied track blocks the shove route.</em></span><br>';
+				return;
+			}
+			var actionLabel = 'Couple to entire track and shove to ' + destinationLabel;
+			output += '<<timedlink "' + actionLabel + '" ' + shoveMinutes + ' "shunting">><<run (function () { var trackTrains = State.variables.stationTracks[State.variables.currentStation][' + targetTrackIndex + '].trains.splice(0); var mergedCars = setup.railyard.flattenTrackTrainsForDirection(trackTrains, ' + (reverse ? 'true' : 'false') + '); State.variables.currentCarIndex += setup.railyard.coupleTrainWithDirection(State.variables.currentTrain, mergedCars, ' + (reverse ? 'true' : 'false') + ', ' + (reverse ? 'false' : 'true') + '); })()>><<set $drivingTrackIndex = ' + destinationIndex + '>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</timedlink>><br>';
 		};
 
 		// If the player is at the leading boundary in the current orientation, offer direct moves into open yard tracks.
@@ -1351,7 +1796,8 @@ Macro.add('drivingMergeButtons', {
 						var targetLabel = setup.railyard.getTrackLabel(tracks, mt);
 						var moveEnteredIndexExpr = reverse ? ('$stationTracks[$currentStation][' + mt + '].trains.length') : '0';
 						if (playerConsistLength <= yardAvail) {
-							output += '<<link "' + moveLabel + targetLabel + '">><<set $drivingTrackIndex = ' + mt + '>><<set $enteredTrainIndex = ' + moveEnteredIndexExpr + '>><<goto "DrivingMode">><</link>><br>';
+							var moveToYardMinutes = Math.max(1, Math.ceil(playerConsistLength / 25));
+							output += '<<timedlink "' + moveLabel + targetLabel + '" ' + moveToYardMinutes + ' "shunting">><<set $drivingTrackIndex = ' + mt + '>><<set $enteredTrainIndex = ' + moveEnteredIndexExpr + '>><<goto "DrivingMode">><</timedlink>><br>';
 						} else {
 							output += '<span class="small-description"><em>' + targetLabel + ' is blocked: requires ' + playerConsistLength + 'm, free ' + yardAvail + 'm.</em></span><br>';
 							appendPushOptions(yoi);
@@ -1379,12 +1825,19 @@ Macro.add('drivingMergeButtons', {
 			var addEdgeCandidate = function(trackIndex, trainIndex, relation, blockedByBoundary, boundaryReason, orientedTrackIndex) {
 				if (!tracks[trackIndex] || !tracks[trackIndex].trains[trainIndex]) return;
 
+				var targetTrainLength = setup.railyard.getTrainLength(tracks[trackIndex].trains[trainIndex]);
 				var canCoupleFront = reverse ? relation === 'back' : relation === 'front';
 				var canCoupleRear = reverse ? relation === 'front' : relation === 'back';
 				var frontReason = canCoupleFront ? '' : 'Train is behind your consist.';
 				var rearReason = canCoupleRear ? '' : 'Train is in front of your consist.';
 				var pushOptions = [];
 				var pushFallbackReason = '';
+				if (trackIndex !== playerTrackIndex && !tracks[playerTrackIndex].infinite
+					&& setup.railyard.getTrackOccupiedLength(tracks[playerTrackIndex]) + playerConsistLength + targetTrainLength > tracks[playerTrackIndex].length) {
+					canCoupleFront = false;
+					canCoupleRear = false;
+					frontReason = rearReason = 'The combined consist will not fit on your current track.';
+				}
 
 				if (blockedByBoundary) {
 					canCoupleFront = false;
@@ -1420,8 +1873,9 @@ Macro.add('drivingMergeButtons', {
 								frontExitPathBlocked = true;
 								continue;
 							}
-							if (setup.railyard.canTrainFitOnTrack(fpiTrack, sourceTrack.trains[trainIndex])) {
-								pushOptions.push({ destinationIndex: fpiActual, insertAtExpression: frontInsertAtExpr, label: 'Push train into ' + setup.railyard.getTrackLabel(tracks, fpiActual) });
+							if (setup.railyard.hasClearPathBetweenTracks(tracks, trackIndex, fpiActual)
+								&& setup.railyard.canTrainFitOnTrack(fpiTrack, sourceTrack.trains[trainIndex])) {
+								pushOptions.push({ destinationIndex: fpiActual, insertAtExpression: frontInsertAtExpr, label: 'Push train into ' + setup.railyard.getTrackLabel(tracks, fpiActual), minutes: Math.max(1, Math.ceil(targetTrainLength / 25)) });
 							}
 						}
 						if (!pushOptions.length) {
@@ -1458,8 +1912,9 @@ Macro.add('drivingMergeButtons', {
 								backExitPathBlocked = true;
 								continue;
 							}
-							if (setup.railyard.canTrainFitOnTrack(bpiTrack, rearSourceTrack.trains[trainIndex])) {
-								pushOptions.push({ destinationIndex: bpiActual, insertAtExpression: backInsertAtExpr, label: 'Push train into ' + setup.railyard.getTrackLabel(tracks, bpiActual) });
+							if (setup.railyard.hasClearPathBetweenTracks(tracks, trackIndex, bpiActual)
+								&& setup.railyard.canTrainFitOnTrack(bpiTrack, rearSourceTrack.trains[trainIndex])) {
+								pushOptions.push({ destinationIndex: bpiActual, insertAtExpression: backInsertAtExpr, label: 'Push train into ' + setup.railyard.getTrackLabel(tracks, bpiActual), minutes: Math.max(1, Math.ceil(targetTrainLength / 25)) });
 							}
 						}
 						if (!pushOptions.length) {
@@ -1584,14 +2039,15 @@ Macro.add('drivingMergeButtons', {
 					output += '<strong>Accessible Train ' + parkedTrainNumber + '</strong> (' + setup.railyard.getTrackLabel(tracks, i) + ', ' + parkedTrain.length + ' car' + (parkedTrain.length === 1 ? '' : 's') + ')<br>';
 					output += '<span>Consist: ' + setup.railyard.getTrainCarListText(parkedTrain) + '</span><br>';
 					var enteredDecrement = (i === playerTrackIndex) ? '<<if $enteredTrainIndex > ' + j + '>><<set $enteredTrainIndex -= 1>><</if>>' : '';
+					var coupleMinutes = Math.max(1, Math.ceil(setup.railyard.getTrainLength(parkedTrain) / 25));
 					if (candidate.canCoupleFront) {
-						output += '<<link "Couple to Front">><<set _mergeTrain = $stationTracks[$currentStation][' + i + '].trains.splice(' + j + ', 1)[0]>><<set _carDelta = setup.railyard.coupleTrainWithDirection($currentTrain, _mergeTrain, ' + (reverse ? 'true' : 'false') + ', true)>><<set $drivingTrackIndex = ' + playerTrackIndex + '>><<if typeof $currentCarIndex !== "undefined">><<set $currentCarIndex += _carDelta>><</if>>' + enteredDecrement + '<<goto "DrivingMode">><</link>>';
+						output += '<<timedlink "Couple to Front" ' + coupleMinutes + ' "shunting">><<set _mergeTrain = $stationTracks[$currentStation][' + i + '].trains.splice(' + j + ', 1)[0]>><<set _carDelta = setup.railyard.coupleTrainWithDirection($currentTrain, _mergeTrain, ' + (reverse ? 'true' : 'false') + ', true)>><<set $drivingTrackIndex = ' + playerTrackIndex + '>><<if typeof $currentCarIndex !== "undefined">><<set $currentCarIndex += _carDelta>><</if>>' + enteredDecrement + '<<goto "DrivingMode">><</timedlink>>';
 					} else {
 							output += '<span class="small-description"><em>Front coupling unavailable: ' + candidate.frontReason + '</em></span>';
 					}
 					output += ' | ';
 					if (candidate.canCoupleRear) {
-							output += '<<link "Couple to Rear">><<set _mergeTrain = $stationTracks[$currentStation][' + i + '].trains.splice(' + j + ', 1)[0]>><<run setup.railyard.coupleTrainWithDirection($currentTrain, _mergeTrain, ' + (reverse ? 'true' : 'false') + ', false)>><<set $drivingTrackIndex = ' + playerTrackIndex + '>>' + enteredDecrement + '<<goto "DrivingMode">><</link>>';
+							output += '<<timedlink "Couple to Rear" ' + coupleMinutes + ' "shunting">><<set _mergeTrain = $stationTracks[$currentStation][' + i + '].trains.splice(' + j + ', 1)[0]>><<run setup.railyard.coupleTrainWithDirection($currentTrain, _mergeTrain, ' + (reverse ? 'true' : 'false') + ', false)>><<set $drivingTrackIndex = ' + playerTrackIndex + '>>' + enteredDecrement + '<<goto "DrivingMode">><</timedlink>>';
 					} else {
 							output += '<span class="small-description"><em>Rear coupling unavailable: ' + candidate.rearReason + '</em></span>';
 					}
@@ -1599,7 +2055,7 @@ Macro.add('drivingMergeButtons', {
 					if (candidate.pushOptions && candidate.pushOptions.length) {
 						for (var poi = 0; poi < candidate.pushOptions.length; poi++) {
 							var po = candidate.pushOptions[poi];
-							output += '<<link "' + po.label + '">><<run (function () { var stationTracks = State.variables.stationTracks[State.variables.currentStation]; var sourceTrack = setup.railyard.ensureTrackTrainArray(stationTracks, ' + i + '); if (!sourceTrack) { return; } var pushedTrain = sourceTrack.trains.splice(' + j + ', 1)[0]; if (!Array.isArray(pushedTrain)) { return; } var destinationTrack = setup.railyard.ensureTrackTrainArray(stationTracks, ' + po.destinationIndex + '); if (!destinationTrack) { setup.railyard.insertTrainIntoTrack(stationTracks, ' + i + ', pushedTrain, ' + j + '); return; } var insertAt = ' + po.insertAtExpression + '; if (!setup.railyard.insertTrainIntoTrack(stationTracks, ' + po.destinationIndex + ', pushedTrain, insertAt)) { setup.railyard.insertTrainIntoTrack(stationTracks, ' + i + ', pushedTrain, ' + j + '); } })()>><<set $drivingTrackIndex = ' + playerTrackIndex + '>>' + enteredDecrement + '<<goto "DrivingMode">><</link>><br>';
+							output += '<<timedlink "' + po.label + '" ' + po.minutes + ' "shunting">><<run (function () { var stationTracks = State.variables.stationTracks[State.variables.currentStation]; var sourceTrack = setup.railyard.ensureTrackTrainArray(stationTracks, ' + i + '); if (!sourceTrack) { return; } var pushedTrain = sourceTrack.trains.splice(' + j + ', 1)[0]; if (!Array.isArray(pushedTrain)) { return; } var destinationTrack = setup.railyard.ensureTrackTrainArray(stationTracks, ' + po.destinationIndex + '); if (!destinationTrack) { setup.railyard.insertTrainIntoTrack(stationTracks, ' + i + ', pushedTrain, ' + j + '); return; } var insertAt = ' + po.insertAtExpression + '; if (!setup.railyard.insertTrainIntoTrack(stationTracks, ' + po.destinationIndex + ', pushedTrain, insertAt)) { setup.railyard.insertTrainIntoTrack(stationTracks, ' + i + ', pushedTrain, ' + j + '); } })()>><<set $drivingTrackIndex = ' + playerTrackIndex + '>>' + enteredDecrement + '<<goto "DrivingMode">><</timedlink>><br>';
 						}
 					} else {
 						output += '<span class="small-description"><em>Push unavailable: ' + candidate.pushFallbackReason + '</em></span>';
@@ -1671,35 +2127,23 @@ Macro.add('initDrivingModeState', {
 // Renders inter-station travel controls and explains why departure is blocked when the yard state forbids it.
 Macro.add('drivingTravelButtons', {
 	handler: function() {
-		// Travel rules reuse the same gap-aware obstruction checks as shunting so station exits behave consistently.
+		if (!setup.railyard.isTrainDriveCapable(State.variables.currentTrain)) {
+			return;
+		}
 		var stationId = State.variables.currentStation;
 		var trackIndex = State.variables.drivingTrackIndex;
-		var canAdvance = setup.railyard.canAdvanceToNextStation(stationId, trackIndex);
-		var blockReason = setup.railyard.getAdvanceBlockReason(stationId, trackIndex);
+		var minutes = Math.max(5, Math.ceil(setup.railyard.getTrainLength(State.variables.currentTrain) / 20));
 		var output = '';
-		var tracks = State.variables.stationTracks[stationId];
-		var travelGapIndex = (typeof State.variables.enteredTrainIndex !== 'undefined')
-			? State.variables.enteredTrainIndex
-			: setup.railyard.getDefaultEnteredTrainIndex(tracks, trackIndex);
-		var blockedTowardEntryOnCurrentTrack = setup.railyard.hasTrackObstructionInDirection(tracks, trackIndex, travelGapIndex, false);
-		// Left available for future travel gating refinements that may depend on "ahead" checks.
-		var blockedAheadOnCurrentTrack = setup.railyard.hasTrackObstructionAhead(tracks, trackIndex, travelGapIndex);
-
-		// Going backward re-enters the previous station from its exit side; going forward enters from the entry side.
-		if (stationId > 1) {
-			if (!blockedTowardEntryOnCurrentTrack) {
-				output += '<<link "Travel to Previous Station">><<set $currentStation -= 1>><<if typeof $stationTracks[$currentStation] === \"undefined\">><<set $stationTracks[$currentStation] = setup.railyard.generateStationTracks($currentStation, $randomSeed)>><</if>><<set $drivingTrackIndex = setup.railyard.getExitTrackIndex($stationTracks[$currentStation])>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</link>><br><br>';
+		[false, true].forEach(function(towardExit) {
+			if (!towardExit && stationId <= 1) return;
+			var label = towardExit ? 'Travel to Next Station' : 'Travel to Previous Station';
+			var reason = setup.railyard.getDepartureBlockReason(stationId, trackIndex, towardExit);
+			if (reason) {
+				output += '<span class="small-description"><em>' + label + ' unavailable: ' + reason + '</em></span><br><br>';
 			} else {
-				output += '<span class="small-description"><em>Cannot travel to the previous station while a consist is behind you on this track.</em></span><br><br>';
+				output += '<<timedlink "' + label + '" ' + minutes + ' "travel">><<run setup.railyard.travelToStation(' + towardExit + ')>><<goto "DrivingMode">><</timedlink>><br><br>';
 			}
-		}
-
-		if (canAdvance) {
-			output += '<<link "Travel to Next Station">><<set $currentStation += 1>><<set $drivingTrackIndex = setup.railyard.getEntryTrackIndex()>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</link>>';
-		} else {
-			output += '<span class="small-description"><em>Cannot travel to the next station: ' + blockReason + '</em></span>';
-		}
-
+		});
 		new Wikifier(this.output, output);
 	}
 });
@@ -1707,6 +2151,9 @@ Macro.add('drivingTravelButtons', {
 // Lets the player split their current consist around the occupied car/gap and leave each section on the track layout.
 Macro.add('drivingShuntingControls', {
 	handler: function() {
+		if (!setup.railyard.isTrainDriveCapable(State.variables.currentTrain)) {
+			return;
+		}
 		if (!State.variables.currentTrain || State.variables.currentTrain.length <= 1) {
 			return;
 		}
@@ -1719,11 +2166,13 @@ Macro.add('drivingShuntingControls', {
 		output += '<<set _rearSplitLength = $currentTrain.length - ($currentCarIndex + 1)>>';
 		output += '<<set _frontSplitTrain = $currentTrain.slice(0, $currentCarIndex)>>';
 		output += '<<set _rearSplitTrain = $currentTrain.slice($currentCarIndex + 1)>>';
+		output += '<<set _frontSplitMinutes = Math.max(1, Math.ceil(_frontSplitLength / 2))>>';
+		output += '<<set _rearSplitMinutes = Math.max(1, Math.ceil(_rearSplitLength / 2))>>';
 		output += '<<set _frontSplitLabel = "Decouple Front Section (" + _frontSplitLength + " car" + (_frontSplitLength === 1 ? "" : "s") + ")">>';
-		output += '<<if $currentCarIndex > 0>><<link _frontSplitLabel>><<set _splitTrain = $currentTrain.splice(0, $currentCarIndex)>><<set _splitTrain.visited = true>><<run setup.railyard.placeDecoupledSplitFromCurrentTrain($currentStation, $drivingTrackIndex, _splitTrain, true)>><<set $currentCarIndex -= _splitTrain.length>><<goto "DrivingMode">><</link>><br><span class="small-description">Front section: <<print setup.railyard.getTrainCarListText(_frontSplitTrain)>></span><</if>>';
+		output += '<<if $currentCarIndex > 0>><<timedlink _frontSplitLabel _frontSplitMinutes "shunting">><<set _splitTrain = $currentTrain.splice(0, $currentCarIndex)>><<run setup.railyard.markTrainVisited(_splitTrain)>><<run setup.railyard.placeDecoupledSplitFromCurrentTrain($currentStation, $drivingTrackIndex, _splitTrain, true)>><<set $currentCarIndex -= _splitTrain.length>><<goto "DrivingMode">><</timedlink>><br><span class="small-description">Front section: <<print setup.railyard.getTrainCarListText(_frontSplitTrain)>></span><</if>>';
 		output += '<<if $currentCarIndex > 0 && $currentCarIndex < $currentTrain.length - 1>> | <</if>>';
 		output += '<<set _rearSplitLabel = "Decouple Rear Section (" + _rearSplitLength + " car" + (_rearSplitLength === 1 ? "" : "s") + ")">>';
-		output += '<<if $currentCarIndex < $currentTrain.length - 1>><<link _rearSplitLabel>><<set _splitTrain = $currentTrain.splice($currentCarIndex + 1)>><<set _splitTrain.visited = true>><<run setup.railyard.placeDecoupledSplitFromCurrentTrain($currentStation, $drivingTrackIndex, _splitTrain, false)>><<goto "DrivingMode">><</link>><br><span class="small-description">Rear section: <<print setup.railyard.getTrainCarListText(_rearSplitTrain)>></span><</if>>';
+		output += '<<if $currentCarIndex < $currentTrain.length - 1>><<timedlink _rearSplitLabel _rearSplitMinutes "shunting">><<set _splitTrain = $currentTrain.splice($currentCarIndex + 1)>><<run setup.railyard.markTrainVisited(_splitTrain)>><<run setup.railyard.placeDecoupledSplitFromCurrentTrain($currentStation, $drivingTrackIndex, _splitTrain, false)>><<goto "DrivingMode">><</timedlink>><br><span class="small-description">Rear section: <<print setup.railyard.getTrainCarListText(_rearSplitTrain)>></span><</if>>';
 
 		new Wikifier(this.output, output);
 	}
@@ -1970,6 +2419,10 @@ Macro.add('debugTools', {
 			var selectedTrainIndex = selectedTrack && selectedTrack.trains.length > 0
 				? Math.max(0, Math.min(State.variables.debugSelectedTrainIndex || 0, selectedTrack.trains.length - 1))
 				: 0;
+			if (!selectedTrack || !selectedTrack.trains[selectedTrainIndex]) {
+				selectedTrackIndex = trainEntries[0].trackIndex;
+				selectedTrainIndex = trainEntries[0].trainIndex;
+			}
 
 			State.variables.debugSelectedTrackIndex = selectedTrackIndex;
 			State.variables.debugSelectedTrainIndex = selectedTrainIndex;
@@ -2179,7 +2632,7 @@ Macro.add('debugTools', {
 
 		var deleteTrackBtn = document.createElement('button');
 		deleteTrackBtn.textContent = 'Delete Track';
-		deleteTrackBtn.disabled = deleteTrackSelect.options.length === 0;
+		deleteTrackBtn.disabled = deleteTrackSelect.options.length <= 1;
 		deleteTrackBtn.addEventListener('click', function () {
 			var selected = parseInt(deleteTrackSelect.value, 10);
 			if (isNaN(selected)) return;
@@ -2216,128 +2669,3 @@ Macro.add('debugTools', {
 		wrapper.appendChild(document.createElement('hr'));
 	}
 });
-
-
-
-:: Start {"position":"101,100"}
-/% Entry splash and pre-game setup passage: initializes settings state and renders the settings macro UI. %/
-<h2>Welcome to Ashline v0.1.0.</h2>
-
-<div class="small-description">
-- Save files are stored in your browser cache. Use the Export/Import tab in Saves to avoid losing them.
-<br>
-- Please report bugs directly to likea.
-
-<br><br></div>
-
-<<set $settingsExitPassage to "StoryInit">>
-<<initsettings>>
-<div id="settingsStart">
-	<<settingsStart>>
-</div>
-
-:: StoryInit {"position":"201,199"}
-/% Core game-state bootstrap passage: initializes player stats, starter train, and station state before entering gameplay. %/
-<<if $settingsMode is "Story">>
-You are a lone train engineer in a world where dangerous zombies called Foamers endlessly expand the railroad. Your goal is to travel from Punta Arenas, Chile, to Cape Town, South Africa, while surviving on your train.
-<<else>>
-You are a lone train engineer in a world where dangerous zombies called Foamers endlessly expand the railroad. Your goal is to simply survive, looting the landscape and traveling until you either become a mindless foamer or die an engineer.
-<</if>>
-
-<<set $player to {
-fatigue: 0,
-physicalDamage: 0,
-immunity: 100,
-mentalHealth: 100,
-hunger: 0,
-thirst: 0
-}>>
-
-<<set $trains to [ [$defaultTrains.steamLoco, $defaultTrains.boxcar] ]>>
-
-<<set $currentStation to 1>>
-
-<<set $stationTracks to {}>>
-
-[[Begin Your Journey|Railyard]]
-
-
-:: StoryMenu
-/% Sidebar menu extension passage: keeps utility links (currently Credits dialog) out of gameplay passages. %/
-<<link "Credits">><<run setup.showCreditsDialog()>><</link>>
-
-
-:: Railyard {"position":"402,201"}
-/% Station hub passage: resolves returning train placement, generates station tracks when needed, and renders yard interaction UI. %/
-<<buildIntegrityNotice>>
-<<if typeof $stationTracks[$currentStation] === 'undefined'>>
-	<<set $stationTracks[$currentStation] = setup.railyard.generateStationTracks($currentStation, $randomSeed)>>
-<</if>>
-<<if $leavingTrain>>
-	<<set $leavingTrain.visited = true>>
-	<<if $currentStation === $enteredStation && typeof $enteredTrackIndex !== 'undefined' && typeof $enteredTrainIndex !== 'undefined'>>
-	<<run setup.railyard.placeTrainInStationTracks($stationTracks[$currentStation], $leavingTrain, $enteredTrackIndex, $enteredTrainIndex)>>
-	<<else>>
-	<<run setup.railyard.placeTrainInStationTracks($stationTracks[$currentStation], $leavingTrain)>>
-	<</if>>
-  <<set $leavingTrain = null>>
-<</if>>
-<<if $debugMode>><<run (function () { if (typeof console !== 'undefined' && typeof console.log === 'function') { console.log('[Ashline Debug] Station ' + State.variables.currentStation + ' railyard tracks:', State.variables.stationTracks[State.variables.currentStation]); } })()>><</if>>
-You step into the railyard. Several trains are parked here, each with its own mix of cars and cargo.
-
-<<railyardButtons>>
-
-<<debugTools>>
-
-
-
-:: TrainInterior
-/% On-board navigation passage: tracks current car position, movement through consist, and transition into driving mode. %/
-<<buildIntegrityNotice>>
-<<if typeof $currentCarIndex === 'undefined'>>
-	<<set $currentCarIndex = setup.railyard.getBoardingCarIndex($currentTrain)>>
-<</if>>
-<<if $currentCarIndex < 0 || $currentCarIndex >= $currentTrain.length>>
-	<<set $currentCarIndex = setup.railyard.getBoardingCarIndex($currentTrain)>>
-<</if>>
-<<set $currentCar to $currentTrain[$currentCarIndex]>>
-You are <<print setup.railyard.getCarLocationText($currentCar)>> of your consist.
-<br>
-Car <<print $currentCarIndex + 1>> of <<print $currentTrain.length>>.
-
-<<if $currentCarIndex > 0>><<link "Move Toward Front">><<set $currentCarIndex -= 1>><<goto "TrainInterior">><</link>><</if>>
-<<if $currentCarIndex > 0 && $currentCarIndex < $currentTrain.length - 1>> | <</if>>
-<<if $currentCarIndex < $currentTrain.length - 1>><<link "Move Toward Rear">><<set $currentCarIndex += 1>><<goto "TrainInterior">><</link>><</if>>
-
-<<if $currentCar.tractiveCapacity > 0>>
-This is the locomotive. From here, you can start your journey.
-<<else>>
-This car does not have the controls needed to drive the train.
-<</if>>
-
-<<link "Leave Train">><<set $currentTrain.visited = true>><<set $enteredStation = $currentStation>><<if typeof $drivingTrackIndex !== 'undefined'>><<set $enteredTrackIndex = $drivingTrackIndex>><</if>><<set $leavingTrain = $currentTrain>><<set $trains.splice($trains.indexOf($currentTrain), 1)>><<goto "Railyard">><</link>>
-
-<<if $currentCar.tractiveCapacity > 0>><<link "Start Driving">><<goto "DrivingMode">><</link>><</if>>
-
-<<debugTools>>
-
-
-:: DrivingMode
-/% Active driving/shunting passage: composes merge, travel, and decoupling controls for the current consist and station context. %/
-<<buildIntegrityNotice>>
-<<initDrivingModeState>>
-You are driving your consist. Current station: <<print $currentStation>>.
-
-<<drivingMergeButtons>>
-
-<<drivingTravelButtons>>
-
-<<drivingShuntingControls>>
-
-<<link "Stop Driving">><<goto "TrainInterior">><</link>>
-
-<<debugTools>>
-
-
-
-

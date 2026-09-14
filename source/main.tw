@@ -1,0 +1,158 @@
+:: StoryTitle {"position":"0,508"}
+Ashline
+
+:: StoryData {"position":"0,599"}
+{
+        "ifid": "4ADA4312-A7CC-4510-9A61-902F70FE704C",
+        "format": "SugarCube",
+        "format-version": "2.36.1"
+}
+
+:: Start {"position":"101,100"}
+/% Entry splash and pre-game setup passage: initializes settings state and renders the settings macro UI. %/
+<h2>Welcome to Ashline v<<print setup.releaseVersion>>.</h2>
+
+<div class="small-description">
+- Saves are stored in this browser. Use Save to Disk in the Saves menu to keep a backup.
+<br>
+- Please report bugs directly to likea.
+
+<br><br></div>
+
+<<set $settingsExitPassage to "Introduction">>
+<<initsettings>>
+<div id="settingsStart">
+	<<settingsStart>>
+</div>
+
+:: StoryInit {"position":"201,199"}
+/% SugarCube runs this once before Start. Keep it free of navigation and visible prose. %/
+<<initsettings>>
+<<set $player to {
+fatigue: 0,
+physicalDamage: 0,
+immunity: 100,
+mentalHealth: 100,
+hunger: 0,
+thirst: 0
+}>>
+
+<<set $trains to []>>
+
+<<set $currentStation to 1>>
+
+<<set $stationTracks to {}>>
+
+:: Introduction
+<<if $settingsMode is "Story">>
+You are a lone train engineer in a world where dangerous zombies called Foamers endlessly expand the railroad. Your goal is to travel from Punta Arenas, Chile, to Cape Town, South Africa, while surviving on your train.
+<<else>>
+You are a lone train engineer in a world where dangerous zombies called Foamers endlessly expand the railroad. Your goal is to simply survive, looting the landscape and traveling until you either become a mindless foamer or die an engineer.
+<</if>>
+
+[[Begin Your Journey|Railyard]]
+
+
+:: StoryMenu
+/% Sidebar menu extension passage: keeps utility links (currently Credits dialog) out of gameplay passages. %/
+<<link "Options">><<run setup.showOptionsDialog()>><</link>><br>
+<<link "Credits">><<run setup.showCreditsDialog()>><</link>>
+
+
+:: StoryCaption
+/% Sidebar caption passage: always-visible date/time status shown above StoryMenu actions. %/
+<<set _sidebarTime = setup.time.getCurrentDateParts()>>
+<div class="small-description">
+<<print _sidebarTime.month>> <<print _sidebarTime.day>>, <<print _sidebarTime.year>>, <<print _sidebarTime.hours>>:<<print _sidebarTime.minutes>><<if _sidebarTime.meridiem>> <<print _sidebarTime.meridiem>><</if>>
+</div>
+
+
+:: Railyard {"position":"402,201"}
+/% Station hub passage: resolves returning train placement, generates station tracks when needed, and renders yard interaction UI. %/
+<<buildIntegrityNotice>>
+<<if typeof $stationTracks[$currentStation] === 'undefined'>>
+	<<set $stationTracks[$currentStation] = setup.railyard.generateStationTracks($currentStation, $randomSeed)>>
+<</if>>
+<<if $leavingTrain>>
+	<<run setup.railyard.markTrainVisited($leavingTrain)>>
+	<<if $currentStation === $enteredStation && typeof $enteredTrackIndex !== 'undefined' && typeof $enteredTrainIndex !== 'undefined'>>
+	<<run setup.railyard.placeTrainInStationTracks($stationTracks[$currentStation], $leavingTrain, $enteredTrackIndex, $enteredTrainIndex)>>
+	<<else>>
+	<<run setup.railyard.placeTrainInStationTracks($stationTracks[$currentStation], $leavingTrain)>>
+	<</if>>
+  <<set $leavingTrain = null>>
+  <<set $currentTrain = null>>
+<</if>>
+<<if $debugMode>><<run (function () { if (typeof console !== 'undefined' && typeof console.log === 'function') { console.log('[Ashline Debug] Station ' + State.variables.currentStation + ' railyard tracks:', State.variables.stationTracks[State.variables.currentStation]); } })()>><</if>>
+You step into the railyard. Several trains are parked here, each with its own mix of cars and cargo.
+
+<<railyardButtons>>
+
+<<debugTools>>
+
+
+
+:: TrainInterior
+/% On-board navigation passage: tracks current car position, movement through consist, and transition into driving mode. %/
+<<buildIntegrityNotice>>
+<<if typeof $currentCarIndex === 'undefined'>>
+	<<set $currentCarIndex = setup.railyard.getBoardingCarIndex($currentTrain)>>
+<</if>>
+<<if $currentCarIndex < 0 || $currentCarIndex >= $currentTrain.length>>
+	<<set $currentCarIndex = setup.railyard.getBoardingCarIndex($currentTrain)>>
+<</if>>
+<<set _currentCar to $currentTrain[$currentCarIndex]>>
+You are <<print setup.railyard.getCarLocationText(_currentCar)>> of your consist.
+<br>
+Car <<print $currentCarIndex + 1>> of <<print $currentTrain.length>>.
+
+<<if $currentCarIndex > 0>><<link "Move Toward Front">><<set $currentCarIndex -= 1>><<goto "TrainInterior">><</link>><</if>>
+<<if $currentCarIndex > 0 && $currentCarIndex < $currentTrain.length - 1>> | <</if>>
+<<if $currentCarIndex < $currentTrain.length - 1>><<link "Move Toward Rear">><<set $currentCarIndex += 1>><<goto "TrainInterior">><</link>><</if>>
+
+<<if _currentCar.tractiveCapacity > 0>>
+This is the locomotive. From here, you can start your journey.
+<<else>>
+This car does not have the controls needed to drive the train.
+<</if>>
+
+<<if setup.railyard.isSteamLocomotiveCar(_currentCar)>>
+	<<run setup.railyard.ensureSteamLocomotiveState(_currentCar)>>
+	<span class="small-description"><strong>Boiler pressure:</strong> <<print setup.railyard.getSteamPressureBar(_currentCar).toFixed(2)>> bar</span><br>
+	<span class="small-description"><em>Coal: <<print setup.railyard.getCargoAmount(_currentCar, "coal").toFixed(2)>> L, Water: <<print setup.railyard.getCargoAmount(_currentCar, "water").toFixed(2)>> L, Firebox: <<print _currentCar.fireboxEnabled ? "on" : "off">></em></span><br>
+	<<set _fireboxLabel = _currentCar.fireboxEnabled ? "Turn Off Firebox" : "Turn On Firebox">>
+	<<link _fireboxLabel>><<run setup.railyard.toggleSteamFireboxByIndex($currentTrain, $currentCarIndex)>><<goto "TrainInterior">><</link>><br>
+	<<if !setup.railyard.isTrainDriveCapable($currentTrain)>>
+		<<set _waitToUsableMinutes = setup.railyard.estimateMinutesUntilSteamUsable($currentTrain, 720)>>
+		<<if _waitToUsableMinutes > 0>><<timedlink "Wait Until Boiler Reaches 10 bar" _waitToUsableMinutes>><<goto "TrainInterior">><</timedlink>><<elseif _waitToUsableMinutes === -1>><span class="small-description"><em>Cannot build usable steam with current firebox/fuel state.</em></span><</if>>
+	<</if>>
+<</if>>
+
+<<timedlink "Leave Train" 1>><<run setup.railyard.leaveCurrentTrain()>><<goto "Railyard">><</timedlink>>
+
+<<if _currentCar.tractiveCapacity > 0>>
+	<<if setup.railyard.isTrainDriveCapable($currentTrain)>><<link "Start Driving">><<goto "DrivingMode">><</link>><<else>>
+		<<if setup.railyard.isDieselLocomotiveCar(_currentCar)>><span class="small-description"><em>Cannot start driving: this diesel locomotive has <<print setup.railyard.getCargoAmount(_currentCar, "diesel").toFixed(2)>> L of diesel; at least 1.00 L is required.</em></span>
+		<<elseif setup.railyard.isSteamLocomotiveCar(_currentCar)>><span class="small-description"><em>Cannot start driving: boiler pressure is <<print setup.railyard.getSteamPressureBar(_currentCar).toFixed(2)>> bar; at least 10.00 bar is required.</em></span>
+		<<else>><span class="small-description"><em>Cannot start driving: this locomotive cannot currently provide traction.</em></span><</if>>
+	<</if>>
+<</if>>
+
+<<debugTools>>
+
+
+:: DrivingMode
+/% Active driving/shunting passage: composes merge, travel, and decoupling controls for the current consist and station context. %/
+<<buildIntegrityNotice>>
+<<initDrivingModeState>>
+You are driving your consist. Current station: <<print $currentStation>>.
+
+<<drivingMergeButtons>>
+
+<<drivingTravelButtons>>
+
+<<drivingShuntingControls>>
+
+<<link "Stop Driving">><<goto "TrainInterior">><</link>>
+
+<<debugTools>>
