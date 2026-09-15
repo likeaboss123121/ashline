@@ -1,50 +1,80 @@
-Ashline is a Twine/SugarCube railway survival prototype. The playable build is [index.html](index.html).
+# Ashline
 
-Edit passages in [source/main.tw](source/main.tw) and game logic/macros in [source/scripts.js](source/scripts.js). Tweego automatically includes JavaScript files from `source` when compiling. Do not edit generated `index.html` directly.
+Ashline is a text-based survival game about circumnavigating the globe by train during a zombie apocalypse. You play a lone train engineer in a world where dangerous zombies called Foamers keep expanding the railroad without end. Explore rail yards, take command of diesel and steam locomotives, and build a working consist from the rolling stock you find along the line.
 
-**Build and play on Windows**
+Ashline is free and open source, and it runs entirely in your browser. It is built with [Twine](https://twinery.org/) and the [SugarCube 2](https://www.motoslave.net/sugarcube/2/) story format.
 
-In VS Code, run the default build task with Ctrl+Shift+B (`Tweego: Build`), then open `index.html` in a browser. `Tweego: Watch` recompiles whenever a source file changes.
+**[Visit the Ashline website](https://likeaserver.myddns.me/ashlinegame/about/)**
 
-The equivalent PowerShell command, from this folder, is:
+## Play
 
-```powershell
-& '.\tweego-2.1.1-windows-x64\tweego.exe' -f sugarcube-2 -o index.html source
+- **In your browser:** play the current build on the [Ashline website](https://likeaserver.myddns.me/ashlinegame).
+- **Offline:** download a playable HTML file from the [Releases page](https://github.com/likeaboss123121/ashline/releases), then open it in any modern browser.
+
+Saves are stored in your browser. To keep a backup, use **Save to Disk** in the Saves menu.
+
+Found a bug? Please [open an issue](https://github.com/likeaboss123121/ashline/issues).
+
+## Building from source
+
+The game compiles to a single HTML file with [Tweego](https://github.com/tmedwards/tweego), a command-line compiler for Twine stories. Tweego is not included in this repository.
+
+### Requirements
+
+1. **Tweego 2.1.1 or newer.** Download it from the [Tweego releases page](https://github.com/tmedwards/tweego/releases). See the [Tweego documentation](https://www.motoslave.net/tweego/docs/) for installation details.
+2. **SugarCube 2.36.1.** Tweego 2.1.1 ships with an older SugarCube (2.30.0), but Ashline targets 2.36.1. Download `sugarcube-2.36.1-for-twine-2.1-local.zip` from the [SugarCube releases page](https://github.com/tmedwards/sugarcube-2/releases/tag/v2.36.1). Then replace the `sugarcube-2` folder inside Tweego's `storyformats` directory with the one from the archive.
+
+Confirm that Tweego finds the correct story format:
+
+```sh
+tweego --list-formats
 ```
 
-The bundled compiler is Tweego 2.1.1 and the game uses the bundled SugarCube 2.36.1. Node.js is only needed for the development commands and tests; the game itself runs from the generated HTML without Node or npm packages.
+The list should include `sugarcube-2   SugarCube (2.36.1)`.
 
-**Development checks**
+### Compile
 
-Install Node.js 22 or newer and Google Chrome, then run:
+From the repository root, run:
 
-```powershell
-npm.cmd ci
-npm.cmd test
-npm.cmd run test:browser
+```sh
+tweego -f sugarcube-2 -o index.html source
 ```
 
-`npm test` runs the game-logic regression suite, including 1,000 deterministic yard-generation cases. `npm run test:browser` first compiles the actual game with Tweego, then exercises that HTML in a fresh, headless Chrome context. These tests use isolated browser storage and do not touch your normal browser saves. Playwright is a development dependency, pinned in `package-lock.json`.
+This compiles every passage and script in `source/` into `index.html`, which you can open directly in a browser. To recompile automatically whenever a source file changes, add `--watch`:
 
-To use installed Microsoft Edge for the browser tests:
-
-```powershell
-$env:ASHLINE_BROWSER = 'msedge'
-npm.cmd run test:browser
+```sh
+tweego --watch -f sugarcube-2 -o index.html source
 ```
 
-`npm run build` and `npm run watch` also invoke Tweego. Set `TWEEGO` to an alternate compiler executable if necessary. The VS Code tasks always use the bundled Windows executable.
+## Development
 
-**Project contents**
+Automated tests and the npm build scripts require [Node.js](https://nodejs.org/) 22 or newer. The browser tests also require Google Chrome or Microsoft Edge.
+
+```sh
+npm ci                    # install development dependencies
+npm test                  # game-logic tests, including 1,000 generated yard layouts
+npm run build             # compile index.html with Tweego
+npm run watch             # recompile on changes
+npm run test:browser      # compile, then test the game in headless Chrome
+```
+
+The npm scripts look for a `tweego` command on your `PATH`. To use a compiler somewhere else, set the `TWEEGO` environment variable to its full path. On Windows, `TWEEGO` is required unless Tweego is in a `tweego-2.1.1-windows-x64` folder at the repository root.
+
+To run the browser tests with Microsoft Edge, set `ASHLINE_BROWSER=msedge`. The browser tests use isolated storage and never touch your normal browser saves.
+
+## Project structure
 
 | Path | Purpose |
 | --- | --- |
 | `source/main.tw` | Story metadata, initialization, and playable passages |
-| `source/scripts.js` | Time/fuel simulation, rolling stock, generation, shunting, dialogs, and custom macros |
-| `scripts/build.cjs` | Build/watch command wrapper |
-| `tests/` | Logic tests and compiled-game browser tests |
-| `tweego-2.1.1-windows-x64/` | Bundled compiler, story formats, icons, and licenses |
-| `tool docs/` | Reference material; some documents cover newer SugarCube APIs than the bundled engine |
-| `REVIEW.md` | Findings, fixes, validation, and outstanding gameplay decisions |
+| `source/scripts.js` | Simulation, rolling stock, yard generation, shunting, dialogs, and custom macros |
+| `scripts/build.cjs` | Build and watch wrapper around Tweego |
+| `tests/` | Game-logic tests and compiled-game browser tests |
 
-Story Mode is intentionally disabled. Infinite Mode is a prototype: survival-stat updates and ordinary cargo transfer/refueling are still unimplemented. See [the review](REVIEW.md) before treating the current build as a complete survival game.
+Do not edit a compiled `index.html` directly. Make changes in `source/` and recompile.
+
+## License
+
+Ashline is licensed under the [GNU Affero General Public License v3.0](LICENSE).
+
+Compiled builds embed [SugarCube](https://github.com/tmedwards/sugarcube-2), which is distributed under its own BSD 2-Clause license. [Tweego](https://github.com/tmedwards/tweego) is a separate tool with its own license and is not part of this project.
