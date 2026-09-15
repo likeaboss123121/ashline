@@ -15,9 +15,12 @@ index.html
 
 # Local notes and editor settings
 REVIEW.md
+AGENTS.md
+CLAUDE.md
 .vscode/
 
 # Local build and test tooling
 scripts/
 package.json
 package-lock.json
+development materials/
