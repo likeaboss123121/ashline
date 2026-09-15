@@ -46,33 +46,6 @@ This compiles every passage and script in `source/` into `index.html`, which you
 tweego --watch -f sugarcube-2 -o index.html source
 ```
 
-## Development
-
-Automated tests and the npm build scripts require [Node.js](https://nodejs.org/) 22 or newer. The browser tests also require Google Chrome or Microsoft Edge.
-
-```sh
-npm ci                    # install development dependencies
-npm test                  # game-logic tests, including 1,000 generated yard layouts
-npm run build             # compile index.html with Tweego
-npm run watch             # recompile on changes
-npm run test:browser      # compile, then test the game in headless Chrome
-```
-
-The npm scripts look for a `tweego` command on your `PATH`. To use a compiler somewhere else, set the `TWEEGO` environment variable to its full path. On Windows, `TWEEGO` is required unless Tweego is in a `tweego-2.1.1-windows-x64` folder at the repository root.
-
-To run the browser tests with Microsoft Edge, set `ASHLINE_BROWSER=msedge`. The browser tests use isolated storage and never touch your normal browser saves.
-
-## Project structure
-
-| Path | Purpose |
-| --- | --- |
-| `source/main.tw` | Story metadata, initialization, and playable passages |
-| `source/scripts.js` | Simulation, rolling stock, yard generation, shunting, dialogs, and custom macros |
-| `scripts/build.cjs` | Build and watch wrapper around Tweego |
-| `tests/` | Game-logic tests and compiled-game browser tests |
-
-Do not edit a compiled `index.html` directly. Make changes in `source/` and recompile.
-
 ## License
 
 Ashline is licensed under the [GNU Affero General Public License v3.0](LICENSE).
