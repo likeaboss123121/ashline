@@ -453,8 +453,9 @@ setup.railyard = {
 	locomotiveKeys: ['steamLoco', 'dieselLoco'],
 	carKeys: ['boxcar', 'flatcar', 'tanker', 'gondola'],
 	cargoPresets: [
-		{type: 'coal', amount: 25, rarity: 'common'},
-		{type: 'water', amount: 1200, rarity: 'common'},
+		{type: 'coal', amount: 6000, rarity: 'common'},
+		{type: 'water', amount: 8000, rarity: 'common'},
+		{type: 'diesel', amount: 6000, rarity: 'uncommon'},
 		{type: 'timber', amount: 35, rarity: 'common'},
 		{type: 'scrap metal', amount: 20, rarity: 'uncommon'},
 		{type: 'machinery', amount: 10, rarity: 'uncommon'},
@@ -1856,6 +1857,7 @@ setup.railyard = {
 			// Station 1 is a fixed tutorial layout.
 			var tutorialLoco = this.createLocomotiveCar('dieselLoco');
 			tutorialLoco.cargo = [{ type: 'diesel', amount: 400 }];
+			tutorialLoco.inventory = setup.items.createStartingKit();
 			return [
 				{ length: 999999, infinite: true, trains: [], hasLead: false, direction: 'south' }, // no station lies behind station 1
 				{ length: 120, trains: [[tutorialLoco]] },

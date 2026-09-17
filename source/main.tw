@@ -129,6 +129,12 @@ This car does not have the controls needed to drive the train.
 		<<if _waitToUsableMinutes > 0>><<timedlink "Wait Until Boiler Reaches 10 bar" _waitToUsableMinutes>><<goto "TrainInterior">><</timedlink>><<elseif _waitToUsableMinutes === -1>><span class="small-description"><em>Cannot build usable steam with current firebox/fuel state.</em></span><</if>>
 	<</if>>
 <</if>>
+<<if setup.railyard.isDieselLocomotiveCar(_currentCar)>>
+	<span class="small-description"><em>Diesel: <<print setup.railyard.getCargoAmount(_currentCar, "diesel").toFixed(2)>> L</em></span><br>
+<</if>>
+
+<<locomotiveKit>>
+<<refuelControls>>
 
 <<if $journey>><span class="small-description"><em>You are out on the line between stations. There is nowhere to get off until you reach a station.</em></span><<else>><<timedlink "Leave Train" 1>><<run setup.railyard.leaveCurrentTrain()>><<goto "Railyard">><</timedlink>><</if>>
 

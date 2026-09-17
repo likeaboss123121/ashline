@@ -111,6 +111,19 @@ setup.worldmap = {
 		return 'plains';
 	},
 
+	// Whether there is water to pump from: the tile itself is water (the line is bridging it), or one of the eight
+	// tiles around it is.
+	isBesideWater: function(seed, x, y) {
+		for (var dx = -1; dx <= 1; dx++) {
+			for (var dy = -1; dy <= 1; dy++) {
+				if (this.getBaseTerrain(seed, x + dx, y + dy) === 'water') {
+					return true;
+				}
+			}
+		}
+		return false;
+	},
+
 	// --- directions and track shapes ----------------------------------------------------------------------
 
 	directionIndex: function(name) {
