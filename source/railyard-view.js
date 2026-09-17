@@ -41,6 +41,7 @@ setup.railyardView = {
 	},
 
 	// Named parts that belong on the rail layer. Everything else in a track piece is its bed.
+	TRAIN_HIT_HALF_BAND: 14, // units either side of the track centre, just inside a track band's 16
 	GROUND_COLOUR: '#2b302d', // .railyard-ground in railyard.css, graded here at dusk and night
 	RAIL_PARTS: ['rails', 'diagonal-rails', 'diagonal-up-rails', 'branch-rails', 'selection'],
 
@@ -611,6 +612,7 @@ setup.railyardView = {
 				return;
 			}
 			var actions = self.actionsFor(svg, target);
+			self.setActiveTarget(svg, null);
 			message.textContent = '';
 			if (!actions.links.length) {
 				message.textContent = actions.reason;
@@ -628,7 +630,21 @@ setup.railyardView = {
 
 	// The choice sits under the drawing rather than over it, so it never hides the yard and reads the same on a
 	// phone. Each button runs the text link it was built from, wording and time cost included.
+	// Marks the target a choice is about, so a touch screen shows what was tapped while the buttons are up. A tap
+	// leaves :hover stuck on the element it hit, so the highlight is a class here rather than a hover style.
+	setActiveTarget: function(svg, target) {
+		var previous = svg.querySelectorAll('.railyard-hit-active');
+		for (var i = 0; i < previous.length; i++) {
+			previous[i].classList.remove('railyard-hit-active');
+		}
+		if (target) {
+			target.classList.add('railyard-hit-active');
+		}
+	},
 	showChoice: function(message, target, links) {
+		var svg = target.ownerSVGElement || target;
+		var self = this;
+		this.setActiveTarget(svg, target);
 		var title = target.querySelector('title');
 		message.textContent = links.length > 1
 			? (title ? title.textContent + ': ' : '')
@@ -642,6 +658,7 @@ setup.railyardView = {
 			button.className = 'railyard-view-choice';
 			button.textContent = link.textContent;
 			button.addEventListener('click', function() {
+				self.setActiveTarget(svg, null);
 				link.click();
 			});
 			message.appendChild(button);
@@ -652,6 +669,7 @@ setup.railyardView = {
 		cancel.className = 'railyard-view-choice';
 		cancel.textContent = 'Cancel';
 		cancel.addEventListener('click', function() {
+			self.setActiveTarget(svg, null);
 			message.textContent = '';
 		});
 		message.appendChild(document.createTextNode(' '));
@@ -767,21 +785,21 @@ setup.railyardView = {
 		layout.flat.sort(byDepth).forEach(function(piece) {
 			place(piece.name, piece.u, piece.v, '', true);
 		});
-		var trainBoxes = {};
+		var trainSpans = {};
 		layout.cars.sort(byDepth).forEach(function(entry) {
 			var name = self.getCarTemplateName(entry.car, layout.flipped);
 			var title = String(entry.car.type || 'car') + ', ' + entry.car.length + ' m' + (entry.isPlayer ? ' (your consist)' : '');
 			var item = place(name, entry.u, entry.v, title);
-			// A parked train's click target is the box its cars actually occupy on screen.
+			// A parked train's click target is the stretch of its own track that its cars stand on, measured along
+			// the rails. A box around them on screen would be a huge upright rectangle over a drawing where nothing
+			// is upright, and would cover the tracks in front of and behind the train as well.
 			if (!entry.isPlayer && typeof entry.trainIndex === 'number') {
-				var boxKey = entry.trackIndex + ':' + entry.trainIndex;
-				var box = trainBoxes[boxKey] || (trainBoxes[boxKey] = {
-					trackIndex: entry.trackIndex, x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity
+				var spanKey = entry.trackIndex + ':' + entry.trainIndex;
+				var span = trainSpans[spanKey] || (trainSpans[spanKey] = {
+					trackIndex: entry.trackIndex, v: entry.v, u0: Infinity, u1: -Infinity
 				});
-				box.x0 = Math.min(box.x0, item.left);
-				box.y0 = Math.min(box.y0, item.top);
-				box.x1 = Math.max(box.x1, item.left + item.template.width);
-				box.y1 = Math.max(box.y1, item.top + item.template.height);
+				span.u0 = Math.min(span.u0, entry.u);
+				span.u1 = Math.max(span.u1, entry.u + (Number(entry.car.length) || 0));
 			}
 			if (entry.isPlayer && player && entry.carIndex === player.carIndex) {
 				// The car the player is in is the one with a lamp lit in it, drawn from its own definition so its
@@ -980,18 +998,18 @@ setup.railyardView = {
 			});
 			svg.setAttribute('data-player-track', player.trackIndex);
 		}
-		Object.keys(trainBoxes).forEach(function(boxKey) {
-			var box = trainBoxes[boxKey];
-			var area = document.createElementNS(ns, 'rect');
-			area.setAttribute('x', box.x0);
-			area.setAttribute('y', box.y0);
-			area.setAttribute('width', Math.max(1, box.x1 - box.x0));
-			area.setAttribute('height', Math.max(1, box.y1 - box.y0));
+		Object.keys(trainSpans).forEach(function(spanKey) {
+			var span = trainSpans[spanKey];
+			var half = self.TRAIN_HIT_HALF_BAND;
+			var corners = [self.project(span.u0 * M, span.v - half), self.project(span.u1 * M, span.v - half),
+				self.project(span.u1 * M, span.v + half), self.project(span.u0 * M, span.v + half)];
+			var area = document.createElementNS(ns, 'polygon');
+			area.setAttribute('points', corners.map(function(point) { return point.x + ',' + point.y; }).join(' '));
 			area.setAttribute('class', 'railyard-hit railyard-hit-train');
-			area.setAttribute('data-yard-target', 'train:' + boxKey);
+			area.setAttribute('data-yard-target', 'train:' + spanKey);
 			var areaTitle = document.createElementNS(ns, 'title');
 			areaTitle.textContent = (player ? 'Parked train on ' : 'Board the train on ')
-				+ setup.railyard.getTrackLabel(tracks, box.trackIndex);
+				+ setup.railyard.getTrackLabel(tracks, span.trackIndex);
 			area.appendChild(areaTitle);
 			hitLayer.appendChild(area);
 		});
@@ -1006,9 +1024,9 @@ setup.railyardView = {
 		// than on whichever end of the yard happens to be at x = 0. Done once the box has been laid out.
 		var focusX = marker ? marker.x : null;
 		if (focusX === null) {
-			var firstBox = Object.keys(trainBoxes).map(function(key) { return trainBoxes[key]; })
-				.sort(function(a, b) { return a.x0 - b.x0; })[0];
-			focusX = firstBox ? (firstBox.x0 + firstBox.x1) / 2 : null;
+			var firstSpan = Object.keys(trainSpans).map(function(key) { return trainSpans[key]; })
+				.sort(function(a, b) { return a.u0 - b.u0; })[0];
+			focusX = firstSpan ? self.project((firstSpan.u0 + firstSpan.u1) / 2 * M, firstSpan.v).x : null;
 		}
 		if (focusX !== null && typeof requestAnimationFrame === 'function') {
 			var fraction = (focusX - minX) / width;

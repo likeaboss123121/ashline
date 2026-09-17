@@ -100,19 +100,34 @@
 	pointer-events: none;
 }
 
-/* Click targets over the drawing: invisible until hovered, and they run the text actions below the view. */
+/* Click targets over the drawing: invisible until pointed at, and they run the text actions below the view. The
+   hover styles are only for a pointer that can really hover, because a tap leaves :hover stuck on what it hit. */
 .railyard-view .railyard-hit {
 	fill: #e5c58a;
 	fill-opacity: 0;
 	cursor: pointer;
 }
 
-.railyard-view .railyard-hit:hover {
-	fill-opacity: 0.12;
+@media (hover: hover) and (pointer: fine) {
+	.railyard-view .railyard-hit:hover {
+		fill-opacity: 0.12;
+	}
+
+	.railyard-view .railyard-hit-train:hover {
+		fill-opacity: 0.22;
+	}
+
+	.railyard-view .railyard-hit-depart:hover {
+		fill-opacity: 0.25;
+	}
 }
 
-.railyard-view .railyard-hit-train:hover {
-	fill-opacity: 0.22;
+/* What a choice on offer is about: outlined along the rails, and shown until the player takes it or cancels. */
+.railyard-view .railyard-hit-active {
+	fill-opacity: 0.14;
+	stroke: #e5c58a;
+	stroke-width: 1.5;
+	stroke-opacity: 0.85;
 }
 
 /* The compass sits in the corner of the view, in the same projection as the yard itself, clear of the message row
@@ -143,10 +158,6 @@
 
 .railyard-compass-label.railyard-compass-onward {
 	fill: #e5c58a;
-}
-
-.railyard-view .railyard-hit-depart:hover {
-	fill-opacity: 0.25;
 }
 
 .railyard-view-message {
