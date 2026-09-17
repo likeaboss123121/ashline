@@ -8,6 +8,16 @@
 	padding: 4px;
 }
 
+/* On a phone the picture takes the passage margins too, the same as the rail yard frame. */
+@media (max-width: 700px) {
+	.driving-view-wrapper {
+		margin-left: -20px;
+		margin-right: -24px;
+		border-left: none;
+		border-right: none;
+	}
+}
+
 .driving-view {
 	display: block;
 	max-width: 100%;
