@@ -96,107 +96,211 @@ setup.drivingTemplates = {
 			]
 		},
 		{
-			"file": "driving-loco-diesel-right.svg",
-			"passage": "driving-loco-diesel-right",
-			"title": "Diesel locomotive, facing right",
-			"width": 40,
-			"height": 23,
+			"file": "driving-loco-diesel-shunter-right.svg",
+			"passage": "driving-loco-diesel-shunter-right",
+			"title": "Two axle diesel shunter, facing right",
+			"width": 22,
+			"height": 22,
 			"anchorX": 2,
 			"anchorY": 18,
-			"lengthMetres": 18,
+			"lengthMetres": 9,
 			"rear": [
 				2,
 				15
 			],
 			"front": [
-				38,
+				20,
 				15
 			],
 			"top": [
-				20,
+				11,
 				5
+			],
+			"cab": [
+				7,
+				5
+			]
+		},
+		{
+			"file": "driving-loco-diesel-shunter-left.svg",
+			"passage": "driving-loco-diesel-shunter-left",
+			"title": "Two axle diesel shunter, facing left",
+			"width": 22,
+			"height": 22,
+			"anchorX": 2,
+			"anchorY": 18,
+			"lengthMetres": 9,
+			"rear": [
+				20,
+				15
+			],
+			"front": [
+				2,
+				15
+			],
+			"top": [
+				11,
+				5
+			],
+			"cab": [
+				16,
+				5
+			]
+		},
+		{
+			"file": "driving-loco-diesel-road-right.svg",
+			"passage": "driving-loco-diesel-road-right",
+			"title": "Six axle road diesel, facing right",
+			"width": 44,
+			"height": 24,
+			"anchorX": 2,
+			"anchorY": 18,
+			"lengthMetres": 20,
+			"rear": [
+				2,
+				15
+			],
+			"front": [
+				42,
+				15
+			],
+			"top": [
+				22,
+				5
+			],
+			"cab": [
+				33,
+				5
+			]
+		},
+		{
+			"file": "driving-loco-diesel-road-left.svg",
+			"passage": "driving-loco-diesel-road-left",
+			"title": "Six axle road diesel, facing left",
+			"width": 44,
+			"height": 24,
+			"anchorX": 2,
+			"anchorY": 18,
+			"lengthMetres": 20,
+			"rear": [
+				42,
+				15
+			],
+			"front": [
+				2,
+				15
+			],
+			"top": [
+				22,
+				5
+			],
+			"cab": [
+				11,
+				5
+			]
+		},
+		{
+			"file": "driving-loco-steam-shunter-right.svg",
+			"passage": "driving-loco-steam-shunter-right",
+			"title": "0-6-0 steam shunter, facing right",
+			"width": 24,
+			"height": 22,
+			"anchorX": 2,
+			"anchorY": 18,
+			"lengthMetres": 10,
+			"rear": [
+				2,
+				15
+			],
+			"front": [
+				22,
+				15
+			],
+			"top": [
+				12,
+				5
+			],
+			"cab": [
+				9,
+				6
+			]
+		},
+		{
+			"file": "driving-loco-steam-shunter-left.svg",
+			"passage": "driving-loco-steam-shunter-left",
+			"title": "0-6-0 steam shunter, facing left",
+			"width": 24,
+			"height": 22,
+			"anchorX": 2,
+			"anchorY": 18,
+			"lengthMetres": 10,
+			"rear": [
+				22,
+				15
+			],
+			"front": [
+				2,
+				15
+			],
+			"top": [
+				12,
+				5
+			],
+			"cab": [
+				16,
+				6
+			]
+		},
+		{
+			"file": "driving-loco-steam-prairie-right.svg",
+			"passage": "driving-loco-steam-prairie-right",
+			"title": "2-6-2 steam engine with tender, facing right",
+			"width": 50,
+			"height": 23,
+			"anchorX": 2,
+			"anchorY": 18,
+			"lengthMetres": 23,
+			"rear": [
+				2,
+				15
+			],
+			"front": [
+				48,
+				15
+			],
+			"top": [
+				25,
+				2
+			],
+			"cab": [
+				23,
+				5
+			]
+		},
+		{
+			"file": "driving-loco-steam-prairie-left.svg",
+			"passage": "driving-loco-steam-prairie-left",
+			"title": "2-6-2 steam engine with tender, facing left",
+			"width": 50,
+			"height": 23,
+			"anchorX": 2,
+			"anchorY": 18,
+			"lengthMetres": 23,
+			"rear": [
+				48,
+				15
+			],
+			"front": [
+				2,
+				15
+			],
+			"top": [
+				25,
+				2
 			],
 			"cab": [
 				28,
 				5
-			]
-		},
-		{
-			"file": "driving-loco-diesel-left.svg",
-			"passage": "driving-loco-diesel-left",
-			"title": "Diesel locomotive, facing left",
-			"width": 40,
-			"height": 23,
-			"anchorX": 2,
-			"anchorY": 18,
-			"lengthMetres": 18,
-			"rear": [
-				38,
-				15
-			],
-			"front": [
-				2,
-				15
-			],
-			"top": [
-				20,
-				5
-			],
-			"cab": [
-				12,
-				5
-			]
-		},
-		{
-			"file": "driving-loco-steam-right.svg",
-			"passage": "driving-loco-steam-right",
-			"title": "Steam locomotive, facing right",
-			"width": 34,
-			"height": 22,
-			"anchorX": 2,
-			"anchorY": 18,
-			"lengthMetres": 15,
-			"rear": [
-				2,
-				15
-			],
-			"front": [
-				32,
-				15
-			],
-			"top": [
-				17,
-				3
-			],
-			"cab": [
-				7,
-				6
-			]
-		},
-		{
-			"file": "driving-loco-steam-left.svg",
-			"passage": "driving-loco-steam-left",
-			"title": "Steam locomotive, facing left",
-			"width": 34,
-			"height": 22,
-			"anchorX": 2,
-			"anchorY": 18,
-			"lengthMetres": 15,
-			"rear": [
-				32,
-				15
-			],
-			"front": [
-				2,
-				15
-			],
-			"top": [
-				17,
-				3
-			],
-			"cab": [
-				27,
-				6
 			]
 		},
 		{
@@ -242,6 +346,15 @@ setup.drivingTemplates = {
 			"width": 82,
 			"height": 61,
 			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-forest.svg",
+			"passage": "driving-terrain-forest",
+			"title": "Forest",
+			"width": 84,
+			"height": 61,
+			"anchorX": 2,
 			"anchorY": 43
 		},
 		{

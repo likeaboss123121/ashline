@@ -113,7 +113,7 @@ Car <<print $currentCarIndex + 1>> of <<print $currentTrain.length>>.
 <<if $currentCarIndex < $currentTrain.length - 1>><<link "Move Toward Rear">><<set $currentCarIndex += 1>><<goto "TrainInterior">><</link>><</if>>
 
 <<if _currentCar.tractiveCapacity > 0>>
-This is the locomotive. From here, you can start your journey.
+This is the locomotive, <<print setup.railyard.getLocomotiveSummary(_currentCar)>>. From here, you can start your journey.
 <<else>>
 This car does not have the controls needed to drive the train.
 <</if>>
@@ -121,7 +121,8 @@ This car does not have the controls needed to drive the train.
 <<if setup.railyard.isSteamLocomotiveCar(_currentCar)>>
 	<<run setup.railyard.ensureSteamLocomotiveState(_currentCar)>>
 	<span class="small-description"><strong>Boiler pressure:</strong> <<print setup.railyard.getSteamPressureBar(_currentCar).toFixed(2)>> bar</span><br>
-	<span class="small-description"><em>Coal: <<print setup.railyard.getCargoAmount(_currentCar, "coal").toFixed(2)>> L, Water: <<print setup.railyard.getCargoAmount(_currentCar, "water").toFixed(2)>> L, Firebox: <<print _currentCar.fireboxEnabled ? "on" : "off">></em></span><br>
+	<span class="small-description"><em><<print setup.fuel.describeBunker(_currentCar)>>. Water: <<print setup.railyard.getCargoAmount(_currentCar, "water").toFixed(2)>> L. Firebox: <<print _currentCar.fireboxEnabled ? "on" : "off">></em></span><br>
+	<<if setup.fuel.hasSolidFuel(_currentCar) && setup.fuel.getFireboxOutput(_currentCar) < 0.995>><span class="small-description"><em>This fuel is too poor to fire the boiler fully: the grate gives <<print Math.round(setup.fuel.getFireboxOutput(_currentCar) * 100)>>% of the steam.</em></span><br><</if>>
 	<<set _fireboxLabel = _currentCar.fireboxEnabled ? "Turn Off Firebox" : "Turn On Firebox">>
 	<<link _fireboxLabel>><<run setup.railyard.toggleSteamFireboxByIndex($currentTrain, $currentCarIndex)>><<goto "TrainInterior">><</link>><br>
 	<<if !setup.railyard.isTrainDriveCapable($currentTrain)>>
@@ -130,7 +131,7 @@ This car does not have the controls needed to drive the train.
 	<</if>>
 <</if>>
 <<if setup.railyard.isDieselLocomotiveCar(_currentCar)>>
-	<span class="small-description"><em>Diesel: <<print setup.railyard.getCargoAmount(_currentCar, "diesel").toFixed(2)>> L</em></span><br>
+	<span class="small-description"><em>Diesel: <<print setup.railyard.getCargoAmount(_currentCar, "diesel").toFixed(2)>> L<<if setup.railyard.getCargoAmount(_currentCar, "diesel") > 0>>, grade <<print setup.fuel.describeGrade(setup.fuel.getGrade(_currentCar, "diesel"), "diesel")>>. Engine power <<print Math.round(setup.fuel.getDieselPowerFactor(setup.fuel.getGrade(_currentCar, "diesel")) * 100)>>%<</if>>.</em></span><br>
 <</if>>
 
 <<locomotiveKit>>
@@ -140,7 +141,8 @@ This car does not have the controls needed to drive the train.
 
 <<if _currentCar.tractiveCapacity > 0>>
 	<<if setup.railyard.isTrainDriveCapable($currentTrain)>><<link "Start Driving">><<set _drivingPassage = $journey ? "OnTheLine" : "DrivingMode">><<goto _drivingPassage>><</link>><<else>>
-		<<if setup.railyard.isDieselLocomotiveCar(_currentCar)>><span class="small-description"><em>Cannot start driving: this diesel locomotive has <<print setup.railyard.getCargoAmount(_currentCar, "diesel").toFixed(2)>> L of diesel; at least 1.00 L is required.</em></span>
+		<<if setup.railyard.isDieselLocomotiveCar(_currentCar) && setup.railyard.getCargoAmount(_currentCar, "diesel") >= setup.fuel.getDieselLitresPerMinute(_currentCar)>><span class="small-description"><em>Cannot start driving: the diesel in the tank is <<print setup.fuel.describeGrade(setup.fuel.getGrade(_currentCar, "diesel"), "diesel")>>, and the engine will not run on anything below <<print setup.fuel.DIESEL_MIN_GRADE>>%. Blend in better fuel.</em></span>
+		<<elseif setup.railyard.isDieselLocomotiveCar(_currentCar)>><span class="small-description"><em>Cannot start driving: this diesel locomotive has <<print setup.railyard.getCargoAmount(_currentCar, "diesel").toFixed(2)>> L of diesel; at least <<print setup.fuel.getDieselLitresPerMinute(_currentCar).toFixed(2)>> L is required.</em></span>
 		<<elseif setup.railyard.isSteamLocomotiveCar(_currentCar)>><span class="small-description"><em>Cannot start driving: boiler pressure is <<print setup.railyard.getSteamPressureBar(_currentCar).toFixed(2)>> bar; at least 10.00 bar is required.</em></span>
 		<<else>><span class="small-description"><em>Cannot start driving: this locomotive cannot currently provide traction.</em></span><</if>>
 	<</if>>

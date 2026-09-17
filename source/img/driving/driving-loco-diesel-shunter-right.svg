@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" shape-rendering="crispEdges" data-template="driving-loco-diesel-shunter-right" data-anchor-x="2" data-anchor-y="18" data-length-m="9">
+<title>Ashline driving template: Two axle diesel shunter, facing right</title>
+<g id="coupler">
+<polygon points="1,17 3,17 3,16 1,16" fill="#7f786a"/>
+<polygon points="1,14 3,14 3,16 1,16" fill="#bbb09a"/>
+</g>
+<g id="frame">
+<polygon points="2,19 20,19 20,18 2,18" fill="#232626"/>
+<polygon points="2,11 20,11 20,18 2,18" fill="#454440"/>
+<polygon points="2,19 20,19 20,20 2,20" fill="#c6975d"/>
+</g>
+<g id="wheels">
+<polygon points="9,19 8,18 7,17 6,17 5,18 4,19 5,20 6,21 7,21 8,20" fill="#1b1f20"/>
+<polygon points="7,19 7,18 7,18 6,18 6,18 6,19 6,19 6,20 7,20 7,19" fill="#8c3b2e"/>
+<polygon points="18,19 17,18 16,17 15,17 14,18 13,19 14,20 15,21 16,21 17,20" fill="#1b1f20"/>
+<polygon points="16,19 16,18 16,18 15,18 15,18 15,19 15,19 15,20 16,20 16,19" fill="#8c3b2e"/>
+</g>
+<g id="rods">
+<polygon points="7,19 16,19 16,20 7,20" fill="#9aa0a0"/>
+</g>
+<g id="cab">
+<polygon points="3,18 10,18 10,10 3,10" fill="#3d5558"/>
+<polygon points="3,2 10,2 10,10 3,10" fill="#9aa092"/>
+<polygon points="5,14 9,14 9,11 5,11" fill="#dec38a"/>
+<polygon points="3,10 11,10 11,9 3,9" fill="#3d5558"/>
+<polygon points="3,1 11,1 11,9 3,9" fill="#9aa092"/>
+</g>
+<g id="hood">
+<polygon points="10,17 19,17 19,12 10,12" fill="#495b58"/>
+<polygon points="10,7 19,7 19,12 10,12" fill="#7a8780"/>
+<polygon points="12,13 13,13 13,16 12,16" fill="#273c3e"/>
+<polygon points="14,13 15,13 15,16 14,16" fill="#273c3e"/>
+<polygon points="16,13 17,13 17,16 16,16" fill="#273c3e"/>
+<polygon points="14,10 16,10 16,9 14,9" fill="#273c3e"/>
+<polygon points="14,7 16,7 16,9 14,9" fill="#383c3b"/>
+<polygon points="18,14 19,14 19,13 18,13" fill="#dec38a"/>
+</g>
+<g id="coupler">
+<polygon points="19,17 21,17 21,16 19,16" fill="#7f786a"/>
+<polygon points="19,14 21,14 21,16 19,16" fill="#bbb09a"/>
+</g>
+</svg>

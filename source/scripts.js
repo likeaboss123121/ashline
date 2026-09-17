@@ -357,33 +357,77 @@ setup.showOptionsDialog = function() {
 
 // Default rolling-stock definitions.
 State.variables.defaultTrains = {
-	steamLoco: {
+	// Locomotives: type says how a locomotive works (steam or diesel), model says which one it is. Each model sets
+	// its own size, pull, speed and appetite; the art is drawn per model (see scripts/draw-*-templates.py).
+	dieselShunter: {
+		type: 'diesel loco',
+		model: 'diesel-shunter',
+		name: 'two axle diesel shunter',
+		hasInterior: true,
+		cargo: [],
+		baseWeight: 32000, // kg
+		maxCargoCapacityKg: 1300,
+		maxCargoCapacityVolume: 1500, // liters: the fuel tank
+		acceptedCargo: ['liquid fuel'],
+		tractiveCapacity: 100, // kN
+		topSpeedKmh: 40,
+		dieselLitresPerMinute: 1,
+		length: 9 // meters
+	},
+	dieselRoad: {
+		type: 'diesel loco',
+		model: 'diesel-road',
+		name: 'six axle road diesel',
+		hasInterior: true,
+		cargo: [],
+		baseWeight: 120000,
+		maxCargoCapacityKg: 5200,
+		maxCargoCapacityVolume: 6000,
+		acceptedCargo: ['liquid fuel'],
+		tractiveCapacity: 320,
+		topSpeedKmh: 100,
+		dieselLitresPerMinute: 3,
+		length: 20
+	},
+	steamShunter: {
 		type: 'steam loco',
+		model: 'steam-shunter',
+		name: '0-6-0 steam shunter',
 		hasInterior: true,
 		cargo: [],
 		fireboxEnabled: false,
 		steamStoredLiters: 0,
 		boilerSteamVolumeLiters: 300000, // liters at 1 bar equivalent
 		maxSteamPressureBar: 14.5,
-		baseWeight: 50000, // kg
-		maxCargoCapacityKg: 11000,
-		maxCargoCapacityVolume: 3200, // liters
+		fireboxScale: 1, // how much fuel and water the firebox takes, and steam it makes, per minute
+		steamUseScale: 1, // how much steam moving the locomotive costs
+		baseWeight: 45000,
+		maxCargoCapacityKg: 7000,
+		maxCargoCapacityVolume: 7000, // side tanks and bunker
 		acceptedCargo: ['solid fuel', 'water'],
-		fuelConsumption: [{type: 'coal', amount: 0.1}, {type: 'water', amount: 0.5}], // per unit time
-		tractiveCapacity: 100, // kN
-		length: 15 // meters
+		tractiveCapacity: 120,
+		topSpeedKmh: 40,
+		length: 10
 	},
-	dieselLoco: {
-		type: 'diesel loco',
+	steamPrairie: {
+		type: 'steam loco',
+		model: 'steam-prairie',
+		name: '2-6-2 steam engine',
 		hasInterior: true,
 		cargo: [],
-		baseWeight: 150000, // kg
-		maxCargoCapacityKg: 3200,
-		maxCargoCapacityVolume: 3200, // liters
-		acceptedCargo: ['liquid fuel'],
-		fuelConsumption: [{type: 'diesel', amount: 0.05}],
-		tractiveCapacity: 150,
-		length: 18
+		fireboxEnabled: false,
+		steamStoredLiters: 0,
+		boilerSteamVolumeLiters: 750000,
+		maxSteamPressureBar: 14.5,
+		fireboxScale: 2.5,
+		steamUseScale: 2.2,
+		baseWeight: 95000,
+		maxCargoCapacityKg: 22000,
+		maxCargoCapacityVolume: 24000, // engine and tender
+		acceptedCargo: ['solid fuel', 'water'],
+		tractiveCapacity: 170,
+		topSpeedKmh: 90,
+		length: 23
 	},
 	boxcar: {
 		type: 'boxcar',
@@ -445,18 +489,22 @@ State.variables.cargoTypes = {
 	'scrap metal': { density: 2.0,  rarity: 'uncommon', tags: ['aggregate'] },
 	machinery:     { density: 1.5,  rarity: 'uncommon', tags: ['rigid'] },
 	food:          { density: 0.5,  rarity: 'rare',     tags: ['rigid'] },
+	firewood:      { density: 0.4,  rarity: 'common',   tags: ['aggregate', 'solid fuel'] },
 	diesel:        { density: 0.85, rarity: 'uncommon', tags: ['liquid', 'liquid fuel'] }
 };
 
 // Core railyard helpers power train generation, placement, shunting, and debug tooling.
 setup.railyard = {
-	locomotiveKeys: ['steamLoco', 'dieselLoco'],
+	locomotiveKeys: ['dieselShunter', 'dieselRoad', 'steamShunter', 'steamPrairie'],
 	carKeys: ['boxcar', 'flatcar', 'tanker', 'gondola'],
 	cargoPresets: [
-		{type: 'coal', amount: 6000, rarity: 'common'},
+		// grade: the range a found load is drawn from. Years of storage mean most diesel is well past its best.
+		// cars: which cars a preset is found in, where it is narrower than what the car accepts.
+		{type: 'coal', amount: 6000, rarity: 'common', grade: [35, 100]},
 		{type: 'water', amount: 8000, rarity: 'common'},
-		{type: 'diesel', amount: 6000, rarity: 'uncommon'},
-		{type: 'timber', amount: 35, rarity: 'common'},
+		{type: 'diesel', amount: 6000, rarity: 'uncommon', grade: [30, 95]},
+		{type: 'firewood', amount: 8000, rarity: 'common', grade: [45, 95], cars: ['gondola']},
+		{type: 'timber', amount: 8000, rarity: 'common', grade: [50, 95], cars: ['flatcar']},
 		{type: 'scrap metal', amount: 20, rarity: 'uncommon'},
 		{type: 'machinery', amount: 10, rarity: 'uncommon'},
 		{type: 'food', amount: 45, rarity: 'rare'}
@@ -584,6 +632,19 @@ setup.railyard = {
 	isDieselLocomotiveCar: function(car) {
 		return !!car && car.type === 'diesel loco';
 	},
+	// One line of what a locomotive is and what it can do, for the cab.
+	getLocomotiveSummary: function(car) {
+		var name = car.name || car.type;
+		return 'a ' + name + ': ' + car.tractiveCapacity + ' kN, ' + (car.topSpeedKmh || setup.worldmap.REFERENCE_SPEED_KMH)
+			+ ' km/h, ' + Math.round(car.baseWeight / 1000) + ' t';
+	},
+	// Which locomotive this is, for its art and its specs. Locomotives from before there were models are shunters.
+	getLocomotiveModel: function(car) {
+		if (car && car.model) {
+			return car.model;
+		}
+		return this.isSteamLocomotiveCar(car) ? 'steam-shunter' : 'diesel-shunter';
+	},
 	// Ensures all steam-locomotive runtime state fields exist for both new and old saves.
 	ensureSteamLocomotiveState: function(car) {
 		if (!this.isSteamLocomotiveCar(car)) {
@@ -679,12 +740,12 @@ setup.railyard = {
 		var pressure = this.getSteamPressureBar(car);
 		var maxPressure = this.getSteamMaxPressureBar(car);
 		var pressureFactor = Math.max(0.25, 1 - ((pressure / maxPressure) * 0.75));
-		return 1750 * pressureFactor;
+		return 1750 * pressureFactor * setup.fuel.getFireboxScale(car);
 	},
 	// Computes shunting steam use per minute from pressure with piecewise exponential anchors.
 	getSteamShuntingCostPerMinute: function(car) {
 		var pressure = this.getSteamPressureBar(car);
-		var base = 3000;
+		var base = 3000 * (Number(car.steamUseScale) > 0 ? Number(car.steamUseScale) : 1);
 		if (pressure >= 10) {
 			var highRate = Math.log(3000 / 2250) / 5;
 			return Math.round(base * Math.exp(highRate * (10 - pressure)));
@@ -701,17 +762,22 @@ setup.railyard = {
 		if (!car.fireboxEnabled) {
 			return;
 		}
-		var coalLitersRequired = 1 / this.getCargoDensityKgPerLiter('coal');
-		var waterLitersRequired = 3;
-		if (this.getCargoAmount(car, 'coal') + 1e-9 < coalLitersRequired || this.getCargoAmount(car, 'water') + 1e-9 < waterLitersRequired) {
+		// The fire goes out without fuel, and is dropped without water to keep the boiler safe. Poor fuel burns at
+		// a fraction of the heat, and the steam and the water it boils off follow that fraction.
+		var fuel = setup.fuel;
+		var scale = fuel.getFireboxScale(car);
+		var waterLitersRequired = fuel.WATER_LITRES_PER_MINUTE * scale;
+		if (fuel.planSolidFuelMinute(car).starved || this.getCargoAmount(car, 'water') + 1e-9 < waterLitersRequired) {
 			car.fireboxEnabled = false;
 			return;
 		}
-		if (!this.consumeCargoAmount(car, 'coal', coalLitersRequired) || !this.consumeCargoAmount(car, 'water', waterLitersRequired)) {
+		var output = fuel.burnSolidFuelMinute(car);
+		if (!(output > 0)) {
 			car.fireboxEnabled = false;
 			return;
 		}
-		this.addSteamLiters(car, this.getSteamProductionLitersPerMinute(car));
+		this.consumeCargoAmount(car, 'water', waterLitersRequired * output);
+		this.addSteamLiters(car, this.getSteamProductionLitersPerMinute(car) * output);
 	},
 	// Returns true when at least one locomotive in the train can currently provide traction.
 	isTrainDriveCapable: function(train) {
@@ -723,7 +789,7 @@ setup.railyard = {
 			if (!car || !(car.tractiveCapacity > 0)) {
 				continue;
 			}
-			if (this.isDieselLocomotiveCar(car) && this.getCargoAmount(car, 'diesel') >= 1) {
+			if (this.isDieselLocomotiveCar(car) && setup.fuel.canDieselRun(car)) {
 				return true;
 			}
 			if (this.isSteamLocomotiveCar(car) && this.getSteamPressureBar(car) >= 10) {
@@ -747,8 +813,8 @@ setup.railyard = {
 				continue;
 			}
 			if (this.isDieselLocomotiveCar(car)) {
-				if (this.getCargoAmount(car, 'diesel') >= 1) {
-					this.consumeCargoAmount(car, 'diesel', 1);
+				if (setup.fuel.canDieselRun(car)) {
+					this.consumeCargoAmount(car, 'diesel', setup.fuel.getDieselLitresPerMinute(car));
 					powered = true;
 				}
 				continue;
@@ -828,7 +894,7 @@ setup.railyard = {
 	},
 	// Generates initial cargo for a newly spawned car while respecting accepted cargo constraints.
 	generateCargoForCar: function(carKey, rng) {
-		if (carKey === 'steamLoco' || carKey === 'dieselLoco') {
+		if (this.locomotiveKeys.indexOf(carKey) !== -1) {
 			return [];
 		}
 		// 20% chance to have cargo (for ~3 in 15 cars)
@@ -838,17 +904,21 @@ setup.railyard = {
 		var carDef = State.variables.defaultTrains[carKey];
 		var acceptedTypes = this.getAcceptedCargoTypes(carDef);
 		var filteredPresets = this.cargoPresets.filter(function(p) {
-			return acceptedTypes.indexOf(p.type) !== -1;
+			return acceptedTypes.indexOf(p.type) !== -1 && (!p.cars || p.cars.indexOf(carKey) !== -1);
 		});
 		if (!filteredPresets.length) return [];
 		var count = carKey === 'boxcar' ? this.randomInt(rng, 1, 2) : 1;
 		var cargo = [];
 		for (var i = 0; i < count; i++) {
 			var item = this.randomChoice(rng, filteredPresets);
-			cargo.push({
+			var stack = {
 				type: item.type,
 				amount: this.randomInt(rng, Math.max(1, Math.floor(item.amount * 0.5)), item.amount)
-			});
+			};
+			if (item.grade) {
+				stack.grade = this.randomInt(rng, item.grade[0], item.grade[1]);
+			}
+			cargo.push(stack);
 		}
 		return cargo;
 	},
@@ -882,7 +952,7 @@ setup.railyard = {
 			if (!preset) {
 				continue;
 			}
-			var label = preset.type
+			var label = (preset.name || preset.type)
 				.split(' ')
 				.map(function(word) {
 					return word.charAt(0).toUpperCase() + word.slice(1);
@@ -1855,7 +1925,7 @@ setup.railyard = {
 	generateStationTracks: function(stationId, baseSeed) {
 		if (stationId === 1) {
 			// Station 1 is a fixed tutorial layout.
-			var tutorialLoco = this.createLocomotiveCar('dieselLoco');
+			var tutorialLoco = this.createLocomotiveCar('dieselShunter');
 			tutorialLoco.cargo = [{ type: 'diesel', amount: 400 }];
 			tutorialLoco.inventory = setup.items.createStartingKit();
 			return [
@@ -1927,7 +1997,7 @@ setup.railyard = {
 	},
 	// Returns a grammatically correct location string for the current car.
 	getCarLocationText: function(car) {
-		return (car.hasInterior ? 'in the ' : 'on the ') + car.type;
+		return (car.hasInterior ? 'in the ' : 'on the ') + (car.name || car.type);
 	},
 	// Serializes car type names for compact consist labels.
 	getTrainCarListText: function(train) {
@@ -2787,6 +2857,18 @@ Macro.add('debugTools', {
 
 			qtyLabel.appendChild(qtyInput);
 			wrapper.appendChild(qtyLabel);
+			var gradeLabel = document.createElement('label');
+			gradeLabel.textContent = ' Grade: ';
+			var gradeInput = document.createElement('input');
+			gradeInput.type = 'number';
+			gradeInput.id = 'debugCargoGrade';
+			gradeInput.min = '0';
+			gradeInput.max = '100';
+			gradeInput.value = '100';
+			gradeInput.style.width = '60px';
+			gradeInput.title = 'Only diesel, coal, firewood and timber have a grade.';
+			gradeLabel.appendChild(gradeInput);
+			wrapper.appendChild(gradeLabel);
 			wrapper.appendChild(maxSpan);
 			wrapper.appendChild(document.createElement('br'));
 			wrapper.appendChild(breakdown);
@@ -2801,15 +2883,8 @@ Macro.add('debugTools', {
 				var maxNow = getMaxAmountForCargo(car, cargoType);
 				if (amount > maxNow) amount = maxNow;
 				if (amount <= 0) return;
-				var existing = null;
-				for (var ei = 0; ei < car.cargo.length; ei++) {
-					if (car.cargo[ei].type === cargoType) { existing = car.cargo[ei]; break; }
-				}
-				if (existing) {
-					existing.amount += amount;
-				} else {
-					car.cargo.push({ type: cargoType, amount: amount });
-				}
+				var grade = parseInt(gradeInput.value, 10);
+				setup.fuel.addCargo(car, cargoType, amount, isNaN(grade) ? 100 : grade);
 				Engine.play(State.passage);
 			});
 			wrapper.appendChild(addBtn);

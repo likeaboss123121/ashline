@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="44" height="24" viewBox="0 0 44 24" shape-rendering="crispEdges" data-template="driving-loco-diesel-road-left" data-anchor-x="2" data-anchor-y="18" data-length-m="20">
+<title>Ashline driving template: Six axle road diesel, facing left</title>
+<g id="coupler">
+<polygon points="43,17 41,17 41,16 43,16" fill="#7f786a"/>
+<polygon points="43,14 41,14 41,16 43,16" fill="#bbb09a"/>
+</g>
+<g id="trucks">
+<polygon points="39,22 28,22 28,20 39,20" fill="#111416"/>
+<polygon points="39,12 28,12 28,20 39,20" fill="#383c3b"/>
+<polygon points="35,21 36,20 37,20 37,20 38,20 38,21 38,22 37,23 37,23 36,22" fill="#1b1f20"/>
+<polygon points="36,21 36,21 37,20 37,20 38,21 38,21 38,22 37,22 37,22 36,22" fill="#8c3b2e"/>
+<polygon points="32,21 32,20 33,20 34,20 35,20 35,21 35,22 34,23 33,23 32,22" fill="#1b1f20"/>
+<polygon points="33,21 33,21 33,20 34,20 34,21 34,21 34,22 34,22 33,22 33,22" fill="#8c3b2e"/>
+<polygon points="28,21 29,20 30,20 30,20 31,20 31,21 31,22 30,23 30,23 29,22" fill="#1b1f20"/>
+<polygon points="29,21 29,21 30,20 30,20 31,21 31,21 31,22 30,22 30,22 29,22" fill="#8c3b2e"/>
+<polygon points="16,22 5,22 5,20 16,20" fill="#111416"/>
+<polygon points="16,12 5,12 5,20 16,20" fill="#383c3b"/>
+<polygon points="12,21 13,20 14,20 14,20 15,20 15,21 15,22 14,23 14,23 13,22" fill="#1b1f20"/>
+<polygon points="13,21 13,21 14,20 14,20 15,21 15,21 15,22 14,22 14,22 13,22" fill="#8c3b2e"/>
+<polygon points="9,21 9,20 10,20 11,20 12,20 12,21 12,22 11,23 10,23 9,22" fill="#1b1f20"/>
+<polygon points="10,21 10,21 10,20 11,20 11,21 11,21 11,22 11,22 10,22 10,22" fill="#8c3b2e"/>
+<polygon points="5,21 6,20 7,20 7,20 8,20 8,21 8,22 7,23 7,23 6,22" fill="#1b1f20"/>
+<polygon points="6,21 6,21 7,20 7,20 8,21 8,21 8,22 7,22 7,22 6,22" fill="#8c3b2e"/>
+</g>
+<g id="fuel-tank">
+<polygon points="27,20 17,20 17,19 27,19" fill="#232626"/>
+<polygon points="27,13 17,13 17,19 27,19" fill="#383c3b"/>
+</g>
+<g id="frame">
+<polygon points="42,19 2,19 2,18 42,18" fill="#232626"/>
+<polygon points="42,11 2,11 2,18 42,18" fill="#454440"/>
+<polygon points="42,19 2,19 2,20 42,20" fill="#d9c9a0"/>
+</g>
+<g id="long-hood">
+<polygon points="40,17 15,17 15,11 40,11" fill="#6f5338"/>
+<polygon points="40,6 15,6 15,11 40,11" fill="#a0805a"/>
+<polygon points="37,13 36,13 36,16 37,16" fill="#3f3024"/>
+<polygon points="34,13 33,13 33,16 34,16" fill="#3f3024"/>
+<polygon points="31,13 30,13 30,16 31,16" fill="#3f3024"/>
+<polygon points="28,13 27,13 27,16 28,16" fill="#3f3024"/>
+<polygon points="25,13 24,13 24,16 25,16" fill="#3f3024"/>
+<polygon points="22,13 21,13 21,16 22,16" fill="#3f3024"/>
+<polygon points="19,13 18,13 18,16 19,16" fill="#3f3024"/>
+<polygon points="38,10 35,10 35,10 38,10" fill="#7d6245"/>
+<polygon points="38,7 35,7 35,10 38,10" fill="#7d6245"/>
+<polygon points="33,10 30,10 30,10 33,10" fill="#7d6245"/>
+<polygon points="33,7 30,7 30,10 33,10" fill="#7d6245"/>
+<polygon points="25,10 23,10 23,8 25,8" fill="#273c3e"/>
+<polygon points="25,7 23,7 23,8 25,8" fill="#383c3b"/>
+</g>
+<g id="cab">
+<polygon points="15,18 7,18 7,10 15,10" fill="#6f5338"/>
+<polygon points="15,2 7,2 7,10 15,10" fill="#b8a07c"/>
+<polygon points="13,13 9,13 9,11 13,11" fill="#dec38a"/>
+<polygon points="15,10 6,10 6,9 15,9" fill="#6f5338"/>
+<polygon points="15,1 6,1 6,9 15,9" fill="#b8a07c"/>
+</g>
+<g id="short-hood">
+<polygon points="7,17 3,17 3,13 7,13" fill="#6f5338"/>
+<polygon points="7,8 3,8 3,13 7,13" fill="#a0805a"/>
+<polygon points="5,13 4,13 4,12 5,12" fill="#dec38a"/>
+</g>
+<g id="coupler">
+<polygon points="3,17 1,17 1,16 3,16" fill="#7f786a"/>
+<polygon points="3,14 1,14 1,16 3,16" fill="#bbb09a"/>
+</g>
+</svg>

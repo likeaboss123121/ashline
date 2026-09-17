@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" shape-rendering="crispEdges" data-template="driving-loco-diesel-shunter-left" data-anchor-x="2" data-anchor-y="18" data-length-m="9">
+<title>Ashline driving template: Two axle diesel shunter, facing left</title>
+<g id="coupler">
+<polygon points="21,17 19,17 19,16 21,16" fill="#7f786a"/>
+<polygon points="21,14 19,14 19,16 21,16" fill="#bbb09a"/>
+</g>
+<g id="frame">
+<polygon points="20,19 2,19 2,18 20,18" fill="#232626"/>
+<polygon points="20,11 2,11 2,18 20,18" fill="#454440"/>
+<polygon points="20,19 2,19 2,20 20,20" fill="#c6975d"/>
+</g>
+<g id="wheels">
+<polygon points="13,19 14,18 15,17 16,17 17,18 18,19 17,20 16,21 15,21 14,20" fill="#1b1f20"/>
+<polygon points="15,19 15,18 15,18 16,18 16,18 16,19 16,19 16,20 15,20 15,19" fill="#8c3b2e"/>
+<polygon points="4,19 5,18 6,17 7,17 8,18 9,19 8,20 7,21 6,21 5,20" fill="#1b1f20"/>
+<polygon points="6,19 6,18 6,18 7,18 7,18 7,19 7,19 7,20 6,20 6,19" fill="#8c3b2e"/>
+</g>
+<g id="rods">
+<polygon points="15,19 6,19 6,20 15,20" fill="#9aa0a0"/>
+</g>
+<g id="cab">
+<polygon points="19,18 12,18 12,10 19,10" fill="#3d5558"/>
+<polygon points="19,2 12,2 12,10 19,10" fill="#9aa092"/>
+<polygon points="17,14 13,14 13,11 17,11" fill="#dec38a"/>
+<polygon points="19,10 11,10 11,9 19,9" fill="#3d5558"/>
+<polygon points="19,1 11,1 11,9 19,9" fill="#9aa092"/>
+</g>
+<g id="hood">
+<polygon points="12,17 3,17 3,12 12,12" fill="#495b58"/>
+<polygon points="12,7 3,7 3,12 12,12" fill="#7a8780"/>
+<polygon points="10,13 9,13 9,16 10,16" fill="#273c3e"/>
+<polygon points="8,13 7,13 7,16 8,16" fill="#273c3e"/>
+<polygon points="6,13 5,13 5,16 6,16" fill="#273c3e"/>
+<polygon points="8,10 6,10 6,9 8,9" fill="#273c3e"/>
+<polygon points="8,7 6,7 6,9 8,9" fill="#383c3b"/>
+<polygon points="4,14 3,14 3,13 4,13" fill="#dec38a"/>
+</g>
+<g id="coupler">
+<polygon points="3,17 1,17 1,16 3,16" fill="#7f786a"/>
+<polygon points="3,14 1,14 1,16 3,16" fill="#bbb09a"/>
+</g>
+</svg>

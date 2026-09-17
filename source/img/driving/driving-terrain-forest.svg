@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="84" height="61" viewBox="0 0 84 61" shape-rendering="crispEdges" data-template="driving-terrain-forest" data-anchor-x="2" data-anchor-y="43">
+<title>Ashline driving template: Forest</title>
+<g id="sky">
+<polygon points="2,1 82,1 82,23 2,23" fill="#1c2322"/>
+</g>
+<g id="treeline">
+<polygon points="1,23 6,15 11,23" fill="#1f2b1f"/>
+<polygon points="9,23 14,12 19,23" fill="#1f2b1f"/>
+<polygon points="17,23 22,10 27,23" fill="#1f2b1f"/>
+<polygon points="25,23 30,12 35,23" fill="#1f2b1f"/>
+<polygon points="33,23 38,14 43,23" fill="#1f2b1f"/>
+<polygon points="41,23 46,11 51,23" fill="#1f2b1f"/>
+<polygon points="49,23 54,11 59,23" fill="#1f2b1f"/>
+<polygon points="57,23 62,13 67,23" fill="#1f2b1f"/>
+<polygon points="65,23 70,13 75,23" fill="#1f2b1f"/>
+<polygon points="73,23 78,11 83,23" fill="#1f2b1f"/>
+</g>
+<g id="ground">
+<polygon points="2,23 82,23 82,60 2,60" fill="#2f3d2a"/>
+</g>
+<g id="near">
+<polygon points="2,54 82,54 82,60 2,60" fill="#384833"/>
+</g>
+<g id="trees">
+<polygon points="8,25 10,25 10,27 8,27" fill="#3d2f24"/>
+<polygon points="5,25 9,18 13,25" fill="#26402a"/>
+<polygon points="7,21 9,18 12,21" fill="#355437"/>
+<polygon points="19,30 21,30 21,33 19,33" fill="#3d2f24"/>
+<polygon points="16,31 20,22 24,31" fill="#26402a"/>
+<polygon points="17,26 20,22 22,26" fill="#355437"/>
+<polygon points="29,27 31,27 31,30 29,30" fill="#3d2f24"/>
+<polygon points="26,28 30,19 34,28" fill="#26402a"/>
+<polygon points="28,22 30,19 33,22" fill="#355437"/>
+<polygon points="40,25 42,25 42,27 40,27" fill="#3d2f24"/>
+<polygon points="37,25 41,15 45,25" fill="#26402a"/>
+<polygon points="38,19 41,15 43,19" fill="#355437"/>
+<polygon points="50,30 52,30 52,33 50,33" fill="#3d2f24"/>
+<polygon points="47,31 51,20 55,31" fill="#26402a"/>
+<polygon points="49,24 51,20 54,24" fill="#355437"/>
+<polygon points="61,27 63,27 63,30 61,30" fill="#3d2f24"/>
+<polygon points="58,28 62,17 66,28" fill="#26402a"/>
+<polygon points="59,20 62,17 64,20" fill="#355437"/>
+<polygon points="71,25 73,25 73,27 71,27" fill="#3d2f24"/>
+<polygon points="68,25 72,18 76,25" fill="#26402a"/>
+<polygon points="70,21 72,18 75,21" fill="#355437"/>
+</g>
+</svg>

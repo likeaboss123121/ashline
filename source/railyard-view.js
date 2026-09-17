@@ -98,7 +98,7 @@ setup.railyardView = {
 		var type = car && car.type;
 		if (type === 'steam loco' || type === 'diesel loco') {
 			var facing = setup.railyard.getCarFacing(car) * (flipped ? -1 : 1);
-			return 'railyard-loco-' + (type === 'steam loco' ? 'steam' : 'diesel') + '-' + (facing >= 0 ? 'right' : 'left');
+			return 'railyard-loco-' + setup.railyard.getLocomotiveModel(car) + '-' + (facing >= 0 ? 'right' : 'left');
 		}
 		if (type === 'flatcar') return 'railyard-car-flatcar';
 		if (type === 'tanker car') return 'railyard-car-tanker';

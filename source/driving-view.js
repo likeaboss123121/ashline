@@ -71,7 +71,7 @@ setup.drivingView = {
 		var type = car && car.type;
 		if (type === 'steam loco' || type === 'diesel loco') {
 			var facing = setup.railyard.getCarFacing(car) * (reversed ? -1 : 1);
-			return 'driving-loco-' + (type === 'steam loco' ? 'steam' : 'diesel') + '-' + (facing >= 0 ? 'right' : 'left');
+			return 'driving-loco-' + setup.railyard.getLocomotiveModel(car) + '-' + (facing >= 0 ? 'right' : 'left');
 		}
 		if (type === 'flatcar') return 'driving-car-flatcar';
 		if (type === 'tanker car') return 'driving-car-tanker';
@@ -81,7 +81,7 @@ setup.drivingView = {
 
 	// Water never carries track, so a tile the train is standing on always has a backdrop to draw.
 	getTerrainTemplateName: function(terrain) {
-		var known = ['plains', 'desert', 'arctic', 'mountain', 'bridge', 'tunnel'];
+		var known = ['plains', 'forest', 'desert', 'arctic', 'mountain', 'bridge', 'tunnel'];
 		return 'driving-terrain-' + (known.indexOf(terrain) === -1 ? 'plains' : terrain);
 	},
 

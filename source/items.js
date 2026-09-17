@@ -8,6 +8,7 @@ setup.items = {
 
 	CATALOGUE: {
 		toolkit: { name: 'Toolkit', stack: 1, detail: 'Spanners, a hammer and a coal shovel.' },
+		axe: { name: 'Axe and bow saw', stack: 1, detail: 'For felling trees and cutting timber into firewood.' },
 		pump: { name: 'Hand pump', stack: 1, detail: 'Draws diesel or water up a hose.' },
 		sleepingBag: { name: 'Sleeping bag', stack: 1, detail: 'Somewhere warm to sleep aboard.' },
 		rations: { name: 'Rations', stack: 6, detail: 'A meal each. Three make a day.' }
@@ -16,6 +17,7 @@ setup.items = {
 	// What the first locomotive is found with: the tools to keep it running, a bed, and a day's food.
 	STARTING_KIT: [
 		{ item: 'toolkit', count: 1 },
+		{ item: 'axe', count: 1 },
 		{ item: 'pump', count: 1 },
 		{ item: 'sleepingBag', count: 1 },
 		{ item: 'rations', count: 3 }

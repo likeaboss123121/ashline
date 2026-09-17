@@ -11,7 +11,8 @@
 setup.worldmap = {
 	TILE_KM: 5,
 	TILE_METRES: 5000,
-	BASE_MINUTES_PER_TILE: 5, // 5 km in 5 minutes on the flat, so a tank of diesel is worth a few hundred km
+	BASE_MINUTES_PER_TILE: 5, // 5 km in 5 minutes on the flat at REFERENCE_SPEED_KMH
+	REFERENCE_SPEED_KMH: 60,
 	GRADE_STEP: 0.5,
 	GRADE_LIMIT: 5,
 	ROLLING_RESISTANCE: 0.004, // fraction of weight, as a grade the train is always fighting
@@ -19,6 +20,7 @@ setup.worldmap = {
 	MAX_LEG_TILES: 20,
 	BRANCH_CHANCE: 0.12,
 	MOUNTAIN_METRES: 1150,
+	FOREST_THRESHOLD: 0.58, // of the forest noise; woods cover roughly a fifth of the land that is not desert or ice
 	TUNNEL_METRES: 1450,
 
 	// Compass directions, 45 degrees apart, so index arithmetic gives turns: a step of 1 is 45 degrees.
@@ -38,6 +40,7 @@ setup.worldmap = {
 		plains: {},
 		desert: {},
 		arctic: {},
+		forest: {},
 		mountain: { forbidden: ['t-junction', 'y-junction', 'cross'] },
 		bridge: { straightOnly: true },
 		tunnel: { straightOnly: true },
@@ -45,7 +48,7 @@ setup.worldmap = {
 	},
 
 	TERRAIN_COLOURS: {
-		plains: '#3f4a36', desert: '#6b5a36', arctic: '#5d6a72', mountain: '#4a4340',
+		plains: '#3f4a36', forest: '#2c4a2e', desert: '#6b5a36', arctic: '#5d6a72', mountain: '#4a4340',
 		bridge: '#5a4a3a', tunnel: '#332f2c', water: '#24384a'
 	},
 
@@ -107,6 +110,9 @@ setup.worldmap = {
 		var dry = this.smoothNoise(seed, 'dry', x, y, 10);
 		if (dry > (km > 900 && km < 3200 ? 0.5 : 0.78)) {
 			return 'desert';
+		}
+		if (this.smoothNoise(seed, 'forest', x, y, 6) > this.FOREST_THRESHOLD) {
+			return 'forest';
 		}
 		return 'plains';
 	},
@@ -423,7 +429,15 @@ setup.worldmap = {
 		var tonnesPerKN = tractive > 0 ? (this.getTrainWeightKg(train) / 1000) / tractive : 0;
 		var weightFactor = 1 + Math.max(0, tonnesPerKN - 1.2) * 0.12;
 		var gradeFactor = grade >= 0 ? 1 + grade * 0.22 : Math.max(0.75, 1 + grade * 0.05);
-		return Math.max(1, Math.round(this.BASE_MINUTES_PER_TILE * gradeFactor * weightFactor));
+		var speedFactor = this.REFERENCE_SPEED_KMH / this.getTopSpeedKmh(train);
+		return Math.max(1, Math.round(this.BASE_MINUTES_PER_TILE * speedFactor * gradeFactor * weightFactor));
+	},
+	// A consist runs no faster than its slowest locomotive: a shunter hauled in a road train still holds it back.
+	getTopSpeedKmh: function(train) {
+		var speeds = (Array.isArray(train) ? train : []).filter(function(car) {
+			return car && Number(car.tractiveCapacity) > 0 && Number(car.topSpeedKmh) > 0;
+		}).map(function(car) { return Number(car.topSpeedKmh); });
+		return speeds.length ? Math.min.apply(null, speeds) : this.REFERENCE_SPEED_KMH;
 	},
 	// The grade of the step between two neighbouring positions, in the direction it is taken.
 	getStepGrade: function(tiles, fromIndex, toIndex) {
@@ -499,8 +513,9 @@ setup.worldmap = {
 	},
 	getTrainTractiveKN: function(train) {
 		if (!Array.isArray(train)) return 0;
+		// What the locomotives can pull now, not what they were built to: degraded diesel derates an engine.
 		return train.reduce(function(total, car) {
-			return total + (car && Number(car.tractiveCapacity) > 0 ? Number(car.tractiveCapacity) : 0);
+			return total + setup.fuel.getEffectiveTractiveKN(car);
 		}, 0);
 	},
 	// The steepest grade a consist can pull at its current weight. Tractive effort has to lift the train up the
@@ -664,7 +679,7 @@ setup.worldmap = {
 			parent.appendChild(heading);
 			parent.appendChild(built.svg);
 			var legend = document.createElement('p');
-			legend.textContent = 'plains, desert, arctic, mountain, bridge, tunnel, water. Hover a tile for its terrain, shape and grade.';
+			legend.textContent = 'plains, forest, desert, arctic, mountain, bridge, tunnel, water. Hover a tile for its terrain, shape and grade.';
 			parent.appendChild(legend);
 		} catch (error) {
 			var failure = document.createElement('p');

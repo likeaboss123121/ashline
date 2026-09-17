@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="22" viewBox="0 0 24 22" shape-rendering="crispEdges" data-template="driving-loco-steam-shunter-right" data-anchor-x="2" data-anchor-y="18" data-length-m="10">
+<title>Ashline driving template: 0-6-0 steam shunter, facing right</title>
+<g id="coupler">
+<polygon points="1,17 3,17 3,16 1,16" fill="#7f786a"/>
+<polygon points="1,14 3,14 3,16 1,16" fill="#bbb09a"/>
+</g>
+<g id="frame">
+<polygon points="2,19 22,19 22,17 2,17" fill="#232626"/>
+<polygon points="2,12 22,12 22,17 2,17" fill="#454440"/>
+</g>
+<g id="wheels">
+<polygon points="10,19 9,17 8,16 7,16 6,17 5,19 6,20 7,21 8,21 9,20" fill="#1b1f20"/>
+<polygon points="9,19 8,18 8,18 7,18 7,18 6,19 7,19 7,20 8,20 8,19" fill="#8c3b2e"/>
+<polygon points="15,19 14,17 13,16 12,16 11,17 10,19 11,20 12,21 13,21 14,20" fill="#1b1f20"/>
+<polygon points="14,19 13,18 13,18 12,18 12,18 11,19 12,19 12,20 13,20 13,19" fill="#8c3b2e"/>
+<polygon points="20,19 19,17 18,16 17,16 16,17 15,19 16,20 17,21 18,21 19,20" fill="#1b1f20"/>
+<polygon points="19,19 18,18 18,18 17,18 17,18 16,19 17,19 17,20 18,20 18,19" fill="#8c3b2e"/>
+</g>
+<g id="rods">
+<polygon points="8,19 18,19 18,20 8,20" fill="#9aa0a0"/>
+</g>
+<g id="running-board">
+<polygon points="3,18 21,18 21,17 3,17" fill="#2d302c"/>
+<polygon points="3,10 21,10 21,17 3,17" fill="#55584f"/>
+</g>
+<g id="bunker">
+<polygon points="3,17 6,17 6,12 3,12" fill="#5b3a32"/>
+<polygon points="3,5 6,5 6,12 3,12" fill="#7a4a3c"/>
+<polygon points="3,12 6,12 6,11 3,11" fill="#1a1a19"/>
+<polygon points="3,5 6,5 6,11 3,11" fill="#2c2b28"/>
+</g>
+<g id="cab">
+<polygon points="6,17 12,17 12,10 6,10" fill="#5b3a32"/>
+<polygon points="6,2 12,2 12,10 6,10" fill="#7a4a3c"/>
+<polygon points="7,13 10,13 10,11 7,11" fill="#dec38a"/>
+<polygon points="5,10 12,10 12,9 5,9" fill="#5b3a32"/>
+<polygon points="5,1 12,1 12,9 5,9" fill="#7a4a3c"/>
+</g>
+<g id="side-tank">
+<polygon points="12,17 19,17 19,13 12,13" fill="#2c3131"/>
+<polygon points="12,6 19,6 19,13 12,13" fill="#4a5150"/>
+<polygon points="12,15 19,15 19,16 12,16" fill="#c9a15f"/>
+</g>
+<g id="boiler">
+<polygon points="12,12 19,12 19,10 12,10" fill="#171a1a"/>
+<polygon points="12,5 19,5 19,10 12,10" fill="#4a5150"/>
+<polygon points="14,8 16,8 16,7 14,7" fill="#2c3131"/>
+<polygon points="14,5 16,5 16,7 14,7" fill="#c9a15f"/>
+</g>
+<g id="smokebox">
+<polygon points="19,17 22,17 22,11 19,11" fill="#1f2222"/>
+<polygon points="19,10 22,10 22,10 19,10" fill="#383c3c"/>
+<polygon points="19,4 22,4 22,10 19,10" fill="#383c3c"/>
+<polygon points="19,8 21,8 21,5 19,5" fill="#1f2222"/>
+<polygon points="19,4 21,4 21,5 19,5" fill="#383c3c"/>
+</g>
+<g id="coupler">
+<polygon points="21,17 23,17 23,16 21,16" fill="#7f786a"/>
+<polygon points="21,14 23,14 23,16 21,16" fill="#bbb09a"/>
+</g>
+</svg>

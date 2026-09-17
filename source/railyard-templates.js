@@ -8,107 +8,211 @@ setup.railyardTemplates = {
 	"junctionMetres": 20,
 	"templates": [
 		{
-			"file": "railyard-loco-steam-right.svg",
-			"passage": "railyard-loco-steam-right",
-			"title": "Steam locomotive, facing right",
-			"width": 42,
-			"height": 39,
-			"anchorX": 7,
-			"anchorY": 22,
-			"lengthMetres": 15,
-			"rear": [
-				7,
-				18
-			],
-			"front": [
-				37,
-				33
-			],
-			"top": [
-				22,
-				10
-			],
-			"cab": [
-				12,
-				8
-			]
-		},
-		{
-			"file": "railyard-loco-steam-left.svg",
-			"passage": "railyard-loco-steam-left",
-			"title": "Steam locomotive, facing left",
-			"width": 42,
-			"height": 38,
-			"anchorX": 5,
-			"anchorY": 21,
-			"lengthMetres": 15,
-			"rear": [
-				5,
-				17
-			],
-			"front": [
-				35,
-				32
-			],
-			"top": [
-				20,
-				9
-			],
-			"cab": [
-				30,
-				17
-			]
-		},
-		{
-			"file": "railyard-loco-diesel-right.svg",
-			"passage": "railyard-loco-diesel-right",
-			"title": "Diesel locomotive, facing right",
-			"width": 48,
-			"height": 34,
+			"file": "railyard-loco-diesel-shunter-right.svg",
+			"passage": "railyard-loco-diesel-shunter-right",
+			"title": "Two axle diesel shunter, facing right",
+			"width": 30,
+			"height": 32,
 			"anchorX": 6,
-			"anchorY": 14,
-			"lengthMetres": 18,
+			"anchorY": 21,
+			"lengthMetres": 9,
 			"rear": [
 				6,
-				10
+				17
 			],
 			"front": [
-				42,
-				28
+				24,
+				26
 			],
 			"top": [
-				24,
-				5
+				15,
+				8
 			],
 			"cab": [
-				32,
-				9
+				11,
+				5
 			]
 		},
 		{
-			"file": "railyard-loco-diesel-left.svg",
-			"passage": "railyard-loco-diesel-left",
-			"title": "Diesel locomotive, facing left",
-			"width": 48,
-			"height": 39,
+			"file": "railyard-loco-diesel-shunter-left.svg",
+			"passage": "railyard-loco-diesel-shunter-left",
+			"title": "Two axle diesel shunter, facing left",
+			"width": 30,
+			"height": 28,
+			"anchorX": 6,
+			"anchorY": 17,
+			"lengthMetres": 9,
+			"rear": [
+				6,
+				13
+			],
+			"front": [
+				24,
+				22
+			],
+			"top": [
+				15,
+				4
+			],
+			"cab": [
+				20,
+				6
+			]
+		},
+		{
+			"file": "railyard-loco-diesel-road-right.svg",
+			"passage": "railyard-loco-diesel-road-right",
+			"title": "Six axle road diesel, facing right",
+			"width": 52,
+			"height": 38,
+			"anchorX": 6,
+			"anchorY": 15,
+			"lengthMetres": 20,
+			"rear": [
+				6,
+				11
+			],
+			"front": [
+				46,
+				31
+			],
+			"top": [
+				26,
+				7
+			],
+			"cab": [
+				37,
+				13
+			]
+		},
+		{
+			"file": "railyard-loco-diesel-road-left.svg",
+			"passage": "railyard-loco-diesel-road-left",
+			"title": "Six axle road diesel, facing left",
+			"width": 52,
+			"height": 42,
 			"anchorX": 6,
 			"anchorY": 19,
-			"lengthMetres": 18,
+			"lengthMetres": 20,
 			"rear": [
 				6,
 				15
 			],
 			"front": [
-				42,
-				33
+				46,
+				35
 			],
 			"top": [
-				24,
-				10
+				26,
+				11
 			],
 			"cab": [
-				16,
+				15,
 				6
+			]
+		},
+		{
+			"file": "railyard-loco-steam-shunter-right.svg",
+			"passage": "railyard-loco-steam-shunter-right",
+			"title": "0-6-0 steam shunter, facing right",
+			"width": 30,
+			"height": 32,
+			"anchorX": 5,
+			"anchorY": 20,
+			"lengthMetres": 10,
+			"rear": [
+				5,
+				16
+			],
+			"front": [
+				25,
+				26
+			],
+			"top": [
+				15,
+				6
+			],
+			"cab": [
+				12,
+				6
+			]
+		},
+		{
+			"file": "railyard-loco-steam-shunter-left.svg",
+			"passage": "railyard-loco-steam-shunter-left",
+			"title": "0-6-0 steam shunter, facing left",
+			"width": 31,
+			"height": 31,
+			"anchorX": 5,
+			"anchorY": 20,
+			"lengthMetres": 10,
+			"rear": [
+				5,
+				16
+			],
+			"front": [
+				25,
+				26
+			],
+			"top": [
+				15,
+				6
+			],
+			"cab": [
+				19,
+				10
+			]
+		},
+		{
+			"file": "railyard-loco-steam-prairie-right.svg",
+			"passage": "railyard-loco-steam-prairie-right",
+			"title": "2-6-2 steam engine with tender, facing right",
+			"width": 57,
+			"height": 41,
+			"anchorX": 5,
+			"anchorY": 16,
+			"lengthMetres": 23,
+			"rear": [
+				5,
+				12
+			],
+			"front": [
+				51,
+				35
+			],
+			"top": [
+				28,
+				6
+			],
+			"cab": [
+				26,
+				8
+			]
+		},
+		{
+			"file": "railyard-loco-steam-prairie-left.svg",
+			"passage": "railyard-loco-steam-prairie-left",
+			"title": "2-6-2 steam engine with tender, facing left",
+			"width": 58,
+			"height": 49,
+			"anchorX": 6,
+			"anchorY": 23,
+			"lengthMetres": 23,
+			"rear": [
+				6,
+				19
+			],
+			"front": [
+				52,
+				42
+			],
+			"top": [
+				29,
+				13
+			],
+			"cab": [
+				32,
+				18
 			]
 		},
 		{
