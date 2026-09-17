@@ -115,6 +115,55 @@ setup.drivingView = {
 		return { cars: placed, width: total + this.MARGIN_UNITS * 2, consistUnits: total };
 	},
 
+	// A scatter of stars in the sky part of a backdrop, behind its skyline. Positions are fixed per template, so the
+	// sky does not shimmer from one tile to the next.
+	addStars: function(group, template, night) {
+		var sky = group.querySelector('#sky');
+		if (!sky || !template) {
+			return;
+		}
+		var ns = this.SVG_NS;
+		var stars = document.createElementNS(ns, 'g');
+		stars.setAttribute('class', 'driving-stars');
+		stars.setAttribute('opacity', Math.min(1, (night - 0.3) / 0.5).toFixed(2));
+		var width = setup.drivingTemplates.terrainTileUnits;
+		for (var i = 0; i < 14; i++) {
+			var star = document.createElementNS(ns, 'rect');
+			star.setAttribute('x', template.anchorX + ((i * 37 + 11) % width));
+			star.setAttribute('y', template.anchorY - 40 + ((i * 23 + 5) % 17));
+			star.setAttribute('width', 1);
+			star.setAttribute('height', 1);
+			star.setAttribute('fill', i % 4 === 0 ? '#f4ecd2' : '#aeb8c8');
+			stars.appendChild(star);
+		}
+		sky.parentNode.insertBefore(stars, sky.nextSibling);
+	},
+	// The leading locomotive's headlamp and the pool of light it throws down the track. Only a locomotive facing the
+	// way the train is going has its front at the leading end.
+	addHeadlight: function(parent, leading, night) {
+		var template = this.getTemplate(leading.name);
+		if (!/^driving-loco-.*-right$/.test(leading.name) || !template || !template.front) {
+			return;
+		}
+		var ns = this.SVG_NS;
+		var x = leading.u - template.anchorX + template.front[0];
+		var y = -template.anchorY + template.front[1] - 5;
+		var beam = document.createElementNS(ns, 'polygon');
+		beam.setAttribute('class', 'driving-headlight');
+		beam.setAttribute('points', [x + ',' + (y - 1), (x + 34) + ',' + (y - 4), (x + 40) + ',' + (y + 6), x + ',' + (y + 2)].join(' '));
+		beam.setAttribute('fill', '#ffe7a8');
+		beam.setAttribute('fill-opacity', (0.22 * night).toFixed(3));
+		parent.appendChild(beam);
+		var lamp = document.createElementNS(ns, 'rect');
+		lamp.setAttribute('class', 'driving-headlamp');
+		lamp.setAttribute('x', x - 1);
+		lamp.setAttribute('y', y - 1);
+		lamp.setAttribute('width', 2);
+		lamp.setAttribute('height', 2);
+		lamp.setAttribute('fill', '#fff4d0');
+		parent.appendChild(lamp);
+	},
+
 	render: function(view, train, carIndex) {
 		var data = setup.drivingTemplates;
 		var ns = this.SVG_NS;
@@ -132,10 +181,23 @@ setup.drivingView = {
 		var idPrefix = 'driving-view-' + this.renderCount + '-';
 		var defs = document.createElementNS(ns, 'defs');
 		svg.appendChild(defs);
+		// The light of the time of day. A tunnel is lit the same at any hour, so its backdrop is never graded.
+		var light = view.light || setup.daylight.getLight();
+		var graded = setup.daylight.isGraded(light);
+		var grader = graded ? setup.daylight.createGrader(light, 'subject') : null;
+		var backdropGrader = graded ? setup.daylight.createGrader(light, 'backdrop') : null;
+		svg.setAttribute('data-light', light.phase);
 		var defined = {};
 		var define = function(name) {
 			if (!defined[name]) {
-				defs.appendChild(self.createTemplateGroup(name, idPrefix + name));
+				var group = self.createTemplateGroup(name, idPrefix + name);
+				if (grader && name !== 'driving-terrain-tunnel') {
+					setup.daylight.applyToElement(group, /^driving-terrain-/.test(name) ? backdropGrader : grader);
+					if (/^driving-terrain-/.test(name) && light.night > 0.3) {
+						self.addStars(group, self.getTemplate(name), light.night);
+					}
+				}
+				defs.appendChild(group);
 				defined[name] = true;
 			}
 		};
@@ -193,6 +255,9 @@ setup.drivingView = {
 				};
 			}
 		});
+		if (light.night > 0.05 && layout.cars.length) {
+			this.addHeadlight(line, layout.cars[0], light.night);
+		}
 		if (marker) {
 			var arrow = document.createElementNS(ns, 'polygon');
 			arrow.setAttribute('class', 'driving-player-marker');

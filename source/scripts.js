@@ -2909,6 +2909,32 @@ Macro.add('debugTools', {
 		var seedValue = typeof State.variables.randomSeed !== 'undefined' ? String(State.variables.randomSeed) : 'not set';
 		seedInfo.textContent = 'RNG Seed: ' + seedValue;
 		wrapper.appendChild(seedInfo);
+
+		// Time of day drives the lighting of the yard and driving views, so debug can jump the clock to any hour.
+		var lightInfo = document.createElement('p');
+		var debugLight = setup.daylight.getLight();
+		lightInfo.textContent = 'Light: ' + debugLight.phase + ', sun ' + debugLight.elevation.toFixed(1) + '\u00b0 at latitude '
+			+ setup.daylight.getLatitude().toFixed(1) + '\u00b0. ';
+		var hourSelect = document.createElement('select');
+		hourSelect.id = 'debugClockHour';
+		var clockNow = new Date(setup.time.getCurrentTimestampMs());
+		for (var hour = 0; hour < 24; hour++) {
+			var hourOption = document.createElement('option');
+			hourOption.value = String(hour);
+			hourOption.textContent = (hour < 10 ? '0' : '') + hour + ':00';
+			hourOption.selected = hour === clockNow.getUTCHours();
+			hourSelect.appendChild(hourOption);
+		}
+		lightInfo.appendChild(hourSelect);
+		var hourButton = document.createElement('button');
+		hourButton.textContent = 'Set Clock';
+		hourButton.addEventListener('click', function() {
+			var now = new Date(setup.time.getCurrentTimestampMs());
+			setup.time.setCurrentTimestampMs(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), parseInt(hourSelect.value, 10), 0, 0, 0));
+			Engine.play(State.passage);
+		});
+		lightInfo.appendChild(hourButton);
+		wrapper.appendChild(lightInfo);
 		var buildInfo = document.createElement('p');
 		var cachedBuild = setup.readCachedBuildMeta ? setup.readCachedBuildMeta() : null;
 		var currentBuildChecksum = setup.getBuildChecksum ? setup.getBuildChecksum() : 'unavailable';

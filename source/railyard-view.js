@@ -41,6 +41,7 @@ setup.railyardView = {
 	},
 
 	// Named parts that belong on the rail layer. Everything else in a track piece is its bed.
+	GROUND_COLOUR: '#2b302d', // .railyard-ground in railyard.css, graded here at dusk and night
 	RAIL_PARTS: ['rails', 'diagonal-rails', 'diagonal-up-rails', 'branch-rails', 'selection'],
 
 	// Copies a template's shapes out of its image passage. Returns a <g> with the whole template, plus
@@ -808,9 +809,17 @@ setup.railyardView = {
 		svg.setAttribute('role', 'img');
 		svg.setAttribute('aria-label', 'Rail yard: ' + tracks.length + ' tracks, ' + layout.trainCount + ' train' + (layout.trainCount === 1 ? '' : 's'));
 
+		// The light of the time of day grades every colour in the drawing; lit windows keep their glow.
+		var light = setup.daylight.getLight();
+		var grader = setup.daylight.isGraded(light) ? setup.daylight.createGrader(light, 'subject') : null;
+		svg.setAttribute('data-light', light.phase);
+
 		grounds.forEach(function(shape) {
 			var groundShape = document.createElementNS(ns, 'polygon');
 			groundShape.setAttribute('class', 'railyard-ground');
+			if (grader) {
+				groundShape.style.fill = grader(self.GROUND_COLOUR);
+			}
 			groundShape.setAttribute('points', shape.map(function(p) { return p.x + ',' + p.y; }).join(' '));
 			svg.appendChild(groundShape);
 		});
@@ -829,6 +838,11 @@ setup.railyardView = {
 				return;
 			}
 			var groups = self.createTemplateGroups(item.name, idPrefix + item.name);
+			if (grader) {
+				['all', 'bed', 'branch', 'ladder', 'rails'].forEach(function(key) {
+					setup.daylight.applyToElement(groups[key], grader);
+				});
+			}
 			defs.appendChild(groups.all);
 			layers[item.name] = {
 				branch: groups.branch.childNodes.length > 0,
