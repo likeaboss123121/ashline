@@ -186,29 +186,33 @@ setup.drivingView = {
 		var graded = setup.daylight.isGraded(light);
 		var grader = graded ? setup.daylight.createGrader(light, 'subject') : null;
 		var backdropGrader = graded ? setup.daylight.createGrader(light, 'backdrop') : null;
+		// The car the player is in is the one with a lamp lit in it, so its windows keep their glow.
+		var litGrader = graded ? setup.daylight.createGrader(light, 'subject', true) : null;
 		svg.setAttribute('data-light', light.phase);
 		var defined = {};
-		var define = function(name) {
-			if (!defined[name]) {
-				var group = self.createTemplateGroup(name, idPrefix + name);
+		var define = function(name, lit) {
+			var id = name + (lit ? '-lit' : '');
+			if (!defined[id]) {
+				var group = self.createTemplateGroup(name, idPrefix + id);
 				if (grader && name !== 'driving-terrain-tunnel') {
-					setup.daylight.applyToElement(group, /^driving-terrain-/.test(name) ? backdropGrader : grader);
+					setup.daylight.applyToElement(group, lit ? litGrader
+						: /^driving-terrain-/.test(name) ? backdropGrader : grader);
 					if (/^driving-terrain-/.test(name) && light.night > 0.3) {
 						self.addStars(group, self.getTemplate(name), light.night);
 					}
 				}
 				defs.appendChild(group);
-				defined[name] = true;
+				defined[id] = true;
 			}
 		};
-		var place = function(parent, name, x, y, title) {
+		var place = function(parent, name, x, y, title, lit) {
 			var template = self.getTemplate(name);
 			if (!template) {
 				throw new Error('missing driving template "' + name + '"');
 			}
-			define(name);
+			define(name, lit);
 			var use = document.createElementNS(ns, 'use');
-			var href = '#' + idPrefix + name;
+			var href = '#' + idPrefix + name + (lit ? '-lit' : '');
 			use.setAttribute('href', href);
 			use.setAttributeNS(self.XLINK_NS, 'xlink:href', href);
 			use.setAttribute('x', x - template.anchorX);
@@ -246,7 +250,7 @@ setup.drivingView = {
 		layout.cars.forEach(function(entry) {
 			var title = String(entry.car.type || 'car') + ', ' + entry.car.length + ' m'
 				+ (entry.isPlayer ? ' (you are here)' : '');
-			var template = place(line, entry.name, entry.u, 0, title);
+			var template = place(line, entry.name, entry.u, 0, title, entry.isPlayer);
 			if (entry.isPlayer) {
 				var point = template.cab || template.top;
 				marker = {

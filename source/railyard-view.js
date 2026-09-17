@@ -763,8 +763,13 @@ setup.railyardView = {
 				box.x1 = Math.max(box.x1, item.left + item.template.width);
 				box.y1 = Math.max(box.y1, item.top + item.template.height);
 			}
-			if (entry.isPlayer && player && entry.carIndex === player.carIndex && item.template.top) {
-				marker = { x: item.left + item.template.top[0], y: item.top + item.template.top[1] };
+			if (entry.isPlayer && player && entry.carIndex === player.carIndex) {
+				// The car the player is in is the one with a lamp lit in it, drawn from its own definition so its
+				// windows keep their glow while every other cab stays dark.
+				item.lit = true;
+				if (item.template.top) {
+					marker = { x: item.left + item.template.top[0], y: item.top + item.template.top[1] };
+				}
 			}
 		});
 		var labels = layout.labels.map(function(label) {
@@ -811,7 +816,9 @@ setup.railyardView = {
 
 		// The light of the time of day grades every colour in the drawing; lit windows keep their glow.
 		var light = setup.daylight.getLight();
-		var grader = setup.daylight.isGraded(light) ? setup.daylight.createGrader(light, 'subject') : null;
+		var graded = setup.daylight.isGraded(light);
+		var grader = graded ? setup.daylight.createGrader(light, 'subject') : null;
+		var litGrader = graded ? setup.daylight.createGrader(light, 'subject', true) : null;
 		svg.setAttribute('data-light', light.phase);
 
 		grounds.forEach(function(shape) {
@@ -857,6 +864,16 @@ setup.railyardView = {
 				if (layers[item.name].rails) defs.appendChild(groups.rails);
 			}
 		});
+		images.filter(function(item) { return item.lit; }).forEach(function(item) {
+			if (defs.querySelector('#' + idPrefix + item.name + '-lit')) {
+				return;
+			}
+			var litGroups = self.createTemplateGroups(item.name, idPrefix + item.name + '-lit');
+			if (litGrader) {
+				setup.daylight.applyToElement(litGroups.all, litGrader);
+			}
+			defs.appendChild(litGroups.all);
+		});
 		var addUse = function(item, suffix, tagged) {
 			var use = document.createElementNS(ns, 'use');
 			var href = '#' + idPrefix + item.name + suffix;
@@ -892,7 +909,7 @@ setup.railyardView = {
 		trackPieces.forEach(function(item) { if (layers[item.name].rails) addUse(item, '-rails', false); });
 		images.forEach(function(item) {
 			if (!(item.flat && hasRails[item.name])) {
-				addUse(item, '', true);
+				addUse(item, item.lit ? '-lit' : '', true);
 			}
 		});
 

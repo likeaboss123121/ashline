@@ -15,7 +15,8 @@
 setup.daylight = {
 	BASE_LATITUDE: -53.2, // Punta Arenas
 	KM_PER_DEGREE: 111,
-	// Colours that give off light, so night does not dim them: lit cab windows and lamps.
+	// Colours that give off light when something is lighting them: a cab window. A cab is only lit while the player
+	// is in that car, so the grade leaves these colours alone in the occupied car and dims them everywhere else.
 	EMISSIVE: ['#dec38a'],
 	// Night keeps the subject readable: trains and track are graded more gently than the scenery behind them, so
 	// they stand out against it the way a lit foreground does.
@@ -94,10 +95,11 @@ setup.daylight = {
 		return this.EMISSIVE.indexOf(String(hex).toLowerCase()) !== -1;
 	},
 	// One colour under the given light. Day returns the colour untouched, so daytime pictures are exactly the art.
-	// role is 'subject' (trains, track, the yard) or 'backdrop' (the scenery behind the train).
-	grade: function(hex, light, role) {
+	// role is 'subject' (trains, track, the yard) or 'backdrop' (the scenery behind the train). An emissive colour
+	// is only left alone in a grader made with lit set: an unoccupied cab has nobody in it to light the lamp.
+	grade: function(hex, light, role, lit) {
 		var rgb = this.parseHex(hex);
-		if (!rgb || !light || (light.night <= 0.001 && light.golden <= 0.001) || this.isEmissive(hex)) {
+		if (!rgb || !light || (light.night <= 0.001 && light.golden <= 0.001) || (lit && this.isEmissive(hex))) {
 			return hex;
 		}
 		var self = this;
@@ -118,12 +120,12 @@ setup.daylight = {
 		return this.toHex(out.map(function(c) { return self.toByte(c); }));
 	},
 	// A grading function that remembers what it has already worked out, for a drawing's many repeated colours.
-	createGrader: function(light, role) {
+	createGrader: function(light, role, lit) {
 		var self = this;
 		var cache = {};
 		return function(hex) {
 			if (!(hex in cache)) {
-				cache[hex] = self.grade(hex, light, role);
+				cache[hex] = self.grade(hex, light, role, lit);
 			}
 			return cache[hex];
 		};
