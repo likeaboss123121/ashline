@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="22" height="15" viewBox="0 0 22 15" shape-rendering="crispEdges" data-template="driving-track" data-anchor-x="1" data-anchor-y="7">
+<title>Ashline driving template: Track</title>
+<g id="ballast">
+<polygon points="1,1 21,1 21,14 1,14" fill="#494c42"/>
+</g>
+<g id="ties">
+<polygon points="2,1 4,1 4,13 2,13" fill="#75654d"/>
+<polygon points="7,1 9,1 9,13 7,13" fill="#75654d"/>
+<polygon points="12,1 14,1 14,13 12,13" fill="#75654d"/>
+<polygon points="17,1 19,1 19,13 17,13" fill="#75654d"/>
+</g>
+<g id="rails">
+<polygon points="1,4 21,4 21,6 1,6" fill="#222a2b"/>
+<polygon points="1,4 21,4 21,5 1,5" fill="#b8b6a0"/>
+<polygon points="1,8 21,8 21,10 1,10" fill="#222a2b"/>
+<polygon points="1,8 21,8 21,9 1,9" fill="#b8b6a0"/>
+</g>
+</svg>

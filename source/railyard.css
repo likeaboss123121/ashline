@@ -1,0 +1,171 @@
+/* Rail yard view (source/railyard-view.js). Colours follow the rail yard templates. */
+.railyard-view-wrapper {
+	position: relative;
+	margin: 0.5em 0 1em;
+	background: #151719;
+	border: 1px solid #2a2f31;
+	border-radius: 4px;
+}
+
+/* On a phone the passage padding costs a quarter of the screen, so the yard takes the full width instead. */
+@media (max-width: 700px) {
+	.railyard-view-wrapper {
+		width: 100vw;
+		margin-left: 50%;
+		transform: translateX(-50%);
+		border-left: none;
+		border-right: none;
+		border-radius: 0;
+	}
+}
+
+/* The yard scrolls in here; the zoom controls stay on the frame outside it. */
+.railyard-view-scroll {
+	overflow: auto;
+	min-height: 240px; /* a window worth panning around in, on a phone as much as a desktop */
+	max-height: 80vh;
+	touch-action: pan-x pan-y;
+	padding: 30px 4px 4px;
+}
+
+.railyard-view {
+	display: block;
+	max-width: none; /* the zoom controls set the width; Fit sets it back to 100% */
+	height: auto;
+}
+
+/* Zoom controls: a big yard is wider than any screen, so the view starts fitted and zooms from there. */
+.railyard-view-zoom {
+	position: absolute;
+	top: 4px;
+	left: 4px;
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 4px;
+	background: rgba(21, 23, 25, 0.85);
+	border-radius: 3px;
+}
+
+.railyard-view-zoom button {
+	min-width: 2em;
+	padding: 0 0.4em;
+	font-size: 0.9em;
+	line-height: 1.6;
+	color: #c7c5b9;
+	background: #23282a;
+	border: 1px solid #39403f;
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+.railyard-view-zoom button:hover {
+	background: #2e3537;
+}
+
+.railyard-view-zoom span {
+	font-family: monospace;
+	font-size: 0.8em;
+	color: #8d938f;
+}
+
+.railyard-view-dragging {
+	cursor: grabbing;
+}
+
+.railyard-view .railyard-ground {
+	fill: #2b302d;
+}
+
+.railyard-view .railyard-label {
+	pointer-events: none; /* a label never swallows a click meant for the track under it */
+	font-family: monospace;
+	font-size: 6px;
+	fill: #c7c5b9;
+	stroke: #151719;
+	stroke-width: 2px;
+	stroke-linejoin: round;
+	paint-order: stroke;
+}
+
+.railyard-view .railyard-label-player {
+	fill: #e5c58a;
+}
+
+.railyard-view .railyard-player-marker {
+	fill: #e5c58a;
+	pointer-events: none;
+}
+
+/* Click targets over the drawing: invisible until hovered, and they run the text actions below the view. */
+.railyard-view .railyard-hit {
+	fill: #e5c58a;
+	fill-opacity: 0;
+	cursor: pointer;
+}
+
+.railyard-view .railyard-hit:hover {
+	fill-opacity: 0.12;
+}
+
+.railyard-view .railyard-hit-train:hover {
+	fill-opacity: 0.22;
+}
+
+/* The compass sits in the corner of the view, in the same projection as the yard itself. */
+.railyard-compass {
+	position: absolute;
+	left: 6px;
+	bottom: 30px;
+	z-index: 2;
+	background: rgba(21, 23, 25, 0.75);
+	border-radius: 3px;
+}
+
+.railyard-compass-arm {
+	stroke: #6d7369;
+	stroke-width: 1.5;
+}
+
+.railyard-compass-label {
+	font-family: monospace;
+	font-size: 11px;
+	fill: #8d938f;
+}
+
+.railyard-compass-arm.railyard-compass-onward {
+	stroke: #e5c58a;
+}
+
+.railyard-compass-label.railyard-compass-onward {
+	fill: #e5c58a;
+}
+
+.railyard-view .railyard-hit-depart:hover {
+	fill-opacity: 0.25;
+}
+
+.railyard-view-message {
+	min-height: 1.2em;
+	padding: 0 6px 4px;
+	font-size: 0.85em;
+	color: #c9a15f;
+}
+
+/* Where a click could mean two different moves, the choice appears here rather than over the yard. */
+.railyard-view-choice {
+	margin: 0 2px;
+	padding: 0 0.4em;
+	font-size: 0.95em;
+	line-height: 1.6;
+	color: #c7c5b9;
+	background: #23282a;
+	border: 1px solid #39403f;
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+.railyard-view-choice:hover {
+	background: #2e3537;
+}

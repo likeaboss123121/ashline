@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="15" viewBox="0 0 18 15" shape-rendering="crispEdges" data-template="railyard-track-buffer-stop-start" data-anchor-x="7" data-anchor-y="9">
+<title>Ashline rail yard template: Buffer stop (place at a track start)</title>
+<g id="sleepers">
+<polygon points="2,9 12,4 17,6 17,9 7,14 2,12" fill="#382f24"/>
+<polygon points="2,12 7,14 7,11 2,9" fill="#4a3e2f"/>
+<polygon points="17,9 7,14 7,11 17,6" fill="#382f24"/>
+<polygon points="12,4 17,6 7,11 2,9" fill="#6b5b44"/>
+</g>
+<g id="beam">
+<polygon points="1,7 13,1 15,2 15,4 3,10 1,9" fill="#5a261e"/>
+<polygon points="1,9 3,10 3,8 1,7" fill="#7d3528"/>
+<polygon points="15,4 3,10 3,8 15,2" fill="#5a261e"/>
+<polygon points="13,1 15,2 3,8 1,7" fill="#b5503d"/>
+</g>
+</svg>

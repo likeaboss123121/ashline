@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="82" height="61" viewBox="0 0 82 61" shape-rendering="crispEdges" data-template="driving-terrain-tunnel" data-anchor-x="1" data-anchor-y="43">
+<title>Ashline driving template: Tunnel</title>
+<g id="rock">
+<polygon points="1,1 81,1 81,23 1,23" fill="#332f2c"/>
+</g>
+<g id="bore">
+<polygon points="1,6 81,6 81,23 1,23" fill="#0d0f10"/>
+</g>
+<g id="ground">
+<polygon points="1,23 81,23 81,60 1,60" fill="#332f2c"/>
+</g>
+<g id="detail">
+<polygon points="7,8 17,8 17,9 7,9" fill="#453f3a"/>
+<polygon points="11,9 13,9 13,10 11,10" fill="#c9a15f"/>
+<polygon points="24,8 34,8 34,9 24,9" fill="#453f3a"/>
+<polygon points="28,9 30,9 30,10 28,10" fill="#c9a15f"/>
+<polygon points="41,8 51,8 51,9 41,9" fill="#453f3a"/>
+<polygon points="45,9 47,9 47,10 45,10" fill="#c9a15f"/>
+<polygon points="58,8 68,8 68,9 58,9" fill="#453f3a"/>
+<polygon points="62,9 64,9 64,10 62,10" fill="#c9a15f"/>
+</g>
+</svg>

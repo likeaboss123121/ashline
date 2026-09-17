@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="90" height="52" viewBox="0 0 90 52" shape-rendering="crispEdges" data-template="railyard-track-y-split-both" data-anchor-x="9" data-anchor-y="7" data-length-m="20">
+<title>Ashline rail yard template: Y switch branching to both neighbouring tracks</title>
+<g id="diagonal-ballast">
+<polygon points="17,3 17,43 1,51 1,11" fill="#494c42"/>
+</g>
+<g id="diagonal-ties">
+<polygon points="3,11 3,13 15,13 15,11" fill="#75654d"/>
+<polygon points="3,16 3,18 15,18 15,16" fill="#75654d"/>
+<polygon points="3,21 3,23 15,23 15,21" fill="#75654d"/>
+<polygon points="3,26 3,28 15,28 15,26" fill="#75654d"/>
+<polygon points="3,31 3,33 15,33 15,31" fill="#75654d"/>
+<polygon points="3,36 3,38 15,38 15,36" fill="#75654d"/>
+<polygon points="3,41 3,43 15,43 15,41" fill="#75654d"/>
+</g>
+<g id="diagonal-rails">
+<polygon points="11,5 13,5 13,46 11,46" fill="#222a2b"/>
+<polygon points="11,5 12,5 12,45 11,45" fill="#b8b6a0"/>
+<polygon points="5,8 7,8 7,49 5,49" fill="#222a2b"/>
+<polygon points="5,8 6,8 6,48 5,48" fill="#b8b6a0"/>
+</g>
+<g id="diagonal-up-ballast">
+<polygon points="9,1 89,1 89,13 9,13" fill="#494c42"/>
+</g>
+<g id="diagonal-up-ties">
+<polygon points="21,2 25,2 25,12 21,12" fill="#75654d"/>
+<polygon points="31,2 35,2 35,12 31,12" fill="#75654d"/>
+<polygon points="41,2 45,2 45,12 41,12" fill="#75654d"/>
+<polygon points="51,2 55,2 55,12 51,12" fill="#75654d"/>
+<polygon points="61,2 65,2 65,12 61,12" fill="#75654d"/>
+<polygon points="71,2 75,2 75,12 71,12" fill="#75654d"/>
+</g>
+<g id="diagonal-up-rails">
+<polygon points="9,3 89,3 89,5 9,5" fill="#222a2b"/>
+<polygon points="9,3 89,3 89,4 9,4" fill="#b8b6a0"/>
+<polygon points="9,9 89,9 89,11 9,11" fill="#222a2b"/>
+<polygon points="9,9 89,9 89,10 9,10" fill="#b8b6a0"/>
+</g>
+<g id="ballast">
+<polygon points="17,3 57,23 41,31 1,11" fill="#494c42"/>
+</g>
+<g id="ties">
+<polygon points="15,5 17,6 7,11 5,10" fill="#75654d"/>
+<polygon points="20,8 22,9 12,14 10,13" fill="#75654d"/>
+<polygon points="25,10 27,11 17,16 15,15" fill="#75654d"/>
+<polygon points="30,13 32,14 22,19 20,18" fill="#75654d"/>
+<polygon points="35,15 37,16 27,21 25,20" fill="#75654d"/>
+<polygon points="40,18 42,19 32,24 30,23" fill="#75654d"/>
+<polygon points="45,20 47,21 37,26 35,25" fill="#75654d"/>
+<polygon points="50,23 52,24 42,29 40,28" fill="#75654d"/>
+</g>
+<g id="rails">
+<polygon points="12,5 52,25 52,27 12,7" fill="#222a2b"/>
+<polygon points="12,5 52,25 52,26 12,6" fill="#b8b6a0"/>
+<polygon points="6,8 46,28 46,30 6,10" fill="#222a2b"/>
+<polygon points="6,8 46,28 46,29 6,9" fill="#b8b6a0"/>
+</g>
+</svg>

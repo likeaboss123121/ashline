@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="33" viewBox="0 0 40 33" shape-rendering="crispEdges" data-template="railyard-car-tanker" data-anchor-x="6" data-anchor-y="16" data-length-m="14">
+<title>Ashline rail yard template: Tanker car</title>
+<g id="coupler">
+<polygon points="4,12 6,11 8,12 8,13 6,14 4,13" fill="#5f5a50"/>
+<polygon points="4,13 6,14 6,13 4,12" fill="#7f786a"/>
+<polygon points="8,13 6,14 6,13 8,12" fill="#5f5a50"/>
+<polygon points="6,11 8,12 6,13 4,12" fill="#bbb09a"/>
+</g>
+<g id="trucks">
+<polygon points="3,18 15,12 21,15 21,18 9,24 3,21" fill="#1a1e20"/>
+<polygon points="3,21 9,24 9,21 3,18" fill="#111416"/>
+<polygon points="21,18 9,24 9,21 21,15" fill="#1a1e20"/>
+<polygon points="15,12 21,15 9,21 3,18" fill="#383c3b"/>
+<polygon points="19,26 31,20 37,23 37,26 25,32 19,29" fill="#1a1e20"/>
+<polygon points="19,29 25,32 25,29 19,26" fill="#111416"/>
+<polygon points="37,26 25,32 25,29 37,23" fill="#1a1e20"/>
+<polygon points="31,20 37,23 25,29 19,26" fill="#383c3b"/>
+</g>
+<g id="underframe">
+<polygon points="1,14 11,9 39,23 39,25 29,30 1,16" fill="#1e2022"/>
+<polygon points="1,16 29,30 29,28 1,14" fill="#232626"/>
+<polygon points="39,25 29,30 29,28 39,23" fill="#1e2022"/>
+<polygon points="11,9 39,23 29,28 1,14" fill="#454440"/>
+</g>
+<g id="walkway">
+<polygon points="2,13 12,8 38,21 38,22 28,27 2,14" fill="#242725"/>
+<polygon points="2,14 28,27 28,26 2,13" fill="#2d302c"/>
+<polygon points="38,22 28,27 28,26 38,21" fill="#242725"/>
+<polygon points="12,8 38,21 28,26 2,13" fill="#55584f"/>
+</g>
+<g id="tank">
+<polygon points="4,6 8,2 10,1 36,14 37,16 36,19 32,23 30,24 4,11" fill="#202424"/>
+<polygon points="4,9 28,21 28,18 4,6" fill="#474d4b"/>
+<polygon points="4,6 28,18 30,16 6,4" fill="#565c5a"/>
+<polygon points="6,4 30,16 32,14 8,2" fill="#656b69"/>
+<polygon points="8,2 32,14 34,13 10,1" fill="#6d7371"/>
+<polygon points="4,11 28,23 28,21 4,9" fill="#353a39"/>
+<polygon points="28,21 28,18 30,16 32,14 34,13 36,14 37,16 36,19 34,21 32,23 30,24 28,23" fill="#2e3332"/>
+</g>
+<g id="dome">
+<polygon points="16,7 20,5 24,7 24,9 20,11 16,9" fill="#2e3332"/>
+<polygon points="16,9 20,11 20,9 16,7" fill="#3f4543"/>
+<polygon points="24,9 20,11 20,9 24,7" fill="#2e3332"/>
+<polygon points="20,5 24,7 20,9 16,7" fill="#6d7371"/>
+</g>
+<g id="coupler">
+<polygon points="32,26 34,25 36,26 36,27 34,28 32,27" fill="#5f5a50"/>
+<polygon points="32,27 34,28 34,27 32,26" fill="#7f786a"/>
+<polygon points="36,27 34,28 34,27 36,26" fill="#5f5a50"/>
+<polygon points="34,25 36,26 34,27 32,26" fill="#bbb09a"/>
+</g>
+</svg>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="82" height="61" viewBox="0 0 82 61" shape-rendering="crispEdges" data-template="driving-terrain-bridge" data-anchor-x="1" data-anchor-y="43">
+<title>Ashline driving template: Bridge</title>
+<g id="sky">
+<polygon points="1,1 81,1 81,23 1,23" fill="#1e262c"/>
+</g>
+<g id="water">
+<polygon points="1,23 81,23 81,60 1,60" fill="#24384a"/>
+<polygon points="4,37 13,37 13,39 4,39" fill="#2e465c"/>
+<polygon points="19,43 28,43 28,44 19,44" fill="#2e465c"/>
+<polygon points="34,49 43,49 43,50 34,50" fill="#2e465c"/>
+<polygon points="48,37 57,37 57,39 48,39" fill="#2e465c"/>
+<polygon points="63,43 72,43 72,44 63,44" fill="#2e465c"/>
+</g>
+<g id="deck">
+<polygon points="1,35 81,35 81,50 1,50" fill="#5a4a3a"/>
+</g>
+<g id="girders">
+<polygon points="1,51 81,51 81,50 1,50" fill="#463a2e"/>
+<polygon points="3,49 5,49 5,53 3,53" fill="#6a5a48"/>
+<polygon points="16,49 18,49 18,53 16,53" fill="#6a5a48"/>
+<polygon points="28,49 30,49 30,53 28,53" fill="#6a5a48"/>
+<polygon points="41,49 43,49 43,53 41,53" fill="#6a5a48"/>
+<polygon points="54,49 56,49 56,53 54,53" fill="#6a5a48"/>
+<polygon points="66,49 68,49 68,53 66,53" fill="#6a5a48"/>
+</g>
+</svg>

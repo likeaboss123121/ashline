@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="50" viewBox="0 0 18 50" shape-rendering="crispEdges" data-template="railyard-track-diagonal" data-anchor-x="9" data-anchor-y="5" data-length-m="20">
+<title>Ashline rail yard template: Ladder diagonal passing a track that does not connect</title>
+<g id="diagonal-ballast">
+<polygon points="17,1 17,41 1,49 1,9" fill="#494c42"/>
+</g>
+<g id="diagonal-ties">
+<polygon points="3,9 3,11 15,11 15,9" fill="#75654d"/>
+<polygon points="3,14 3,16 15,16 15,14" fill="#75654d"/>
+<polygon points="3,19 3,21 15,21 15,19" fill="#75654d"/>
+<polygon points="3,24 3,26 15,26 15,24" fill="#75654d"/>
+<polygon points="3,29 3,31 15,31 15,29" fill="#75654d"/>
+<polygon points="3,34 3,36 15,36 15,34" fill="#75654d"/>
+<polygon points="3,39 3,41 15,41 15,39" fill="#75654d"/>
+</g>
+<g id="diagonal-rails">
+<polygon points="11,3 13,3 13,44 11,44" fill="#222a2b"/>
+<polygon points="11,3 12,3 12,43 11,43" fill="#b8b6a0"/>
+<polygon points="5,6 7,6 7,47 5,47" fill="#222a2b"/>
+<polygon points="5,6 6,6 6,46 5,46" fill="#b8b6a0"/>
+</g>
+</svg>

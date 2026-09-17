@@ -1,0 +1,92 @@
+/* The player's condition (source/stats.js): a compact panel in the sidebar and the fuller screen in the dialog. */
+
+.stats-panel {
+	margin: 0.6em 0 0.2em;
+}
+
+.stat-row {
+	margin-bottom: 0.4em;
+}
+
+.stat-head {
+	display: flex;
+	justify-content: space-between;
+	gap: 0.5em;
+	font-size: 0.78em;
+	line-height: 1.2;
+}
+
+.stat-label {
+	color: #c7c5b9;
+}
+
+.stat-band {
+	color: #8d938f;
+}
+
+.stat-value {
+	display: none;
+	color: #8d938f;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Tapping the panel shows the numbers behind the words. */
+.stats-panel.expanded .stat-value {
+	display: inline;
+}
+
+.stats-panel.expanded .stat-band {
+	flex: 1;
+	text-align: right;
+	margin-right: 0.4em;
+}
+
+.stat-track {
+	position: relative;
+	height: 4px;
+	margin-top: 2px;
+	background: #23282a;
+	border: 1px solid #333a3b;
+	border-radius: 2px;
+	overflow: hidden;
+}
+
+/* The bar's length is the number; its colour is how much trouble that number means. */
+.stat-fill {
+	height: 100%;
+}
+
+.stat-fine { background: #6f8f5a; }
+.stat-mild { background: #9aa95c; }
+.stat-moderate { background: #c9a15f; }
+.stat-severe { background: #c07a44; }
+.stat-critical { background: #b5503d; }
+
+.condition-stat {
+	margin-bottom: 0.9em;
+}
+
+.condition-heading {
+	margin: 0 0 0.25em;
+	font-weight: bold;
+}
+
+.condition-driver {
+	margin: 0.25em 0 0;
+	font-size: 0.85em;
+	color: #8d938f;
+}
+
+/* A marker where the stat starts reading as severe, so the edge is visible before it is reached. */
+.stat-pin {
+	position: absolute;
+	top: -1px;
+	width: 1px;
+	height: calc(100% + 2px);
+	background: #8d938f;
+	opacity: 0.8;
+}
+
+.stats-panel {
+	cursor: pointer;
+}

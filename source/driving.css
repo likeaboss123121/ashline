@@ -1,0 +1,21 @@
+/* Driving view: the consist out on the line, drawn from the templates in source/img/driving/. */
+
+.driving-view-wrapper {
+	margin: 0.6em 0;
+	overflow-x: auto;
+	background: #151719;
+	border: 1px solid #2a2e31;
+	padding: 4px;
+}
+
+.driving-view {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	image-rendering: pixelated;
+	image-rendering: crisp-edges;
+}
+
+.driving-player-marker {
+	fill: #e5c58a;
+}

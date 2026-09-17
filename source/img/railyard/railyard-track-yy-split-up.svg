@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="90" height="32" viewBox="0 0 90 32" shape-rendering="crispEdges" data-template="railyard-track-yy-split-up" data-anchor-x="9" data-anchor-y="7" data-length-m="20">
+<title>Ashline rail yard template: YY switch, split, up</title>
+<g id="ballast">
+<polygon points="17,3 57,23 41,31 1,11" fill="#494c42"/>
+</g>
+<g id="ties">
+<polygon points="35,15 37,16 27,21 25,20" fill="#75654d"/>
+<polygon points="40,18 42,19 32,24 30,23" fill="#75654d"/>
+<polygon points="45,20 47,21 37,26 35,25" fill="#75654d"/>
+<polygon points="50,23 52,24 42,29 40,28" fill="#75654d"/>
+</g>
+<g id="branch-rails">
+<polygon points="12,5 52,25 52,27 12,7" fill="#222a2b"/>
+<polygon points="12,5 52,25 52,26 12,6" fill="#b8b6a0"/>
+<polygon points="6,8 46,28 46,30 6,10" fill="#222a2b"/>
+<polygon points="6,8 46,28 46,29 6,9" fill="#b8b6a0"/>
+</g>
+<g id="diagonal-up-ballast">
+<polygon points="9,1 89,1 89,13 9,13" fill="#494c42"/>
+</g>
+<g id="diagonal-up-ties">
+<polygon points="21,2 25,2 25,12 21,12" fill="#75654d"/>
+<polygon points="31,2 35,2 35,12 31,12" fill="#75654d"/>
+<polygon points="41,2 45,2 45,12 41,12" fill="#75654d"/>
+<polygon points="51,2 55,2 55,12 51,12" fill="#75654d"/>
+<polygon points="61,2 65,2 65,12 61,12" fill="#75654d"/>
+<polygon points="71,2 75,2 75,12 71,12" fill="#75654d"/>
+</g>
+<g id="diagonal-up-rails">
+<polygon points="9,3 89,3 89,5 9,5" fill="#222a2b"/>
+<polygon points="9,3 89,3 89,4 9,4" fill="#b8b6a0"/>
+<polygon points="9,9 89,9 89,11 9,11" fill="#222a2b"/>
+<polygon points="9,9 89,9 89,10 9,10" fill="#b8b6a0"/>
+</g>
+</svg>
