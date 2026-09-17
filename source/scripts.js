@@ -779,53 +779,53 @@ setup.railyard = {
 		this.consumeCargoAmount(car, 'water', waterLitersRequired * output);
 		this.addSteamLiters(car, this.getSteamProductionLitersPerMinute(car) * output);
 	},
-	// Returns true when at least one locomotive in the train can currently provide traction.
-	isTrainDriveCapable: function(train) {
-		if (!Array.isArray(train) || !train.length) {
-			return false;
+	// Which locomotive is being driven: the one the player stands in, or failing that the first in the consist.
+	// Without multiple unit control (not built yet), that locomotive alone pulls, sets the speed and burns fuel.
+	// Any other locomotive is in neutral: hauled like a car of the same weight. Every train passed here is the
+	// player's consist or a copy of it, so the player's car index applies to it.
+	getControllingLocomotiveIndex: function(train) {
+		if (!Array.isArray(train)) {
+			return -1;
+		}
+		var index = Number(State.variables && State.variables.currentCarIndex);
+		if (train[index] && train[index].tractiveCapacity > 0) {
+			return index;
 		}
 		for (var i = 0; i < train.length; i++) {
-			var car = train[i];
-			if (!car || !(car.tractiveCapacity > 0)) {
-				continue;
-			}
-			if (this.isDieselLocomotiveCar(car) && setup.fuel.canDieselRun(car)) {
-				return true;
-			}
-			if (this.isSteamLocomotiveCar(car) && this.getSteamPressureBar(car) >= 10) {
-				return true;
+			if (train[i] && train[i].tractiveCapacity > 0) {
+				return i;
 			}
 		}
-		return false;
+		return -1;
 	},
-	// Consumes per-minute shunting resources from locomotives and returns whether traction remains available.
-	consumeShuntingResourcesForMinute: function(train) {
-		if (!Array.isArray(train) || !train.length) {
+	getControllingLocomotive: function(train) {
+		var index = this.getControllingLocomotiveIndex(train);
+		return index === -1 ? null : train[index];
+	},
+	// Whether the locomotive being driven can provide traction right now.
+	isTrainDriveCapable: function(train) {
+		var car = this.getControllingLocomotive(train);
+		if (!car) {
 			return false;
 		}
+		if (this.isDieselLocomotiveCar(car)) {
+			return setup.fuel.canDieselRun(car);
+		}
+		return this.isSteamLocomotiveCar(car) && this.getSteamPressureBar(car) >= 10;
+	},
+	// Spends one minute of moving from the locomotive being driven, and returns whether it had the power to.
+	consumeShuntingResourcesForMinute: function(train) {
 		if (!this.isTrainDriveCapable(train)) {
 			return false;
 		}
-		var powered = false;
-		for (var i = 0; i < train.length; i++) {
-			var car = train[i];
-			if (!car || !(car.tractiveCapacity > 0)) {
-				continue;
-			}
-			if (this.isDieselLocomotiveCar(car)) {
-				if (setup.fuel.canDieselRun(car)) {
-					this.consumeCargoAmount(car, 'diesel', setup.fuel.getDieselLitresPerMinute(car));
-					powered = true;
-				}
-				continue;
-			}
-			if (this.isSteamLocomotiveCar(car) && this.getSteamPressureBar(car) >= 10) {
-				powered = this.consumeSteamLiters(car, this.getSteamShuntingCostPerMinute(car)) || powered;
-			}
+		var car = this.getControllingLocomotive(train);
+		if (this.isDieselLocomotiveCar(car)) {
+			return this.consumeCargoAmount(car, 'diesel', setup.fuel.getDieselLitresPerMinute(car));
 		}
-		return powered;
+		return this.consumeSteamLiters(car, this.getSteamShuntingCostPerMinute(car));
 	},
-	// Estimates wait time to reach usable steam pressure (10 bar) for any firing steam locomotive.
+	// Estimates the wait until the locomotive being driven reaches usable steam pressure (10 bar), by running a copy
+	// of the whole consist, so car positions stay the same as in the real one.
 	estimateMinutesUntilSteamUsable: function(train, maxMinutes) {
 		if (!Array.isArray(train) || !train.length) {
 			return -1;
@@ -834,14 +834,17 @@ setup.railyard = {
 			return 0;
 		}
 		var limit = Math.max(1, setup.safeParseInt(maxMinutes, 720));
-		var sim = train.filter(function(car) { return this.isSteamLocomotiveCar(car); }, this)
-			.map(function(car) { return this.cloneCar(car); }, this);
+		var sim = train.map(function(car) { return this.cloneCar(car); }, this);
+		var driven = this.getControllingLocomotive(sim);
+		if (!this.isSteamLocomotiveCar(driven)) {
+			return -1;
+		}
 		for (var minute = 1; minute <= limit; minute++) {
 			for (var si = 0; si < sim.length; si++) {
 				this.processSteamFireboxMinuteForCar(sim[si]);
 			}
 			if (this.isTrainDriveCapable(sim)) return minute;
-			if (!sim.some(function(car) { return car.fireboxEnabled; })) break;
+			if (!driven.fireboxEnabled) break;
 		}
 		return -1;
 	},

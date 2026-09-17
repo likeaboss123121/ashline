@@ -432,12 +432,11 @@ setup.worldmap = {
 		var speedFactor = this.REFERENCE_SPEED_KMH / this.getTopSpeedKmh(train);
 		return Math.max(1, Math.round(this.BASE_MINUTES_PER_TILE * speedFactor * gradeFactor * weightFactor));
 	},
-	// A consist runs no faster than its slowest locomotive: a shunter hauled in a road train still holds it back.
+	// The consist runs at the top speed of the locomotive being driven. Another locomotive hauled in neutral is only
+	// weight, and does not hold the train back.
 	getTopSpeedKmh: function(train) {
-		var speeds = (Array.isArray(train) ? train : []).filter(function(car) {
-			return car && Number(car.tractiveCapacity) > 0 && Number(car.topSpeedKmh) > 0;
-		}).map(function(car) { return Number(car.topSpeedKmh); });
-		return speeds.length ? Math.min.apply(null, speeds) : this.REFERENCE_SPEED_KMH;
+		var loco = setup.railyard.getControllingLocomotive(train);
+		return loco && Number(loco.topSpeedKmh) > 0 ? Number(loco.topSpeedKmh) : this.REFERENCE_SPEED_KMH;
 	},
 	// The grade of the step between two neighbouring positions, in the direction it is taken.
 	getStepGrade: function(tiles, fromIndex, toIndex) {
@@ -513,10 +512,9 @@ setup.worldmap = {
 	},
 	getTrainTractiveKN: function(train) {
 		if (!Array.isArray(train)) return 0;
-		// What the locomotives can pull now, not what they were built to: degraded diesel derates an engine.
-		return train.reduce(function(total, car) {
-			return total + setup.fuel.getEffectiveTractiveKN(car);
-		}, 0);
+		// What the locomotive being driven can pull now, not what it was built to: degraded diesel derates an engine.
+		// Other locomotives are in neutral and add only their weight.
+		return setup.fuel.getEffectiveTractiveKN(setup.railyard.getControllingLocomotive(train));
 	},
 	// The steepest grade a consist can pull at its current weight. Tractive effort has to lift the train up the
 	// grade and overcome rolling resistance, so loading cargo flattens the limit: weight is a real decision.
