@@ -457,17 +457,37 @@ setup.railyardView = {
 		return result;
 	},
 
-	// The view opens at the drawing's own size, which is big enough to read, and scrolls when the yard is wider
-	// than the page. Fit squeezes a whole yard in when the player wants the overview. The level lives on setup
-	// rather than in the save: it is how the player is looking at the yard, not part of the game.
-	getZoom: function() {
+	// The view opens at the drawing's own size where that fits, and fitted where it does not, which is most yards on
+	// a phone: opening scrolled into a corner of a yard four times the width of the screen tells the player nothing.
+	// Fit squeezes a whole yard in. The level lives on setup rather than in the save: it is how the player is
+	// looking at the yard, not part of the game.
+	getViewportWidth: function() {
+		return typeof window === 'undefined' ? 1024 : Math.max(240, (window.innerWidth || 1024) - 60);
+	},
+	// The largest step that fits the screen, never below half, which is the art at one pixel to one pixel: shrinking
+	// a yard to fit a phone makes it unreadable and its tap targets too small to hit, so a big yard is scrolled
+	// instead. Fit is still a button away.
+	getDefaultZoom: function(naturalWidth) {
+		var available = this.getViewportWidth();
+		var steps = this.ZOOM_STEPS.filter(function(step) { return step >= 0.5 && step <= 1; });
+		for (var i = steps.length - 1; i >= 0; i--) {
+			if (naturalWidth * steps[i] <= available) {
+				return steps[i];
+			}
+		}
+		return steps[0];
+	},
+	getZoom: function(naturalWidth) {
 		if (this.zoomLevel === 'fit') {
 			return null;
 		}
-		return typeof this.zoomLevel === 'number' ? this.zoomLevel : 1;
+		if (typeof this.zoomLevel === 'number') {
+			return this.zoomLevel;
+		}
+		return this.getDefaultZoom(naturalWidth);
 	},
 	applyZoom: function(svg, naturalWidth) {
-		var zoom = this.getZoom();
+		var zoom = this.getZoom(naturalWidth);
 		// Fit fills the width of the view either way: it enlarges a small yard as readily as it shrinks a long one.
 		svg.style.maxWidth = 'none';
 		svg.style.width = zoom === null ? '100%' : Math.round(naturalWidth * zoom) + 'px';
@@ -480,7 +500,7 @@ setup.railyardView = {
 		bar.className = 'railyard-view-zoom';
 		var readout = document.createElement('span');
 		var update = function() {
-			var zoom = self.getZoom();
+			var zoom = self.getZoom(naturalWidth);
 			readout.textContent = zoom === null ? 'Fit' : Math.round(zoom * 100) + '%';
 			self.applyZoom(svg, naturalWidth);
 		};
@@ -497,7 +517,7 @@ setup.railyardView = {
 		};
 		var stepFrom = function(direction) {
 			var steps = self.ZOOM_STEPS;
-			var current = self.getZoom();
+			var current = self.getZoom(naturalWidth);
 			if (current === null) {
 				// Coming out of Fit, step to whichever end the player asked for.
 				return direction > 0 ? 1 : steps[0];
@@ -982,6 +1002,22 @@ setup.railyardView = {
 		var scroll = document.createElement('div');
 		scroll.className = 'railyard-view-scroll';
 		scroll.appendChild(svg);
+		// A yard wider than the screen opens on the player's own consist, or on the first train parked here, rather
+		// than on whichever end of the yard happens to be at x = 0. Done once the box has been laid out.
+		var focusX = marker ? marker.x : null;
+		if (focusX === null) {
+			var firstBox = Object.keys(trainBoxes).map(function(key) { return trainBoxes[key]; })
+				.sort(function(a, b) { return a.x0 - b.x0; })[0];
+			focusX = firstBox ? (firstBox.x0 + firstBox.x1) / 2 : null;
+		}
+		if (focusX !== null && typeof requestAnimationFrame === 'function') {
+			var fraction = (focusX - minX) / width;
+			requestAnimationFrame(function() {
+				if (scroll.scrollWidth > scroll.clientWidth) {
+					scroll.scrollLeft = Math.max(0, fraction * scroll.scrollWidth - scroll.clientWidth / 2);
+				}
+			});
+		}
 		wrapper.appendChild(this.createZoomControls(svg, width * this.SCALE));
 		wrapper.appendChild(scroll);
 		wrapper.appendChild(this.createCompass(tracks, layout.flipped));

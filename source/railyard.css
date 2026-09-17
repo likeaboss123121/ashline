@@ -7,12 +7,14 @@
 	border-radius: 4px;
 }
 
-/* On a phone the passage padding costs a quarter of the screen, so the yard takes the full width instead. */
+/* On a phone the passage margins cost a fifth of the screen, so the yard reaches into them. It stops short of the
+   stowed sidebar on the left (SugarCube leaves the passage 56px clear of it there, and the stowed bar is 33px wide)
+   and takes the whole 24px passage margin on the right. A full 100vw here would slide under the sidebar and push
+   the page sideways. */
 @media (max-width: 700px) {
 	.railyard-view-wrapper {
-		width: 100vw;
-		margin-left: 50%;
-		transform: translateX(-50%);
+		margin-left: -20px;
+		margin-right: -24px;
 		border-left: none;
 		border-right: none;
 		border-radius: 0;
@@ -113,11 +115,12 @@
 	fill-opacity: 0.22;
 }
 
-/* The compass sits in the corner of the view, in the same projection as the yard itself. */
+/* The compass sits in the corner of the view, in the same projection as the yard itself, clear of the message row
+   below the drawing. */
 .railyard-compass {
 	position: absolute;
 	left: 6px;
-	bottom: 30px;
+	bottom: 34px;
 	z-index: 2;
 	background: rgba(21, 23, 25, 0.75);
 	border-radius: 3px;
@@ -147,7 +150,7 @@
 }
 
 .railyard-view-message {
-	min-height: 1.2em;
+	min-height: 1.4em;
 	padding: 0 6px 4px;
 	font-size: 0.85em;
 	color: #c9a15f;
@@ -168,4 +171,26 @@
 
 .railyard-view-choice:hover {
 	background: #2e3537;
+}
+
+/* Touch: a finger needs a bigger target than a mouse pointer, and a tapped choice wraps onto a second line, which
+   the compass has to stay clear of. */
+@media (pointer: coarse) {
+	.railyard-view-zoom button {
+		min-width: 2.6em;
+		line-height: 2.2;
+	}
+
+	.railyard-view-choice {
+		line-height: 2.2;
+		padding: 0 0.7em;
+	}
+
+	.railyard-view-message {
+		min-height: 3.2em;
+	}
+
+	.railyard-compass {
+		bottom: 62px;
+	}
 }
