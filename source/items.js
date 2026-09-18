@@ -123,3 +123,23 @@ Macro.add('locomotiveKit', {
 		new Wikifier(this.output, output);
 	}
 });
+
+// The locomotive's own numbers, folded away in the cab until the player wants them.
+Macro.add('locomotivePanel', {
+	handler: function() {
+		var variables = State.variables;
+		var train = variables.currentTrain;
+		var car = Array.isArray(train) ? train[variables.currentCarIndex] : null;
+		if (!setup.items.isLocomotive(car)) {
+			return;
+		}
+		var rows = setup.railyard.getLocomotiveStats(car).map(function(row) {
+			return '<div class="loco-stat"><span class="loco-stat-name">' + row[0] + '</span>'
+				+ '<span class="loco-stat-value">' + row[1] + '</span></div>';
+		}).join('');
+		var panel = document.createElement('details');
+		panel.className = 'loco-panel';
+		panel.innerHTML = '<summary>Locomotive</summary><div class="loco-stats">' + rows + '</div>';
+		this.output.appendChild(panel);
+	}
+});

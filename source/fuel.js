@@ -185,8 +185,8 @@ setup.fuel = {
 		var parts = this.SOLID_FUELS.slice().reverse().filter(function(type) {
 			return railyard.getCargoAmount(car, type) > 0;
 		}).map(function(type) {
-			return type.charAt(0).toUpperCase() + type.slice(1) + ': ' + railyard.getCargoAmount(car, type).toFixed(1)
-				+ ' L, grade ' + self.describeGrade(self.getGrade(car, type), type);
+			return type.charAt(0).toUpperCase() + type.slice(1) + ': ' + setup.units.litres(railyard.getCargoAmount(car, type))
+				+ ', grade ' + self.describeGrade(self.getGrade(car, type), type);
 		});
 		return parts.length ? parts.join('; ') : 'Bunker empty';
 	}

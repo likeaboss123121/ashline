@@ -238,28 +238,24 @@ Macro.add('conditionControls', {
 		var drink = condition.findDrink(train);
 		var output = '<h4>Rest and rations</h4>';
 
+		var offered = 0;
 		if (rations > 0) {
+			offered++;
 			output += '<<timedlink "Eat a ration" 10 "rest" "hunger:+2">><<run setup.condition.eat($currentTrain)>>'
 				+ '<<goto "TrainInterior">><</timedlink>> <span class="small-description">('
 				+ rations + ' left)</span><br>';
-		} else {
-			output += '<span class="small-description"><em>Eat a ration: you have none left.</em></span><br>';
 		}
-
 		if (drink) {
+			offered++;
 			output += '<<timedlink "Drink" 2 "rest" "thirst:+2">><<run setup.condition.drink($currentTrain)>>'
 				+ '<<goto "TrainInterior">><</timedlink>> <span class="small-description">(water at grade '
 				+ Math.round(drink.grade) + '%)</span><br>';
-		} else {
-			output += '<span class="small-description"><em>Drink: there is no water aboard to drink.</em></span><br>';
 		}
-
 		if (condition.hasBedroll(train)) {
+			offered++;
 			output += '<<link "Lie down to sleep">><<goto "Sleep">><</link>><br>';
-		} else {
-			output += '<span class="small-description"><em>Sleep: you have no bedroll aboard.</em></span><br>';
 		}
-		new Wikifier(this.output, output);
+		new Wikifier(this.output, offered ? output : '');
 	}
 });
 

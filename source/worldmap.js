@@ -781,7 +781,7 @@ setup.worldmap = {
 			return '';
 		}
 		var travel = this.getLegTravel(this.getSeed(), legIndex, train, !towardExit);
-		return travel.kilometres + ' km, steepest climb ' + travel.steepestClimb.toFixed(1) + '%'
+		return setup.units.kilometres(travel.kilometres) + ', steepest climb ' + travel.steepestClimb.toFixed(1) + '%'
 			+ (travel.climbLimit > 0 ? ', your consist pulls ' + travel.climbLimit.toFixed(1) + '%' : '') + '.';
 	},
 	// Why the train cannot make this leg, or '' if it can. A consist with no locomotive is left to the drive

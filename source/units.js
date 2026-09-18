@@ -34,6 +34,9 @@ setup.units = {
 	litres: function(litres) {
 		return this.isImperial() ? this.toTenth(litres * 0.264172) + ' gal' : this.whole(litres) + ' L';
 	},
+	force: function(kn) {
+		return this.isImperial() ? this.whole(kn * 224.809) + ' lbf' : this.whole(kn) + ' kN';
+	},
 	temperature: function(celsius) {
 		return this.isImperial()
 			? this.toTenth(celsius * 9 / 5 + 32) + '°F'

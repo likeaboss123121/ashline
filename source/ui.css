@@ -242,3 +242,30 @@
 .driving-options br + br {
 	margin: 0;
 }
+
+/* The locomotive's numbers, folded away in the cab. */
+.loco-panel {
+	margin: 0.4em 0;
+	border: 1px solid #2a2f31;
+}
+
+.loco-panel > summary {
+	padding: 0.3em 0.6em;
+	color: #8d938f;
+	cursor: pointer;
+}
+
+.loco-stats {
+	padding: 0.3em 0.6em 0.5em;
+}
+
+.loco-stat {
+	display: flex;
+	justify-content: space-between;
+	gap: 1em;
+	font-size: 0.9em;
+}
+
+.loco-stat-name {
+	color: #8d938f;
+}

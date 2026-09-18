@@ -213,17 +213,19 @@ Macro.add('refuelControls', {
 			return;
 		}
 		var output = '<h4>Refuelling</h4>';
+		var offered = 0;
 		options.forEach(function(option) {
 			if (option.reason) {
-				output += '<span class="small-description"><em>' + option.label + ': ' + option.reason + '.</em></span><br>';
 				return;
 			}
-			var grade = option.grade === null ? '' : ', grade ' + Math.round(option.grade) + '%';
+			offered++;
+			var grade = option.grade === null ? '' : ' <span class="small-description">(grade '
+				+ Math.round(option.grade) + '%)</span>';
 			output += '<<timedlink "' + option.label + ', ' + option.amountText + '" ' + option.minutes + ' "work" "fatigue:+'
 				+ setup.effects.levelForRate(option.fatiguePerMinute) + '">>'
 				+ '<<run setup.refuel.perform("' + option.id + '", ' + locoIndex + ')>><<goto "TrainInterior">><</timedlink>>'
-				+ ' <span class="small-description">(fatigue +' + option.fatigue + grade + ')</span><br>';
+				+ grade + '<br>';
 		});
-		new Wikifier(this.output, output);
+		new Wikifier(this.output, offered ? output : '');
 	}
 });

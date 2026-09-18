@@ -125,7 +125,9 @@ Car <<print $currentCarIndex + 1>> of <<print $currentTrain.length>>.
 <<if $currentCarIndex < $currentTrain.length - 1>><<link "Move toward the rear">><<set $currentCarIndex += 1>><<goto "TrainInterior">><</link>><</if>>
 
 <<if _currentCar.tractiveCapacity > 0>>
-This is the locomotive, <<print setup.railyard.getLocomotiveSummary(_currentCar)>>. From here, you can start your journey.
+This is the locomotive. From here, you can start your journey.
+
+<<locomotivePanel>>
 <<else>>
 This car does not have the controls needed to drive the train.
 <</if>>

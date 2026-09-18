@@ -702,21 +702,34 @@ setup.railyard = {
 		if (this.isDieselLocomotiveCar(loco)) {
 			var litres = this.getCargoAmount(loco, 'diesel');
 			var minutes = Math.floor(litres / setup.fuel.getDieselLitresPerMinute(loco));
-			return '<p><strong>Fuel:</strong> ' + litres.toFixed(0) + ' L of diesel, grade '
+			return '<p><strong>Fuel:</strong> ' + setup.units.litres(litres) + ' of diesel, grade '
 				+ setup.fuel.describeGrade(setup.fuel.getGrade(loco, 'diesel'), 'diesel') + ', about '
 				+ setup.time.formatDuration(minutes) + ' of running.</p>';
 		}
 		if (this.isSteamLocomotiveCar(loco)) {
 			return '<p><strong>Boiler:</strong> ' + this.getSteamPressureBar(loco).toFixed(1) + ' bar. '
-				+ setup.fuel.describeBunker(loco) + '. Water: ' + this.getCargoAmount(loco, 'water').toFixed(0) + ' L.</p>';
+				+ setup.fuel.describeBunker(loco) + '. Water: ' + setup.units.litres(this.getCargoAmount(loco, 'water')) + '.</p>';
 		}
 		return '';
 	},
-	// One line of what a locomotive is and what it can do, for the cab.
-	getLocomotiveSummary: function(car) {
-		var name = car.name || car.type;
-		return 'a ' + name + ': ' + car.tractiveCapacity + ' kN, ' + (car.topSpeedKmh || setup.worldmap.REFERENCE_SPEED_KMH)
-			+ ' km/h, ' + Math.round(car.baseWeight / 1000) + ' t';
+	// What a locomotive is and what it can do, as rows for the cab's own panel.
+	getLocomotiveStats: function(car) {
+		var rows = [
+			['Model', car.name || car.type],
+			['Pull', setup.units.force(car.tractiveCapacity)],
+			['Top speed', setup.units.kilometresPerHour(car.topSpeedKmh || setup.worldmap.REFERENCE_SPEED_KMH)],
+			['Weight', setup.units.tonnes(Math.round(car.baseWeight / 100) / 10)],
+			['Length', setup.units.metres(car.length)]
+		];
+		if (this.isDieselLocomotiveCar(car)) {
+			rows.push(['Tank', setup.units.litres(this.getCargoAmount(car, 'diesel')) + ' of '
+				+ setup.units.litres(car.maxCargoCapacityVolume)]);
+		} else if (this.isSteamLocomotiveCar(car)) {
+			rows.push(['Boiler', this.getSteamPressureBar(car).toFixed(1) + ' of '
+				+ this.getSteamMaxPressureBar(car).toFixed(1) + ' bar']);
+			rows.push(['Bunker and tanks', setup.units.litres(car.maxCargoCapacityVolume)]);
+		}
+		return rows;
 	},
 	// Which locomotive this is, for its art and its specs. Locomotives from before there were models are shunters.
 	getLocomotiveModel: function(car) {
@@ -2716,8 +2729,8 @@ Macro.add('lineStatus', {
 			+ (view.branch ? ' &middot; side track' : '') + '</h2>';
 		output += '<p>Tile ' + (Math.min(view.tileIndex, view.tileCount - 1) + 1) + ' of ' + view.tileCount
 			+ ' &middot; ' + view.terrain + ' &middot; ' + slope + '</p>';
-		output += '<p class="small-description">' + view.kilometresDone + ' km behind you, '
-			+ view.kilometresLeft + ' km to run.</p>';
+		output += '<p class="small-description">' + setup.units.kilometres(view.kilometresDone) + ' behind you, '
+			+ setup.units.kilometres(view.kilometresLeft) + ' to run.</p>';
 		output += setup.railyard.getFuelReadout(State.variables.currentTrain);
 		new Wikifier(this.output, output);
 	}
@@ -2753,7 +2766,8 @@ Macro.add('lineControls', {
 			if (!step) {
 				return;
 			}
-			var label = (direction > 0 ? 'Drive 5 km ' : 'Reverse 5 km ') + (step.heading || 'on');
+			var label = (direction > 0 ? 'Drive ' : 'Reverse ') + setup.units.kilometres(setup.worldmap.TILE_KM)
+				+ ' ' + (step.heading || 'on');
 			var slope = step.grade > 0 ? 'climbs ' + step.grade.toFixed(1) + '%'
 				: step.grade < 0 ? 'falls ' + Math.abs(step.grade).toFixed(1) + '%' : 'runs level';
 			if (step.blocked) {
@@ -2774,14 +2788,14 @@ Macro.add('lineControls', {
 			if (!step) {
 				return;
 			}
-			var label = 'Drive 5 km ' + choice.direction;
+			var label = 'Drive ' + setup.units.kilometres(setup.worldmap.TILE_KM) + ' ' + choice.direction;
 			if (step.blocked) {
 				return;
 			}
 			output += '<<timedlink "' + label + '" ' + step.minutes + ' "travel">>'
 				+ '<<run setup.railyard.takeBranch("' + choice.id + '")>><<goto "OnTheLine">><</timedlink>><br>';
 			output += '<span class="small-description">Into ' + choice.terrain + ', a track that runs '
-				+ (choice.tiles * 5) + ' km'
+				+ setup.units.kilometres(choice.tiles * setup.worldmap.TILE_KM)
 				+ (choice.rejoins ? ' and joins the line again further on' : ' and ends at a buffer stop') + '.</span><br>';
 		});
 		output += escapeLink;

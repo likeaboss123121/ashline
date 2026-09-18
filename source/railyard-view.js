@@ -423,7 +423,8 @@ setup.railyardView = {
 			var onUpLadder = leads.entry && r < entryRow;
 			var occupied = setup.railyard.getTrackOccupiedLength(trackAt(r)) + (selected ? setup.railyard.getTrainLength(player.train) : 0);
 			result.labels.push({
-				text: this.getTrackBadge(dataIndex(r)) + ' · ' + Math.max(0, trackAt(r).length - occupied) + '/' + trackAt(r).length + ' m free',
+				text: this.getTrackBadge(dataIndex(r)) + ' · ' + setup.units.metres(Math.max(0, trackAt(r).length - occupied))
+					+ ' free of ' + setup.units.metres(trackAt(r).length),
 				// A stub hung from the exit ladder is labelled beside its own start, not away at the entry ladder.
 				u: hangsFromExit(r) ? start - J : entryJunction(r),
 				v: v, dx: onUpLadder ? -6 : -this.LABEL_OFFSET_UNITS, dy: onUpLadder ? -11 : 10, anchor: 'end', player: selected
