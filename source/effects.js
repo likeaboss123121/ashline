@@ -20,16 +20,24 @@ setup.effects = {
 			return key ? { key: key, direction: direction, level: level } : null;
 		}).filter(Boolean);
 	},
-	// The wording for one effect: three plusses of fatigue, or three minus signs of it for something that takes it
+	// The wording for one effect: three plusses of Fatigue, or three minus signs of it for something that takes it
 	// away. The minus is U+2212 rather than a hyphen, because SugarCube's typography turns three hyphens into a dash.
 	describeOne: function(effect) {
 		var stat = setup.stats.getStat(effect.key);
-		var label = (stat ? stat.label : effect.key).toLowerCase();
+		var label = stat ? stat.label : effect.key;
 		return (effect.direction < 0 ? '\u2212' : '+').repeat(effect.level) + label;
 	},
 	describe: function(spec) {
 		var self = this;
 		return this.parse(spec).map(function(effect) { return self.describeOne(effect); }).join(', ');
+	},
+	// The same, coloured per stat, for putting beside a link rather than inside its text.
+	describeHtml: function(spec) {
+		var self = this;
+		var parts = this.parse(spec).map(function(effect) {
+			return '<span class="effect effect-' + effect.key + '">' + self.describeOne(effect) + '</span>';
+		});
+		return parts.length ? '<span class="effects">' + parts.join(' ') + '</span>' : '';
 	},
 	// The level a job's fatigue rate deserves, so the jobs table sets its rates and the wording follows from them.
 	levelForRate: function(perMinute) {

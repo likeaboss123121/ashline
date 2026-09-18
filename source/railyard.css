@@ -4,7 +4,6 @@
 	margin: 0.5em 0 1em;
 	background: #151719;
 	border: 1px solid #2a2f31;
-	border-radius: 4px;
 }
 
 /* On a phone the passage margins cost a fifth of the screen, so the yard reaches into them. It stops short of the
@@ -17,7 +16,6 @@
 		margin-right: -24px;
 		border-left: none;
 		border-right: none;
-		border-radius: 0;
 	}
 }
 
@@ -47,7 +45,6 @@
 	gap: 4px;
 	padding: 2px 4px;
 	background: rgba(21, 23, 25, 0.85);
-	border-radius: 3px;
 }
 
 .railyard-view-zoom button {
@@ -58,7 +55,6 @@
 	color: #c7c5b9;
 	background: #23282a;
 	border: 1px solid #39403f;
-	border-radius: 3px;
 	cursor: pointer;
 }
 
@@ -138,7 +134,6 @@
 	bottom: 34px;
 	z-index: 2;
 	background: rgba(21, 23, 25, 0.75);
-	border-radius: 3px;
 }
 
 .railyard-compass-arm {
@@ -176,7 +171,6 @@
 	color: #c7c5b9;
 	background: #23282a;
 	border: 1px solid #39403f;
-	border-radius: 3px;
 	cursor: pointer;
 }
 

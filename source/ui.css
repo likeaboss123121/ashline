@@ -7,7 +7,6 @@
 	padding: 0.4em 0.6em;
 	background: #1c2022;
 	border: 1px solid #2a2f31;
-	border-radius: 4px;
 }
 
 .advanced-settings > summary {
@@ -60,7 +59,6 @@
 	color: #c7c5b9;
 	background: #23282a;
 	border: 1px solid #39403f;
-	border-radius: 3px;
 	cursor: pointer;
 	font-size: 0.9em;
 	line-height: 1.8;
@@ -141,7 +139,6 @@
 	color: #c8b8b8;
 	background: #1b1618;
 	border: 1px solid #55343a;
-	border-radius: 4px;
 	font-size: 0.9em;
 }
 
@@ -168,7 +165,6 @@
 	margin-bottom: 0.3em;
 	background: #201a1c;
 	border: 1px solid #3a2a2e;
-	border-radius: 3px;
 }
 
 .debug-section > summary {
@@ -202,7 +198,6 @@
 	color: #d8d0d0;
 	background: #2a2226;
 	border: 1px solid #4a373c;
-	border-radius: 2px;
 }
 
 .debug-body button {
@@ -211,10 +206,39 @@
 	color: #e0d0d0;
 	background: #33272b;
 	border: 1px solid #55343a;
-	border-radius: 3px;
 	cursor: pointer;
 }
 
 .debug-body button:hover {
 	background: #3f3035;
+}
+
+/* Why an action is not on offer. The drawing reads these when the player points at something; the list does not
+   show them, because an option that cannot be taken is not an option. */
+.yard-reason {
+	display: none;
+}
+
+/* What an action costs the body, beside the link that does it. Each stat keeps one colour wherever it appears. */
+.effects {
+	margin-left: 0.4em;
+	font-size: 0.85em;
+	white-space: nowrap;
+}
+
+.effect + .effect {
+	margin-left: 0.3em;
+}
+
+.effect-fatigue { color: #d8a657; }
+.effect-health { color: #d98d7a; }
+.effect-immunity { color: #89a86b; }
+.effect-sanity { color: #a98cc4; }
+.effect-hunger { color: #cf9b5a; }
+.effect-thirst { color: #79a7bd; }
+
+/* Lists of actions sit close together: one line each, not a paragraph each. */
+.driving-options p,
+.driving-options br + br {
+	margin: 0;
 }

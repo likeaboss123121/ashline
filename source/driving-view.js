@@ -138,30 +138,42 @@ setup.drivingView = {
 		}
 		sky.parentNode.insertBefore(stars, sky.nextSibling);
 	},
-	// The leading locomotive's headlamp and the pool of light it throws down the track. Only a locomotive facing the
-	// way the train is going has its front at the leading end.
-	addHeadlight: function(parent, leading, night) {
-		var template = this.getTemplate(leading.name);
-		if (!/^driving-loco-.*-right$/.test(leading.name) || !template || !template.front) {
+	// The headlamp, and the pool of light it throws down the track. The lamp belongs to the leading locomotive that
+	// faces the way the train is going, wherever it stands in the consist, and the beam runs out ahead of whatever
+	// is in front, so a locomotive shoving cars still lights the road.
+	addHeadlight: function(parent, cars, night) {
+		var self = this;
+		var lit = cars.filter(function(entry) { return /^driving-loco-.*-right$/.test(entry.name); })[0];
+		if (!lit) {
+			return;
+		}
+		var template = this.getTemplate(lit.name);
+		if (!template || !template.front) {
 			return;
 		}
 		var ns = this.SVG_NS;
-		var x = leading.u - template.anchorX + template.front[0];
-		var y = -template.anchorY + template.front[1] - 5;
+		var lamp = { x: lit.u - template.anchorX + template.front[0], y: -template.anchorY + template.front[1] - 5 };
+		// The beam starts at the front of the train, which is the leading car whether or not it is the locomotive.
+		var head = cars[0];
+		var headTemplate = this.getTemplate(head.name);
+		var x = headTemplate && headTemplate.front
+			? head.u - headTemplate.anchorX + headTemplate.front[0]
+			: lamp.x;
+		var y = lamp.y;
 		var beam = document.createElementNS(ns, 'polygon');
 		beam.setAttribute('class', 'driving-headlight');
 		beam.setAttribute('points', [x + ',' + (y - 1), (x + 34) + ',' + (y - 4), (x + 40) + ',' + (y + 6), x + ',' + (y + 2)].join(' '));
 		beam.setAttribute('fill', '#ffe7a8');
 		beam.setAttribute('fill-opacity', (0.22 * night).toFixed(3));
 		parent.appendChild(beam);
-		var lamp = document.createElementNS(ns, 'rect');
-		lamp.setAttribute('class', 'driving-headlamp');
-		lamp.setAttribute('x', x - 1);
-		lamp.setAttribute('y', y - 1);
-		lamp.setAttribute('width', 2);
-		lamp.setAttribute('height', 2);
-		lamp.setAttribute('fill', '#fff4d0');
-		parent.appendChild(lamp);
+		var bulb = document.createElementNS(ns, 'rect');
+		bulb.setAttribute('class', 'driving-headlamp');
+		bulb.setAttribute('x', lamp.x - 1);
+		bulb.setAttribute('y', lamp.y - 1);
+		bulb.setAttribute('width', 2);
+		bulb.setAttribute('height', 2);
+		bulb.setAttribute('fill', '#fff4d0');
+		parent.appendChild(bulb);
 	},
 
 	render: function(view, train, carIndex) {
@@ -182,7 +194,8 @@ setup.drivingView = {
 		var defs = document.createElementNS(ns, 'defs');
 		svg.appendChild(defs);
 		// The light of the time of day. A tunnel is lit the same at any hour, so its backdrop is never graded.
-		var light = view.light || setup.daylight.getLight();
+		// Underground there is no daylight to speak of, so a tunnel is always graded as night.
+		var light = view.terrain === 'tunnel' ? setup.daylight.getLight(-20) : (view.light || setup.daylight.getLight());
 		var graded = setup.daylight.isGraded(light);
 		var grader = graded ? setup.daylight.createGrader(light, 'subject') : null;
 		var backdropGrader = graded ? setup.daylight.createGrader(light, 'backdrop') : null;
@@ -259,8 +272,10 @@ setup.drivingView = {
 				};
 			}
 		});
-		if (light.night > 0.05 && layout.cars.length) {
-			this.addHeadlight(line, layout.cars[0], light.night);
+		// A tunnel is night whatever the clock says, so the lamps are lit in there too.
+		var lampNight = view.terrain === 'tunnel' ? 1 : light.night;
+		if (lampNight > 0.05 && layout.cars.length) {
+			this.addHeadlight(line, layout.cars, lampNight);
 		}
 		if (marker) {
 			var arrow = document.createElementNS(ns, 'polygon');
