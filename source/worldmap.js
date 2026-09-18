@@ -19,8 +19,18 @@ setup.worldmap = {
 	MIN_LEG_TILES: 8,
 	MAX_LEG_TILES: 20,
 	BRANCH_CHANCE: 0.12,
+	REJOIN_CHANCE: 0.45, // of branches that try to find their way back to the main line rather than stopping dead
 	MOUNTAIN_METRES: 1150,
-	FOREST_THRESHOLD: 0.58, // of the forest noise; woods cover roughly a fifth of the land that is not desert or ice
+	// Where the world sits, and what its climate does with that. Station 1 is Punta Arenas.
+	BASE_LATITUDE: -53.2,
+	BASE_LONGITUDE: -70.9,
+	KM_PER_DEGREE: 111,
+	ARCTIC_TEMPERATURE: 0, // degrees C, below which the ground stays frozen
+	DESERT_HUMIDITY: 0.32,
+	FOREST_HUMIDITY: 0.68,
+	// Humidity by how far a tile lies from the equator: wet on the equator, dry under the trade winds, wet again
+	// under the westerlies, and dry over the poles.
+	HUMIDITY_BY_LATITUDE: [[0, 0.88], [12, 0.72], [25, 0.3], [33, 0.28], [45, 0.62], [58, 0.7], [70, 0.45], [90, 0.3]],
 	TUNNEL_METRES: 1450,
 
 	// Compass directions, 45 degrees apart, so index arithmetic gives turns: a step of 1 is 45 degrees.
@@ -96,22 +106,54 @@ setup.worldmap = {
 	},
 	// The land before any track is laid on it. y counts tiles north of Punta Arenas, so the far south is subpolar
 	// and the dry belt sits well up the continent.
+	// The climate of a tile: where it is, how high it stands, how warm it is and how wet. Terrain is read off these
+	// numbers rather than rolled separately, so the world makes sense as you cross it: the dry belt sits where the
+	// dry belt belongs, forests follow the rain, and it gets colder as you climb or leave the temperate latitudes.
+	getClimate: function(seed, x, y) {
+		var latitude = this.BASE_LATITUDE + (y * this.TILE_KM) / this.KM_PER_DEGREE;
+		// A degree of longitude is shorter the further from the equator you stand.
+		var shrink = Math.max(0.25, Math.cos(latitude * Math.PI / 180));
+		var longitude = this.BASE_LONGITUDE + (x * this.TILE_KM) / (this.KM_PER_DEGREE * shrink);
+		var elevation = this.getElevationMetres(seed, x, y);
+		var away = Math.abs(latitude);
+		// Warm at the equator, colder toward the poles, and colder still with height, give or take the weather.
+		var temperature = 34 - 0.48 * away - elevation * 0.0065
+			+ (this.smoothNoise(seed, 'temp', x, y, 12) - 0.5) * 8;
+		// Wet on the equator, dry in the trade wind belts, wet again under the westerlies, dry at the poles.
+		var humidity = Math.max(0, Math.min(1, this.interpolateBand(away, this.HUMIDITY_BY_LATITUDE)
+			+ (this.smoothNoise(seed, 'humid', x, y, 9) - 0.5) * 0.45));
+		return {
+			latitude: latitude, longitude: longitude, elevation: elevation,
+			temperature: temperature, humidity: humidity
+		};
+	},
+	// Reads a value off a table of [degrees, value] anchors, sloping smoothly between them.
+	interpolateBand: function(degrees, band) {
+		for (var i = 1; i < band.length; i++) {
+			if (degrees <= band[i][0]) {
+				var span = band[i][0] - band[i - 1][0];
+				var along = span > 0 ? (degrees - band[i - 1][0]) / span : 0;
+				return band[i - 1][1] + (band[i][1] - band[i - 1][1]) * along;
+			}
+		}
+		return band[band.length - 1][1];
+	},
 	getBaseTerrain: function(seed, x, y) {
+		// Water is where the land is not, and is decided before any climate question.
 		if (this.smoothNoise(seed, 'water', x, y, 7) > 0.74) {
 			return 'water';
 		}
-		if (this.getElevationMetres(seed, x, y) > this.MOUNTAIN_METRES) {
+		var climate = this.getClimate(seed, x, y);
+		if (climate.elevation > this.MOUNTAIN_METRES) {
 			return 'mountain';
 		}
-		var km = y * this.TILE_KM;
-		if (km < 200 && this.smoothNoise(seed, 'cold', x, y, 8) > 0.45) {
+		if (climate.temperature < this.ARCTIC_TEMPERATURE) {
 			return 'arctic';
 		}
-		var dry = this.smoothNoise(seed, 'dry', x, y, 10);
-		if (dry > (km > 900 && km < 3200 ? 0.5 : 0.78)) {
+		if (climate.humidity < this.DESERT_HUMIDITY) {
 			return 'desert';
 		}
-		if (this.smoothNoise(seed, 'forest', x, y, 6) > this.FOREST_THRESHOLD) {
+		if (climate.humidity > this.FOREST_HUMIDITY) {
 			return 'forest';
 		}
 		return 'plains';
@@ -296,9 +338,9 @@ setup.worldmap = {
 			elevation: this.getElevationMetres(seed, x, y), grade: 0, out: -1, station: legIndex + 1
 		});
 
-		this.addBranches(seed, legIndex, tiles, byKey, rng);
+		var branches = this.addBranches(seed, legIndex, tiles, byKey, rng);
 		return {
-			index: legIndex, tiles: tiles, byKey: byKey,
+			index: legIndex, tiles: tiles, byKey: byKey, branches: branches,
 			start: { x: start.x, y: start.y }, end: { x: x, y: y },
 			rect: this.rectFor(tiles)
 		};
@@ -308,6 +350,9 @@ setup.worldmap = {
 	addBranches: function(seed, legIndex, tiles, byKey, rng) {
 		var self = this;
 		var mainLine = tiles.slice();
+		var branches = [];
+		var mainIndexByKey = {};
+		mainLine.forEach(function(tile, index) { mainIndexByKey[self.key(tile.x, tile.y)] = index; });
 		for (var i = 1; i < mainLine.length - 1; i++) {
 			var tile = mainLine[i];
 			if (rng() > this.BRANCH_CHANCE || tile.station) {
@@ -329,15 +374,19 @@ setup.worldmap = {
 			if (!this.canPlace(tile.terrain, junctionShape)) {
 				continue; // mountains, bridges and tunnels have no room for a junction
 			}
-			var branchTiles = this.buildBranch(seed, legIndex, i, tile, branchDirection, byKey, rng);
-			if (!branchTiles.length) {
+			var branch = this.buildBranch(seed, legIndex, i, tile, branchDirection, byKey, rng, mainIndexByKey, mainLine);
+			if (!branch.tiles.length) {
 				continue;
 			}
 			tile.ends = junctionEnds;
 			tile.shape = junctionShape;
-			branchTiles.forEach(function(branchTile) {
+			branch.tiles.forEach(function(branchTile) {
 				tiles.push(branchTile);
 				byKey[self.key(branchTile.x, branchTile.y)] = branchTile;
+			});
+			branches.push({
+				id: legIndex + ':' + i + ':' + branchDirection, legIndex: legIndex, fromIndex: i,
+				direction: branchDirection, tiles: branch.tiles, rejoinIndex: branch.rejoinIndex
 			});
 
 			// Now and then a second branch leaves the far side of the same tile, and the lines cross there.
@@ -346,30 +395,56 @@ setup.worldmap = {
 				var crossEnds = tile.ends.concat([acrossDirection]).sort(function(a, b) { return a - b; });
 				var crossShape = this.getShape(crossEnds);
 				if (this.canPlace(tile.terrain, crossShape)) {
-					var crossTiles = this.buildBranch(seed, legIndex, i, tile, acrossDirection, byKey, rng);
-					if (crossTiles.length) {
+					var across = this.buildBranch(seed, legIndex, i, tile, acrossDirection, byKey, rng, mainIndexByKey, mainLine);
+					if (across.tiles.length) {
 						tile.ends = crossEnds;
 						tile.shape = crossShape;
-						crossTiles.forEach(function(branchTile) {
+						across.tiles.forEach(function(branchTile) {
 							tiles.push(branchTile);
 							byKey[self.key(branchTile.x, branchTile.y)] = branchTile;
+						});
+						branches.push({
+							id: legIndex + ':' + i + ':' + acrossDirection, legIndex: legIndex, fromIndex: i,
+							direction: acrossDirection, tiles: across.tiles, rejoinIndex: across.rejoinIndex
 						});
 					}
 				}
 			}
 		}
+		return branches;
 	},
-	buildBranch: function(seed, legIndex, tileIndex, junction, direction, byKey, rng) {
-		var length = 2 + Math.floor(rng() * 4);
+	// One branch off the main line. Most wander a few tiles and stop at a buffer stop; some bend back and meet the
+	// main line again further along, which makes them a real alternative route rather than a dead end with a view.
+	buildBranch: function(seed, legIndex, tileIndex, junction, direction, byKey, rng, mainIndexByKey, mainLine) {
+		var wantsRejoin = rng() < this.REJOIN_CHANCE;
+		var length = wantsRejoin ? 6 : 2 + Math.floor(rng() * 4);
+		// A branch meant to rejoin curves steadily back toward the line it left, turning the shorter way round.
+		var turnSign = ((direction - (junction.out >= 0 ? junction.out : direction) + 8) % 8) < 4 ? -1 : 1;
 		var made = [];
+		var rejoinIndex = null;
 		var travel = direction;
 		var position = this.step(junction.x, junction.y, direction);
 		for (var i = 0; i < length; i++) {
-			if (byKey[this.key(position.x, position.y)]) {
+			var occupied = byKey[this.key(position.x, position.y)];
+			if (occupied) {
+				// Running into the main line further along is how a branch rejoins it, if the junction fits there.
+				var meetIndex = mainIndexByKey ? mainIndexByKey[this.key(position.x, position.y)] : undefined;
+				if (wantsRejoin && made.length && typeof meetIndex === 'number' && meetIndex > tileIndex + 1
+					&& !occupied.station) {
+					var meetEnds = occupied.ends.concat([this.opposite(travel)]).sort(function(a, b) { return a - b; });
+					var meetShape = this.getShape(meetEnds);
+					if (occupied.ends.indexOf(this.opposite(travel)) === -1 && this.canPlace(occupied.terrain, meetShape)) {
+						occupied.ends = meetEnds;
+						occupied.shape = meetShape;
+						rejoinIndex = meetIndex;
+					}
+				}
 				break;
 			}
 			var last = i === length - 1;
-			var out = last ? -1 : (rng() < 0.75 ? travel : (rng() < 0.5 ? (travel + 1) % 8 : (travel + 7) % 8));
+			var out = last ? -1
+				: wantsRejoin ? (travel + turnSign + 8) % 8
+				: (rng() < 0.75 ? travel : (rng() < 0.5 ? (travel + 1) % 8 : (travel + 7) % 8));
 			var ends = last ? [this.opposite(travel)] : [this.opposite(travel), out].sort(function(a, b) { return a - b; });
 			var shape = this.getShape(ends);
 			var terrain = this.trackTerrain(seed, position.x, position.y, this.isStraight(shape) || last);
@@ -388,14 +463,43 @@ setup.worldmap = {
 			position = this.step(position.x, position.y, out);
 			travel = out;
 		}
-		if (made.length) {
+		if (made.length && rejoinIndex === null) {
 			var end = made[made.length - 1];
 			end.ends = [end.ends[0]];
 			end.shape = 'dead-end';
 			end.out = -1;
 			end.grade = 0;
+		} else if (made.length) {
+			// The last tile of a rejoining branch points at the main line tile it meets.
+			var last = made[made.length - 1];
+			var meetTile = mainLine[rejoinIndex];
+			var toward = this.directionBetween(last, meetTile);
+			if (toward === -1) {
+				rejoinIndex = null;
+				last.ends = [last.ends[0]];
+				last.shape = 'dead-end';
+				last.out = -1;
+				last.grade = 0;
+			} else {
+				last.ends = [this.opposite(last.out === -1 ? this.opposite(last.ends[0]) : last.ends[0]), toward]
+					.sort(function(a, b) { return a - b; });
+				last.ends = [last.ends[0], last.ends[last.ends.length - 1]];
+				last.shape = this.getShape(last.ends);
+				last.out = toward;
+				last.grade = this.getGradePercent(seed, last.x, last.y, toward);
+			}
 		}
-		return made;
+		return { tiles: made, rejoinIndex: rejoinIndex };
+	},
+	// Which of the eight directions leads from one tile to its neighbour, or -1 if they are not neighbours.
+	directionBetween: function(from, to) {
+		for (var d = 0; d < this.DIRECTIONS.length; d++) {
+			var step = this.step(from.x, from.y, d);
+			if (step.x === to.x && step.y === to.y) {
+				return d;
+			}
+		}
+		return -1;
 	},
 	// The rectangle a leg occupies, padded so the map shows the land the line is threading through.
 	rectFor: function(tiles, padding) {
@@ -449,13 +553,61 @@ setup.worldmap = {
 		var journey = State.variables && State.variables.journey;
 		return journey && typeof journey.legIndex === 'number' ? journey : null;
 	},
+	// The run of tiles the train is standing on: the leg's main line, or a branch off it if the player took one.
+	getJourneyPath: function() {
+		var journey = this.getJourney();
+		if (!journey) {
+			return null;
+		}
+		var leg = this.getLeg(this.getSeed(), journey.legIndex);
+		if (journey.branch) {
+			var taken = (leg.branches || []).filter(function(branch) { return branch.id === journey.branch; })[0];
+			if (taken) {
+				return { tiles: taken.tiles, branch: taken, leg: leg };
+			}
+		}
+		return { tiles: this.getMainLine(this.getSeed(), journey.legIndex), branch: null, leg: leg };
+	},
+	// The branches leaving the tile the train is standing on, for the player to choose between.
+	getBranchChoices: function() {
+		var journey = this.getJourney();
+		var path = this.getJourneyPath();
+		if (!journey || !path || path.branch) {
+			return [];
+		}
+		var self = this;
+		return (path.leg.branches || []).filter(function(branch) {
+			return branch.fromIndex === journey.tileIndex && branch.tiles.length;
+		}).map(function(branch) {
+			return {
+				id: branch.id, direction: self.DIRECTIONS[branch.direction].name.toUpperCase(),
+				tiles: branch.tiles.length, terrain: branch.tiles[0].terrain,
+				rejoins: branch.rejoinIndex !== null,
+				grade: self.getGradePercent(self.getSeed(), path.tiles[journey.tileIndex].x,
+					path.tiles[journey.tileIndex].y, branch.direction)
+			};
+		});
+	},
 	// Where the consist stands, for the driving view and the status line.
 	getJourneyView: function() {
 		var journey = this.getJourney();
 		if (!journey) {
 			return null;
 		}
-		var tiles = this.getMainLine(this.getSeed(), journey.legIndex);
+		var path = this.getJourneyPath();
+		var tiles = path.tiles;
+		if (path.branch) {
+			var onBranch = Math.max(0, Math.min(journey.tileIndex, tiles.length - 1));
+			var branchTile = tiles[onBranch];
+			return {
+				legIndex: journey.legIndex, tileIndex: onBranch, tileCount: tiles.length, forward: journey.forward,
+				tile: branchTile, terrain: branchTile.terrain, shape: branchTile.shape,
+				grade: branchTile.grade, branch: path.branch.id, rejoins: path.branch.rejoinIndex !== null,
+				kilometresDone: onBranch * this.TILE_KM,
+				kilometresLeft: (tiles.length - 1 - onBranch) * this.TILE_KM,
+				fromStation: journey.legIndex, toStation: journey.legIndex + 1
+			};
+		}
 		var index = Math.max(0, Math.min(journey.tileIndex, tiles.length - 1));
 		var tile = tiles[index];
 		var travelled = journey.forward ? index : tiles.length - 1 - index;
@@ -470,30 +622,81 @@ setup.worldmap = {
 			toStation: journey.forward ? journey.legIndex + 1 : journey.legIndex
 		};
 	},
-	// One step along the line: direction 1 carries on, -1 backs up. Returns null where there is nowhere to go.
+	// What a step would cost, wherever it ends up, and why it cannot be taken.
+	describeStep: function(grade, terrain, extra) {
+		var train = State.variables.currentTrain;
+		var limit = this.getClimbLimitPercent(train);
+		var step = {
+			grade: grade, terrain: terrain, minutes: this.getTileMinutes(grade, train),
+			blocked: (this.getTrainTractiveKN(train) > 0 && grade > limit)
+				? 'The grade ahead is ' + grade.toFixed(1) + '%, and your consist can pull ' + limit.toFixed(1) + '%.'
+				: '',
+			arrivesAt: 0, toBranch: null, toMain: null
+		};
+		for (var key in extra) {
+			if (Object.prototype.hasOwnProperty.call(extra, key)) {
+				step[key] = extra[key];
+			}
+		}
+		return step;
+	},
+	// One step along the line: direction 1 carries on, -1 backs up. On a branch, 1 runs further out and -1 comes
+	// back toward the junction, and either end of a branch may put the train back on the main line. Returns null
+	// where there is nowhere to go.
 	getJourneyStep: function(direction) {
 		var journey = this.getJourney();
-		if (!journey) {
+		var path = this.getJourneyPath();
+		if (!journey || !path) {
 			return null;
 		}
-		var tiles = this.getMainLine(this.getSeed(), journey.legIndex);
+		var tiles = path.tiles;
 		var from = Math.max(0, Math.min(journey.tileIndex, tiles.length - 1));
+
+		if (path.branch) {
+			var branch = path.branch;
+			var out = from + (direction >= 0 ? 1 : -1);
+			if (out < 0) {
+				// Back out of the branch onto the main line tile the junction stands on.
+				var mainTiles = this.getMainLine(this.getSeed(), journey.legIndex);
+				return this.describeStep(-tiles[0].grade, mainTiles[branch.fromIndex].terrain,
+					{ fromIndex: from, toIndex: branch.fromIndex, toMain: branch.fromIndex });
+			}
+			if (out >= tiles.length) {
+				if (branch.rejoinIndex === null) {
+					return null; // the branch stops here
+				}
+				var rejoinTiles = this.getMainLine(this.getSeed(), journey.legIndex);
+				return this.describeStep(tiles[tiles.length - 1].grade, rejoinTiles[branch.rejoinIndex].terrain,
+					{ fromIndex: from, toIndex: branch.rejoinIndex, toMain: branch.rejoinIndex });
+			}
+			return this.describeStep(this.getStepGrade(tiles, from, out), tiles[out].terrain,
+				{ fromIndex: from, toIndex: out });
+		}
+
 		var to = from + (journey.forward ? 1 : -1) * (direction >= 0 ? 1 : -1);
 		if (to < 0 || to >= tiles.length) {
 			return null;
 		}
-		var train = State.variables.currentTrain;
-		var grade = this.getStepGrade(tiles, from, to);
-		var limit = this.getClimbLimitPercent(train);
-		return {
-			fromIndex: from, toIndex: to, grade: grade, terrain: tiles[to].terrain,
-			minutes: this.getTileMinutes(grade, train),
-			blocked: (this.getTrainTractiveKN(train) > 0 && grade > limit)
-				? 'The grade ahead is ' + grade.toFixed(1) + '%, and your consist can pull ' + limit.toFixed(1) + '%.'
-				: '',
+		return this.describeStep(this.getStepGrade(tiles, from, to), tiles[to].terrain, {
+			fromIndex: from, toIndex: to,
 			// Reaching either end of the line means arriving at the station standing there.
 			arrivesAt: to === 0 ? journey.legIndex : (to === tiles.length - 1 ? journey.legIndex + 1 : 0)
-		};
+		});
+	},
+	// What turning off onto a branch would cost.
+	getBranchStep: function(branchId) {
+		var journey = this.getJourney();
+		var path = this.getJourneyPath();
+		if (!journey || !path || path.branch) {
+			return null;
+		}
+		var branch = (path.leg.branches || []).filter(function(candidate) { return candidate.id === branchId; })[0];
+		if (!branch || branch.fromIndex !== journey.tileIndex || !branch.tiles.length) {
+			return null;
+		}
+		var junction = path.tiles[journey.tileIndex];
+		return this.describeStep(this.getGradePercent(this.getSeed(), junction.x, junction.y, branch.direction),
+			branch.tiles[0].terrain, { fromIndex: journey.tileIndex, toIndex: 0, toBranch: branch.id });
 	},
 
 	getTrainWeightKg: function(train) {
@@ -623,9 +826,12 @@ setup.worldmap = {
 				cellRect.setAttribute('stroke', '#1b1d1f');
 				cellRect.setAttribute('stroke-width', '0.5');
 				var title = document.createElementNS(ns, 'title');
+				var climate = this.getClimate(seed, x, y);
 				title.textContent = x + ',' + y + ' ' + terrain
 					+ (tile ? ' ' + tile.shape + ' ' + tile.grade.toFixed(1) + '%' : '')
-					+ ' ' + this.getElevationMetres(seed, x, y) + ' m';
+					+ ' | ' + climate.latitude.toFixed(1) + '\u00b0, ' + climate.longitude.toFixed(1) + '\u00b0'
+					+ ' | ' + climate.elevation + ' m, ' + climate.temperature.toFixed(1) + '\u00b0C, humidity '
+					+ climate.humidity.toFixed(2);
 				cellRect.appendChild(title);
 				svg.appendChild(cellRect);
 			}

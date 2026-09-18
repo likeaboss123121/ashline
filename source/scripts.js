@@ -1451,12 +1451,28 @@ setup.railyard = {
 	},
 	// One 5 km step: direction 1 carries on toward the destination, -1 backs up the way the train came. Reaching
 	// either end of the line arrives at the station standing there and ends the journey.
+	// Turning off the main line onto a branch. The branch is then the line the train is running on.
+	takeBranch: function(branchId) {
+		var step = setup.worldmap.getBranchStep(branchId);
+		if (!step || step.blocked) {
+			return false;
+		}
+		var journey = setup.worldmap.getJourney();
+		journey.branch = branchId;
+		journey.tileIndex = 0;
+		State.variables.journey = journey;
+		return true;
+	},
 	moveAlongLine: function(direction) {
 		var step = setup.worldmap.getJourneyStep(direction);
 		if (!step || step.blocked) {
 			return false;
 		}
 		var journey = setup.worldmap.getJourney();
+		// A branch can end on the main line at either end: back at its junction, or further along where it rejoins.
+		if (step.toMain !== null && typeof step.toMain !== 'undefined') {
+			journey.branch = null;
+		}
 		journey.tileIndex = step.toIndex;
 		State.variables.journey = journey;
 		if (step.arrivesAt) {
@@ -2648,7 +2664,8 @@ Macro.add('lineStatus', {
 		var grade = view.grade;
 		var slope = grade > 0 ? 'climbing ' + grade.toFixed(1) + '%'
 			: grade < 0 ? 'descending ' + Math.abs(grade).toFixed(1) + '%' : 'level';
-		var output = '<h2>Station ' + view.fromStation + ' to Station ' + view.toStation + '</h2>';
+		var output = '<h2>Station ' + view.fromStation + ' to Station ' + view.toStation
+			+ (view.branch ? ' &middot; branch line' : '') + '</h2>';
 		output += '<p>Tile ' + (Math.min(view.tileIndex, view.tileCount - 1) + 1) + ' of ' + view.tileCount
 			+ ' &middot; ' + view.terrain + ' &middot; ' + slope + '</p>';
 		output += '<p class="small-description">' + view.kilometresDone + ' km behind you, '
@@ -2687,7 +2704,10 @@ Macro.add('lineControls', {
 			if (!step) {
 				return;
 			}
-			var heading = direction > 0 ? 'Drive ahead' : 'Reverse back';
+			var heading = view.branch
+				? (direction > 0 ? (step.toMain !== null ? 'Carry on to where the branch rejoins the line' : 'Drive further along the branch')
+					: 'Reverse back to the junction')
+				: (direction > 0 ? 'Drive ahead' : 'Reverse back');
 			var label = heading + ' 5 km';
 			var slope = step.grade > 0 ? 'climbs ' + step.grade.toFixed(1) + '%'
 				: step.grade < 0 ? 'falls ' + Math.abs(step.grade).toFixed(1) + '%' : 'runs level';
@@ -2702,6 +2722,23 @@ Macro.add('lineControls', {
 				+ '<<goto _linePassage>><</timedlink>><br>';
 			output += '<span class="small-description">Into ' + step.terrain + ', ' + slope
 				+ (step.arrivesAt ? ', arriving at Station ' + step.arrivesAt : '') + '.</span><br><br>';
+		});
+		// Where the line divides, the player picks which way to go. A branch that rejoins the main line is another
+		// way round; one that does not is somewhere to explore and back out of.
+		setup.worldmap.getBranchChoices().forEach(function(choice) {
+			var step = setup.worldmap.getBranchStep(choice.id);
+			if (!step) {
+				return;
+			}
+			var label = 'Take the ' + choice.direction + ' branch';
+			if (step.blocked) {
+				output += '<span class="small-description"><em>' + label + ' unavailable: ' + step.blocked + '</em></span><br><br>';
+				return;
+			}
+			output += '<<timedlink "' + label + '" ' + step.minutes + ' "travel">>'
+				+ '<<run setup.railyard.takeBranch("' + choice.id + '")>><<goto "OnTheLine">><</timedlink>><br>';
+			output += '<span class="small-description">' + (choice.tiles * 5) + ' km of branch into ' + choice.terrain
+				+ (choice.rejoins ? ', rejoining the main line further on' : ', ending at a buffer stop') + '.</span><br><br>';
 		});
 		output += escapeLink;
 		output += '<<link "Enter the Train">><<goto "TrainInterior">><</link>><br>';
