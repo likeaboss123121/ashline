@@ -413,7 +413,7 @@ State.variables.defaultTrains = {
 		acceptedCargo: ['liquid fuel'],
 		tractiveCapacity: 320,
 		topSpeedKmh: 100,
-		dieselLitresPerMinute: 3,
+		dieselLitresPerMinute: 10, // a big engine working hard drinks about ten litres a minute
 		length: 20
 	},
 	steamShunter: {
@@ -427,7 +427,7 @@ State.variables.defaultTrains = {
 		boilerSteamVolumeLiters: 5000, // liters at 1 bar equivalent: about 45 minutes from cold to working pressure
 		maxSteamPressureBar: 14.5,
 		fireboxScale: 1, // how much fuel and water the firebox takes, and steam it makes, per minute
-		steamUseScale: 1, // how much steam moving the locomotive costs
+		steamUseScale: 0.8, // how much steam moving the locomotive costs: a light engine is easy on its boiler
 		baseWeight: 45000,
 		maxCargoCapacityKg: 7000,
 		maxCargoCapacityVolume: 7000, // side tanks and bunker
