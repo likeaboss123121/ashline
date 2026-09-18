@@ -10,10 +10,10 @@ Ashline
 
 :: Start {"position":"101,100"}
 /% Entry splash and pre-game setup passage: initializes settings state and renders the settings macro UI. %/
-<h2>Welcome to Ashline v<<print setup.releaseVersion>>.</h2>
+<h2>Welcome to Ashline v<<print setup.releaseVersion>></h2>
 
 <div class="small-description">
-- Saves are stored in this browser. Use Save to Disk in the Saves menu to keep a backup.
+- Saves are stored in this browser. Use Save to disk in the Saves menu to keep a backup.
 <br>
 - Please report bugs directly to likea.
 
@@ -45,12 +45,12 @@ thirst: 100
 
 :: Introduction
 <<if $settingsMode is "Story">>
-You are a lone train engineer in a world where dangerous zombies called Foamers endlessly expand the railroad. Your goal is to travel from Punta Arenas, Chile, to Cape Town, South Africa, while surviving on your train.
+You are a lone train engineer in a world where dangerous zombies called Foamers endlessly expand the railroad. Your goal is to travel from Punta Arenas, Chile, to Cape Town, South Africa, surviving on your train along the way.
 <<else>>
-You are a lone train engineer in a world where dangerous zombies called Foamers endlessly expand the railroad. Your goal is to simply survive, looting the landscape and traveling until you either become a mindless foamer or die an engineer.
+You are a lone train engineer in a world where dangerous zombies called Foamers endlessly expand the railroad. Your goal is simply to survive: looting the landscape and travelling on until you either become a mindless Foamer yourself or die an engineer.
 <</if>>
 
-[[Begin Your Journey|Railyard]]
+[[Begin your journey|Railyard]]
 
 
 :: PassageHeader
@@ -119,9 +119,9 @@ You are <<print setup.railyard.getCarLocationText(_currentCar)>> of your consist
 <br>
 Car <<print $currentCarIndex + 1>> of <<print $currentTrain.length>>.
 
-<<if $currentCarIndex > 0>><<link "Move Toward Front">><<set $currentCarIndex -= 1>><<goto "TrainInterior">><</link>><</if>>
+<<if $currentCarIndex > 0>><<link "Move toward the front">><<set $currentCarIndex -= 1>><<goto "TrainInterior">><</link>><</if>>
 <<if $currentCarIndex > 0 && $currentCarIndex < $currentTrain.length - 1>> | <</if>>
-<<if $currentCarIndex < $currentTrain.length - 1>><<link "Move Toward Rear">><<set $currentCarIndex += 1>><<goto "TrainInterior">><</link>><</if>>
+<<if $currentCarIndex < $currentTrain.length - 1>><<link "Move toward the rear">><<set $currentCarIndex += 1>><<goto "TrainInterior">><</link>><</if>>
 
 <<if _currentCar.tractiveCapacity > 0>>
 This is the locomotive, <<print setup.railyard.getLocomotiveSummary(_currentCar)>>. From here, you can start your journey.
@@ -134,11 +134,11 @@ This car does not have the controls needed to drive the train.
 	<span class="small-description"><strong>Boiler pressure:</strong> <<print setup.railyard.getSteamPressureBar(_currentCar).toFixed(2)>> bar</span><br>
 	<span class="small-description"><em><<print setup.fuel.describeBunker(_currentCar)>>. Water: <<print setup.railyard.getCargoAmount(_currentCar, "water").toFixed(2)>> L. Firebox: <<print _currentCar.fireboxEnabled ? "on" : "off">></em></span><br>
 	<<if setup.fuel.hasSolidFuel(_currentCar) && setup.fuel.getFireboxOutput(_currentCar) < 0.995>><span class="small-description"><em>This fuel is too poor to fire the boiler fully: the grate gives <<print Math.round(setup.fuel.getFireboxOutput(_currentCar) * 100)>>% of the steam.</em></span><br><</if>>
-	<<set _fireboxLabel = _currentCar.fireboxEnabled ? "Turn Off Firebox" : "Turn On Firebox">>
+	<<set _fireboxLabel = _currentCar.fireboxEnabled ? "Let the firebox out" : "Light the firebox">>
 	<<link _fireboxLabel>><<run setup.railyard.toggleSteamFireboxByIndex($currentTrain, $currentCarIndex)>><<goto "TrainInterior">><</link>><br>
 	<<if !setup.railyard.isTrainDriveCapable($currentTrain)>>
 		<<set _waitToUsableMinutes = setup.railyard.estimateMinutesUntilSteamUsable($currentTrain, 720)>>
-		<<if _waitToUsableMinutes > 0>><<timedlink "Wait Until Boiler Reaches 10 bar" _waitToUsableMinutes>><<goto "TrainInterior">><</timedlink>><<elseif _waitToUsableMinutes === -1>><span class="small-description"><em>Cannot build usable steam with current firebox/fuel state.</em></span><</if>>
+		<<if _waitToUsableMinutes > 0>><<timedlink "Wait until the boiler reaches 10 bar" _waitToUsableMinutes>><<goto "TrainInterior">><</timedlink>><<elseif _waitToUsableMinutes === -1>><span class="small-description"><em>Cannot build usable steam with current firebox/fuel state.</em></span><</if>>
 	<</if>>
 <</if>>
 <<if setup.railyard.isDieselLocomotiveCar(_currentCar)>>
@@ -150,10 +150,10 @@ This car does not have the controls needed to drive the train.
 
 <<conditionControls>>
 
-<<if $journey>><span class="small-description"><em>You are out on the line between stations. There is nowhere to get off until you reach a station.</em></span><<else>><<timedlink "Leave Train" 1>><<run setup.railyard.leaveCurrentTrain()>><<goto "Railyard">><</timedlink>><</if>>
+<<if $journey>><span class="small-description"><em>You are out on the line between stations. There is nowhere to get off until you reach a station.</em></span><<else>><<timedlink "Leave the train" 1>><<run setup.railyard.leaveCurrentTrain()>><<goto "Railyard">><</timedlink>><</if>>
 
 <<if _currentCar.tractiveCapacity > 0>>
-	<<if setup.railyard.isTrainDriveCapable($currentTrain)>><<link "Start Driving">><<set _drivingPassage = $journey ? "OnTheLine" : "DrivingMode">><<goto _drivingPassage>><</link>><<else>>
+	<<if setup.railyard.isTrainDriveCapable($currentTrain)>><<link "Start driving">><<set _drivingPassage = $journey ? "OnTheLine" : "DrivingMode">><<goto _drivingPassage>><</link>><<else>>
 		<<if setup.railyard.isDieselLocomotiveCar(_currentCar) && setup.railyard.getCargoAmount(_currentCar, "diesel") >= setup.fuel.getDieselLitresPerMinute(_currentCar)>><span class="small-description"><em>Cannot start driving: the diesel in the tank is <<print setup.fuel.describeGrade(setup.fuel.getGrade(_currentCar, "diesel"), "diesel")>>, and the engine will not run on anything below <<print setup.fuel.DIESEL_MIN_GRADE>>%. Blend in better fuel.</em></span>
 		<<elseif setup.railyard.isDieselLocomotiveCar(_currentCar)>><span class="small-description"><em>Cannot start driving: this diesel locomotive has <<print setup.railyard.getCargoAmount(_currentCar, "diesel").toFixed(2)>> L of diesel; at least <<print setup.fuel.getDieselLitresPerMinute(_currentCar).toFixed(2)>> L is required.</em></span>
 		<<elseif setup.railyard.isSteamLocomotiveCar(_currentCar)>><span class="small-description"><em>Cannot start driving: boiler pressure is <<print setup.railyard.getSteamPressureBar(_currentCar).toFixed(2)>> bar; at least 10.00 bar is required.</em></span>
@@ -193,7 +193,7 @@ You are driving your consist. Current station: <<print $currentStation>>.
 
 <<drivingShuntingControls>>
 
-<<link "Stop Driving">><<goto "TrainInterior">><</link>>
+<<link "Stop driving">><<goto "TrainInterior">><</link>>
 
 <<debugTools>>
 

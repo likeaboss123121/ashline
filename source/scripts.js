@@ -2593,13 +2593,13 @@ Macro.add('drivingMergeButtons', {
 					var enteredDecrement = (i === playerTrackIndex) ? '<<if $enteredTrainIndex > ' + j + '>><<set $enteredTrainIndex -= 1>><</if>>' : '';
 					var coupleMinutes = Math.max(1, Math.ceil(setup.railyard.getTrainLength(parkedTrain) / 25));
 					if (candidate.canCoupleFront) {
-						output += '<span data-yard-action="couple-front:' + i + ':' + j + '"><<timedlink "Couple to Front" ' + coupleMinutes + ' "shunting" "fatigue:+1">><<set _mergeTrain = $stationTracks[$currentStation][' + i + '].trains.splice(' + j + ', 1)[0]>><<set _carDelta = setup.railyard.coupleTrainWithDirection($currentTrain, _mergeTrain, ' + (reverse ? 'true' : 'false') + ', true)>><<set $drivingTrackIndex = ' + playerTrackIndex + '>><<if typeof $currentCarIndex !== "undefined">><<set $currentCarIndex += _carDelta>><</if>>' + enteredDecrement + '<<goto "DrivingMode">><</timedlink>></span>';
+						output += '<span data-yard-action="couple-front:' + i + ':' + j + '"><<timedlink "Couple to the front" ' + coupleMinutes + ' "shunting" "fatigue:+1">><<set _mergeTrain = $stationTracks[$currentStation][' + i + '].trains.splice(' + j + ', 1)[0]>><<set _carDelta = setup.railyard.coupleTrainWithDirection($currentTrain, _mergeTrain, ' + (reverse ? 'true' : 'false') + ', true)>><<set $drivingTrackIndex = ' + playerTrackIndex + '>><<if typeof $currentCarIndex !== "undefined">><<set $currentCarIndex += _carDelta>><</if>>' + enteredDecrement + '<<goto "DrivingMode">><</timedlink>></span>';
 					} else {
 							output += '<span class="small-description" data-yard-reason="couple-front:' + i + ':' + j + '"><em>Front coupling unavailable: ' + candidate.frontReason + '</em></span>';
 					}
 					output += ' | ';
 					if (candidate.canCoupleRear) {
-							output += '<span data-yard-action="couple-rear:' + i + ':' + j + '"><<timedlink "Couple to Rear" ' + coupleMinutes + ' "shunting" "fatigue:+1">><<set _mergeTrain = $stationTracks[$currentStation][' + i + '].trains.splice(' + j + ', 1)[0]>><<run setup.railyard.coupleTrainWithDirection($currentTrain, _mergeTrain, ' + (reverse ? 'true' : 'false') + ', false)>><<set $drivingTrackIndex = ' + playerTrackIndex + '>>' + enteredDecrement + '<<goto "DrivingMode">><</timedlink>></span>';
+							output += '<span data-yard-action="couple-rear:' + i + ':' + j + '"><<timedlink "Couple to the rear" ' + coupleMinutes + ' "shunting" "fatigue:+1">><<set _mergeTrain = $stationTracks[$currentStation][' + i + '].trains.splice(' + j + ', 1)[0]>><<run setup.railyard.coupleTrainWithDirection($currentTrain, _mergeTrain, ' + (reverse ? 'true' : 'false') + ', false)>><<set $drivingTrackIndex = ' + playerTrackIndex + '>>' + enteredDecrement + '<<goto "DrivingMode">><</timedlink>></span>';
 					} else {
 							output += '<span class="small-description" data-yard-reason="couple-rear:' + i + ':' + j + '"><em>Rear coupling unavailable: ' + candidate.rearReason + '</em></span>';
 					}
@@ -2695,7 +2695,7 @@ Macro.add('lineControls', {
 			output += '<p class="small-description"><em>Your train cannot move: it has no diesel or steam pressure. '
 				+ 'Enter the train and work the firebox.</em></p>';
 			output += escapeLink;
-			output += '<<link "Enter the Train">><<goto "TrainInterior">><</link>><br>';
+			output += '<<link "Enter the train">><<goto "TrainInterior">><</link>><br>';
 			new Wikifier(this.output, output);
 			return;
 		}
@@ -2741,7 +2741,7 @@ Macro.add('lineControls', {
 				+ (choice.rejoins ? ', rejoining the main line further on' : ', ending at a buffer stop') + '.</span><br><br>';
 		});
 		output += escapeLink;
-		output += '<<link "Enter the Train">><<goto "TrainInterior">><</link>><br>';
+		output += '<<link "Enter the train">><<goto "TrainInterior">><</link>><br>';
 		new Wikifier(this.output, output);
 	}
 });
@@ -2836,7 +2836,7 @@ Macro.add('drivingShuntingControls', {
 				return;
 			}
 			var side = isFront ? 'Front' : 'Rear';
-			var label = 'Decouple ' + side + ' Section (' + section.length + ' car' + (section.length === 1 ? '' : 's') + ')';
+			var label = 'Decouple the ' + side.toLowerCase() + ' section (' + section.length + ' car' + (section.length === 1 ? '' : 's') + ')';
 			var reason = setup.railyard.getDecoupleBlockReason(isFront);
 			if (reason) {
 				output += '<span class="small-description"><em>' + label + ' unavailable: ' + reason + '</em></span><br>';
