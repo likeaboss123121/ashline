@@ -199,3 +199,9 @@
 		bottom: 62px;
 	}
 }
+
+/* Track labels sit over the rails where the ladder leaves no clear ground, so they carry a plate to stay legible. */
+.railyard-view .railyard-label-plate {
+	fill: #151719;
+	fill-opacity: 0.82;
+}

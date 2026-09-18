@@ -174,6 +174,12 @@ setup.worldmap = {
 
 	// --- directions and track shapes ----------------------------------------------------------------------
 
+	// The compass name a player would use for a direction, rather than the two letters the map stores.
+	COMPASS_NAMES: { n: 'north', ne: 'north-east', e: 'east', se: 'south-east', s: 'south', sw: 'south-west', w: 'west', nw: 'north-west' },
+	describeDirection: function(index) {
+		var direction = this.DIRECTIONS[index];
+		return direction ? this.COMPASS_NAMES[direction.name] : '';
+	},
 	directionIndex: function(name) {
 		for (var i = 0; i < this.DIRECTIONS.length; i++) {
 			if (this.DIRECTIONS[i].name === name) return i;
@@ -580,7 +586,7 @@ setup.worldmap = {
 			return branch.fromIndex === journey.tileIndex && branch.tiles.length;
 		}).map(function(branch) {
 			return {
-				id: branch.id, direction: self.DIRECTIONS[branch.direction].name.toUpperCase(),
+				id: branch.id, direction: self.describeDirection(branch.direction),
 				tiles: branch.tiles.length, terrain: branch.tiles[0].terrain,
 				rejoins: branch.rejoinIndex !== null,
 				grade: self.getGradePercent(self.getSeed(), path.tiles[journey.tileIndex].x,
@@ -627,7 +633,7 @@ setup.worldmap = {
 		var train = State.variables.currentTrain;
 		var limit = this.getClimbLimitPercent(train);
 		var step = {
-			grade: grade, terrain: terrain, minutes: this.getTileMinutes(grade, train),
+			grade: grade, terrain: terrain, heading: '', minutes: this.getTileMinutes(grade, train),
 			blocked: (this.getTrainTractiveKN(train) > 0 && grade > limit)
 				? 'The grade ahead is ' + grade.toFixed(1) + '%, and your consist can pull ' + limit.toFixed(1) + '%.'
 				: '',
@@ -659,7 +665,8 @@ setup.worldmap = {
 				// Back out of the branch onto the main line tile the junction stands on.
 				var mainTiles = this.getMainLine(this.getSeed(), journey.legIndex);
 				return this.describeStep(-tiles[0].grade, mainTiles[branch.fromIndex].terrain,
-					{ fromIndex: from, toIndex: branch.fromIndex, toMain: branch.fromIndex });
+					{ fromIndex: from, toIndex: branch.fromIndex, toMain: branch.fromIndex,
+						heading: this.describeDirection(this.opposite(branch.direction)) });
 			}
 			if (out >= tiles.length) {
 				if (branch.rejoinIndex === null) {
@@ -667,10 +674,12 @@ setup.worldmap = {
 				}
 				var rejoinTiles = this.getMainLine(this.getSeed(), journey.legIndex);
 				return this.describeStep(tiles[tiles.length - 1].grade, rejoinTiles[branch.rejoinIndex].terrain,
-					{ fromIndex: from, toIndex: branch.rejoinIndex, toMain: branch.rejoinIndex });
+					{ fromIndex: from, toIndex: branch.rejoinIndex, toMain: branch.rejoinIndex,
+						heading: this.describeDirection(tiles[tiles.length - 1].out) });
 			}
 			return this.describeStep(this.getStepGrade(tiles, from, out), tiles[out].terrain,
-				{ fromIndex: from, toIndex: out });
+				{ fromIndex: from, toIndex: out,
+					heading: this.describeDirection(out > from ? tiles[from].out : this.opposite(tiles[out].out)) });
 		}
 
 		var to = from + (journey.forward ? 1 : -1) * (direction >= 0 ? 1 : -1);
@@ -679,6 +688,7 @@ setup.worldmap = {
 		}
 		return this.describeStep(this.getStepGrade(tiles, from, to), tiles[to].terrain, {
 			fromIndex: from, toIndex: to,
+			heading: this.describeDirection(to > from ? tiles[from].out : this.opposite(tiles[to].out)),
 			// Reaching either end of the line means arriving at the station standing there.
 			arrivesAt: to === 0 ? journey.legIndex : (to === tiles.length - 1 ? journey.legIndex + 1 : 0)
 		});
@@ -696,7 +706,8 @@ setup.worldmap = {
 		}
 		var junction = path.tiles[journey.tileIndex];
 		return this.describeStep(this.getGradePercent(this.getSeed(), junction.x, junction.y, branch.direction),
-			branch.tiles[0].terrain, { fromIndex: journey.tileIndex, toIndex: 0, toBranch: branch.id });
+			branch.tiles[0].terrain, { fromIndex: journey.tileIndex, toIndex: 0, toBranch: branch.id,
+				heading: this.describeDirection(branch.direction) });
 	},
 
 	getTrainWeightKg: function(train) {
@@ -863,6 +874,26 @@ setup.worldmap = {
 				svg.appendChild(marker);
 			}
 		});
+		// Where the train is standing, and which way it is going, so the map can be read against the journey.
+		var here = this.getJourneyView();
+		if (here && here.legIndex === legIndex) {
+			var marker = document.createElementNS(ns, 'polygon');
+			var mx = left(here.tile.x) + cell / 2;
+			var my = top(here.tile.y) + cell / 2;
+			var out = here.tile.out >= 0 ? here.tile.out : 0;
+			var facing = here.forward ? out : this.opposite(out);
+			var pointer = this.DIRECTIONS[facing];
+			var angle = Math.atan2(-pointer.dy, pointer.dx);
+			var point = function(distance, spread) {
+				return (mx + Math.cos(angle + spread) * distance) + ',' + (my + Math.sin(angle + spread) * distance);
+			};
+			marker.setAttribute('points', [point(cell * 0.55, 0), point(cell * 0.45, 2.5), point(cell * 0.45, -2.5)].join(' '));
+			marker.setAttribute('fill', '#e0625c');
+			var markerTitle = document.createElementNS(ns, 'title');
+			markerTitle.textContent = 'Your train, heading ' + this.describeDirection(facing);
+			marker.appendChild(markerTitle);
+			svg.appendChild(marker);
+		}
 		return { svg: svg, leg: leg, rect: rect };
 	},
 	// Adds the map plus a line of numbers to a debug panel.

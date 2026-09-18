@@ -416,9 +416,10 @@ setup.railyardView = {
 			this.packForward(yardGroups[r], start, v, result.cars, dataIndex(r), flipped);
 			result.hits.push({ trackIndex: dataIndex(r), u0: start, u1: end, v: v });
 
-			// Each label sits beside the junction where its track meets the entry ladder, where no car can cover it:
-			// left of the vertical ladder for the entry track and nearer tracks, and above the horizontal up ladder
-			// for farther tracks, whose junctions share one screen row 80 pixels apart.
+			// Each label sits beside the junction where its track meets the entry ladder, where no car can cover it,
+			// and clear of the rails: to the left of the junction for the entry track and nearer tracks, and further
+			// out to the left for tracks up the ladder, whose junctions share one screen row. Putting those above
+			// the junction instead laid them across the rails of the track above whenever it was a short one.
 			var onUpLadder = leads.entry && r < entryRow;
 			var occupied = setup.railyard.getTrackOccupiedLength(trackAt(r)) + (selected ? setup.railyard.getTrainLength(player.train) : 0);
 			result.labels.push({
@@ -947,6 +948,16 @@ setup.railyardView = {
 		});
 
 		labels.forEach(function(label) {
+			// A plate behind the text, because a label up the ladder has to sit over its own rails: the junctions
+			// there share one screen row, and there is no clear ground between the tracks to put it on.
+			var width = label.text.length * 3.6;
+			var plate = document.createElementNS(ns, 'rect');
+			plate.setAttribute('class', 'railyard-label-plate');
+			plate.setAttribute('x', (label.anchor === 'end' ? label.x - width : label.x) - 1);
+			plate.setAttribute('y', label.y - 6);
+			plate.setAttribute('width', width + 2);
+			plate.setAttribute('height', 8);
+			svg.appendChild(plate);
 			var text = document.createElementNS(ns, 'text');
 			text.setAttribute('class', 'railyard-label' + (label.player ? ' railyard-label-player' : ''));
 			text.setAttribute('x', label.x);

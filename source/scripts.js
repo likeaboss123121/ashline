@@ -2218,7 +2218,7 @@ Macro.add('railyardButtons', {
 			for (var j = 0; j < tracks[i].trains.length; j++) {
 				output += setup.railyard.trainSummaryHtml(tracks[i].trains[j], displayNumber - 1);
 				output += '<span data-yard-action="board:' + i + ':' + j + '">'
-					+ '<<timedlink "Board Train ' + displayNumber + '" 1>><<run setup.railyard.boardTrain($currentStation, ' + i + ', ' + j + ')>><<goto "TrainInterior">><</timedlink>></span><br><br>';
+					+ '<<timedlink "Board Train ' + displayNumber + '" 1>><<run setup.railyard.boardTrain($currentStation, ' + i + ', ' + j + ')>><<goto "TrainInterior">><</timedlink>></span><br>';
 				displayNumber++;
 			}
 		}
@@ -2678,7 +2678,7 @@ Macro.add('lineStatus', {
 		var slope = grade > 0 ? 'climbing ' + grade.toFixed(1) + '%'
 			: grade < 0 ? 'descending ' + Math.abs(grade).toFixed(1) + '%' : 'level';
 		var output = '<h2>Station ' + view.fromStation + ' to Station ' + view.toStation
-			+ (view.branch ? ' &middot; branch line' : '') + '</h2>';
+			+ (view.branch ? ' &middot; side track' : '') + '</h2>';
 		output += '<p>Tile ' + (Math.min(view.tileIndex, view.tileCount - 1) + 1) + ' of ' + view.tileCount
 			+ ' &middot; ' + view.terrain + ' &middot; ' + slope + '</p>';
 		output += '<p class="small-description">' + view.kilometresDone + ' km behind you, '
@@ -2718,11 +2718,7 @@ Macro.add('lineControls', {
 			if (!step) {
 				return;
 			}
-			var heading = view.branch
-				? (direction > 0 ? (step.toMain !== null ? 'Carry on to where the branch rejoins the line' : 'Drive further along the branch')
-					: 'Reverse back to the junction')
-				: (direction > 0 ? 'Drive ahead' : 'Reverse back');
-			var label = heading + ' 5 km';
+			var label = (direction > 0 ? 'Drive 5 km ' : 'Reverse 5 km ') + (step.heading || 'on');
 			var slope = step.grade > 0 ? 'climbs ' + step.grade.toFixed(1) + '%'
 				: step.grade < 0 ? 'falls ' + Math.abs(step.grade).toFixed(1) + '%' : 'runs level';
 			if (step.blocked) {
@@ -2734,7 +2730,7 @@ Macro.add('lineControls', {
 				+ '<<set _linePassage = State.variables.journey ? "OnTheLine" : "DrivingMode">>'
 				+ '<<goto _linePassage>><</timedlink>><br>';
 			output += '<span class="small-description">Into ' + step.terrain + ', ' + slope
-				+ (step.arrivesAt ? ', arriving at Station ' + step.arrivesAt : '') + '.</span><br><br>';
+				+ (step.arrivesAt ? ', arriving at Station ' + step.arrivesAt : '') + '.</span><br>';
 		});
 		// Where the line divides, the player picks which way to go. A branch that rejoins the main line is another
 		// way round; one that does not is somewhere to explore and back out of.
@@ -2743,14 +2739,15 @@ Macro.add('lineControls', {
 			if (!step) {
 				return;
 			}
-			var label = 'Take the ' + choice.direction + ' branch';
+			var label = 'Drive 5 km ' + choice.direction;
 			if (step.blocked) {
 				return;
 			}
 			output += '<<timedlink "' + label + '" ' + step.minutes + ' "travel">>'
 				+ '<<run setup.railyard.takeBranch("' + choice.id + '")>><<goto "OnTheLine">><</timedlink>><br>';
-			output += '<span class="small-description">' + (choice.tiles * 5) + ' km of branch into ' + choice.terrain
-				+ (choice.rejoins ? ', rejoining the main line further on' : ', ending at a buffer stop') + '.</span><br><br>';
+			output += '<span class="small-description">Into ' + choice.terrain + ', a track that runs '
+				+ (choice.tiles * 5) + ' km'
+				+ (choice.rejoins ? ' and joins the line again further on' : ' and ends at a buffer stop') + '.</span><br>';
 		});
 		output += escapeLink;
 		output += '<<link "Enter the train">><<goto "TrainInterior">><</link>><br>';
@@ -2821,7 +2818,7 @@ Macro.add('drivingTravelButtons', {
 				output += '<span data-yard-action="depart:' + (towardExit ? 'exit' : 'entry') + '">'
 					+ '<<link "Depart ' + heading + ' toward Station ' + (stationId + (towardExit ? 1 : -1)) + '">>'
 					+ '<<run setup.railyard.departOntoLine(' + towardExit + ')>><<goto "OnTheLine">><</link>></span><br>';
-				output += '<span class="small-description">' + summary + ' About ' + setup.time.formatDuration(minutes) + ' at this weight.</span><br><br>';
+				output += '<span class="small-description">' + summary + ' About ' + setup.time.formatDuration(minutes) + ' at this weight.</span><br>';
 			}
 		});
 		new Wikifier(this.output, output);
@@ -2894,6 +2891,14 @@ Macro.add('debugTools', {
 		var panel = document.createElement('div');
 		panel.className = 'debug-container';
 		this.output.appendChild(panel);
+		// Running a debug tool replays the passage. Without this the page would jump back to the top every time,
+		// which makes the tools unusable at the bottom of a long yard.
+		if (setup.debugReturnToPanel && typeof requestAnimationFrame === 'function') {
+			setup.debugReturnToPanel = false;
+			requestAnimationFrame(function() {
+				panel.scrollIntoView({ block: 'start' });
+			});
+		}
 		// Everything written from here lands in the section opened last, so each block of tools carries its own
 		// heading and can be folded out of the way. wrapper is reassigned rather than replaced so the many
 		// appendChild calls below need no rewriting.
@@ -3031,7 +3036,7 @@ Macro.add('debugTools', {
 				if (amount <= 0) return;
 				var grade = parseInt(gradeInput.value, 10);
 				setup.fuel.addCargo(car, cargoType, amount, isNaN(grade) ? 100 : grade);
-				Engine.play(State.passage);
+				setup.debugReturnToPanel = true; Engine.play(State.passage);
 			});
 			wrapper.appendChild(addBtn);
 			wrapper.appendChild(document.createElement('br'));
@@ -3074,7 +3079,7 @@ Macro.add('debugTools', {
 		hourButton.addEventListener('click', function() {
 			var now = new Date(setup.time.getCurrentTimestampMs());
 			setup.time.setCurrentTimestampMs(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), parseInt(hourSelect.value, 10), 0, 0, 0));
-			Engine.play(State.passage);
+			setup.debugReturnToPanel = true; Engine.play(State.passage);
 		});
 		lightInfo.appendChild(hourButton);
 		wrapper.appendChild(lightInfo);
@@ -3105,7 +3110,7 @@ Macro.add('debugTools', {
 		conditionBtn.textContent = 'Set Stat';
 		conditionBtn.addEventListener('click', function () {
 			setup.stats.setValue(conditionSelect.value, conditionValue.value);
-			Engine.play(State.passage);
+			setup.debugReturnToPanel = true; Engine.play(State.passage);
 		});
 		conditionLabel.appendChild(conditionSelect);
 		wrapper.appendChild(conditionLabel);
@@ -3138,8 +3143,8 @@ Macro.add('debugTools', {
 			interiorInfo.textContent = 'Current car: ' + currentCar.type + ' (car ' + (currentCarIndex + 1) + ' of ' + currentTrain.length + ')';
 			wrapper.appendChild(interiorInfo);
 
-			wiki('<<link "Clear Current Car Cargo">><<run State.variables.currentTrain[State.variables.currentCarIndex].cargo = []>><<goto "TrainInterior">><</link>><br>');
-			wiki('<<link "Clear Current Train Cargo">><<run (function() { for (var i = 0; i < State.variables.currentTrain.length; i++) { State.variables.currentTrain[i].cargo = []; } })()>><<goto "TrainInterior">><</link>><br>');
+			wiki('<<link "Clear Current Car Cargo">><<run setup.debugReturnToPanel = true>><<run State.variables.currentTrain[State.variables.currentCarIndex].cargo = []>><<goto "TrainInterior">><</link>><br>');
+			wiki('<<link "Clear Current Train Cargo">><<run setup.debugReturnToPanel = true>><<run (function() { for (var i = 0; i < State.variables.currentTrain.length; i++) { State.variables.currentTrain[i].cargo = []; } })()>><<goto "TrainInterior">><</link>><br>');
 			buildAddCargoSection(currentCar);
 			return;
 		}
@@ -3237,7 +3242,7 @@ Macro.add('debugTools', {
 				State.variables.debugSelectedTrackIndex = parseInt(parts[0], 10);
 				State.variables.debugSelectedTrainIndex = parseInt(parts[1], 10);
 				State.variables.debugSelectedCarIndex = -1;
-				Engine.play(State.passage);
+				setup.debugReturnToPanel = true; Engine.play(State.passage);
 			});
 			trainLabel.appendChild(trainSelect);
 			wrapper.appendChild(trainLabel);
@@ -3275,7 +3280,7 @@ Macro.add('debugTools', {
 			}
 			carSelect.addEventListener('change', function () {
 				State.variables.debugSelectedCarIndex = parseInt(this.value, 10);
-				Engine.play(State.passage);
+				setup.debugReturnToPanel = true; Engine.play(State.passage);
 			});
 			carLabel.appendChild(carSelect);
 			wrapper.appendChild(carLabel);
@@ -3362,7 +3367,7 @@ Macro.add('debugTools', {
 					swapStatus.textContent = 'Swap failed: ' + result.reason;
 					return;
 				}
-				Engine.play(State.passage);
+				setup.debugReturnToPanel = true; Engine.play(State.passage);
 			});
 			wrapper.appendChild(swapBtn);
 			wrapper.appendChild(document.createElement('br'));
@@ -3431,7 +3436,7 @@ Macro.add('debugTools', {
 			var selected = parseInt(deleteTrackSelect.value, 10);
 			if (isNaN(selected)) return;
 			setup.railyard.deleteDebugTrack(State.variables.currentStation, selected);
-			Engine.play(State.passage);
+			setup.debugReturnToPanel = true; Engine.play(State.passage);
 		});
 		wrapper.appendChild(deleteTrackBtn);
 		wrapper.appendChild(document.createElement('br'));
@@ -3470,7 +3475,7 @@ Macro.add('debugTools', {
 			if (isNaN(selected)) return;
 			var mode = connectionModeSelect.value;
 			setup.railyard.setDebugTrackConnections(State.variables.currentStation, selected, mode === 'both' || mode === 'entry', mode === 'both' || mode === 'exit');
-			Engine.play(State.passage);
+			setup.debugReturnToPanel = true; Engine.play(State.passage);
 		});
 		wrapper.appendChild(connectionBtn);
 		wrapper.appendChild(document.createElement('br'));
@@ -3505,7 +3510,7 @@ Macro.add('debugTools', {
 		leadBtn.disabled = entryLeadSelect.options.length === 0;
 		leadBtn.addEventListener('click', function () {
 			setup.railyard.setDebugLeadTracks(State.variables.currentStation, parseInt(entryLeadSelect.value, 10), parseInt(exitLeadSelect.value, 10));
-			Engine.play(State.passage);
+			setup.debugReturnToPanel = true; Engine.play(State.passage);
 		});
 		wrapper.appendChild(leadBtn);
 		wrapper.appendChild(document.createElement('br'));
@@ -3538,7 +3543,7 @@ Macro.add('debugTools', {
 			var mode = leadModes.filter(function (candidate) { return candidate[0] === leadModesSelect.value; })[0];
 			if (!mode) return;
 			setup.railyard.setDebugLeads(State.variables.currentStation, mode[2], mode[3]);
-			Engine.play(State.passage);
+			setup.debugReturnToPanel = true; Engine.play(State.passage);
 		});
 		wrapper.appendChild(leadModesBtn);
 		wrapper.appendChild(document.createElement('br'));
@@ -3570,7 +3575,7 @@ Macro.add('debugTools', {
 		directionsBtn.textContent = 'Set Lead Directions';
 		directionsBtn.addEventListener('click', function () {
 			setup.railyard.setDebugLeadDirections(State.variables.currentStation, entryDirectionSelect.value, exitDirectionSelect.value);
-			Engine.play(State.passage);
+			setup.debugReturnToPanel = true; Engine.play(State.passage);
 		});
 		wrapper.appendChild(directionsBtn);
 		wrapper.appendChild(document.createElement('br'));
@@ -3595,7 +3600,7 @@ Macro.add('debugTools', {
 			var length = parseInt(addTrackInput.value, 10);
 			if (isNaN(length) || length <= 0) return;
 			setup.railyard.addDebugTrack(State.variables.currentStation, length);
-			Engine.play(State.passage);
+			setup.debugReturnToPanel = true; Engine.play(State.passage);
 		});
 		wrapper.appendChild(addTrackBtn);
 		wrapper.appendChild(document.createElement('br'));
