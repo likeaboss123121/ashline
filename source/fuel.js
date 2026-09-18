@@ -11,7 +11,8 @@
 // - Coal and firewood: a grade is heat. The firebox burns more of a poor fuel to raise the same steam, up to what
 //   the grate can take; past that, steam production falls, and the boiler cannot keep up with the work.
 setup.fuel = {
-	GRADED: ['diesel', 'coal', 'firewood', 'timber'],
+	// Water's grade is how clean it is, which matters when the player drinks it rather than boils it.
+	GRADED: ['diesel', 'coal', 'firewood', 'timber', 'water'],
 	// Heat per kilogram at grade 100, as a share of good steam coal. Dry firewood gives a little over half.
 	HEAT_PER_KG: { coal: 1, firewood: 0.55 },
 	// A firebox burns firewood first: it is bulky, and burning it frees the bunker for coal.
@@ -82,7 +83,8 @@ setup.fuel = {
 	// A grade in words. Only diesel can be too far gone to use at all; poor coal or wet wood still burns, badly.
 	describeGrade: function(grade, cargoType) {
 		var value = Math.round(grade);
-		var word = value >= 90 ? 'good' : value >= 70 ? 'fair' : value >= 50 ? 'poor'
+		var best = cargoType === 'water' ? 'clean' : 'good';
+		var word = value >= 90 ? best : value >= 70 ? 'fair' : value >= 50 ? 'poor'
 			: cargoType === 'diesel' && grade < this.DIESEL_MIN_GRADE ? 'unusable' : 'very poor';
 		return value + '% (' + word + ')';
 	},

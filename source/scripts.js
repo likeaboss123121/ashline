@@ -103,6 +103,20 @@ setup.time = {
 			}
 		}
 	},
+	// How much harder than idling a minute of this kind of work is. Everything else is just time passing, which the
+	// player is never told about: the clock is the only notice they need.
+	MODE_FATIGUE_EXTRA: { shunting: 0.1 },
+	// Sleep and collapse run the clock the same way, but the body is resting rather than wearing out, and the
+	// player cannot collapse from exhaustion while already unconscious.
+	advanceMinutesAsleep: function(minutes) {
+		var delta = this.resolveMinutes(minutes);
+		for (var m = 0; m < delta; m++) {
+			this.processSteamFireboxesMinute();
+			setup.condition.tickMinute('sleep');
+			this.setCurrentTimestampMs(this.getCurrentTimestampMs() + 60000);
+		}
+		return true;
+	},
 	advanceMinutesWithSystems: function(minutes, actionType) {
 		var delta = this.resolveMinutes(minutes);
 		var mode = typeof actionType === 'string' ? actionType : 'generic';
@@ -125,7 +139,12 @@ setup.time = {
 			if (mode === 'shunting' || mode === 'travel') {
 				setup.railyard.consumeShuntingResourcesForMinute(State.variables.currentTrain);
 			}
+			setup.condition.tickMinute(mode);
 			this.setCurrentTimestampMs(this.getCurrentTimestampMs() + 60000);
+		}
+		// A player who works themselves past the end of the bar drops where they stand, and wakes hours later.
+		if (setup.condition.isCollapsed()) {
+			setup.condition.collapse();
 		}
 		return true;
 	},
@@ -149,8 +168,11 @@ setup.time = {
 			meridiem: use24Hour ? '' : (rawHour >= 12 ? 'PM' : 'AM')
 		};
 	},
-	formatLinkLabel: function(baseLabel, minutes) {
-		return String(baseLabel) + ' (' + this.formatDuration(minutes) + ')';
+	// A link says what it costs: the time on the clock, and the stats it moves, so the player never has to learn
+	// by watching the sidebar afterwards. Plain time passing is left unmarked.
+	formatLinkLabel: function(baseLabel, minutes, effects) {
+		var described = setup.effects.describe(effects);
+		return String(baseLabel) + ' (' + this.formatDuration(minutes) + (described ? ', ' + described : '') + ')';
 	}
 };
 
@@ -170,7 +192,10 @@ Macro.add('timedlink', {
 		var label = String(this.args[0]);
 		var minutes = setup.time.resolveMinutes(this.args[1]);
 		var actionType = this.args.length > 2 ? String(this.args[2]) : 'generic';
-		var renderedLabel = setup.time.formatLinkLabel(label, minutes)
+		// The fourth argument declares which stats this action moves, so every link that costs something says so
+		// without each call site writing its own wording. See setup.effects.
+		var effects = this.args.length > 3 ? String(this.args[3]) : '';
+		var renderedLabel = setup.time.formatLinkLabel(label, minutes, effects)
 			.replace(/\\/g, '\\\\')
 			.replace(/"/g, '\\"');
 		var safeActionType = actionType
@@ -503,7 +528,7 @@ setup.railyard = {
 		// grade: the range a found load is drawn from. Years of storage mean most diesel is well past its best.
 		// cars: which cars a preset is found in, where it is narrower than what the car accepts.
 		{type: 'coal', amount: 6000, rarity: 'common', grade: [35, 100]},
-		{type: 'water', amount: 8000, rarity: 'common'},
+		{type: 'water', amount: 8000, rarity: 'common', grade: [40, 90]},
 		{type: 'diesel', amount: 6000, rarity: 'uncommon', grade: [30, 95]},
 		{type: 'firewood', amount: 8000, rarity: 'common', grade: [45, 95], cars: ['gondola']},
 		{type: 'timber', amount: 8000, rarity: 'common', grade: [50, 95], cars: ['flatcar']},
@@ -2216,7 +2241,7 @@ Macro.add('drivingMergeButtons', {
 			// No entry track: nothing to reverse onto.
 		} else if (playerTrackIndex !== entryTrackIndex && !blockedTowardEntryOnCurrentTrack && clearPathToEntryTrack) {
 			var reverseToEntryMinutes = Math.max(1, Math.ceil(playerConsistLength / 25));
-			output += '<span data-yard-action="track:' + entryTrackIndex + '"><<timedlink "Reverse consist to ' + entryTrackLabel + '" ' + reverseToEntryMinutes + ' "shunting">><<set $drivingTrackIndex = ' + entryTrackIndex + '>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</timedlink>></span><br>';
+			output += '<span data-yard-action="track:' + entryTrackIndex + '"><<timedlink "Reverse consist to ' + entryTrackLabel + '" ' + reverseToEntryMinutes + ' "shunting" "fatigue:+1">><<set $drivingTrackIndex = ' + entryTrackIndex + '>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</timedlink>></span><br>';
 		} else if (playerTrackIndex !== entryTrackIndex && blockedTowardEntryOnCurrentTrack) {
 			output += '<span class="small-description" data-yard-reason="track:' + entryTrackIndex + '"><em>Cannot reverse toward ' + entryTrackLabel + ' while a consist is behind you on this track.</em></span><br>';
 		} else if (playerTrackIndex !== entryTrackIndex && !clearPathToEntryTrack) {
@@ -2227,7 +2252,7 @@ Macro.add('drivingMergeButtons', {
 			// No exit track: nothing to drive onto.
 		} else if (playerTrackIndex !== exitTrackIndex && !blockedTowardExitOnCurrentTrack && clearPathToExitTrack) {
 			var driveToExitMinutes = Math.max(1, Math.ceil(playerConsistLength / 25));
-			output += '<span data-yard-action="track:' + exitTrackIndex + '"><<timedlink "Drive consist to ' + exitTrackLabel + '" ' + driveToExitMinutes + ' "shunting">><<set $drivingTrackIndex = ' + exitTrackIndex + '>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</timedlink>></span><br>';
+			output += '<span data-yard-action="track:' + exitTrackIndex + '"><<timedlink "Drive consist to ' + exitTrackLabel + '" ' + driveToExitMinutes + ' "shunting" "fatigue:+1">><<set $drivingTrackIndex = ' + exitTrackIndex + '>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</timedlink>></span><br>';
 		} else if (playerTrackIndex !== exitTrackIndex && !clearPathToExitTrack) {
 			output += '<span class="small-description" data-yard-reason="track:' + exitTrackIndex + '"><em>Cannot drive to ' + exitTrackLabel + ' while another track between here and it is occupied.</em></span><br>';
 		}
@@ -2254,7 +2279,7 @@ Macro.add('drivingMergeButtons', {
 				return;
 			}
 			var actionLabel = 'Couple to entire track and shove to ' + destinationLabel;
-			output += '<<timedlink "' + actionLabel + '" ' + shoveMinutes + ' "shunting">><<run (function () { var trackTrains = State.variables.stationTracks[State.variables.currentStation][' + targetTrackIndex + '].trains.splice(0); var mergedCars = setup.railyard.flattenTrackTrainsForDirection(trackTrains, ' + (reverse ? 'true' : 'false') + '); State.variables.currentCarIndex += setup.railyard.coupleTrainWithDirection(State.variables.currentTrain, mergedCars, ' + (reverse ? 'true' : 'false') + ', ' + (reverse ? 'false' : 'true') + '); })()>><<set $drivingTrackIndex = ' + destinationIndex + '>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</timedlink>><br>';
+			output += '<<timedlink "' + actionLabel + '" ' + shoveMinutes + ' "shunting" "fatigue:+1">><<run (function () { var trackTrains = State.variables.stationTracks[State.variables.currentStation][' + targetTrackIndex + '].trains.splice(0); var mergedCars = setup.railyard.flattenTrackTrainsForDirection(trackTrains, ' + (reverse ? 'true' : 'false') + '); State.variables.currentCarIndex += setup.railyard.coupleTrainWithDirection(State.variables.currentTrain, mergedCars, ' + (reverse ? 'true' : 'false') + ', ' + (reverse ? 'false' : 'true') + '); })()>><<set $drivingTrackIndex = ' + destinationIndex + '>><<set $enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex($stationTracks[$currentStation], $drivingTrackIndex)>><<goto "DrivingMode">><</timedlink>><br>';
 		};
 
 		// If the player is at the leading boundary in the current orientation, offer direct moves into open yard tracks.
@@ -2275,7 +2300,7 @@ Macro.add('drivingMergeButtons', {
 						var moveEnteredIndexExpr = reverse ? ('$stationTracks[$currentStation][' + mt + '].trains.length') : '0';
 						if (playerConsistLength <= yardAvail) {
 							var moveToYardMinutes = Math.max(1, Math.ceil(playerConsistLength / 25));
-							output += '<span data-yard-action="track:' + mt + '"><<timedlink "' + moveLabel + targetLabel + '" ' + moveToYardMinutes + ' "shunting">><<set $drivingTrackIndex = ' + mt + '>><<set $enteredTrainIndex = ' + moveEnteredIndexExpr + '>><<goto "DrivingMode">><</timedlink>></span><br>';
+							output += '<span data-yard-action="track:' + mt + '"><<timedlink "' + moveLabel + targetLabel + '" ' + moveToYardMinutes + ' "shunting" "fatigue:+1">><<set $drivingTrackIndex = ' + mt + '>><<set $enteredTrainIndex = ' + moveEnteredIndexExpr + '>><<goto "DrivingMode">><</timedlink>></span><br>';
 						} else {
 							output += '<span class="small-description" data-yard-reason="track:' + mt + '"><em>' + targetLabel + ' is blocked: requires ' + playerConsistLength + 'm, free ' + yardAvail + 'm.</em></span><br>';
 							appendPushOptions(yoi);
@@ -2522,13 +2547,13 @@ Macro.add('drivingMergeButtons', {
 					var enteredDecrement = (i === playerTrackIndex) ? '<<if $enteredTrainIndex > ' + j + '>><<set $enteredTrainIndex -= 1>><</if>>' : '';
 					var coupleMinutes = Math.max(1, Math.ceil(setup.railyard.getTrainLength(parkedTrain) / 25));
 					if (candidate.canCoupleFront) {
-						output += '<span data-yard-action="couple-front:' + i + ':' + j + '"><<timedlink "Couple to Front" ' + coupleMinutes + ' "shunting">><<set _mergeTrain = $stationTracks[$currentStation][' + i + '].trains.splice(' + j + ', 1)[0]>><<set _carDelta = setup.railyard.coupleTrainWithDirection($currentTrain, _mergeTrain, ' + (reverse ? 'true' : 'false') + ', true)>><<set $drivingTrackIndex = ' + playerTrackIndex + '>><<if typeof $currentCarIndex !== "undefined">><<set $currentCarIndex += _carDelta>><</if>>' + enteredDecrement + '<<goto "DrivingMode">><</timedlink>></span>';
+						output += '<span data-yard-action="couple-front:' + i + ':' + j + '"><<timedlink "Couple to Front" ' + coupleMinutes + ' "shunting" "fatigue:+1">><<set _mergeTrain = $stationTracks[$currentStation][' + i + '].trains.splice(' + j + ', 1)[0]>><<set _carDelta = setup.railyard.coupleTrainWithDirection($currentTrain, _mergeTrain, ' + (reverse ? 'true' : 'false') + ', true)>><<set $drivingTrackIndex = ' + playerTrackIndex + '>><<if typeof $currentCarIndex !== "undefined">><<set $currentCarIndex += _carDelta>><</if>>' + enteredDecrement + '<<goto "DrivingMode">><</timedlink>></span>';
 					} else {
 							output += '<span class="small-description" data-yard-reason="couple-front:' + i + ':' + j + '"><em>Front coupling unavailable: ' + candidate.frontReason + '</em></span>';
 					}
 					output += ' | ';
 					if (candidate.canCoupleRear) {
-							output += '<span data-yard-action="couple-rear:' + i + ':' + j + '"><<timedlink "Couple to Rear" ' + coupleMinutes + ' "shunting">><<set _mergeTrain = $stationTracks[$currentStation][' + i + '].trains.splice(' + j + ', 1)[0]>><<run setup.railyard.coupleTrainWithDirection($currentTrain, _mergeTrain, ' + (reverse ? 'true' : 'false') + ', false)>><<set $drivingTrackIndex = ' + playerTrackIndex + '>>' + enteredDecrement + '<<goto "DrivingMode">><</timedlink>></span>';
+							output += '<span data-yard-action="couple-rear:' + i + ':' + j + '"><<timedlink "Couple to Rear" ' + coupleMinutes + ' "shunting" "fatigue:+1">><<set _mergeTrain = $stationTracks[$currentStation][' + i + '].trains.splice(' + j + ', 1)[0]>><<run setup.railyard.coupleTrainWithDirection($currentTrain, _mergeTrain, ' + (reverse ? 'true' : 'false') + ', false)>><<set $drivingTrackIndex = ' + playerTrackIndex + '>>' + enteredDecrement + '<<goto "DrivingMode">><</timedlink>></span>';
 					} else {
 							output += '<span class="small-description" data-yard-reason="couple-rear:' + i + ':' + j + '"><em>Rear coupling unavailable: ' + candidate.rearReason + '</em></span>';
 					}
@@ -2536,7 +2561,7 @@ Macro.add('drivingMergeButtons', {
 					if (candidate.pushOptions && candidate.pushOptions.length) {
 						for (var poi = 0; poi < candidate.pushOptions.length; poi++) {
 							var po = candidate.pushOptions[poi];
-							output += '<<timedlink "' + po.label + '" ' + po.minutes + ' "shunting">><<run (function () { var stationTracks = State.variables.stationTracks[State.variables.currentStation]; var sourceTrack = setup.railyard.ensureTrackTrainArray(stationTracks, ' + i + '); if (!sourceTrack) { return; } var pushedTrain = sourceTrack.trains.splice(' + j + ', 1)[0]; if (!Array.isArray(pushedTrain)) { return; } var destinationTrack = setup.railyard.ensureTrackTrainArray(stationTracks, ' + po.destinationIndex + '); if (!destinationTrack) { setup.railyard.insertTrainIntoTrack(stationTracks, ' + i + ', pushedTrain, ' + j + '); return; } var insertAt = ' + po.insertAtExpression + '; if (!setup.railyard.insertTrainIntoTrack(stationTracks, ' + po.destinationIndex + ', pushedTrain, insertAt)) { setup.railyard.insertTrainIntoTrack(stationTracks, ' + i + ', pushedTrain, ' + j + '); } })()>><<set $drivingTrackIndex = ' + playerTrackIndex + '>>' + enteredDecrement + '<<goto "DrivingMode">><</timedlink>><br>';
+							output += '<<timedlink "' + po.label + '" ' + po.minutes + ' "shunting" "fatigue:+1">><<run (function () { var stationTracks = State.variables.stationTracks[State.variables.currentStation]; var sourceTrack = setup.railyard.ensureTrackTrainArray(stationTracks, ' + i + '); if (!sourceTrack) { return; } var pushedTrain = sourceTrack.trains.splice(' + j + ', 1)[0]; if (!Array.isArray(pushedTrain)) { return; } var destinationTrack = setup.railyard.ensureTrackTrainArray(stationTracks, ' + po.destinationIndex + '); if (!destinationTrack) { setup.railyard.insertTrainIntoTrack(stationTracks, ' + i + ', pushedTrain, ' + j + '); return; } var insertAt = ' + po.insertAtExpression + '; if (!setup.railyard.insertTrainIntoTrack(stationTracks, ' + po.destinationIndex + ', pushedTrain, insertAt)) { setup.railyard.insertTrainIntoTrack(stationTracks, ' + i + ', pushedTrain, ' + j + '); } })()>><<set $drivingTrackIndex = ' + playerTrackIndex + '>>' + enteredDecrement + '<<goto "DrivingMode">><</timedlink>><br>';
 						}
 					} else {
 						output += '<span class="small-description"><em>Push unavailable: ' + candidate.pushFallbackReason + '</em></span>';
@@ -2749,7 +2774,7 @@ Macro.add('drivingShuntingControls', {
 			if (reason) {
 				output += '<span class="small-description"><em>' + label + ' unavailable: ' + reason + '</em></span><br>';
 			} else {
-				output += '<<timedlink "' + label + '" ' + Math.max(1, Math.ceil(section.length / 2)) + ' "shunting">>'
+				output += '<<timedlink "' + label + '" ' + Math.max(1, Math.ceil(section.length / 2)) + ' "shunting" "fatigue:+1">>'
 					+ '<<run setup.railyard.decoupleSection(' + isFront + ')>><<goto "DrivingMode">><</timedlink>><br>';
 			}
 			output += '<span class="small-description">' + side + ' section: '

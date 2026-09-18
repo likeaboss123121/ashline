@@ -75,6 +75,7 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 :: Railyard {"position":"402,201"}
 /% Station hub passage: resolves returning train placement, generates station tracks when needed, and renders yard interaction UI. %/
 <<buildIntegrityNotice>>
+<<collapseNotice>>
 <<if typeof $stationTracks[$currentStation] === 'undefined'>>
 	<<set $stationTracks[$currentStation] = setup.railyard.generateStationTracks($currentStation, $randomSeed)>>
 <</if>>
@@ -100,6 +101,7 @@ You step into the railyard. Several trains are parked here, each with its own mi
 :: TrainInterior
 /% On-board navigation passage: tracks current car position, movement through consist, and transition into driving mode. %/
 <<buildIntegrityNotice>>
+<<collapseNotice>>
 <<if typeof $currentCarIndex === 'undefined'>>
 	<<set $currentCarIndex = setup.railyard.getBoardingCarIndex($currentTrain)>>
 <</if>>
@@ -140,6 +142,8 @@ This car does not have the controls needed to drive the train.
 <<locomotiveKit>>
 <<refuelControls>>
 
+<<conditionControls>>
+
 <<if $journey>><span class="small-description"><em>You are out on the line between stations. There is nowhere to get off until you reach a station.</em></span><<else>><<timedlink "Leave Train" 1>><<run setup.railyard.leaveCurrentTrain()>><<goto "Railyard">><</timedlink>><</if>>
 
 <<if _currentCar.tractiveCapacity > 0>>
@@ -157,6 +161,7 @@ This car does not have the controls needed to drive the train.
 :: OnTheLine
 /% Travelling between stations: the consist stands on one 5 km world tile at a time, and every move is one tile. %/
 <<buildIntegrityNotice>>
+<<collapseNotice>>
 <<if !$journey>><<goto "DrivingMode">><</if>>
 <<lineStatus>>
 
@@ -170,6 +175,7 @@ This car does not have the controls needed to drive the train.
 :: DrivingMode
 /% Active driving/shunting passage: composes merge, travel, and decoupling controls for the current consist and station context. %/
 <<buildIntegrityNotice>>
+<<collapseNotice>>
 <<initDrivingModeState>>
 You are driving your consist. Current station: <<print $currentStation>>.
 
@@ -183,3 +189,20 @@ You are driving your consist. Current station: <<print $currentStation>>.
 <<link "Stop Driving">><<goto "TrainInterior">><</link>>
 
 <<debugTools>>
+
+:: Sleep
+/% The sleep screen: how long to lie down for. Sleeping needs a bedroll somewhere in the consist. %/
+<<collapseNotice>>
+<<if !setup.condition.hasBedroll($currentTrain)>>
+You have no bedroll aboard to sleep in.
+
+<<link "Back">><<goto "TrainInterior">><</link>>
+<<else>>
+You lay the bedroll out in the cab.
+
+<span class="small-description">Fatigue: <<print setup.stats.getValue("fatigue")>>/100. Rest is worth less while you are hungry, thirsty or unwell: this bed is worth <<print Math.round(setup.condition.getRestEfficiency() * 100)>>% of a good night's sleep.</span>
+
+<<sleepChoices>>
+
+<<link "Get up again">><<goto "TrainInterior">><</link>>
+<</if>>

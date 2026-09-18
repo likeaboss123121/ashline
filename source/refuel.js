@@ -12,6 +12,8 @@
 setup.refuel = {
 	WATER_TANK_CHANCE: 0.4, // of stations with a water tank
 	GREEN_WOOD_GRADE: 50,
+	STATION_WATER_GRADE: 75, // a kept tank is fit to drink
+	RIVER_WATER_GRADE: 40, // water out of a river is not
 
 	// Every job, in the order the cab lists them.
 	//   loco        which locomotives it is for: 'diesel', 'steam', or 'any'
@@ -27,9 +29,9 @@ setup.refuel = {
 		{ id: 'water-from-tanker', label: 'Pump water from the tanker', loco: 'steam', tool: 'pump',
 			from: { carType: 'tanker car', cargo: 'water' }, into: 'water', unit: 'L', rate: 20, batch: 400, fatigue: 0.15 },
 		{ id: 'water-from-tank', label: "Pump water from the station's water tank", loco: 'steam', tool: 'pump',
-			where: 'station-tank', into: 'water', unit: 'L', rate: 20, batch: 400, fatigue: 0.15 },
+			where: 'station-tank', into: 'water', unit: 'L', rate: 20, batch: 400, fatigue: 0.15, grade: 75 },
 		{ id: 'water-from-river', label: 'Pump water from beside the line', loco: 'steam', tool: 'pump',
-			where: 'beside-water', into: 'water', unit: 'L', rate: 20, batch: 400, fatigue: 0.15 },
+			where: 'beside-water', into: 'water', unit: 'L', rate: 20, batch: 400, fatigue: 0.15, grade: 40 },
 		{ id: 'coal-from-gondola', label: 'Shovel coal from the gondola into the bunker', loco: 'steam', tool: 'toolkit',
 			from: { carType: 'gondola', cargo: 'coal' }, into: 'coal', unit: 'kg', rate: 25, batch: 200, fatigue: 0.4 },
 		{ id: 'firewood-from-gondola', label: 'Load firewood from the gondola', loco: 'steam',
@@ -37,7 +39,7 @@ setup.refuel = {
 		{ id: 'cut-timber', label: 'Cut timber into firewood', loco: 'steam', tool: 'axe',
 			from: { cargo: 'timber' }, into: 'firewood', unit: 'kg', rate: 15, batch: 150, fatigue: 0.6 },
 		{ id: 'chop-trees', label: 'Fell trees for timber', loco: 'any', tool: 'axe',
-			where: 'forest', into: 'timber', intoCar: true, unit: 'kg', rate: 10, batch: 300, fatigue: 0.7 }
+			where: 'forest', into: 'timber', intoCar: true, unit: 'kg', rate: 10, batch: 300, fatigue: 0.7, grade: 50 }
 	],
 
 	// How much more of a cargo a car can take: the lesser of what its volume and its weight limits still allow.
@@ -167,10 +169,10 @@ setup.refuel = {
 			var minutes = Math.max(1, Math.ceil(amount / job.rate - 1e-9));
 			options.push({
 				id: job.id, label: job.label, cargoType: job.into, kg: kg, amountText: self.describeAmount(job, kg),
-				minutes: minutes, fatigue: Math.round(minutes * job.fatigue), reason: reason,
-				grade: setup.fuel.isGraded(job.into)
-					? (job.where === 'forest' ? self.GREEN_WOOD_GRADE : source ? setup.fuel.getGrade(source.car, job.from.cargo) : 100)
-					: null
+				minutes: minutes, fatigue: Math.round(minutes * job.fatigue), fatiguePerMinute: job.fatigue, reason: reason,
+				grade: !setup.fuel.isGraded(job.into) ? null
+					: typeof job.grade === 'number' ? job.grade
+					: source ? setup.fuel.getGrade(source.car, job.from.cargo) : 100
 			});
 		});
 		return options;
@@ -217,7 +219,8 @@ Macro.add('refuelControls', {
 				return;
 			}
 			var grade = option.grade === null ? '' : ', grade ' + Math.round(option.grade) + '%';
-			output += '<<timedlink "' + option.label + ', ' + option.amountText + '" ' + option.minutes + ' "work">>'
+			output += '<<timedlink "' + option.label + ', ' + option.amountText + '" ' + option.minutes + ' "work" "fatigue:+'
+				+ setup.effects.levelForRate(option.fatiguePerMinute) + '">>'
 				+ '<<run setup.refuel.perform("' + option.id + '", ' + locoIndex + ')>><<goto "TrainInterior">><</timedlink>>'
 				+ ' <span class="small-description">(fatigue +' + option.fatigue + grade + ')</span><br>';
 		});
