@@ -2859,10 +2859,27 @@ Macro.add('debugTools', {
 
 		// This wrapper keeps all debug DOM isolated from story markup and makes it easy to rebuild on passage refresh.
 		var currentPassage = State.passage;
-		var wrapper = document.createElement('div');
-		wrapper.className = 'debug-container';
-		wrapper.style.color = '#ad3d3d';
-		this.output.appendChild(wrapper);
+		var panel = document.createElement('div');
+		panel.className = 'debug-container';
+		this.output.appendChild(panel);
+		// Everything written from here lands in the section opened last, so each block of tools carries its own
+		// heading and can be folded out of the way. wrapper is reassigned rather than replaced so the many
+		// appendChild calls below need no rewriting.
+		var wrapper = panel;
+		var startSection = function (title, open) {
+			var section = document.createElement('details');
+			section.className = 'debug-section';
+			section.open = !!open;
+			var summary = document.createElement('summary');
+			summary.textContent = title;
+			section.appendChild(summary);
+			var body = document.createElement('div');
+			body.className = 'debug-body';
+			section.appendChild(body);
+			panel.appendChild(section);
+			wrapper = body;
+			return body;
+		};
 		var wiki = function (markup) {
 			jQuery(wrapper).wiki(markup);
 		};
@@ -2987,24 +3004,24 @@ Macro.add('debugTools', {
 			wrapper.appendChild(addBtn);
 			wrapper.appendChild(document.createElement('br'));
 		};
-		if (!document.getElementById('debug-tools-style')) {
-			var styleEl = document.createElement('style');
-			styleEl.id = 'debug-tools-style';
-			styleEl.textContent = '.debug-container a { color: #a43dad; }';
-			document.head.appendChild(styleEl);
-		}
-
-		// Shared top-level debug info is shown in every supported passage before passage-specific tools are added.
-		wiki('<hr><h3>DEBUG TOOLS</h3>');
-		var passageInfo = document.createElement('p');
-		passageInfo.textContent = 'Current passage: ' + currentPassage;
-		wrapper.appendChild(passageInfo);
-		var seedInfo = document.createElement('p');
+		// The panel's own heading, then a line of what this session is: passage, seed, build.
+		var heading = document.createElement('h3');
+		heading.className = 'debug-heading';
+		heading.textContent = 'Debug tools';
+		panel.appendChild(heading);
+		var status = document.createElement('p');
+		status.className = 'debug-status';
 		var seedValue = typeof State.variables.randomSeed !== 'undefined' ? String(State.variables.randomSeed) : 'not set';
-		seedInfo.textContent = 'RNG Seed: ' + seedValue;
-		wrapper.appendChild(seedInfo);
+		var cachedBuild = setup.readCachedBuildMeta ? setup.readCachedBuildMeta() : null;
+		var currentBuildChecksum = setup.getBuildChecksum ? setup.getBuildChecksum() : 'unavailable';
+		status.textContent = currentPassage + ' \u00b7 seed ' + seedValue + ' \u00b7 v' + (setup.releaseVersion || 'unknown')
+			+ ' \u00b7 build ' + currentBuildChecksum.slice(0, 8)
+			+ (cachedBuild && cachedBuild.checksum && cachedBuild.checksum !== currentBuildChecksum
+				? ' (last played ' + cachedBuild.checksum.slice(0, 8) + ')' : '');
+		panel.appendChild(status);
 
 		// Time of day drives the lighting of the yard and driving views, so debug can jump the clock to any hour.
+		startSection('Clock and light', true);
 		var lightInfo = document.createElement('p');
 		var debugLight = setup.daylight.getLight();
 		lightInfo.textContent = 'Light: ' + debugLight.phase + ', sun ' + debugLight.elevation.toFixed(1) + '\u00b0 at latitude '
@@ -3029,14 +3046,9 @@ Macro.add('debugTools', {
 		});
 		lightInfo.appendChild(hourButton);
 		wrapper.appendChild(lightInfo);
-		var buildInfo = document.createElement('p');
-		var cachedBuild = setup.readCachedBuildMeta ? setup.readCachedBuildMeta() : null;
-		var currentBuildChecksum = setup.getBuildChecksum ? setup.getBuildChecksum() : 'unavailable';
-		var cachedBuildChecksum = cachedBuild && cachedBuild.checksum ? cachedBuild.checksum : 'none';
-		buildInfo.textContent = 'Build checksum (current/cached): ' + currentBuildChecksum.slice(0, 8) + ' / ' + cachedBuildChecksum.slice(0, 8) + ' | Version: ' + (setup.releaseVersion || 'unknown');
-		wrapper.appendChild(buildInfo);
 
-		// The survival stats are not driven by anything yet, so debug can move them to see how the sidebar reads.
+		// The player's condition, for setting a stat straight to a value worth testing against.
+		startSection('Condition');
 		var conditionLabel = document.createElement('label');
 		conditionLabel.textContent = 'Condition: ';
 		var conditionSelect = document.createElement('select');
@@ -3071,13 +3083,15 @@ Macro.add('debugTools', {
 
 		// The generated world between this station and the next, read straight from the seed. Deliberately plain:
 		// it is here to check what the generator produced, not to be a player-facing map.
+		startSection('World map');
 		setup.worldmap.appendDebugMap(wrapper, State.variables.currentStation);
 
 		// TrainInterior debug mode focuses on cargo editing for the active consist and current car.
 		if (currentPassage === 'TrainInterior') {
+			startSection('Cargo', true);
 			var currentTrain = State.variables.currentTrain;
 			if (!currentTrain || !currentTrain.length) {
-				wiki('<p><em>No active train available.</em></p><hr>');
+				wiki('<p><em>No active train available.</em></p>');
 				return;
 			}
 
@@ -3095,12 +3109,12 @@ Macro.add('debugTools', {
 			wiki('<<link "Clear Current Car Cargo">><<run State.variables.currentTrain[State.variables.currentCarIndex].cargo = []>><<goto "TrainInterior">><</link>><br>');
 			wiki('<<link "Clear Current Train Cargo">><<run (function() { for (var i = 0; i < State.variables.currentTrain.length; i++) { State.variables.currentTrain[i].cargo = []; } })()>><<goto "TrainInterior">><</link>><br>');
 			buildAddCargoSection(currentCar);
-			wiki('<hr>');
 			return;
 		}
 
 		// DrivingMode debug output is intentionally read-only for now so shunting logic is not bypassed accidentally.
 		if (currentPassage === 'DrivingMode') {
+			startSection('Consist', true);
 			var drivingTrain = State.variables.currentTrain;
 			var drivingInfo = document.createElement('p');
 			drivingInfo.textContent = 'Driving track: ' + (typeof State.variables.drivingTrackIndex !== 'undefined' ? setup.railyard.getTrackLabel(State.variables.stationTracks[State.variables.currentStation] || [], State.variables.drivingTrackIndex) : 'unknown');
@@ -3110,19 +3124,20 @@ Macro.add('debugTools', {
 				consistInfo.textContent = 'Current consist: ' + setup.railyard.getTrainCarListText(drivingTrain);
 				wrapper.appendChild(consistInfo);
 			}
-			wiki('<hr>');
 			return;
 		}
 
 		// The railyard debug panel is the full editor: selection, deletion, cargo editing, swapping, and track management.
 		if (currentPassage !== 'Railyard') {
-			wiki('<p><em>No debug tools are available in this passage yet.</em></p><hr>');
+			startSection('Yard', true);
+			wiki('<p><em>This passage has no yard tools.</em></p>');
 			return;
 		}
 
 		var stationId = State.variables.currentStation;
 		if (typeof State.variables.stationTracks[stationId] === 'undefined') {
-			wiki('<p><em>No station track data available.</em></p><hr>');
+			startSection('Yard', true);
+			wiki('<p><em>No station track data available.</em></p>');
 			return;
 		}
 
@@ -3135,12 +3150,13 @@ Macro.add('debugTools', {
 		}
 
 		if (!totalTrains) {
-			wiki('<p><em>No trains to debug.</em></p>');
+			startSection('Yard', true);
+			wiki('<p><em>No trains in this yard.</em></p>');
 		}
 
 		// Build the train/car selectors first so every later debug action has a stable target.
 		if (totalTrains > 0) {
-			wiki('<h4>Train & Car Selection</h4>');
+			startSection('Train and car selection', true);
 
 			// Build train dropdown
 			var trainEntries = [];
@@ -3236,7 +3252,7 @@ Macro.add('debugTools', {
 
 			var targetName = State.variables.debugSelectedCarIndex === -1 ? 'Train' : 'Car ' + (State.variables.debugSelectedCarIndex + 1);
 
-				wiki('<h4>Actions</h4>');
+				startSection('Actions on the selected train', true);
 				wiki('<<link "Delete ' + targetName + '">><<run setup.railyard.deleteDebugTarget(State.variables.currentStation, State.variables.debugSelectedTrackIndex, State.variables.debugSelectedTrainIndex, State.variables.debugSelectedCarIndex)>><<goto "Railyard">><</link>><br>');
 				wiki('<<link "Clear Cargo of ' + targetName + '">><<run (function() { if (State.variables.debugSelectedCarIndex === -1) { var train = State.variables.stationTracks[State.variables.currentStation][State.variables.debugSelectedTrackIndex].trains[State.variables.debugSelectedTrainIndex]; for (var i = 0; i < train.length; i++) { train[i].cargo = []; } } else { State.variables.stationTracks[State.variables.currentStation][State.variables.debugSelectedTrackIndex].trains[State.variables.debugSelectedTrainIndex][State.variables.debugSelectedCarIndex].cargo = []; } })()>><<goto "Railyard">><</link>><br><br>');
 				if (selectedCarIndex !== -1) {
@@ -3247,7 +3263,7 @@ Macro.add('debugTools', {
 
 		// Swapping is separated from deletion/editing because it needs two train selections and fit validation.
 		if (totalTrains >= 2) {
-			wiki('<h4>Swap Two Trains</h4>');
+			startSection('Swap two trains');
 			var swapEntries = [];
 			var swapNumber = 1;
 			for (var sti = 0; sti < tracks.length; sti++) {
@@ -3322,7 +3338,7 @@ Macro.add('debugTools', {
 		}
 
 		// Placement and track management live at the end because they mutate the yard layout itself.
-		wiki('<h4>Place New Train on Track</h4>');
+		startSection('Place a new train');
 		var placeTrackLabel = document.createElement('label');
 		placeTrackLabel.textContent = 'Select Track: ';
 		var placeTrackSelect = document.createElement('select');
@@ -3359,7 +3375,7 @@ Macro.add('debugTools', {
 
 		wiki('<<link "Place Train">><<run (function() { var trackIdx = parseInt(document.getElementById("debugPlaceTrackSelect").value, 10); var carType = document.getElementById("debugTrainTypeSelect").value; var newTrain = setup.railyard.createTrainFromPreset(carType); if (!newTrain.length) { return; } setup.railyard.placeTrainInStationTracks(State.variables.stationTracks[State.variables.currentStation], newTrain, trackIdx); })()>><<goto "Railyard">><</link>><br>');
 
-		wiki('<h4>Track Management</h4>');
+		startSection('Track management');
 		var deleteTrackLabel = document.createElement('label');
 		deleteTrackLabel.textContent = 'Delete Yard Track: ';
 		var deleteTrackSelect = document.createElement('select');

@@ -133,3 +133,88 @@
 		line-height: 2.4;
 	}
 }
+
+/* Debug tools: a panel of folded sections rather than one wall of controls, and clearly not part of the game. */
+.debug-container {
+	margin-top: 1.2em;
+	padding: 0.6em 0.8em 0.8em;
+	color: #c8b8b8;
+	background: #1b1618;
+	border: 1px solid #55343a;
+	border-radius: 4px;
+	font-size: 0.9em;
+}
+
+.debug-container a {
+	color: #c77ccc;
+}
+
+.debug-heading {
+	margin: 0;
+	color: #d4707a;
+	font-size: 1em;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.debug-status {
+	margin: 0.2em 0 0.8em;
+	color: #8f8388;
+	font-family: monospace;
+	font-size: 0.85em;
+}
+
+.debug-section {
+	margin-bottom: 0.3em;
+	background: #201a1c;
+	border: 1px solid #3a2a2e;
+	border-radius: 3px;
+}
+
+.debug-section > summary {
+	padding: 0.35em 0.6em;
+	color: #d8c8c8;
+	cursor: pointer;
+	user-select: none;
+}
+
+.debug-section[open] > summary {
+	border-bottom: 1px solid #3a2a2e;
+}
+
+.debug-body {
+	padding: 0.5em 0.6em;
+}
+
+.debug-body h4 {
+	margin: 0.2em 0 0.4em;
+	color: #c8b0b4;
+	font-size: 0.95em;
+}
+
+.debug-body p {
+	margin: 0.25em 0;
+}
+
+.debug-body select,
+.debug-body input {
+	margin: 0.1em 0.3em 0.1em 0;
+	color: #d8d0d0;
+	background: #2a2226;
+	border: 1px solid #4a373c;
+	border-radius: 2px;
+}
+
+.debug-body button {
+	margin: 0.15em 0.3em 0.15em 0;
+	padding: 0.15em 0.6em;
+	color: #e0d0d0;
+	background: #33272b;
+	border: 1px solid #55343a;
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+.debug-body button:hover {
+	background: #3f3035;
+}
