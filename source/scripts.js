@@ -558,6 +558,7 @@ State.variables.cargoTypes = {
 setup.railyard = {
 	locomotiveKeys: ['dieselShunter', 'dieselRoad', 'steamShunter', 'steamPrairie'],
 	carKeys: ['boxcar', 'flatcar', 'tanker', 'gondola'],
+	DERELICT_CHANCE: 0.2, // of stations with a dead car standing in the way of something
 	cargoPresets: [
 		// grade: the range a found load is drawn from. Years of storage mean most diesel is well past its best.
 		// cars: which cars a preset is found in, where it is narrower than what the car accepts.
@@ -1035,6 +1036,40 @@ setup.railyard = {
 		}
 		return cargo;
 	},
+	// Now and then a station has a dead car standing in the way. It carries nothing and is worth nothing, so the
+	// only thing to do with it is shift it, which is the point of it.
+	addDerelict: function(tracks, rng) {
+		if (rng() >= this.DERELICT_CHANCE) {
+			return null;
+		}
+		var candidates = [];
+		for (var index = 1; index < tracks.length - 1; index++) {
+			var track = tracks[index];
+			if (track.length - this.getTrackOccupiedLength(track) >= 16) {
+				candidates.push(index);
+			}
+		}
+		if (!candidates.length) {
+			return null;
+		}
+		var trackIndex = candidates[this.randomInt(rng, 0, candidates.length - 1)];
+		tracks[trackIndex].trains.push([this.createDerelictCar(this.randomChoice(rng, this.carKeys), rng)]);
+		return trackIndex;
+	},
+	// A derelict: a car that carries nothing, takes nothing and is worth nothing.
+	createDerelictCar: function(carKey, rng) {
+		var car = this.cloneCar(State.variables.defaultTrains[carKey]);
+		car.cargo = [];
+		car.acceptedCargo = [];
+		car.derelict = true;
+		car.name = 'derelict ' + car.type;
+		car.hasInterior = false;
+		car.facing = rng() < 0.5 ? -1 : 1;
+		return car;
+	},
+	isDerelictCar: function(car) {
+		return !!car && car.derelict === true;
+	},
 	// Creates a locomotive instance from defaults and guarantees it starts empty.
 	createLocomotiveCar: function(locoKey) {
 		var loco = this.cloneCar(State.variables.defaultTrains[locoKey]);
@@ -1489,7 +1524,7 @@ setup.railyard = {
 		// Which way the player is going decides which end of the yard they are looking from. Backing into the
 		// station they just left is not a change of direction: they are still heading the way they were, so the
 		// yard keeps its orientation and nothing appears to turn round.
-		if (Number(destination) !== Number(variables.currentStation)) {
+		if (String(destination) !== String(variables.currentStation)) {
 			variables.travellingForward = !!towardExit;
 		}
 		variables.currentStation = destination;
@@ -1502,6 +1537,9 @@ setup.railyard = {
 	departOntoLine: function(towardExit) {
 		setup.tutorial.finish();
 		var variables = State.variables;
+		if (setup.worldmap.isBranchStation(variables.currentStation)) {
+			return this.departFromBranchTerminus();
+		}
 		var stationId = Number(variables.currentStation);
 		if (this.getDepartureBlockReason(stationId, variables.drivingTrackIndex, towardExit)) {
 			return false;
@@ -1513,6 +1551,22 @@ setup.railyard = {
 		var tiles = setup.worldmap.getMainLine(setup.worldmap.getSeed(), legIndex);
 		variables.travellingForward = !!towardExit;
 		variables.journey = { legIndex: legIndex, tileIndex: towardExit ? 0 : tiles.length - 1, forward: !!towardExit };
+		return true;
+	},
+	// Leaving a branch terminus: back onto the branch at its far end, facing the junction it came from.
+	departFromBranchTerminus: function() {
+		var variables = State.variables;
+		var branch = setup.worldmap.getBranchForStation(setup.worldmap.getSeed(), variables.currentStation);
+		if (!branch || !branch.tiles.length) {
+			return false;
+		}
+		if (this.getDepartureBlockReason(variables.currentStation, variables.drivingTrackIndex, false)) {
+			return false;
+		}
+		variables.journey = {
+			legIndex: branch.legIndex, branch: branch.id, tileIndex: branch.tiles.length - 1,
+			forward: variables.travellingForward !== false
+		};
 		return true;
 	},
 	// One 5 km step: direction 1 carries on toward the destination, -1 backs up the way the train came. Reaching
@@ -1543,7 +1597,9 @@ setup.railyard = {
 		State.variables.journey = journey;
 		if (step.arrivesAt) {
 			// Arriving forward means coming in on the next station's entry lead, and backing in means its exit lead.
-			this.arriveAtStation(step.arrivesAt, step.arrivesAt > journey.legIndex);
+			// A branch terminus has only the one lead, so a train always arrives on it.
+			var onEntryLead = setup.worldmap.isBranchStation(step.arrivesAt) || step.arrivesAt > journey.legIndex;
+			this.arriveAtStation(step.arrivesAt, onEntryLead);
 		}
 		return true;
 	},
@@ -2072,6 +2128,10 @@ setup.railyard = {
 			];
 		}
 
+		if (setup.worldmap.isBranchStation(stationId)) {
+			return this.generateBranchTerminus(stationId, baseSeed);
+		}
+
 		// The yard's shape is settled first: how many tracks it has, which track each lead runs along, and how
 		// long its longest track is. Every other length follows from that geometry, so no track is drawn at a
 		// length its switches could not give it.
@@ -2119,6 +2179,31 @@ setup.railyard = {
 		tracks[0].direction = this.oppositeDirection(this.getLegHeading(stationId - 1, baseSeed));
 		tracks[tracks.length - 1].direction = this.getLegHeading(stationId, baseSeed);
 
+		this.addDerelict(tracks, shapeRng);
+		return tracks;
+	},
+	// The end of a branch: a couple of short roads and one way out, the way the train came in. Shunting here is
+	// the whole point of the place, so it gets no second lead to escape through.
+	generateBranchTerminus: function(stationId, baseSeed) {
+		var branch = setup.worldmap.getBranchForStation(setup.worldmap.getSeed(), stationId);
+		var rng = this.mulberry32(this.seedFromString(baseSeed + stationId + ':terminus'));
+		var yardCount = this.randomInt(rng, 2, 3);
+		var lengths = [];
+		for (var row = 0; row < yardCount; row++) {
+			lengths.push(this.randomInt(rng, 8, 18) * 10);
+		}
+		var tracks = [{ length: 999999, infinite: true, trains: [] }]
+			.concat(this.generateRailyardTracks(baseSeed + stationId, lengths))
+			.concat([{ length: 999999, infinite: true, trains: [], hasLead: false }]);
+		tracks[0].leadTrack = 1;
+		tracks[tracks.length - 1].leadTrack = yardCount;
+		// The way in is the way the branch runs, so the lead is named for the direction a train leaves by.
+		var last = branch && branch.tiles.length ? branch.tiles[branch.tiles.length - 1] : null;
+		var back = last && last.ends.length ? last.ends[0] : 0;
+		// A lead is named for one of the four compass points, so a branch running north-east comes in as north.
+		var heading = setup.worldmap.DIRECTIONS[back].name;
+		var cardinal = { n: 'north', ne: 'north', nw: 'north', s: 'south', se: 'south', sw: 'south', e: 'east', w: 'west' };
+		tracks[0].direction = cardinal[heading] || 'north';
 		return tracks;
 	},
 	// Chooses the preferred car index to board when entering a train (locomotive first, then interior car).
@@ -2849,6 +2934,24 @@ Macro.add('drivingTravelButtons', {
 		}
 		var trackIndex = State.variables.drivingTrackIndex;
 		var output = '';
+		if (setup.worldmap.isBranchStation(stationId)) {
+			var terminus = setup.worldmap.getBranchForStation(setup.worldmap.getSeed(), stationId);
+			var terminusReason = setup.railyard.getDepartureBlockReason(stationId, trackIndex, false);
+			var terminusHeading = setup.railyard.getDirectionName(setup.railyard.getLeadDirection(tracks, 'entry'));
+			var terminusLabel = 'Depart ' + terminusHeading + ' toward the main line';
+			if (terminusReason) {
+				output += '<span class="yard-reason" data-yard-reason="depart:entry"><em>' + terminusLabel
+					+ ' unavailable: ' + terminusReason + '</em></span>';
+			} else {
+				output += '<span data-yard-action="depart:entry"><<link "' + terminusLabel + '">>'
+					+ '<<run setup.railyard.departOntoLine(false)>><<goto "OnTheLine">><</link>></span><br>';
+				output += '<span class="small-description">'
+					+ setup.units.kilometres((terminus ? terminus.tiles.length : 0) * setup.worldmap.TILE_KM)
+					+ ' of branch back to the line it leaves.</span><br>';
+			}
+			new Wikifier(this.output, output);
+			return;
+		}
 		[false, true].forEach(function(towardExit) {
 			if (!towardExit && stationId <= 1) return;
 			// Travelling reads as the heading the lead track is named for, not as next and previous.

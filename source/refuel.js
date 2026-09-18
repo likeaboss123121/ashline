@@ -41,6 +41,18 @@ setup.refuel = {
 		{ id: 'chop-trees', label: 'Fell trees for timber', loco: 'any', tool: 'axe',
 			where: 'forest', into: 'timber', intoCar: true, unit: 'kg', rate: 10, batch: 300, fatigue: 0.7, grade: 50 }
 	],
+	// Siphoning takes from another locomotive rather than from a car of cargo. The jobs are the same shape; what
+	// changes is where the fuel comes from, so the player picks which engine to drain when there is more than one.
+	SIPHON_JOBS: [
+		{ id: 'siphon-diesel', label: 'Siphon diesel from', loco: 'diesel', tool: 'pump', cargo: 'diesel',
+			unit: 'L', rate: 15, batch: 400, fatigue: 0.2 },
+		{ id: 'siphon-water', label: 'Take water from', loco: 'steam', tool: 'pump', cargo: 'water',
+			unit: 'L', rate: 15, batch: 400, fatigue: 0.2 },
+		{ id: 'siphon-coal', label: 'Shovel coal across from', loco: 'steam', tool: 'toolkit', cargo: 'coal',
+			unit: 'kg', rate: 20, batch: 200, fatigue: 0.45 },
+		{ id: 'siphon-firewood', label: 'Carry firewood across from', loco: 'steam', cargo: 'firewood',
+			unit: 'kg', rate: 25, batch: 200, fatigue: 0.4 }
+	],
 
 	// How much more of a cargo a car can take: the lesser of what its volume and its weight limits still allow.
 	getRoom: function(car, cargoType) {
@@ -124,6 +136,98 @@ setup.refuel = {
 	describeAmount: function(job, kg) {
 		var density = setup.railyard.getCargoDensityKgPerLiter(job.into);
 		return job.unit === 'L' ? Math.round(kg / density) + ' L' : Math.round(kg) + ' kg';
+	},
+
+	// The locomotives the player could take fuel from: every other engine standing on this track, and every engine
+	// coupled into the consist. Each is offered separately, because which one to drain is the player's choice.
+	getSiphonSources: function(train, loco) {
+		var sources = [];
+		var seen = [];
+		var add = function(car, where) {
+			if (!car || car === loco || !setup.items.isLocomotive(car) || seen.indexOf(car) !== -1) {
+				return;
+			}
+			seen.push(car);
+			sources.push({ car: car, where: where, name: car.name || car.type });
+		};
+		(Array.isArray(train) ? train : []).forEach(function(car) { add(car, 'in your consist'); });
+		var variables = State.variables;
+		var tracks = variables.stationTracks ? variables.stationTracks[variables.currentStation] : null;
+		var trackIndex = setup.safeParseInt(variables.drivingTrackIndex, -1);
+		if (Array.isArray(tracks) && tracks[trackIndex]) {
+			(tracks[trackIndex].trains || []).forEach(function(parked) {
+				(parked || []).forEach(function(car) { add(car, 'parked alongside'); });
+			});
+		}
+		return sources;
+	},
+	// One siphoning job per source locomotive that actually has something worth taking.
+	getSiphonOptions: function(train, locoIndex) {
+		var loco = Array.isArray(train) ? train[locoIndex] : null;
+		var railyard = setup.railyard;
+		var self = this;
+		if (!setup.items.isLocomotive(loco)) {
+			return [];
+		}
+		var kind = railyard.isSteamLocomotiveCar(loco) ? 'steam' : railyard.isDieselLocomotiveCar(loco) ? 'diesel' : '';
+		var sources = this.getSiphonSources(train, loco);
+		var options = [];
+		this.SIPHON_JOBS.forEach(function(job) {
+			if (job.loco !== kind) {
+				return;
+			}
+			if (job.tool && !setup.items.consistHas(train, job.tool)) {
+				return;
+			}
+			var room = self.getRoom(loco, job.cargo);
+			if (room <= 0) {
+				return;
+			}
+			var density = railyard.getCargoDensityKgPerLiter(job.cargo);
+			sources.forEach(function(source, index) {
+				var available = railyard.getCargoAmount(source.car, job.cargo);
+				if (available <= 0) {
+					return;
+				}
+				var batchKg = job.unit === 'L' ? job.batch * density : job.batch;
+				var kg = Math.min(batchKg, available * density, room * density);
+				if (kg <= 0) {
+					return;
+				}
+				var amount = job.unit === 'L' ? kg / density : kg;
+				var minutes = Math.max(1, Math.ceil(amount / job.rate - 1e-9));
+				options.push({
+					id: job.id + ':' + index, jobId: job.id, sourceIndex: index, cargoType: job.cargo, kg: kg,
+					label: job.label + ' the ' + source.name + ' ' + source.where,
+					amountText: self.describeAmount({ into: job.cargo, unit: job.unit }, kg),
+					minutes: minutes, fatigue: Math.round(minutes * job.fatigue), fatiguePerMinute: job.fatigue,
+					grade: setup.fuel.isGraded(job.cargo) ? setup.fuel.getGrade(source.car, job.cargo) : null, reason: ''
+				});
+			});
+		});
+		return options;
+	},
+	// Moves one batch between locomotives.
+	performSiphon: function(id, locoIndex) {
+		var train = State.variables.currentTrain;
+		var option = this.getSiphonOptions(train, locoIndex).filter(function(candidate) { return candidate.id === id; })[0];
+		if (!option || !(option.kg > 0)) {
+			return false;
+		}
+		var loco = train[locoIndex];
+		var source = this.getSiphonSources(train, loco)[option.sourceIndex];
+		if (!source) {
+			return false;
+		}
+		var density = setup.railyard.getCargoDensityKgPerLiter(option.cargoType);
+		var litres = Math.min(option.kg / density, setup.railyard.getCargoAmount(source.car, option.cargoType),
+			this.getRoom(loco, option.cargoType));
+		if (litres <= 0 || !setup.railyard.consumeCargoAmount(source.car, option.cargoType, litres)) {
+			return false;
+		}
+		setup.fuel.addCargo(loco, option.cargoType, litres, option.grade);
+		setup.stats.adjust('fatigue', option.fatigue);
+		return true;
 	},
 
 	// Every refuelling job that applies to this locomotive. Each is ready to run, with its amount, time and effort,
@@ -214,6 +318,15 @@ Macro.add('refuelControls', {
 		}
 		var output = '<h4>Refuelling</h4>';
 		var offered = 0;
+		setup.refuel.getSiphonOptions(variables.currentTrain, locoIndex).forEach(function(option) {
+			offered++;
+			var grade = option.grade === null ? '' : ' <span class="small-description">(grade '
+				+ Math.round(option.grade) + '%)</span>';
+			output += '<<timedlink "' + option.label + ', ' + option.amountText + '" ' + option.minutes + ' "work" "fatigue:+'
+				+ setup.effects.levelForRate(option.fatiguePerMinute) + '">>'
+				+ '<<run setup.refuel.performSiphon("' + option.id + '", ' + locoIndex + ')>><<goto "TrainInterior">><</timedlink>>'
+				+ grade + '<br>';
+		});
 		options.forEach(function(option) {
 			if (option.reason) {
 				return;

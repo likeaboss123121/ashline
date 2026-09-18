@@ -248,7 +248,14 @@ setup.worldmap = {
 	},
 	// Station 1 sits at the origin; every station after it stands at the end of the leg that reaches it.
 	getStationTile: function(seed, stationId) {
-		var id = Math.max(1, Math.floor(stationId));
+		if (this.isBranchStation(stationId)) {
+			var branch = this.getBranchForStation(seed, stationId);
+			return branch ? branch.tiles[branch.tiles.length - 1] : { x: 0, y: 0 };
+		}
+		var id = Math.floor(Number(stationId));
+		if (!isFinite(id) || id < 1) {
+			return { x: 0, y: 0 }; // a station id the map does not place, such as one from a branch it cannot find
+		}
 		var cache = this.cacheFor(seed);
 		if (cache.stations[id]) {
 			return cache.stations[id];
@@ -390,10 +397,7 @@ setup.worldmap = {
 				tiles.push(branchTile);
 				byKey[self.key(branchTile.x, branchTile.y)] = branchTile;
 			});
-			branches.push({
-				id: legIndex + ':' + i + ':' + branchDirection, legIndex: legIndex, fromIndex: i,
-				direction: branchDirection, tiles: branch.tiles, rejoinIndex: branch.rejoinIndex
-			});
+			branches.push(this.finishBranch(legIndex, branches.length, i, branchDirection, branch));
 
 			// Now and then a second branch leaves the far side of the same tile, and the lines cross there.
 			var acrossDirection = this.opposite(branchDirection);
@@ -409,15 +413,41 @@ setup.worldmap = {
 							tiles.push(branchTile);
 							byKey[self.key(branchTile.x, branchTile.y)] = branchTile;
 						});
-						branches.push({
-							id: legIndex + ':' + i + ':' + acrossDirection, legIndex: legIndex, fromIndex: i,
-							direction: acrossDirection, tiles: across.tiles, rejoinIndex: across.rejoinIndex
-						});
+						branches.push(this.finishBranch(legIndex, branches.length, i, acrossDirection, across));
 					}
 				}
 			}
 		}
 		return branches;
+	},
+	// A branch, as the rest of the game sees it. One that does not find the main line again ends at a station of
+	// its own, so every track the player can take leads somewhere they can stop, shunt and turn round.
+	finishBranch: function(legIndex, ordinal, fromIndex, direction, built) {
+		var branch = {
+			id: legIndex + ':' + fromIndex + ':' + direction, legIndex: legIndex, fromIndex: fromIndex,
+			direction: direction, tiles: built.tiles, rejoinIndex: built.rejoinIndex, stationId: null
+		};
+		if (built.rejoinIndex === null && built.tiles.length) {
+			branch.stationId = 'L' + legIndex + 'B' + (ordinal + 1);
+			built.tiles[built.tiles.length - 1].station = branch.stationId;
+		}
+		return branch;
+	},
+	// Station ids are numbers along the main line, and 'L3B1' for the terminus of a branch off leg 3.
+	isBranchStation: function(stationId) {
+		return /^L\d+B\d+$/.test(String(stationId));
+	},
+	getBranchForStation: function(seed, stationId) {
+		var match = /^L(\d+)B(\d+)$/.exec(String(stationId));
+		if (!match) {
+			return null;
+		}
+		var branches = this.getLeg(seed, Number(match[1])).branches || [];
+		return branches.filter(function(branch) { return branch.stationId === stationId; })[0] || null;
+	},
+	// What the player calls a station.
+	getStationName: function(stationId) {
+		return 'Station ' + String(stationId).replace(/^L/, '').replace('B', 'B');
 	},
 	// One branch off the main line. Most wander a few tiles and stop at a buffer stop; some bend back and meet the
 	// main line again further along, which makes them a real alternative route rather than a dead end with a view.
@@ -679,6 +709,7 @@ setup.worldmap = {
 			}
 			return this.describeStep(this.getStepGrade(tiles, from, out), tiles[out].terrain,
 				{ fromIndex: from, toIndex: out,
+					arrivesAt: (out === tiles.length - 1 && branch.stationId) ? branch.stationId : 0,
 					heading: this.describeDirection(out > from ? tiles[from].out : this.opposite(tiles[out].out)) });
 		}
 
@@ -742,8 +773,13 @@ setup.worldmap = {
 		return Math.round(limit / this.GRADE_STEP) * this.GRADE_STEP;
 	},
 	// Which leg a departure uses: heading on takes the leg ahead of the station, turning back takes the one behind.
+	// A branch terminus is on no leg of its own; leaving one is handled by the branch it stands at the end of.
 	getLegIndexFor: function(stationId, towardExit) {
-		return towardExit ? Math.floor(stationId) : Math.floor(stationId) - 1;
+		var id = Math.floor(Number(stationId));
+		if (!isFinite(id)) {
+			return 0;
+		}
+		return towardExit ? id : id - 1;
 	},
 	// Time over a leg, tile by tile. Climbing is slow and a heavy train is slower still; running downhill saves a
 	// little. Fuel follows from the clock, because the time system burns fuel by the minute while travelling.
@@ -808,7 +844,8 @@ setup.worldmap = {
 	// them. It is a look at what the generator produced, not a player-facing map.
 	buildDebugMap: function(stationId, cellSize) {
 		var seed = this.getSeed();
-		var legIndex = Math.max(1, Math.floor(stationId));
+		var branchHere = this.getBranchForStation(seed, stationId);
+		var legIndex = branchHere ? branchHere.legIndex : Math.max(1, Math.floor(stationId));
 		var leg = this.getLeg(seed, legIndex);
 		var rect = leg.rect;
 		var cell = cellSize || 9;
