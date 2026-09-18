@@ -53,6 +53,11 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 [[Begin Your Journey|Railyard]]
 
 
+:: PassageHeader
+/% Runs before every passage: the backup reminder sits above whatever the player is doing. %/
+<<saveReminder>>
+
+
 :: StoryMenu
 /% Sidebar menu extension passage: keeps utility links (currently Credits dialog) out of gameplay passages. %/
 <<link "Condition">><<run setup.showConditionDialog()>><</link>><br>
