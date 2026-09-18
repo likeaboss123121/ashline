@@ -468,15 +468,10 @@ setup.railyardView = {
 	// The largest step that fits the screen, never below half, which is the art at one pixel to one pixel: shrinking
 	// a yard to fit a phone makes it unreadable and its tap targets too small to hit, so a big yard is scrolled
 	// instead. Fit is still a button away.
+	// The view opens fitted: the whole yard on screen is what tells the player where everything is. Zooming in is a
+	// button away for reading detail or for a finger-sized target.
 	getDefaultZoom: function(naturalWidth) {
-		var available = this.getViewportWidth();
-		var steps = this.ZOOM_STEPS.filter(function(step) { return step >= 0.5 && step <= 1; });
-		for (var i = steps.length - 1; i >= 0; i--) {
-			if (naturalWidth * steps[i] <= available) {
-				return steps[i];
-			}
-		}
-		return steps[0];
+		return naturalWidth > this.getViewportWidth() ? null : 1;
 	},
 	getZoom: function(naturalWidth) {
 		if (this.zoomLevel === 'fit') {

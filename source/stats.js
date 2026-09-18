@@ -1,8 +1,10 @@
 // The player's condition: six stats, the words that describe them, and what drives each one.
 //
-// There are two kinds. A burden climbs from 0 (fine) to 100 (dire): fatigue, damage, hunger, thirst. A reserve
-// falls from 100 (fine) to 0: immunity and mental health. Holding both in one list lets the sidebar draw and word
-// them the same way, and lets the rest of the game move a stat without caring which kind it is.
+// There are two kinds. A reserve falls from 100 (fine) to 0 (dire): health, immunity, sanity, hunger and thirst
+// all read as how much of something is left, so a full bar is always good news. Fatigue is the one burden, and
+// climbs from 0 to 100, because what it measures is how much of it has built up. Holding both kinds in one list
+// lets the sidebar draw and word them the same way, and lets the rest of the game move a stat without caring
+// which kind it is.
 //
 // A bar's length is the stat's own value, so it reads as the number it is. Its colour is the judgement: severity
 // rises as a burden fills and as a reserve empties, so red always means trouble whichever way the stat runs.
@@ -15,32 +17,39 @@ setup.stats = {
 		{
 			key: 'fatigue', label: 'Fatigue', kind: 'burden',
 			bands: ['Rested', 'Tired', 'Weary', 'Exhausted', 'Collapsing'],
-			driver: 'Work, and the hours since you last slept.'
+			driver: 'Climbs with every hour you are awake, and faster while you work. '
+				+ 'Sleeping in your bedroll brings it down; so does collapsing where you stand, which you will do if it fills. '
+				+ 'Hunger, thirst and poor health make it climb faster and make rest worth less.'
 		},
 		{
-			key: 'physicalDamage', label: 'Damage', kind: 'burden',
+			key: 'health', label: 'Health', kind: 'reserve',
 			bands: ['Unhurt', 'Bruised', 'Hurt', 'Injured', 'Broken'],
-			driver: 'Falls, Foamers, and injuries at work.'
+			driver: 'Falls with falls, fights and injuries at work, and is worn down by going hungry or thirsty for long. '
+				+ 'It comes back slowly while you are fed, watered and rested.'
 		},
 		{
 			key: 'immunity', label: 'Immunity', kind: 'reserve',
 			bands: ['Strong', 'Steady', 'Weakened', 'Failing', 'Overwhelmed'],
-			driver: 'Poor water, poor food, and wounds left untreated.'
+			driver: 'Falls with poor food, poor water and untreated wounds, and with long hunger or thirst. '
+				+ 'A weakened body tires faster and rests worse. Good food and clean water build it back.'
 		},
 		{
-			key: 'mentalHealth', label: 'Mind', kind: 'reserve',
+			key: 'sanity', label: 'Sanity', kind: 'reserve',
 			bands: ['Sound', 'Strained', 'Fraying', 'Haunted', 'Breaking'],
-			driver: 'Overwork and isolation, and whatever is out there.'
+			driver: 'Falls when you are awake in the small hours, and whenever you collapse from exhaustion. '
+				+ 'It mends on its own with time, and fastest while you sleep through the night.'
 		},
 		{
-			key: 'hunger', label: 'Hunger', kind: 'burden',
+			key: 'hunger', label: 'Hunger', kind: 'reserve',
 			bands: ['Fed', 'Peckish', 'Hungry', 'Starving', 'Wasting'],
-			driver: 'Going without food.'
+			driver: 'Falls as the hours pass. Eating rations fills it, and how good the food is decides what it does '
+				+ 'to your immunity. Empty, it eats into your health and wears you out faster.'
 		},
 		{
-			key: 'thirst', label: 'Thirst', kind: 'burden',
+			key: 'thirst', label: 'Thirst', kind: 'reserve',
 			bands: ['Watered', 'Dry', 'Thirsty', 'Parched', 'Failing'],
-			driver: 'Going without water.'
+			driver: 'Falls as the hours pass, faster than hunger. Drinking fills it, and how clean the water is decides '
+				+ 'what it does to your immunity. Empty, it eats into your health and wears you out faster.'
 		}
 	],
 
@@ -217,11 +226,6 @@ setup.showConditionDialog = function() {
 		block.appendChild(driver);
 		body.appendChild(block);
 	});
-	var note = document.createElement('p');
-	note.className = 'condition-driver';
-	note.textContent = 'Nothing moves these yet: the survival loop is not built. The readings are here so the screen '
-		+ 'and the numbers can be judged before anything starts driving them.';
-	body.appendChild(note);
 	Dialog.append(body);
 	Dialog.open();
 };

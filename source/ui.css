@@ -1,0 +1,24 @@
+/* Shared interface bits that are not part of a single view. */
+
+/* The settings screen keeps its technical controls folded away, so a new player sees a Continue link and little
+   else, while the seed and the debug tools stay one click from anyone who wants them. */
+.advanced-settings {
+	margin: 0.5em 0;
+	padding: 0.4em 0.6em;
+	background: #1c2022;
+	border: 1px solid #2a2f31;
+	border-radius: 4px;
+}
+
+.advanced-settings > summary {
+	cursor: pointer;
+	color: #8d938f;
+	font-size: 0.9em;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.advanced-settings[open] > summary {
+	margin-bottom: 0.6em;
+	color: #c7c5b9;
+}

@@ -4,13 +4,15 @@ Macro.add('settingsStart', {
 		if (!State.variables.randomSeed) {
 			State.variables.randomSeed = String(Math.floor(Math.random() * 10000000000) + 1);
 		}
-		// Story mode is intentionally visible but disabled so the release build can advertise it without exposing dead paths.
+		// The seed and the debug tools are for people who came looking for them, so they stay folded away.
 		new Wikifier(this.output, `
 			<h3>Game Settings</h3>
-			<label><input type="radio" name="mode" value="Story" disabled${State.variables.settingsMode === "Story" ? " checked" : ""}> Story Mode (Coming Soon)</label><br>
-			<label><<radiobutton "$settingsMode" "Infinite" autocheck>> Infinite Mode</label><br><br>
-			<label>Random Seed: <<textbox "$randomSeed" $randomSeed>></label><br><br>
-			<label><<checkbox "$debugMode" false true autocheck>> Enable Debug Tools</label><br><br>
+			<details class="advanced-settings">
+				<summary>Advanced</summary>
+				<label>Random Seed: <<textbox "$randomSeed" $randomSeed>></label><br><br>
+				<label><<checkbox "$debugMode" false true autocheck>> Enable Debug Tools</label>
+			</details>
+			<br>
 			[[Continue|${State.variables.settingsExitPassage}]]
 		`);
 	}

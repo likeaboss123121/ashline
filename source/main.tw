@@ -30,11 +30,11 @@ Ashline
 <<initsettings>>
 <<set $player to {
 fatigue: 0,
-physicalDamage: 0,
+health: 100,
 immunity: 100,
-mentalHealth: 100,
-hunger: 0,
-thirst: 0
+sanity: 100,
+hunger: 100,
+thirst: 100
 }>>
 
 <<set $trains to []>>
@@ -61,12 +61,15 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 
 
 :: StoryCaption
-/% Sidebar caption passage: always-visible date/time status shown above StoryMenu actions. %/
+/% Sidebar caption passage: the clock and the player's condition, once the game itself has started. The settings
+   screen in front of the game shows neither: there is no journey to time or body to read yet. %/
+<<if $settingsExitPassage and ["Start"].indexOf(passage()) === -1>>
 <<set _sidebarTime = setup.time.getCurrentDateParts()>>
 <div class="small-description">
 <<print _sidebarTime.month>> <<print _sidebarTime.day>>, <<print _sidebarTime.year>>, <<print _sidebarTime.hours>>:<<print _sidebarTime.minutes>><<if _sidebarTime.meridiem>> <<print _sidebarTime.meridiem>><</if>>
 </div>
 <<playerStats>>
+<</if>>
 
 
 :: Railyard {"position":"402,201"}
