@@ -2884,6 +2884,9 @@ Macro.add('lineControls', {
 				+ (choice.rejoins ? ' and joins the line again further on' : ' and ends at a buffer stop') + '.</span><br>';
 		});
 		output += escapeLink;
+		// There is a world out there, and a pair of boots. Climbing down is slow, which is the point of it.
+		output += '<<timedlink "Climb down from the train" 2 "generic">><<run setup.onfoot.climbDown()>>'
+			+ '<<goto "OnFoot">><</timedlink>><br>';
 		output += '<<link "Enter the train">><<goto "TrainInterior">><</link>><br>';
 		new Wikifier(this.output, output);
 	}

@@ -143,3 +143,132 @@ Macro.add('locomotivePanel', {
 		this.output.appendChild(panel);
 	}
 });
+
+// What the player has on them, as opposed to what the locomotive holds. Beside the train it hardly matters: the
+// cab is right there. A tile away it is everything they have.
+setup.items.PLAYER_SLOTS = 4;
+setup.items.PLAYER_CARRY_KG = 60;
+
+setup.items.getPlayerKit = function() {
+	var player = State.variables.player;
+	if (!player) {
+		return [];
+	}
+	if (!Array.isArray(player.carried)) {
+		player.carried = [];
+	}
+	return player.carried;
+};
+setup.items.playerHas = function(item) {
+	return this.getPlayerKit().some(function(slot) { return slot.item === item && slot.count > 0; });
+};
+// Moves one item between a locomotive's kit and the player's pack, in either direction.
+setup.items.takeFromCar = function(car, item) {
+	if (!this.playerHasRoom(item) || !this.remove(car, item, 1)) {
+		return false;
+	}
+	var kit = this.getPlayerKit();
+	var slot = kit.filter(function(candidate) { return candidate.item === item; })[0];
+	if (slot) {
+		slot.count++;
+	} else {
+		kit.push({ item: item, count: 1 });
+	}
+	return true;
+};
+setup.items.giveToCar = function(car, item) {
+	var kit = this.getPlayerKit();
+	var slot = kit.filter(function(candidate) { return candidate.item === item; })[0];
+	if (!slot || !this.add(car, item, 1)) {
+		return false;
+	}
+	slot.count--;
+	if (!slot.count) {
+		kit.splice(kit.indexOf(slot), 1);
+	}
+	return true;
+};
+setup.items.playerHasRoom = function(item) {
+	var kit = this.getPlayerKit();
+	var definition = this.CATALOGUE[item];
+	if (!definition) {
+		return false;
+	}
+	var slot = kit.filter(function(candidate) { return candidate.item === item; })[0];
+	return (slot && slot.count < definition.stack) || kit.length < this.PLAYER_SLOTS;
+};
+
+// Cargo the player is carrying in their arms: timber cut away from the train, mostly. Limited by weight, not slots.
+setup.items.getPlayerCargo = function() {
+	var player = State.variables.player;
+	if (!player) {
+		return [];
+	}
+	if (!Array.isArray(player.carriedCargo)) {
+		player.carriedCargo = [];
+	}
+	return player.carriedCargo;
+};
+setup.items.getPlayerCarriedKg = function() {
+	return this.getPlayerCargo().reduce(function(total, stack) {
+		return total + stack.amount * setup.railyard.getCargoDensityKgPerLiter(stack.type);
+	}, 0);
+};
+setup.items.addPlayerCargo = function(type, litres, grade) {
+	var cargo = this.getPlayerCargo();
+	var stack = cargo.filter(function(candidate) { return candidate.type === type; })[0];
+	if (stack) {
+		var blended = (stack.amount * (stack.grade || 100) + litres * (grade || 100)) / (stack.amount + litres);
+		stack.amount += litres;
+		stack.grade = Math.round(blended * 10) / 10;
+	} else {
+		cargo.push({ type: type, amount: litres, grade: grade });
+	}
+};
+setup.items.removePlayerCargo = function(type, litres) {
+	var cargo = this.getPlayerCargo();
+	for (var i = cargo.length - 1; i >= 0; i--) {
+		if (cargo[i].type === type) {
+			cargo[i].amount -= litres;
+			if (cargo[i].amount <= 0.001) {
+				cargo.splice(i, 1);
+			}
+		}
+	}
+};
+setup.items.describePlayerLoad = function() {
+	var kit = this.getPlayerKit().map(function(slot) { return setup.items.describeSlot(slot); });
+	var cargo = this.getPlayerCargo().map(function(stack) {
+		return setup.units.kilograms(stack.amount * setup.railyard.getCargoDensityKgPerLiter(stack.type)) + ' of ' + stack.type;
+	});
+	var carried = kit.concat(cargo);
+	return carried.length ? carried.join(', ') : 'nothing';
+};
+
+// The player's pack, and moving things between it and the locomotive's kit.
+Macro.add('playerPack', {
+	handler: function() {
+		var variables = State.variables;
+		var train = variables.currentTrain;
+		var car = Array.isArray(train) ? train[variables.currentCarIndex] : null;
+		var output = '<p class="player-pack"><strong>You are carrying</strong> (' + setup.items.getPlayerKit().length
+			+ '/' + setup.items.PLAYER_SLOTS + '): ' + setup.items.describePlayerLoad() + '</p>';
+		if (setup.items.isLocomotive(car)) {
+			var moves = [];
+			setup.items.getKit(car).forEach(function(slot) {
+				moves.push('<<link "Take the ' + (setup.items.CATALOGUE[slot.item] || { name: slot.item }).name.toLowerCase() + '">>'
+					+ '<<run setup.items.takeFromCar($currentTrain[$currentCarIndex], "' + slot.item + '")>>'
+					+ '<<goto "TrainInterior">><</link>>');
+			});
+			setup.items.getPlayerKit().forEach(function(slot) {
+				moves.push('<<link "Stow the ' + (setup.items.CATALOGUE[slot.item] || { name: slot.item }).name.toLowerCase() + '">>'
+					+ '<<run setup.items.giveToCar($currentTrain[$currentCarIndex], "' + slot.item + '")>>'
+					+ '<<goto "TrainInterior">><</link>>');
+			});
+			if (moves.length) {
+				output += '<p class="small-description">' + moves.join(' &middot; ') + '</p>';
+			}
+		}
+		new Wikifier(this.output, output);
+	}
+});

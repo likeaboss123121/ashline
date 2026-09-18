@@ -149,6 +149,7 @@ This car does not have the controls needed to drive the train.
 <</if>>
 
 <<locomotiveKit>>
+<<playerPack>>
 <<refuelControls>>
 
 <<conditionControls>>
@@ -215,3 +216,14 @@ You lay the bedroll out in the cab.
 
 <<link "Get up again">><<goto "TrainInterior">><</link>>
 <</if>>
+
+:: OnFoot
+/% Out of the train, on the ballast: walking the line, felling trees, and climbing back aboard. %/
+<<collapseNotice>>
+<<onFootStatus>>
+
+<<onFootControls>>
+
+<<conditionControls>>
+
+<<debugTools>>
