@@ -983,7 +983,7 @@ setup.railyardView = {
 		// is when there is a consist to move; parked trains are clickable either way, to couple to one while driving
 		// or to board one from the station view.
 		var hitLayer = document.createElementNS(ns, 'g');
-		hitLayer.setAttribute('class', 'railyard-hits');
+		hitLayer.setAttribute('class', 'railyard-hits' + (State.variables.showYardTargets ? ' railyard-hits-shown' : ''));
 		if (player) {
 			// Track bands are generous, since reaching for a track is the common move. The way out of the station is
 			// a small box at the very tip of the lead, so it is hard to hit by accident.

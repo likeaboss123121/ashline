@@ -41,18 +41,18 @@ setup.saves = {
 		var place = variables.journey ? 'On the line past Station ' + station : 'Station ' + station;
 		return {
 			place: place,
-			when: parts.month + ' ' + parts.day + ', ' + parts.year + ', ' + parts.hours + ':' + parts.minutes
-				+ (parts.meridiem ? ' ' + parts.meridiem : ''),
+			when: setup.time.formatDate(parts) + ', ' + setup.time.formatClock(parts),
 			turns: State.turns
 		};
 	},
-	save: function(index) {
+	save: function(index, automatic) {
 		var slots = this.slotApi();
 		if (!slots || !slots.save) {
 			return false;
 		}
 		var detail = this.describeCurrent();
-		slots.save(index, detail.place, detail);
+		detail.automatic = !!automatic;
+		slots.save(index, (automatic ? 'Autosave: ' : '') + detail.place, detail);
 		this.countSave();
 		return true;
 	},
@@ -194,12 +194,12 @@ setup.saves = {
 		detail.className = 'saves-detail';
 		var heading = document.createElement('span');
 		heading.className = 'saves-slot-name';
-		heading.textContent = 'Slot ' + (index + 1);
+		var meta = save && save.metadata ? save.metadata : {};
+		heading.textContent = 'Slot ' + (index + 1) + (meta.automatic ? ' (autosave)' : '');
 		detail.appendChild(heading);
 		var line = document.createElement('span');
 		line.className = 'small-description';
 		if (save) {
-			var meta = save.metadata || {};
 			var saved = save.date ? new Date(save.date) : null;
 			line.textContent = (meta.place || save.title || 'Saved game')
 				+ (meta.when ? ' · ' + meta.when : '')

@@ -205,3 +205,15 @@
 	fill: #151719;
 	fill-opacity: 0.82;
 }
+
+/* Clickable areas, outlined all the time for players who would rather see them than find them by pointing. */
+.railyard-view .railyard-hits-shown .railyard-hit {
+	fill-opacity: 0.05;
+	stroke: #e5c58a;
+	stroke-opacity: 0.35;
+	stroke-width: 1;
+}
+
+.railyard-view .railyard-hits-shown .railyard-hit-depart {
+	stroke-opacity: 0.6;
+}

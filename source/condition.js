@@ -215,6 +215,14 @@ setup.condition = {
 		var span = Math.max(1, Math.floor(Number(minutes) || 0));
 		setup.time.advanceMinutesAsleep(span);
 		return span;
+	},
+	// Lying down is the natural place to save: the player has stopped, and nothing is half-done.
+	AUTOSAVE_SLOT: 0,
+	autosaveAfterSleep: function() {
+		if (!State.variables.autosaveOnSleep) {
+			return false;
+		}
+		return setup.saves.save(this.AUTOSAVE_SLOT, true);
 	}
 };
 
@@ -263,9 +271,10 @@ Macro.add('sleepChoices', {
 		var output = '';
 		for (var hours = 1; hours <= 8; hours++) {
 			output += '<<timedlink "Sleep ' + hours + ' hour' + (hours === 1 ? '' : 's') + '" ' + (hours * 60)
-				+ ' "sleep" "fatigue:-3">><<goto "TrainInterior">><</timedlink>><br>';
+				+ ' "sleep" "fatigue:-3">><<run setup.condition.autosaveAfterSleep()>><<goto "TrainInterior">><</timedlink>><br>';
 		}
-		output += '<<timedlink "Sleep until rested" ' + untilRested + ' "sleep" "fatigue:-3">><<goto "TrainInterior">><</timedlink>><br>';
+		output += '<<timedlink "Sleep until rested" ' + untilRested + ' "sleep" "fatigue:-3">>'
+			+ '<<run setup.condition.autosaveAfterSleep()>><<goto "TrainInterior">><</timedlink>><br>';
 		new Wikifier(this.output, output);
 	}
 });

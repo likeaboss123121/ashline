@@ -71,8 +71,9 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 <<if $settingsExitPassage and ["Start"].indexOf(passage()) === -1>>
 <<set _sidebarTime = setup.time.getCurrentDateParts()>>
 <div class="small-description">
-<<print _sidebarTime.month>> <<print _sidebarTime.day>>, <<print _sidebarTime.year>>, <<print _sidebarTime.hours>>:<<print _sidebarTime.minutes>><<if _sidebarTime.meridiem>> <<print _sidebarTime.meridiem>><</if>>
+<<print setup.time.formatDate(_sidebarTime)>>, <<print setup.time.formatClock(_sidebarTime)>>
 </div>
+<<outsideTemperature>>
 <<playerStats>>
 <</if>>
 

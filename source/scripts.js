@@ -154,6 +154,26 @@ setup.time = {
 		var remainder = totalMinutes % 60;
 		return hours + ':' + String(remainder).padStart(2, '0');
 	},
+	// How the date reads. The clock itself is always the same; only the writing of it changes.
+	DATE_FORMATS: [
+		['long', 'Month dd, yyyy'],
+		['dmy', 'dd/mm/yyyy'],
+		['mdy', 'mm/dd/yyyy'],
+		['ymd', 'yyyy/mm/dd']
+	],
+	formatDate: function(parts) {
+		var pad = function(value) { return String(value).padStart(2, '0'); };
+		var monthNumber = pad(this.monthNames.indexOf(parts.month) + 1);
+		switch (State.variables.dateFormat) {
+			case 'dmy': return pad(parts.day) + '/' + monthNumber + '/' + parts.year;
+			case 'mdy': return monthNumber + '/' + pad(parts.day) + '/' + parts.year;
+			case 'ymd': return parts.year + '/' + monthNumber + '/' + pad(parts.day);
+			default: return parts.month + ' ' + parts.day + ', ' + parts.year;
+		}
+	},
+	formatClock: function(parts) {
+		return parts.hours + ':' + parts.minutes + (parts.meridiem ? ' ' + parts.meridiem : '');
+	},
 	getCurrentDateParts: function() {
 		var current = new Date(this.getCurrentTimestampMs());
 		var rawHour = current.getUTCHours();
@@ -218,6 +238,10 @@ Macro.add('initsettings', {
 		setup.initializeStateVar('randomSeed', '');
 		setup.initializeStateVar('gameTimeTimestampMs', function() { return setup.time.startTimestampMs; });
 		setup.initializeStateVar('use24HourTime', false);
+		setup.initializeStateVar('dateFormat', 'long');
+		setup.initializeStateVar('imperialUnits', false);
+		setup.initializeStateVar('showYardTargets', false);
+		setup.initializeStateVar('autosaveOnSleep', true);
 		setup.initializeStateVar('debugMode', false);
 		setup.initializeStateVar('debugSelectedTrackIndex', 0);
 		setup.initializeStateVar('debugSelectedTrainIndex', 0);
@@ -376,7 +400,18 @@ setup.showOptionsDialog = function() {
 		return;
 	}
 	Dialog.setup('Options');
-	Dialog.wiki('<p><strong>Time Display</strong></p><label><<checkbox "$use24HourTime" false true autocheck>> Use 24-hour time</label>');
+	var formats = setup.time.DATE_FORMATS.map(function(format) {
+		return '<label><<radiobutton "$dateFormat" "' + format[0] + '" autocheck>> ' + format[1] + '</label>';
+	}).join('<br>');
+	Dialog.wiki('<p><strong>Time and date</strong></p>'
+		+ '<label><<checkbox "$use24HourTime" false true autocheck>> Use 24-hour time</label><br>'
+		+ formats
+		+ '<p><strong>Units</strong></p>'
+		+ '<label><<checkbox "$imperialUnits" false true autocheck>> Show distances, weights and temperatures in imperial</label>'
+		+ '<p><strong>The rail yard</strong></p>'
+		+ '<label><<checkbox "$showYardTargets" false true autocheck>> Show clickable areas on railyard</label>'
+		+ '<p><strong>Saving</strong></p>'
+		+ '<label><<checkbox "$autosaveOnSleep" false true autocheck>> Autosave when you sleep</label>');
 	jQuery('#ui-dialog-body input').on('change', function() { UIBar.update(); });
 	Dialog.open();
 };
