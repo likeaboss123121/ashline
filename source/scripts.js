@@ -424,7 +424,7 @@ State.variables.defaultTrains = {
 		cargo: [],
 		fireboxEnabled: false,
 		steamStoredLiters: 0,
-		boilerSteamVolumeLiters: 300000, // liters at 1 bar equivalent
+		boilerSteamVolumeLiters: 5000, // liters at 1 bar equivalent: about 45 minutes from cold to working pressure
 		maxSteamPressureBar: 14.5,
 		fireboxScale: 1, // how much fuel and water the firebox takes, and steam it makes, per minute
 		steamUseScale: 1, // how much steam moving the locomotive costs
@@ -444,7 +444,7 @@ State.variables.defaultTrains = {
 		cargo: [],
 		fireboxEnabled: false,
 		steamStoredLiters: 0,
-		boilerSteamVolumeLiters: 750000,
+		boilerSteamVolumeLiters: 50000, // a big boiler: about three hours from cold to working pressure
 		maxSteamPressureBar: 14.5,
 		fireboxScale: 2.5,
 		steamUseScale: 2.2,
@@ -683,9 +683,11 @@ setup.railyard = {
 		if (typeof car.steamStoredLiters !== 'number' || !isFinite(car.steamStoredLiters)) {
 			car.steamStoredLiters = 0;
 		}
-		if (typeof car.boilerSteamVolumeLiters !== 'number' || !isFinite(car.boilerSteamVolumeLiters) || car.boilerSteamVolumeLiters <= 0 || car.boilerSteamVolumeLiters === 3000) {
-			// Migrate old saves that still use the previous 3,000 L default.
-			car.boilerSteamVolumeLiters = 300000;
+		if (typeof car.boilerSteamVolumeLiters !== 'number' || !isFinite(car.boilerSteamVolumeLiters)
+			|| car.boilerSteamVolumeLiters <= 0 || car.boilerSteamVolumeLiters === 3000 || car.boilerSteamVolumeLiters >= 100000) {
+			// Boilers from before the warm-up rebalance were hundreds of times too large, which put a cold start two
+			// days away. Take the size this model of locomotive is built with now.
+			car.boilerSteamVolumeLiters = this.getModelDefault(car, 'boilerSteamVolumeLiters', 5000);
 		}
 		if (typeof car.maxSteamPressureBar !== 'number' || !isFinite(car.maxSteamPressureBar) || car.maxSteamPressureBar <= 0) {
 			car.maxSteamPressureBar = 14.5;
@@ -693,6 +695,18 @@ setup.railyard = {
 		// Public getters call this initializer, so use the normalized fields directly.
 		var maxStored = car.boilerSteamVolumeLiters * car.maxSteamPressureBar;
 		car.steamStoredLiters = Math.max(0, Math.min(car.steamStoredLiters, maxStored));
+	},
+	// A field from the definition of this locomotive's model, for normalising a car built by an older build.
+	getModelDefault: function(car, field, fallback) {
+		var defaults = State.variables.defaultTrains || {};
+		var model = this.getLocomotiveModel(car);
+		for (var key in defaults) {
+			if (Object.prototype.hasOwnProperty.call(defaults, key) && defaults[key].model === model
+				&& typeof defaults[key][field] !== 'undefined') {
+				return defaults[key][field];
+			}
+		}
+		return fallback;
 	},
 	// Returns the max configured boiler pressure.
 	getSteamMaxPressureBar: function(car) {
@@ -762,22 +776,25 @@ setup.railyard = {
 		this.ensureSteamLocomotiveState(train[index]);
 		train[index].fireboxEnabled = !train[index].fireboxEnabled;
 	},
-	// Steam production slows at higher pressure while still consuming fuel whenever the firebox is on.
+	// Steam production slows as pressure rises while the firebox still eats the same fuel, so the last few bar are
+	// the slow ones: a shunter is at working pressure in about three quarters of an hour and full in about two.
 	getSteamProductionLitersPerMinute: function(car) {
 		var pressure = this.getSteamPressureBar(car);
 		var maxPressure = this.getSteamMaxPressureBar(car);
-		var pressureFactor = Math.max(0.25, 1 - ((pressure / maxPressure) * 0.75));
+		var pressureFactor = Math.max(0.08, 1 - ((pressure / maxPressure) * 0.92));
 		return 1750 * pressureFactor * setup.fuel.getFireboxScale(car);
 	},
 	// Computes shunting steam use per minute from pressure with piecewise exponential anchors.
 	getSteamShuntingCostPerMinute: function(car) {
 		var pressure = this.getSteamPressureBar(car);
-		var base = 3000 * (Number(car.steamUseScale) > 0 ? Number(car.steamUseScale) : 1);
+		// Working costs more steam than the fire makes at working pressure, so a long spell of shunting or a hard
+		// leg pulls the needle down and the crew has to stop and let her build up again.
+		var base = 800 * (Number(car.steamUseScale) > 0 ? Number(car.steamUseScale) : 1);
 		if (pressure >= 10) {
-			var highRate = Math.log(3000 / 2250) / 5;
+			var highRate = Math.log(800 / 600) / 5;
 			return Math.round(base * Math.exp(highRate * (10 - pressure)));
 		}
-		var lowRate = Math.log(6000 / 3000) / 5;
+		var lowRate = Math.log(1600 / 800) / 5;
 		return Math.round(base * Math.exp(lowRate * (10 - pressure)));
 	},
 	// Runs one minute of steam-firebox simulation and handles auto-shutdown on missing fuel/water.
