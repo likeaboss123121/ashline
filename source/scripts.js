@@ -1434,6 +1434,7 @@ setup.railyard = {
 	},
 	// Leaving a yard puts the consist on the first tile of the leg, and from there it moves a tile at a time.
 	departOntoLine: function(towardExit) {
+		setup.tutorial.finish();
 		var variables = State.variables;
 		var stationId = Number(variables.currentStation);
 		if (this.getDepartureBlockReason(stationId, variables.drivingTrackIndex, towardExit)) {
@@ -1971,14 +1972,21 @@ setup.railyard = {
 	// Builds a full station layout (entry + generated yard + exit), with a fixed tutorial station at id 1.
 	generateStationTracks: function(stationId, baseSeed) {
 		if (stationId === 1) {
-			// Station 1 is a fixed tutorial layout.
+			// Station 1 is a fixed layout that teaches shunting by making the player do it: the locomotive stands on
+			// a short stub, and a flatcar sits on the through track between it and the way out. Getting out of the
+			// station means driving across to the flatcar, coupling to it, and only then leaving.
 			var tutorialLoco = this.createLocomotiveCar('dieselShunter');
 			tutorialLoco.cargo = [{ type: 'diesel', amount: 400 }];
 			tutorialLoco.inventory = setup.items.createStartingKit();
+			tutorialLoco.facing = 1;
+			var tutorialFlatcar = this.cloneCar(State.variables.defaultTrains.flatcar);
+			tutorialFlatcar.cargo = [{ type: 'timber', amount: 400, grade: 80 }];
+			tutorialFlatcar.facing = 1;
 			return [
 				{ length: 999999, infinite: true, trains: [], hasLead: false, direction: 'south' }, // no station lies behind station 1
-				{ length: 120, trains: [[tutorialLoco]] },
-				{ length: 999999, infinite: true, trains: [], direction: this.getLegHeading(1, baseSeed) }
+				{ length: 80, trains: [[tutorialLoco]], connectsToEntry: false }, // a stub: it ends in a buffer stop
+				{ length: 140, trains: [] },
+				{ length: 999999, infinite: true, trains: [[tutorialFlatcar]], direction: this.getLegHeading(1, baseSeed) }
 			];
 		}
 
@@ -1995,10 +2003,15 @@ setup.railyard = {
 		// Sidings: a stub off one ladder, closed at the other end, which is how most small yards are actually
 		// arranged. They never sit on a lead's own line, because that line has to carry the ladder through.
 		var closures = [];
+		var throughRows = yardCount;
 		for (var row = 1; row <= yardCount; row++) {
-			if (row === entryRow || row === exitRow || shapeRng() >= this.SIDING_CHANCE) {
+			// A lead's own line can be a stub too, which is how a yard ends up with a siding trailing off the
+			// northbound or southbound track itself. What the yard cannot do is close every track: something has to
+			// run from one lead to the other, or a train could never cross the station.
+			if (shapeRng() >= this.SIDING_CHANCE || throughRows <= 1 || (row === entryRow && row === exitRow)) {
 				continue;
 			}
+			throughRows--;
 			// Which ladder the stub hangs from: closed toward the exit it trails from the entry ladder, and closed
 			// toward the entry it hangs off the exit ladder at the far end of the yard. Either way it is a stub, so
 			// it is shorter than the through tracks around it.

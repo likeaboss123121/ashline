@@ -30,3 +30,13 @@
 	background: #2a2118;
 	border-left: 3px solid #c9a15f;
 }
+
+/* The first station's hints: how to work the yard, shown until the player has done it. */
+.tutorial-hint {
+	margin: 0.6em 0;
+	padding: 0.5em 0.7em;
+	color: #cfd4cd;
+	background: #1d2426;
+	border-left: 3px solid #6f9ca8;
+	font-size: 0.95em;
+}

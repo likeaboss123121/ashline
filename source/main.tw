@@ -92,6 +92,7 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 <<if $debugMode>><<run (function () { if (typeof console !== 'undefined' && typeof console.log === 'function') { console.log('[Ashline Debug] Station ' + State.variables.currentStation + ' railyard tracks:', State.variables.stationTracks[State.variables.currentStation]); } })()>><</if>>
 You step into the railyard. Several trains are parked here, each with its own mix of cars and cargo.
 
+<<tutorialHint>>
 <<railyardButtons>>
 
 <<debugTools>>
@@ -179,6 +180,7 @@ This car does not have the controls needed to drive the train.
 <<initDrivingModeState>>
 You are driving your consist. Current station: <<print $currentStation>>.
 
+<<tutorialHint>>
 <<railyardView>>
 <<drivingMergeButtons>>
 
