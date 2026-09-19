@@ -25,6 +25,15 @@ setup.tutorial = {
 		var flatcar = train.findIndex(function(car) { return car && car.type === 'flatcar'; });
 		return locomotive !== -1 && flatcar > locomotive;
 	},
+	getFlatcarTrackIndex: function(tracks) {
+		if (!Array.isArray(tracks)) return -1;
+		for (var i = 0; i < tracks.length; i++) {
+			for (var j = 0; j < tracks[i].trains.length; j++) {
+				if (this.hasFlatcar(tracks[i].trains[j])) return i;
+			}
+		}
+		return -1;
+	},
 	requestExit: function(towardExit) {
 		if (!this.isActive() || this.flatcarIsAtRear(State.variables.currentTrain)) {
 			return true;
@@ -54,13 +63,29 @@ setup.tutorial = {
 				text: 'Click on the locomotive below to drive the train, or use the links underneath.'
 			};
 		}
-		if (!this.hasFlatcar(train)) {
+		var flatcarTrack = this.getFlatcarTrackIndex(tracks);
+		if (!this.hasFlatcar(train) && flatcarTrack === 3) {
 			return {
 				id: 'couple',
 				text: 'The exit to the railyard is blocked. Couple the flatcar to the front of your locomotive to move it.'
 			};
 		}
 		if (!this.flatcarIsAtRear(train)) {
+			if (this.hasFlatcar(train) && Number(variables.drivingTrackIndex) !== 2) {
+				return { id: 'move-flatcar', text: 'Move the consist and flatcar to the empty Yard Track 2.' };
+			}
+			if (this.hasFlatcar(train)) {
+				return { id: 'decouple-flatcar', text: 'Decouple the front section to leave the flatcar on Yard Track 2.' };
+			}
+			if (flatcarTrack === 2 && Number(variables.drivingTrackIndex) === 2) {
+				return { id: 'runaround-stub', text: 'Reverse the locomotive onto Yard Track 1 so it can run around the flatcar.' };
+			}
+			if (flatcarTrack === 2 && Number(variables.drivingTrackIndex) === 1) {
+				return { id: 'runaround-lead', text: 'Drive the locomotive around to the Northbound Track, on the other side of the flatcar.' };
+			}
+			if (flatcarTrack === 2 && Number(variables.drivingTrackIndex) === 3) {
+				return { id: 'couple-rear', text: 'Back into the flatcar and couple it to the rear of the locomotive.' };
+			}
 			return {
 				id: 'shunt',
 				text: 'Good work! Next, we want to attach the flatcar to the rear of the consist. Decouple the front consist, '
@@ -82,5 +107,26 @@ Macro.add('tutorialHint', {
 			return;
 		}
 		new Wikifier(this.output, '<p class="tutorial-hint" data-hint="' + hint.id + '">' + hint.text + '</p>');
+	}
+});
+
+// The general shunting controls stay available throughout the tutorial.  These short, state-aware links expose
+// the intended run-around route so the first lesson cannot depend on discovering a dense yard-control menu.
+Macro.add('tutorialControls', {
+	handler: function() {
+		if (!setup.tutorial.isActive() || !Array.isArray(State.variables.currentTrain)) return;
+		var tracks = State.variables.stationTracks[setup.tutorial.STATION];
+		var train = State.variables.currentTrain;
+		var flatcarTrack = setup.tutorial.getFlatcarTrackIndex(tracks);
+		var currentTrack = Number(State.variables.drivingTrackIndex);
+		var output = '';
+		if (setup.tutorial.hasFlatcar(train) && !setup.tutorial.flatcarIsAtRear(train) && currentTrack !== 2) {
+			output = '<<timedlink "Move consist to Yard Track 2" 1 "shunting" "fatigue:+1">><<set $drivingTrackIndex = 2>><<set $enteredTrainIndex = 0>><<goto "DrivingMode">><</timedlink>>';
+		} else if (!setup.tutorial.hasFlatcar(train) && flatcarTrack === 2 && currentTrack === 2) {
+			output = '<<timedlink "Reverse locomotive to Yard Track 1" 1 "shunting" "fatigue:+1">><<set $drivingTrackIndex = 1>><<set $enteredTrainIndex = 0>><<goto "DrivingMode">><</timedlink>>';
+		} else if (!setup.tutorial.hasFlatcar(train) && flatcarTrack === 2 && currentTrack === 1) {
+			output = '<<timedlink "Drive locomotive to Northbound Track" 1 "shunting" "fatigue:+1">><<set $drivingTrackIndex = 3>><<set $enteredTrainIndex = 0>><<goto "DrivingMode">><</timedlink>>';
+		}
+		if (output) new Wikifier(this.output, '<p class="tutorial-controls">' + output + '</p>');
 	}
 });

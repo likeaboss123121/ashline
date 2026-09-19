@@ -163,6 +163,7 @@ You are driving your consist. Current station: <<print $currentStation>>.
 <<railyardView>>
 <<drivingStatus>>
 <<drivingShuntingControls>>
+<<tutorialControls>>
 <<drivingTravelButtons>>
 <<drivingMergeButtons>>
 <<link "Stop driving">><<goto "TrainInterior">><</link>>
