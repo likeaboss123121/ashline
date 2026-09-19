@@ -286,7 +286,8 @@ setup.worldmap = {
 	// land makes it easier, and dropping abandoned branches along the way.
 	buildLeg: function(seed, legIndex) {
 		var self = this;
-		var headingName = { north: 'n', south: 's', east: 'e', west: 'w' }[setup.railyard.getLegHeading(legIndex, seed)] || 'n';
+		var headingName = { north: 'n', northeast: 'ne', east: 'e', southeast: 'se', south: 's', southwest: 'sw',
+			west: 'w', northwest: 'nw' }[setup.railyard.getLegHeading(legIndex, seed)] || 'n';
 		var start = this.getStationTile(seed, legIndex);
 		var rng = this.rngFor(seed, 'leg', legIndex);
 		var count = this.MIN_LEG_TILES + Math.floor(rng() * (this.MAX_LEG_TILES - this.MIN_LEG_TILES + 1));

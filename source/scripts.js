@@ -1166,19 +1166,33 @@ setup.railyard = {
 	// Compass headings along the route. The journey runs north out of Punta Arenas and turns east or west as it
 	// crosses continents, so each leg between two stations has a heading of its own, seeded from the save so the
 	// answer never changes. The first legs, up Patagonia, always run north.
+	// The eight points a leg can run on. A station's two leads always face opposite ways, so a yard drawn from
+	// either end reads the same; which pair it uses is what varies.
+	HEADINGS: ['north', 'northeast', 'east', 'southeast', 'south', 'southwest', 'west', 'northwest'],
+	// The route trends north over all, but a leg can strike off in any compass direction.
+	HEADING_WEIGHTS: [
+		['north', 29], ['northeast', 16], ['northwest', 16], ['east', 12], ['west', 12],
+		['southeast', 5], ['south', 5], ['southwest', 5]
+	],
 	getLegHeading: function(stationId, baseSeed) {
+		// Keep the opening journey north through Patagonia. Later legs can use every compass point.
 		if (stationId < 10) {
 			return 'north';
 		}
 		var rng = this.mulberry32(this.seedFromString(String(baseSeed || '') + stationId + ':heading'));
-		if (this.randomInt(rng, 1, 100) > 85) {
-			return this.randomInt(rng, 0, 1) ? 'east' : 'west';
+		var roll = this.randomInt(rng, 1, 100);
+		var running = 0;
+		for (var i = 0; i < this.HEADING_WEIGHTS.length; i++) {
+			running += this.HEADING_WEIGHTS[i][1];
+			if (roll <= running) {
+				return this.HEADING_WEIGHTS[i][0];
+			}
 		}
 		return 'north';
 	},
 	oppositeDirection: function(direction) {
-		var opposites = { north: 'south', south: 'north', east: 'west', west: 'east' };
-		return opposites[direction] || 'south';
+		var index = this.HEADINGS.indexOf(direction);
+		return index === -1 ? 'south' : this.HEADINGS[(index + 4) % 8];
 	},
 	// The heading a train takes when it leaves the station by this lead: the exit lead follows the leg ahead, and
 	// the entry lead points back down the leg the player arrived on. Each is stored on its own lead track object,
@@ -1191,8 +1205,17 @@ setup.railyard = {
 		return (track && track.direction) || (which === 'exit' ? 'north' : 'south');
 	},
 	// Turns a heading into the name the player reads, as in 'Northbound'.
+	// What a lead is called: Northbound, North-eastbound, and so on.
+	DIRECTION_NAMES: {
+		north: 'North', northeast: 'North-east', east: 'East', southeast: 'South-east',
+		south: 'South', southwest: 'South-west', west: 'West', northwest: 'North-west'
+	},
+	DIRECTION_LETTERS: {
+		north: 'N', northeast: 'NE', east: 'E', southeast: 'SE',
+		south: 'S', southwest: 'SW', west: 'W', northwest: 'NW'
+	},
 	getDirectionName: function(direction) {
-		return direction.charAt(0).toUpperCase() + direction.slice(1) + 'bound';
+		return (this.DIRECTION_NAMES[direction] || 'North') + 'bound';
 	},
 	// Which way a car physically points: 1 toward the station's exit, -1 the other way. Shunting never turns a car
 	// round, so a car keeps its facing through coupling, decoupling, travel and being parked.

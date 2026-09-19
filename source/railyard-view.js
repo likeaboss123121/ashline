@@ -678,7 +678,7 @@ setup.railyardView = {
 	// view, so when the yard is drawn from its other end the compass is drawn from there too.
 	createCompass: function(tracks, flipped) {
 		var ns = this.SVG_NS;
-		var order = ['north', 'east', 'south', 'west'];
+		var order = setup.railyard.HEADINGS;
 		var onward = setup.railyard.getLeadDirection(tracks, flipped ? 'entry' : 'exit');
 		var first = Math.max(0, order.indexOf(onward));
 		var svg = document.createElementNS(ns, 'svg');
@@ -704,7 +704,9 @@ setup.railyardView = {
 			label.setAttribute('y', String(arm.y + 3));
 			label.setAttribute('text-anchor', 'middle');
 			label.setAttribute('class', 'railyard-compass-label' + (isOnward ? ' railyard-compass-onward' : ''));
-			label.textContent = order[(first + index) % 4].charAt(0).toUpperCase();
+			// The four arms are the yard's own axes, so they are the compass points 90 degrees apart from the one
+			// the line leaves by: north, east, south, west for a northbound yard, or NE, SE, SW, NW for a diagonal.
+			label.textContent = setup.railyard.DIRECTION_LETTERS[order[(first + index * 2) % 8]] || '?';
 			svg.appendChild(label);
 		});
 		return svg;
