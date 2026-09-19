@@ -80,12 +80,20 @@ setup.fuel = {
 			first.grade = Math.round(blended * 10) / 10;
 		}
 	},
-	// A grade in words. Only diesel can be too far gone to use at all; poor coal or wet wood still burns, badly.
+	// A diesel tank can only be judged by sight and smell. The number remains internal to the fuel model, so a future
+	// testing tool can reveal it without making ordinary play a laboratory readout.
 	describeGrade: function(grade, cargoType) {
+		if (cargoType === 'diesel') {
+			if (grade >= 90) return "The diesel looks fresh and is a bright shade of yellow. It's likely been refined within the past few weeks.";
+			if (grade >= 70) return "The diesel looks fine, and is a light amber color. There's a slight oily film on the top.";
+			if (grade >= 55) return "The diesel looks brown and hazy. There's a oily film on the top. It smells sour.";
+			if (grade >= this.DIESEL_MIN_GRADE) return "The diesel looks dark and cloudy. There's a thick oily film on the top. It smells rancid.";
+			return 'The diesel looks pitch black and appears slimy. It smells rancid.';
+		}
 		var value = Math.round(grade);
 		var best = cargoType === 'water' ? 'clean' : 'good';
 		var word = value >= 90 ? best : value >= 70 ? 'fair' : value >= 50 ? 'poor'
-			: cargoType === 'diesel' && grade < this.DIESEL_MIN_GRADE ? 'unusable' : 'very poor';
+			: 'very poor';
 		return value + '% (' + word + ')';
 	},
 

@@ -320,8 +320,8 @@ Macro.add('refuelControls', {
 		var offered = 0;
 		setup.refuel.getSiphonOptions(variables.currentTrain, locoIndex).forEach(function(option) {
 			offered++;
-			var grade = option.grade === null ? '' : ' <span class="small-description">(grade '
-				+ Math.round(option.grade) + '%)</span>';
+			var grade = option.grade === null ? '' : ' <span class="small-description">('
+				+ setup.fuel.describeGrade(option.grade, option.cargoType) + ')</span>';
 			output += '<<timedlink "' + option.label + ', ' + option.amountText + '" ' + option.minutes + ' "work" "fatigue:+'
 				+ setup.effects.levelForRate(option.fatiguePerMinute) + '">>'
 				+ '<<run setup.refuel.performSiphon("' + option.id + '", ' + locoIndex + ')>><<goto "TrainInterior">><</timedlink>>'
@@ -332,8 +332,8 @@ Macro.add('refuelControls', {
 				return;
 			}
 			offered++;
-			var grade = option.grade === null ? '' : ' <span class="small-description">(grade '
-				+ Math.round(option.grade) + '%)</span>';
+			var grade = option.grade === null ? '' : ' <span class="small-description">('
+				+ setup.fuel.describeGrade(option.grade, option.cargoType) + ')</span>';
 			output += '<<timedlink "' + option.label + ', ' + option.amountText + '" ' + option.minutes + ' "work" "fatigue:+'
 				+ setup.effects.levelForRate(option.fatiguePerMinute) + '">>'
 				+ '<<run setup.refuel.perform("' + option.id + '", ' + locoIndex + ')>><<goto "TrainInterior">><</timedlink>>'

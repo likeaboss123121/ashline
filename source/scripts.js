@@ -564,7 +564,7 @@ setup.railyard = {
 		// cars: which cars a preset is found in, where it is narrower than what the car accepts.
 		{type: 'coal', amount: 6000, rarity: 'common', grade: [35, 100]},
 		{type: 'water', amount: 8000, rarity: 'common', grade: [40, 90]},
-		{type: 'diesel', amount: 6000, rarity: 'uncommon', grade: [30, 95]},
+		{type: 'diesel', amount: 6000, rarity: 'uncommon', grade: [30, 89]},
 		{type: 'firewood', amount: 8000, rarity: 'common', grade: [45, 95], cars: ['gondola']},
 		{type: 'timber', amount: 8000, rarity: 'common', grade: [50, 95], cars: ['flatcar']},
 		{type: 'scrap metal', amount: 20, rarity: 'uncommon'},
@@ -703,8 +703,8 @@ setup.railyard = {
 		if (this.isDieselLocomotiveCar(loco)) {
 			var litres = this.getCargoAmount(loco, 'diesel');
 			var minutes = Math.floor(litres / setup.fuel.getDieselLitresPerMinute(loco));
-			return '<p><strong>Fuel:</strong> ' + setup.units.litres(litres) + ' of diesel, grade '
-				+ setup.fuel.describeGrade(setup.fuel.getGrade(loco, 'diesel'), 'diesel') + ', about '
+			return '<p><strong>Fuel:</strong> ' + setup.units.litres(litres) + ' of diesel. '
+				+ setup.fuel.describeGrade(setup.fuel.getGrade(loco, 'diesel'), 'diesel') + ' About '
 				+ setup.time.formatDuration(minutes) + ' of running.</p>';
 		}
 		if (this.isSteamLocomotiveCar(loco)) {
