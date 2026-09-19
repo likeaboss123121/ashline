@@ -2479,7 +2479,6 @@ Macro.add('railyardButtons', {
 		}
 		var output = '<h2>Station ' + State.variables.currentStation + '</h2>';
 		output += '<p>There ' + (totalTrains === 1 ? 'is ' : 'are ') + totalTrains + ' train' + (totalTrains === 1 ? '' : 's') + ' staged across ' + trackCount + ' track' + (trackCount === 1 ? '' : 's') + '.</p>';
-		output += '<<railyardView>>';
 		var displayNumber = 1;
 		// Each track is rendered independently so empty tracks, finite length, and train numbering stay readable.
 		for (var i = 0; i < tracks.length; i++) {

@@ -84,6 +84,7 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
   <<set $currentTrain = null>>
 <</if>>
 <<if $debugMode>><<run (function () { if (typeof console !== 'undefined' && typeof console.log === 'function') { console.log('[Ashline Debug] Station ' + State.variables.currentStation + ' railyard tracks:', State.variables.stationTracks[State.variables.currentStation]); } })()>><</if>>
+<<railyardView>>
 You step into the railyard. Several trains are parked here, each with its own mix of cars and cargo.
 <<tutorialHint>>
 <<railyardButtons>>
@@ -100,6 +101,7 @@ You step into the railyard. Several trains are parked here, each with its own mi
 	<<set $currentCarIndex = setup.railyard.getBoardingCarIndex($currentTrain)>>
 <</if>>
 <<set _currentCar to $currentTrain[$currentCarIndex]>>
+<<if !$journey>><<railyardView>><</if>>
 You are <<print setup.railyard.getCarLocationText(_currentCar)>> of your consist.
 <br>
 Car <<print $currentCarIndex + 1>> of <<print $currentTrain.length>>.
@@ -111,7 +113,6 @@ Car <<print $currentCarIndex + 1>> of <<print $currentTrain.length>>.
 		<<else>><span class="small-description"><em>Cannot start driving: this locomotive cannot currently provide traction.</em></span><</if>>
 	<</if>>
 <</if>>
-<<if !$journey>><<railyardView>><</if>>
 <<if $currentCarIndex > 0>><<link "Move toward the front">><<set $currentCarIndex -= 1>><<goto "TrainInterior">><</link>><</if>>
 <<if $currentCarIndex > 0 && $currentCarIndex < $currentTrain.length - 1>> | <</if>>
 <<if $currentCarIndex < $currentTrain.length - 1>><<link "Move toward the rear">><<set $currentCarIndex += 1>><<goto "TrainInterior">><</link>><</if>>
@@ -158,9 +159,9 @@ This car does not have the controls needed to drive the train.
 <<buildIntegrityNotice>>
 <<collapseNotice>>
 <<initDrivingModeState>>
+<<railyardView>>
 You are driving your consist. Current station: <<print $currentStation>>.
 <<tutorialHint>>
-<<railyardView>>
 <<drivingStatus>>
 <<tutorialControls>>
 <<drivingTravelButtons>>
