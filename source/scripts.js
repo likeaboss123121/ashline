@@ -1509,17 +1509,10 @@ setup.railyard = {
 		if (!(fromConnections.entry && toConnections.entry) && !(fromConnections.exit && toConnections.exit)) {
 			return false;
 		}
-		var start = Math.min(from, to) + 1;
-		var end = Math.max(from, to) - 1;
-		for (var i = start; i <= end; i++) {
-			var pathTrack = this.ensureTrackTrainArray(stationTracks, i);
-			var pathConnections = this.getTrackConnections(pathTrack, leads);
-			// A siding ends at one ladder. Its cars are clear of the through crossover and must not trap a train
-			// on a neighbouring road; a through track still blocks exactly as before.
-			if (pathConnections.entry && pathConnections.exit && pathTrack.trains.length > 0) {
-				return false;
-			}
-		}
+		// Parked trains are packed at a track's entry end.  They do not occupy the ladder at the other end, so a car
+		// on Track 02 must not prevent a locomotive on Track 01 reaching the Northbound lead.  Track occupancy is
+		// checked on the player's own rail and on the destination lead by the caller; this helper only answers
+		// whether the two rails share a real ladder end.
 		return true;
 	},
 	// Validates that the player is positioned at the departure edge of a boundary track.
