@@ -3233,6 +3233,58 @@ Macro.add('debugTools', {
 				? ' (last played ' + cachedBuild.checksum.slice(0, 8) + ')' : '');
 		panel.appendChild(status);
 
+		// A live reference sheet for balancing and debugging. Every value comes straight from the definitions the game
+		// is using, so it cannot drift from the train, fuel or pack systems as a separately written wiki would.
+		startSection('Reference data');
+		var addReferenceTable = function(title, headings, rows) {
+			var block = document.createElement('details');
+			var summary = document.createElement('summary');
+			summary.textContent = title;
+			block.appendChild(summary);
+			var table = document.createElement('table');
+			var head = document.createElement('tr');
+			headings.forEach(function(text) {
+				var cell = document.createElement('th');
+				cell.textContent = text;
+				head.appendChild(cell);
+			});
+			table.appendChild(head);
+			rows.forEach(function(row) {
+				var line = document.createElement('tr');
+				row.forEach(function(value) {
+					var cell = document.createElement('td');
+					cell.textContent = String(value);
+					line.appendChild(cell);
+				});
+				table.appendChild(line);
+			});
+			block.appendChild(table);
+			wrapper.appendChild(block);
+		};
+		var stock = State.variables.defaultTrains || {};
+		addReferenceTable('Railcars', ['Type', 'Length', 'Empty weight', 'Cargo capacity', 'Pull', 'Top speed'],
+			Object.keys(stock).map(function(key) {
+				var car = stock[key];
+				return [car.name || car.type || key, (car.length || 0) + ' m', (car.baseWeight || 0) + ' kg',
+					(car.maxCargoCapacityKg || 0) + ' kg / ' + (car.maxCargoCapacityVolume || 0) + ' L',
+					(car.tractiveCapacity || 0) + ' kN', (car.topSpeedKmh || 0) + ' km/h'];
+			}));
+		var cargoTypes = State.variables.cargoTypes || {};
+		addReferenceTable('Cargo', ['Cargo', 'Density', 'Rarity', 'Tags'], Object.keys(cargoTypes).map(function(key) {
+			var cargo = cargoTypes[key];
+			return [key, cargo.density + ' kg/L', cargo.rarity || '', (cargo.tags || []).join(', ')];
+		}));
+		addReferenceTable('Fuel', ['Rule', 'Value'], [
+			['Diesel minimum usable grade', setup.fuel.DIESEL_MIN_GRADE + '%'],
+			['Diesel full-power grade', setup.fuel.DIESEL_FULL_POWER_GRADE + '%'],
+			['Diesel power at minimum grade', Math.round(setup.fuel.DIESEL_POWER_AT_MIN_GRADE * 100) + '%']
+		]);
+		var catalogue = (setup.items && setup.items.CATALOGUE) || {};
+		addReferenceTable('Pack items', ['Item', 'Grid', 'Weight', 'Stack limit'], Object.keys(catalogue).map(function(key) {
+			var item = catalogue[key];
+			return [item.name || key, (item.width || 1) + ' × ' + (item.height || 1), (item.weightKg || 0) + ' kg', item.stack || 1];
+		}));
+
 		// Time of day drives the lighting of the yard and driving views, so debug can jump the clock to any hour.
 		startSection('Clock and light', true);
 		var lightInfo = document.createElement('p');

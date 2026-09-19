@@ -17,39 +17,32 @@ setup.stats = {
 		{
 			key: 'fatigue', label: 'Fatigue', kind: 'burden',
 			bands: ['Rested', 'Tired', 'Weary', 'Exhausted', 'Collapsing'],
-			driver: 'Climbs with every hour you are awake, and faster while you work. '
-				+ 'Sleeping in your bedroll brings it down; so does collapsing where you stand, which you will do if it fills. '
-				+ 'Hunger, thirst and poor health make it climb faster and make rest worth less.'
+			driver: 'Fatigue is increased by doing work and staying awake for long periods of time. If you are tired, take a break!'
 		},
 		{
 			key: 'health', label: 'Health', kind: 'reserve',
 			bands: ['Unhurt', 'Bruised', 'Hurt', 'Injured', 'Broken'],
-			driver: 'Falls with falls, fights and injuries at work, and is worn down by going hungry or thirsty for long. '
-				+ 'It comes back slowly while you are fed, watered and rested.'
+			driver: 'Health represents injuries. In a world without hospitals, even a minor accident can be fatal.'
 		},
 		{
 			key: 'immunity', label: 'Immunity', kind: 'reserve',
 			bands: ['Strong', 'Steady', 'Weakened', 'Failing', 'Overwhelmed'],
-			driver: 'Falls with poor food, poor water and untreated wounds, and with long hunger or thirst. '
-				+ 'A weakened body tires faster and rests worse. Good food and clean water build it back.'
+			driver: 'Immunity represents the status of your immune system. Consuming unclean food or water will make you sick.'
 		},
 		{
 			key: 'sanity', label: 'Sanity', kind: 'reserve',
 			bands: ['Sound', 'Strained', 'Fraying', 'Haunted', 'Breaking'],
-			driver: 'Falls when you are awake in the small hours, and whenever you collapse from exhaustion. '
-				+ 'It mends on its own with time, and fastest while you sleep through the night.'
+			driver: 'Sanity is decreased by being alone for long periods of time. Even those with the strongest wills are susceptible to prolonged isolation.'
 		},
 		{
 			key: 'hunger', label: 'Hunger', kind: 'reserve',
 			bands: ['Fed', 'Peckish', 'Hungry', 'Starving', 'Wasting'],
-			driver: 'Falls as the hours pass. Eating rations fills it, and how good the food is decides what it does '
-				+ 'to your immunity. Empty, it eats into your health and wears you out faster.'
+			driver: 'Hunger is a major obstacle when food is scarce. Desperation can drive you to eat anything.'
 		},
 		{
 			key: 'thirst', label: 'Thirst', kind: 'reserve',
 			bands: ['Watered', 'Dry', 'Thirsty', 'Parched', 'Failing'],
-			driver: 'Falls as the hours pass, faster than hunger. Drinking fills it, and how clean the water is decides '
-				+ 'what it does to your immunity. Empty, it eats into your health and wears you out faster.'
+			driver: 'Thirst will kill you if you are not careful. Make sure to carry plenty of water.'
 		}
 	],
 
