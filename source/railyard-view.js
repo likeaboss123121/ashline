@@ -504,7 +504,7 @@ setup.railyardView = {
 	// The view opens fitted: the whole yard on screen is what tells the player where everything is. Zooming in is a
 	// button away for reading detail or for a finger-sized target.
 	getDefaultZoom: function(naturalWidth) {
-		return naturalWidth > this.getViewportWidth() ? null : 1;
+		return null;
 	},
 	getZoom: function(naturalWidth) {
 		if (this.zoomLevel === 'fit') {
