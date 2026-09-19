@@ -17,7 +17,7 @@ setup.stats = {
 		{
 			key: 'fatigue', label: 'Fatigue', kind: 'burden',
 			bands: ['Rested', 'Tired', 'Weary', 'Exhausted', 'Collapsing'],
-			driver: 'Fatigue is increased by doing work and staying awake for long periods of time. If you are tired, take a break!'
+			driver: 'Fatigue is increased by doing work and staying awake for long periods of time. If you\'re tired, take a break!'
 		},
 		{
 			key: 'health', label: 'Health', kind: 'reserve',

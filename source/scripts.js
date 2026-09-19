@@ -1599,7 +1599,6 @@ setup.railyard = {
 	},
 	// Leaving a yard puts the consist on the first tile of the leg, and from there it moves a tile at a time.
 	departOntoLine: function(towardExit) {
-		setup.tutorial.finish();
 		var variables = State.variables;
 		if (setup.worldmap.isBranchStation(variables.currentStation)) {
 			return this.departFromBranchTerminus();
@@ -1608,6 +1607,7 @@ setup.railyard = {
 		if (this.getDepartureBlockReason(stationId, variables.drivingTrackIndex, towardExit)) {
 			return false;
 		}
+		setup.tutorial.finish();
 		var legIndex = setup.worldmap.getLegIndexFor(stationId, towardExit);
 		if (legIndex < 1) {
 			return false;
@@ -3049,7 +3049,7 @@ Macro.add('drivingTravelButtons', {
 				// Departing costs nothing by itself: the time and the fuel are spent tile by tile out on the line.
 				output += '<span data-yard-action="depart:' + (towardExit ? 'exit' : 'entry') + '">'
 					+ '<<link "Depart ' + heading + ' toward Station ' + (stationId + (towardExit ? 1 : -1)) + '">>'
-					+ '<<run setup.railyard.departOntoLine(' + towardExit + ')>><<goto "OnTheLine">><</link>></span><br>';
+					+ '<<if setup.tutorial.requestExit(' + towardExit + ')>><<run setup.railyard.departOntoLine(' + towardExit + ')>><<goto "OnTheLine">><</if>><</link>></span><br>';
 				output += '<span class="small-description">' + summary + ' About ' + setup.time.formatDuration(minutes) + ' at this weight.</span><br>';
 			}
 		});

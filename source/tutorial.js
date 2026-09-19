@@ -19,6 +19,23 @@ setup.tutorial = {
 	hasFlatcar: function(train) {
 		return (Array.isArray(train) ? train : []).some(function(car) { return car && car.type === 'flatcar'; });
 	},
+	flatcarIsAtRear: function(train) {
+		if (!Array.isArray(train)) return false;
+		var locomotive = train.findIndex(function(car) { return car && car.tractiveCapacity > 0; });
+		var flatcar = train.findIndex(function(car) { return car && car.type === 'flatcar'; });
+		return locomotive !== -1 && flatcar > locomotive;
+	},
+	requestExit: function(towardExit) {
+		if (!this.isActive() || this.flatcarIsAtRear(State.variables.currentTrain)) {
+			return true;
+		}
+		Dialog.setup('Leave tutorial?');
+		Dialog.wiki('<p>Are you sure you want to exit the tutorial without learning how to shunt rail cars?</p>'
+			+ '<<link "Exit tutorial">><<run setup.tutorial.finish()>><<run setup.railyard.departOntoLine(' + (!!towardExit) + ')>><<run Dialog.close()>><<goto "OnTheLine">><</link>>'
+			+ ' | <<link "Keep shunting">><<run Dialog.close()>><</link>>');
+		Dialog.open();
+		return false;
+	},
 	// Which hint belongs on the screen, from the state of the yard itself.
 	getHint: function() {
 		if (!this.isActive()) {
@@ -34,22 +51,25 @@ setup.tutorial = {
 		if (!aboard) {
 			return {
 				id: 'board',
-				text: 'Everything you do here happens on the drawing. Click the locomotive on Yard Track 1 to climb aboard, '
-					+ 'or use the links underneath: the picture and the list always offer the same moves.'
+				text: 'Click on the locomotive below to drive the train, or use the links underneath.'
 			};
 		}
-		if (this.hasFlatcar(train)) {
+		if (!this.hasFlatcar(train)) {
 			return {
-				id: 'depart',
-				text: 'The flatcar is on your drawbar. Click the far end of the Northbound Track, at the bottom right, to '
-					+ 'leave the station, or take the departure link below the drawing.'
+				id: 'couple',
+				text: 'The exit to the railyard is blocked. Couple the flatcar to the front of your locomotive to move it.'
+			};
+		}
+		if (!this.flatcarIsAtRear(train)) {
+			return {
+				id: 'shunt',
+				text: 'Good work! Next, we want to attach the flatcar to the rear of the consist. Decouple the front consist, '
+					+ 'and navigate to the other track. Then, you can back into the track where the flatcar is to couple to the rear.'
 			};
 		}
 		return {
-			id: 'couple',
-			text: 'You are standing on a stub, and a loaded flatcar is parked across the northbound road out of here. '
-				+ 'Nothing leaves this station until it is moved: click the flatcar to couple to it. Every move costs '
-				+ 'time, and the clock is in the sidebar.'
+			id: 'complete',
+			text: 'Awesome work! Now you know how to handle basic shunting! There\'s a lot of work ahead of you to survive. Good luck!'
 		};
 	}
 };
