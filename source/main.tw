@@ -60,7 +60,10 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 
 :: StoryMenu
 /% Sidebar menu extension passage: keeps utility links (currently Credits dialog) out of gameplay passages. %/
+<<if passage() !== "Start">>
 <<link "Condition">><<run setup.showConditionDialog()>><</link>><br>
+<<link "Inventory">><<run setup.items.showInventoryDialog()>><</link>><br>
+<</if>>
 <<link "Options">><<run setup.showOptionsDialog()>><</link>><br>
 <<link "Credits">><<run setup.showCreditsDialog()>><</link>>
 

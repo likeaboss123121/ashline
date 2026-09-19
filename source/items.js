@@ -245,6 +245,45 @@ setup.items.describePlayerLoad = function() {
 	return carried.length ? carried.join(', ') : 'nothing';
 };
 
+// The sidebar inventory is a read-only view of everything the player can use without hunting through the train
+// or the railyard text. It deliberately follows the player: a parked train remains its own station inventory.
+setup.items.showInventoryDialog = function() {
+	var variables = State.variables;
+	var playerKit = this.getPlayerKit();
+	var playerCargo = this.getPlayerCargo();
+	var playerItems = playerKit.map(function(slot) { return setup.items.describeSlot(slot); });
+	var playerLoads = playerCargo.map(function(stack) {
+		return setup.units.kilograms(stack.amount * setup.railyard.getCargoDensityKgPerLiter(stack.type)) + ' of ' + stack.type;
+	});
+	var carriedKg = this.getPlayerCarriedKg();
+	var html = '<p><strong>On you</strong> (' + playerKit.length + '/' + this.PLAYER_SLOTS + ' kit slots, '
+		+ setup.units.kilograms(carriedKg) + '/' + setup.units.kilograms(this.PLAYER_CARRY_KG) + ' carried): '
+		+ (playerItems.concat(playerLoads).join(' · ') || '<em>nothing</em>') + '</p>';
+	var train = Array.isArray(variables.currentTrain) ? variables.currentTrain : null;
+	if (train && train.length) {
+		html += '<h3>Your train</h3><ul>';
+		train.forEach(function(car, index) {
+			var contents = [];
+			if (setup.items.isLocomotive(car)) {
+				var kit = setup.items.getKit(car).map(function(slot) { return setup.items.describeSlot(slot); });
+				contents.push('kit: ' + (kit.join(', ') || 'empty'));
+			}
+			if (Array.isArray(car.cargo) && car.cargo.length) {
+				contents.push(car.cargo.map(function(stack) {
+					return setup.units.litres(stack.amount) + ' ' + stack.type;
+				}).join(', '));
+			}
+			html += '<li><strong>' + (car.type || 'Railcar') + '</strong>' + (contents.length ? ': ' + contents.join('; ') : ': empty') + '</li>';
+		});
+		html += '</ul>';
+	} else {
+		html += '<p class="small-description"><em>Board a train to inspect its kits and cargo here.</em></p>';
+	}
+	Dialog.setup('Inventory');
+	Dialog.wiki(html);
+	Dialog.open();
+};
+
 // The player's pack, and moving things between it and the locomotive's kit.
 Macro.add('playerPack', {
 	handler: function() {
