@@ -553,6 +553,31 @@ State.variables.defaultTrains = {
 		fuelConsumption: [],
 		tractiveCapacity: 0,
 		length: 13
+	},
+	passengerCoach: {
+		type: 'passenger coach', name: 'passenger coach', hasInterior: true, cargo: [],
+		baseWeight: 48000, maxCargoCapacityKg: 5000, maxCargoCapacityVolume: 12000,
+		acceptedCargo: ['rigid'], fuelConsumption: [], tractiveCapacity: 0, length: 24
+	},
+	sleeperCoach: {
+		type: 'sleeper coach', name: 'sleeper passenger coach', hasInterior: true, cargo: [],
+		baseWeight: 52000, maxCargoCapacityKg: 5000, maxCargoCapacityVolume: 12000,
+		acceptedCargo: ['rigid'], fuelConsumption: [], tractiveCapacity: 0, length: 25
+	},
+	observationCar: {
+		type: 'observation car', name: 'passenger observation car', hasInterior: true, cargo: [],
+		baseWeight: 46000, maxCargoCapacityKg: 3500, maxCargoCapacityVolume: 8000,
+		acceptedCargo: ['rigid'], fuelConsumption: [], tractiveCapacity: 0, length: 23
+	},
+	kitchenCar: {
+		type: 'kitchen car', name: 'passenger kitchen car', hasInterior: true, cargo: [],
+		baseWeight: 50000, maxCargoCapacityKg: 8000, maxCargoCapacityVolume: 14000,
+		acceptedCargo: ['rigid', 'liquid'], fuelConsumption: [], tractiveCapacity: 0, length: 24
+	},
+	privateCar: {
+		type: 'private car', name: 'private rail car', hasInterior: true, cargo: [],
+		baseWeight: 44000, maxCargoCapacityKg: 4000, maxCargoCapacityVolume: 9000,
+		acceptedCargo: ['rigid'], fuelConsumption: [], tractiveCapacity: 0, length: 22
 	}
 };
 
@@ -2334,8 +2359,10 @@ setup.railyard = {
 			return car.name.replace(/\b\w/g, function(letter) { return letter.toUpperCase(); });
 		}
 		var names = {
-			boxcar: 'Boxcar', flatcar: 'Flatcar', gondola: 'Gondola',
-			'tanker car': 'Tank car'
+			boxcar: 'Boxcar', flatcar: 'Flatcar', gondola: 'Gondola', 'tanker car': 'Tank car',
+			'passenger coach': 'Passenger coach', 'sleeper coach': 'Sleeper passenger coach',
+			'observation car': 'Passenger observation car', 'kitchen car': 'Passenger kitchen car',
+			'private car': 'Private rail car'
 		};
 		return names[car.type] || String(car.type || 'Railcar').replace(/\b\w/g, function(letter) { return letter.toUpperCase(); });
 	},
