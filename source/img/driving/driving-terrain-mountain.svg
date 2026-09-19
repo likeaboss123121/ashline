@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="82" height="61" viewBox="0 0 82 61" shape-rendering="crispEdges" data-template="driving-terrain-mountain" data-anchor-x="1" data-anchor-y="43">
 <title>Ashline driving template: Mountain</title>
 <g id="sky">
-<polygon points="1,1 81,1 81,23 1,23" fill="#1d1f22"/>
+<polygon points="1,1 81,1 81,23 1,23" fill="#6f9bb7"/>
 </g>
 <g id="far">
 <polygon points="1,18 11,18 11,23 1,23" fill="#3a3431"/>

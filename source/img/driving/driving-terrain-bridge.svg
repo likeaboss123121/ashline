@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="82" height="61" viewBox="0 0 82 61" shape-rendering="crispEdges" data-template="driving-terrain-bridge" data-anchor-x="1" data-anchor-y="43">
 <title>Ashline driving template: Bridge</title>
 <g id="sky">
-<polygon points="1,1 81,1 81,23 1,23" fill="#1e262c"/>
+<polygon points="1,1 81,1 81,23 1,23" fill="#6f9fbc"/>
 </g>
 <g id="water">
 <polygon points="1,23 81,23 81,60 1,60" fill="#24384a"/>

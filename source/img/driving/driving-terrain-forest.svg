@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="84" height="61" viewBox="0 0 84 61" shape-rendering="crispEdges" data-template="driving-terrain-forest" data-anchor-x="2" data-anchor-y="43">
 <title>Ashline driving template: Forest</title>
 <g id="sky">
-<polygon points="2,1 82,1 82,23 2,23" fill="#1c2322"/>
+<polygon points="2,1 82,1 82,23 2,23" fill="#6b9aaa"/>
 </g>
 <g id="treeline">
 <polygon points="1,23 6,15 11,23" fill="#1f2b1f"/>
