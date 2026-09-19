@@ -2196,8 +2196,10 @@ setup.railyard = {
 			tutorialFlatcar.cargo = [{ type: 'timber', amount: 400, grade: 80 }];
 			tutorialFlatcar.facing = 1;
 			return [
-				{ length: 999999, infinite: true, trains: [], hasLead: false, direction: 'south' }, // no station lies behind station 1
-				{ length: 80, trains: [[tutorialLoco]], connectsToEntry: false }, // a stub: it ends in a buffer stop
+				// The Southbound boundary track is finite: it is a real connected stub, not a disconnected yard road.
+				// Its buffer is at the outer end and its inner end joins the entry ladder, making it the tutorial run-around.
+				{ length: 80, trains: [], direction: 'south', leadTrack: 1 },
+				{ length: 140, trains: [[tutorialLoco]] },
 				{ length: 140, trains: [] },
 				{ length: 999999, infinite: true, trains: [[tutorialFlatcar]], direction: this.getLegHeading(1, baseSeed) }
 			];
