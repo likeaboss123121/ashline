@@ -414,7 +414,15 @@ setup.railyardView = {
 				piece('buffer-stop', end, v); // nothing beyond this track runs far enough to take its merge
 			}
 			this.packForward(yardGroups[r], start, v, result.cars, dataIndex(r), flipped);
-			result.hits.push({ trackIndex: dataIndex(r), u0: start, u1: end, v: v });
+			// A target covers the rail the player can see, not merely the clear section where trains are packed. In
+			// particular, the entry switch is often a car-length of visible track before `start`; leaving it out made
+			// the left side of a yard feel dead while the exit side clicked right to its rail end.
+			result.hits.push({
+				trackIndex: dataIndex(r),
+				u0: ends.entry ? entryJunction(r) : (entryStubRoom ? start - tile : start),
+				u1: ends.exit || !exitStubRoom ? end : end + tile,
+				v: v
+			});
 
 			// Each label sits beside the junction where its track meets the entry ladder, where no car can cover it,
 			// and clear of the rails: to the left of the junction for the entry track and nearer tracks, and further
