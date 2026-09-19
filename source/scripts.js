@@ -2833,12 +2833,12 @@ Macro.add('lineStatus', {
 		var grade = view.grade;
 		var slope = grade > 0 ? 'climbing ' + grade.toFixed(1) + '%'
 			: grade < 0 ? 'descending ' + Math.abs(grade).toFixed(1) + '%' : 'level';
-		var output = '<h2>Station ' + view.fromStation + ' to Station ' + view.toStation
-			+ (view.branch ? ' &middot; side track' : '') + '</h2>';
+		var output = '<h2>On the line</h2>';
 		output += '<p>Tile ' + (Math.min(view.tileIndex, view.tileCount - 1) + 1) + ' of ' + view.tileCount
 			+ ' &middot; ' + view.terrain + ' &middot; ' + slope + '</p>';
-		output += '<p class="small-description">' + setup.units.kilometres(view.kilometresDone) + ' behind you, '
-			+ setup.units.kilometres(view.kilometresLeft) + ' to run.</p>';
+		output += '<p class="small-description">' + (view.branch
+			? setup.units.kilometres(view.kilometresDone) + ' from the junction.'
+			: setup.units.kilometres(view.kilometresDone) + ' behind you, ' + setup.units.kilometres(view.kilometresLeft) + ' to run.') + '</p>';
 		output += setup.railyard.getFuelReadout(State.variables.currentTrain);
 		new Wikifier(this.output, output);
 	}
@@ -2889,8 +2889,8 @@ Macro.add('lineControls', {
 			output += '<span class="small-description">Into ' + step.terrain + ', ' + slope
 				+ (step.arrivesAt ? ', arriving at Station ' + step.arrivesAt : '') + '.</span><br>';
 		});
-		// Where the line divides, the player picks which way to go. A branch that rejoins the main line is another
-		// way round; one that does not is somewhere to explore and back out of.
+		// At a junction the player knows only which way the rails immediately run. Whether a track reconnects or
+		// ends is deliberately not exposed: there is no map to consult out here.
 		setup.worldmap.getBranchChoices().forEach(function(choice) {
 			var step = setup.worldmap.getBranchStep(choice.id);
 			if (!step) {
@@ -2902,9 +2902,8 @@ Macro.add('lineControls', {
 			}
 			output += '<<timedlink "' + label + '" ' + step.minutes + ' "travel">>'
 				+ '<<run setup.railyard.takeBranch("' + choice.id + '")>><<goto "OnTheLine">><</timedlink>><br>';
-			output += '<span class="small-description">Into ' + choice.terrain + ', a track that runs '
-				+ setup.units.kilometres(choice.tiles * setup.worldmap.TILE_KM)
-				+ (choice.rejoins ? ' and joins the line again further on' : ' and ends at a buffer stop') + '.</span><br>';
+			output += '<span class="small-description">A track leads ' + choice.direction + ' into '
+				+ choice.terrain + '.</span><br>';
 		});
 		output += escapeLink;
 		// There is a world out there, and a pair of boots. Climbing down is slow, which is the point of it.
@@ -2964,7 +2963,7 @@ Macro.add('drivingTravelButtons', {
 			var terminus = setup.worldmap.getBranchForStation(setup.worldmap.getSeed(), stationId);
 			var terminusReason = setup.railyard.getDepartureBlockReason(stationId, trackIndex, false);
 			var terminusHeading = setup.railyard.getDirectionName(setup.railyard.getLeadDirection(tracks, 'entry'));
-			var terminusLabel = 'Depart ' + terminusHeading + ' toward the main line';
+			var terminusLabel = 'Depart ' + terminusHeading;
 			if (terminusReason) {
 				output += '<span class="yard-reason" data-yard-reason="depart:entry"><em>' + terminusLabel
 					+ ' unavailable: ' + terminusReason + '</em></span>';
@@ -2972,8 +2971,7 @@ Macro.add('drivingTravelButtons', {
 				output += '<span data-yard-action="depart:entry"><<link "' + terminusLabel + '">>'
 					+ '<<run setup.railyard.departOntoLine(false)>><<goto "OnTheLine">><</link>></span><br>';
 				output += '<span class="small-description">'
-					+ setup.units.kilometres((terminus ? terminus.tiles.length : 0) * setup.worldmap.TILE_KM)
-					+ ' of branch back to the line it leaves.</span><br>';
+					+ 'the only track back from this station.</span><br>';
 			}
 			new Wikifier(this.output, output);
 			return;
