@@ -1468,7 +1468,9 @@ setup.railyard = {
 		var enteredTrainIndex = arguments[2];
 		return this.hasTrackObstructionInDirection(stationTracks, safeIndex, enteredTrainIndex, !reverseDir);
 	},
-	// Checks that every track between two indices is empty, enabling cross-track routing.
+	// A ladder is not blocked merely because a train is standing on a parallel track.  The old index-by-index
+	// check treated every road between two array positions as if it lay across the route, which stranded a train
+	// on Track 03 behind an occupied stub on Track 02.  The actual route is determined by the shared ladder end.
 	hasClearPathBetweenTracks: function(stationTracks, fromTrackIndex, toTrackIndex) {
 		if (!stationTracks || !stationTracks.length) {
 			return false;
@@ -1479,14 +1481,20 @@ setup.railyard = {
 		if (from === to) {
 			return true;
 		}
+		var leads = this.getLeads(stationTracks);
+		var fromConnections = this.getTrackConnections(stationTracks[from], leads);
+		var toConnections = this.getTrackConnections(stationTracks[to], leads);
+		if (!(fromConnections.entry && toConnections.entry) && !(fromConnections.exit && toConnections.exit)) {
+			return false;
+		}
 		var start = Math.min(from, to) + 1;
 		var end = Math.max(from, to) - 1;
 		for (var i = start; i <= end; i++) {
 			var pathTrack = this.ensureTrackTrainArray(stationTracks, i);
-			if (!pathTrack) {
-				return false;
-			}
-			if (pathTrack.trains.length > 0) {
+			var pathConnections = this.getTrackConnections(pathTrack, leads);
+			// A siding ends at one ladder. Its cars are clear of the through crossover and must not trap a train
+			// on a neighbouring road; a through track still blocks exactly as before.
+			if (pathConnections.entry && pathConnections.exit && pathTrack.trains.length > 0) {
 				return false;
 			}
 		}
@@ -1545,6 +1553,9 @@ setup.railyard = {
 		}
 		var boundaryIndex = towardExit ? this.getExitTrackIndex(tracks) : this.getEntryTrackIndex();
 		var boundary = tracks[boundaryIndex];
+		if (!boundary.infinite) {
+			return this.getTrackLabel(tracks, boundaryIndex) + ' ends at a buffer stop.';
+		}
 		if (boundary.trains.length && !this.isAtBoundaryDeparturePosition(tracks, playerTrackIndex, gap, towardExit)) {
 			return this.getTrackLabel(tracks, boundaryIndex) + ' is blocked.';
 		}
@@ -2244,7 +2255,45 @@ setup.railyard = {
 		tracks[tracks.length - 1].direction = this.getLegHeading(stationId, baseSeed);
 
 		this.addDerelict(tracks, shapeRng);
+		this.ensureDieselReserve(tracks, stationId);
 		return tracks;
+	},
+	// A station must not strand a player who arrived with an empty tank.  Keep enough usable diesel on one
+	// locomotive to run the next leg plus a five-percent margin; this is calculated from the same travel clock
+	// that burns fuel, rather than from a fixed distance guess.
+	ensureDieselReserve: function(tracks, stationId) {
+		if (!Array.isArray(tracks) || !tracks.length || setup.worldmap.isBranchStation(stationId)) {
+			return;
+		}
+		var reserveEngine = null;
+		for (var i = 0; i < tracks.length && !reserveEngine; i++) {
+			for (var j = 0; j < tracks[i].trains.length && !reserveEngine; j++) {
+				for (var c = 0; c < tracks[i].trains[j].length; c++) {
+					if (this.isDieselLocomotiveCar(tracks[i].trains[j][c])) {
+						reserveEngine = tracks[i].trains[j][c];
+						break;
+					}
+				}
+			}
+		}
+		if (!reserveEngine) {
+			reserveEngine = this.createLocomotiveCar('dieselShunter');
+			for (var t = 1; t < tracks.length - 1; t++) {
+				if (this.canTrainFitOnTrack(tracks[t], [reserveEngine])) {
+					this.insertTrainIntoTrack(tracks, t, [reserveEngine]);
+					break;
+				}
+			}
+			if (!tracks.some(function(track) { return track.trains.some(function(train) { return train.indexOf(reserveEngine) !== -1; }); })) {
+				this.insertTrainIntoTrack(tracks, this.getExitTrackIndex(tracks), [reserveEngine]);
+			}
+		}
+		var minutes = setup.worldmap.getTravelMinutes(stationId, true, [reserveEngine]);
+		var required = Math.ceil(minutes * setup.fuel.getDieselLitresPerMinute(reserveEngine) * 1.05);
+		var present = this.getCargoAmount(reserveEngine, 'diesel');
+		if (present < required) {
+			setup.fuel.addCargo(reserveEngine, 'diesel', required - present, 80);
+		}
 	},
 	// The end of a branch: a couple of short roads and one way out, the way the train came in. Shunting here is
 	// the whole point of the place, so it gets no second lead to escape through.

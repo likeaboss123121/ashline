@@ -41,7 +41,8 @@ setup.railyardView = {
 	},
 
 	// Named parts that belong on the rail layer. Everything else in a track piece is its bed.
-	TRAIN_HIT_HALF_BAND: 14, // units either side of the track centre, just inside a track band's 16
+	TRACK_HIT_HALF_BAND: 14, // one consistent finger/mouse band for rails and parked trains
+	TRAIN_HIT_HALF_BAND: 14,
 	GROUND_COLOUR: '#2b302d', // .railyard-ground in railyard.css, graded here at dusk and night
 	RAIL_PARTS: ['rails', 'diagonal-rails', 'diagonal-up-rails', 'branch-rails', 'selection'],
 
@@ -301,8 +302,12 @@ setup.railyardView = {
 		var entryV = rowV(entryRow);
 		if (leads.entry) {
 			var entryGroups = groupsAt(entryRow, arrivalIndex);
-			var entryLead = roundUp(Math.max(this.MIN_LEAD_METRES, this.getGroupsLength(entryGroups) + this.LEAD_CLEARANCE_METRES + this.FREE_STUB_METRES));
-			piece('fade-in', -entryLead, entryV);
+			var entryTrack = tracks[arrivalIndex];
+			var entryIsStub = !entryTrack.infinite;
+			var entryLead = entryIsStub ? roundUp(Math.max(tile, Number(entryTrack.length) || tile))
+				: roundUp(Math.max(this.MIN_LEAD_METRES, this.getGroupsLength(entryGroups) + this.LEAD_CLEARANCE_METRES + this.FREE_STUB_METRES));
+			if (entryIsStub) piece('buffer-stop-start', -entryLead, entryV);
+			else piece('fade-in', -entryLead, entryV);
 			tiles(-entryLead + tile, 0, entryV, isOn(arrivalIndex));
 			if (yardCount && !entry.any) {
 				piece('buffer-stop', 0, entryV); // no yard track connects to the entry
@@ -310,9 +315,11 @@ setup.railyardView = {
 			this.packBackward(entryGroups, -this.LEAD_CLEARANCE_METRES, entryV, result.cars, arrivalIndex, flipped);
 			result.hits.push({ trackIndex: arrivalIndex, u0: -entryLead + tile, u1: 0, v: entryV });
 			// The far end of the lead leaves the station: clicking it departs, the way the travel links do.
-			result.hits.push({
-				depart: flipped ? 'exit' : 'entry', u0: -entryLead, u1: -entryLead + tile, v: entryV
-			});
+			if (!entryIsStub) {
+				result.hits.push({
+					depart: flipped ? 'exit' : 'entry', u0: -entryLead, u1: -entryLead + tile, v: entryV
+				});
+			}
 			var entryName = setup.railyard.getDirectionName(setup.railyard.getLeadDirection(tracks, flipped ? 'exit' : 'entry')).toUpperCase();
 			result.labels.push({ text: entryName, u: -entryLead, v: entryV, dx: -3, dy: 2, anchor: 'end', player: isOn(arrivalIndex) });
 		}
@@ -448,19 +455,25 @@ setup.railyardView = {
 			var exitV = rowV(exitRow);
 			var exitStart = yardCount ? exitJunction(exitRow) : 0;
 			var exitGroups = groupsAt(exitRow, onwardIndex);
-			var exitLead = roundUp(Math.max(this.MIN_LEAD_METRES, this.getGroupsLength(exitGroups) + this.LEAD_CLEARANCE_METRES + this.FREE_STUB_METRES));
+			var exitTrack = tracks[onwardIndex];
+			var exitIsStub = !exitTrack.infinite;
+			var exitLead = exitIsStub ? roundUp(Math.max(tile, Number(exitTrack.length) || tile))
+				: roundUp(Math.max(this.MIN_LEAD_METRES, this.getGroupsLength(exitGroups) + this.LEAD_CLEARANCE_METRES + this.FREE_STUB_METRES));
 			tiles(exitStart, exitStart + exitLead - tile, exitV, isOn(onwardIndex));
-			piece('fade-out', exitStart + exitLead - tile, exitV);
+			if (exitIsStub) piece('buffer-stop', exitStart + exitLead - tile, exitV);
+			else piece('fade-out', exitStart + exitLead - tile, exitV);
 			if (yardCount && !exit.any) {
 				piece('buffer-stop-start', exitStart, exitV); // no yard track connects to the exit
 			}
 			this.packForward(exitGroups, exitStart + this.LEAD_CLEARANCE_METRES, exitV, result.cars, onwardIndex, flipped);
 			result.hits.push({ trackIndex: onwardIndex, u0: exitStart, u1: exitStart + exitLead - tile, v: exitV });
 			// The far end of the lead leaves the station: clicking it departs, the way the travel links do.
-			result.hits.push({
-				depart: flipped ? 'entry' : 'exit',
-				u0: exitStart + exitLead - tile, u1: exitStart + exitLead, v: exitV
-			});
+			if (!exitIsStub) {
+				result.hits.push({
+					depart: flipped ? 'entry' : 'exit',
+					u0: exitStart + exitLead - tile, u1: exitStart + exitLead, v: exitV
+				});
+			}
 			var exitName = setup.railyard.getDirectionName(setup.railyard.getLeadDirection(tracks, flipped ? 'entry' : 'exit')).toUpperCase();
 			result.labels.push({ text: exitName, u: exitStart + exitLead, v: exitV, dx: 3, dy: 2, anchor: 'start', player: isOn(onwardIndex) });
 		}
@@ -1008,7 +1021,7 @@ setup.railyardView = {
 			// Track bands are generous, since reaching for a track is the common move. The way out of the station is
 			// a small box at the very tip of the lead, so it is hard to hit by accident.
 			layout.hits.forEach(function(hit) {
-				var halfBand = hit.depart ? 8 : 16;
+				var halfBand = hit.depart ? 8 : self.TRACK_HIT_HALF_BAND;
 				var corners = [self.project(hit.u0 * M, hit.v - halfBand), self.project(hit.u1 * M, hit.v - halfBand),
 					self.project(hit.u1 * M, hit.v + halfBand), self.project(hit.u0 * M, hit.v + halfBand)];
 				var band = document.createElementNS(ns, 'polygon');
