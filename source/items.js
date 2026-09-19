@@ -7,11 +7,11 @@ setup.items = {
 	SLOTS: 6,
 
 	CATALOGUE: {
-		toolkit: { name: 'Toolkit', stack: 1, detail: 'Spanners, a hammer and a coal shovel.' },
-		axe: { name: 'Axe and bow saw', stack: 1, detail: 'For felling trees and cutting timber into firewood.' },
-		pump: { name: 'Hand pump', stack: 1, detail: 'Draws diesel or water up a hose.' },
-		sleepingBag: { name: 'Sleeping bag', stack: 1, detail: 'Somewhere warm to sleep aboard.' },
-		rations: { name: 'Rations', stack: 6, detail: 'A meal each. Three make a day.' }
+		toolkit: { name: 'Toolkit', stack: 1, width: 2, height: 2, weightKg: 5, detail: 'Spanners, a hammer and a coal shovel.' },
+		axe: { name: 'Axe and bow saw', stack: 1, width: 2, height: 2, weightKg: 3, detail: 'For felling trees and cutting timber into firewood.' },
+		pump: { name: 'Hand pump', stack: 1, width: 3, height: 2, weightKg: 7, detail: 'Draws diesel or water up a hose.' },
+		sleepingBag: { name: 'Sleeping bag', stack: 1, width: 2, height: 2, weightKg: 2, detail: 'Somewhere warm to sleep aboard.' },
+		rations: { name: 'Rations', stack: 6, width: 1, height: 1, weightKg: 0.4, detail: 'A meal each. Three make a day.' }
 	},
 
 	// What the first locomotive is found with: the tools to keep it running, a bed, and a day's food.
@@ -146,8 +146,9 @@ Macro.add('locomotivePanel', {
 
 // What the player has on them, as opposed to what the locomotive holds. Beside the train it hardly matters: the
 // cab is right there. A tile away it is everything they have.
-setup.items.PLAYER_SLOTS = 4;
-setup.items.PLAYER_CARRY_KG = 60;
+setup.items.PLAYER_GRID_WIDTH = 4;
+setup.items.PLAYER_GRID_HEIGHT = 4;
+setup.items.PLAYER_CARRY_KG = 50;
 
 setup.items.getPlayerKit = function() {
 	var player = State.variables.player;
@@ -161,6 +162,56 @@ setup.items.getPlayerKit = function() {
 };
 setup.items.playerHas = function(item) {
 	return this.getPlayerKit().some(function(slot) { return slot.item === item && slot.count > 0; });
+};
+// Packs each carried stack into the first place it fits. Coordinates are derived rather than saved, so older saves
+// with the former slot-only pack migrate cleanly and reordering a stack cannot corrupt the player's inventory.
+setup.items.getPlayerPackLayout = function() {
+	var width = this.PLAYER_GRID_WIDTH;
+	var height = this.PLAYER_GRID_HEIGHT;
+	var cells = [];
+	for (var y = 0; y < height; y++) {
+		cells[y] = [];
+		for (var x = 0; x < width; x++) cells[y][x] = null;
+	}
+	var placements = [];
+	var overflow = [];
+	this.getPlayerKit().forEach(function(slot) {
+		var definition = setup.items.CATALOGUE[slot.item];
+		if (!definition || !slot.count) return;
+		var itemWidth = definition.width || 1;
+		var itemHeight = definition.height || 1;
+		var placed = false;
+		for (var top = 0; top <= height - itemHeight && !placed; top++) {
+			for (var left = 0; left <= width - itemWidth && !placed; left++) {
+				var clear = true;
+				for (var row = top; row < top + itemHeight && clear; row++) {
+					for (var column = left; column < left + itemWidth; column++) {
+						if (cells[row][column]) clear = false;
+					}
+				}
+				if (clear) {
+					for (var fillY = top; fillY < top + itemHeight; fillY++) {
+						for (var fillX = left; fillX < left + itemWidth; fillX++) cells[fillY][fillX] = slot;
+					}
+					placements.push({ slot: slot, x: left, y: top, width: itemWidth, height: itemHeight });
+					placed = true;
+				}
+			}
+		}
+		if (!placed) overflow.push(slot);
+	});
+	return { cells: cells, placements: placements, overflow: overflow };
+};
+setup.items.getPlayerKitKg = function() {
+	return this.getPlayerKit().reduce(function(total, slot) {
+		var definition = setup.items.CATALOGUE[slot.item] || {};
+		return total + (Number(definition.weightKg) || 0) * (Number(slot.count) || 0);
+	}, 0);
+};
+setup.items.getPlayerPackSquares = function() {
+	return this.getPlayerPackLayout().placements.reduce(function(total, placement) {
+		return total + placement.width * placement.height;
+	}, 0);
 };
 // Moves one item between a locomotive's kit and the player's pack, in either direction.
 setup.items.takeFromCar = function(car, item) {
@@ -189,13 +240,23 @@ setup.items.giveToCar = function(car, item) {
 	return true;
 };
 setup.items.playerHasRoom = function(item) {
-	var kit = this.getPlayerKit();
 	var definition = this.CATALOGUE[item];
 	if (!definition) {
 		return false;
 	}
-	var slot = kit.filter(function(candidate) { return candidate.item === item; })[0];
-	return (slot && slot.count < definition.stack) || kit.length < this.PLAYER_SLOTS;
+	if (this.getPlayerCarriedKg() + (Number(definition.weightKg) || 0) > this.PLAYER_CARRY_KG) {
+		return false;
+	}
+	var slot = this.getPlayerKit().filter(function(candidate) { return candidate.item === item; })[0];
+	if (slot && slot.count < definition.stack) {
+		return true;
+	}
+	// Test the new stack without leaving it in saved state.
+	var kit = this.getPlayerKit();
+	kit.push({ item: item, count: 1 });
+	var fits = !this.getPlayerPackLayout().overflow.length;
+	kit.pop();
+	return fits;
 };
 
 // Cargo the player is carrying in their arms: timber cut away from the train, mostly. Limited by weight, not slots.
@@ -209,10 +270,13 @@ setup.items.getPlayerCargo = function() {
 	}
 	return player.carriedCargo;
 };
-setup.items.getPlayerCarriedKg = function() {
+setup.items.getPlayerCargoKg = function() {
 	return this.getPlayerCargo().reduce(function(total, stack) {
 		return total + stack.amount * setup.railyard.getCargoDensityKgPerLiter(stack.type);
 	}, 0);
+};
+setup.items.getPlayerCarriedKg = function() {
+	return this.getPlayerKitKg() + this.getPlayerCargoKg();
 };
 setup.items.addPlayerCargo = function(type, litres, grade) {
 	var cargo = this.getPlayerCargo();
@@ -244,6 +308,19 @@ setup.items.describePlayerLoad = function() {
 	var carried = kit.concat(cargo);
 	return carried.length ? carried.join(', ') : 'nothing';
 };
+setup.items.getPlayerPackGridHtml = function() {
+	var layout = this.getPlayerPackLayout();
+	var labels = {};
+	layout.placements.forEach(function(placement) {
+		labels[placement.x + ',' + placement.y] = (setup.items.CATALOGUE[placement.slot.item] || { name: '?' }).name.charAt(0);
+	});
+	var rows = layout.cells.map(function(row, y) {
+		return row.map(function(slot, x) {
+			return labels[x + ',' + y] || (slot ? '&middot;' : '&nbsp;');
+		}).join(' | ');
+	});
+	return '<pre aria-label="4 by 4 inventory grid">' + rows.join('\n') + '</pre>';
+};
 
 // The sidebar inventory is a read-only view of everything the player can use without hunting through the train
 // or the railyard text. It deliberately follows the player: a parked train remains its own station inventory.
@@ -256,9 +333,13 @@ setup.items.showInventoryDialog = function() {
 		return setup.units.kilograms(stack.amount * setup.railyard.getCargoDensityKgPerLiter(stack.type)) + ' of ' + stack.type;
 	});
 	var carriedKg = this.getPlayerCarriedKg();
-	var html = '<p><strong>On you</strong> (' + playerKit.length + '/' + this.PLAYER_SLOTS + ' kit slots, '
+	var html = '<p><strong>On you</strong> (' + this.getPlayerPackSquares() + '/' + (this.PLAYER_GRID_WIDTH * this.PLAYER_GRID_HEIGHT) + ' pack squares, '
 		+ setup.units.kilograms(carriedKg) + '/' + setup.units.kilograms(this.PLAYER_CARRY_KG) + ' carried): '
 		+ (playerItems.concat(playerLoads).join(' · ') || '<em>nothing</em>') + '</p>';
+	html += '<p class="small-description"><strong>Pack (4 × 4)</strong></p>' + this.getPlayerPackGridHtml();
+	if (this.getPlayerPackLayout().overflow.length) {
+		html += '<p><em>Some carried items do not fit the pack. Stow them before leaving the train.</em></p>';
+	}
 	var train = Array.isArray(variables.currentTrain) ? variables.currentTrain : null;
 	if (train && train.length) {
 		html += '<h3>Your train</h3><ul>';
@@ -290,8 +371,10 @@ Macro.add('playerPack', {
 		var variables = State.variables;
 		var train = variables.currentTrain;
 		var car = Array.isArray(train) ? train[variables.currentCarIndex] : null;
-		var output = '<p class="player-pack"><strong>You are carrying</strong> (' + setup.items.getPlayerKit().length
-			+ '/' + setup.items.PLAYER_SLOTS + '): ' + setup.items.describePlayerLoad() + '</p>';
+		var output = '<p class="player-pack"><strong>You are carrying</strong> (' + setup.items.getPlayerPackSquares()
+			+ '/' + (setup.items.PLAYER_GRID_WIDTH * setup.items.PLAYER_GRID_HEIGHT) + ' squares, '
+			+ setup.units.kilograms(setup.items.getPlayerCarriedKg()) + '/' + setup.units.kilograms(setup.items.PLAYER_CARRY_KG)
+			+ '): ' + setup.items.describePlayerLoad() + '</p>';
 		if (setup.items.isLocomotive(car)) {
 			var moves = [];
 			setup.items.getKit(car).forEach(function(slot) {
