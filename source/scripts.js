@@ -1363,7 +1363,9 @@ setup.railyard = {
 			var which = index === 0 ? 'entry' : 'exit';
 			var direction = this.getDirectionName(this.getLeadDirection(stationTracks, which));
 			var boundary = stationTracks[index];
-			return direction + (boundary && !boundary.infinite ? ' Stub' : ' Track');
+			return boundary && !boundary.infinite
+				? direction.replace(/bound$/, '') + ' Stub'
+				: direction + ' Track';
 		}
 		return 'Yard Track ' + index;
 	},
