@@ -322,8 +322,12 @@ setup.railyardView = {
 					depart: flipped ? 'exit' : 'entry', u0: -entryLead, u1: -entryLead + tile, v: entryV
 				});
 			}
-			var entryName = setup.railyard.getDirectionName(setup.railyard.getLeadDirection(tracks, flipped ? 'exit' : 'entry')).toUpperCase();
-			result.labels.push({ text: entryName, u: -entryLead, v: entryV, dx: -3, dy: 2, anchor: 'end', player: isOn(arrivalIndex) });
+			var entryName = setup.railyard.getTrackLabel(tracks, arrivalIndex).toUpperCase();
+			var entryOccupied = setup.railyard.getTrackOccupiedLength(entryTrack)
+				+ (isOn(arrivalIndex) ? setup.railyard.getTrainLength(player.train) : 0);
+			result.labels.push({ text: entryIsStub ? entryName + ' · ' + setup.units.metres(Math.max(0, entryTrack.length - entryOccupied))
+				+ ' free of ' + setup.units.metres(entryTrack.length) : entryName,
+				u: -entryLead, v: entryV, dx: -3, dy: 2, anchor: 'end', player: isOn(arrivalIndex) });
 		}
 
 		// Entry ladders. The lead's own track gets a Y switch (or one branching both ways); tracks the ladder
@@ -476,8 +480,12 @@ setup.railyardView = {
 					u0: exitStart + exitLead - tile, u1: exitStart + exitLead, v: exitV
 				});
 			}
-			var exitName = setup.railyard.getDirectionName(setup.railyard.getLeadDirection(tracks, flipped ? 'entry' : 'exit')).toUpperCase();
-			result.labels.push({ text: exitName, u: exitStart + exitLead, v: exitV, dx: 3, dy: 2, anchor: 'start', player: isOn(onwardIndex) });
+			var exitName = setup.railyard.getTrackLabel(tracks, onwardIndex).toUpperCase();
+			var exitOccupied = setup.railyard.getTrackOccupiedLength(exitTrack)
+				+ (isOn(onwardIndex) ? setup.railyard.getTrainLength(player.train) : 0);
+			result.labels.push({ text: exitIsStub ? exitName + ' · ' + setup.units.metres(Math.max(0, exitTrack.length - exitOccupied))
+				+ ' free of ' + setup.units.metres(exitTrack.length) : exitName,
+				u: exitStart + exitLead, v: exitV, dx: 3, dy: 2, anchor: 'start', player: isOn(onwardIndex) });
 		}
 		result.flipped = flipped;
 		return result;

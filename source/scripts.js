@@ -1359,8 +1359,12 @@ setup.railyard = {
 	// Produces player-facing track names. A lead is named for the compass direction a train takes when it leaves
 	// by it, so the player reads real directions while the code goes on working in entry and exit.
 	getTrackLabel: function(stationTracks, index) {
-		if (index === 0) return this.getDirectionName(this.getLeadDirection(stationTracks, 'entry')) + ' Track';
-		if (index === stationTracks.length - 1) return this.getDirectionName(this.getLeadDirection(stationTracks, 'exit')) + ' Track';
+		if (index === 0 || index === stationTracks.length - 1) {
+			var which = index === 0 ? 'entry' : 'exit';
+			var direction = this.getDirectionName(this.getLeadDirection(stationTracks, which));
+			var boundary = stationTracks[index];
+			return direction + (boundary && !boundary.infinite ? ' Stub' : ' Track');
+		}
 		return 'Yard Track ' + index;
 	},
 	// Returns track indices in current travel orientation order (forward or reversed).
