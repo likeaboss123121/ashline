@@ -31,6 +31,19 @@ setup.safeParseInt = function(value, fallback) {
 	return isNaN(parsed) ? (typeof fallback === 'number' ? fallback : 0) : parsed;
 };
 
+// Passage back/forward controls duplicate actions in a stateful simulation, so they stay off unless the player
+// deliberately asks for them. SugarCube reads this configuration live when it renders the UI.
+setup.applyHistorySetting = function() {
+	if (typeof Config === 'undefined' || !Config.history) {
+		return;
+	}
+	var enabled = !!State.variables.enableHistoryControls;
+	Config.history.controls = enabled;
+	Config.history.maxStates = enabled ? 100 : 1;
+};
+
+setup.applyHistorySetting();
+
 // Centralized time utilities for clock state, formatting, and reusable time-cost UI labels.
 setup.time = {
 	startTimestampMs: Date.UTC(2000, 6, 24, 9, 0, 0, 0),
@@ -242,10 +255,12 @@ Macro.add('initsettings', {
 		setup.initializeStateVar('imperialUnits', false);
 		setup.initializeStateVar('showYardTargets', false);
 		setup.initializeStateVar('autosaveOnSleep', true);
+		setup.initializeStateVar('enableHistoryControls', false);
 		setup.initializeStateVar('debugMode', false);
 		setup.initializeStateVar('debugSelectedTrackIndex', 0);
 		setup.initializeStateVar('debugSelectedTrainIndex', 0);
 		setup.initializeStateVar('debugSelectedCarIndex', -1);
+		setup.applyHistorySetting();
 	}
 });
 
@@ -411,8 +426,9 @@ setup.showOptionsDialog = function() {
 		+ '<p><strong>The rail yard</strong></p>'
 		+ '<label><<checkbox "$showYardTargets" false true autocheck>> Show clickable areas on railyard</label>'
 		+ '<p><strong>Saving</strong></p>'
-		+ '<label><<checkbox "$autosaveOnSleep" false true autocheck>> Autosave when you sleep</label>');
-	jQuery('#ui-dialog-body input').on('change', function() { UIBar.update(); });
+		+ '<label><<checkbox "$autosaveOnSleep" false true autocheck>> Autosave when you sleep</label><br>'
+		+ '<label><<checkbox "$enableHistoryControls" false true autocheck>> Enable passage back and forward controls</label>');
+	jQuery('#ui-dialog-body input').on('change', function() { setup.applyHistorySetting(); UIBar.update(); });
 	Dialog.open();
 };
 
@@ -2310,27 +2326,40 @@ setup.railyard = {
 		return 0;
 	},
 	// Builds the visible station inventory: track headers, train summaries, and boarding links.
+	getCarDescription: function(car) {
+		if (!car) {
+			return 'Unknown railcar';
+		}
+		if (car.name) {
+			return car.name.replace(/\b\w/g, function(letter) { return letter.toUpperCase(); });
+		}
+		var names = {
+			boxcar: 'Boxcar', flatcar: 'Flatcar', gondola: 'Gondola',
+			'tanker car': 'Tank car'
+		};
+		return names[car.type] || String(car.type || 'Railcar').replace(/\b\w/g, function(letter) { return letter.toUpperCase(); });
+	},
 	trainSummaryHtml: function(train, index) {
 		var trainLength = this.getTrainLength(train);
 		var html = '<div class="railyard-train">';
-		html += '<h3>Train ' + (index + 1) + ' (' + trainLength + 'm)</h3>';
+		html += '<h3>Train ' + (index + 1) + ' · ' + trainLength + ' m</h3>';
 		html += '<ol>';
 		for (var j = 0; j < train.length; j++) {
 			var car = train[j];
-			html += '<li><strong>' + car.type + '</strong> (' + car.length + 'm, ' + car.baseWeight + 'kg base';
+			html += '<li><strong>' + this.getCarDescription(car) + '</strong> — ' + car.length + ' m long; ' + car.baseWeight + ' kg empty';
 			if (car.maxCargoCapacityKg > 0) {
-				html += ', ' + car.maxCargoCapacityKg + 'kg capacity';
+				html += '; ' + car.maxCargoCapacityKg + ' kg cargo capacity';
 			}
-			html += ')';
+			html += '.';
 			if (this.isTrainVisited(train) && car.cargo && car.cargo.length) {
 				html += '<ul>';
 				for (var k = 0; k < car.cargo.length; k++) {
 					var cargo = car.cargo[k];
-					html += '<li>' + cargo.type + ': ' + cargo.amount + '</li>';
+					html += '<li>' + String(cargo.type).replace(/\b\w/g, function(letter) { return letter.toUpperCase(); }) + ': ' + cargo.amount + '.</li>';
 				}
 				html += '</ul>';
 			} else if (this.isTrainVisited(train)) {
-				html += ' — Empty';
+				html += ' Empty.';
 			}
 			html += '</li>';
 		}

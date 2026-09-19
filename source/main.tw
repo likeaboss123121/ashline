@@ -1,30 +1,24 @@
 :: StoryTitle {"position":"0,508"}
 Ashline
-
 :: StoryData {"position":"0,599"}
 {
         "ifid": "4ADA4312-A7CC-4510-9A61-902F70FE704C",
         "format": "SugarCube",
         "format-version": "2.36.1"
 }
-
 :: Start {"position":"101,100"}
 /% Entry splash and pre-game setup passage: initializes settings state and renders the settings macro UI. %/
 <h2>Welcome to Ashline v<<print setup.releaseVersion>></h2>
-
 <div class="small-description">
 - Saves are stored in this browser. Use Save to disk in the Saves menu to keep a backup.
 <br>
 - Please report bugs directly to likea.
-
 <br><br></div>
-
 <<set $settingsExitPassage to "Introduction">>
 <<initsettings>>
 <div id="settingsStart">
 	<<settingsStart>>
 </div>
-
 :: StoryInit {"position":"201,199"}
 /% SugarCube runs this once before Start. Keep it free of navigation and visible prose. %/
 <<initsettings>>
@@ -36,27 +30,20 @@ sanity: 100,
 hunger: 100,
 thirst: 100
 }>>
-
 <<set $trains to []>>
-
 <<set $currentStation to 1>>
-
 <<set $stationTracks to {}>>
-
 :: Introduction
 <<if $settingsMode is "Story">>
 You are a lone train engineer in a world where dangerous zombies called Foamers endlessly expand the railroad. Your goal is to travel from Punta Arenas, Chile, to Cape Town, South Africa, surviving on your train along the way.
 <<else>>
 You are a lone train engineer in a world where dangerous zombies called Foamers endlessly expand the railroad. Your goal is simply to survive: looting the landscape and travelling on until you either become a mindless Foamer yourself or die an engineer.
 <</if>>
-
 [[Begin your journey|Railyard]]
-
 
 :: PassageHeader
 /% Runs before every passage: the backup reminder sits above whatever the player is doing. %/
 <<saveReminder>>
-
 
 :: StoryMenu
 /% Sidebar menu extension passage: keeps utility links (currently Credits dialog) out of gameplay passages. %/
@@ -66,7 +53,6 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 <</if>>
 <<link "Options">><<run setup.showOptionsDialog()>><</link>><br>
 <<link "Credits">><<run setup.showCreditsDialog()>><</link>>
-
 
 :: StoryCaption
 /% Sidebar caption passage: the clock and the player's condition, once the game itself has started. The settings
@@ -79,7 +65,6 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 <<outsideTemperature>>
 <<playerStats>>
 <</if>>
-
 
 :: Railyard {"position":"402,201"}
 /% Station hub passage: resolves returning train placement, generates station tracks when needed, and renders yard interaction UI. %/
@@ -100,13 +85,9 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 <</if>>
 <<if $debugMode>><<run (function () { if (typeof console !== 'undefined' && typeof console.log === 'function') { console.log('[Ashline Debug] Station ' + State.variables.currentStation + ' railyard tracks:', State.variables.stationTracks[State.variables.currentStation]); } })()>><</if>>
 You step into the railyard. Several trains are parked here, each with its own mix of cars and cargo.
-
 <<tutorialHint>>
 <<railyardButtons>>
-
 <<debugTools>>
-
-
 
 :: TrainInterior
 /% On-board navigation passage: tracks current car position, movement through consist, and transition into driving mode. %/
@@ -122,19 +103,16 @@ You step into the railyard. Several trains are parked here, each with its own mi
 You are <<print setup.railyard.getCarLocationText(_currentCar)>> of your consist.
 <br>
 Car <<print $currentCarIndex + 1>> of <<print $currentTrain.length>>.
-
+<<if !$journey>><<railyardView>><</if>>
 <<if $currentCarIndex > 0>><<link "Move toward the front">><<set $currentCarIndex -= 1>><<goto "TrainInterior">><</link>><</if>>
 <<if $currentCarIndex > 0 && $currentCarIndex < $currentTrain.length - 1>> | <</if>>
 <<if $currentCarIndex < $currentTrain.length - 1>><<link "Move toward the rear">><<set $currentCarIndex += 1>><<goto "TrainInterior">><</link>><</if>>
-
 <<if _currentCar.tractiveCapacity > 0>>
 This is the locomotive. From here, you can start your journey.
-
 <<locomotivePanel>>
 <<else>>
 This car does not have the controls needed to drive the train.
 <</if>>
-
 <<if setup.railyard.isSteamLocomotiveCar(_currentCar)>>
 	<<run setup.railyard.ensureSteamLocomotiveState(_currentCar)>>
 	<span class="small-description"><strong>Boiler pressure:</strong> <<print setup.railyard.getSteamPressureBar(_currentCar).toFixed(2)>> bar</span><br>
@@ -150,15 +128,11 @@ This car does not have the controls needed to drive the train.
 <<if setup.railyard.isDieselLocomotiveCar(_currentCar)>>
 	<span class="small-description"><em>Diesel: <<print setup.railyard.getCargoAmount(_currentCar, "diesel").toFixed(2)>> L<<if setup.railyard.getCargoAmount(_currentCar, "diesel") > 0>>. <<print setup.fuel.describeGrade(setup.fuel.getGrade(_currentCar, "diesel"), "diesel")>> Engine power <<print Math.round(setup.fuel.getDieselPowerFactor(setup.fuel.getGrade(_currentCar, "diesel")) * 100)>>%<</if>>.</em></span><br>
 <</if>>
-
 <<locomotiveKit>>
 <<playerPack>>
 <<refuelControls>>
-
 <<conditionControls>>
-
 <<if $journey>><span class="small-description"><em>You are out on the line between stations. There is nowhere to get off until you reach a station.</em></span><<else>><<timedlink "Leave the train" 1>><<run setup.railyard.leaveCurrentTrain()>><<goto "Railyard">><</timedlink>><</if>>
-
 <<if _currentCar.tractiveCapacity > 0>>
 	<<if setup.railyard.isTrainDriveCapable($currentTrain)>><<link "Start driving">><<set _drivingPassage = $journey ? "OnTheLine" : "DrivingMode">><<goto _drivingPassage>><</link>><<else>>
 		<<if setup.railyard.isDieselLocomotiveCar(_currentCar) && setup.railyard.getCargoAmount(_currentCar, "diesel") >= setup.fuel.getDieselLitresPerMinute(_currentCar)>><span class="small-description"><em>Cannot start driving: <<print setup.fuel.describeGrade(setup.fuel.getGrade(_currentCar, "diesel"), "diesel")>> This engine cannot run on diesel in that condition; blend in better fuel.</em></span>
@@ -167,9 +141,7 @@ This car does not have the controls needed to drive the train.
 		<<else>><span class="small-description"><em>Cannot start driving: this locomotive cannot currently provide traction.</em></span><</if>>
 	<</if>>
 <</if>>
-
 <<debugTools>>
-
 
 :: OnTheLine
 /% Travelling between stations: the consist stands on one 5 km world tile at a time, and every move is one tile. %/
@@ -177,13 +149,9 @@ This car does not have the controls needed to drive the train.
 <<collapseNotice>>
 <<if !$journey>><<goto "DrivingMode">><</if>>
 <<lineStatus>>
-
 <<drivingView>>
-
 <<lineControls>>
-
 <<debugTools>>
-
 
 :: DrivingMode
 /% Active driving/shunting passage: composes merge, travel, and decoupling controls for the current consist and station context. %/
@@ -191,42 +159,30 @@ This car does not have the controls needed to drive the train.
 <<collapseNotice>>
 <<initDrivingModeState>>
 You are driving your consist. Current station: <<print $currentStation>>.
-
 <<tutorialHint>>
 <<railyardView>>
 <<drivingStatus>>
 <<drivingShuntingControls>>
 <<drivingTravelButtons>>
 <<drivingMergeButtons>>
-
 <<link "Stop driving">><<goto "TrainInterior">><</link>>
-
 <<debugTools>>
-
 :: Sleep
 /% The sleep screen: how long to lie down for. Sleeping needs a bedroll somewhere in the consist. %/
 <<collapseNotice>>
 <<if !setup.condition.hasBedroll($currentTrain)>>
 You have no bedroll aboard to sleep in.
-
 <<link "Back">><<goto "TrainInterior">><</link>>
 <<else>>
 You lay the bedroll out in the cab.
-
 <span class="small-description">Fatigue: <<print setup.stats.getValue("fatigue")>>/100. Rest is worth less while you are hungry, thirsty or unwell: this bed is worth <<print Math.round(setup.condition.getRestEfficiency() * 100)>>% of a good night's sleep.</span>
-
 <<sleepChoices>>
-
 <<link "Get up again">><<goto "TrainInterior">><</link>>
 <</if>>
-
 :: OnFoot
 /% Out of the train, on the ballast: walking the line, felling trees, and climbing back aboard. %/
 <<collapseNotice>>
 <<onFootStatus>>
-
 <<onFootControls>>
-
 <<conditionControls>>
-
 <<debugTools>>

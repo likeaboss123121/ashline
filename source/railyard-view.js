@@ -795,7 +795,16 @@ setup.railyardView = {
 		var trainSpans = {};
 		layout.cars.sort(byDepth).forEach(function(entry) {
 			var name = self.getCarTemplateName(entry.car, layout.flipped);
-			var title = String(entry.car.type || 'car') + ', ' + entry.car.length + ' m' + (entry.isPlayer ? ' (your consist)' : '');
+			var title = setup.railyard.getCarDescription(entry.car) + '. ' + entry.car.length + ' m long'
+				+ (entry.isPlayer ? '. Your consist.' : '.');
+			// Once a train has been boarded its load is known; expose that same information on the car under the pointer.
+			// Unvisited trains remain unknown rather than leaking their cargo through the drawing.
+			if (entry.car.visited) {
+				var cargo = Array.isArray(entry.car.cargo) ? entry.car.cargo : [];
+				title += cargo.length
+					? ' Contents: ' + cargo.map(function(load) { return load.type + ' ' + load.amount; }).join(', ') + '.'
+					: ' Empty.';
+			}
 			var item = place(name, entry.u, entry.v, title);
 			// A parked train's click target is the stretch of its own track that its cars stand on, measured along
 			// the rails. A box around them on screen would be a huge upright rectangle over a drawing where nothing
