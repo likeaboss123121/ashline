@@ -39,7 +39,7 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 <<else>>
 You are a lone train engineer in a world where dangerous zombies called Foamers endlessly expand the railroad. Your goal is simply to survive: looting the landscape and travelling on until you either become a mindless Foamer yourself or die an engineer.
 <</if>>
-[[Begin your journey|Railyard]]
+<<link "Begin your journey">><<startNewGame true>><<goto "Railyard">><</link>>
 
 :: PassageHeader
 /% Runs before every passage: the backup reminder sits above whatever the player is doing. %/
@@ -160,12 +160,12 @@ This car does not have the controls needed to drive the train.
 <<initDrivingModeState>>
 You are driving your consist. Current station: <<print $currentStation>>.
 <<tutorialHint>>
+<<railyardView>>
 <<drivingStatus>>
 <<tutorialControls>>
 <<drivingTravelButtons>>
 <<drivingShuntingControls>>
 <<drivingMergeButtons>>
-<<railyardView>>
 <<link "Stop driving">><<goto "TrainInterior">><</link>>
 <<debugTools>>
 :: Sleep

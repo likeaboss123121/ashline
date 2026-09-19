@@ -6,6 +6,13 @@
 	border: 1px solid #2a2f31;
 }
 
+@media (min-width: 701px) {
+	.railyard-view-wrapper.railyard-view-wide {
+		width: calc(100vw - 4em);
+		margin-left: calc((100% - (100vw - 4em)) / 2);
+	}
+}
+
 /* On a phone the passage margins cost a fifth of the screen, so the yard reaches into them. It stops short of the
    stowed sidebar on the left (SugarCube leaves the passage 56px clear of it there, and the stowed bar is 33px wide)
    and takes the whole 24px passage margin on the right. A full 100vw here would slide under the sidebar and push

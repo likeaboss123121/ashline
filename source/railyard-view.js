@@ -523,7 +523,7 @@ setup.railyardView = {
 		svg.style.height = 'auto';
 	},
 	// The zoom buttons redraw nothing: they resize the drawing that is already on the page.
-	createZoomControls: function(svg, naturalWidth) {
+	createZoomControls: function(svg, naturalWidth, wrapper) {
 		var self = this;
 		var bar = document.createElement('div');
 		bar.className = 'railyard-view-zoom';
@@ -560,6 +560,7 @@ setup.railyardView = {
 		addButton('\u2212', 'Zoom out', function() { self.zoomLevel = stepFrom(-1); });
 		addButton('+', 'Zoom in', function() { self.zoomLevel = stepFrom(1); });
 		addButton('Fit', 'Fit the whole yard to the page', function() { self.zoomLevel = 'fit'; });
+		addButton('Wide', 'Expand the yard view across the screen', function() { wrapper.classList.toggle('railyard-view-wide'); });
 		bar.appendChild(readout);
 		update();
 		return bar;
@@ -1085,7 +1086,7 @@ setup.railyardView = {
 				}
 			});
 		}
-		wrapper.appendChild(this.createZoomControls(svg, width * this.SCALE));
+		wrapper.appendChild(this.createZoomControls(svg, width * this.SCALE, wrapper));
 		wrapper.appendChild(scroll);
 		wrapper.appendChild(this.createCompass(tracks, layout.flipped));
 		this.addDragToPan(scroll);

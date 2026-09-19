@@ -264,6 +264,22 @@ Macro.add('initsettings', {
 	}
 });
 
+// The title screen always begins a fresh run.  Settings stay available there, but no visited yards, journey
+// position, tutorial state, or carried train can leak out of the browser's cached story state into the next game.
+Macro.add('startNewGame', {
+	handler: function() {
+		var variables = State.variables;
+		['currentTrain', 'leavingTrain', 'enteredStation', 'enteredTrackIndex', 'enteredTrainIndex',
+			'drivingTrackIndex', 'currentCarIndex', 'journey', 'onFoot', 'tutorialDone',
+			'collapseNotice', 'timedActionFailure'].forEach(function(name) { delete variables[name]; });
+		variables.player = { fatigue: 0, health: 100, immunity: 100, sanity: 100, hunger: 100, thirst: 100 };
+		variables.trains = [];
+		variables.currentStation = 1;
+		variables.stationTracks = {};
+		variables.gameTimeTimestampMs = setup.time.startTimestampMs;
+	}
+});
+
 // Release metadata is used both for the title screen and build-integrity popup.
 setup.releaseVersion = '0.2.0';
 setup.buildCheckDone = false;
@@ -2112,6 +2128,9 @@ setup.railyard = {
 		var trackCount = lengths.length;
 		var tracks = [];
 		var hasLoco = false;
+		// A clear road is the yard's escape valve: without one, every boundary crossover is locked and a player can
+		// be forced to couple an unrelated car merely to leave.  Reserve it before placing stock, not afterward.
+		var clearTrackIndex = this.randomInt(rng, 0, Math.max(0, trackCount - 1));
 
 		// Weighted toward fewer trains: 0 and 1 are most common, 4 is rare.
 		var pickTrainCount = function(rngFn) {
@@ -2127,7 +2146,7 @@ setup.railyard = {
 			var trackLength = lengths[i];
 			var track = {length: trackLength, trains: []};
 			var remaining = trackLength;
-			var trainsToGenerate = pickTrainCount(rng);
+			var trainsToGenerate = i === clearTrackIndex ? 0 : pickTrainCount(rng);
 
 			for (var t = 0; t < trainsToGenerate; t++) {
 				if (remaining < 12) {
@@ -2176,6 +2195,7 @@ setup.railyard = {
 
 		if (!hasLoco) {
 			for (var ti = 0; ti < tracks.length; ti++) {
+				if (ti === clearTrackIndex) continue;
 				var locoKey = this.randomChoice(rng, this.locomotiveKeys);
 				var fallbackLoco = this.createLocomotiveCar(locoKey);
 				if (this.getTrackOccupiedLength(tracks[ti]) + fallbackLoco.length <= tracks[ti].length) {
@@ -3137,9 +3157,6 @@ Macro.add('drivingStatus', {
 
 Macro.add('drivingShuntingControls', {
 	handler: function() {
-		if (!setup.railyard.isTrainDriveCapable(State.variables.currentTrain)) {
-			return;
-		}
 		if (!State.variables.currentTrain || State.variables.currentTrain.length <= 1) {
 			return;
 		}
@@ -3159,7 +3176,7 @@ Macro.add('drivingShuntingControls', {
 			if (reason) {
 				return;
 			} else {
-				output += '<<timedlink "' + label + '" ' + Math.max(1, Math.ceil(section.length / 2)) + ' "shunting" "fatigue:+1">>'
+				output += '<<timedlink "' + label + '" ' + Math.max(1, Math.ceil(section.length / 2)) + ' "generic" "fatigue:+1">>'
 					+ '<<run setup.railyard.decoupleSection(' + isFront + ')>><<goto "DrivingMode">><</timedlink>><br>';
 			}
 			output += '<span class="small-description">' + side + ' section: '
