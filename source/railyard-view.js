@@ -308,12 +308,14 @@ setup.railyardView = {
 				: roundUp(Math.max(this.MIN_LEAD_METRES, this.getGroupsLength(entryGroups) + this.LEAD_CLEARANCE_METRES + this.FREE_STUB_METRES));
 			if (entryIsStub) piece('buffer-stop-start', -entryLead, entryV);
 			else piece('fade-in', -entryLead, entryV);
-			tiles(-entryLead + tile, 0, entryV, isOn(arrivalIndex));
+			// A finite lead's buffer stop is anchored at the rail end, so its first tile must begin at that same
+			// anchor. Starting one tile later left a visible, non-functional gap between a Southbound stub and its ladder.
+			tiles(entryIsStub ? -entryLead : -entryLead + tile, 0, entryV, isOn(arrivalIndex));
 			if (yardCount && !entry.any) {
 				piece('buffer-stop', 0, entryV); // no yard track connects to the entry
 			}
 			this.packBackward(entryGroups, -this.LEAD_CLEARANCE_METRES, entryV, result.cars, arrivalIndex, flipped);
-			result.hits.push({ trackIndex: arrivalIndex, u0: -entryLead + tile, u1: 0, v: entryV });
+			result.hits.push({ trackIndex: arrivalIndex, u0: entryIsStub ? -entryLead : -entryLead + tile, u1: 0, v: entryV });
 			// The far end of the lead leaves the station: clicking it departs, the way the travel links do.
 			if (!entryIsStub) {
 				result.hits.push({
