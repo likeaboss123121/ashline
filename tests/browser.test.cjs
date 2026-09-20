@@ -141,6 +141,8 @@ test('save confirmations, dedicated autosave, real export/import and invalid fil
 test('help and journal are placeholders, debug tabs are separate, and same-page scrolling respects its option',async t=>{
   const page=await openGame(t,{viewport:{width:1000,height:650}});await enableDebug(page);await begin(page);await board(page);
   assert.equal(await page.locator('#passages .debug-container').count(),0);
+  assert.deepEqual((await page.locator('#menu-story > li').allTextContents()).slice(-3),['Credits','Debug','Wiki']);
+  assert.equal(await page.locator('#menu-story .developer-menu-item > a').first().evaluate(el=>getComputedStyle(el).color),'rgb(255, 102, 102)');
   await page.getByRole('button',{name:'Wiki',exact:true}).click();
   assert.equal(await page.locator('#developer-Wiki').isVisible(),true);
   assert.equal(await page.locator('#developer-Debug').isVisible(),false);
@@ -166,6 +168,21 @@ test('help and journal are placeholders, debug tabs are separate, and same-page 
   assert.equal(await page.evaluate(()=>scrollY),0);
   await page.evaluate(()=>{SugarCube.State.variables.debugMode=false;SugarCube.Engine.play('TrainInterior');});
   assert.equal(await page.locator('#developer-tabs').count(),0);
+  assert.equal(await page.locator('#menu-story .developer-menu-item').count(),0);
+});
+
+test('red developer sidebar menus work on mobile with keyboard and close controls',async t=>{
+  const page=await openGame(t,{viewport:{width:390,height:844}});await enableDebug(page);await beginTutorial(page);
+  if(await page.locator('#ui-bar').evaluate(el=>el.classList.contains('stowed'))) await page.locator('#ui-bar-toggle').click();
+  const debug=page.locator('#menu-story').getByRole('button',{name:'Debug',exact:true});
+  await debug.focus();await page.keyboard.press('Enter');
+  assert.equal(await page.locator('#developer-Debug').isVisible(),true);
+  const box=await page.locator('#developer-Debug').boundingBox();assert.ok(box.x>=0 && box.x+box.width<=391);
+  await page.getByRole('button',{name:'Close Debug',exact:true}).click();
+  assert.equal(await debug.getAttribute('aria-expanded'),'false');
+  await page.locator('#menu-story').getByRole('button',{name:'Wiki',exact:true}).click();
+  assert.equal(await page.locator('#developer-Wiki').isVisible(),true);
+  await page.getByRole('button',{name:'Close Wiki',exact:true}).click();
 });
 
 test('tutorial highlight is below stock, empty cabs and passenger cars are unlit, and map scroll is retained',async t=>{

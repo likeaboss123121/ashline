@@ -273,11 +273,14 @@
 .tutorial-next-action { border-left: 3px solid #dec38a; padding-left: 0.4em; }
 .railyard-view .tutorial-next-target { stroke: #dec38a; stroke-width: 2px; stroke-dasharray: 4 3; fill: rgba(222, 195, 138, 0.08); }
 .pack-grid { display: block; width: min(100%, 300px); height: auto; font-family: inherit; }
-#developer-tabs { position: fixed; left: 0; top: 6rem; z-index: 150; }
-.developer-tab-buttons { display: flex; flex-direction: column; width: 2rem; }
-.developer-tab-buttons button { writing-mode: vertical-rl; padding: .6rem .25rem; font: inherit; background: #252728; }
-.developer-tab-buttons button[aria-expanded="true"] { color: #dec38a; }
-.developer-panel { position: fixed; left: 2rem; top: 0; bottom: 0; width: min(640px, calc(100vw - 2rem)); box-sizing: border-box; overflow: auto; padding: 1rem; background: #191b1c; border-right: 1px solid #777; }
+#developer-tabs { position: relative; z-index: 150; }
+#menu-story .developer-menu-item > a { color: #ff6666; }
+#menu-story .developer-menu-item > a:hover,
+#menu-story .developer-menu-item > a:focus,
+#menu-story .developer-menu-item > a[aria-expanded="true"] { color: #ff9999; }
+.developer-panel { position: fixed; left: 17.5em; top: 0; bottom: 0; width: min(640px, calc(100vw - 17.5em)); box-sizing: border-box; overflow: auto; padding: 1rem; background: #191b1c; border-right: 1px solid #777; }
+#ui-bar.stowed ~ #developer-tabs .developer-panel { left: 2rem; width: min(640px, calc(100vw - 2rem)); }
+@media (max-width: 767px) { .developer-panel { left: 0; width: 100vw; } }
 .developer-panel[hidden] { display: none; }
 .developer-panel .debug-container { margin: 0; padding: 0; border: 0; }
 .recovery-controls p { margin: .25rem 0; }

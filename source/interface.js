@@ -13,19 +13,27 @@ setup.sideTabs = {
 		var scroll = previous ? previous.scrollTop : 0;
 		var opened = old ? Array.from(old.querySelectorAll('details[open] > summary')).map(function(s) { return s.textContent; }) : [];
 		if (old) old.remove();
+		document.querySelectorAll('#menu-story .developer-menu-item').forEach(function(item) { item.remove(); });
 		if (!State.variables.debugMode || State.passage === 'Start') { this.active = null; return; }
+		var menu = document.getElementById('menu-story'); if (!menu) return;
 		var root = document.createElement('aside'); root.id = 'developer-tabs';
-		var buttons = document.createElement('div'); buttons.className = 'developer-tab-buttons';
-		root.appendChild(buttons);
 		var self = this;
+		function close() {
+			var selected = self.active; self.active = null; self.refresh();
+			var button = document.querySelector('[aria-controls="developer-' + selected + '"]'); if (button) button.focus();
+		}
 		['Debug', 'Wiki'].forEach(function(name) {
-			var b = document.createElement('button'); b.type = 'button'; b.textContent = name;
+			var item = document.createElement('li'); item.className = 'developer-menu-item';
+			var b = document.createElement('a'); b.textContent = name; b.tabIndex = 0; b.setAttribute('role', 'button');
 			b.setAttribute('aria-controls', 'developer-' + name); b.setAttribute('aria-expanded', self.active === name ? 'true' : 'false');
 			b.addEventListener('click', function() { self.active = self.active === name ? null : name; self.refresh();
 				var panel = document.getElementById('developer-' + name); if (panel && !panel.hidden) panel.focus(); });
-			buttons.appendChild(b);
+			b.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); b.click(); } });
+			item.appendChild(b); menu.appendChild(item);
 			var panel = document.createElement('section'); panel.id = 'developer-' + name; panel.className = 'developer-panel';
 			panel.setAttribute('aria-label', name); panel.tabIndex = -1; panel.hidden = self.active !== name;
+			var dismiss = document.createElement('button'); dismiss.type = 'button'; dismiss.textContent = 'Close ' + name;
+			dismiss.addEventListener('click', close); panel.appendChild(dismiss);
 			root.appendChild(panel);
 		});
 		var debug = root.querySelector('#developer-Debug'), wiki = root.querySelector('#developer-Wiki');
@@ -33,8 +41,7 @@ setup.sideTabs = {
 		var reference = debug.querySelector('.procedural-wiki');
 		if (reference) { reference.open = true; wiki.appendChild(reference); }
 		root.querySelectorAll('details > summary').forEach(function(s) { if (opened.indexOf(s.textContent) >= 0) s.parentElement.open = true; });
-		root.addEventListener('keydown', function(e) { if (e.key === 'Escape') { var selected = self.active; self.active = null; self.refresh();
-			var button = document.querySelector('[aria-controls="developer-' + selected + '"]'); if (button) button.focus(); } });
+		root.addEventListener('keydown', function(e) { if (e.key === 'Escape') close(); });
 		document.body.appendChild(root);
 		var current = root.querySelector('.developer-panel:not([hidden])'); if (current) current.scrollTop = scroll;
 	}
