@@ -871,6 +871,19 @@ setup.railyardView = {
 				groundPoints.push(self.project(u, span.v - H), self.project(u, span.v + H));
 			});
 		});
+		// Horizontal ladders extend outside the ground envelope of the parallel roads. Give them the same
+		// shoulder width, measured perpendicular to their own direction, before forming the yard's outline.
+		layout.flat.forEach(function(piece) {
+			if (!/-up$|-both$/.test(piece.name)) return;
+			var spacing = setup.railyardTemplates.trackSpacingUnits;
+			var v = piece.v + (piece.name === 'railyard-track-y-merge-both' ? spacing : 0);
+			var start = self.project(piece.u * M, v);
+			var end = self.project((piece.u + setup.railyardTemplates.junctionMetres) * M, v - spacing);
+			var shoulder = H / Math.sqrt(2);
+			[start, end].forEach(function(point) {
+				groundPoints.push({ x: point.x, y: point.y - shoulder }, { x: point.x, y: point.y + shoulder });
+			});
+		});
 		var grounds = groundPoints.length >= 3 ? [this.convexHull(groundPoints)] : [];
 		// Size the drawing to fit the ground, every image, and every label.
 		var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;

@@ -603,6 +603,13 @@ def ladder_diagonal(s, up=False, u0=0, v0=0):
 
         s.part(f'{name}-ballast')
         s.poly(edge(-8) + list(reversed(edge(8))), P['ballast'])
+        # Fill the wedges between the miter and the adjoining tile's cross-section as well. Otherwise
+        # the rails can join above a triangular hole in the gravel at the outside of the corner.
+        for distance in (-8, 8):
+            for i, endpoint in enumerate(edge(distance)):
+                centre = (x0 + i * span, y0)
+                tile_edge = (centre[0] + px(-distance), centre[1] + px(distance / 2))
+                s.poly([centre, endpoint, tile_edge], P['ballast'])
         s.part(f'{name}-ties')
         # Eight-pixel pitch divides the piece evenly, including across chained ladder pieces.
         # A two-unit sleeper thickness projects to roughly three pixels along this direction.
@@ -612,8 +619,16 @@ def ladder_diagonal(s, up=False, u0=0, v0=0):
         s.part(f'{name}-rails')
         for v in (-3, 3):
             rail = edge(v, z=1)
-            s.poly(rail + list(reversed([(x, y + 2) for x, y in rail])), P['rail_dark'])
-            s.poly(rail + list(reversed([(x, y + 1) for x, y in rail])), P['rail_top'])
+            # The snapped miter may lie a pixel beyond a straight tile's endpoint. Carry the railhead
+            # all the way to that actual endpoint, including its thickness, rather than leaving a gap
+            # between two mathematically intersecting lines that are clipped to separate templates.
+            joints = [(x0 + px(-v), y0 + px(v / 2 - 1)),
+                      (x0 + span + px(-v), y0 + px(v / 2 - 1))]
+            for thickness, colour in ((2, P['rail_dark']), (1, P['rail_top'])):
+                s.poly(rail + list(reversed([(x, y + thickness) for x, y in rail])), colour)
+                for end, joint in zip(rail, joints):
+                    s.poly([end, joint, (joint[0], joint[1] + thickness),
+                            (end[0], end[1] + thickness)], colour)
         return
 
     s.part(f'{name}-ballast')
