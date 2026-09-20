@@ -32,7 +32,7 @@ setup.sideTabs = {
 			item.appendChild(b); menu.appendChild(item);
 			var panel = document.createElement('section'); panel.id = 'developer-' + name; panel.className = 'developer-panel';
 			panel.setAttribute('aria-label', name); panel.tabIndex = -1; panel.hidden = self.active !== name;
-			var dismiss = document.createElement('button'); dismiss.type = 'button'; dismiss.textContent = 'Close ' + name;
+			var dismiss = document.createElement('button'); dismiss.type = 'button'; dismiss.className = 'developer-close'; dismiss.textContent = 'Close ' + name;
 			dismiss.addEventListener('click', close); panel.appendChild(dismiss);
 			root.appendChild(panel);
 		});

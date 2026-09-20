@@ -178,7 +178,10 @@ test('red developer sidebar menus work on mobile with keyboard and close control
   await debug.focus();await page.keyboard.press('Enter');
   assert.equal(await page.locator('#developer-Debug').isVisible(),true);
   const box=await page.locator('#developer-Debug').boundingBox();assert.ok(box.x>=0 && box.x+box.width<=391);
-  await page.getByRole('button',{name:'Close Debug',exact:true}).click();
+  const closeDebug=page.getByRole('button',{name:'Close Debug',exact:true});
+  assert.equal(await closeDebug.evaluate(el=>getComputedStyle(el).textTransform),'uppercase');
+  assert.ok(await closeDebug.evaluate(el=>el.offsetWidth/el.parentElement.clientWidth>.9));
+  await closeDebug.click();
   assert.equal(await debug.getAttribute('aria-expanded'),'false');
   await page.locator('#menu-story').getByRole('button',{name:'Wiki',exact:true}).click();
   assert.equal(await page.locator('#developer-Wiki').isVisible(),true);

@@ -282,6 +282,22 @@
 #ui-bar.stowed ~ #developer-tabs .developer-panel { left: 2rem; width: min(640px, calc(100vw - 2rem)); }
 @media (max-width: 767px) { .developer-panel { left: 0; width: 100vw; } }
 .developer-panel[hidden] { display: none; }
+.developer-panel .developer-close {
+	display: block;
+	width: 100%;
+	margin: 0 0 1rem;
+	padding: .5em;
+	color: #eee;
+	background: #222;
+	border: 1px solid #444;
+	font: inherit;
+	line-height: 1.2;
+	text-align: center;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+.developer-panel .developer-close:hover,
+.developer-panel .developer-close:focus { color: #fff; background: #333; border-color: #777; }
 .developer-panel .debug-container { margin: 0; padding: 0; border: 0; }
 .recovery-controls p { margin: .25rem 0; }
 .passage > br + br { display: none; }
