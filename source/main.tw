@@ -104,7 +104,7 @@ You step into the railyard. Several trains are parked here, each with its own mi
 	<</if>>
 <</if>>
 <<if setup.railyard.isDieselLocomotiveCar(_currentCar)>>
-	<span class="small-description"><em>Diesel: <<print setup.railyard.getCargoAmount(_currentCar, "diesel").toFixed(2)>> L<<if setup.railyard.getCargoAmount(_currentCar, "diesel") > 0>>. <<print setup.fuel.describeGrade(setup.fuel.getGrade(_currentCar, "diesel"), "diesel")>> Engine power <<print Math.round(setup.fuel.getDieselPowerFactor(setup.fuel.getGrade(_currentCar, "diesel")) * 100)>>%<</if>>.</em></span><br>
+	<span class="small-description"><em>Diesel: <<print setup.railyard.getCargoAmount(_currentCar, "diesel").toFixed(2)>> L.<<if setup.railyard.getCargoAmount(_currentCar, "diesel") > 0>> <<print setup.fuel.describeGrade(setup.fuel.getGrade(_currentCar, "diesel"), "diesel")>><</if>></em></span><br>
 <</if>>
 <<if !$journey>><<drivingShuntingControls>><</if>>
 <<conditionControls>>

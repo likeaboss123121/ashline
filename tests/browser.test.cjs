@@ -498,6 +498,7 @@ test('the first locomotive carries a kit, and pumps diesel from a coupled tanker
   assert.match(dieselText, /Diesel: 800.00 L/);
   assert.match(dieselText, /The diesel looks/);
   assert.doesNotMatch(dieselText, /grade \d+%/);
+  assert.doesNotMatch(dieselText, /engine power\s+\d+%/i);
 });
 
 test('a Prairie is drawn as itself, shows its graded fuel, and cuts timber from a coupled flatcar into firewood', async t => {

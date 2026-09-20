@@ -2853,8 +2853,7 @@ Macro.add('debugTools', {
 		}));
 		addReferenceTable('Fuel', ['Rule', 'Value'], [
 			['Diesel minimum usable grade', setup.fuel.DIESEL_MIN_GRADE + '%'],
-			['Diesel full-power grade', setup.fuel.DIESEL_FULL_POWER_GRADE + '%'],
-			['Diesel power at minimum grade', Math.round(setup.fuel.DIESEL_POWER_AT_MIN_GRADE * 100) + '%']
+			['Diesel full-power grade', setup.fuel.DIESEL_FULL_POWER_GRADE + '%']
 		]);
 		var catalogue = (setup.items && setup.items.CATALOGUE) || {};
 		addReferenceTable('Pack items', ['Item', 'Grid', 'Weight', 'Stack limit'], Object.keys(catalogue).map(function(key) {
