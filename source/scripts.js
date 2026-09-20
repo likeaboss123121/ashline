@@ -235,10 +235,6 @@ Macro.add('timedlink', {
 // Normalizes persistent settings variables so every new session starts from a known state.
 Macro.add('initsettings', {
 	handler: function() {
-		setup.initializeStateVar('settingsMode', 'Infinite');
-		if (State.variables.settingsMode === 'Story') {
-			State.variables.settingsMode = 'Infinite';
-		}
 		setup.initializeStateVar('randomSeed', '');
 		setup.initializeStateVar('gameTimeTimestampMs', function() { return setup.time.startTimestampMs; });
 		setup.initializeStateVar('use24HourTime', false);
@@ -260,7 +256,7 @@ Macro.add('initsettings', {
 setup.startNewRun = function() {
 	var v = State.variables;
 	// Preferences and static catalogues survive a new run; everything else belongs to that run.
-	var keep = ['settingsMode', 'settingsExitPassage', 'randomSeed', 'use24HourTime', 'dateFormat',
+	var keep = ['settingsExitPassage', 'randomSeed', 'use24HourTime', 'dateFormat',
 		'imperialUnits', 'showYardTargets', 'autosaveOnSleep', 'preserveScroll', 'enableHistoryControls', 'debugMode',
 		'defaultTrains', 'cargoTypes'];
 	Object.keys(v).forEach(function(key) { if (keep.indexOf(key) === -1) delete v[key]; });

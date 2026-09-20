@@ -22,11 +22,7 @@ Ashline
 :: StoryInit
 <<silently>><<initsettings>><<run setup.startNewRun()>><</silently>>
 :: Introduction
-<<if $settingsMode is "Story">>
 You are a lone train engineer in a world where dangerous zombies called Foamers endlessly expand the railroad. Your goal is to travel from Punta Arenas, Chile, to Cape Town, South Africa, surviving on your train along the way.
-<<else>>
-You are a lone train engineer in a world where dangerous zombies called Foamers endlessly expand the railroad. Your goal is simply to survive: looting the landscape and travelling on until you either become a mindless Foamer yourself or die an engineer.
-<</if>>
 <<link "Begin your journey">><<startNewGame true>><<goto "Railyard">><</link>>
 :: PassageHeader
 <<if ["Railyard", "TrainInterior", "DrivingMode", "OnTheLine"].indexOf(passage()) === -1>><<saveReminder>><</if>>

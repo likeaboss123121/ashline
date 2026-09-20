@@ -401,6 +401,13 @@ async function board(page) {
   await choose(page, 'Board Train 1 (0:01)', 'TrainInterior');
 }
 
+test('the introduction always gives the authored journey objective', async t => {
+  const page = await openGame(t);
+  await choose(page, 'Continue', 'Introduction');
+  const introduction = await page.locator('#passages').innerText();
+  assert.match(introduction, /travel from Punta Arenas, Chile, to Cape Town, South Africa/);
+});
+
 test('new game: board, drive, travel both ways, leave, and board again', async t => {
   const page = await openGame(t);
   await begin(page);
