@@ -1,3 +1,9 @@
+<!--
+MAINTAINER AND AI NOTE: Keep this README limited to a public description of Ashline and instructions for
+building/compiling it. Do not add per-version update commentary, changelogs, internal gameplay rules,
+implementation details, roadmaps, development status, or agent notes. Put that material in release notes,
+issues, or the appropriate development documentation instead.
+-->
 # Ashline
 
 Ashline is a text-based survival game about circumnavigating the globe by train during a zombie apocalypse. You play a lone train engineer in a world where dangerous zombies called Foamers keep expanding the railroad without end. Explore rail yards, take command of diesel and steam locomotives, and build a working consist from the rolling stock you find along the line.
@@ -18,17 +24,6 @@ In debug mode, **Copy bug report** opens a selectable report with the build, see
 consist and recent actions. Review it before sharing; it includes your current gameplay state.
 
 ## Building from source
-
-### 0.2.0 development systems
-
-- `source/food.js`: portable raw food, rations, kitchen yield and carried water.
-- `source/recovery.js`: finite depot stocks and weight-limited on-foot fuel recovery. Default depot volumes
-  are 12,000 L diesel, 5,000 L coal and 30,000 L water; nearby exhausted depots require longer supply runs.
-- `source/saves.js`: live-state snapshots, independent sleep autosave, confirmations and validated file imports.
-- `source/interface.js`: separate debug/wiki side tabs and optional same-passage scroll retention.
-- `source/journal.js`: saved journey counters. Help and Journal passages intentionally contain authoring placeholders.
-
-Test saves still share storage with the main game by design. Schema migration and production release remain deferred.
 
 The game compiles to a single HTML file with [Tweego](https://github.com/tmedwards/tweego), a command-line compiler for Twine stories. Tweego is not included in this repository.
 
@@ -81,14 +76,6 @@ Edit the generators, not the generated files:
 python3 scripts/draw-railyard-templates.py
 python3 scripts/draw-driving-templates.py
 ```
-
-### Yard rules
-
-`source/yard-actions.js` owns endpoint connections, route clearance, action validation and execution.
-Map shortcuts and text controls share these commands; the tutorial only highlights them.
-Generated yards reserve a clear road and an accessible diesel shunter. Its fuel budget covers the
-next route (or the return branch), a loaded flatcar, 5% margin, and 20 minutes of yard work.
-It is an escape/resupply baseline, not a guarantee that an arbitrarily heavy train can leave.
 
 ## License
 
