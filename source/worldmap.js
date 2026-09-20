@@ -571,8 +571,8 @@ setup.worldmap = {
 		return journey && typeof journey.legIndex === 'number' ? journey : null;
 	},
 	// The run of tiles the train is standing on: the leg's main line, or a branch off it if the player took one.
-	getJourneyPath: function() {
-		var journey = this.getJourney();
+	getJourneyPath: function(position) {
+		var journey = position || this.getJourney();
 		if (!journey) {
 			return null;
 		}
@@ -606,12 +606,12 @@ setup.worldmap = {
 		});
 	},
 	// Where the consist stands, for the driving view and the status line.
-	getJourneyView: function() {
-		var journey = this.getJourney();
+	getJourneyView: function(position) {
+		var journey = position || this.getJourney();
 		if (!journey) {
 			return null;
 		}
-		var path = this.getJourneyPath();
+		var path = this.getJourneyPath(journey);
 		var tiles = path.tiles;
 		if (path.branch) {
 			var onBranch = Math.max(0, Math.min(journey.tileIndex, tiles.length - 1));
@@ -660,9 +660,9 @@ setup.worldmap = {
 	// One step along the line: direction 1 carries on, -1 backs up. On a branch, 1 runs further out and -1 comes
 	// back toward the junction, and either end of a branch may put the train back on the main line. Returns null
 	// where there is nowhere to go.
-	getJourneyStep: function(direction) {
-		var journey = this.getJourney();
-		var path = this.getJourneyPath();
+	getJourneyStep: function(direction, position) {
+		var journey = position || this.getJourney();
+		var path = this.getJourneyPath(journey);
 		if (!journey || !path) {
 			return null;
 		}

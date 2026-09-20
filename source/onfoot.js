@@ -29,23 +29,16 @@ setup.onfoot = {
 		var train = this.getTrainPosition();
 		return !!foot && !!train && foot.tileIndex === train.tileIndex && (foot.branch || null) === train.branch;
 	},
+	// Query the walker's route without temporarily moving the parked train.
+	getPosition: function() {
+		var foot = this.get(), journey = setup.worldmap.getJourney();
+		return foot && journey ? { legIndex: journey.legIndex, tileIndex: foot.tileIndex,
+			branch: foot.branch || null, forward: true } : null;
+	},
 	// The tile the player is standing on, which is not always the one the train is on.
 	getTile: function() {
-		var foot = this.get();
-		if (!foot) {
-			return null;
-		}
-		var journey = setup.worldmap.getJourney();
-		if (!journey) {
-			return null;
-		}
-		var saved = journey.tileIndex;
-		var savedBranch = journey.branch;
-		journey.tileIndex = foot.tileIndex;
-		journey.branch = foot.branch || null;
-		var view = setup.worldmap.getJourneyView();
-		journey.tileIndex = saved;
-		journey.branch = savedBranch;
+		var position = this.getPosition();
+		var view = position && setup.worldmap.getJourneyView(position);
 		return view ? view.tile : null;
 	},
 	climbDown: function() {
@@ -64,30 +57,41 @@ setup.onfoot = {
 		return true;
 	},
 	// One tile up or down the line. The walk is the cost: an hour, and the legs to go with it.
-	getWalk: function(direction) {
-		var foot = this.get();
-		var journey = setup.worldmap.getJourney();
-		if (!foot || !journey) {
-			return null;
+	getWalk: function(direction, branchId) {
+		var position = this.getPosition(), world = setup.worldmap;
+		if (!position) return null;
+		var step;
+		if (branchId != null) {
+			if (position.branch) return null;
+			var branch = (world.getJourneyPath(position).leg.branches || []).filter(function(candidate) {
+				return candidate.id === branchId && candidate.tiles.length
+					&& (candidate.fromIndex === position.tileIndex || candidate.rejoinIndex === position.tileIndex);
+			})[0];
+			if (!branch) return null;
+			var atStart = branch.fromIndex === position.tileIndex;
+			var index = atStart ? 0 : branch.tiles.length - 1;
+			step = { toIndex: index, toBranch: branch.id, toMain: null, terrain: branch.tiles[index].terrain,
+				heading: world.describeDirection(atStart ? branch.direction : world.opposite(branch.tiles[index].out)) };
+		} else {
+			// Reuse rail connectivity, but never apply train power/grade restrictions to walking.
+			step = world.getJourneyStep(direction, position);
 		}
-		var path = setup.worldmap.getJourneyPath();
-		var tiles = path ? path.tiles : [];
-		var to = foot.tileIndex + (direction >= 0 ? 1 : -1);
-		if (to < 0 || to >= tiles.length) {
-			return null;
-		}
-		return {
-			toIndex: to, terrain: tiles[to].terrain, minutes: this.MINUTES_PER_TILE,
-			heading: setup.worldmap.describeDirection(to > foot.tileIndex
-				? tiles[foot.tileIndex].out : setup.worldmap.opposite(tiles[to].out))
-		};
+		return step ? { toIndex: step.toIndex, branch: step.toMain != null ? null : (step.toBranch || position.branch),
+			terrain: step.terrain, heading: step.heading, minutes: this.MINUTES_PER_TILE } : null;
 	},
-	walk: function(direction) {
-		var walk = this.getWalk(direction);
+	getBranchWalks: function() {
+		var position = this.getPosition(), self = this;
+		if (!position || position.branch) return [];
+		return (setup.worldmap.getJourneyPath(position).leg.branches || []).map(function(branch) {
+			return self.getWalk(1, branch.id);
+		}).filter(function(walk) { return !!walk; });
+	},
+	walk: function(direction, branchId) {
+		var walk = this.getWalk(direction, branchId);
 		if (!walk) {
 			return false;
 		}
-		State.variables.onFoot = { tileIndex: walk.toIndex, branch: this.get().branch || null };
+		State.variables.onFoot = { tileIndex: walk.toIndex, branch: walk.branch };
 		return true;
 	},
 	// A tool counts as to hand if the player is carrying it, or if the train is right there to fetch it from.
@@ -160,6 +164,11 @@ Macro.add('onFootControls', {
 			output += '<<timedlink "Walk ' + setup.units.kilometres(setup.worldmap.TILE_KM) + ' ' + walk.heading + '" '
 				+ walk.minutes + ' "walk" "fatigue:+3">><<run setup.onfoot.walk(' + direction + ')>>'
 				+ '<<goto "OnFoot">><</timedlink>><br>';
+		});
+		onfoot.getBranchWalks().forEach(function(walk) {
+			output += '<<timedlink "Walk ' + setup.units.kilometres(setup.worldmap.TILE_KM) + ' ' + walk.heading
+				+ ' onto the branch" ' + walk.minutes + ' "walk" "fatigue:+3">><<run setup.onfoot.walk(1, '
+				+ JSON.stringify(walk.branch) + ')>><<goto "OnFoot">><</timedlink>><br>';
 		});
 		var chopReason = onfoot.canChop();
 		if (!chopReason) {

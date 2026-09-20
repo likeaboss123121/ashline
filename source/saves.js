@@ -67,7 +67,9 @@ setup.saves = {
 	},
 	load: function(index) {
 		try {
-			if (!this.getSlot(index)) return this.fail('No save was found in this slot.');
+			var data = this.getSlot(index);
+			if (!data) return this.fail('No save was found in this slot.');
+			this.validate(data);
 			this.error = false; this.message = '';
 			var ok = index === 'auto' ? Save.autosave.load() : this.slotApi().load(index);
 			if (ok !== true) return this.fail('Load failed. The current game has not been replaced.');
@@ -104,24 +106,52 @@ setup.saves = {
 			this.refresh(); return true;
 		} catch (error) { return this.fail('Export failed. ' + error.message); }
 	},
+	// Check every restorable moment, not just the active train. Never mutate the live run here.
+	validate: function(data) {
+		function object(value) { return value && typeof value === 'object' && !Array.isArray(value); }
+		function amount(value) { return typeof value === 'number' && isFinite(value) && value >= 0; }
+		function stacks(value, cargo) {
+			return value == null || (Array.isArray(value) && value.every(function(stack) {
+				return object(stack) && typeof stack[cargo ? 'type' : 'item'] === 'string'
+					&& amount(stack[cargo ? 'amount' : 'count']);
+			}));
+		}
+		function train(value) {
+			return Array.isArray(value) && value.every(function(car) {
+				return object(car) && typeof car.type === 'string' && amount(car.length) && car.length > 0
+					&& stacks(car.cargo, true) && stacks(car.inventory, false);
+			});
+		}
+		if (!object(data) || data.id !== Config.saves.id || !object(data.state)
+			|| !Array.isArray(data.state.delta) || !data.state.delta.length) throw new Error('This is not an Ashline save.');
+		var history = State.deltaDecode(data.state.delta), index = data.state.index;
+		if (!Number.isInteger(index) || index < 0 || index >= history.length) throw new Error('Invalid save history.');
+		history.forEach(function(state) {
+			if (!object(state) || typeof state.title !== 'string' || !Story.has(state.title)
+				|| !object(state.variables)) throw new Error('Invalid save history.');
+			var v = state.variables;
+			if (!object(v.player) || !object(v.stationTracks)) throw new Error('The save is incomplete.');
+			if (['TrainInterior', 'DrivingMode', 'OnTheLine', 'OnFoot', 'Sleep'].indexOf(state.title) >= 0
+				&& (!Array.isArray(v.currentTrain) || !v.currentTrain.length)) throw new Error('The train is missing.');
+			if ((v.currentTrain != null && !train(v.currentTrain)) || (v.leavingTrain != null && !train(v.leavingTrain)))
+				throw new Error('Invalid train data.');
+			if (!stacks(v.player.carried, false) || !stacks(v.player.carriedCargo, true)) throw new Error('Invalid inventory data.');
+			Object.keys(v.stationTracks).forEach(function(station) {
+				var tracks = v.stationTracks[station];
+				if (!Array.isArray(tracks) || !tracks.length || !tracks.every(function(track) {
+					return object(track) && amount(track.length) && track.length > 0
+						&& Array.isArray(track.trains) && track.trains.every(train);
+				})) throw new Error('Invalid station data.');
+			});
+		});
+	},
 	importText: function(text) {
 		try {
 			if (typeof text !== 'string' || text.length > 20 * 1024 * 1024) throw new Error('Invalid or oversized file.');
-			var data = JSON.parse(/^\s*\{/.test(text) ? text : LZString.decompressFromBase64(text.trim()));
-			if (!data || data.id !== Config.saves.id || !data.state || !Array.isArray(data.state.delta) || !data.state.delta.length)
-				throw new Error('This is not an Ashline save.');
-			var history = State.deltaDecode(data.state.delta), state = history[data.state.index];
-			if (!state || !Story.has(state.title) || !state.variables || typeof state.variables.player !== 'object'
-				|| !state.variables.player || typeof state.variables.stationTracks !== 'object' || !state.variables.stationTracks)
-				throw new Error('The save is incomplete.');
-			var v = state.variables;
-			if (['TrainInterior', 'DrivingMode', 'OnTheLine', 'OnFoot', 'Sleep'].indexOf(state.title) >= 0
-				&& (!Array.isArray(v.currentTrain) || !v.currentTrain.length)) throw new Error('The train is missing.');
-			if (v.currentTrain && (!Array.isArray(v.currentTrain) || v.currentTrain.some(function(car) {
-				return !car || typeof car.type !== 'string' || !(Number(car.length) > 0)
-					|| (car.cargo != null && !Array.isArray(car.cargo)) || (car.inventory != null && !Array.isArray(car.inventory));
-			}))) throw new Error('Invalid train data.');
-			if (v.player.carried != null && !Array.isArray(v.player.carried)) throw new Error('Invalid inventory data.');
+			var json = /^\s*\{/.test(text) ? text : LZString.decompressFromBase64(text.trim());
+			if (!json || json.length > 20 * 1024 * 1024) throw new Error('Invalid or oversized file.');
+			var data = JSON.parse(json);
+			this.validate(data);
 			if (data.metadata == null) data.metadata = {};
 			this.error = false; this.message = '';
 			var result = Save.deserialize(LZString.compressToBase64(JSON.stringify(data)));

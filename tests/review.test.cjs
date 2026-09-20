@@ -103,6 +103,43 @@ test('empty engines can collect finite station fuel and recover from the line wi
   assert.equal(s.recovery.plan(route.station,'diesel',false),null);
 });
 
+test('walking crosses both branch junctions and returns to a stranded train without moving it',()=>{
+  const {setup:s,State:{variables:v}}=game([lead(),road(),lead()]);
+  const tile=(x,y,out)=>({x,y,out,terrain:'plains',grade:0});
+  const main=[tile(0,0,0),tile(0,1,0),tile(0,2,0),tile(0,3,0)];
+  const branch={id:'B1',fromIndex:1,rejoinIndex:3,direction:2,tiles:[tile(1,1,0),tile(1,2,6)]};
+  s.worldmap.getLeg=()=>({tiles:main,branches:[branch]});
+  s.worldmap.getMainLine=()=>main;
+  v.journey={legIndex:1,tileIndex:0,branch:'B1',forward:false};
+  const parked=JSON.stringify(v.journey);
+  assert.equal(s.onfoot.climbDown(),true);
+  assert.equal(s.onfoot.walk(-1),true,'can leave the branch at its starting junction');
+  assert.equal(v.onFoot.branch,null); assert.equal(v.onFoot.tileIndex,1);
+  assert.equal(s.onfoot.walk(-1),true);
+  assert.equal(s.recovery.supplyRoutes('diesel')[0].station,1);
+  assert.equal(s.onfoot.walk(1),true);
+  assert.equal(s.onfoot.getBranchWalks().length,1);
+  assert.equal(s.onfoot.walk(1,'B1'),true);
+  assert.equal(s.onfoot.isBesideTrain(),true);
+  assert.equal(s.onfoot.walk(1),true);
+  assert.equal(s.onfoot.walk(1),true,'can leave a branch at its rejoining junction');
+  assert.equal(v.onFoot.branch,null); assert.equal(v.onFoot.tileIndex,3);
+  assert.equal(s.onfoot.walk(1),false,'cannot walk beyond the station');
+  assert.equal(s.onfoot.walk(1,'B1'),true,'can return via the rejoining junction');
+  assert.equal(v.onFoot.tileIndex,1); assert.equal(v.onFoot.branch,'B1');
+  assert.equal(s.onfoot.walk(-1),true); assert.equal(s.onfoot.climbAboard(),true);
+  assert.equal(JSON.stringify(v.journey),parked);
+
+  branch.rejoinIndex=null; branch.stationId='L1B1';
+  v.stationTracks.L1B1=[lead(),road(),lead()];
+  s.onfoot.climbDown(); s.onfoot.walk(1);
+  assert.equal(s.onfoot.getWalk(1),null,'terminus is a real endpoint');
+  assert.equal(s.recovery.supplyRoutes('diesel')[0].station,'L1B1');
+  assert.equal(s.onfoot.walk(-1),true); assert.equal(s.onfoot.walk(-1),true);
+  assert.equal(s.onfoot.walk(1,'missing'),false);
+  assert.equal(JSON.stringify(v.journey),parked);
+});
+
 test('generated broken stock cannot provide supplies, storage, or power and never destroys escape reserves',()=>{
   const {setup:s,State:{variables:v}}=game([lead(),road(),lead()]);
   let coaches=0, brokenCoaches=0, freight=0, brokenFreight=0;

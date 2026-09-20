@@ -1,5 +1,27 @@
 // Page layout and session-only navigation state never belong in saved game data.
 if (typeof Config !== 'undefined') Config.passages.nobr = true;
+// SugarCube removes its history markup at startup when controls are disabled.
+// Restore those same native controls when the player opts in during a run.
+setup.refreshHistoryControls = function() {
+	var controls = document.getElementById('ui-bar-history');
+	if (!Config.history.controls) { if (controls) controls.hidden = true; return; }
+	if (!controls) {
+		var toggle = document.getElementById('ui-bar-toggle');
+		if (!toggle) return;
+		controls = document.createElement('div'); controls.id = 'ui-bar-history';
+		[['backward', '\uE821', 'uiBarBackward'], ['forward', '\uE822', 'uiBarForward']].forEach(function(spec) {
+			var button = document.createElement('button'); button.id = 'history-' + spec[0]; button.type = 'button';
+			button.textContent = spec[1]; button.title = L10n.get(spec[2]);
+			jQuery(button).ariaClick({ label: button.title }, function() { Engine[spec[0]](); });
+			controls.appendChild(button);
+		});
+		toggle.parentElement.appendChild(controls);
+	}
+	controls.hidden = false;
+	jQuery('#history-backward').ariaDisabled(State.length < 2);
+	jQuery('#history-forward').ariaDisabled(State.length === State.size);
+};
+jQuery(document).on(':historyupdate.ashline-ui', function() { setup.applyHistorySetting(); });
 setup.pages = {
 	open: function(name) {
 		if (State.passage !== 'Help') State.variables.utilityReturn = State.passage;

@@ -157,6 +157,83 @@ test('empty locomotive menus expose on-foot recovery and return carried fuel to 
   assert.ok(await page.evaluate(()=>SugarCube.setup.railyard.isTrainDriveCapable(SugarCube.State.variables.currentTrain)));
 });
 
+test('walking junction controls lead back to the parked branch train',async t=>{
+  const page=await openGame(t);await begin(page);await board(page);
+  await page.evaluate(()=>{
+    const {setup:s,State:{variables:v}}=SugarCube;
+    const branch=s.worldmap.getLeg(s.worldmap.getSeed(),2).branches[0];
+    if(!branch) throw new Error('Fixture needs a branch');
+    v.journey={legIndex:2,tileIndex:0,branch:branch.id,forward:false};
+    s.onfoot.climbDown();SugarCube.Engine.play('OnFoot');
+  });
+  const leave=await page.evaluate(()=>`Walk 5 km ${SugarCube.setup.onfoot.getWalk(-1).heading} (1:00)`);
+  await choose(page,leave,'OnFoot');
+  assert.equal(await page.evaluate(()=>SugarCube.State.variables.onFoot.branch),null);
+  await page.locator('#passages a').filter({hasText:/onto the branch/}).first().click();
+  await passage(page,'OnFoot');
+  assert.equal(await page.evaluate(()=>SugarCube.setup.onfoot.isBesideTrain()),true);
+  await choose(page,'Climb back aboard (0:02)','OnTheLine');
+});
+
+test('structurally corrupt imported saves leave the current run untouched',async t=>{
+  const page=await openGame(t);await begin(page);await board(page);
+  const results=await page.evaluate(()=>{
+    const {setup:s,State,Save}=SugarCube;
+    s.saves.save(0);
+    const original=JSON.stringify(State.variables);
+    return ['tracks','parked car','cargo','history'].map(kind=>{
+      const data=JSON.parse(JSON.stringify(Save.slots.get(0)));
+      const history=State.deltaDecode(data.state.delta),v=history[data.state.index].variables;
+      if(kind==='tracks') v.stationTracks[v.currentStation]={};
+      if(kind==='parked car') v.stationTracks[v.currentStation][1].trains=[[null]];
+      if(kind==='cargo') v.currentTrain[0].cargo=[null];
+      if(kind==='history') {history.unshift({title:'Railyard',variables:null});data.state.index++;}
+      data.state.delta=State.deltaEncode(history);
+      const loaded=s.saves.importText(JSON.stringify(data));
+      return {kind,loaded,unchanged:JSON.stringify(State.variables)===original};
+    });
+  });
+  for(const result of results) {
+    assert.equal(result.loaded,false,result.kind);
+    assert.equal(result.unchanged,true,result.kind);
+  }
+});
+
+test('save validation accepts real multi-moment history and refuses corrupt browser slots before loading',async t=>{
+  const page=await openGame(t);await begin(page);await board(page);
+  await page.getByText('Options',{exact:true}).click();
+  await page.getByLabel('Enable passage back and forward controls').check();
+  await page.locator('#ui-dialog-close').click();
+  assert.equal(await page.locator('#ui-bar-history').isVisible(),true);
+  await choose(page,'Start driving','DrivingMode');
+  await page.locator('#history-backward').click();await passage(page,'TrainInterior');
+  await page.locator('#history-forward').click();await passage(page,'DrivingMode');
+  const result=await page.evaluate(()=>{
+    const {setup:s,State,Save}=SugarCube;
+    s.saves.save(0);
+    const saved=Save.slots.get(0),moments=State.deltaDecode(saved.state.delta).length;
+    const original=JSON.stringify(State.variables),getSlot=s.saves.getSlot;
+    const corrupt=JSON.parse(JSON.stringify(saved));corrupt.state.index=-1;
+    let rejected,unchanged;
+    try {
+      s.saves.getSlot=()=>corrupt;
+      rejected=!s.saves.load(0);unchanged=JSON.stringify(State.variables)===original;
+    } finally {s.saves.getSlot=getSlot;}
+    State.variables.enableHistoryControls=false;s.applyHistorySetting();
+    return {moments,rejected,unchanged,loaded:s.saves.load(0)};
+  });
+  assert.ok(result.moments>1);
+  assert.equal(result.rejected,true);assert.equal(result.unchanged,true);assert.equal(result.loaded,true);
+  await passage(page,'DrivingMode');
+  assert.equal(await page.locator('#ui-bar-history').isVisible(),true,'loading restores the saved preference');
+  await page.reload();await passage(page,'DrivingMode');
+  await page.locator('#ui-bar-history').waitFor({state:'visible'});
+  await page.getByText('Options',{exact:true}).click();
+  await page.getByLabel('Enable passage back and forward controls').uncheck();
+  await page.locator('#ui-dialog-close').click();
+  assert.equal(await page.locator('#ui-bar-history').isVisible(),false);
+});
+
 test('save confirmations, dedicated autosave, real export/import and invalid files preserve the run',async t=>{
   const page=await openGame(t);await begin(page);await board(page);
   await page.locator('#menu-item-saves a').click();

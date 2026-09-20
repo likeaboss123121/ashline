@@ -30,13 +30,20 @@ setup.safeParseInt = function(value, fallback) {
 };
 // Passage back/forward controls duplicate actions in a stateful simulation, so they stay off unless the player
 // deliberately asks for them. SugarCube reads this configuration live when it renders the UI.
-setup.applyHistorySetting = function() {
+setup.applyHistorySetting = function(updateHistory) {
 	if (typeof Config === 'undefined' || !Config.history) {
 		return;
 	}
 	var enabled = !!State.variables.enableHistoryControls;
-	Config.history.controls = enabled;
+	// Going back must not undo the preference and strand the player without Forward.
+	if (updateHistory && State.history) State.history.forEach(function(moment) {
+		moment.variables.enableHistoryControls = enabled;
+	});
+	// SugarCube rejects visible history controls while the limit is still one.
+	Config.history.controls = false;
 	Config.history.maxStates = enabled ? 100 : 1;
+	Config.history.controls = enabled;
+	if (setup.refreshHistoryControls) setup.refreshHistoryControls();
 };
 setup.applyHistorySetting();
 // Centralized time utilities for clock state, formatting, and reusable time-cost UI labels.
@@ -421,7 +428,7 @@ setup.showOptionsDialog = function() {
 		+ '<p><strong>Saving</strong></p>'
 		+ '<label><<checkbox "$autosaveOnSleep" false true autocheck>> Autosave when you sleep</label><br>'
 		+ '<label><<checkbox "$enableHistoryControls" false true autocheck>> Enable passage back and forward controls</label>');
-	jQuery('#ui-dialog-body input').on('change', function() { setup.applyHistorySetting(); UIBar.update(); });
+	jQuery('#ui-dialog-body input').on('change', function() { setup.applyHistorySetting(true); UIBar.update(); });
 	Dialog.open();
 };
 // Default rolling-stock definitions.
