@@ -1,20 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="98" height="18" viewBox="0 0 98 18" shape-rendering="crispEdges" data-template="railyard-track-diagonal-up" data-anchor-x="9" data-anchor-y="9" data-length-m="20">
+<svg xmlns="http://www.w3.org/2000/svg" width="98" height="10" viewBox="0 0 98 10" shape-rendering="crispEdges" data-template="railyard-track-diagonal-up" data-anchor-x="9" data-anchor-y="5" data-length-m="20">
 <title>Ashline rail yard template: Ladder diagonal passing a track that does not connect</title>
 <g id="diagonal-up-ballast">
-<polygon points="17,5 21,7 25,8 29,9 33,9 37,9 41,8 45,8 49,7 53,6 57,5 61,4 65,3 69,2 73,2 77,1 81,1 85,1 89,2 93,3 97,5 81,13 77,11 73,10 69,9 65,9 61,9 57,10 53,10 49,11 45,12 41,13 37,14 33,15 29,16 25,16 21,17 17,17 13,17 9,16 5,15 1,13" fill="#494c42"/>
+<polygon points="17,1 97,1 81,9 1,9" fill="#494c42"/>
 </g>
 <g id="diagonal-up-ties">
-<polygon points="27,10 29,10 19,15 17,15" fill="#75654d"/>
-<polygon points="37,10 39,10 29,15 27,15" fill="#75654d"/>
-<polygon points="47,8 49,8 39,13 37,13" fill="#75654d"/>
-<polygon points="57,6 59,5 49,10 47,11" fill="#75654d"/>
-<polygon points="67,4 69,3 59,8 57,9" fill="#75654d"/>
+<polygon points="27,3 29,3 19,8 17,8" fill="#75654d"/>
+<polygon points="37,3 39,3 29,8 27,8" fill="#75654d"/>
+<polygon points="47,3 49,3 39,8 37,8" fill="#75654d"/>
+<polygon points="57,3 59,3 49,8 47,8" fill="#75654d"/>
+<polygon points="67,3 69,3 59,8 57,8" fill="#75654d"/>
 <polygon points="77,3 79,3 69,8 67,8" fill="#75654d"/>
 </g>
 <g id="diagonal-up-rails">
-<polygon points="12,8 16,9 20,10 24,11 28,11 32,11 36,11 40,10 44,9 48,8 52,8 56,7 60,6 64,5 68,4 72,4 76,4 80,4 84,5 88,6 92,8 92,10 88,8 84,7 80,6 76,6 72,6 68,6 64,7 60,8 56,9 52,10 48,10 44,11 40,12 36,13 32,13 28,13 24,13 20,12 16,11 12,10" fill="#222a2b"/>
-<polygon points="12,8 16,9 20,10 24,11 28,11 32,11 36,11 40,10 44,9 48,8 52,8 56,7 60,6 64,5 68,4 72,4 76,4 80,4 84,5 88,6 92,8 92,9 88,7 84,6 80,5 76,5 72,5 68,5 64,6 60,7 56,8 52,9 48,9 44,10 40,11 36,12 32,12 28,12 24,12 20,11 16,10 12,9" fill="#b8b6a0"/>
-<polygon points="6,11 10,12 14,13 18,14 22,14 26,14 30,14 34,13 38,12 42,11 46,11 50,10 54,9 58,8 62,7 66,7 70,7 74,7 78,8 82,9 86,11 86,13 82,11 78,10 74,9 70,9 66,9 62,9 58,10 54,11 50,12 46,13 42,13 38,14 34,15 30,16 26,16 22,16 18,16 14,15 10,14 6,13" fill="#222a2b"/>
-<polygon points="6,11 10,12 14,13 18,14 22,14 26,14 30,14 34,13 38,12 42,11 46,11 50,10 54,9 58,8 62,7 66,7 70,7 74,7 78,8 82,9 86,11 86,12 82,10 78,9 74,8 70,8 66,8 62,8 58,9 54,10 50,11 46,12 42,12 38,13 34,14 30,15 26,15 22,15 18,15 14,14 10,13 6,12" fill="#b8b6a0"/>
+<polygon points="12,4 92,4 92,6 12,6" fill="#222a2b"/>
+<polygon points="12,4 92,4 92,5 12,5" fill="#b8b6a0"/>
+<polygon points="6,7 86,7 86,9 6,9" fill="#222a2b"/>
+<polygon points="6,7 86,7 86,8 6,8" fill="#b8b6a0"/>
 </g>
 </svg>

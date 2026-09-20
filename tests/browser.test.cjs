@@ -1261,13 +1261,15 @@ test('rail yard view places the entry and exit leads on any yard track', async t
       .filter(name => /split|merge|diagonal/.test(name))
       .forEach(name => { out[name] = (out[name] || 0) + 1; });
     const template = SugarCube.setup.railyardView.templateDocuments['railyard-track-yy-merge-up'];
-    const ballast = template.querySelector('#diagonal-up-ballast polygon').getAttribute('points');
-    const curveYValues = new Set(ballast.trim().split(/\s+/).map(point => point.split(',')[1])).size;
-    return { counts: out, curveYValues };
+    const ballast = template.querySelector('#diagonal-up-ballast polygon').getAttribute('points').trim().split(/\s+/)
+      .map(point => point.split(',').map(Number));
+    return { counts: out, ballastYValues: new Set(ballast.map(point => point[1])).size,
+      slantedEnds: ballast[0][0] !== ballast[3][0] && ballast[1][0] !== ballast[2][0] };
   });
   // Entry on track 3: ladders branch both ways. Exit on track 2: track 1 joins from above, tracks 3-5 from below.
   assert.deepEqual(drawing.counts, { 'y-split-both': 1, 'yy-split': 1, 'yy-split-up': 1, 'y-merge-both': 1, 'yy-merge-up': 2 });
-  assert.ok(drawing.curveYValues > 4, `up-ladder remained flat: ${drawing.curveYValues} y values`);
+  assert.equal(drawing.ballastYValues, 2, 'straight up-ladder bent in projection');
+  assert.equal(drawing.slantedEnds, true, 'up-ladder reverted to square, misaligned joints');
   const leads = await page.evaluate(() => {
     const railyard = SugarCube.setup.railyard;
     const tracks = railyard.generateStationTracks(7, 'lead-test');

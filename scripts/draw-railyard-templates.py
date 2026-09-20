@@ -580,11 +580,10 @@ def ladder_diagonal(s, up=False, u0=0, v0=0):
     Down diagonals go to the next track over (+v). A 45-degree diagonal in the world is then a vertical
     line on screen, with pixel-column rails and horizontal-bar ties.
 
-    Up diagonals go to the previous track (-v) while still moving forward along u. Their endpoints project onto
-    the same horizontal line, but a ruler-straight connector looks like a pasted-on piece and meets both yard
-    tracks at a hard angle. Draw a shallow reverse curve instead. Its tangent follows the ordinary track at both
-    ends, and every bed edge, rail and tie uses the same projected v offsets as ordinary track, so the joints
-    line up exactly.
+    Up diagonals go to the previous track (-v) while still moving forward along u, so this straight track projects
+    as a horizontal line. Every bed edge, rail and tie uses the same projected v offsets as ordinary track. This
+    gives it the narrower gauge the perspective requires and slanted end cuts that line up with the adjoining
+    track instead of making a square-ended strip.
 
     Both rails run the full length, so where a diagonal meets a track, one rail joins that track's near rail
     and the other crosses it to join the far rail.
@@ -593,21 +592,17 @@ def ladder_diagonal(s, up=False, u0=0, v0=0):
     name = 'diagonal-up' if up else 'diagonal'
     if up:
         x0, y0 = project(u0, v0)
-        span = 2 * S
-        tangent_y = span / 2
 
         def centre(t):
-            # Cubic Hermite curve from (0, 0) to (span, 0), tangent to +u at both ends.
-            p = t / S
-            return x0 + span * p, y0 + tangent_y * (2 * p ** 3 - 3 * p ** 2 + p)
+            return x0 + 2 * t, y0
 
         def offset(points, v):
             # Match project(0, v): rails, ties and ballast land on the same pixels as straight track.
             return [(x - v, y + v / 2) for x, y in points]
 
-        curve = [centre(t) for t in range(0, S + 1, 2)]
+        line = [centre(0), centre(S)]
         s.part(f'{name}-ballast')
-        s.poly(offset(curve, -8) + list(reversed(offset(curve, 8))), P['ballast'])
+        s.poly(offset(line, -8) + list(reversed(offset(line, 8))), P['ballast'])
         s.part(f'{name}-ties')
         for t in range(7, S - 6, 5):
             before = centre(t - 1)
@@ -622,7 +617,7 @@ def ladder_diagonal(s, up=False, u0=0, v0=0):
                     (right[0] - along[0], right[1] - along[1])], P['tie'])
         s.part(f'{name}-rails')
         for v in (-3, 3):
-            rail = offset(curve, v)
+            rail = offset(line, v)
             s.poly(rail + list(reversed([(x, y + 2) for x, y in rail])), P['rail_dark'])
             s.poly(rail + list(reversed([(x, y + 1) for x, y in rail])), P['rail_top'])
         return

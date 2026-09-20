@@ -501,9 +501,9 @@ setup.railyardTemplates = {
 			"passage": "railyard-track-y-split-up",
 			"title": "Y switch, split, up",
 			"width": 98,
-			"height": 34,
+			"height": 30,
 			"anchorX": 9,
-			"anchorY": 9,
+			"anchorY": 5,
 			"lengthMetres": 20
 		},
 		{
@@ -511,7 +511,7 @@ setup.railyardTemplates = {
 			"passage": "railyard-track-y-merge-up",
 			"title": "Y switch, merge, up",
 			"width": 98,
-			"height": 34,
+			"height": 30,
 			"anchorX": 9,
 			"anchorY": 25,
 			"lengthMetres": 20
@@ -521,9 +521,9 @@ setup.railyardTemplates = {
 			"passage": "railyard-track-yy-split-up",
 			"title": "YY switch, split, up",
 			"width": 98,
-			"height": 34,
+			"height": 30,
 			"anchorX": 9,
-			"anchorY": 9,
+			"anchorY": 5,
 			"lengthMetres": 20
 		},
 		{
@@ -531,7 +531,7 @@ setup.railyardTemplates = {
 			"passage": "railyard-track-yy-merge-up",
 			"title": "YY switch, merge, up",
 			"width": 98,
-			"height": 34,
+			"height": 30,
 			"anchorX": 9,
 			"anchorY": 25,
 			"lengthMetres": 20
@@ -541,9 +541,9 @@ setup.railyardTemplates = {
 			"passage": "railyard-track-diagonal-up",
 			"title": "Ladder diagonal passing a track that does not connect",
 			"width": 98,
-			"height": 18,
+			"height": 10,
 			"anchorX": 9,
-			"anchorY": 9,
+			"anchorY": 5,
 			"lengthMetres": 20
 		},
 		{
@@ -551,9 +551,9 @@ setup.railyardTemplates = {
 			"passage": "railyard-track-y-split-both",
 			"title": "Y switch branching to both neighbouring tracks",
 			"width": 98,
-			"height": 54,
+			"height": 50,
 			"anchorX": 9,
-			"anchorY": 9,
+			"anchorY": 5,
 			"lengthMetres": 20
 		},
 		{
@@ -561,7 +561,7 @@ setup.railyardTemplates = {
 			"passage": "railyard-track-y-merge-both",
 			"title": "Y switch joining from both neighbouring tracks",
 			"width": 98,
-			"height": 54,
+			"height": 50,
 			"anchorX": 49,
 			"anchorY": 25,
 			"lengthMetres": 20
