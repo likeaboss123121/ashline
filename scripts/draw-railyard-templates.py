@@ -581,9 +581,9 @@ def ladder_diagonal(s, up=False, u0=0, v0=0):
     line on screen, with pixel-column rails and horizontal-bar ties.
 
     Up diagonals go to the previous track (-v) while still moving forward along u, so this straight track projects
-    as a horizontal line. Every bed edge, rail and tie uses the same projected v offsets as ordinary track. This
-    gives it the narrower gauge the perspective requires and slanted end cuts that line up with the adjoining
-    track instead of making a square-ended strip.
+    as a horizontal line. Its perpendicular runs along (1, 1), so sleepers project vertically. Rotate the
+    ordinary track's widths into that perpendicular before projecting, and miter the ends against the adjoining
+    track. Rails retain the ordinary track's one-unit elevation above the sleepers.
 
     Both rails run the full length, so where a diagonal meets a track, one rail joins that track's near rail
     and the other crosses it to join the far rail.
@@ -592,32 +592,26 @@ def ladder_diagonal(s, up=False, u0=0, v0=0):
     name = 'diagonal-up' if up else 'diagonal'
     if up:
         x0, y0 = project(u0, v0)
+        span = 2 * S
 
-        def centre(t):
-            return x0 + 2 * t, y0
+        def edge(distance, z=0):
+            # Intersect the horizontal edge with the adjoining 2:1 line after pixel snapping. Using the
+            # same rounding as line_u keeps the railhead continuous at split, merge and plain-tile joints.
+            y = px(distance / math.sqrt(2) - z)
+            x = px(-distance) + 2 * (y - px(distance / 2 - z))
+            return [(x0 + x, y0 + y), (x0 + span + x, y0 + y)]
 
-        def offset(points, v):
-            # Match project(0, v): rails, ties and ballast land on the same pixels as straight track.
-            return [(x - v, y + v / 2) for x, y in points]
-
-        line = [centre(0), centre(S)]
         s.part(f'{name}-ballast')
-        s.poly(offset(line, -8) + list(reversed(offset(line, 8))), P['ballast'])
+        s.poly(edge(-8) + list(reversed(edge(8))), P['ballast'])
         s.part(f'{name}-ties')
-        for t in range(7, S - 6, 5):
-            before = centre(t - 1)
-            after = centre(t + 1)
-            left, right = offset([centre(t)], -5)[0], offset([centre(t)], 5)[0]
-            dx, dy = (after[0] - before[0]) / 2, (after[1] - before[1]) / 2
-            length = math.hypot(dx, dy) or 1
-            along = (dx / length, dy / length)
-            s.poly([(left[0] - along[0], left[1] - along[1]),
-                    (left[0] + along[0], left[1] + along[1]),
-                    (right[0] + along[0], right[1] + along[1]),
-                    (right[0] - along[0], right[1] - along[1])], P['tie'])
+        # Eight-pixel pitch divides the piece evenly, including across chained ladder pieces.
+        # A two-unit sleeper thickness projects to roughly three pixels along this direction.
+        for x in range(4, span, 8):
+            s.poly([(x0 + x - 1, y0 - 4), (x0 + x + 2, y0 - 4),
+                    (x0 + x + 2, y0 + 4), (x0 + x - 1, y0 + 4)], P['tie'])
         s.part(f'{name}-rails')
         for v in (-3, 3):
-            rail = offset(line, v)
+            rail = edge(v, z=1)
             s.poly(rail + list(reversed([(x, y + 2) for x, y in rail])), P['rail_dark'])
             s.poly(rail + list(reversed([(x, y + 1) for x, y in rail])), P['rail_top'])
         return
@@ -667,7 +661,7 @@ def yy_switch(merge, up=False):
     s.world_poly([(0, v - bed, 0), (S, v - bed, 0), (S, v + bed, 0), (0, v + bed, 0)], P['ballast'])
     s.part('ties')
     for u in range(1, S, 5):
-        if up:  # keep branch ties clear of the curved ladder bed at the joint
+        if up:  # keep branch ties clear of the horizontal ladder bed at the joint
             clear_of_ladder = u + 2 + 5 < S - 2 * bed if merge else u - 5 > 2 * bed
         else:
             clear_of_ladder = u + 2 < S - bed - 5 if merge else u > bed + 5
