@@ -75,6 +75,24 @@ setup.sideTabs = {
 		var current = root.querySelector('.developer-panel:not([hidden])'); if (current) current.scrollTop = scroll;
 	}
 };
+// Browser-console shortcut for an existing run. Reading `debug` is intentional: it lets the player type exactly
+// that word in the console. The returned function also keeps `debug()` useful for people who add parentheses.
+setup.enableDebugMode = function() {
+	if (typeof State === 'undefined' || !State.variables) return 'Ashline is not ready yet.';
+	State.variables.debugMode = true;
+	setup.sideTabs.refresh();
+	return 'Ashline debug mode enabled.';
+};
+if (typeof window !== 'undefined') {
+	var ashlineDebugCommand = function() { return setup.enableDebugMode(); };
+	Object.defineProperty(window, 'debug', {
+		configurable: true,
+		get: function() {
+			setup.enableDebugMode();
+			return ashlineDebugCommand;
+		}
+	});
+}
 jQuery(document).on(':passageinit.ashline-ui', function(event) {
 	setup.pendingSections = {};
 	if (State.passage === event.passage.title) document.querySelectorAll('#passages details[data-ui-section]').forEach(function(section) {

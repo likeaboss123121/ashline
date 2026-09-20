@@ -237,6 +237,18 @@ test('red developer sidebar menus work on mobile with keyboard and close control
   assert.ok(Math.abs(dialog.width/390-.92)<.02,JSON.stringify(dialog));
 });
 
+test('the browser-console debug command enables debug mode during a run',async t=>{
+  const page=await openGame(t);await begin(page);
+  assert.equal(await page.evaluate(()=>SugarCube.State.variables.debugMode),false);
+  await page.evaluate('debug');
+  await page.locator('#menu-story').getByRole('button',{name:'Debug',exact:true}).waitFor();
+  assert.equal(await page.evaluate(()=>SugarCube.State.variables.debugMode),true);
+  await page.evaluate(()=>{SugarCube.State.variables.debugMode=false;SugarCube.setup.sideTabs.refresh();});
+  assert.equal(await page.locator('#menu-story .developer-menu-item').count(),0);
+  assert.equal(await page.evaluate('debug()'),'Ashline debug mode enabled.');
+  assert.equal(await page.locator('#menu-story .developer-menu-item').count(),2);
+});
+
 test('tutorial highlight is below stock, empty cabs and passenger cars are unlit, and map scroll is retained',async t=>{
   const page=await openGame(t);await beginTutorial(page);
   assert.match(await page.locator('.tutorial-hint').innerText(),/locomotive above/);
