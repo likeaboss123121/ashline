@@ -1254,16 +1254,20 @@ test('rail yard view places the entry and exit leads on any yard track', async t
     SugarCube.Engine.play('Railyard');
   });
   await passage(page, 'Railyard');
-  const counts = await page.evaluate(() => {
+  const drawing = await page.evaluate(() => {
     const out = {};
     [...document.querySelectorAll('#passages svg.railyard-view use[data-template]')]
       .map(use => use.dataset.template.replace('railyard-track-', ''))
       .filter(name => /split|merge|diagonal/.test(name))
       .forEach(name => { out[name] = (out[name] || 0) + 1; });
-    return out;
+    const template = SugarCube.setup.railyardView.templateDocuments['railyard-track-yy-merge-up'];
+    const ballast = template.querySelector('#diagonal-up-ballast polygon').getAttribute('points');
+    const curveYValues = new Set(ballast.trim().split(/\s+/).map(point => point.split(',')[1])).size;
+    return { counts: out, curveYValues };
   });
   // Entry on track 3: ladders branch both ways. Exit on track 2: track 1 joins from above, tracks 3-5 from below.
-  assert.deepEqual(counts, { 'y-split-both': 1, 'yy-split': 1, 'yy-split-up': 1, 'y-merge-both': 1, 'yy-merge-up': 2 });
+  assert.deepEqual(drawing.counts, { 'y-split-both': 1, 'yy-split': 1, 'yy-split-up': 1, 'y-merge-both': 1, 'yy-merge-up': 2 });
+  assert.ok(drawing.curveYValues > 4, `up-ladder remained flat: ${drawing.curveYValues} y values`);
   const leads = await page.evaluate(() => {
     const railyard = SugarCube.setup.railyard;
     const tracks = railyard.generateStationTracks(7, 'lead-test');

@@ -574,21 +574,17 @@ def straight_track(s, v, length):
         s.line_u(0, length + OVERLAP_UNITS, v + offset, 1, P['rail_top'])
 
 
-UP_BED, UP_TIE, UP_RAIL = 6, 5, 3  # up-ladder widths across the track, in units that move straight up the screen
-
-
 def ladder_diagonal(s, up=False, u0=0, v0=0):
     """Track crossing to a neighbouring track within one track spacing, starting at world (u0, v0).
 
     Down diagonals go to the next track over (+v). A 45-degree diagonal in the world is then a vertical
     line on screen, with pixel-column rails and horizontal-bar ties.
 
-    Up diagonals go to the previous track (-v) while still moving forward along u, and project as horizontal
-    lines. A strict projection would squeeze their gauge to 3 pixels, so they are drawn with offsets across
-    the track along (1, 1), which move straight up the screen: rails 6 pixels apart, ties 10 tall, and a bed
-    12 tall, matching the vertical ladder's on-screen widths. Near its ends the wider bed reaches slightly into
-    neighbouring track tiles; the game paints switch beds before tile beds, so tiles cover it there. Rails
-    still meet each track's rails at both ends.
+    Up diagonals go to the previous track (-v) while still moving forward along u. Their endpoints project onto
+    the same horizontal line, but a ruler-straight connector looks like a pasted-on piece and meets both yard
+    tracks at a hard angle. Draw a shallow reverse curve instead. Its tangent follows the ordinary track at both
+    ends, and every bed edge, rail and tie uses the same projected v offsets as ordinary track, so the joints
+    line up exactly.
 
     Both rails run the full length, so where a diagonal meets a track, one rail joins that track's near rail
     and the other crosses it to join the far rail.
@@ -596,20 +592,39 @@ def ladder_diagonal(s, up=False, u0=0, v0=0):
     S = TRACK_SPACING_UNITS
     name = 'diagonal-up' if up else 'diagonal'
     if up:
-        def point(t, b):  # t along the diagonal, b across it (straight up or down the screen)
-            return (u0 + t + b, v0 - t + b, 0)
+        x0, y0 = project(u0, v0)
+        span = 2 * S
+        tangent_y = span / 2
+
+        def centre(t):
+            # Cubic Hermite curve from (0, 0) to (span, 0), tangent to +u at both ends.
+            p = t / S
+            return x0 + span * p, y0 + tangent_y * (2 * p ** 3 - 3 * p ** 2 + p)
+
+        def offset(points, v):
+            # Match project(0, v): rails, ties and ballast land on the same pixels as straight track.
+            return [(x - v, y + v / 2) for x, y in points]
+
+        curve = [centre(t) for t in range(0, S + 1, 2)]
         s.part(f'{name}-ballast')
-        s.world_poly([point(0, -UP_BED), point(S, -UP_BED), point(S, UP_BED), point(0, UP_BED)], P['ballast'])
+        s.poly(offset(curve, -8) + list(reversed(offset(curve, 8))), P['ballast'])
         s.part(f'{name}-ties')
-        # A tie reaches UP_TIE + 1 units along u either side of its centre; keep it inside the piece.
-        for t in range(UP_TIE + 2, S - UP_TIE - 1, 5):
-            s.world_poly([(u0 + t + a + b, v0 - t - a + b, 0) for a, b in ((-1, -UP_TIE), (1, -UP_TIE), (1, UP_TIE), (-1, UP_TIE))], P['tie'])
+        for t in range(7, S - 6, 5):
+            before = centre(t - 1)
+            after = centre(t + 1)
+            left, right = offset([centre(t)], -5)[0], offset([centre(t)], 5)[0]
+            dx, dy = (after[0] - before[0]) / 2, (after[1] - before[1]) / 2
+            length = math.hypot(dx, dy) or 1
+            along = (dx / length, dy / length)
+            s.poly([(left[0] - along[0], left[1] - along[1]),
+                    (left[0] + along[0], left[1] + along[1]),
+                    (right[0] + along[0], right[1] + along[1]),
+                    (right[0] - along[0], right[1] - along[1])], P['tie'])
         s.part(f'{name}-rails')
-        for b in (-UP_RAIL, UP_RAIL):
-            (x0, y0), (x1, _) = project(*point(0, b)[:2], 1), project(*point(S, b)[:2], 1)
-            x0, x1, y = px(x0), px(x1), px(y0)
-            s.poly([(x0, y), (x1, y), (x1, y + 2), (x0, y + 2)], P['rail_dark'])
-            s.poly([(x0, y), (x1, y), (x1, y + 1), (x0, y + 1)], P['rail_top'])
+        for v in (-3, 3):
+            rail = offset(curve, v)
+            s.poly(rail + list(reversed([(x, y + 2) for x, y in rail])), P['rail_dark'])
+            s.poly(rail + list(reversed([(x, y + 1) for x, y in rail])), P['rail_top'])
         return
 
     s.part(f'{name}-ballast')
@@ -657,8 +672,8 @@ def yy_switch(merge, up=False):
     s.world_poly([(0, v - bed, 0), (S, v - bed, 0), (S, v + bed, 0), (0, v + bed, 0)], P['ballast'])
     s.part('ties')
     for u in range(1, S, 5):
-        if up:  # up ladder bed covers |u + v| <= UP_BED around the ladder, measured across along (1, 1)
-            clear_of_ladder = u + 2 + 5 < S - 2 * UP_BED if merge else u - 5 > 2 * UP_BED
+        if up:  # keep branch ties clear of the curved ladder bed at the joint
+            clear_of_ladder = u + 2 + 5 < S - 2 * bed if merge else u - 5 > 2 * bed
         else:
             clear_of_ladder = u + 2 < S - bed - 5 if merge else u > bed + 5
         if clear_of_ladder:
