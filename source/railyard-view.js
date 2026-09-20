@@ -106,6 +106,9 @@ setup.railyardView = {
 		if (type === 'flatcar') return 'railyard-car-flatcar';
 		if (type === 'tanker car') return 'railyard-car-tanker';
 		if (type === 'gondola') return 'railyard-car-gondola';
+		var passenger = { 'passenger coach': 'passenger', 'sleeper coach': 'sleeper',
+			'observation car': 'observation', 'kitchen car': 'kitchen', 'private car': 'private' };
+		if (passenger[type]) return 'railyard-car-' + passenger[type];
 		return 'railyard-car-boxcar';
 	},
 
@@ -295,7 +298,9 @@ setup.railyardView = {
 		var exitJunction = function(row) { return exitBase - Math.abs(row - exitRow) * J; };
 		var rowStart = function(row) { return hangsFromExit(row) ? exitJunction(row) - sections[row] : sectionStart(row); };
 		var rowEnd = function(row) { return hangsFromExit(row) ? exitJunction(row) : entryEnd(row); };
-		var reachesLadder = function(row) { return row >= 1 && row <= yardCount && rowEnd(row) >= exitJunction(row); };
+		// Connections are rules, not a side effect of drawing lengths. A short usable section gets connecting
+		// rail out to its ladder; the renderer must never invent a buffer on a route the planner permits.
+		var reachesLadder = function(row) { return row >= 1 && row <= yardCount && connects(row).exit; };
 		var deadExit = {};
 
 		// Entry lead: arrives from off the map along the entry track's line and ends at the ladder (u = 0).
@@ -397,7 +402,7 @@ setup.railyardView = {
 			var v = rowV(r);
 			var selected = isOn(dataIndex(r));
 			var start = rowStart(r);
-			var end = rowEnd(r);
+			var end = connects(r).exit ? exitJunction(r) : rowEnd(r);
 			var ends = connects(r);
 			// The 10 m of track drawn beyond a buffer stop only fits where it will not run into the ladder crossing
 			// this row. A generated stub always has that room; a full-length track closed at one end does not, and
@@ -543,6 +548,7 @@ setup.railyardView = {
 				update();
 			});
 			bar.appendChild(button);
+			return button;
 		};
 		var stepFrom = function(direction) {
 			var steps = self.ZOOM_STEPS;
@@ -560,7 +566,18 @@ setup.railyardView = {
 		addButton('\u2212', 'Zoom out', function() { self.zoomLevel = stepFrom(-1); });
 		addButton('+', 'Zoom in', function() { self.zoomLevel = stepFrom(1); });
 		addButton('Fit', 'Fit the whole yard to the page', function() { self.zoomLevel = 'fit'; });
-		addButton('Wide', 'Expand the yard view across the screen', function() { wrapper.classList.toggle('railyard-view-wide'); });
+		var wide = addButton('Wide', 'Expand the yard view across the screen', function() {
+			wrapper.classList.toggle('railyard-view-wide');
+			wide.setAttribute('aria-pressed', wrapper.classList.contains('railyard-view-wide') ? 'true' : 'false');
+			wide.textContent = wrapper.classList.contains('railyard-view-wide') ? 'Close wide view' : 'Wide';
+		});
+		wide.setAttribute('aria-pressed', 'false');
+		wrapper.addEventListener('keydown', function(event) {
+			if (event.key === 'Escape' && wrapper.classList.contains('railyard-view-wide')) {
+				wide.click();
+				wide.focus();
+			}
+		});
 		bar.appendChild(readout);
 		update();
 		return bar;
@@ -587,8 +604,8 @@ setup.railyardView = {
 		// one is board it. A train ahead couples to the front and one behind to the rear, so only the valid
 		// coupling is ever on the page.
 		var wanted = kind === 'train'
-			? ['couple-front:' + suffix, 'couple-rear:' + suffix, 'board:' + suffix, 'track:' + suffix.split(':')[0]]
-			: [key];
+			? ['couple-front:' + suffix, 'couple-rear:' + suffix, 'board:' + suffix, 'track:' + suffix.split(':')[0], 'shove:' + suffix.split(':')[0]]
+			: kind === 'track' ? [key, 'setout:' + suffix + ':true', 'setout:' + suffix + ':false'] : [key];
 		var links = [];
 		var reason = '';
 		wanted.forEach(function(action) {
@@ -1039,6 +1056,7 @@ setup.railyardView = {
 				band.setAttribute('points', corners.map(function(point) { return point.x + ',' + point.y; }).join(' '));
 				band.setAttribute('class', 'railyard-hit' + (hit.depart ? ' railyard-hit-depart' : ''));
 				band.setAttribute('data-yard-target', hit.depart ? 'depart:' + hit.depart : 'track:' + hit.trackIndex);
+				setup.tutorial.markTarget(band);
 				var bandTitle = document.createElementNS(ns, 'title');
 				bandTitle.textContent = hit.depart
 					? 'Leave the station this way'
@@ -1057,6 +1075,7 @@ setup.railyardView = {
 			area.setAttribute('points', corners.map(function(point) { return point.x + ',' + point.y; }).join(' '));
 			area.setAttribute('class', 'railyard-hit railyard-hit-train');
 			area.setAttribute('data-yard-target', 'train:' + spanKey);
+			setup.tutorial.markTarget(area);
 			var areaTitle = document.createElementNS(ns, 'title');
 			areaTitle.textContent = (player ? 'Parked train on ' : 'Board the train on ')
 				+ setup.railyard.getTrackLabel(tracks, span.trackIndex);

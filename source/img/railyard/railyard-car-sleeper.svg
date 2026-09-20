@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="62" height="46" viewBox="0 0 62 46" shape-rendering="crispEdges" data-template="railyard-car-sleeper" data-anchor-x="6" data-anchor-y="18" data-length-m="25">
+<title>Ashline rail yard template: Sleeper</title>
+<g id="coupler">
+<polygon points="4,14 6,13 8,14 8,15 6,16 4,15" fill="#5f5a50"/>
+<polygon points="4,15 6,16 6,15 4,14" fill="#7f786a"/>
+<polygon points="8,15 6,16 6,15 8,14" fill="#5f5a50"/>
+<polygon points="6,13 8,14 6,15 4,14" fill="#bbb09a"/>
+</g>
+<g id="trucks">
+<polygon points="3,20 15,14 21,17 21,20 9,26 3,23" fill="#1a1e20"/>
+<polygon points="3,23 9,26 9,23 3,20" fill="#111416"/>
+<polygon points="21,20 9,26 9,23 21,17" fill="#1a1e20"/>
+<polygon points="15,14 21,17 9,23 3,20" fill="#383c3b"/>
+<polygon points="41,39 53,33 59,36 59,39 47,45 41,42" fill="#1a1e20"/>
+<polygon points="41,42 47,45 47,42 41,39" fill="#111416"/>
+<polygon points="59,39 47,45 47,42 59,36" fill="#1a1e20"/>
+<polygon points="53,33 59,36 47,42 41,39" fill="#383c3b"/>
+</g>
+<g id="underframe">
+<polygon points="1,16 11,11 61,36 61,38 51,43 1,18" fill="#1e2022"/>
+<polygon points="1,18 51,43 51,41 1,16" fill="#232626"/>
+<polygon points="61,38 51,43 51,41 61,36" fill="#1e2022"/>
+<polygon points="11,11 61,36 51,41 1,16" fill="#454440"/>
+</g>
+<g id="body">
+<polygon points="2,6 12,1 60,25 60,35 50,40 2,16" fill="#353d3a"/>
+<polygon points="2,16 50,40 50,30 2,6" fill="#454d66"/>
+<polygon points="60,35 50,40 50,30 60,25" fill="#353d3a"/>
+<polygon points="12,1 60,25 50,30 2,6" fill="#92968a"/>
+</g>
+<g id="windows">
+<polygon points="6,13 10,15 10,11 6,9" fill="#dec38a"/>
+<polygon points="13,17 17,19 17,15 13,13" fill="#dec38a"/>
+<polygon points="20,20 24,22 24,18 20,16" fill="#dec38a"/>
+<polygon points="27,24 31,26 31,22 27,20" fill="#dec38a"/>
+<polygon points="34,27 38,29 38,25 34,23" fill="#dec38a"/>
+<polygon points="41,31 45,33 45,29 41,27" fill="#dec38a"/>
+</g>
+<g id="doors">
+<polygon points="3,8 4,8 4,17 3,17" fill="#b8b6a0"/>
+<polygon points="47,30 48,30 48,39 47,39" fill="#b8b6a0"/>
+<polygon points="3,14 49,37 49,38 3,15" fill="#c6975d"/>
+</g>
+<g id="coupler">
+<polygon points="54,39 56,38 58,39 58,40 56,41 54,40" fill="#5f5a50"/>
+<polygon points="54,40 56,41 56,40 54,39" fill="#7f786a"/>
+<polygon points="58,40 56,41 56,40 58,39" fill="#5f5a50"/>
+<polygon points="56,38 58,39 56,40 54,39" fill="#bbb09a"/>
+</g>
+</svg>

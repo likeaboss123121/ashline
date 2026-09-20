@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="58" height="44" viewBox="0 0 58 44" shape-rendering="crispEdges" data-template="railyard-car-observation" data-anchor-x="6" data-anchor-y="18" data-length-m="23">
+<title>Ashline rail yard template: Observation</title>
+<g id="coupler">
+<polygon points="4,14 6,13 8,14 8,15 6,16 4,15" fill="#5f5a50"/>
+<polygon points="4,15 6,16 6,15 4,14" fill="#7f786a"/>
+<polygon points="8,15 6,16 6,15 8,14" fill="#5f5a50"/>
+<polygon points="6,13 8,14 6,15 4,14" fill="#bbb09a"/>
+</g>
+<g id="trucks">
+<polygon points="3,20 15,14 21,17 21,20 9,26 3,23" fill="#1a1e20"/>
+<polygon points="3,23 9,26 9,23 3,20" fill="#111416"/>
+<polygon points="21,20 9,26 9,23 21,17" fill="#1a1e20"/>
+<polygon points="15,14 21,17 9,23 3,20" fill="#383c3b"/>
+<polygon points="37,37 49,31 55,34 55,37 43,43 37,40" fill="#1a1e20"/>
+<polygon points="37,40 43,43 43,40 37,37" fill="#111416"/>
+<polygon points="55,37 43,43 43,40 55,34" fill="#1a1e20"/>
+<polygon points="49,31 55,34 43,40 37,37" fill="#383c3b"/>
+</g>
+<g id="underframe">
+<polygon points="1,16 11,11 57,34 57,36 47,41 1,18" fill="#1e2022"/>
+<polygon points="1,18 47,41 47,39 1,16" fill="#232626"/>
+<polygon points="57,36 47,41 47,39 57,34" fill="#1e2022"/>
+<polygon points="11,11 57,34 47,39 1,16" fill="#454440"/>
+</g>
+<g id="body">
+<polygon points="2,6 12,1 56,23 56,33 46,38 2,16" fill="#353d3a"/>
+<polygon points="2,16 46,38 46,28 2,6" fill="#626951"/>
+<polygon points="56,33 46,38 46,28 56,23" fill="#353d3a"/>
+<polygon points="12,1 56,23 46,28 2,6" fill="#92968a"/>
+</g>
+<g id="windows">
+<polygon points="6,13 10,15 10,11 6,9" fill="#dec38a"/>
+<polygon points="12,16 16,18 16,14 12,12" fill="#dec38a"/>
+<polygon points="18,19 22,21 22,17 18,15" fill="#dec38a"/>
+<polygon points="24,22 28,24 28,20 24,18" fill="#dec38a"/>
+<polygon points="30,25 34,27 34,23 30,21" fill="#dec38a"/>
+<polygon points="36,28 40,30 40,26 36,24" fill="#dec38a"/>
+</g>
+<g id="doors">
+<polygon points="3,8 4,8 4,17 3,17" fill="#b8b6a0"/>
+<polygon points="43,28 44,28 44,37 43,37" fill="#b8b6a0"/>
+<polygon points="3,14 45,35 45,36 3,15" fill="#c6975d"/>
+</g>
+<g id="glass-roof">
+<polygon points="17,10 25,6 41,13 41,16 33,20 17,13" fill="#465f65"/>
+<polygon points="17,13 33,20 33,17 17,10" fill="#647e80"/>
+<polygon points="41,16 33,20 33,17 41,13" fill="#465f65"/>
+<polygon points="25,6 41,13 33,17 17,10" fill="#a3b9b7"/>
+</g>
+<g id="coupler">
+<polygon points="50,37 52,36 54,37 54,38 52,39 50,38" fill="#5f5a50"/>
+<polygon points="50,38 52,39 52,38 50,37" fill="#7f786a"/>
+<polygon points="54,38 52,39 52,38 54,37" fill="#5f5a50"/>
+<polygon points="52,36 54,37 52,38 50,37" fill="#bbb09a"/>
+</g>
+</svg>

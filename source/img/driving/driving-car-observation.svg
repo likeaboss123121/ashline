@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="22" viewBox="0 0 50 22" shape-rendering="crispEdges" data-template="driving-car-observation" data-anchor-x="2" data-anchor-y="17" data-length-m="23">
+<title>Ashline driving template: Observation</title>
+<g id="coupler">
+<polygon points="1,16 3,16 3,15 1,15" fill="#7f786a"/>
+<polygon points="1,13 3,13 3,15 1,15" fill="#bbb09a"/>
+</g>
+<g id="trucks">
+<polygon points="5,21 11,21 11,19 5,19" fill="#111416"/>
+<polygon points="5,11 11,11 11,19 5,19" fill="#383c3b"/>
+<polygon points="8,18 8,17 7,16 6,16 5,17 5,18 5,19 6,20 7,20 8,19" fill="#1b1f20"/>
+<polygon points="7,18 7,18 7,17 6,17 6,18 6,18 6,19 6,19 7,19 7,19" fill="#8c3b2e"/>
+<polygon points="11,18 11,17 10,16 9,16 8,17 8,18 8,19 9,20 10,20 11,19" fill="#1b1f20"/>
+<polygon points="10,18 10,18 10,17 9,17 9,18 9,18 9,19 9,19 10,19 10,19" fill="#8c3b2e"/>
+<polygon points="39,21 45,21 45,19 39,19" fill="#111416"/>
+<polygon points="39,11 45,11 45,19 39,19" fill="#383c3b"/>
+<polygon points="42,18 42,17 41,16 40,16 39,17 39,18 39,19 40,20 41,20 42,19" fill="#1b1f20"/>
+<polygon points="41,18 41,18 41,17 40,17 40,18 40,18 40,19 40,19 41,19 41,19" fill="#8c3b2e"/>
+<polygon points="45,18 45,17 44,16 43,16 42,17 42,18 42,19 43,20 44,20 45,19" fill="#1b1f20"/>
+<polygon points="44,18 44,18 44,17 43,17 43,18 43,18 43,19 43,19 44,19 44,19" fill="#8c3b2e"/>
+</g>
+<g id="underframe">
+<polygon points="2,18 48,18 48,17 2,17" fill="#232626"/>
+<polygon points="2,10 48,10 48,17 2,17" fill="#454440"/>
+</g>
+<g id="body">
+<polygon points="3,17 47,17 47,10 3,10" fill="#626951"/>
+<polygon points="3,3 47,3 47,10 3,10" fill="#92968a"/>
+</g>
+<g id="windows">
+<polygon points="7,13 11,13 11,11 7,11" fill="#dec38a"/>
+<polygon points="13,13 17,13 17,11 13,11" fill="#dec38a"/>
+<polygon points="19,13 23,13 23,11 19,11" fill="#dec38a"/>
+<polygon points="25,13 29,13 29,11 25,11" fill="#dec38a"/>
+<polygon points="31,13 35,13 35,11 31,11" fill="#dec38a"/>
+<polygon points="37,13 41,13 41,11 37,11" fill="#dec38a"/>
+</g>
+<g id="doors">
+<polygon points="4,11 5,11 5,17 4,17" fill="#b8b6a0"/>
+<polygon points="44,11 45,11 45,17 44,17" fill="#b8b6a0"/>
+<polygon points="4,15 46,15 46,16 4,16" fill="#c6975d"/>
+</g>
+<g id="glass-roof">
+<polygon points="17,9 33,9 33,7 17,7" fill="#647e80"/>
+<polygon points="17,1 33,1 33,7 17,7" fill="#a3b9b7"/>
+</g>
+<g id="coupler">
+<polygon points="47,16 49,16 49,15 47,15" fill="#7f786a"/>
+<polygon points="47,13 49,13 49,15 47,15" fill="#bbb09a"/>
+</g>
+</svg>

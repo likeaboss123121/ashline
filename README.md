@@ -14,6 +14,8 @@ Ashline is free and open source, and it runs entirely in your browser. It is bui
 Saves are stored in your browser. To keep a backup, use **Save to Disk** in the Saves menu.
 
 Found a bug? Please [open an issue](https://github.com/likeaboss123121/ashline/issues).
+In debug mode, **Copy bug report** opens a selectable report with the build, seed, current yard,
+consist and recent actions. Review it before sharing; it includes your current gameplay state.
 
 ## Building from source
 
@@ -45,6 +47,37 @@ This compiles every passage and script in `source/` into `index.html`, which you
 ```sh
 tweego --watch -f sugarcube-2 -o index.html source
 ```
+
+### Tests and artwork
+
+First-party build scripts, tests, and npm manifests are version-controlled. Install Node.js 22+
+and run `npm ci`, then install the browser with `npx playwright install chromium`.
+With Tweego and SugarCube configured as above:
+
+```sh
+npm run build
+npm test
+ASHLINE_BROWSER=chromium npm run test:browser
+```
+
+Browser fixtures use a fixed seed. Screenshots and diagnostic state for failed cases go into the
+ignored `test-results/` directory. `npm run verify` runs all checks; only passing builds should be deployed.
+
+The two Python 3 generators under `scripts/` produce the SVG assets and their placement data.
+Edit the generators, not the generated files:
+
+```sh
+python3 scripts/draw-railyard-templates.py
+python3 scripts/draw-driving-templates.py
+```
+
+### Yard rules
+
+`source/yard-actions.js` owns endpoint connections, route clearance, action validation and execution.
+Map shortcuts and text controls share these commands; the tutorial only highlights them.
+Generated yards reserve a clear road and an accessible diesel shunter. Its fuel budget covers the
+next route (or the return branch), a loaded flatcar, 5% margin, and 20 minutes of yard work.
+It is an escape/resupply baseline, not a guarantee that an arbitrarily heavy train can leave.
 
 ## License
 

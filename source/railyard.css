@@ -6,11 +6,18 @@
 	border: 1px solid #2a2f31;
 }
 
-@media (min-width: 701px) {
-	.railyard-view-wrapper.railyard-view-wide {
-		width: calc(100vw - 4em);
-		margin-left: calc((100% - (100vw - 4em)) / 2);
-	}
+.railyard-view-wrapper.railyard-view-wide {
+	position: fixed;
+	inset: 8px;
+	margin: 0;
+	z-index: 100;
+}
+.railyard-view-wide .railyard-view-scroll {
+	height: calc(100dvh - 54px);
+	max-height: none;
+}
+.railyard-view-wide:focus-within {
+	outline: 1px solid #8d938f;
 }
 
 /* On a phone the passage margins cost a fifth of the screen, so the yard reaches into them. It stops short of the
@@ -29,8 +36,8 @@
 /* The yard scrolls in here; the zoom controls stay on the frame outside it. */
 .railyard-view-scroll {
 	overflow: auto;
-	min-height: 240px; /* a window worth panning around in, on a phone as much as a desktop */
-	max-height: 80vh;
+	min-height: min(240px, 45dvh);
+	max-height: 65dvh;
 	touch-action: pan-x pan-y;
 	padding: 30px 4px 4px;
 }

@@ -96,6 +96,116 @@ setup.drivingTemplates = {
 			]
 		},
 		{
+			"file": "driving-car-passenger.svg",
+			"passage": "driving-car-passenger",
+			"title": "Passenger",
+			"width": 52,
+			"height": 20,
+			"anchorX": 2,
+			"anchorY": 15,
+			"lengthMetres": 24,
+			"rear": [
+				2,
+				12
+			],
+			"front": [
+				50,
+				12
+			],
+			"top": [
+				26,
+				4
+			]
+		},
+		{
+			"file": "driving-car-sleeper.svg",
+			"passage": "driving-car-sleeper",
+			"title": "Sleeper",
+			"width": 54,
+			"height": 20,
+			"anchorX": 2,
+			"anchorY": 15,
+			"lengthMetres": 25,
+			"rear": [
+				2,
+				12
+			],
+			"front": [
+				52,
+				12
+			],
+			"top": [
+				27,
+				4
+			]
+		},
+		{
+			"file": "driving-car-observation.svg",
+			"passage": "driving-car-observation",
+			"title": "Observation",
+			"width": 50,
+			"height": 22,
+			"anchorX": 2,
+			"anchorY": 17,
+			"lengthMetres": 23,
+			"rear": [
+				2,
+				14
+			],
+			"front": [
+				48,
+				14
+			],
+			"top": [
+				25,
+				4
+			]
+		},
+		{
+			"file": "driving-car-kitchen.svg",
+			"passage": "driving-car-kitchen",
+			"title": "Kitchen",
+			"width": 52,
+			"height": 20,
+			"anchorX": 2,
+			"anchorY": 15,
+			"lengthMetres": 24,
+			"rear": [
+				2,
+				12
+			],
+			"front": [
+				50,
+				12
+			],
+			"top": [
+				26,
+				3
+			]
+		},
+		{
+			"file": "driving-car-private.svg",
+			"passage": "driving-car-private",
+			"title": "Private",
+			"width": 48,
+			"height": 20,
+			"anchorX": 2,
+			"anchorY": 15,
+			"lengthMetres": 22,
+			"rear": [
+				2,
+				12
+			],
+			"front": [
+				46,
+				12
+			],
+			"top": [
+				24,
+				4
+			]
+		},
+		{
 			"file": "driving-loco-diesel-shunter-right.svg",
 			"passage": "driving-loco-diesel-shunter-right",
 			"title": "Two axle diesel shunter, facing right",
@@ -311,6 +421,15 @@ setup.drivingTemplates = {
 			"height": 15,
 			"anchorX": 1,
 			"anchorY": 7
+		},
+		{
+			"file": "driving-terrain-yard.svg",
+			"passage": "driving-terrain-yard",
+			"title": "Rail yard",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
 		},
 		{
 			"file": "driving-terrain-plains.svg",

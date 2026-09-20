@@ -304,6 +304,116 @@ setup.railyardTemplates = {
 			]
 		},
 		{
+			"file": "railyard-car-passenger.svg",
+			"passage": "railyard-car-passenger",
+			"title": "Passenger",
+			"width": 60,
+			"height": 45,
+			"anchorX": 6,
+			"anchorY": 18,
+			"lengthMetres": 24,
+			"rear": [
+				6,
+				14
+			],
+			"front": [
+				54,
+				38
+			],
+			"top": [
+				30,
+				15
+			]
+		},
+		{
+			"file": "railyard-car-sleeper.svg",
+			"passage": "railyard-car-sleeper",
+			"title": "Sleeper",
+			"width": 62,
+			"height": 46,
+			"anchorX": 6,
+			"anchorY": 18,
+			"lengthMetres": 25,
+			"rear": [
+				6,
+				14
+			],
+			"front": [
+				56,
+				39
+			],
+			"top": [
+				31,
+				16
+			]
+		},
+		{
+			"file": "railyard-car-observation.svg",
+			"passage": "railyard-car-observation",
+			"title": "Observation",
+			"width": 58,
+			"height": 44,
+			"anchorX": 6,
+			"anchorY": 18,
+			"lengthMetres": 23,
+			"rear": [
+				6,
+				14
+			],
+			"front": [
+				52,
+				37
+			],
+			"top": [
+				29,
+				12
+			]
+		},
+		{
+			"file": "railyard-car-kitchen.svg",
+			"passage": "railyard-car-kitchen",
+			"title": "Kitchen",
+			"width": 60,
+			"height": 45,
+			"anchorX": 6,
+			"anchorY": 18,
+			"lengthMetres": 24,
+			"rear": [
+				6,
+				14
+			],
+			"front": [
+				54,
+				38
+			],
+			"top": [
+				30,
+				13
+			]
+		},
+		{
+			"file": "railyard-car-private.svg",
+			"passage": "railyard-car-private",
+			"title": "Private",
+			"width": 56,
+			"height": 43,
+			"anchorX": 6,
+			"anchorY": 18,
+			"lengthMetres": 22,
+			"rear": [
+				6,
+				14
+			],
+			"front": [
+				50,
+				36
+			],
+			"top": [
+				28,
+				14
+			]
+		},
+		{
 			"file": "railyard-track-tile.svg",
 			"passage": "railyard-track-tile",
 			"title": "Track tile",

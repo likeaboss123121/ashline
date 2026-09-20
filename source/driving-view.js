@@ -76,12 +76,15 @@ setup.drivingView = {
 		if (type === 'flatcar') return 'driving-car-flatcar';
 		if (type === 'tanker car') return 'driving-car-tanker';
 		if (type === 'gondola') return 'driving-car-gondola';
+		var passenger = { 'passenger coach': 'passenger', 'sleeper coach': 'sleeper',
+			'observation car': 'observation', 'kitchen car': 'kitchen', 'private car': 'private' };
+		if (passenger[type]) return 'driving-car-' + passenger[type];
 		return 'driving-car-boxcar';
 	},
 
 	// Water never carries track, so a tile the train is standing on always has a backdrop to draw.
 	getTerrainTemplateName: function(terrain) {
-		var known = ['plains', 'forest', 'desert', 'arctic', 'mountain', 'bridge', 'tunnel'];
+		var known = ['plains', 'forest', 'desert', 'arctic', 'mountain', 'bridge', 'tunnel', 'yard'];
 		return 'driving-terrain-' + (known.indexOf(terrain) === -1 ? 'plains' : terrain);
 	},
 
@@ -176,7 +179,7 @@ setup.drivingView = {
 		parent.appendChild(bulb);
 	},
 
-	render: function(view, train, carIndex) {
+	render: function(view, train, carIndex, interactive) {
 		var data = setup.drivingTemplates;
 		var ns = this.SVG_NS;
 		var self = this;
@@ -185,7 +188,7 @@ setup.drivingView = {
 		var svg = document.createElementNS(ns, 'svg');
 		svg.setAttribute('class', 'driving-view');
 		svg.setAttribute('shape-rendering', 'crispEdges');
-		svg.setAttribute('role', 'img');
+		svg.setAttribute('role', interactive ? 'group' : 'img');
 		svg.setAttribute('aria-label', 'Your consist on ' + (view.terrain || 'plains') + ' terrain, grade '
 			+ view.grade.toFixed(1) + ' percent');
 
@@ -264,6 +267,37 @@ setup.drivingView = {
 			var title = String(entry.car.type || 'car') + ', ' + entry.car.length + ' m'
 				+ (entry.isPlayer ? ' (you are here)' : '');
 			var template = place(line, entry.name, entry.u, 0, title, entry.isPlayer);
+			if (interactive) {
+				var index = train.indexOf(entry.car);
+				var target = document.createElementNS(ns, 'rect');
+				target.setAttribute('x', entry.u - template.anchorX);
+				target.setAttribute('y', -template.anchorY);
+				target.setAttribute('width', template.width);
+				target.setAttribute('height', template.height);
+				target.setAttribute('class', 'consist-car-target');
+				target.setAttribute('data-car-index', index);
+				target.setAttribute('role', 'button');
+				target.setAttribute('tabindex', '0');
+				var contents = (entry.car.cargo || []).map(function(load) { return load.type + ': ' + setup.units.litres(load.amount); });
+				(entry.car.inventory || []).forEach(function(slot) { contents.push(slot.count + ' ' + (setup.items.CATALOGUE[slot.item] || { name: slot.item }).name); });
+				var description = 'Car ' + (index + 1) + ': ' + setup.railyard.getCarDescription(entry.car) + '. '
+					+ (contents.length ? contents.join(', ') : 'Empty.') + (entry.isPlayer ? ' You are here.' : ' Click to move here.');
+				target.setAttribute('aria-label', description);
+				var tooltip = document.createElementNS(ns, 'title');
+				tooltip.textContent = description;
+				target.appendChild(tooltip);
+				var select = function() {
+					State.variables.currentCarIndex = index;
+					Engine.play('TrainInterior');
+				};
+				target.addEventListener('click', select);
+				target.addEventListener('keydown', function(event) {
+					if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); select(); }
+				});
+				target.addEventListener('pointerenter', function() { details.textContent = description; });
+				target.addEventListener('focus', function() { details.textContent = description; });
+				line.appendChild(target);
+			}
 			if (entry.isPlayer) {
 				var point = template.cab || template.top;
 				marker = {
@@ -299,6 +333,14 @@ setup.drivingView = {
 		var wrapper = document.createElement('div');
 		wrapper.className = 'driving-view-wrapper';
 		wrapper.appendChild(svg);
+		var details = document.createElement('div');
+		if (interactive) {
+			wrapper.classList.add('consist-view-wrapper');
+			details.className = 'consist-details';
+			details.setAttribute('aria-live', 'polite');
+			details.textContent = 'Select a car to move there. Hover or focus a car to inspect its contents.';
+			wrapper.appendChild(details);
+		}
 		return wrapper;
 	}
 };
@@ -320,5 +362,14 @@ Macro.add('drivingView', {
 		} catch (error) {
 			return this.error('could not draw the line: ' + error.message);
 		}
+	}
+});
+
+Macro.add('consistView', {
+	handler: function() {
+		var v = State.variables;
+		if (!Array.isArray(v.currentTrain) || !v.currentTrain.length) return;
+		var view = setup.worldmap.getJourneyView() || { terrain: 'yard', grade: 0, forward: v.travellingForward !== false };
+		this.output.appendChild(setup.drivingView.render(view, v.currentTrain, Number(v.currentCarIndex) || 0, true));
 	}
 });

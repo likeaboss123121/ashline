@@ -1,0 +1,1736 @@
+const { test, before, after } = require('node:test');
+const assert = require('node:assert/strict');
+const path = require('node:path');
+const fs = require('node:fs');
+const { pathToFileURL } = require('node:url');
+const { chromium } = require('playwright');
+
+let browser;
+before(async () => {
+  browser = await chromium.launch({ channel: process.env.ASHLINE_BROWSER || 'chrome', headless: true });
+});
+after(async () => { if (browser) await browser.close(); });
+
+async function openGame(t, options) {
+  const page = await browser.newPage(options);
+  // Bound failures and capture state instead of masking broken selectors with retries.
+  page.setDefaultTimeout(15000);
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('dialog', async dialog => { errors.push(dialog.message()); await dialog.dismiss(); });
+  t.after(async () => {
+    const markupErrors = await page.locator('#passages .error').allTextContents();
+    if (t.passed !== true || errors.length || markupErrors.length) {
+      const artifact = path.join('test-results', t.name.replace(/[^a-z0-9]+/gi, '-').slice(0, 140));
+      fs.mkdirSync('test-results', { recursive: true });
+      const state = await page.evaluate(() => window.SugarCube && SugarCube.setup.bugReport.build()).catch(() => null);
+      fs.writeFileSync(artifact + '.json', JSON.stringify({ errors, markupErrors, state }, null, 2));
+      await page.screenshot({ path: artifact + '.png', fullPage: true });
+    }
+    await page.close();
+    assert.deepEqual(errors, [], 'No uncaught errors or error dialogs');
+    assert.deepEqual(markupErrors, [], 'No SugarCube macro errors');
+  });
+  await page.goto(pathToFileURL(path.resolve(process.env.ASHLINE_HTML || 'index.html')).href);
+  // Each newPage has isolated browser storage; clear slots explicitly for fixture clarity.
+  await page.waitForFunction(() => !!window.SugarCube);
+  await page.evaluate(() => {
+    localStorage.removeItem('ashline.saves.sinceExport');
+    localStorage.removeItem('ashline.saves.lastExport');
+    for (let slot = 0; slot < 8; slot++) {
+      try { SugarCube.Save.slots.delete(slot); } catch (error) { /* an empty slot is what we wanted anyway */ }
+    }
+  });
+  await passage(page, 'Start');
+  await page.evaluate(() => { SugarCube.State.variables.randomSeed = 'browser-regression'; });
+  return page;
+}
+
+test('maps are first on desktop and mobile; wide view stays inside the viewport and closes with Escape', async t => {
+  for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
+    const page = await openGame(t, { viewport });
+    await begin(page);
+    async function topMap(selector) {
+      await page.evaluate(() => window.scrollTo(0, 0));
+      const box = await page.locator(selector).boundingBox();
+      assert.ok(box.y < 100, `map starts at ${box.y}`);
+      assert.ok(box.x >= 0 && box.x + box.width <= viewport.width + 1, JSON.stringify(box));
+    }
+    await topMap('.railyard-view-wrapper');
+    await page.getByRole('button', { name: 'Wide', exact: true }).click();
+    await topMap('.railyard-view-wrapper');
+    assert.equal(await page.getByRole('button', { name: 'Close wide view' }).getAttribute('aria-pressed'), 'true');
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    await page.keyboard.press('Escape');
+    assert.equal(await page.getByRole('button', { name: 'Wide', exact: true }).getAttribute('aria-pressed'), 'false');
+    await board(page);
+    await topMap('.consist-view-wrapper');
+    await choose(page, 'Start driving', 'DrivingMode');
+    await topMap('.railyard-view-wrapper');
+    await page.locator('#passages').getByText(/^Depart Northbound toward Station/).click();
+    await passage(page, 'OnTheLine');
+    await topMap('.driving-view-wrapper');
+    await choose(page, 'Enter the train', 'TrainInterior');
+    await topMap('.consist-view-wrapper');
+  }
+});
+
+test('onboard preview selects passenger cars with mouse or keyboard, shows contents, and uncouples a cold train', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables, copy = key => JSON.parse(JSON.stringify(v.defaultTrains[key]));
+    const loco = v.stationTracks[1][1].trains[0][0]; loco.cargo = [];
+    const coach = copy('passengerCoach'); coach.cargo = [{ type: 'food', amount: 100 }];
+    v.stationTracks[1][1].trains[0].push(coach, copy('sleeperCoach'));
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+  await board(page);
+  assert.equal(await page.getByText('Start driving', { exact: true }).count(), 0);
+  const coach = page.locator('[data-car-index="1"]');
+  await coach.hover();
+  assert.match(await page.locator('.consist-details').innerText(), /food: 100 L/);
+  await coach.click();
+  await page.waitForFunction(() => SugarCube.State.variables.currentCarIndex === 1);
+  await page.locator('[data-car-index="2"]').focus();
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => SugarCube.State.variables.currentCarIndex === 2);
+  await page.locator('[data-car-index="0"]').click();
+  await page.waitForFunction(() => SugarCube.State.variables.currentCarIndex === 0);
+  await choose(page, 'Decouple the rear section (2 cars) (0:01)', 'TrainInterior');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.currentTrain.length), 1);
+  assert.deepEqual(await page.evaluate(() => SugarCube.State.variables.stationTracks[1][1].trains.flat().map(car => car.type)), ['passenger coach', 'sleeper coach']);
+});
+
+test('push-detach-return is an ordinary validated yard action, including on a short stub', async t => {
+  const page = await openGame(t);
+  await begin(page); await board(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    v.currentTrain.unshift(JSON.parse(JSON.stringify(v.defaultTrains.flatcar))); v.currentCarIndex = 1;
+    v.stationTracks[2] = [{ length: 80, trains: [] }, { length: 120, trains: [] },
+      { length: 14, trains: [], connectsToExit: false }, { infinite: true, length: 999999, trains: [] }];
+    v.currentStation = 2; v.drivingTrackIndex = 0; v.enteredTrainIndex = 0;
+    SugarCube.Engine.play('DrivingMode');
+  });
+  await passage(page, 'DrivingMode');
+  assert.equal(await page.locator('[data-yard-action="track:2"] a').count(), 0);
+  await page.locator('[data-yard-action="setout:2:true"] a').click();
+  await page.waitForFunction(() => SugarCube.State.variables.currentTrain.length === 1);
+  assert.deepEqual(await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    return { track: v.drivingTrackIndex, car: v.currentCarIndex, parked: v.stationTracks[2][2].trains[0][0].type };
+  }), { track: 0, car: 0, parked: 'flatcar' });
+});
+
+test('debug bug report exports seed, layout and recent actions with a selectable clipboard fallback', async t => {
+  const page = await openGame(t);
+  await enableDebug(page); await begin(page); await board(page);
+  await page.locator('.debug-container').getByRole('button', { name: 'Copy bug report', exact: true }).click();
+  const reportText = page.getByRole('textbox', { name: 'Bug report' });
+  const report = JSON.parse(await reportText.inputValue());
+  assert.equal(report.seed, 'browser-regression');
+  assert.equal(report.station, 1);
+  assert.ok(report.tracks.length && report.consist.length && report.build);
+  assert.ok(report.recentActions.length);
+  await page.locator('#ui-dialog').getByRole('button', { name: 'Copy bug report', exact: true }).click();
+  assert.equal(await reportText.getAttribute('readonly'), '');
+});
+
+async function passage(page, title) {
+  await page.waitForFunction(expected => SugarCube.State.passage === expected && !SugarCube.Engine.isPlaying(), title);
+}
+async function choose(page, text, next) {
+  const turn = await page.evaluate(() => SugarCube.State.turns);
+  await page.locator('#passages').getByText(text, { exact: true }).click();
+  if (next) {
+    await page.waitForFunction(previous => SugarCube.State.turns > previous, turn);
+    await passage(page, next);
+  }
+}
+// Runs a whole leg the way a player does: depart, then one move per 5 km tile until the yard at the far end.
+async function travelLeg(page, heading) {
+  await page.locator('#passages').getByText(new RegExp('^Depart ' + heading + ' toward Station')).first().click();
+  await passage(page, 'OnTheLine');
+  for (let guard = 0; guard < 40; guard++) {
+    if (await page.evaluate(() => !SugarCube.State.variables.journey)) break;
+    const turn = await page.evaluate(() => SugarCube.State.turns);
+    await page.locator('#passages').getByText(/^Drive 5 km [a-z-]+ \(/).first().click();
+    await page.waitForFunction(previous => SugarCube.State.turns > previous, turn);
+    await page.waitForFunction(() => !SugarCube.Engine.isPlaying());
+  }
+  await passage(page, 'DrivingMode');
+}
+// Debug tools are folded away on the settings screen, so a test opens Advanced the way a player would.
+async function enableDebug(page) {
+  await page.locator('details.advanced-settings > summary').click();
+  await page.locator('details.advanced-settings input[type=checkbox]').check();
+}
+async function begin(page) {
+  await choose(page, 'Continue', 'Introduction');
+  await choose(page, 'Begin your journey', 'Railyard');
+  await plainYard(page);
+}
+// Station 1 is a shunting puzzle: the locomotive sits on a stub and a flatcar blocks the road out. Tests that are
+// about something else flatten it to one plain yard track first, so they are not rewritten every time the puzzle
+// changes. beginTutorial keeps the real layout.
+async function beginTutorial(page) {
+  await choose(page, 'Continue', 'Introduction');
+  await choose(page, 'Begin your journey', 'Railyard');
+}
+async function plainYard(page) {
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const tracks = v.stationTracks[1];
+    const exit = tracks[tracks.length - 1];
+    exit.trains = []; // the puzzle's flatcar blocks the road out, and these tests are not about the puzzle
+    v.stationTracks[1] = [tracks[0], { length: 120, trains: [tracks[1].trains[0]] }, exit];
+    v.tutorialDone = true;
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+}
+async function board(page) {
+  await choose(page, 'Board Train 1 (0:01)', 'TrainInterior');
+}
+
+test('new game: board, drive, travel both ways, leave, and board again', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await board(page);
+  await choose(page, 'Start driving', 'DrivingMode');
+  const plan = await page.evaluate(() => ({
+    fuel: SugarCube.State.variables.currentTrain[0].cargo[0].amount,
+    time: SugarCube.State.variables.gameTimeTimestampMs
+  }));
+  await travelLeg(page, 'Northbound');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.currentStation), 2);
+  await travelLeg(page, 'Southbound');
+  const after = await page.evaluate(() => ({
+    station: SugarCube.State.variables.currentStation,
+    fuel: SugarCube.State.variables.currentTrain[0].cargo[0].amount,
+    time: SugarCube.State.variables.gameTimeTimestampMs
+  }));
+  const minutes = (after.time - plan.time) / 60000;
+  assert.equal(after.station, 1);
+  // Travel burns a litre of diesel a minute, tile by tile, in both directions.
+  assert.ok(minutes > 20, `both legs should cost real time, got ${minutes} minutes`);
+  assert.equal(after.fuel, plan.fuel - minutes);
+  await choose(page, 'Stop driving', 'TrainInterior');
+  await choose(page, 'Leave the train (0:01)', 'Railyard');
+  const parked = await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    return { active: v.currentTrain, count: v.stationTracks[1].flatMap(track => track.trains).length };
+  });
+  assert.deepEqual(parked, { active: null, count: 1 });
+  await board(page);
+  // Boarding again hands back the same train, with the fuel it had left when it was parked.
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.currentTrain[0].cargo[0].amount), after.fuel);
+});
+
+test('steam controls render, burn fuel once per minute, and survive save/load', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const loco = JSON.parse(JSON.stringify(v.defaultTrains.steamShunter));
+    loco.cargo = [{ type: 'coal', amount: 100 }, { type: 'water', amount: 300 }];
+    v.stationTracks[1][1].trains = [[loco]];
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+  await board(page);
+  await choose(page, 'Light the firebox', 'TrainInterior');
+  await choose(page, 'Leave the train (0:01)', 'Railyard');
+  let cargo = await page.evaluate(() => SugarCube.State.variables.stationTracks[1][1].trains[0][0].cargo);
+  assert.deepEqual(cargo.map(c => c.amount), [98.75, 297]);
+  await page.evaluate(() => { SugarCube.Save.slots.save(0); });
+  await board(page);
+  await page.evaluate(() => { SugarCube.Save.slots.load(0); });
+  await passage(page, 'Railyard');
+  cargo = await page.evaluate(() => SugarCube.State.variables.stationTracks[1][1].trains[0][0].cargo);
+  assert.deepEqual(cargo.map(c => c.amount), [98.75, 297]);
+  assert.match(await page.locator('#passages').innerText(), /Coal: 98.75\./);
+});
+
+test('the first locomotive carries a kit, and pumps diesel from a coupled tanker for time and fatigue', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const tanker = JSON.parse(JSON.stringify(v.defaultTrains.tanker));
+    tanker.cargo = [{ type: 'diesel', amount: 1000 }];
+    v.stationTracks[1][1].trains[0].push(tanker);
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+  await board(page);
+  const text = await page.locator('#passages').innerText();
+  assert.match(text, /Kit \(5\/6 slots\): Toolkit · Axe and bow saw · Hand pump · Sleeping bag · Rations ×3/);
+  assert.match(text, /Diesel: 400.00 L/);
+  const before = await page.evaluate(() => SugarCube.setup.time.getCurrentTimestampMs());
+  await choose(page, 'Pump diesel from the tanker, 400 L (0:20)', 'TrainInterior');
+  const after = await page.evaluate(start => {
+    const v = SugarCube.State.variables;
+    return { train: v.currentTrain.map(car => car.cargo[0].amount), fatigue: v.player.fatigue,
+      minutes: (SugarCube.setup.time.getCurrentTimestampMs() - start) / 60000 };
+  }, before);
+  // Three from the pumping itself, and one more from twenty minutes of simply being awake.
+  assert.deepEqual(after, { train: [800, 600], fatigue: 4, minutes: 20 });
+  const dieselText = await page.locator('#passages').innerText();
+  assert.match(dieselText, /Diesel: 800.00 L/);
+  assert.match(dieselText, /The diesel looks/);
+  assert.doesNotMatch(dieselText, /grade \d+%/);
+});
+
+test('a Prairie is drawn as itself, shows its graded fuel, and cuts timber from a coupled flatcar into firewood', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const copy = key => JSON.parse(JSON.stringify(v.defaultTrains[key]));
+    const prairie = copy('steamPrairie');
+    prairie.facing = 1;
+    prairie.inventory = SugarCube.setup.items.createStartingKit();
+    prairie.cargo = [{ type: 'coal', amount: 500, grade: 30 }, { type: 'water', amount: 2000 }];
+    const flatcar = copy('flatcar');
+    flatcar.cargo = [{ type: 'timber', amount: 1000, grade: 80 }];
+    v.stationTracks[1][1].trains = [[prairie, flatcar]];
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+  const drawn = await page.locator('.railyard-view use[data-template^="railyard-loco-"]').evaluateAll(uses => uses.map(use => use.dataset.template));
+  assert.deepEqual(drawn, ['railyard-loco-steam-prairie-right']);
+  await board(page);
+  let text = await page.locator('#passages').innerText();
+  const stats = await page.locator('.loco-panel .loco-stat').allTextContents();
+  assert.ok(stats.some(row => /Model.*2-6-2 steam engine/.test(row)), stats.join(' | '));
+  assert.ok(stats.some(row => /Pull.*170 kN/.test(row)), stats.join(' | '));
+  assert.ok(stats.some(row => /Top speed.*90 km\/h/.test(row)), stats.join(' | '));
+  assert.match(text, /Coal: 500 L, grade 30% \(very poor\)/);
+  assert.match(text, /the grate gives 60% of the steam/);
+  await choose(page, 'Cut timber into firewood, 150 kg (0:10)', 'TrainInterior');
+  text = await page.locator('#passages').innerText();
+  assert.match(text, /Coal: 500 L, grade 30% \(very poor\); Firewood: 375 L, grade 80% \(fair\)/);
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.player.fatigue), 6);
+});
+
+test('the yard and the line are drawn by the light of the time of day', async t => {
+  const page = await openGame(t);
+  await enableDebug(page);
+  await begin(page);
+  // The debug clock jumps to any hour of the day.
+  const setHour = async hour => {
+    await page.locator('#debugClockHour').selectOption(String(hour));
+    const turn = await page.evaluate(() => SugarCube.State.turns);
+    await page.getByRole('button', { name: 'Set Clock', exact: true }).click();
+    await page.waitForFunction(() => !SugarCube.Engine.isPlaying());
+    return turn;
+  };
+  const yard = () => page.evaluate(() => {
+    const svg = document.querySelector('#passages svg.railyard-view');
+    return { light: svg.dataset.light, ground: svg.querySelector('.railyard-ground').style.fill,
+      windows: [...svg.querySelectorAll('defs [fill="#dec38a"]')].length,
+      lit: [...svg.querySelectorAll('use')].filter(use => /-lit$/.test(use.getAttribute('href'))).length };
+  });
+  await setHour(13);
+  let drawn = await yard();
+  assert.equal(drawn.light, 'day');
+  assert.equal(drawn.ground, '');
+  await setHour(1);
+  drawn = await yard();
+  assert.equal(drawn.light, 'night');
+  assert.notEqual(drawn.ground, '', 'the ground is graded at night');
+  assert.equal(drawn.windows, 0, 'an empty cab is dark at night');
+  assert.equal(drawn.lit, 0);
+  assert.match(await page.locator('#passages').innerText(), /Light: night, sun -\d/);
+
+  // Once the player is aboard, the cab they are in is the one with a light on.
+  await board(page);
+  await choose(page, 'Start driving', 'DrivingMode');
+  drawn = await yard();
+  assert.ok(drawn.windows > 0, 'the occupied cab keeps its glow');
+  assert.equal(drawn.lit, 1, 'exactly one car is drawn lit');
+  await page.locator('#passages').getByText(/^Depart Northbound toward Station/).first().click();
+  await passage(page, 'OnTheLine');
+  const line = await page.evaluate(() => {
+    const svg = document.querySelector('#passages svg.driving-view');
+    return { light: svg.dataset.light, stars: svg.querySelectorAll('.driving-stars rect').length,
+      headlamps: svg.querySelectorAll('.driving-headlamp').length,
+      lit: [...svg.querySelectorAll('use')].filter(use => /-lit$/.test(use.getAttribute('href'))).length,
+      windows: svg.querySelectorAll('defs [fill="#dec38a"]').length };
+  });
+  assert.equal(line.light, 'night');
+  assert.ok(line.stars > 0);
+  assert.equal(line.headlamps, 1);
+  assert.equal(line.lit, 1, 'only the car the player is in is lit');
+  assert.ok(line.windows > 0);
+});
+
+test('on a phone the yard fits the screen, opens readable, and keeps its controls clear of each other', async t => {
+  // A Pixel 9a: 412 by 915 CSS pixels, touch, no hover.
+  const page = await openGame(t, { viewport: { width: 412, height: 915 }, deviceScaleFactor: 2.625, isMobile: true, hasTouch: true });
+  await begin(page);
+  await board(page);
+  await choose(page, 'Start driving', 'DrivingMode');
+  const layout = await page.evaluate(() => {
+    const box = el => { const b = el.getBoundingClientRect(); return { left: Math.round(b.left), right: Math.round(b.right), top: Math.round(b.top), bottom: Math.round(b.bottom), width: Math.round(b.width), height: Math.round(b.height) }; };
+    const svg = document.querySelector('#passages svg.railyard-view');
+    const bands = [...svg.querySelectorAll('.railyard-hit')].map(b => box(b));
+    return {
+      pageWidth: document.scrollingElement.scrollWidth, viewport: document.documentElement.clientWidth,
+      sidebarRight: Math.round(document.querySelector('#ui-bar').getBoundingClientRect().right),
+      passageWidth: Math.round(document.querySelector('#passages').getBoundingClientRect().width),
+      wrapper: box(document.querySelector('.railyard-view-wrapper')),
+      zoom: box(document.querySelector('.railyard-view-zoom')),
+      compass: box(document.querySelector('.railyard-compass')),
+      message: box(document.querySelector('.railyard-view-message')),
+      readout: document.querySelector('.railyard-view-zoom span').textContent,
+      widestBand: Math.max(...bands.map(b => b.width))
+    };
+  });
+  // The page itself never scrolls sideways, and the yard reaches into the passage margins without sliding under
+  // the stowed sidebar.
+  assert.equal(layout.pageWidth, layout.viewport, 'no horizontal page scroll');
+  assert.ok(layout.wrapper.left >= layout.sidebarRight, `yard (${layout.wrapper.left}) clear of sidebar (${layout.sidebarRight})`);
+  assert.ok(layout.wrapper.right <= layout.viewport, 'yard inside the screen');
+  assert.ok(layout.wrapper.width > layout.passageWidth, 'the yard is wider than the passage column');
+  // It opens at half zoom at least, which is the art at one pixel to one pixel, not shrunk to an unreadable fit.
+  assert.equal(layout.readout, 'Fit', 'a yard wider than the screen opens fitted');
+  // The controls do not sit on top of each other, and a track is a big enough target for a finger.
+  assert.ok(layout.compass.bottom <= layout.message.top, 'compass clear of the message row');
+  assert.ok(layout.zoom.bottom < layout.compass.top, 'zoom bar clear of the compass');
+  assert.ok(layout.widestBand >= 44, `track targets are finger sized, got ${layout.widestBand}`);
+
+  // Tapping a track the consist is not on offers the move with a confirm, and the buttons are big enough to hit.
+  const other = await page.evaluate(() => {
+    const svg = document.querySelector('#passages svg.railyard-view');
+    const band = [...svg.querySelectorAll('.railyard-hit')].find(b => /^track:/.test(b.dataset.yardTarget)
+      && b.dataset.yardTarget !== 'track:' + svg.dataset.playerTrack);
+    return band ? band.dataset.yardTarget : null;
+  });
+  assert.ok(other, 'there is another track to tap');
+  await page.locator(`.railyard-hit[data-yard-target="${other}"]`).first().tap();
+  await page.waitForTimeout(100);
+  const choices = await page.locator('.railyard-view-choice').evaluateAll(els => els.map(el => ({ text: el.textContent, height: Math.round(el.getBoundingClientRect().height) })));
+  assert.ok(choices.length >= 2, JSON.stringify(choices));
+  assert.ok(choices.every(choice => choice.height >= 30), JSON.stringify(choices));
+  assert.equal(choices[choices.length - 1].text, 'Cancel');
+
+  // The tapped target is outlined while the choice is up, because a tap leaves no hover behind to show it, and
+  // cancelling clears it again.
+  assert.equal(await page.evaluate(() => document.querySelectorAll('.railyard-hit-active').length), 1);
+  await page.locator('.railyard-view-choice', { hasText: 'Cancel' }).tap();
+  assert.equal(await page.evaluate(() => document.querySelectorAll('.railyard-hit-active').length), 0);
+
+  // A parked train's target follows its own track, rather than being an upright box over the whole drawing.
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const car = key => JSON.parse(JSON.stringify(v.defaultTrains[key]));
+    v.stationTracks[1][2].trains = [[car('gondola'), car('boxcar'), car('gondola')]];
+    SugarCube.Engine.play('DrivingMode');
+  });
+  await passage(page, 'DrivingMode');
+  const train = await page.evaluate(() => {
+    const area = document.querySelector('.railyard-hit-train');
+    const band = document.querySelector('.railyard-hit:not(.railyard-hit-train):not(.railyard-hit-depart)');
+    if (!area) return null;
+    const box = area.getBBox();
+    const trackBox = band.getBBox();
+    return { shape: area.tagName, height: Math.round(box.height), width: Math.round(box.width),
+      trackHeight: Math.round(trackBox.height), trackWidth: Math.round(trackBox.width) };
+  });
+  assert.equal(train.shape, 'polygon');
+  // A band along the rails is about half as tall as it is wide; an upright box around the same cars is far taller.
+  assert.ok(train.height < train.width, JSON.stringify(train));
+  assert.ok(Math.abs(train.height / train.width - train.trackHeight / train.trackWidth) < 0.2, JSON.stringify(train));
+});
+
+test('the player eats, drinks and sleeps aboard, and collapses if they never do', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const tanker = JSON.parse(JSON.stringify(v.defaultTrains.tanker));
+    tanker.cargo = [{ type: 'water', amount: 2000, grade: 80 }];
+    v.stationTracks[1][1].trains[0].push(tanker);
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+  await board(page);
+  await page.evaluate(() => {
+    SugarCube.setup.stats.setValue('hunger', 30);
+    SugarCube.setup.stats.setValue('thirst', 30);
+    SugarCube.Engine.play('TrainInterior');
+  });
+  await passage(page, 'TrainInterior');
+  assert.match(await page.locator('#passages').innerText(), /Rest and rations/);
+
+  await choose(page, 'Eat a ration (0:10)', 'TrainInterior');
+  await choose(page, 'Drink (0:02)', 'TrainInterior');
+  const fed = await page.evaluate(() => ({ hunger: SugarCube.State.variables.player.hunger,
+    thirst: SugarCube.State.variables.player.thirst,
+    rations: SugarCube.setup.condition.countRations(SugarCube.State.variables.currentTrain),
+    water: SugarCube.setup.railyard.getCargoAmount(SugarCube.State.variables.currentTrain[1], 'water') }));
+  assert.equal(fed.rations, 2);
+  assert.ok(fed.hunger > 60 && fed.thirst > 65, JSON.stringify(fed));
+  assert.equal(fed.water, 1998);
+
+  // Sleeping needs the bedroll, and the sleep screen offers the hours.
+  await choose(page, 'Lie down to sleep', 'Sleep');
+  await page.evaluate(() => { SugarCube.setup.stats.setValue('fatigue', 60); SugarCube.Engine.play('Sleep'); });
+  await passage(page, 'Sleep');
+  const hours = await page.locator('#passages a').allTextContents();
+  assert.ok(hours.some(text => text.startsWith('Sleep 1 hour (1:00)')), hours.join(' | '));
+  assert.ok(hours.some(text => text.startsWith('Sleep until rested')), hours.join(' | '));
+  await choose(page, 'Sleep 4 hours (4:00)', 'TrainInterior');
+  assert.ok(await page.evaluate(() => SugarCube.State.variables.player.fatigue) <= 15, 'four hours takes the edge off');
+
+  // Working on and on without rest ends with the player face down on the cab floor.
+  await page.evaluate(() => { SugarCube.setup.stats.setValue('fatigue', 100); });
+  const clock = await page.evaluate(() => SugarCube.setup.time.getCurrentTimestampMs());
+  await choose(page, 'Drink (0:02)', 'TrainInterior');
+  const after = await page.evaluate(() => ({ fatigue: SugarCube.State.variables.player.fatigue }));
+  assert.ok(after.fatigue <= 75, `a collapse gives back a quarter of the bar, got ${after.fatigue}`);
+  const hoursLost = await page.evaluate(start => (SugarCube.setup.time.getCurrentTimestampMs() - start) / 3600000, clock);
+  assert.ok(hoursLost >= 2 && hoursLost <= 6.1, `two to six hours pass, got ${hoursLost}`);
+  assert.match(await page.locator('#passages').innerText(), /You come round on the cab floor/);
+});
+
+test('the first station teaches shunting: off the stub, onto the flatcar, and away', async t => {
+  const page = await openGame(t);
+  await beginTutorial(page);
+  const hint = () => page.evaluate(() => {
+    const node = document.querySelector('#passages .tutorial-hint');
+    return node ? node.dataset.hint : null;
+  });
+
+  // The yard is laid out so the way out is blocked: a stub with the locomotive, a flatcar on the road to the exit.
+  const yard = await page.evaluate(() => SugarCube.State.variables.stationTracks[1].map(track => ({
+    length: track.length, trains: track.trains.map(train => train.map(car => car.type)),
+    closedToEntry: track.connectsToEntry === false, lead: !!track.infinite
+  })));
+  assert.equal(yard.length, 4);
+  assert.deepEqual(yard[1].trains, [['diesel loco']]);
+  assert.ok(!yard[0].lead, 'the Southbound run-around is a finite stub');
+  assert.deepEqual(yard[3].trains, [['flatcar']], 'the flatcar blocks the road out');
+  assert.equal(await hint(), 'board');
+
+  await board(page);
+  await choose(page, 'Start driving', 'DrivingMode');
+  assert.equal(await hint(), 'couple');
+
+  // Nothing leaves this station until the flatcar is dealt with.
+  const links = await page.locator('#passages a').allTextContents();
+  assert.ok(!links.some(text => /^Depart /.test(text)), links.join(' | '));
+
+  await choose(page, 'Couple to the front (0:01)', 'DrivingMode');
+  assert.deepEqual(await page.evaluate(() => SugarCube.State.variables.currentTrain.map(car => car.type)),
+    ['flatcar', 'diesel loco']);
+  assert.equal(await hint(), 'move-flatcar');
+  await choose(page, 'Drive consist into Yard Track 2 (0:02)', 'DrivingMode');
+  assert.equal(await hint(), 'decouple-flatcar');
+  await choose(page, 'Decouple the front section (1 car) (0:01)', 'DrivingMode');
+  assert.equal(await hint(), 'runaround-stub');
+  await choose(page, 'Reverse consist to South Stub (0:01)', 'DrivingMode');
+  assert.equal(await hint(), 'runaround-lead');
+  await choose(page, 'Drive consist to Northbound Track (0:02)', 'DrivingMode');
+  assert.equal(await hint(), 'couple-rear');
+  await choose(page, 'Couple to the rear (0:01)', 'DrivingMode');
+  assert.deepEqual(await page.evaluate(() => SugarCube.State.variables.currentTrain.map(car => car.type)),
+    ['diesel loco', 'flatcar']);
+  assert.equal(await hint(), 'complete');
+
+  // Leaving the station for the first time finishes the tutorial for good.
+  await page.locator('#passages').getByText(/^Depart Northbound toward Station/).first().click();
+  await passage(page, 'OnTheLine');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.tutorialDone), true);
+  assert.equal(await hint(), null);
+});
+
+test('the saves menu shows what each slot holds, and asks for a backup when one is overdue', async t => {
+  const page = await openGame(t);
+  await begin(page);
+
+  // The sidebar's Saves button opens our menu, with a row for every slot.
+  await page.locator('#menu-item-saves a').click();
+  await page.locator('.saves-menu').waitFor({ state: 'visible' });
+  const slots = await page.locator('.saves-slot').count();
+  assert.equal(slots, 8);
+  assert.match(await page.locator('.saves-backup').innerText(), /No backup has been saved to disk/);
+
+  // Saving into a slot records where the train is and when.
+  await page.locator('.saves-slot[data-slot="0"] .saves-button').first().click();
+  const row = await page.locator('.saves-slot[data-slot="0"]').innerText();
+  assert.match(row, /Station 1/);
+  assert.match(row, /July 24, 2000/);
+  assert.match(row, /Overwrite/);
+  assert.match(row, /Load/);
+  assert.match(row, /Delete/);
+
+  // No reminder yet: one save is not a habit. After a few, the banner asks for a backup.
+  await page.evaluate(() => { SugarCube.Dialog.close(); });
+  assert.equal(await page.locator('.save-reminder').count(), 0);
+  await page.evaluate(() => {
+    localStorage.setItem('ashline.saves.sinceExport', '9');
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+  const reminder = page.locator('.save-reminder');
+  await reminder.waitFor({ state: 'visible' });
+  assert.match(await reminder.innerText(), /9 saves since your last backup|never saved a copy to disk/);
+
+  // Dismissing it keeps it away for the rest of the session.
+  await reminder.getByText('Later', { exact: true }).click();
+  await page.evaluate(() => { SugarCube.Engine.play('Railyard'); });
+  await passage(page, 'Railyard');
+  assert.equal(await page.locator('.save-reminder').count(), 0);
+
+  // Deleting a save empties its slot again.
+  await page.locator('#menu-item-saves a').click();
+  await page.locator('.saves-menu').waitFor({ state: 'visible' });
+  await page.locator('.saves-slot[data-slot="0"] .saves-danger').click();
+  assert.match(await page.locator('.saves-slot[data-slot="0"]').innerText(), /Empty/);
+});
+
+test('the options screen changes how the game reads, without changing the game', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  const sidebar = () => page.locator('#story-caption').innerText();
+  assert.match(await sidebar(), /July 24, 2000, 9:0\d AM/);
+  assert.match(await sidebar(), /\d+(\.\d)?°C outside/);
+
+  await page.getByText('Options', { exact: true }).click();
+  const dialog = page.locator('#ui-dialog-body');
+  await dialog.waitFor({ state: 'visible' });
+  const labels = await dialog.locator('label').allTextContents();
+  assert.ok(labels.some(text => /24-hour/.test(text)), labels.join(' | '));
+  assert.ok(labels.some(text => /dd\/mm\/yyyy/.test(text)), labels.join(' | '));
+  assert.ok(labels.some(text => /imperial/.test(text)), labels.join(' | '));
+  assert.ok(labels.some(text => /Show clickable areas on railyard/.test(text)), labels.join(' | '));
+  assert.ok(labels.some(text => /Autosave when you sleep/.test(text)), labels.join(' | '));
+
+  // Imperial and a different date format change the writing, not the clock underneath.
+  const clockBefore = await page.evaluate(() => SugarCube.setup.time.getCurrentTimestampMs());
+  await dialog.getByText('imperial', { exact: false }).click();
+  await dialog.getByText('yyyy/mm/dd', { exact: true }).click();
+  await page.evaluate(() => { SugarCube.Dialog.close(); SugarCube.Engine.play('Railyard'); });
+  await passage(page, 'Railyard');
+  assert.match(await sidebar(), /2000\/07\/24/);
+  assert.match(await sidebar(), /°F outside/);
+  assert.equal(await page.evaluate(() => SugarCube.setup.time.getCurrentTimestampMs()), clockBefore);
+
+  // The clickable areas can be shown all the time.
+  assert.equal(await page.locator('.railyard-hits-shown').count(), 0);
+  await page.getByText('Options', { exact: true }).click();
+  await dialog.getByText('Show clickable areas on railyard', { exact: false }).click();
+  await page.evaluate(() => { SugarCube.Dialog.close(); SugarCube.Engine.play('Railyard'); });
+  await passage(page, 'Railyard');
+  assert.equal(await page.locator('.railyard-hits-shown').count(), 1);
+});
+
+test('sleeping saves the game, unless the player would rather it did not', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await board(page);
+  await choose(page, 'Lie down to sleep', 'Sleep');
+  await choose(page, 'Sleep 2 hours (2:00)', 'TrainInterior');
+  const auto = await page.evaluate(() => {
+    const save = SugarCube.Save.slots.get(0);
+    return save ? { title: save.title, automatic: save.metadata.automatic, place: save.metadata.place } : null;
+  });
+  assert.equal(auto.automatic, true);
+  assert.match(auto.title, /^Autosave: Station 1/);
+
+  // Turned off, sleeping leaves the slot alone.
+  await page.evaluate(() => {
+    SugarCube.Save.slots.delete(0);
+    SugarCube.State.variables.autosaveOnSleep = false;
+  });
+  await choose(page, 'Lie down to sleep', 'Sleep');
+  await choose(page, 'Sleep 2 hours (2:00)', 'TrainInterior');
+  assert.equal(await page.evaluate(() => !!SugarCube.Save.slots.get(0)), false);
+});
+
+test('the player can get down from the train out on the line and walk the track', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await board(page);
+  await choose(page, 'Start driving', 'DrivingMode');
+  await page.locator('#passages').getByText(/^Depart Northbound toward Station/).first().click();
+  await passage(page, 'OnTheLine');
+
+  await choose(page, 'Climb down from the train (0:02)', 'OnFoot');
+  let text = await page.locator('#passages').innerText();
+  assert.match(text, /on the ballast beside your train/);
+  assert.match(text, /Carrying: nothing/);
+
+  // Walking is an hour a tile and hard work, against five minutes riding.
+  const before = await page.evaluate(() => ({
+    clock: SugarCube.setup.time.getCurrentTimestampMs(), fatigue: SugarCube.State.variables.player.fatigue }));
+  // The passage replays itself, so wait for the turn rather than for the name to change.
+  const walkAway = (await page.locator('#passages a').allTextContents()).find(text => /^Walk 5 km/.test(text));
+  await choose(page, walkAway, 'OnFoot');
+  const after = await page.evaluate(start => ({
+    minutes: (SugarCube.setup.time.getCurrentTimestampMs() - start.clock) / 60000,
+    fatigue: SugarCube.State.variables.player.fatigue - start.fatigue,
+    beside: SugarCube.setup.onfoot.isBesideTrain()
+  }), before);
+  assert.equal(after.minutes, 60);
+  assert.ok(after.fatigue >= 4, `walking should tell on you, got ${after.fatigue}`);
+  assert.equal(after.beside, false);
+  text = await page.locator('#passages').innerText();
+  assert.match(text, /The train is further down the line/);
+  assert.equal(await page.locator('#passages a').filter({ hasText: 'Climb back aboard' }).count(), 0);
+
+  // Walking back reaches the train again, and climbing aboard returns the player to the cab.
+  const walkBack = (await page.locator('#passages a').allTextContents()).filter(text => /^Walk 5 km/.test(text)).pop();
+  await choose(page, walkBack, 'OnFoot');
+  assert.equal(await page.evaluate(() => SugarCube.setup.onfoot.isBesideTrain()), true);
+  await choose(page, 'Climb back aboard (0:02)', 'OnTheLine');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.onFoot), null);
+
+  // The pack is in the cab, and the axe can be moved between it and the locomotive's kit.
+  await choose(page, 'Enter the train', 'TrainInterior');
+  assert.match(await page.locator('.player-pack').innerText(), /You are carrying \(0\/16 squares, 0 kg\/50 kg\): nothing/);
+  await choose(page, 'Take the axe and bow saw', 'TrainInterior');
+  assert.match(await page.locator('.player-pack').innerText(), /Axe and bow saw/);
+  assert.equal(await page.evaluate(() => SugarCube.setup.items.countItem(SugarCube.State.variables.currentTrain[0], 'axe')), 0);
+});
+
+test('debug cargo editor targets the initially selected train', async t => {
+  const page = await openGame(t);
+  await enableDebug(page);
+  await begin(page);
+  await page.locator('#debugCarSelect').selectOption('0');
+  await passage(page, 'Railyard');
+  const quantity = page.locator('#debugCargoAmount');
+  await quantity.fill('10');
+  await page.getByRole('button', { name: 'Add Cargo', exact: true }).click();
+  await passage(page, 'Railyard');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.stationTracks[1][1].trains[0][0].cargo[0].amount), 410);
+});
+
+test('seed text remains literal when revisiting settings', async t => {
+  const page = await openGame(t);
+  const seed = 'seed " quote <<set $seedInjected = true>>';
+  await page.locator('details.advanced-settings > summary').click();
+  await page.locator('input[type=text]').fill(seed);
+  await choose(page, 'Continue', 'Introduction');
+  await page.evaluate(() => { SugarCube.Engine.play('Start'); });
+  await passage(page, 'Start');
+  await page.locator('details.advanced-settings > summary').click();
+  assert.equal(await page.locator('input[type=text]').inputValue(), seed);
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.seedInjected), undefined);
+});
+
+test('coupling and front decoupling preserve the occupied car and all parked cars', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await board(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const car = JSON.parse(JSON.stringify(v.defaultTrains.boxcar));
+    car.reviewId = 'coupled';
+    v.stationTracks[1][1].trains = [[car]];
+  });
+  await choose(page, 'Start driving', 'DrivingMode');
+  await choose(page, 'Couple to the front (0:01)', 'DrivingMode');
+  assert.deepEqual(await page.evaluate(() => ({
+    types: SugarCube.State.variables.currentTrain.map(car => car.type),
+    carIndex: SugarCube.State.variables.currentCarIndex
+  })), { types: ['boxcar', 'diesel loco'], carIndex: 1 });
+  await choose(page, 'Decouple the front section (1 car) (0:01)', 'DrivingMode');
+  assert.deepEqual(await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    return { active: v.currentTrain.map(car => car.type), index: v.currentCarIndex,
+      parked: v.stationTracks[1][1].trains.flat().map(car => car.reviewId), gap: v.enteredTrainIndex };
+  }), { active: ['diesel loco'], index: 0, parked: ['coupled'], gap: 0 });
+  await choose(page, 'Stop driving', 'TrainInterior');
+  await choose(page, 'Leave the train (0:01)', 'Railyard');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.stationTracks[1][1].trains.flat().length), 2);
+});
+
+test('full-track shove uses a boundary track and keeps the driver in the locomotive', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await board(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const car = JSON.parse(JSON.stringify(v.defaultTrains.boxcar));
+    const lead = () => ({ length: 999999, infinite: true, trains: [] });
+    v.stationTracks[2] = [lead(), { length: 12, trains: [[car]] }, lead()];
+    v.currentStation = 2;
+    v.drivingTrackIndex = 0;
+    v.enteredTrainIndex = 0;
+  });
+  await choose(page, 'Start driving', 'DrivingMode');
+  await choose(page, 'Couple to entire track and shove to Northbound Track (0:01)', 'DrivingMode');
+  assert.deepEqual(await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    return { track: v.drivingTrackIndex, index: v.currentCarIndex,
+      driverCar: v.currentTrain[v.currentCarIndex].type, cars: v.currentTrain.length,
+      parked: v.stationTracks[2][1].trains.length };
+  }), { track: 2, index: 1, driverCar: 'diesel loco', cars: 2, parked: 0 });
+});
+
+test('insufficient fuel explains the failure and leaves the entire move unchanged', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await board(page);
+  await page.evaluate(() => { SugarCube.State.variables.currentTrain[0].cargo[0].amount = 2; });
+  await choose(page, 'Start driving', 'DrivingMode');
+  await page.locator('#passages').getByText(/^Depart Northbound toward Station/).first().click();
+  await passage(page, 'OnTheLine');
+  const before = await page.evaluate(() => JSON.stringify(SugarCube.State.variables));
+  await page.locator('#passages').getByText(/^Drive 5 km [a-z-]+ \(/).first().click();
+  assert.match(await page.locator('#ui-dialog').innerText(), /Not enough fuel or steam/);
+  const after = await page.evaluate(() => {
+    const v = { ...SugarCube.State.variables };
+    v.timedActionFailure = '';
+    return JSON.stringify(v);
+  });
+  assert.equal(after, before);
+});
+
+test('browser refresh and save restoration preserve current-car edits and discovery', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await board(page);
+  await choose(page, 'Start driving', 'DrivingMode');
+  await choose(page, 'Drive consist to Northbound Track (0:01)', 'DrivingMode');
+  await page.evaluate(() => { SugarCube.Save.slots.save(0); });
+  await page.reload();
+  await passage(page, 'DrivingMode');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.drivingTrackIndex), 2);
+  await choose(page, 'Stop driving', 'TrainInterior');
+  await choose(page, 'Leave the train (0:01)', 'Railyard');
+  await page.evaluate(() => { SugarCube.Save.slots.load(0); });
+  await passage(page, 'DrivingMode');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.currentTrain[0].cargo[0].amount), 399);
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.stationTracks[1].flatMap(track => track.trains).length), 0);
+});
+
+test('legacy intro saves load as an introduction without resetting gameplay state', async t => {
+  const page = await openGame(t);
+  await choose(page, 'Continue', 'Introduction');
+  await page.evaluate(() => {
+    SugarCube.Save.onSave.add(function(save) {
+      for (const moment of save.state.history) {
+        if (moment.title === 'Introduction') {
+          moment.title = 'StoryInit';
+          moment.variables.player.immunity = 73;
+        }
+      }
+    });
+    SugarCube.Save.slots.save(0);
+    SugarCube.Save.slots.load(0);
+  });
+  await passage(page, 'Introduction');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.player.immunity), 73);
+  assert.equal(await page.locator('#passages').getByText('Begin your journey', { exact: true }).count(), 1);
+});
+
+test('time-display option updates the sidebar immediately', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await page.getByText('Options', { exact: true }).click();
+  await page.locator('#ui-dialog-body #checkbox-use24hourtime').check();
+  assert.match(await page.locator('#story-caption').innerText(), /9:00/);
+  assert.doesNotMatch(await page.locator('#story-caption').innerText(), /AM|PM/);
+});
+
+test('reverse full-track shove and rear decoupling preserve the occupied car', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await board(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const car = JSON.parse(JSON.stringify(v.defaultTrains.boxcar));
+    const lead = () => ({ length: 999999, infinite: true, trains: [] });
+    v.stationTracks[2] = [lead(), { length: 12, trains: [[car]] }, lead()];
+    v.currentStation = 2;
+    v.drivingTrackIndex = 2;
+    v.enteredTrainIndex = 0;
+  });
+  await choose(page, 'Start driving', 'DrivingMode');
+  await choose(page, 'Couple to entire track and shove to Southbound Track (0:01)', 'DrivingMode');
+  assert.deepEqual(await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    return { track: v.drivingTrackIndex, index: v.currentCarIndex, cars: v.currentTrain.map(car => car.type) };
+  }), { track: 0, index: 0, cars: ['diesel loco', 'boxcar'] });
+  await choose(page, 'Decouple the rear section (1 car) (0:01)', 'DrivingMode');
+  assert.deepEqual(await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    return { gap: v.enteredTrainIndex, active: v.currentTrain.length, parked: v.stationTracks[2][0].trains.flat().length };
+  }), { gap: 1, active: 1, parked: 1 });
+});
+
+test('cross-track coupling cannot overflow the current finite track', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await board(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    v.stationTracks[1][1].length = 18;
+    v.stationTracks[1][2].trains = [[JSON.parse(JSON.stringify(v.defaultTrains.boxcar))]];
+  });
+  await choose(page, 'Start driving', 'DrivingMode');
+  // An option that cannot be taken is not printed; the drawing keeps the reason for when the player asks.
+  assert.equal(await page.locator('#passages a').filter({ hasText: /^Couple to the front/ }).count(), 0);
+  assert.match(await page.locator('#passages .yard-reason').allTextContents().then(all => all.join(' ')),
+    /combined consist will not fit/);
+  assert.equal(await page.locator('#passages a').filter({ hasText: /^Couple to the (front|rear)/ }).count(), 0);
+});
+
+test('rail yard view draws the station layout and the player\'s consist', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  const readView = () => page.evaluate(() => {
+    const view = document.querySelector('#passages svg.railyard-view');
+    const templates = [...view.querySelectorAll('use')].map(image => image.dataset.template);
+    return {
+      cars: templates.filter(name => /^railyard-(car|loco)-/.test(name)),
+      tiles: templates.filter(name => name === 'railyard-track-tile').length,
+      selectedTiles: templates.filter(name => name === 'railyard-track-tile-selected').length,
+      unbundled: [...view.querySelectorAll('use')].filter(use => {
+        const target = view.querySelector(use.getAttribute('href'));
+        return !target || !target.querySelector('polygon');
+      }).length,
+      labels: [...view.querySelectorAll('text')].map(text => text.textContent),
+      markers: view.querySelectorAll('.railyard-player-marker').length
+    };
+  });
+
+  const yard = await readView();
+  assert.deepEqual(yard.cars, ['railyard-loco-diesel-shunter-right']);
+  assert.deepEqual(yard.labels, ['SOUTH STUB \u00b7 80 m free of 80 m', '01 \u00b7 111 m free of 120 m', 'NORTHBOUND TRACK']);
+  assert.ok(yard.tiles > 0);
+  assert.equal(yard.selectedTiles, 0);
+  assert.equal(yard.unbundled, 0);
+  assert.equal(yard.markers, 0);
+
+  await board(page);
+  await choose(page, 'Start driving', 'DrivingMode');
+  const driving = await readView();
+  assert.deepEqual(driving.cars, ['railyard-loco-diesel-shunter-right']);
+  assert.ok(driving.selectedTiles > 0);
+  assert.equal(driving.markers, 1);
+	assert.match(await page.locator('#passages svg.railyard-view use[data-template*="loco"] title').textContent(), /Contents: diesel 400/);
+});
+
+test('rail yard view joins the yard tracks to the entry and exit leads with Y switches', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const copy = key => JSON.parse(JSON.stringify(v.defaultTrains[key]));
+    const lead = trains => ({ length: 999999, infinite: true, trains });
+    // Leads at opposite corners: the geometry gives every track the same length.
+    const lengths = SugarCube.setup.railyard.getYardTrackLengths(3, 1, 3, 120);
+    v.stationTracks[1] = [
+      lead([]),
+      { length: lengths[0], trains: [] },
+      { length: lengths[1], trains: [[copy('dieselShunter'), copy('boxcar')]] },
+      { length: lengths[2], trains: [] },
+      lead([[copy('flatcar')]])
+    ];
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+  const drawn = await page.evaluate(() => {
+    const templates = [...document.querySelectorAll('#passages svg.railyard-view use')].map(image => image.dataset.template);
+    const count = name => templates.filter(template => template === name).length;
+    return {
+      splits: count('railyard-track-y-split'),
+      yySplits: count('railyard-track-yy-split'),
+      merges: count('railyard-track-y-merge'),
+      yyMerges: count('railyard-track-yy-merge'),
+      fadeIns: count('railyard-track-fade-in'),
+      fadeOuts: count('railyard-track-fade-out'),
+      cars: templates.filter(template => /^railyard-(car|loco)-/.test(template)),
+      labels: [...document.querySelectorAll('#passages svg.railyard-view text')].map(text => text.textContent)
+    };
+  });
+  assert.deepEqual(drawn, {
+    splits: 1,
+    yySplits: 1,
+    merges: 1,
+    yyMerges: 1,
+    fadeIns: 1,
+    fadeOuts: 1,
+    cars: ['railyard-car-boxcar', 'railyard-loco-diesel-shunter-right', 'railyard-car-flatcar'],
+    labels: ['SOUTHBOUND TRACK', '01 \u00b7 120 m free of 120 m', '02 \u00b7 99 m free of 120 m', '03 \u00b7 120 m free of 120 m', 'NORTHBOUND TRACK']
+  });
+});
+
+test('rail yard view draws dead ends where tracks do not connect to the entry or exit', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const lead = () => ({ length: 999999, infinite: true, trains: [] });
+    v.stationTracks[1] = [
+      lead(),
+      { length: 100, trains: [], connectsToExit: false },
+      { length: 100, trains: [], connectsToEntry: false },
+      { length: 100, trains: [] },
+      { length: 100, trains: [], connectsToEntry: false },
+      lead()
+    ];
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+  const counts = await page.evaluate(() => {
+    const templates = [...document.querySelectorAll('#passages svg.railyard-view use')].map(image => image.dataset.template);
+    const count = name => templates.filter(template => template === 'railyard-track-' + name).length;
+    return {
+      splits: count('y-split'), yySplits: count('yy-split'), merges: count('y-merge'), yyMerges: count('yy-merge'),
+      diagonals: count('diagonal'),
+      startStops: count('buffer-stop-start'), endStops: count('buffer-stop')
+    };
+  });
+  // Entry ladder reaches track 3: Y split at 1, diagonal past 2. Exit ladder starts at track 2: YY merge at 3, Y merge into 4.
+  assert.deepEqual(counts, { splits: 1, yySplits: 0, merges: 1, yyMerges: 1, diagonals: 1, startStops: 2, endStops: 1 });
+  const headers = await page.locator('#passages h3').allTextContents();
+  assert.ok(headers.includes('Yard Track 1 (100m long, 100m free, no link to the Northbound Track)'), headers.join(' | '));
+  assert.ok(headers.includes('Yard Track 4 (100m long, 100m free, no link to the Southbound Track)'), headers.join(' | '));
+  // A track may not be closed at both ends, or its trains could never leave.
+  const rule = await page.evaluate(() => {
+    const railyard = SugarCube.setup.railyard;
+    railyard.setDebugTrackConnections(1, 3, false, false);
+    const track = SugarCube.State.variables.stationTracks[1][3];
+    return {
+      unchanged: track.connectsToEntry === undefined && track.connectsToExit === undefined,
+      closedBoth: railyard.getTrackConnections({ connectsToEntry: false, connectsToExit: false })
+    };
+  });
+  assert.deepEqual(rule, { unchanged: true, closedBoth: { entry: false, exit: false } });
+});
+
+test('rail yard view places the entry and exit leads on any yard track', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const lead = track => ({ length: 999999, infinite: true, trains: [], leadTrack: track });
+    // Entry lead on track 3 and exit on track 2, with the lengths that shape implies.
+    const yard = SugarCube.setup.railyard.getYardTrackLengths(5, 3, 2, 200).map(length => ({ length, trains: [] }));
+    v.stationTracks[1] = [lead(3)].concat(yard, [lead(2)]);
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+  const counts = await page.evaluate(() => {
+    const out = {};
+    [...document.querySelectorAll('#passages svg.railyard-view use[data-template]')]
+      .map(use => use.dataset.template.replace('railyard-track-', ''))
+      .filter(name => /split|merge|diagonal/.test(name))
+      .forEach(name => { out[name] = (out[name] || 0) + 1; });
+    return out;
+  });
+  // Entry on track 3: ladders branch both ways. Exit on track 2: track 1 joins from above, tracks 3-5 from below.
+  assert.deepEqual(counts, { 'y-split-both': 1, 'yy-split': 1, 'yy-split-up': 1, 'y-merge-both': 1, 'yy-merge-up': 2 });
+  const leads = await page.evaluate(() => {
+    const railyard = SugarCube.setup.railyard;
+    const tracks = railyard.generateStationTracks(7, 'lead-test');
+    return { entry: railyard.getLeadTrack(tracks, 'entry'), exit: railyard.getLeadTrack(tracks, 'exit'), stored: tracks[0].leadTrack, yard: tracks.length - 2 };
+  });
+  assert.ok(leads.stored >= 1 && leads.entry <= leads.yard && leads.exit >= 1 && leads.exit <= leads.yard, JSON.stringify(leads));
+});
+
+test('stations without an entry or exit track still leave the player a way out', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  const first = await page.evaluate(() => ({
+    labels: [...document.querySelectorAll('#passages svg.railyard-view text')].map(text => text.textContent),
+    fadeIns: [...document.querySelectorAll('#passages svg.railyard-view use')]
+      .filter(use => use.dataset.template === 'railyard-track-fade-in').length,
+    headers: [...document.querySelectorAll('#passages h3')].map(header => header.textContent),
+    refusal: SugarCube.setup.railyard.setDebugLeads(1, true, true)
+  }));
+  // Nothing lies behind station 1, so it has no entry track to draw, list, or travel through.
+  assert.deepEqual(first.labels, ['SOUTH STUB \u00b7 80 m free of 80 m', '01 \u00b7 111 m free of 120 m', 'NORTHBOUND TRACK']);
+  assert.equal(first.fadeIns, 0);
+  assert.ok(!first.headers.some(header => header.startsWith('Southbound Track')), first.headers.join(' | '));
+  assert.match(first.refusal, /station 1/);
+
+  await board(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const lead = extra => Object.assign({ length: 999999, infinite: true, trains: [] }, extra);
+    v.stationTracks[2] = [lead(), { length: 120, trains: [] }, lead({ hasLead: false })];
+  });
+  await choose(page, 'Start driving', 'DrivingMode');
+  assert.equal(await page.locator('#passages').getByText('Reverse consist to Southbound Track').count(), 0);
+  await travelLeg(page, 'Northbound');
+  const second = await page.evaluate(() => ({
+    station: SugarCube.State.variables.currentStation,
+    labels: [...document.querySelectorAll('#passages svg.railyard-view text')].map(text => text.textContent)
+  }));
+  const drivingText = await page.locator('#passages').innerText();
+  // Station 2 has no exit track: the yard track ends in a buffer stop and only the way back is offered.
+  assert.equal(second.station, 2);
+  assert.deepEqual(second.labels, ['SOUTHBOUND TRACK', '01 \u00b7 120 m free of 120 m']);
+  assert.equal(await page.locator('#passages a').filter({ hasText: /^Depart Northbound/ }).count(), 0);
+  assert.match(await page.locator('#passages .yard-reason').allTextContents().then(all => all.join(' ')),
+    /Depart Northbound toward Station 3 unavailable: This station has no Northbound Track/);
+  assert.doesNotMatch(drivingText, /Drive consist to Northbound Track/);
+  await travelLeg(page, 'Southbound');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.currentStation), 1);
+});
+
+test('lead tracks are named for the compass direction a train leaves by', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await board(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const lead = extra => Object.assign({ length: 999999, infinite: true, trains: [] }, extra);
+    // The route turns east at station 2: the player arrives from the south and leaves eastbound.
+    v.stationTracks[2] = [lead({ direction: 'south' }), { length: 120, trains: [] }, lead({ direction: 'east' })];
+  });
+  await choose(page, 'Start driving', 'DrivingMode');
+  await travelLeg(page, 'Northbound');
+  const labels = await page.evaluate(() =>
+    [...document.querySelectorAll('#passages svg.railyard-view text')].map(text => text.textContent));
+  const drivingText = await page.locator('#passages').innerText();
+  // The drawing keeps its shape; only the names follow the compass.
+  assert.deepEqual(labels, ['SOUTHBOUND TRACK', '01 \u00b7 120 m free of 120 m', 'EASTBOUND TRACK']);
+  assert.match(drivingText, /Drive consist to Eastbound Track/);
+  assert.match(drivingText, /Depart Eastbound toward Station 3/);
+  assert.match(drivingText, /Depart Southbound toward Station 1/);
+  await choose(page, 'Stop driving', 'TrainInterior');
+  await choose(page, 'Leave the train (0:01)', 'Railyard');
+  const headers = await page.locator('#passages h3').allTextContents();
+  assert.ok(headers.some(header => header.startsWith('Eastbound Track')), headers.join(' | '));
+  assert.ok(headers.some(header => header.startsWith('Southbound Track')), headers.join(' | '));
+});
+
+test('debug mode draws the generated world map for the leg ahead', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await page.evaluate(() => {
+    SugarCube.State.variables.debugMode = true;
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+  const map = await page.evaluate(() => {
+    const svg = document.querySelector('#passages svg.worldmap-debug');
+    if (!svg) return null;
+    return {
+      cells: svg.querySelectorAll('rect').length,
+      track: svg.querySelectorAll('line').length,
+      stations: svg.querySelectorAll('circle').length,
+      heading: svg.previousElementSibling.textContent
+    };
+  });
+  assert.ok(map, 'the debug panel should draw a world map');
+  assert.ok(map.cells > 50, JSON.stringify(map));
+  assert.ok(map.track > 10, JSON.stringify(map));
+  // Both ends of the leg, plus any branch terminus the generator put on it.
+  assert.ok(map.stations >= 2, JSON.stringify(map));
+  assert.match(map.heading, /World map, leg 1 \(station 1 to 2\): \d+ tiles, \d+ km/);
+  const reference = page.locator('details.debug-section').filter({ has: page.getByText('Reference data', { exact: true }) });
+  await reference.locator(':scope > summary').click();
+  await reference.getByText('Railcars', { exact: true }).click();
+  await reference.getByText('Fuel', { exact: true }).click();
+  await reference.getByText('Pack items', { exact: true }).click();
+  const referenceText = await reference.innerText();
+  assert.match(referenceText, /two axle diesel shunter/);
+  assert.match(referenceText, /Diesel minimum usable grade/);
+  assert.match(referenceText, /Hand pump/);
+});
+
+test('driving the line goes one 5 km tile at a time, and draws the consist on it', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await board(page);
+  await choose(page, 'Start driving', 'DrivingMode');
+  await page.locator('#passages').getByText(/^Depart Northbound toward Station/).first().click();
+  await passage(page, 'OnTheLine');
+
+  const start = await page.evaluate(() => {
+    const view = SugarCube.setup.worldmap.getJourneyView();
+    const svg = document.querySelector('#passages svg.driving-view');
+    return {
+      tileIndex: view.tileIndex, tileCount: view.tileCount, terrain: view.terrain,
+      cars: [...svg.querySelectorAll('use')].map(use => use.dataset.template).filter(name => /^driving-(car|loco)-/.test(name)),
+      terrainTiles: [...svg.querySelectorAll('use')].filter(use => /^driving-terrain-/.test(use.dataset.template)).length,
+      track: [...svg.querySelectorAll('use')].filter(use => use.dataset.template === 'driving-track').length,
+      markers: svg.querySelectorAll('.driving-player-marker').length,
+      status: document.querySelector('#passages h2').textContent,
+      fuel: SugarCube.State.variables.currentTrain[0].cargo[0].amount,
+      time: SugarCube.State.variables.gameTimeTimestampMs
+    };
+  });
+  // The consist is drawn on the tile it stands on, forward to the right, with the terrain behind it.
+  assert.deepEqual(start.cars, ['driving-loco-diesel-shunter-right']);
+  assert.ok(start.terrainTiles > 0 && start.track > 0, JSON.stringify(start));
+  assert.equal(start.markers, 1);
+  assert.equal(start.tileIndex, 0);
+  assert.equal(start.status, 'On the line');
+
+  await page.locator('#passages').getByText(/^Drive 5 km [a-z-]+ \(/).first().click();
+  await passage(page, 'OnTheLine');
+  const moved = await page.evaluate(() => ({
+    tileIndex: SugarCube.setup.worldmap.getJourneyView().tileIndex,
+    fuel: SugarCube.State.variables.currentTrain[0].cargo[0].amount,
+    time: SugarCube.State.variables.gameTimeTimestampMs
+  }));
+  // One tile costs its own time, and travelling burns a litre of diesel a minute.
+  const minutes = (moved.time - start.time) / 60000;
+  assert.equal(moved.tileIndex, 1);
+  assert.ok(minutes >= 3 && minutes <= 20, `a tile should cost a few minutes, got ${minutes}`);
+  assert.equal(moved.fuel, start.fuel - minutes);
+
+  // There is no getting off between stations, but backing up returns to the tile before.
+  await choose(page, 'Enter the train', 'TrainInterior');
+  const interior = await page.locator('#passages').innerText();
+  assert.match(interior, /You are out on the line between stations/);
+  assert.doesNotMatch(interior, /Leave Train/);
+  await choose(page, 'Start driving', 'OnTheLine');
+
+  // Backing onto the station's own tile is arriving back in its yard, and the journey is over.
+  await page.locator('#passages').getByText(/^Reverse 5 km \w+ \(/).first().click();
+  await passage(page, 'DrivingMode');
+  assert.deepEqual(await page.evaluate(() => ({
+    station: SugarCube.State.variables.currentStation,
+    journey: SugarCube.State.variables.journey
+  })), { station: 1, journey: null });
+
+  // Departing again, the yard is still right there: backing in costs nothing, which is the way out for a
+  // consist that sets off without the fuel to get anywhere.
+  await page.locator('#passages').getByText(/^Depart Northbound toward Station/).first().click();
+  await passage(page, 'OnTheLine');
+  await choose(page, 'Back into Station 1', 'DrivingMode');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.journey), null);
+});
+
+test('a side track reveals its direction, not where it ends or reconnects', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await board(page);
+  await choose(page, 'Start driving', 'DrivingMode');
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const map = SugarCube.setup.worldmap;
+    const seed = map.getSeed();
+    let found = null;
+    for (let legIndex = 1; legIndex < 40 && !found; legIndex++) {
+      const branch = map.getLeg(seed, legIndex).branches[0];
+      if (branch) found = { legIndex, branch };
+    }
+    if (!found) throw new Error('expected a generated side track');
+    v.journey = { legIndex: found.legIndex, tileIndex: found.branch.fromIndex, forward: true };
+    SugarCube.Engine.play('OnTheLine');
+  });
+  await passage(page, 'OnTheLine');
+  const text = await page.locator('#passages').innerText();
+  assert.match(text, /Drive 5 km (north|north-east|east|south-east|south|south-west|west|north-west)/);
+  assert.doesNotMatch(text, /joins the line|ends at a buffer stop|side track/i);
+});
+
+test('the credits dialog discloses how AI was used', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await page.locator('#menu-story').getByText('Credits', { exact: true }).click();
+  const dialog = page.locator('#ui-dialog');
+  // The dialog fades in, so wait for the link to lay out before reading any text out of it.
+  const link = dialog.locator('a[href="https://likeaserver.myddns.me/ashlinegame/about/#ai-generation-disclosure"]');
+  await link.waitFor({ state: 'visible' });
+  const shown = await dialog.innerText();
+  assert.match(shown, /AI Generated Content Disclosure:/);
+  assert.match(shown, /AI was used to make code and \.svg art for this game\./);
+  assert.match(shown, /Diffusion \(what people commonly refer to as AI Image Generation\) was not used for this game\./);
+  // The link reads as words, with the address behind it rather than printed in the sentence.
+  assert.equal(await link.count(), 1);
+  assert.equal(await link.innerText(), "Ashline's Page on my Website");
+  assert.doesNotMatch(shown, /https:\/\//);
+  // The credits that were there before are untouched.
+  assert.match(shown, /Created by: likea/);
+  assert.match(shown, /Official Website/);
+  assert.doesNotMatch(shown, /Discord/);
+});
+
+test('the yard view zooms, and fitting never blows a small yard up', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  const zoom = page.locator('.railyard-view-zoom');
+  const svg = page.locator('svg.railyard-view');
+  const readout = zoom.locator('span');
+  // The view opens fitted so the whole yard is visible without hunting for its far end.
+  assert.equal(await readout.innerText(), 'Fit');
+  const natural = await svg.evaluate(element => Number(element.getAttribute('width')));
+  const initialWidth = await page.locator('.railyard-view-scroll').evaluate(box =>
+    box.clientWidth - parseFloat(getComputedStyle(box).paddingLeft) - parseFloat(getComputedStyle(box).paddingRight));
+  assert.ok(Math.abs((await svg.boundingBox()).width - initialWidth) <= 2, 'the opening yard should fit its frame');
+
+  await zoom.getByRole('button', { name: '+' }).click();
+  assert.equal(await readout.innerText(), '100%');
+  const zoomed = (await svg.boundingBox()).width;
+  assert.ok(Math.abs(zoomed - natural) <= 2, `${zoomed} should be the drawing's natural width`);
+
+  // Fit fills the width of the window, whether that means shrinking the yard or enlarging it.
+  await zoom.getByRole('button', { name: 'Fit' }).click();
+  assert.equal(await readout.innerText(), 'Fit');
+  const windowWidth = await page.locator('.railyard-view-scroll').evaluate(box =>
+    box.clientWidth - parseFloat(getComputedStyle(box).paddingLeft) - parseFloat(getComputedStyle(box).paddingRight));
+  const fitted = (await svg.boundingBox()).width;
+  assert.ok(Math.abs(fitted - windowWidth) <= 2, `fitted ${fitted} should fill the ${windowWidth} wide window`);
+
+  // Zoomed in and scrolled, the controls stay in the corner of the view instead of sliding away with the yard.
+  await zoom.getByRole('button', { name: '+' }).click();
+  await zoom.getByRole('button', { name: '+' }).click();
+  const parked = await zoom.boundingBox();
+  await page.locator('.railyard-view-scroll').evaluate(box => { box.scrollLeft = 220; box.scrollTop = 40; });
+  const scrolled = await zoom.boundingBox();
+  assert.deepEqual({ x: Math.round(scrolled.x), y: Math.round(scrolled.y) },
+    { x: Math.round(parked.x), y: Math.round(parked.y) });
+});
+
+test('clicking the yard drawing runs the same shunting actions as the text links', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const copy = key => JSON.parse(JSON.stringify(v.defaultTrains[key]));
+    const lead = () => ({ length: 999999, infinite: true, trains: [] });
+    const lengths = SugarCube.setup.railyard.getYardTrackLengths(3, 1, 3, 200);
+    const loco = copy('dieselShunter');
+    loco.cargo = [{ type: 'diesel', amount: 400 }];
+    v.stationTracks[1] = [lead(),
+      { length: lengths[0], trains: [[loco]] },
+      { length: lengths[1], trains: [[copy('boxcar')]] },
+      { length: lengths[2], trains: [] },
+      lead()];
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+  await board(page);
+  await choose(page, 'Start driving', 'DrivingMode');
+
+  // Clicking a track runs its move, with the same cost the text link would have charged. The way out to the
+  // southbound lead is clear; the parked train on track 2 blocks the other direction, as the text list says.
+  const before = await page.evaluate(() => SugarCube.State.variables.gameTimeTimestampMs);
+  await page.locator('svg.railyard-view [data-yard-target="track:0"]').click();
+  await passage(page, 'DrivingMode');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.drivingTrackIndex), 0);
+  assert.ok(await page.evaluate(() => SugarCube.State.variables.gameTimeTimestampMs) > before, 'the move costs time');
+
+  await page.locator('svg.railyard-view [data-yard-target="track:3"]').click();
+  await passage(page, 'DrivingMode');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.drivingTrackIndex), 3);
+
+  // Clicking the track you are already on explains itself instead of doing anything.
+  await page.locator('svg.railyard-view [data-yard-target="track:3"]').click();
+  assert.match(await page.locator('.railyard-view-message').innerText(), /already on this track/);
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.drivingTrackIndex), 3);
+
+  // Clicking a parked train couples it, exactly as its text link does.
+  assert.equal(await page.locator('#passages [data-yard-action="couple-rear:2:0"] a').count(), 1,
+    'the text list should offer rear coupling for that train');
+  await page.locator('svg.railyard-view [data-yard-target="train:2:0"]').click();
+  // Both ends can now be reached via legal headshunt routes: select the rear coupling explicitly.
+  await page.locator('.railyard-view-choice').filter({ hasText: /^Couple to the rear/ }).click();
+  await passage(page, 'DrivingMode');
+  assert.deepEqual(await page.evaluate(() => ({
+    cars: SugarCube.State.variables.currentTrain.map(car => car.type),
+    parked: SugarCube.State.variables.stationTracks[1][2].trains.length
+  })), { cars: ['diesel loco', 'boxcar'], parked: 0 });
+});
+
+test('a section that will not fit says so instead of scattering the cars', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const copy = key => JSON.parse(JSON.stringify(v.defaultTrains[key]));
+    const lead = () => ({ length: 999999, infinite: true, trains: [] });
+    const loco = copy('dieselShunter');
+    loco.cargo = [{ type: 'diesel', amount: 400 }];
+    // A short track that already holds a parked train, so the rear section has nowhere to go.
+    v.stationTracks[1] = [lead(),
+      { length: 30, trains: [[copy('boxcar')], [loco, copy('boxcar'), copy('tanker')]] },
+      lead()];
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+  await choose(page, 'Board Train 2 (0:01)', 'TrainInterior');
+  await choose(page, 'Start driving', 'DrivingMode');
+  const shown = await page.locator('#passages').innerText();
+  assert.doesNotMatch(shown, /Decouple the rear section \(2 cars\) \(/);
+  assert.equal(await page.locator('#passages a').filter({ hasText: 'Decouple the rear section' }).count(), 0,
+    'the refused move offers no link, only the reason');
+  assert.deepEqual(await page.evaluate(() => ({
+    consist: SugarCube.State.variables.currentTrain.map(car => car.type),
+    onLead: SugarCube.State.variables.stationTracks[1][0].trains.length
+  })), { consist: ['diesel loco', 'boxcar', 'tanker car'], onLead: 0 });
+});
+
+test('clicking a parked train offers coupling it or pulling up to it', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const copy = key => JSON.parse(JSON.stringify(v.defaultTrains[key]));
+    const loco = copy('dieselShunter');
+    loco.cargo = [{ type: 'diesel', amount: 400 }];
+    // The consist waits on the southbound lead, with one parked train on the yard track beyond it.
+    v.stationTracks[1] = [
+      { length: 999999, infinite: true, trains: [[loco]] },
+      { length: 200, trains: [[copy('boxcar')]] },
+      { length: 999999, infinite: true, trains: [] }
+    ];
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+  await board(page);
+  await choose(page, 'Start driving', 'DrivingMode');
+
+  // Both moves are possible here, so the click asks which one rather than picking for the player.
+  await page.locator('svg.railyard-view [data-yard-target="train:1:0"]').click();
+  const choices = page.locator('.railyard-view-choice');
+  const labels = await choices.allTextContents();
+  assert.equal(labels.length, 3, `two moves and a way out, got: ${labels.join(' | ')}`);
+  assert.ok(labels.includes('Cancel'), labels.join(' | '));
+  assert.ok(labels.some(text => /^Couple to the front/.test(text)), labels.join(' | '));
+  assert.ok(labels.some(text => /^Drive consist into Yard Track 1/.test(text)), labels.join(' | '));
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.drivingTrackIndex), 0, 'nothing happens yet');
+
+  // Pulling up to it moves the consist onto the track and leaves the train where it stands.
+  await choices.filter({ hasText: 'Drive consist into Yard Track 1' }).click();
+  await passage(page, 'DrivingMode');
+  assert.deepEqual(await page.evaluate(() => ({
+    track: SugarCube.State.variables.drivingTrackIndex,
+    consist: SugarCube.State.variables.currentTrain.map(car => car.type),
+    parked: SugarCube.State.variables.stationTracks[1][1].trains.flat().map(car => car.type)
+  })), { track: 1, consist: ['diesel loco'], parked: ['boxcar'] });
+});
+
+// Reads what the yard drawing is currently saying: its labels, its track numbers, and the compass.
+async function readYard(page) {
+  return page.evaluate(() => {
+    const view = document.querySelector('#passages svg.railyard-view');
+    const labels = [...view.querySelectorAll('text')].map(text => text.textContent);
+    const onward = document.querySelector('.railyard-compass .railyard-compass-label.railyard-compass-onward');
+    return {
+      labels,
+      badges: labels.filter(text => /^\d\d /.test(text)).map(text => text.slice(0, 2)),
+      compass: onward ? onward.textContent : null
+    };
+  });
+}
+
+test('the yard is drawn from the end the player arrived at, and the compass turns with it', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const copy = key => JSON.parse(JSON.stringify(v.defaultTrains[key]));
+    const lead = extra => Object.assign({ length: 999999, infinite: true, trains: [] }, extra);
+    const loco = copy('dieselShunter');
+    loco.cargo = [{ type: 'diesel', amount: 400 }];
+    const lengths = SugarCube.setup.railyard.getYardTrackLengths(3, 1, 3, 200);
+    v.stationTracks[1] = [lead({ direction: 'southwest', trains: [[loco]] }),
+      { length: lengths[0], trains: [] }, { length: lengths[1], trains: [] }, { length: lengths[2], trains: [] },
+      lead({ direction: 'northeast' })];
+    v.travellingForward = true;
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+
+  // Running northeast: the southwest lead is the one behind, at the top left, and northeast lies to the bottom right.
+  const forward = await readYard(page);
+  assert.equal(forward.labels[0], 'SOUTH-WESTBOUND TRACK');
+  assert.equal(forward.labels[forward.labels.length - 1], 'NORTH-EASTBOUND TRACK');
+  assert.equal(forward.compass, 'NE');
+  assert.deepEqual(forward.badges, ['01', '02', '03']);
+
+  // Coming back the other way turns the whole yard round: the lead just arrived on is at the top left again.
+  await page.evaluate(() => {
+    SugarCube.State.variables.travellingForward = false;
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+  const backward = await readYard(page);
+  assert.equal(backward.labels[0], 'NORTH-EASTBOUND TRACK');
+  assert.equal(backward.labels[backward.labels.length - 1], 'SOUTH-WESTBOUND TRACK');
+  assert.equal(backward.compass, 'SW');
+  assert.deepEqual(backward.badges, ['03', '02', '01'], 'the rows mirror, and keep their own numbers');
+});
+
+test('cars keep the direction they face, whichever way the yard is drawn', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  const drawnLocos = () => page.evaluate(() =>
+    [...document.querySelectorAll('#passages svg.railyard-view use')]
+      .map(use => use.dataset.template).filter(name => /^railyard-loco-/.test(name)));
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const copy = key => JSON.parse(JSON.stringify(v.defaultTrains[key]));
+    const lead = () => ({ length: 999999, infinite: true, trains: [] });
+    const facingOn = copy('dieselShunter');
+    facingOn.facing = 1;
+    const facingBack = copy('steamShunter');
+    facingBack.facing = -1;
+    // A locomotive at the rear of a train no longer flips just because of where it stands in the consist.
+    v.stationTracks[1] = [lead(),
+      { length: 200, trains: [[copy('boxcar'), facingOn]] },
+      { length: 200, trains: [[facingBack, copy('boxcar')]] },
+      lead()];
+    v.travellingForward = true;
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+  const forward = await drawnLocos();
+  assert.ok(forward.includes('railyard-loco-diesel-shunter-right'), forward.join(' | '));
+  assert.ok(forward.includes('railyard-loco-steam-shunter-left'), forward.join(' | '));
+
+  // Seen from the other end of the yard, both face the other way on screen without having turned round.
+  await page.evaluate(() => {
+    SugarCube.State.variables.travellingForward = false;
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+  const backward = await drawnLocos();
+  assert.ok(backward.includes('railyard-loco-diesel-shunter-left'), backward.join(' | '));
+  assert.ok(backward.includes('railyard-loco-steam-shunter-right'), backward.join(' | '));
+});
+
+test('clicking the far end of a lead leaves the station', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await board(page);
+  await choose(page, 'Start driving', 'DrivingMode');
+  // The way out is a small target at the very end of the lead; the track itself is the easy one to hit.
+  const departBox = await page.locator('svg.railyard-view [data-yard-target="depart:exit"]').boundingBox();
+  const trackBox = await page.locator('svg.railyard-view [data-yard-target="track:2"]').boundingBox();
+  assert.ok(trackBox.width > departBox.width * 1.5,
+    `the track band (${Math.round(trackBox.width)}) should be the bigger target, not the way out (${Math.round(departBox.width)})`);
+
+  await page.locator('svg.railyard-view [data-yard-target="depart:exit"]').click();
+  await passage(page, 'OnTheLine');
+  assert.deepEqual(await page.evaluate(() => {
+    const journey = SugarCube.State.variables.journey;
+    return { leg: journey.legIndex, forward: journey.forward, tile: journey.tileIndex };
+  }), { leg: 1, forward: true, tile: 0 });
+});
+
+test('clicking a train on the station map boards it', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await page.evaluate(() => {
+    const v = SugarCube.State.variables;
+    const copy = key => JSON.parse(JSON.stringify(v.defaultTrains[key]));
+    const lead = () => ({ length: 999999, infinite: true, trains: [] });
+    const loco = copy('dieselShunter');
+    loco.cargo = [{ type: 'diesel', amount: 400 }];
+    v.stationTracks[1] = [lead(),
+      { length: 200, trains: [[copy('boxcar')]] },
+      { length: 200, trains: [[loco, copy('tanker')]] },
+      lead()];
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+
+  // With no consist to move, the tracks are not targets: only the trains are, and clicking one boards it.
+  assert.equal(await page.locator('svg.railyard-view [data-yard-target^="track:"]').count(), 0);
+  await page.locator('svg.railyard-view [data-yard-target="train:2:0"]').click();
+  await passage(page, 'TrainInterior');
+  assert.deepEqual(await page.evaluate(() => ({
+    consist: SugarCube.State.variables.currentTrain.map(car => car.type),
+    leftOnTrack: SugarCube.State.variables.stationTracks[1][2].trains.length,
+    boardedFrom: SugarCube.State.variables.enteredTrackIndex
+  })), { consist: ['diesel loco', 'tanker car'], leftOnTrack: 0, boardedFrom: 2 });
+});
+
+test('a locomotive facing the other way is drawn with the mirrored texture', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await board(page);
+  await choose(page, 'Start driving', 'DrivingMode');
+  await page.locator('svg.railyard-view [data-yard-target="depart:exit"]').click();
+  await passage(page, 'OnTheLine');
+  const drawnLocos = () => page.evaluate(() =>
+    [...document.querySelectorAll('#passages svg.driving-view use')]
+      .map(use => use.dataset.template).filter(name => /loco/.test(name)));
+  assert.deepEqual(await drawnLocos(), ['driving-loco-diesel-shunter-right']);
+
+  // The same locomotive, pointing the other way, gets the mirrored texture.
+  await page.evaluate(() => {
+    SugarCube.State.variables.currentTrain[0].facing = -1;
+    SugarCube.Engine.play('OnTheLine');
+  });
+  await passage(page, 'OnTheLine');
+  assert.deepEqual(await drawnLocos(), ['driving-loco-diesel-shunter-left']);
+
+  // Running the leg the other way mirrors it back: the locomotive has not turned round, the train has.
+  await page.evaluate(() => {
+    SugarCube.State.variables.journey.forward = false;
+    SugarCube.Engine.play('OnTheLine');
+  });
+  await passage(page, 'OnTheLine');
+  assert.deepEqual(await drawnLocos(), ['driving-loco-diesel-shunter-right']);
+});
+
+test('backing into the station you left turns neither the yard nor the train round', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await board(page);
+  await choose(page, 'Start driving', 'DrivingMode');
+  const yardView = () => page.evaluate(() => ({
+    forward: SugarCube.State.variables.travellingForward !== false,
+    loco: [...document.querySelectorAll('#passages svg.railyard-view use')]
+      .map(use => use.dataset.template).find(name => /loco/.test(name)),
+    topLeft: document.querySelector('#passages svg.railyard-view text').textContent
+  }));
+  const before = await yardView();
+
+  // Out onto the line, one tile along, then straight back into the yard it left.
+  await page.locator('#passages').getByText(/^Depart Northbound toward Station/).first().click();
+  await passage(page, 'OnTheLine');
+  await page.locator('#passages').getByText(/^Drive 5 km [a-z-]+ \(/).first().click();
+  await passage(page, 'OnTheLine');
+  await page.locator('#passages').getByText(/^Reverse 5 km \w+ \(/).first().click();
+  await passage(page, 'DrivingMode');
+
+  // Still northbound, still the same yard the same way round, and the locomotive has not turned round. The
+  // track label reads differently only because the consist has moved off it, which is not about orientation.
+  const after = await yardView();
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.currentStation), 1);
+  assert.equal(after.forward, before.forward);
+  assert.equal(after.loco, before.loco);
+  assert.doesNotMatch(after.topLeft, /BOUND/, 'the far lead has not swapped into the top left corner');
+});
+
+test('hovering the yard says what a click would do', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await board(page);
+  await choose(page, 'Start driving', 'DrivingMode');
+  assert.equal(await page.evaluate(() => SugarCube.setup.railyardView.hasHover()), true);
+  const message = page.locator('.railyard-view-message');
+
+  await page.locator('svg.railyard-view [data-yard-target="track:2"]').hover();
+  assert.match(await message.innerText(), /Drive consist to Northbound Track/);
+
+  // Hovering somewhere nothing can happen explains that instead.
+  await page.locator('svg.railyard-view [data-yard-target="track:1"]').hover();
+  assert.match(await message.innerText(), /already on this track/);
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.drivingTrackIndex), 1, 'hovering changes nothing');
+});
+
+test('without a hover, a tap offers the move and a second tap takes it', async t => {
+  const page = await openGame(t, { hasTouch: true, isMobile: true });
+  await begin(page);
+  await board(page);
+  await choose(page, 'Start driving', 'DrivingMode');
+  assert.equal(await page.evaluate(() => SugarCube.setup.railyardView.hasHover()), false,
+    'a touch screen reports no hover');
+
+  // The first tap offers the move rather than taking it.
+  await page.locator('svg.railyard-view [data-yard-target="track:2"]').click();
+  assert.match(await page.locator('.railyard-view-message').innerText(), /Confirm/);
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.drivingTrackIndex), 1, 'nothing has happened yet');
+
+  // The second takes it.
+  await page.locator('.railyard-view-choice').first().click();
+  await passage(page, 'DrivingMode');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.drivingTrackIndex), 2);
+});
+
+test('the sidebar shows the player condition, and the screen explains what drives it', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  const rows = await page.evaluate(() => [...document.querySelectorAll('#story-caption .stat-row')].map(row => ({
+    stat: row.dataset.stat,
+    label: row.querySelector('.stat-label').textContent,
+    band: row.querySelector('.stat-band').textContent,
+    width: row.querySelector('.stat-fill').style.width,
+    severity: row.querySelector('.stat-fill').className.replace('stat-fill stat-', '')
+  })));
+  assert.deepEqual(rows.map(row => row.stat),
+    ['fatigue', 'health', 'immunity', 'sanity', 'hunger', 'thirst']);
+  // A fresh player: fatigue empty, every reserve full, and all of them reading as fine.
+  assert.deepEqual(rows.map(row => row.label), ['Fatigue', 'Health', 'Immunity', 'Sanity', 'Hunger', 'Thirst']);
+  assert.deepEqual(rows.map(row => row.band), ['Rested', 'Unhurt', 'Strong', 'Sound', 'Fed', 'Watered']);
+  assert.deepEqual(rows.map(row => row.width), ['0%', '100%', '100%', '100%', '100%', '100%']);
+  assert.deepEqual([...new Set(rows.map(row => row.severity))], ['fine']);
+
+  // Turning a stat bad colours it and renames it, without touching the others.
+  await page.evaluate(() => {
+    SugarCube.setup.stats.setValue('thirst', 25);
+    SugarCube.setup.stats.setValue('sanity', 30);
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+  const changed = await page.evaluate(() => {
+    const read = key => {
+      const row = document.querySelector(`#story-caption .stat-row[data-stat="${key}"]`);
+      return { band: row.querySelector('.stat-band').textContent, fill: row.querySelector('.stat-fill').className };
+    };
+    return { thirst: read('thirst'), mind: read('sanity'), fatigue: read('fatigue') };
+  });
+  assert.equal(changed.thirst.band, 'Parched');
+  assert.match(changed.thirst.fill, /stat-severe/);
+  assert.equal(changed.mind.band, 'Haunted');
+  assert.match(changed.mind.fill, /stat-severe/);
+  assert.equal(changed.fatigue.band, 'Rested');
+
+  // The Condition screen lists every stat with what drives it.
+  await page.locator('#menu-story').getByText('Condition', { exact: true }).click();
+  const dialog = page.locator('#ui-dialog');
+  await dialog.locator('.condition-stat').first().waitFor({ state: 'visible' });
+  const shown = await dialog.innerText();
+  assert.match(shown, /Thirst: Parched \(25\/100\)/);
+  assert.match(shown, /Sanity: Haunted \(30\/100\)/);
+  assert.match(shown, /Make sure to carry plenty of water/);
+  assert.match(shown, /even a minor accident can be fatal/);
+  // Plans and progress notes belong in the development notes, never in front of a player.
+  assert.doesNotMatch(shown, /not built|not implemented|coming soon|yet\b/i);
+});
+
+test('inventory is available after the game begins, but gameplay submenus stay off the start screen', async t => {
+  const page = await openGame(t);
+  assert.equal(await page.locator('#menu-story').getByText('Condition', { exact: true }).count(), 0);
+  assert.equal(await page.locator('#menu-story').getByText('Inventory', { exact: true }).count(), 0);
+
+  await begin(page);
+  await page.locator('#menu-story').getByText('Inventory', { exact: true }).click();
+  const dialog = page.locator('#ui-dialog');
+  await dialog.getByText('Inventory', { exact: true }).waitFor({ state: 'visible' });
+  assert.match(await dialog.innerText(), /On you/);
+  assert.match(await dialog.innerText(), /Board a train to inspect/);
+  await page.evaluate(() => SugarCube.Dialog.close());
+  await board(page);
+  await page.locator('#menu-story').getByText('Inventory', { exact: true }).click();
+  await dialog.getByText('Inventory', { exact: true }).waitFor({ state: 'visible' });
+  assert.match(await dialog.innerText(), /Your train/);
+  assert.match(await dialog.innerText(), /Pack \(4 × 4\)/);
+  assert.match(await dialog.innerText(), /0\/16 pack squares, 0 kg\/50 kg carried/);
+  assert.match(await dialog.innerText(), /Toolkit/);
+});
+
+test('the condition bars carry a marker where trouble starts, and can show their numbers', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  const pins = await page.evaluate(() => ({
+    fatigue: document.querySelector('#story-caption .stat-row[data-stat="fatigue"] .stat-pin').style.left,
+    immunity: document.querySelector('#story-caption .stat-row[data-stat="immunity"] .stat-pin').style.left,
+    numbersShown: getComputedStyle(document.querySelector('#story-caption .stat-value')).display
+  }));
+  // A burden turns severe four fifths up; a reserve one fifth down.
+  assert.equal(pins.fatigue, '60%');
+  assert.equal(pins.immunity, '40%');
+  assert.equal(pins.numbersShown, 'none', 'the words carry the meaning until the numbers are asked for');
+
+  // Tapping the panel shows the numbers behind the words.
+  await page.locator('#story-caption .stats-panel').click();
+  const expanded = await page.evaluate(() => ({
+    display: getComputedStyle(document.querySelector('#story-caption .stat-value')).display,
+    text: document.querySelector('#story-caption .stat-row[data-stat="immunity"] .stat-value').textContent
+  }));
+  assert.notEqual(expanded.display, 'none');
+  assert.equal(expanded.text, '100/100');
+});

@@ -269,3 +269,9 @@
 .loco-stat-name {
 	color: #8d938f;
 }
+/* The lesson highlights normal actions; it never supplies a second set of movement rules. */
+.tutorial-next-action { border-left: 3px solid #dec38a; padding-left: 0.4em; }
+.railyard-view .tutorial-next-target { stroke: #dec38a; stroke-width: 2px; stroke-dasharray: 4 3; fill: rgba(222, 195, 138, 0.08); }
+.consist-car-target { fill: transparent; cursor: pointer; }
+.consist-car-target:hover, .consist-car-target:focus { stroke: #dec38a; stroke-width: 1; outline: none; }
+.consist-details { margin-top: 0.4em; }

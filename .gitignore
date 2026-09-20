@@ -1,7 +1,6 @@
 node_modules/
 .review/
 .vs/
-tests/
 test-results/
 playwright-report/
 
@@ -20,8 +19,7 @@ CLAUDE.md
 docs/
 .vscode/
 
-# Local build and test tooling
-scripts/
-package.json
-package-lock.json
+# Generated Python caches (first-party build and test tooling is tracked)
+__pycache__/
+*.pyc
 development materials/

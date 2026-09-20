@@ -37,6 +37,24 @@ setup.tutorial = {
 		}
 		return -1;
 	},
+	isSuggested: function(key) {
+		var hint = this.getHint();
+		var actions = { couple: 'couple-front:3:0', 'move-flatcar': 'track:2',
+			'decouple-flatcar': 'decouple:front', 'runaround-stub': 'track:0',
+			'runaround-lead': 'track:3', 'couple-rear': 'couple-rear:2:0' };
+		return !!hint && actions[hint.id] === key;
+	},
+	markTarget: function(element) {
+		var key = element.getAttribute('data-yard-target');
+		var hint = this.getHint();
+		if (!hint) return;
+		var suffix = key.replace(/^train:/, '');
+		if (this.isSuggested(key) || (key.indexOf('train:') === 0
+			&& (this.isSuggested('couple-front:' + suffix) || this.isSuggested('couple-rear:' + suffix)
+				|| (hint.id === 'board' && key === 'train:1:0')))) {
+			element.classList.add('tutorial-next-target');
+		}
+	},
 	requestExit: function(towardExit) {
 		if (!this.isActive() || this.flatcarIsAtRear(State.variables.currentTrain)) {
 			return true;
@@ -81,10 +99,10 @@ setup.tutorial = {
 				return { id: 'decouple-flatcar', text: 'Decouple the front section to leave the flatcar on Yard Track 2.' };
 			}
 			if (flatcarTrack === this.SETOUT_TRACK && Number(variables.drivingTrackIndex) === this.SETOUT_TRACK) {
-				return { id: 'runaround-stub', text: 'Reverse the locomotive onto the Southbound Track stub so it can run around the flatcar.' };
+				return { id: 'runaround-stub', text: 'Reverse the locomotive onto the ' + setup.railyard.getTrackLabel(tracks, this.STUB_TRACK) + ' so it can run around the flatcar.' };
 			}
 			if (flatcarTrack === this.SETOUT_TRACK && Number(variables.drivingTrackIndex) === this.STUB_TRACK) {
-				return { id: 'runaround-lead', text: 'Drive the locomotive around to the Northbound Track, on the other side of the flatcar.' };
+				return { id: 'runaround-lead', text: 'Drive through the clear yard track to the ' + setup.railyard.getTrackLabel(tracks, this.EXIT_TRACK) + ', on the other side of the flatcar.' };
 			}
 			if (flatcarTrack === this.SETOUT_TRACK && Number(variables.drivingTrackIndex) === this.EXIT_TRACK) {
 				return { id: 'couple-rear', text: 'Back into the flatcar and couple it to the rear of the locomotive.' };
@@ -110,26 +128,5 @@ Macro.add('tutorialHint', {
 			return;
 		}
 		new Wikifier(this.output, '<p class="tutorial-hint" data-hint="' + hint.id + '">' + hint.text + '</p>');
-	}
-});
-
-// The general shunting controls stay available throughout the tutorial.  These short, state-aware links expose
-// the intended run-around route so the first lesson cannot depend on discovering a dense yard-control menu.
-Macro.add('tutorialControls', {
-	handler: function() {
-		if (!setup.tutorial.isActive() || !Array.isArray(State.variables.currentTrain)) return;
-		var tracks = State.variables.stationTracks[setup.tutorial.STATION];
-		var train = State.variables.currentTrain;
-		var flatcarTrack = setup.tutorial.getFlatcarTrackIndex(tracks);
-		var currentTrack = Number(State.variables.drivingTrackIndex);
-		var output = '';
-		if (setup.tutorial.hasFlatcar(train) && !setup.tutorial.flatcarIsAtRear(train) && currentTrack !== setup.tutorial.SETOUT_TRACK) {
-			output = '<<timedlink "Move consist to Yard Track 2" 1 "shunting" "fatigue:+1">><<set $drivingTrackIndex = 2>><<set $enteredTrainIndex = 0>><<goto "DrivingMode">><</timedlink>>';
-		} else if (!setup.tutorial.hasFlatcar(train) && flatcarTrack === setup.tutorial.SETOUT_TRACK && currentTrack === setup.tutorial.SETOUT_TRACK) {
-			output = '<<timedlink "Reverse locomotive to Southbound Track" 1 "shunting" "fatigue:+1">><<set $drivingTrackIndex = 0>><<set $enteredTrainIndex = 0>><<goto "DrivingMode">><</timedlink>>';
-		} else if (!setup.tutorial.hasFlatcar(train) && flatcarTrack === setup.tutorial.SETOUT_TRACK && currentTrack === setup.tutorial.STUB_TRACK) {
-			output = '<<timedlink "Drive locomotive to Northbound Track" 1 "shunting" "fatigue:+1">><<set $drivingTrackIndex = 3>><<set $enteredTrainIndex = 0>><<goto "DrivingMode">><</timedlink>>';
-		}
-		if (output) new Wikifier(this.output, '<p class="tutorial-controls">' + output + '</p>');
 	}
 });

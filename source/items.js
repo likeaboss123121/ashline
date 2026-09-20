@@ -219,7 +219,8 @@ setup.items.takeFromCar = function(car, item) {
 		return false;
 	}
 	var kit = this.getPlayerKit();
-	var slot = kit.filter(function(candidate) { return candidate.item === item; })[0];
+	var limit = this.CATALOGUE[item].stack;
+	var slot = kit.filter(function(candidate) { return candidate.item === item && candidate.count < limit; })[0];
 	if (slot) {
 		slot.count++;
 	} else {
@@ -247,7 +248,7 @@ setup.items.playerHasRoom = function(item) {
 	if (this.getPlayerCarriedKg() + (Number(definition.weightKg) || 0) > this.PLAYER_CARRY_KG) {
 		return false;
 	}
-	var slot = this.getPlayerKit().filter(function(candidate) { return candidate.item === item; })[0];
+	var slot = this.getPlayerKit().filter(function(candidate) { return candidate.item === item && candidate.count < definition.stack; })[0];
 	if (slot && slot.count < definition.stack) {
 		return true;
 	}

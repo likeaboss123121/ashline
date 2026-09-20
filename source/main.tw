@@ -19,20 +19,8 @@ Ashline
 <div id="settingsStart">
 	<<settingsStart>>
 </div>
-:: StoryInit {"position":"201,199"}
-/% SugarCube runs this once before Start. Keep it free of navigation and visible prose. %/
-<<initsettings>>
-<<set $player to {
-fatigue: 0,
-health: 100,
-immunity: 100,
-sanity: 100,
-hunger: 100,
-thirst: 100
-}>>
-<<set $trains to []>>
-<<set $currentStation to 1>>
-<<set $stationTracks to {}>>
+:: StoryInit
+<<silently>><<initsettings>><<run setup.startNewRun()>><</silently>>
 :: Introduction
 <<if $settingsMode is "Story">>
 You are a lone train engineer in a world where dangerous zombies called Foamers endlessly expand the railroad. Your goal is to travel from Punta Arenas, Chile, to Cape Town, South Africa, surviving on your train along the way.
@@ -42,9 +30,7 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 <<link "Begin your journey">><<startNewGame true>><<goto "Railyard">><</link>>
 
 :: PassageHeader
-/% Runs before every passage: the backup reminder sits above whatever the player is doing. %/
-<<saveReminder>>
-
+<<if ["Railyard", "TrainInterior", "DrivingMode", "OnTheLine"].indexOf(passage()) === -1>><<saveReminder>><</if>>
 :: StoryMenu
 /% Sidebar menu extension passage: keeps utility links (currently Credits dialog) out of gameplay passages. %/
 <<if passage() !== "Start">>
@@ -67,9 +53,7 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 <</if>>
 
 :: Railyard {"position":"402,201"}
-/% Station hub passage: resolves returning train placement, generates station tracks when needed, and renders yard interaction UI. %/
-<<buildIntegrityNotice>>
-<<collapseNotice>>
+<<silently>>/% Station hub passage: resolves returning train placement, generates station tracks when needed, and renders yard interaction UI. %/
 <<if typeof $stationTracks[$currentStation] === 'undefined'>>
 	<<set $stationTracks[$currentStation] = setup.railyard.generateStationTracks($currentStation, $randomSeed)>>
 <</if>>
@@ -84,16 +68,14 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
   <<set $currentTrain = null>>
 <</if>>
 <<if $debugMode>><<run (function () { if (typeof console !== 'undefined' && typeof console.log === 'function') { console.log('[Ashline Debug] Station ' + State.variables.currentStation + ' railyard tracks:', State.variables.stationTracks[State.variables.currentStation]); } })()>><</if>>
-<<railyardView>>
+<</silently>><<railyardView>><<saveReminder>><<buildIntegrityNotice>><<collapseNotice>>
 You step into the railyard. Several trains are parked here, each with its own mix of cars and cargo.
 <<tutorialHint>>
 <<railyardButtons>>
 <<debugTools>>
 
 :: TrainInterior
-/% On-board navigation passage: tracks current car position, movement through consist, and transition into driving mode. %/
-<<buildIntegrityNotice>>
-<<collapseNotice>>
+<<silently>>/% On-board navigation passage: tracks current car position, movement through consist, and transition into driving mode. %/
 <<if typeof $currentCarIndex === 'undefined'>>
 	<<set $currentCarIndex = setup.railyard.getBoardingCarIndex($currentTrain)>>
 <</if>>
@@ -101,7 +83,7 @@ You step into the railyard. Several trains are parked here, each with its own mi
 	<<set $currentCarIndex = setup.railyard.getBoardingCarIndex($currentTrain)>>
 <</if>>
 <<set _currentCar to $currentTrain[$currentCarIndex]>>
-<<if !$journey>><<railyardView>><</if>>
+<<if !$journey>><<initDrivingModeState>><</if>><</silently>><<consistView>><<saveReminder>><<buildIntegrityNotice>><<collapseNotice>>
 You are <<print setup.railyard.getCarLocationText(_currentCar)>> of your consist.
 <br>
 Car <<print $currentCarIndex + 1>> of <<print $currentTrain.length>>.
@@ -137,6 +119,7 @@ This car does not have the controls needed to drive the train.
 <<if setup.railyard.isDieselLocomotiveCar(_currentCar)>>
 	<span class="small-description"><em>Diesel: <<print setup.railyard.getCargoAmount(_currentCar, "diesel").toFixed(2)>> L<<if setup.railyard.getCargoAmount(_currentCar, "diesel") > 0>>. <<print setup.fuel.describeGrade(setup.fuel.getGrade(_currentCar, "diesel"), "diesel")>> Engine power <<print Math.round(setup.fuel.getDieselPowerFactor(setup.fuel.getGrade(_currentCar, "diesel")) * 100)>>%<</if>>.</em></span><br>
 <</if>>
+<<if !$journey>><<drivingShuntingControls>><</if>>
 <<locomotiveKit>>
 <<playerPack>>
 <<refuelControls>>
@@ -145,25 +128,20 @@ This car does not have the controls needed to drive the train.
 <<debugTools>>
 
 :: OnTheLine
-/% Travelling between stations: the consist stands on one 5 km world tile at a time, and every move is one tile. %/
-<<buildIntegrityNotice>>
-<<collapseNotice>>
+<<silently>>/% Travelling between stations: the consist stands on one 5 km world tile at a time, and every move is one tile. %/
 <<if !$journey>><<goto "DrivingMode">><</if>>
+<</silently>><<drivingView>><<saveReminder>><<buildIntegrityNotice>><<collapseNotice>>
 <<lineStatus>>
 <<lineControls>>
-<<drivingView>>
 <<debugTools>>
 
 :: DrivingMode
-/% Active driving/shunting passage: composes merge, travel, and decoupling controls for the current consist and station context. %/
-<<buildIntegrityNotice>>
-<<collapseNotice>>
+<<silently>>/% Active driving/shunting passage: composes merge, travel, and decoupling controls for the current consist and station context. %/
 <<initDrivingModeState>>
-<<railyardView>>
+<</silently>><<railyardView>><<saveReminder>><<buildIntegrityNotice>><<collapseNotice>>
 You are driving your consist. Current station: <<print $currentStation>>.
 <<tutorialHint>>
 <<drivingStatus>>
-<<tutorialControls>>
 <<drivingTravelButtons>>
 <<drivingShuntingControls>>
 <<drivingMergeButtons>>

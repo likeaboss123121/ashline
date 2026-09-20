@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="82" height="61" viewBox="0 0 82 61" shape-rendering="crispEdges" data-template="driving-terrain-yard" data-anchor-x="1" data-anchor-y="43">
+<title>Ashline driving template: Rail yard</title>
+<g id="sky">
+<polygon points="1,1 81,1 81,23 1,23" fill="#78a9c4"/>
+</g>
+<g id="far">
+<polygon points="1,21 11,21 11,23 1,23" fill="#3b3e37"/>
+<polygon points="11,17 21,17 21,23 11,23" fill="#3b3e37"/>
+<polygon points="21,20 31,20 31,23 21,23" fill="#3b3e37"/>
+<polygon points="31,17 41,17 41,23 31,23" fill="#3b3e37"/>
+<polygon points="41,19 51,19 51,23 41,23" fill="#3b3e37"/>
+<polygon points="51,18 61,18 61,23 51,23" fill="#3b3e37"/>
+<polygon points="61,18 71,18 71,23 61,23" fill="#3b3e37"/>
+<polygon points="71,18 81,18 81,23 71,23" fill="#3b3e37"/>
+</g>
+<g id="ground">
+<polygon points="1,23 81,23 81,60 1,60" fill="#494c42"/>
+</g>
+<g id="near">
+<polygon points="1,54 81,54 81,60 1,60" fill="#55584f"/>
+</g>
+<g id="detail">
+<polygon points="5,27 6,27 6,29 5,29" fill="#75654d"/>
+<polygon points="6,28 7,28 7,29 6,29" fill="#75654d"/>
+<polygon points="17,37 18,37 18,39 17,39" fill="#75654d"/>
+<polygon points="18,37 19,37 19,39 18,39" fill="#75654d"/>
+<polygon points="29,46 30,46 30,49 29,49" fill="#75654d"/>
+<polygon points="30,48 31,48 31,49 30,49" fill="#75654d"/>
+<polygon points="41,32 42,32 42,34 41,34" fill="#75654d"/>
+<polygon points="42,32 43,32 43,34 42,34" fill="#75654d"/>
+<polygon points="53,42 54,42 54,44 53,44" fill="#75654d"/>
+<polygon points="54,43 55,43 55,44 54,44" fill="#75654d"/>
+<polygon points="65,26 66,26 66,29 65,29" fill="#75654d"/>
+<polygon points="66,27 67,27 67,29 66,29" fill="#75654d"/>
+</g>
+</svg>
