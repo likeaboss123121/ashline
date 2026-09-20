@@ -268,12 +268,14 @@ setup.startNewRun = function() {
 		'defaultTrains', 'cargoTypes'];
 	Object.keys(v).forEach(function(key) { if (keep.indexOf(key) === -1) delete v[key]; });
 	Object.assign(v, { player: { fatigue: 0, health: 100, immunity: 100, sanity: 100, hunger: 100, thirst: 100 },
+		saveSchemaVersion: setup.saveMigrations ? setup.saveMigrations.CURRENT : 1,
 		trains: [], currentStation: 1, stationTracks: {}, travellingForward: true,
 		gameTimeTimestampMs: setup.time.startTimestampMs, debugSelectedTrackIndex: 0,
 		debugSelectedTrainIndex: 0, debugSelectedCarIndex: -1 });
 	if (setup.worldmap) setup.worldmap.clearCache();
 	if (setup.railyardView) setup.railyardView.zoomLevel = 'fit';
 	if (setup.bugReport) setup.bugReport.recent = [];
+	if (setup.saveMigrations) { setup.saveMigrations.notice = ''; setup.saveMigrations.recovery = null; }
 	setup.debugReturnToPanel = false;
 };
 Macro.add('startNewGame', { handler: function() { setup.startNewRun(); } });
@@ -349,7 +351,8 @@ setup.runBuildIntegrityCheck = function() {
 		previousVersion = cachedMeta.version || previousVersion;
 	}
 	var notice = '';
-	if (typeof previousChecksum === 'string' && previousChecksum !== currentChecksum) {
+	if (typeof previousChecksum === 'string' && previousChecksum !== currentChecksum
+		&& !(setup.saveMigrations && (setup.saveMigrations.notice || setup.saveMigrations.recovery))) {
 		var currentShort = currentChecksum.slice(0, 8);
 		var previousShort = previousChecksum.slice(0, 8);
 		notice = 'There have been changes made to the source file since you last played. Current version ' + currentVersion + ', version last played ' + (previousVersion || 'unknown') + '. Build checksums: ' + currentShort + ' (current) vs ' + previousShort + ' (last played). Unexpected behaviour may occur. If possible, create a new save file.';
@@ -367,21 +370,7 @@ setup.runBuildIntegrityCheck = function() {
 jQuery(document).one(':storyready', function () {
 	setup.runBuildIntegrityCheck();
 });
-// Loading another save in the same tab must compare that save's build metadata too.
-Save.onLoad.add(function (save) {
-	setup.buildCheckDone = false;
-	// Migrate the old playable StoryInit passage and discard obsolete state aliases.
-	if (save.state && Array.isArray(save.state.history)) {
-		save.state.history.forEach(function(moment) {
-			if (moment.title === 'StoryInit') moment.title = 'Introduction';
-			var variables = moment.variables;
-			variables.trains = [];
-			delete variables.currentCar;
-			if (moment.title === 'Railyard') variables.currentTrain = null;
-			if (variables.settingsExitPassage === 'StoryInit') variables.settingsExitPassage = 'Introduction';
-		});
-	}
-});
+// Save loading, schema upgrades and build-check reset live in save-migrations.js.
 // Forces the build-integrity check to run when a passage asks for it, but leaves the warning popup-only.
 Macro.add('buildIntegrityNotice', {
 	handler: function() {
@@ -592,6 +581,9 @@ State.variables.cargoTypes = {
 	firewood:      { density: 0.4,  rarity: 'common',   tags: ['aggregate', 'solid fuel'] },
 	diesel:        { density: 0.85, rarity: 'uncommon', tags: ['liquid', 'liquid fuel'] }
 };
+// Release-owned definitions must not come from whichever older save is being loaded.
+setup.currentDefinitions = JSON.parse(JSON.stringify({ defaultTrains: State.variables.defaultTrains,
+	cargoTypes: State.variables.cargoTypes }));
 // Core railyard helpers power train generation, placement, shunting, and debug tooling.
 setup.railyard = {
 	locomotiveKeys: ['dieselShunter', 'dieselRoad', 'steamShunter', 'steamPrairie'],

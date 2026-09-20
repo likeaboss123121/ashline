@@ -157,6 +157,80 @@ test('empty locomotive menus expose on-foot recovery and return carried fuel to 
   assert.ok(await page.evaluate(()=>SugarCube.setup.railyard.isTrainDriveCapable(SugarCube.State.variables.currentTrain)));
 });
 
+test('actual v0.1.0 exports migrate every passage and preserve stock, cargo and placement',async t=>{
+  function stock(v,title) {
+    const train=cars=>(cars||[]).map(car=>({type:car.type,cargo:car.cargo}));
+    return {station:v.currentStation,track:v.drivingTrackIndex,car:v.currentCarIndex,
+      yards:Object.fromEntries(Object.entries(v.stationTracks).map(([id,tracks])=>[id,tracks.map(t=>({length:t.length,trains:t.trains.map(train)}))])),
+      current:title==='Railyard'?null:train(v.currentTrain)};
+  }
+  for(const name of ['start','introduction','yard-first-entry','interior','driving','arrival','yard-pending-placement']) {
+    const fixture=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/v010',name+'.json')));
+    const page=await openGame(t);
+    assert.equal(await page.evaluate(text=>SugarCube.setup.saves.importText(text),fixture.exported),true,name);
+    const title=fixture.passage==='StoryInit'?'Introduction':fixture.passage;
+    await passage(page,title);
+    const migrated=await page.evaluate(()=>JSON.parse(JSON.stringify(SugarCube.State.variables)));
+    assert.deepEqual(stock(migrated,title),stock(fixture.live,fixture.passage),name);
+    assert.equal(migrated.player.health,100);assert.equal(migrated.player.hunger,100);assert.equal(migrated.player.thirst,100);
+    assert.equal(migrated.trains.length,0);assert.equal(migrated.currentCar,undefined);
+    assert.ok(await page.evaluate(()=>SugarCube.State.history.every(m=>m.variables.saveSchemaVersion===SugarCube.setup.saveMigrations.CURRENT)));
+    assert.equal(await page.evaluate(()=>SugarCube.setup.saves.save(1)),true);
+    assert.equal(await page.evaluate(()=>SugarCube.setup.saves.load(1)),true);
+    await passage(page,title);
+  }
+});
+
+test('v0.1.0 browser slots and restored sessions migrate without overwriting the original slot',async t=>{
+  const fixture=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/v010/interior.json')));
+  const page=await openGame(t);
+  const result=await page.evaluate(fixture=>{
+    const {Save,storage,setup:s}=SugarCube;
+    storage.set('saves',{autosave:fixture.save,slots:[fixture.save,...Array(7).fill(null)]});
+    const before=JSON.stringify(Save.slots.get(0));
+    const loaded=s.saves.load(0);
+    return {loaded,unchanged:JSON.stringify(Save.slots.get(0))===before};
+  },fixture);
+  assert.deepEqual(result,{loaded:true,unchanged:true});await passage(page,'TrainInterior');
+  await choose(page,'Start driving','DrivingMode');
+  await page.locator('#passages a').filter({hasText:/^Depart Northbound/}).first().click();await passage(page,'OnTheLine');
+  const turn=await page.evaluate(()=>SugarCube.State.turns);
+  await page.locator('#passages a').filter({hasText:/^Drive 5 km/}).first().click();await passage(page,'OnTheLine');
+  await page.waitForFunction(turn=>SugarCube.State.turns>turn&&SugarCube.Engine.isIdle(),turn);
+  await page.evaluate(session=>SugarCube.session.set('state',session),fixture.session);
+  await page.reload();await passage(page,'TrainInterior');
+  assert.equal(await page.evaluate(()=>SugarCube.State.variables.currentTrain[0].model),'diesel-shunter');
+  assert.equal(await page.evaluate(()=>SugarCube.State.variables.saveSchemaVersion),1);
+  await page.reload();await passage(page,'TrainInterior');
+  assert.equal(await page.evaluate(()=>SugarCube.State.variables.player.hunger),100,'session is not inverted twice');
+  assert.equal(await page.evaluate(()=>SugarCube.setup.saves.load('auto')),true);
+  await passage(page,'TrainInterior');
+});
+
+test('future save schemas fail safely and incompatible sessions offer the untouched recovery data',async t=>{
+  const page=await openGame(t);await begin(page);await board(page);
+  const result=await page.evaluate(()=>{
+    const {Save,State,setup:s}=SugarCube;s.saves.save(0);
+    const save=Save.slots.get(0);save.version=999;
+    const before=JSON.stringify(State.variables);
+    return {loaded:s.saves.importText(JSON.stringify(save)),unchanged:JSON.stringify(State.variables)===before,message:s.saves.message};
+  });
+  assert.equal(result.loaded,false);assert.equal(result.unchanged,true);assert.match(result.message,/newer version/);
+  const original=await page.evaluate(()=>{
+    const {State,session}=SugarCube,state=State.marshalForSave();
+    state.history[state.index].variables.saveSchemaVersion=999;
+    state.delta=State.deltaEncode(state.history);delete state.history;
+    session.set('state',state);return state;
+  });
+  await page.reload();await passage(page,'SaveRecovery');
+  const downloadPromise=page.waitForEvent('download');
+  await page.getByRole('button',{name:'Download original session'}).click();
+  const download=await downloadPromise;
+  const recovered=JSON.parse(fs.readFileSync(await download.path(),'utf8'));
+  assert.deepEqual(recovered.state,original);
+  assert.equal(await page.evaluate(()=>SugarCube.Save.slots.save(1)),false,'recovery cannot overwrite saves');
+});
+
 test('walking junction controls lead back to the parked branch train',async t=>{
   const page=await openGame(t);await begin(page);await board(page);
   await page.evaluate(()=>{

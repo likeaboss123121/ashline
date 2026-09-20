@@ -11,6 +11,8 @@ if (typeof Save !== 'undefined' && Save.onSave) Save.onSave.add(function(save) {
 	if (save.state && save.state.history && save.state.history[save.state.index]) {
 		save.state.history[save.state.index].variables = JSON.parse(JSON.stringify(State.variables));
 	}
+	save.state = setup.saveMigrations.upgradeState(save.state).state;
+	save.version = setup.saveMigrations.CURRENT;
 });
 setup.saves = {
 	SLOT_COUNT: 8,
@@ -108,6 +110,13 @@ setup.saves = {
 	},
 	// Check every restorable moment, not just the active train. Never mutate the live run here.
 	validate: function(data) {
+		if (!data || data.id !== Config.saves.id || !data.state || !Array.isArray(data.state.delta) || !data.state.delta.length)
+			throw new Error('This is not an Ashline save.');
+		var state = Object.assign({}, data.state, { history: State.deltaDecode(data.state.delta) });
+		delete state.delta;
+		setup.saveMigrations.upgradeState(state, data.version);
+	},
+	validateState: function(stateData) {
 		function object(value) { return value && typeof value === 'object' && !Array.isArray(value); }
 		function amount(value) { return typeof value === 'number' && isFinite(value) && value >= 0; }
 		function stacks(value, cargo) {
@@ -122,15 +131,16 @@ setup.saves = {
 					&& stacks(car.cargo, true) && stacks(car.inventory, false);
 			});
 		}
-		if (!object(data) || data.id !== Config.saves.id || !object(data.state)
-			|| !Array.isArray(data.state.delta) || !data.state.delta.length) throw new Error('This is not an Ashline save.');
-		var history = State.deltaDecode(data.state.delta), index = data.state.index;
+		var history = stateData.history, index = stateData.index;
 		if (!Number.isInteger(index) || index < 0 || index >= history.length) throw new Error('Invalid save history.');
 		history.forEach(function(state) {
-			if (!object(state) || typeof state.title !== 'string' || !Story.has(state.title)
+			if (!object(state) || typeof state.title !== 'string' || (typeof Story !== 'undefined' && !Story.has(state.title))
 				|| !object(state.variables)) throw new Error('Invalid save history.');
 			var v = state.variables;
 			if (!object(v.player) || !object(v.stationTracks)) throw new Error('The save is incomplete.');
+			if (['fatigue', 'health', 'immunity', 'sanity', 'hunger', 'thirst'].some(function(key) {
+				return !amount(v.player[key]) || v.player[key] > 100;
+			})) throw new Error('Invalid player data.');
 			if (['TrainInterior', 'DrivingMode', 'OnTheLine', 'OnFoot', 'Sleep'].indexOf(state.title) >= 0
 				&& (!Array.isArray(v.currentTrain) || !v.currentTrain.length)) throw new Error('The train is missing.');
 			if ((v.currentTrain != null && !train(v.currentTrain)) || (v.leavingTrain != null && !train(v.leavingTrain)))
@@ -326,6 +336,10 @@ setup.saves = {
 // The backup reminder, at the top of the screen where it cannot be missed.
 Macro.add('saveReminder', {
 	handler: function() {
+		if (setup.saveMigrations.notice) {
+			var migration = document.createElement('p'); migration.className = 'save-reminder';
+			migration.textContent = setup.saveMigrations.notice; this.output.appendChild(migration);
+		}
 		if (setup.saves.error) {
 			var warning = document.createElement('p'); warning.className = 'save-reminder'; warning.setAttribute('role', 'alert');
 			warning.textContent = setup.saves.message + ' ';

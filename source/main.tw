@@ -21,6 +21,10 @@ Ashline
 </div>
 :: StoryInit
 <<silently>><<initsettings>><<run setup.startNewRun()>><</silently>>
+:: SaveRecovery
+<h2>Save recovery</h2>
+<<saveMigrationRecovery>>
+<p>Keep a copy before using Restart. Existing save slots and exported files have not been changed.</p>
 :: Introduction
 You are a lone train engineer in a world where dangerous zombies called Foamers endlessly expand the railroad. Your goal is to travel from Punta Arenas, Chile, to Cape Town, South Africa, surviving on your train along the way.
 <<link "Begin your journey">><<startNewGame true>><<goto "Railyard">><</link>>
@@ -28,7 +32,7 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 <<if ["Railyard", "TrainInterior", "DrivingMode", "OnTheLine"].indexOf(passage()) === -1>><<saveReminder>><</if>>
 :: StoryMenu
 /% Sidebar menu extension passage: keeps utility links (currently Credits dialog) out of gameplay passages. %/
-<<if passage() !== "Start">>
+<<if ["Start", "SaveRecovery"].indexOf(passage()) === -1>>
 <<link "Inventory">><<run setup.items.showInventoryDialog()>><</link>><br>
 <<link "Condition">><<run setup.showConditionDialog()>><</link>><br>
 <<link "Help">><<run setup.pages.open("Help")>><</link>><br>
@@ -38,7 +42,7 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 :: StoryCaption
 /% Sidebar caption passage: the clock and the player's condition, once the game itself has started. The settings
    screen in front of the game shows neither: there is no journey to time or body to read yet. %/
-<<if $settingsExitPassage and ["Start"].indexOf(passage()) === -1>>
+<<if $settingsExitPassage and ["Start", "SaveRecovery"].indexOf(passage()) === -1>>
 <<set _sidebarTime = setup.time.getCurrentDateParts()>>
 <div class="small-description">
 <<print setup.time.formatDate(_sidebarTime)>>, <<print setup.time.formatClock(_sidebarTime)>>
