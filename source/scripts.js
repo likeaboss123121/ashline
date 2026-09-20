@@ -280,7 +280,7 @@ setup.startNewRun = function() {
 };
 Macro.add('startNewGame', { handler: function() { setup.startNewRun(); } });
 // Release metadata is used both for the title screen and build-integrity popup.
-setup.releaseVersion = '0.2.0';
+setup.releaseVersion = '0.3.0';
 setup.buildCheckDone = false;
 setup.enableBuildChangeAlert = true;
 setup.buildCacheStorageKey = 'ashline.buildMeta';
