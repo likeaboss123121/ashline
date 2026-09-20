@@ -1,5 +1,23 @@
 /* Shared interface bits that are not part of a single view. */
 
+/* SugarCube caps passages at 54em by default. Use the available screen area instead, while retaining a small
+   reading margin on desktop and the full story width on compact screens. */
+#passages {
+	width: 94%;
+	max-width: none;
+	box-sizing: border-box;
+}
+
+/* SugarCube writes pixel offsets directly on dialogs. Percentage insets keep every dialog on-screen and make
+   the inventory, saves and condition views use the same responsive width. */
+#ui-dialog {
+	left: 20% !important;
+	right: 20% !important;
+	width: auto;
+	max-width: none;
+	box-sizing: border-box;
+}
+
 /* The settings screen keeps its technical controls folded away, so a new player sees a Continue link and little
    else, while the seed and the debug tools stay one click from anyone who wants them. */
 .advanced-settings {
@@ -280,7 +298,12 @@
 #menu-story .developer-menu-item > a[aria-expanded="true"] { color: #ff9999; }
 .developer-panel { position: fixed; left: 17.5em; top: 0; bottom: 0; width: min(60vw, calc(100vw - 17.5em)); max-width: 100%; box-sizing: border-box; overflow: auto; padding: 1rem; background: #191b1c; border-right: 1px solid #777; }
 #ui-bar.stowed ~ #developer-tabs .developer-panel { left: 2rem; width: min(60vw, calc(100vw - 2rem)); }
-@media (max-width: 767px) { .developer-panel { left: 0; width: 100%; } }
+@media (max-width: 800px) {
+	#passages { width: 100%; }
+	#ui-dialog { left: 4% !important; right: 4% !important; }
+	#developer-tabs .developer-panel,
+	#ui-bar.stowed ~ #developer-tabs .developer-panel { left: 0; width: 100%; }
+}
 .developer-panel[hidden] { display: none; }
 .developer-panel .developer-close {
 	display: block;

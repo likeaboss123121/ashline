@@ -1,6 +1,7 @@
 /* Rail yard view (source/railyard-view.js). Colours follow the rail yard templates. */
 .railyard-view-wrapper {
 	position: relative;
+	box-sizing: border-box;
 	margin: 0.5em 0 1em;
 	background: #151719;
 	border: 1px solid #2a2f31;

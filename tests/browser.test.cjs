@@ -47,7 +47,7 @@ async function openGame(t, options) {
 }
 
 test('maps are first on desktop and mobile; wide view stays inside the viewport and closes with Escape', async t => {
-  for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
+  for (const viewport of [{ width: 1280, height: 800 }, { width: 768, height: 700 }, { width: 390, height: 844 }]) {
     const page = await openGame(t, { viewport });
     await begin(page);
     async function topMap(selector) {
@@ -57,19 +57,25 @@ test('maps are first on desktop and mobile; wide view stays inside the viewport 
       assert.ok(box.x >= 0 && box.x + box.width <= viewport.width + 1, JSON.stringify(box));
     }
     await topMap('.railyard-view-wrapper');
+    const passageWidth=await page.evaluate(()=>({passage:document.querySelector('#passages').getBoundingClientRect().width,
+      story:document.querySelector('#story').getBoundingClientRect().width}));
+    assert.ok(passageWidth.passage/passageWidth.story>=(viewport.width<=767?.99:.93),JSON.stringify(passageWidth));
     await page.getByRole('button', { name: 'Wide', exact: true }).click();
     await topMap('.railyard-view-wrapper');
     assert.equal(await page.getByRole('button', { name: 'Close wide view' }).getAttribute('aria-pressed'), 'true');
     const wide=await page.evaluate(()=>{
       const wrapper=document.querySelector('.railyard-view-wrapper'),scroll=wrapper.querySelector('.railyard-view-scroll');
       const sidebar=document.querySelector('#ui-bar'),actions=Array.from(document.querySelectorAll('#passages h2')).find(el=>/^Station /.test(el.textContent));
+      const box=wrapper.getBoundingClientRect(),storyBox=document.querySelector('#story').getBoundingClientRect();
       return {position:getComputedStyle(wrapper).position,height:scroll.getBoundingClientRect().height,
+        left:box.left,right:box.right,storyLeft:storyBox.left,storyRight:storyBox.right,
         sidebarVisible:getComputedStyle(sidebar).display!=='none',actionsBelow:actions.getBoundingClientRect().top>=wrapper.getBoundingClientRect().bottom};
     });
     assert.equal(wide.position,'relative');
     assert.ok(wide.height<=viewport.height*.53,JSON.stringify(wide));
     assert.equal(wide.sidebarVisible,true);
     assert.equal(wide.actionsBelow,true);
+    if(viewport.width>700) {assert.ok(Math.abs(wide.left-wide.storyLeft)<2,JSON.stringify(wide));assert.ok(Math.abs(wide.right-wide.storyRight)<2,JSON.stringify(wide));}
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await page.keyboard.press('Escape');
     assert.equal(await page.getByRole('button', { name: 'Wide', exact: true }).getAttribute('aria-pressed'), 'false');
@@ -100,6 +106,8 @@ test('portable food, kitchen preparation and SVG inventory work through ordinary
   await choose(page,'Prepare 3 rations in a kitchen (1.5 kg food) (0:15)','TrainInterior');
   assert.equal(await page.evaluate(()=>SugarCube.setup.food.count('rations')),3);
   await page.getByText('Inventory',{exact:true}).click();
+  const dialog=await page.locator('#ui-dialog').boundingBox();
+  assert.ok(Math.abs(dialog.width/await page.evaluate(()=>innerWidth)-.6)<.02,JSON.stringify(dialog));
   assert.equal(await page.locator('#ui-dialog-body svg.pack-grid').count(),1);
   assert.match(await page.locator('#ui-dialog-body').innerText(),/Rations/);
 });
@@ -214,7 +222,7 @@ test('red developer sidebar menus work on mobile with keyboard and close control
   const debug=page.locator('#menu-story').getByRole('button',{name:'Debug',exact:true});
   await debug.focus();await page.keyboard.press('Enter');
   assert.equal(await page.locator('#developer-Debug').isVisible(),true);
-  const box=await page.locator('#developer-Debug').boundingBox();assert.ok(box.x>=0 && box.x+box.width<=391);
+  const box=await page.locator('#developer-Debug').boundingBox();assert.ok(box.x>=0 && box.x+box.width<=391);assert.ok(box.width>=389,JSON.stringify(box));
   const closeDebug=page.getByRole('button',{name:'Close Debug',exact:true});
   assert.equal(await closeDebug.evaluate(el=>getComputedStyle(el).textTransform),'uppercase');
   assert.ok(await closeDebug.evaluate(el=>el.offsetWidth/el.parentElement.clientWidth>.9));
@@ -223,6 +231,10 @@ test('red developer sidebar menus work on mobile with keyboard and close control
   await page.locator('#menu-story').getByRole('button',{name:'Wiki',exact:true}).click();
   assert.equal(await page.locator('#developer-Wiki').isVisible(),true);
   await page.getByRole('button',{name:'Close Wiki',exact:true}).click();
+  await page.getByText('Inventory',{exact:true}).click();
+  const dialog=await page.locator('#ui-dialog').boundingBox();
+  assert.ok(dialog.x>=0&&dialog.x+dialog.width<=390,JSON.stringify(dialog));
+  assert.ok(Math.abs(dialog.width/390-.92)<.02,JSON.stringify(dialog));
 });
 
 test('tutorial highlight is below stock, empty cabs and passenger cars are unlit, and map scroll is retained',async t=>{

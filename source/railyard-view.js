@@ -546,12 +546,24 @@ setup.railyardView = {
 		addButton('Fit', 'Fit the whole yard to the page', function() { self.zoomLevel = 'fit'; });
 		var sizeWideView = function() {
 			if (!wrapper.classList.contains('railyard-view-wide')) return;
-			wrapper.style.width = Math.max(240, window.innerWidth - wrapper.getBoundingClientRect().left - 12) + 'px';
+			wrapper.style.removeProperty('width');
+			wrapper.style.removeProperty('margin-left');
+			var current = wrapper.getBoundingClientRect();
+			var story = document.getElementById('story');
+			var storyBox = story ? story.getBoundingClientRect() : current;
+			var compact = window.innerWidth <= 700;
+			var left = compact ? Math.max(0, current.left) : storyBox.left;
+			var right = compact ? window.innerWidth - 12 : storyBox.right;
+			if (Math.abs(left - current.left) > 0.5) wrapper.style.marginLeft = (left - current.left) + 'px';
+			wrapper.style.width = Math.max(240, right - left) + 'px';
 		};
 		var wide = addButton('Wide', 'Expand the yard view while keeping the sidebar and passage controls visible', function() {
 			wrapper.classList.toggle('railyard-view-wide');
 			if (wrapper.classList.contains('railyard-view-wide')) sizeWideView();
-			else wrapper.style.removeProperty('width');
+			else {
+				wrapper.style.removeProperty('width');
+				wrapper.style.removeProperty('margin-left');
+			}
 			wide.setAttribute('aria-pressed', wrapper.classList.contains('railyard-view-wide') ? 'true' : 'false');
 			wide.textContent = wrapper.classList.contains('railyard-view-wide') ? 'Close wide view' : 'Wide';
 		});
