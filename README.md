@@ -1,9 +1,3 @@
-<!--
-MAINTAINER AND AI NOTE: Keep this README limited to a public description of Ashline and instructions for
-building/compiling it. Do not add per-version update commentary, changelogs, internal gameplay rules,
-implementation details, roadmaps, development status, or agent notes. Put that material in release notes,
-issues, or the appropriate development documentation instead.
--->
 # Ashline
 
 Ashline is a text-based survival game about circumnavigating the globe by train during a zombie apocalypse. You play a lone train engineer in a world where dangerous zombies called Foamers keep expanding the railroad without end. Explore rail yards, take command of diesel and steam locomotives, and build a working consist from the rolling stock you find along the line.
