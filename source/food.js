@@ -57,16 +57,18 @@ setup.food = {
 		return true;
 	},
 	craftPlan: function() {
+		var campfire = setup.campfire && setup.campfire.isHere();
+		var kitchen = this.accessibleTrain().some(function(c) { return c.type === 'kitchen car' || c.type === 'private car'; });
+		if (State.variables.onFoot && !campfire && !kitchen) return null;
 		var kit = JSON.parse(JSON.stringify(setup.items.getPlayerKit()));
 		var removed = this.remove(kit, 'rawFood', this.RECIPE_PORTIONS);
 		var needed = this.RECIPE_PORTIONS - removed.count;
 		var car = needed ? this.source('food', needed * this.portionLitres()) : null;
 		if (needed && !car) return null;
-		var kitchen = this.accessibleTrain().some(function(c) { return c.type === 'kitchen car'; });
 		var count = kitchen ? this.KITCHEN_YIELD : this.BASIC_YIELD;
 		var grade = (removed.quality + needed * (car ? setup.fuel.getGrade(car, 'food') : 0)) / this.RECIPE_PORTIONS;
 		this.add(kit, 'rations', count, grade);
-		return this.fits(kit) ? { kit: kit, car: car, litres: needed * this.portionLitres(), count: count, kitchen: kitchen } : null;
+		return this.fits(kit) ? { kit: kit, car: car, litres: needed * this.portionLitres(), count: count, kitchen: kitchen, campfire: campfire } : null;
 	},
 	craft: function() {
 		var p = this.craftPlan();
@@ -111,7 +113,7 @@ Macro.add('foodControls', {
 		}
 		if (food.takePlan()) out += link('Pack raw food (0.5 kg)', 'take', 1);
 		if (food.count('rawFood') || food.source('food', food.portionLitres())) out += link('Eat raw food', 'eatRaw', 5, 'hunger:+1');
-		if (craft) out += link('Prepare ' + craft.count + ' rations' + (craft.kitchen ? ' in the kitchen car' : '') + ' (1.5 kg food)', 'craft', 15, 'fatigue:+1');
+		if (craft) out += link('Prepare ' + craft.count + ' rations' + (craft.kitchen ? ' in a kitchen' : craft.campfire ? ' over the campfire' : '') + ' (1.5 kg food)', 'craft', 15, 'fatigue:+1');
 		if (food.waterPlan()) out += link('Pack 2 L of drinking water', 'takeWater', 1);
 		new Wikifier(this.output, out);
 	}

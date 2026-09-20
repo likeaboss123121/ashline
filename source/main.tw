@@ -36,7 +36,6 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 <<link "Inventory">><<run setup.items.showInventoryDialog()>><</link>><br>
 <<link "Condition">><<run setup.showConditionDialog()>><</link>><br>
 <<link "Help">><<run setup.pages.open("Help")>><</link>><br>
-<<link "Journal">><<run setup.pages.open("Journal")>><</link>><br>
 <</if>>
 <<link "Options">><<run setup.showOptionsDialog()>><</link>><br>
 <<link "Credits">><<run setup.showCreditsDialog()>><</link>>
@@ -67,7 +66,7 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
   <<set $currentTrain = null>>
 <</if>>
 <<if $debugMode>><<run (function () { if (typeof console !== 'undefined' && typeof console.log === 'function') { console.log('[Ashline Debug] Station ' + State.variables.currentStation + ' railyard tracks:', State.variables.stationTracks[State.variables.currentStation]); } })()>><</if>>
-<</silently>><<railyardView>><<saveReminder>><<buildIntegrityNotice>><<collapseNotice>>
+<</silently>><<railyardView>><<saveReminder>><<buildIntegrityNotice>>
 You step into the railyard. Several trains are parked here, each with its own mix of cars and cargo.
 <<tutorialHint>>
 <<railyardButtons>>
@@ -80,7 +79,7 @@ You step into the railyard. Several trains are parked here, each with its own mi
 	<<set $currentCarIndex = setup.railyard.getBoardingCarIndex($currentTrain)>>
 <</if>>
 <<set _currentCar to $currentTrain[$currentCarIndex]>>
-<<if !$journey>><<initDrivingModeState>><</if>><</silently>><<consistView>><<saveReminder>><<buildIntegrityNotice>><<collapseNotice>>
+<<if !$journey>><<initDrivingModeState>><</if>><</silently>><<consistView>><<saveReminder>><<buildIntegrityNotice>>
 <p>You are <<print setup.railyard.getCarLocationText(_currentCar)>> of your consist. Car <<print $currentCarIndex + 1>> of <<print $currentTrain.length>>.</p>
 <div class="train-primary-controls">
 <<if _currentCar.tractiveCapacity > 0 && !_currentCar.broken>>
@@ -122,13 +121,13 @@ You step into the railyard. Several trains are parked here, each with its own mi
 :: OnTheLine
 <<silently>>/% Travelling between stations: the consist stands on one 5 km world tile at a time, and every move is one tile. %/
 <<if !$journey>><<goto "DrivingMode">><</if>>
-<</silently>><<drivingView>><<saveReminder>><<buildIntegrityNotice>><<collapseNotice>>
+<</silently>><<drivingView>><<saveReminder>><<buildIntegrityNotice>>
 <<lineStatus>>
 <<lineControls>>
 :: DrivingMode
 <<silently>>/% Active driving/shunting passage: composes merge, travel, and decoupling controls for the current consist and station context. %/
 <<initDrivingModeState>>
-<</silently>><<railyardView>><<saveReminder>><<buildIntegrityNotice>><<collapseNotice>>
+<</silently>><<railyardView>><<saveReminder>><<buildIntegrityNotice>>
 <p>You are driving your consist. Current station: <<print $currentStation>>.</p>
 <p><<link "Stop driving">><<goto "TrainInterior">><</link>></p>
 <<tutorialHint>>
@@ -138,37 +137,34 @@ You step into the railyard. Several trains are parked here, each with its own mi
 <<drivingMergeButtons>>
 :: Sleep
 /% The sleep screen: how long to lie down for. Sleeping needs a bedroll somewhere in the consist. %/
-<<collapseNotice>>
 <<if !setup.condition.hasBedroll($currentTrain)>>
-You have no bedroll aboard to sleep in.
-<<link "Back">><<goto "TrainInterior">><</link>>
+<p>You have nowhere suitable to sleep here.</p>
+<<link "Back">><<run Engine.play($sleepReturn || "TrainInterior")>><</link>>
 <<else>>
-<p>You lay the bedroll out<<if !$onFoot>> in the cab<</if>>.</p>
-<p class="small-description">Fatigue: <<print setup.stats.getValue("fatigue")>>/100. Rest is worth less while you are hungry, thirsty or unwell: this bed is worth <<print Math.round(setup.condition.getRestEfficiency() * 100)>>% of a good night's sleep.</p>
+<p>You settle down in the <<print setup.condition.getSleepComfort().label>>.</p>
+<p class="small-description">Fatigue: <<print setup.stats.getValue("fatigue")>>/100. Hunger, thirst, illness and shelter make this rest <<print Math.round(setup.condition.getRestEfficiency() * 100)>>% effective.</p>
 <<sleepChoices>>
 <<link "Get up again">><<run Engine.play($sleepReturn || "TrainInterior")>><</link>>
 <</if>>
 :: OnFoot
 /% Out of the train, on the ballast: walking the line, felling trees, and climbing back aboard. %/
-<<collapseNotice>>
 <<onFootStatus>>
 <<onFootControls>>
 <<conditionControls>>
+<<campfireControls>>
 <<set _needsFuel = !setup.railyard.isTrainDriveCapable($currentTrain)>>
 <<uiSection "food" "Food preparation">><<foodControls>><</uiSection>>
 <<uiSection "inventory" "Inventory and equipment">><<playerPack>><</uiSection>>
 <<uiSection "supplies" "Station supplies" _needsFuel>><<recoveryControls>><</uiSection>>
 :: Help
 <h2>Help</h2>
-<details open><summary>Getting started</summary><p>TEMP HELP - movement, map controls, and the tutorial.</p></details>
-<details><summary>Shunting</summary><p>TEMP HELP - front/rear coupling, stubs, track capacity, and setting out cars.</p></details>
-<details><summary>Fuel</summary><p>TEMP HELP - diesel quality, steam preparation, refuelling, and stranded-train recovery.</p></details>
-<details><summary>Survival and inventory</summary><p>TEMP HELP - carrying limits, raw food, rations, kitchen cars, drinking, and sleep.</p></details>
-<details><summary>Saves</summary><p>TEMP HELP - browser slots, sleep autosave, file backups, and loading.</p></details>
+<details open><summary>Getting Started</summary><p>This is Ashline. The goal of this game is to drive a train around the earth. You can enter cars in the railyard by clicking on them. From there, you can begin driving if you're in a locomotive, and navigate through the railyard and attach to other cars by clicking on them.</p></details>
+<details><summary>Shunting</summary><p>Shunting is the process of moving railcars around in a railyard. You can couple to the front or rear of a railcar. As well, you can push and pull the entire consist. If a railyard's layout is challenging, remember that you can decouple cars from the consist after pushing it to re-order it. Tracks cannot fit more railcars than the length of the track. Sometimes stub tracks are in a railyard that can only be accessed by a single connecting track.</p></details>
+<details><summary>Fuel</summary><p>Diesel is required to power a Diesel-Electric Locomotive, while coal and water is required to power a Steam Locomotive. In the wilderness, varying qualities of water and fuel can be found, that can adversely affect railcars in varying ways. Mixing two fuels of varying quality will average their qualities out, meaning you can degrade high quality fuel by mixing in low quality fuel. You can usually find fuel at railyards, or inside abandoned tanker cars or gondolas. In order to refuel diesel locomotives, you have to pump it from a tanker car or other diesel locomotive in your consist, or from the station. In order to refuel steam locomotives, you need to shovel coal from a gondola or other steam locomotive. Then, you need to pump water in from railyards or at rivers. You can also find coal and water at railyards. In an emergency, you can chop trees in a forest to fuel a steam locomotive, but wood is heavier and makes less energy than coal.</p></details>
+<details><summary>Survival and Inventory</summary><p>In a situation with complete isolation, survival is a difficult, arduous journey. You have six stats you have to manage. Fatigue is your body's resistance to putting in more work. Be sure to get a good night's sleep to increase the amount of work you can do. Health is your physical state. If you have injuries, you have physical harm done to you. Immunity is your resistance to illness. If you have low immunity, you're more likely to get sick. Sanity is how well you are resisting total isolation in a zombie apocalypse. Feelings of isolation worsen at nighttime. Finally, hunger and thirst are self evident, but in case you're not a human, you can eat food and drink water to survive. You can find food and water in abandoned railcars, or draw water from rivers. If you have raw food, you can eat it raw, or cook it in a kitchen.</p></details>
+<details><summary>Saves</summary><p>Your saves are kept in your browser cache. To avoid loss of save data, remember to take regular backups to your device. By default, your game will autosave whenever you sleep. This behaviour can be disabled in settings.</p></details>
 <<link "Back">><<run Engine.play($utilityReturn || "Railyard")>><</link>>
-:: Journal
-<h2>Journal</h2>
-<p>TEMP JOURNAL - introduction to the journey record.</p>
-<<journeyRecord>>
-<p>TEMP JOURNAL - space for station notes and future journal entries.</p>
-<<link "Back">><<run Engine.play($utilityReturn || "Railyard")>><</link>>
+:: Blackout
+<p>The exertion is too much. You black out.</p>
+<p>You wake up on the ground, feeling groggy. <<print setup.time.formatDuration($pendingCollapse ? $pendingCollapse.minutes : 0)>> has passed.</p>
+<<link "Continue">><<set $pendingCollapse = null>><<run Engine.play($blackoutReturn || ($onFoot ? "OnFoot" : "TrainInterior"))>><</link>>

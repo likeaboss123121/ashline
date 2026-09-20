@@ -7,14 +7,14 @@
 }
 
 .railyard-view-wrapper.railyard-view-wide {
-	position: fixed;
-	inset: 8px;
-	margin: 0;
-	z-index: 100;
+	position: relative;
+	max-width: calc(100vw - 12px);
+	z-index: 1;
 }
 .railyard-view-wide .railyard-view-scroll {
-	height: calc(100dvh - 54px);
-	max-height: none;
+	height: min(32rem, 52dvh);
+	max-height: 52dvh;
+	box-sizing: border-box;
 }
 .railyard-view-wide:focus-within {
 	outline: 1px solid #8d938f;

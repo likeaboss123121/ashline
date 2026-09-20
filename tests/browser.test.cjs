@@ -60,6 +60,16 @@ test('maps are first on desktop and mobile; wide view stays inside the viewport 
     await page.getByRole('button', { name: 'Wide', exact: true }).click();
     await topMap('.railyard-view-wrapper');
     assert.equal(await page.getByRole('button', { name: 'Close wide view' }).getAttribute('aria-pressed'), 'true');
+    const wide=await page.evaluate(()=>{
+      const wrapper=document.querySelector('.railyard-view-wrapper'),scroll=wrapper.querySelector('.railyard-view-scroll');
+      const sidebar=document.querySelector('#ui-bar'),actions=Array.from(document.querySelectorAll('#passages h2')).find(el=>/^Station /.test(el.textContent));
+      return {position:getComputedStyle(wrapper).position,height:scroll.getBoundingClientRect().height,
+        sidebarVisible:getComputedStyle(sidebar).display!=='none',actionsBelow:actions.getBoundingClientRect().top>=wrapper.getBoundingClientRect().bottom};
+    });
+    assert.equal(wide.position,'relative');
+    assert.ok(wide.height<=viewport.height*.53,JSON.stringify(wide));
+    assert.equal(wide.sidebarVisible,true);
+    assert.equal(wide.actionsBelow,true);
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await page.keyboard.press('Escape');
     assert.equal(await page.getByRole('button', { name: 'Wide', exact: true }).getAttribute('aria-pressed'), 'false');
@@ -87,7 +97,7 @@ test('portable food, kitchen preparation and SVG inventory work through ordinary
   await choose(page,'Pack raw food (0.5 kg) (0:01)','TrainInterior');
   await choose(page,'Eat raw food (0:05)','TrainInterior');
   assert.ok(await page.evaluate(()=>SugarCube.State.variables.player.hunger>10));
-  await choose(page,'Prepare 3 rations in the kitchen car (1.5 kg food) (0:15)','TrainInterior');
+  await choose(page,'Prepare 3 rations in a kitchen (1.5 kg food) (0:15)','TrainInterior');
   assert.equal(await page.evaluate(()=>SugarCube.setup.food.count('rations')),3);
   await page.getByText('Inventory',{exact:true}).click();
   assert.equal(await page.locator('#ui-dialog-body svg.pack-grid').count(),1);
@@ -120,10 +130,19 @@ test('empty locomotive menus expose on-foot recovery and return carried fuel to 
     const v=SugarCube.State.variables;v.journey={legIndex:1,tileIndex:1,forward:true};
     v.currentTrain[0].cargo=[];SugarCube.Engine.play('OnTheLine');
   });
+  assert.equal(await page.locator('#passages').getByText(/Climb down from the train/).count(),0,'driving mode only offers the train interior');
+  await choose(page,'Enter the train','TrainInterior');
+  await openSection(page,'inventory');
+  await choose(page,'Take the 20 l jerrycan','TrainInterior');
   await choose(page,'Climb down from the train (0:02)','OnFoot');
+  assert.equal(await page.locator('.recovery-controls a').filter({hasText:/diesel/}).count(),0,'a distant depot is not an automated action');
+  const toStation=await page.evaluate(()=>`Walk 5 km ${SugarCube.setup.onfoot.getWalk(-1).heading} (1:00)`);
+  await choose(page,toStation,'OnFoot');
   await page.locator('.recovery-controls a').filter({hasText:/diesel/}).first().click();
   await passage(page,'OnFoot');
-  assert.ok(await page.evaluate(()=>SugarCube.setup.items.getPlayerCargo().some(s=>s.type==='diesel'&&s.amount>0)));
+  assert.ok(await page.evaluate(()=>SugarCube.setup.items.getPlayerCargo().some(s=>s.type==='diesel'&&s.amount>0&&s.amount<=20)));
+  const toTrain=await page.evaluate(()=>`Walk 5 km ${SugarCube.setup.onfoot.getWalk(1).heading} (1:00)`);
+  await choose(page,toTrain,'OnFoot');
   await page.getByText('Load carried diesel into the locomotive',{exact:true}).click();
   await passage(page,'OnFoot');
   await choose(page,'Climb back aboard (0:02)','OnTheLine');
@@ -159,7 +178,7 @@ test('save confirmations, dedicated autosave, real export/import and invalid fil
   assert.ok(await page.evaluate(()=>!!SugarCube.Save.slots.get(0)));
 });
 
-test('help and journal are placeholders, debug tabs are separate, and same-page scrolling respects its option',async t=>{
+test('finished help, deferred journal, separate debug tabs, and same-page scrolling respect the interface',async t=>{
   const page=await openGame(t,{viewport:{width:1000,height:650}});await enableDebug(page);await begin(page);await board(page);
   assert.equal(await page.locator('#passages .debug-container').count(),0);
   assert.deepEqual((await page.locator('#menu-story > li').allTextContents()).slice(-3),['Credits','Debug','Wiki']);
@@ -169,17 +188,14 @@ test('help and journal are placeholders, debug tabs are separate, and same-page 
   assert.equal(await page.locator('#developer-Debug').isVisible(),false);
   await page.keyboard.press('Escape');
   await page.getByText('Help',{exact:true}).click();await passage(page,'Help');
-  assert.match(await page.locator('#passages').innerText(),/TEMP HELP/);
+  const help=await page.locator('#passages').innerText();
+  assert.match(help,/The goal of this game is to drive a train around the earth/);
+  assert.doesNotMatch(help,/TEMP HELP/);
+  await page.locator('#passages details').nth(1).locator('summary').click();
+  assert.match(await page.locator('#passages').innerText(),/Shunting is the process of moving railcars around in a railyard/);
   await choose(page,'Back','TrainInterior');
-  await page.getByText('Journal',{exact:true}).click();await passage(page,'Journal');
-  assert.match(await page.locator('#passages').innerText(),/TEMP JOURNAL/);
-  await page.evaluate(()=>{
-    const v=SugarCube.State.variables;delete v.journal;
-    v.gameTimeTimestampMs=SugarCube.setup.time.startTimestampMs+3*86400000;
-    SugarCube.Engine.play('Journal');
-  });
-  assert.equal(await page.locator('#passages dd').first().innerText(),'3','old runs retain their elapsed survival days');
-  await choose(page,'Back','TrainInterior');
+  assert.equal(await page.getByText('Journal',{exact:true}).count(),0);
+  assert.equal(await page.evaluate(()=>SugarCube.State.variables.journal),undefined);
   const before=await page.evaluate(()=>{window.scrollTo(0,300);return scrollY;});
   await page.evaluate(()=>SugarCube.Engine.play('TrainInterior'));
   await page.waitForTimeout(100);
@@ -435,7 +451,7 @@ test('the first locomotive carries a kit, and pumps diesel from a coupled tanker
   await board(page);
   await openSection(page,'inventory');
   const text = await page.locator('#passages').innerText();
-  assert.match(text, /Kit \(5\/6 slots\): Toolkit · Axe and bow saw · Hand pump · Sleeping bag · Rations ×3/);
+  assert.match(text, /Kit \(6\/6 slots\): Toolkit · Axe and bow saw · Hand pump · Sleeping bag · Rations ×3 · 20 L jerrycan/);
   assert.match(text, /Diesel: 400.00 L/);
   const before = await page.evaluate(() => SugarCube.setup.time.getCurrentTimestampMs());
   await openSection(page,'refuelling');
@@ -659,15 +675,22 @@ test('the player eats, drinks and sleeps aboard, and collapses if they never do'
   await choose(page, 'Sleep 4 hours (4:00)', 'TrainInterior');
   assert.ok(await page.evaluate(() => SugarCube.State.variables.player.fatigue) <= 15, 'four hours takes the edge off');
 
-  // Working on and on without rest ends with the player face down on the cab floor.
+  // Working on and on without rest opens the dedicated blackout passage without moving the player.
   await page.evaluate(() => { SugarCube.setup.stats.setValue('fatigue', 100); });
   const clock = await page.evaluate(() => SugarCube.setup.time.getCurrentTimestampMs());
-  await choose(page, 'Drink (0:02)', 'TrainInterior');
-  const after = await page.evaluate(() => ({ fatigue: SugarCube.State.variables.player.fatigue }));
+  const beforePlace=await page.evaluate(()=>({onFoot:SugarCube.State.variables.onFoot,car:SugarCube.State.variables.currentCarIndex}));
+  await page.getByText('Drink (0:02)',{exact:true}).click();
+  await passage(page,'Blackout');
+  const after = await page.evaluate(() => ({ fatigue: SugarCube.State.variables.player.fatigue,
+    onFoot:SugarCube.State.variables.onFoot,car:SugarCube.State.variables.currentCarIndex }));
   assert.ok(after.fatigue <= 75, `a collapse gives back a quarter of the bar, got ${after.fatigue}`);
+  assert.deepEqual({onFoot:after.onFoot,car:after.car},beforePlace);
   const hoursLost = await page.evaluate(start => (SugarCube.setup.time.getCurrentTimestampMs() - start) / 3600000, clock);
   assert.ok(hoursLost >= 2 && hoursLost <= 6.1, `two to six hours pass, got ${hoursLost}`);
-  assert.match(await page.locator('#passages').innerText(), /You come round on the cab floor/);
+  const blackout=await page.locator('#passages').innerText();
+  assert.match(blackout,/The exertion is too much\. You black out\./);
+  assert.match(blackout,/You wake up on the ground, feeling groggy\. [0-9:]+ has passed\./);
+  await choose(page,'Continue','TrainInterior');
 });
 
 test('the first station teaches shunting: off the stub, onto the flatcar, and away', async t => {
@@ -834,10 +857,13 @@ test('the player can get down from the train out on the line and walk the track'
   await page.locator('#passages').getByText(/^Depart Northbound toward Station/).first().click();
   await passage(page, 'OnTheLine');
 
+  assert.equal(await page.locator('#passages').getByText(/Climb down from the train/).count(),0);
+  await choose(page,'Enter the train','TrainInterior');
   await choose(page, 'Climb down from the train (0:02)', 'OnFoot');
   let text = await page.locator('#passages').innerText();
   assert.match(text, /on the ballast beside your train/);
   assert.match(text, /Carrying: nothing/);
+  assert.doesNotMatch(text,/Load what you are carrying into the train/);
 
   // Walking is an hour a tile and hard work, against five minutes riding.
   const before = await page.evaluate(() => ({

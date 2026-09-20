@@ -167,7 +167,7 @@ Macro.add('onFootControls', {
 				+ '<<run setup.onfoot.chop()>><<goto "OnFoot">><</timedlink>><br>';
 		}
 		if (onfoot.isBesideTrain()) {
-			if (setup.items.getPlayerCargo().length) {
+			if (setup.items.getPlayerCargo().some(function(stack) { return stack.amount > 0; })) {
 				output += '<<timedlink "Load what you are carrying into the train" 10 "work" "fatigue:+1">>'
 					+ '<<run setup.onfoot.stow()>><<goto "OnFoot">><</timedlink>><br>';
 			}

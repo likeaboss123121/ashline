@@ -272,15 +272,15 @@
 /* The lesson highlights normal actions; it never supplies a second set of movement rules. */
 .tutorial-next-action { border-left: 3px solid #dec38a; padding-left: 0.4em; }
 .railyard-view .tutorial-next-target { stroke: #dec38a; stroke-width: 2px; stroke-dasharray: 4 3; fill: rgba(222, 195, 138, 0.08); }
-.pack-grid { display: block; width: min(100%, 300px); height: auto; font-family: inherit; }
+.pack-grid { display: block; width: 100%; max-width: 18.75rem; height: auto; font-family: inherit; }
 #developer-tabs { position: relative; z-index: 150; }
 #menu-story .developer-menu-item > a { color: #ff6666; }
 #menu-story .developer-menu-item > a:hover,
 #menu-story .developer-menu-item > a:focus,
 #menu-story .developer-menu-item > a[aria-expanded="true"] { color: #ff9999; }
-.developer-panel { position: fixed; left: 17.5em; top: 0; bottom: 0; width: min(640px, calc(100vw - 17.5em)); box-sizing: border-box; overflow: auto; padding: 1rem; background: #191b1c; border-right: 1px solid #777; }
-#ui-bar.stowed ~ #developer-tabs .developer-panel { left: 2rem; width: min(640px, calc(100vw - 2rem)); }
-@media (max-width: 767px) { .developer-panel { left: 0; width: 100vw; } }
+.developer-panel { position: fixed; left: 17.5em; top: 0; bottom: 0; width: min(60vw, calc(100vw - 17.5em)); max-width: 100%; box-sizing: border-box; overflow: auto; padding: 1rem; background: #191b1c; border-right: 1px solid #777; }
+#ui-bar.stowed ~ #developer-tabs .developer-panel { left: 2rem; width: min(60vw, calc(100vw - 2rem)); }
+@media (max-width: 767px) { .developer-panel { left: 0; width: 100%; } }
 .developer-panel[hidden] { display: none; }
 .developer-panel .developer-close {
 	display: block;
@@ -307,3 +307,33 @@
 .consist-car-target { fill: transparent; cursor: pointer; }
 .consist-car-target:hover, .consist-car-target:focus { stroke: #dec38a; stroke-width: 1; outline: none; }
 .consist-details { margin-top: 0.4em; }
+
+/* Generated menus and data must shrink with the passage instead of pushing the page sideways. */
+.advanced-settings,
+.save-reminder,
+.saves-backup,
+.saves-slot,
+.debug-container,
+.debug-section,
+.loco-panel,
+.train-primary-controls,
+.recovery-controls,
+#ui-dialog-body,
+#ui-dialog-body form,
+#ui-dialog-body table {
+	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+.debug-body,
+#ui-dialog-body { overflow-wrap: anywhere; }
+.debug-body table,
+#ui-dialog-body table { display: block; overflow-x: auto; }
+.debug-body input,
+.debug-body select,
+.debug-body textarea,
+#ui-dialog-body input,
+#ui-dialog-body select,
+#ui-dialog-body textarea { max-width: 100%; box-sizing: border-box; }
+.saves-detail { min-width: min(12em, 100%); }
+.saves-actions { flex-wrap: wrap; max-width: 100%; }

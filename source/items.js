@@ -8,6 +8,7 @@ setup.items = {
 	CATALOGUE: {
 		toolkit: { name: 'Toolkit', stack: 1, width: 2, height: 2, weightKg: 5, detail: 'Spanners, a hammer and a coal shovel.' },
 		rawFood: { name: 'Raw food', stack: 6, width: 1, height: 1, weightKg: 0.5, detail: 'Food taken from bulk cargo. Eat raw or prepare rations.' },
+		jerrycan: { name: '20 L jerrycan', stack: 1, width: 2, height: 3, weightKg: 2.5, detail: 'Carries up to 20 litres of diesel.' },
 		axe: { name: 'Axe and bow saw', stack: 1, width: 2, height: 2, weightKg: 3, detail: 'For felling trees and cutting timber into firewood.' },
 		pump: { name: 'Hand pump', stack: 1, width: 3, height: 2, weightKg: 7, detail: 'Draws diesel or water up a hose.' },
 		sleepingBag: { name: 'Sleeping bag', stack: 1, width: 2, height: 2, weightKg: 2, detail: 'Somewhere warm to sleep aboard.' },
@@ -19,7 +20,8 @@ setup.items = {
 		{ item: 'axe', count: 1 },
 		{ item: 'pump', count: 1 },
 		{ item: 'sleepingBag', count: 1 },
-		{ item: 'rations', count: 3 }
+		{ item: 'rations', count: 3 },
+		{ item: 'jerrycan', count: 1 }
 	],
 	createStartingKit: function() {
 		return this.STARTING_KIT.map(function(slot) {
@@ -229,6 +231,9 @@ setup.items.takeFromCar = function(car, item) {
 	return true;
 };
 setup.items.giveToCar = function(car, item) {
+	if (item === 'jerrycan' && this.getPlayerCargo().some(function(stack) { return stack.type === 'diesel' && stack.amount > 0; })) {
+		return false;
+	}
 	var kit = this.getPlayerKit();
 	var slot = kit.filter(function(candidate) { return candidate.item === item; })[0];
 	if (!slot || !this.add(car, item, 1, slot.grade)) {
@@ -314,6 +319,9 @@ setup.items.describePlayerLoad = function() {
 	return carried.length ? carried.join(', ') : 'nothing';
 };
 setup.items.confirmDiscard = function(item, cargo) {
+	if (!cargo && item === 'jerrycan' && this.getPlayerCargo().some(function(stack) { return stack.type === 'diesel' && stack.amount > 0; })) {
+		return false;
+	}
 	var name = cargo ? item : (this.CATALOGUE[item] || { name: item }).name;
 	Dialog.setup('Discard');
 	var box = document.createElement('div'), message = document.createElement('p');
@@ -404,6 +412,7 @@ Macro.add('playerPack', {
 					+ '<<run Engine.play(State.passage)>><</link>>');
 			});
 			setup.items.getPlayerKit().forEach(function(slot) {
+				if (slot.item === 'jerrycan' && setup.items.getPlayerCargo().some(function(stack) { return stack.type === 'diesel' && stack.amount > 0; })) return;
 				var kit = setup.items.getKit(car), definition = setup.items.CATALOGUE[slot.item];
 				if (kit.length >= setup.items.SLOTS && !kit.some(function(s) { return s.item === slot.item && s.count < definition.stack; })) return;
 				moves.push('<<link "Stow the ' + (setup.items.CATALOGUE[slot.item] || { name: slot.item }).name.toLowerCase() + '">>'
@@ -420,7 +429,10 @@ Macro.add('playerPack', {
 		if (carried.length) {
 			var details = document.createElement('details'), summary = document.createElement('summary');
 			summary.textContent = 'Discard carried supplies'; details.appendChild(summary);
-			carried.forEach(function(s) { details.appendChild(setup.saves.button('Discard ' + s.label, 'Free carrying capacity', function() { setup.items.confirmDiscard(s.id, s.cargo); })); });
+			carried.forEach(function(s) {
+				if (s.id === 'jerrycan' && !s.cargo && setup.items.getPlayerCargo().some(function(stack) { return stack.type === 'diesel' && stack.amount > 0; })) return;
+				details.appendChild(setup.saves.button('Discard ' + s.label, 'Free carrying capacity', function() { setup.items.confirmDiscard(s.id, s.cargo); }));
+			});
 			this.output.appendChild(details);
 		}
 	}

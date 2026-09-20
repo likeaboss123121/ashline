@@ -272,7 +272,6 @@ setup.startNewRun = function() {
 	if (setup.railyardView) setup.railyardView.zoomLevel = 'fit';
 	if (setup.bugReport) setup.bugReport.recent = [];
 	setup.debugReturnToPanel = false;
-	if (setup.journal) setup.journal.get();
 };
 Macro.add('startNewGame', { handler: function() { setup.startNewRun(); } });
 // Release metadata is used both for the title screen and build-integrity popup.
@@ -594,6 +593,8 @@ State.variables.cargoTypes = {
 setup.railyard = {
 	locomotiveKeys: ['dieselShunter', 'dieselRoad', 'steamShunter', 'steamPrairie'],
 	carKeys: ['boxcar', 'flatcar', 'tanker', 'gondola', 'passengerCoach', 'sleeperCoach', 'observationCar', 'kitchenCar', 'privateCar'],
+	carWeights: { boxcar: 5, flatcar: 5, tanker: 5, gondola: 5, passengerCoach: 5,
+		sleeperCoach: 5, observationCar: 5, kitchenCar: 5, privateCar: 1 },
 	DERELICT_CHANCE: 0.2, // of stations with a dead car standing in the way of something
 	cargoPresets: [
 		// grade: the range a found load is drawn from. Years of storage mean most diesel is well past its best.
@@ -1048,6 +1049,17 @@ setup.railyard = {
 			return array[this.randomInt(rng, 0, array.length - 1)];
 		}
 	},
+	// Private cars are deliberately uncommon; every other ordinary car has five times its weight.
+	randomCarKey: function(rng) {
+		var self = this;
+		var total = this.carKeys.reduce(function(sum, key) { return sum + (self.carWeights[key] || 1); }, 0);
+		var pick = rng() * total;
+		for (var i = 0; i < this.carKeys.length; i++) {
+			pick -= this.carWeights[this.carKeys[i]] || 1;
+			if (pick < 0) return this.carKeys[i];
+		}
+		return this.carKeys[this.carKeys.length - 1];
+	},
 	// Generates initial cargo for a newly spawned car while respecting accepted cargo constraints.
 	generateCargoForCar: function(carKey, rng) {
 		if (this.locomotiveKeys.indexOf(carKey) !== -1) {
@@ -1099,7 +1111,7 @@ setup.railyard = {
 		var connections = this.getTrackConnections(selected, this.getLeads(tracks));
 		// Keep the reserved locomotive exposed at the connected end of a siding.
 		selected.trains.splice(connections.entry ? selected.trains.length : 0, 0,
-			[this.createDerelictCar(this.randomChoice(rng, this.carKeys), rng)]);
+			[this.createDerelictCar(this.randomCarKey(rng), rng)]);
 		return trackIndex;
 	},
 	// A derelict: a car that carries nothing, takes nothing and is worth nothing.
@@ -1586,7 +1598,6 @@ setup.railyard = {
 			variables.travellingForward = !!towardExit;
 		}
 		variables.currentStation = destination;
-		if (setup.journal) setup.journal.visit(destination);
 		variables.drivingTrackIndex = arrivalTrackIndex;
 		variables.enteredTrainIndex = this.getDefaultEnteredTrainIndex(tracks, variables.drivingTrackIndex);
 		variables.journey = null;
@@ -1638,7 +1649,6 @@ setup.railyard = {
 		}
 		var journey = setup.worldmap.getJourney();
 		journey.branch = branchId;
-		if (setup.journal) setup.journal.travel();
 		journey.tileIndex = 0;
 		State.variables.journey = journey;
 		return true;
@@ -1654,7 +1664,6 @@ setup.railyard = {
 			journey.branch = null;
 		}
 		journey.tileIndex = step.toIndex;
-		if (setup.journal) setup.journal.travel();
 		State.variables.journey = journey;
 		if (step.arrivesAt) {
 			// Arriving forward means coming in on the next station's entry lead, and backing in means its exit lead.
@@ -2046,7 +2055,7 @@ setup.railyard = {
 		var maxCars = this.randomInt(rng, 1, 3);
 		var carAttempts = 0;
 		while (carAttempts < maxCars) {
-			var carKey = this.randomChoice(rng, this.carKeys);
+			var carKey = this.randomCarKey(rng);
 			var car = this.cloneCar(State.variables.defaultTrains[carKey]);
 			car.cargo = this.generateCargoForCar(carKey, rng);
 			if (trainLength + car.length > remainingLength) {
@@ -2108,7 +2117,7 @@ setup.railyard = {
 					}
 				}
 				for (var c = train.length; c < carTarget; c++) {
-					var carKey = this.randomChoice(rng, this.carKeys);
+					var carKey = this.randomCarKey(rng);
 					var car = this.cloneCar(State.variables.defaultTrains[carKey]);
 					car.cargo = this.generateCargoForCar(carKey, rng);
 					if (trainLength + car.length > remaining) {
@@ -2475,7 +2484,6 @@ Macro.add('lineControls', {
 				+ 'Enter the train and work the firebox.</em></p>';
 			output += escapeLink;
 			output += '<<link "Enter the train">><<goto "TrainInterior">><</link>><br>';
-			output += '<<timedlink "Climb down from the train" 2 "generic">><<run setup.onfoot.climbDown()>><<goto "OnFoot">><</timedlink>><br>';
 			new Wikifier(this.output, output);
 			return;
 		}
@@ -2516,9 +2524,6 @@ Macro.add('lineControls', {
 				+ choice.terrain + '.</span><br>';
 		});
 		output += escapeLink;
-		// There is a world out there, and a pair of boots. Climbing down is slow, which is the point of it.
-		output += '<<timedlink "Climb down from the train" 2 "generic">><<run setup.onfoot.climbDown()>>'
-			+ '<<goto "OnFoot">><</timedlink>><br>';
 		output += '<<link "Enter the train">><<goto "TrainInterior">><</link>><br>';
 		new Wikifier(this.output, output);
 	}

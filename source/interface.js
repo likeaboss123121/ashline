@@ -2,7 +2,7 @@
 if (typeof Config !== 'undefined') Config.passages.nobr = true;
 setup.pages = {
 	open: function(name) {
-		if (State.passage !== 'Help' && State.passage !== 'Journal') State.variables.utilityReturn = State.passage;
+		if (State.passage !== 'Help') State.variables.utilityReturn = State.passage;
 		Engine.play(name);
 	},
 	disclosures: function(root) {

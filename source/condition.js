@@ -79,7 +79,15 @@ setup.condition = {
 	getRestEfficiency: function() {
 		var loss = 0.4 * (1 - setup.stats.getValue('immunity') / 100)
 			+ 0.3 * this.getNeedPressure('hunger') + 0.3 * this.getNeedPressure('thirst');
-		return Math.max(0.25, 1 - loss);
+		return Math.max(0.25, 1 - loss) * this.getSleepComfort().multiplier;
+	},
+	getSleepComfort: function() {
+		var v = State.variables, car = !v.onFoot && Array.isArray(v.currentTrain) ? v.currentTrain[v.currentCarIndex] : null;
+		if (car && !car.broken && car.type === 'private car') return { multiplier: 1.5, label: 'private-car bedroom' };
+		if ((car && !car.broken && car.type === 'sleeper coach') || (v.onFoot && setup.campfire && setup.campfire.isHere()))
+			return { multiplier: 1.25, label: car && car.type === 'sleeper coach' ? 'sleeper berth' : 'campfire' };
+		if (car && !car.broken && car.type === 'passenger coach') return { multiplier: 1, label: 'passenger coach' };
+		return { multiplier: 1, label: v.onFoot ? 'bedroll on the ground' : 'bedroll' };
 	},
 	isNight: function() {
 		var hour = new Date(setup.time.getCurrentTimestampMs()).getUTCHours();
@@ -141,10 +149,13 @@ setup.condition = {
 		// and no more, which is what makes lying down in a bedroll worth the time it costs.
 		setup.stats.setValue('fatigue', Math.max(0, before - this.FAINT_FATIGUE_RECOVERED));
 		State.variables.pendingCollapse = {
-			minutes: minutes,
-			text: 'You come round on the cab floor with no memory of falling. ' + setup.time.formatDuration(minutes)
-				+ ' has gone, and you feel no better for it.'
+			minutes: minutes
 		};
+		if (typeof setTimeout === 'function' && typeof Engine !== 'undefined') setTimeout(function() {
+			if (!State.variables.pendingCollapse || State.passage === 'Blackout') return;
+			State.variables.blackoutReturn = State.passage;
+			Engine.play('Blackout');
+		}, 0);
 		return State.variables.pendingCollapse;
 	},
 	// --- what the player can do ------------------------------------------------------------------------------
@@ -199,7 +210,9 @@ setup.condition = {
 		return true;
 	},
 	hasBedroll: function(train) {
-		return setup.items.playerHas('sleepingBag') || setup.items.consistHas(setup.food.accessibleTrain(train), 'sleepingBag');
+		var v = State.variables, car = !v.onFoot && Array.isArray(train) ? train[v.currentCarIndex] : null;
+		return !!(car && !car.broken && ['passenger coach', 'sleeper coach', 'private car'].indexOf(car.type) >= 0)
+			|| setup.items.playerHas('sleepingBag') || setup.items.consistHas(setup.food.accessibleTrain(train), 'sleepingBag');
 	},
 	// How long until the player would wake up rested, capped so "until rested" can never run for ever.
 	getMinutesUntilRested: function() {
@@ -261,16 +274,5 @@ Macro.add('sleepChoices', {
 		output += '<<timedlink "Sleep until rested" ' + untilRested + ' "sleep" "fatigue:-3">>'
 			+ '<<run setup.condition.autosaveAfterSleep()>><<run Engine.play($sleepReturn || "TrainInterior")>><</timedlink>><br>';
 		new Wikifier(this.output, output);
-	}
-});
-// What the player reads after waking from a collapse, shown once wherever they come round.
-Macro.add('collapseNotice', {
-	handler: function() {
-		var collapse = State.variables.pendingCollapse;
-		if (!collapse || !collapse.text) {
-			return;
-		}
-		State.variables.pendingCollapse = null;
-		new Wikifier(this.output, '<p class="collapse-notice">' + collapse.text + '</p>');
 	}
 });

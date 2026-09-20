@@ -623,7 +623,7 @@ test('a locomotive kit has a few slots, stacks what stacks, and the first engine
   const tutorial = setup.railyard.generateStationTracks(1, 'kit')[1].trains[0][0];
   assert.equal(tutorial.model, 'diesel-shunter');
   assert.deepEqual([...tutorial.inventory].map(slot => [slot.item, slot.count]),
-    [['toolkit', 1], ['axe', 1], ['pump', 1], ['sleepingBag', 1], ['rations', 3]]);
+    [['toolkit', 1], ['axe', 1], ['pump', 1], ['sleepingBag', 1], ['rations', 3], ['jerrycan', 1]]);
 
   // Generated locomotives start with nothing, and cars that are not locomotives have no kit at all.
   const loco = setup.railyard.createLocomotiveCar('steamShunter');
@@ -1057,7 +1057,7 @@ test('sleep clears the bar, the small hours cost sanity, and collapsing is not a
   // The faint itself costs eight, of which the hours out cold mend a little back.
   assert.ok(setup.stats.getValue('sanity') < 58 && setup.stats.getValue('sanity') > 50, setup.stats.getValue('sanity'));
   assert.equal(setup.time.getCurrentTimestampMs() - clockBefore, collapse.minutes * 60000);
-  assert.match(State.variables.pendingCollapse.text, /come round/);
+  assert.deepEqual(JSON.parse(JSON.stringify(State.variables.pendingCollapse)), { minutes: collapse.minutes });
 });
 
 test('eating and drinking fill the needs, and their quality decides what they do to immunity', () => {

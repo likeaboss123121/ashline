@@ -28,13 +28,42 @@ test('food preparation validates weight and grid before taking ingredients; carr
   assert.equal(s.food.craft(),false); assert.equal(JSON.stringify(v.player.carried),before);
   assert.equal(v.currentTrain[0].cargo[1].amount,food);
   v.player.carried=[{item:'rawFood',count:3,grade:45}];
-  v.player.carriedCargo=[{type:'water',amount:2,grade:35}];
+  v.player.carriedCargo=[{type:'water',amount:2,grade:35},{type:'firewood',amount:7.5,grade:50}];
   v.journey={legIndex:1,tileIndex:0,forward:true}; v.onFoot={tileIndex:1,branch:null};
+  assert.equal(s.food.craft(),false,'outdoor cooking needs a fire');
+  assert.equal(s.campfire.build(),true);
   assert.equal(s.food.craft(),true);
   v.player.hunger=0; assert.equal(s.condition.eat(v.currentTrain),true); assert.equal(v.player.hunger,34);
   v.player.thirst=0; assert.equal(s.condition.drink(v.currentTrain),true); assert.equal(v.player.thirst,40);
   assert.equal(s.items.getPlayerCargo().length,0);
   assert.equal(s.food.take(),false,'cannot reach train cargo remotely');
+});
+
+test('campfires support wilderness cooking and sleep, while passenger cars provide distinct rest tiers',()=>{
+  const {setup:s,State:{variables:v}}=game([lead(),road(),lead()]);
+  v.journey={legIndex:1,tileIndex:1,forward:true};v.onFoot={tileIndex:1,branch:null};
+  v.currentTrain[0].cargo.push({type:'firewood',amount:20,grade:50});
+  v.player.carried=[{item:'rawFood',count:3,grade:60}];
+  const wood=s.railyard.getCargoAmount(v.currentTrain[0],'firewood');
+  assert.equal(s.campfire.canBuild(),true);assert.equal(s.campfire.build(),true);
+  assert.equal(s.railyard.getCargoAmount(v.currentTrain[0],'firewood'),wood-7.5);
+  assert.equal(s.condition.getSleepComfort().multiplier,1.25);
+  assert.equal(s.food.craftPlan().campfire,true);
+
+  v.onFoot=null;v.journey=null;v.player.carried=[];
+  for(const [key,multiplier] of [['passengerCoach',1],['sleeperCoach',1.25],['privateCar',1.5]]) {
+    v.currentTrain=[s.railyard.cloneCar(v.defaultTrains[key])];v.currentCarIndex=0;
+    assert.equal(s.condition.hasBedroll(v.currentTrain),true,key);
+    assert.equal(s.condition.getSleepComfort().multiplier,multiplier,key);
+  }
+  v.player.carried=[{item:'rawFood',count:3,grade:60}];
+  assert.equal(s.food.craftPlan().count,3,'a private car includes an intact kitchen');
+});
+
+test('private cars are much rarer than every other ordinary car',()=>{
+  const {setup:s}=game([lead(),road(),lead()]),rng=s.railyard.mulberry32(12345),counts={};
+  for(let i=0;i<18000;i++) {const key=s.railyard.randomCarKey(rng);counts[key]=(counts[key]||0)+1;}
+  for(const key of s.railyard.carKeys) if(key!=='privateCar') assert.ok(counts[key]>counts.privateCar*3,key+' '+JSON.stringify(counts));
 });
 
 test('firebox refuses absent fuel or water at the model boundary',()=>{
@@ -52,13 +81,22 @@ test('empty engines can collect finite station fuel and recover from the line wi
   assert.equal(s.recovery.collect(2,'diesel',true),true);
   assert.equal(s.recovery.stock(2).diesel,before-400);
   assert.equal(s.railyard.isTrainDriveCapable(v.currentTrain),true);
+  v.currentTrain[0].inventory=s.items.createStartingKit();
   v.currentTrain[0].cargo=[];v.journey={legIndex:1,tileIndex:2,forward:true};
   assert.equal(s.onfoot.climbDown(),true);
-  const route=s.recovery.stations()[0],clock=s.time.getCurrentTimestampMs();
+  assert.equal(s.recovery.supplyRoutes('diesel').length,0,'no station collection is offered from a distant tile');
+  assert.equal(s.items.takeFromCar(v.currentTrain[0],'jerrycan'),true);
+  v.onFoot.tileIndex=0;
+  const route=s.recovery.supplyRoutes('diesel')[0],clock=s.time.getCurrentTimestampMs();
+  assert.equal(route.station,1);
   assert.equal(s.recovery.collect(route.station,'diesel',false),true);
   assert.ok(s.time.getCurrentTimestampMs()>clock);
   assert.ok(s.items.getPlayerCarriedKg()<=50);
+  assert.ok(s.items.getPlayerCargo().find(stack=>stack.type==='diesel').amount<=20);
+  v.onFoot.tileIndex=2;
+  assert.equal(s.items.giveToCar(v.currentTrain[0],'jerrycan'),false,'a filled jerrycan cannot be stowed without its diesel');
   assert.equal(s.recovery.load('diesel'),true);
+  assert.equal(s.items.giveToCar(v.currentTrain[0],'jerrycan'),true);
   assert.equal(s.railyard.isTrainDriveCapable(v.currentTrain),true);
   assert.equal(s.items.getPlayerCargo().length,0);
   v.player.carriedCargo=[{type:'water',amount:50}];
@@ -96,12 +134,13 @@ test('reported seed and branch termini draw their true incoming connection, not 
   }
 });
 
-test('journal records actual moves and visits and resets for a new run',()=>{
+test('the deferred journal neither initializes nor records travel',()=>{
   const {setup:s,State:{variables:v}}=game([lead(),road(),lead()]);
-  s.journal.travel();s.journal.visit(2);s.journal.visit(2);s.journal.visit('L1B1');
-  assert.equal(v.journal.kilometres,5);assert.equal(v.journal.stations.length,3);
-  const restored=JSON.parse(JSON.stringify(v.journal));assert.equal(restored.stations[2],'L1B1');
-  s.startNewRun();assert.equal(v.journal.kilometres,0);assert.equal(v.journal.stations.length,1);
+  assert.equal(v.journal,undefined);
+  v.journey={legIndex:1,tileIndex:0,forward:true};
+  s.railyard.moveAlongLine(1);
+  assert.equal(v.journal,undefined);
+  s.startNewRun();assert.equal(v.journal,undefined);
 });
 
 test('save wrappers respect failed storage writes and keep autosaves outside manual slots',()=>{
@@ -114,16 +153,14 @@ test('save wrappers respect failed storage writes and keep autosaves outside man
   g.Save.slots.save=()=>{throw new Error('quota');};assert.equal(s.save(0),false);assert.equal(count,1);
 });
 
-test('depleted depots lead to a longer supply run without replenishing looted fuel',()=>{
+test('a depleted depot stays depleted and does not offer an automated supply run',()=>{
   const {setup:s,State:{variables:v}}=game([lead(),road(),lead()]);
   s.recovery.stock(2).diesel=0;
-  const route=s.recovery.supplyRoutes('diesel').at(-1);
-  assert.equal(route.station,3);assert.ok(route.distance>0);
+  assert.equal(s.recovery.supplyRoutes('diesel').length,0);
   assert.equal(s.recovery.plan(3,'diesel',true),null,'cannot carry a bulk tank fill on foot');
-  assert.ok(s.recovery.plan(3,'diesel',false));
+  assert.equal(s.recovery.plan(3,'diesel',false),null);
   assert.equal(s.recovery.stock(2).diesel,0);
-  assert.equal(s.recovery.collect(3,'diesel',false),true);
-  assert.ok(s.items.getPlayerCarriedKg()<=50);
+  assert.equal(s.recovery.collect(3,'diesel',false),false);
 });
 
 test('a steam bunker filled with only one resource can be unloaded to make room for the other',()=>{
@@ -176,7 +213,6 @@ test('diesel and steam can complete multi-station runs on generated depot suppli
       assert.ok(guard<100,model+' finishes '+station);
       assert.equal(v.currentStation,station+1);
     }
-    assert.ok(v.journal.kilometres>=400);
   }
 });
 

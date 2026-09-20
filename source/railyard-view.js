@@ -544,11 +544,22 @@ setup.railyardView = {
 		addButton('\u2212', 'Zoom out', function() { self.zoomLevel = stepFrom(-1); });
 		addButton('+', 'Zoom in', function() { self.zoomLevel = stepFrom(1); });
 		addButton('Fit', 'Fit the whole yard to the page', function() { self.zoomLevel = 'fit'; });
-		var wide = addButton('Wide', 'Expand the yard view across the screen', function() {
+		var sizeWideView = function() {
+			if (!wrapper.classList.contains('railyard-view-wide')) return;
+			wrapper.style.width = Math.max(240, window.innerWidth - wrapper.getBoundingClientRect().left - 12) + 'px';
+		};
+		var wide = addButton('Wide', 'Expand the yard view while keeping the sidebar and passage controls visible', function() {
 			wrapper.classList.toggle('railyard-view-wide');
+			if (wrapper.classList.contains('railyard-view-wide')) sizeWideView();
+			else wrapper.style.removeProperty('width');
 			wide.setAttribute('aria-pressed', wrapper.classList.contains('railyard-view-wide') ? 'true' : 'false');
 			wide.textContent = wrapper.classList.contains('railyard-view-wide') ? 'Close wide view' : 'Wide';
 		});
+		var resizeWideView = function() {
+			if (!wrapper.isConnected) return window.removeEventListener('resize', resizeWideView);
+			sizeWideView();
+		};
+		window.addEventListener('resize', resizeWideView);
 		wide.setAttribute('aria-pressed', 'false');
 		wrapper.addEventListener('keydown', function(event) {
 			if (event.key === 'Escape' && wrapper.classList.contains('railyard-view-wide')) {
