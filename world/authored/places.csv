@@ -1,0 +1,36 @@
+place_id,geonames_id,name,country_code,latitude,longitude,population
+ar-bahia-blanca,3865086,Bahía Blanca,AR,-38.71760,-62.26545,299101
+ar-bariloche,7647007,San Carlos de Bariloche,AR,-41.14557,-71.30822,95394
+ar-buenos-aires,3435910,Buenos Aires,AR,-34.61315,-58.37723,2891082
+ar-cordoba,3860259,Córdoba,AR,-31.40648,-64.18853,2106734
+ar-mendoza,3844421,Mendoza,AR,-32.88946,-68.84582,114893
+ar-rio-gallegos,3838859,Río Gallegos,AR,-51.62530,-69.25229,95796
+bo-santa-cruz,3904906,Santa Cruz de la Sierra,BO,-17.78629,-63.18117,1831434
+br-belem,3405870,Belém,BR,-1.45583,-48.50444,1499641
+br-boa-vista,3664980,Boa Vista,BR,2.81972,-60.67333,419652
+br-fortaleza,3399415,Fortaleza,BR,-3.71722,-38.54306,2400000
+br-manaus,3663517,Manaus,BR,-3.10194,-60.02500,2219580
+br-porto-alegre,3452925,Porto Alegre,BR,-30.03283,-51.23019,1488252
+br-porto-velho,3662762,Porto Velho,BR,-8.76194,-63.90389,548952
+br-rio-de-janeiro,3451190,Rio de Janeiro,BR,-22.90642,-43.18223,6747815
+br-salvador,3450554,Salvador,BR,-12.97563,-38.49096,2711840
+br-sao-paulo,3448439,São Paulo,BR,-23.54750,-46.63611,12400232
+cl-antofagasta,3899539,Antofagasta,CL,-23.65094,-70.39752,401096
+cl-arica,3899361,Arica,CL,-18.47552,-70.30058,241653
+cl-puerto-montt,3874960,Puerto Montt,CL,-41.46930,-72.94237,245902
+cl-punta-arenas,3874787,Punta Arenas,CL,-53.16282,-70.90922,117430
+cl-santiago,3871336,Santiago,CL,-33.45694,-70.64827,4837295
+co-bogota,3688689,Bogotá,CO,4.60971,-74.08175,7674366
+co-cali,3687925,Cali,CO,3.43054,-76.51990,2392877
+co-cartagena,3687238,Cartagena,CO,10.39817,-75.49328,914552
+co-medellin,3674962,Medellín,CO,6.24500,-75.57151,1999979
+ec-guayaquil,3657509,Guayaquil,EC,-2.19616,-79.88621,2723665
+ec-quito,3652462,Quito,EC,-0.22985,-78.52495,2781641
+gy-georgetown,3378644,Georgetown,GY,6.80448,-58.15527,235017
+pa-panama-city,3703443,Panama City,PA,8.99360,-79.51973,408168
+pe-arequipa,3947322,Arequipa,PE,-16.39899,-71.53747,1195700
+pe-lima,3936456,Lima,PE,-12.04318,-77.02824,7737002
+pe-trujillo,3691175,Trujillo,PE,-8.11599,-79.02998,1067700
+py-asuncion,3439389,Asunción,PY,-25.28646,-57.64700,1482200
+ve-caracas,3646738,Caracas,VE,10.48801,-66.87919,3000000
+ve-ciudad-guayana,3645528,Ciudad Guayana,VE,8.35122,-62.64102,978202

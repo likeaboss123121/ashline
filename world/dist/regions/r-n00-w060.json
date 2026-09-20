@@ -1,0 +1,41 @@
+{
+  "id": "r-n00-w060",
+  "nodes": [
+    {
+      "id": "gy-georgetown",
+      "name": "Georgetown",
+      "countryCode": "GY",
+      "latitude": 6.80448,
+      "longitude": -58.15527,
+      "population": 235017,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3378644"
+    }
+  ],
+  "portals": [
+    {
+      "id": "br-belem",
+      "name": "Belém",
+      "countryCode": "BR",
+      "latitude": -1.45583,
+      "longitude": -48.50444,
+      "population": 1499641,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3405870"
+    }
+  ],
+  "links": [
+    {
+      "id": "plan:atlantic:10",
+      "from": "br-belem",
+      "to": "gy-georgetown",
+      "corridorId": "atlantic",
+      "distanceKm": 1410.9,
+      "estimatedSlices": 283,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    }
+  ]
+}

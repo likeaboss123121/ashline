@@ -1,0 +1,41 @@
+{
+  "id": "r-s20-w070",
+  "nodes": [
+    {
+      "id": "bo-santa-cruz",
+      "name": "Santa Cruz de la Sierra",
+      "countryCode": "BO",
+      "latitude": -17.78629,
+      "longitude": -63.18117,
+      "population": 1831434,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3904906"
+    }
+  ],
+  "portals": [
+    {
+      "id": "br-porto-velho",
+      "name": "Porto Velho",
+      "countryCode": "BR",
+      "latitude": -8.76194,
+      "longitude": -63.90389,
+      "population": 548952,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3662762"
+    }
+  ],
+  "links": [
+    {
+      "id": "plan:central-amazon:07",
+      "from": "bo-santa-cruz",
+      "to": "br-porto-velho",
+      "corridorId": "central-amazon",
+      "distanceKm": 1006.5,
+      "estimatedSlices": 202,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    }
+  ]
+}

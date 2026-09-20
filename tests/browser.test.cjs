@@ -1521,6 +1521,13 @@ test('debug mode draws the generated world map for the leg ahead', async t => {
   // Both ends of the leg, plus any branch terminus the generator put on it.
   assert.ok(map.stations >= 2, JSON.stringify(map));
   assert.match(map.heading, /World map, leg 1 \(station 1 to 2\): \d+ tiles, \d+ km/);
+  const prototype = page.locator('details.debug-section').filter({
+    has: page.getByText('Worldwide graph prototype', { exact: true })
+  });
+  assert.match(await prototype.innerText(), /35 places, 40 non-navigable links in 24 regional chunks/);
+  assert.match(await prototype.innerText(), /not claimed railway geometry/);
+  assert.equal(await prototype.locator('svg.world-graph-debug polyline').count(), 3);
+  assert.equal(await prototype.locator('svg.world-graph-debug circle').count(), 35);
   const reference = page.locator('details.debug-section').filter({ has: page.getByText('Reference data', { exact: true }) });
   await page.getByRole('button', { name: 'Wiki', exact: true }).click();
   await reference.getByText('Railcars', { exact: true }).click();

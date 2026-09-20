@@ -1,0 +1,17 @@
+{
+  "id": "r-s60-w070",
+  "nodes": [
+    {
+      "id": "ar-rio-gallegos",
+      "name": "Río Gallegos",
+      "countryCode": "AR",
+      "latitude": -51.6253,
+      "longitude": -69.25229,
+      "population": 95796,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3838859"
+    }
+  ],
+  "portals": [],
+  "links": []
+}

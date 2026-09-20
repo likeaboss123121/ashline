@@ -6,7 +6,9 @@
   "scripts": {
     "build": "node scripts/build.cjs",
     "watch": "node scripts/build.cjs --watch",
-    "test": "node --test tests/core.test.cjs tests/review.test.cjs tests/migrations.test.cjs",
+    "world:build": "node scripts/world/compile-world.cjs",
+    "world:check": "node scripts/world/compile-world.cjs --check",
+    "test": "node --test tests/core.test.cjs tests/review.test.cjs tests/migrations.test.cjs tests/world-graph.test.cjs",
     "test:browser": "node scripts/build.cjs && node --test tests/browser.test.cjs",
     "verify": "npm run build && npm test && npm run test:browser"
   },

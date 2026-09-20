@@ -1,0 +1,40 @@
+{
+  "id": "r-s40-w060",
+  "nodes": [
+    {
+      "id": "ar-buenos-aires",
+      "name": "Buenos Aires",
+      "countryCode": "AR",
+      "latitude": -34.61315,
+      "longitude": -58.37723,
+      "population": 2891082,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3435910"
+    },
+    {
+      "id": "br-porto-alegre",
+      "name": "Porto Alegre",
+      "countryCode": "BR",
+      "latitude": -30.03283,
+      "longitude": -51.23019,
+      "population": 1488252,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3452925"
+    }
+  ],
+  "portals": [],
+  "links": [
+    {
+      "id": "plan:atlantic:04",
+      "from": "ar-buenos-aires",
+      "to": "br-porto-alegre",
+      "corridorId": "atlantic",
+      "distanceKm": 842.4,
+      "estimatedSlices": 169,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    }
+  ]
+}

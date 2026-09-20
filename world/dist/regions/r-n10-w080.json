@@ -1,0 +1,41 @@
+{
+  "id": "r-n10-w080",
+  "nodes": [
+    {
+      "id": "co-cartagena",
+      "name": "Cartagena",
+      "countryCode": "CO",
+      "latitude": 10.39817,
+      "longitude": -75.49328,
+      "population": 914552,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3687238"
+    }
+  ],
+  "portals": [
+    {
+      "id": "ve-caracas",
+      "name": "Caracas",
+      "countryCode": "VE",
+      "latitude": 10.48801,
+      "longitude": -66.87919,
+      "population": 3000000,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3646738"
+    }
+  ],
+  "links": [
+    {
+      "id": "plan:atlantic:13",
+      "from": "ve-caracas",
+      "to": "co-cartagena",
+      "corridorId": "atlantic",
+      "distanceKm": 942,
+      "estimatedSlices": 189,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    }
+  ]
+}

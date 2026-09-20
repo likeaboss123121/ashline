@@ -1,0 +1,17 @@
+{
+  "id": "r-n10-w070",
+  "nodes": [
+    {
+      "id": "ve-caracas",
+      "name": "Caracas",
+      "countryCode": "VE",
+      "latitude": 10.48801,
+      "longitude": -66.87919,
+      "population": 3000000,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3646738"
+    }
+  ],
+  "portals": [],
+  "links": []
+}

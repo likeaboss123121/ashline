@@ -1,0 +1,17 @@
+{
+  "id": "r-s20-w040",
+  "nodes": [
+    {
+      "id": "br-salvador",
+      "name": "Salvador",
+      "countryCode": "BR",
+      "latitude": -12.97563,
+      "longitude": -38.49096,
+      "population": 2711840,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3450554"
+    }
+  ],
+  "portals": [],
+  "links": []
+}

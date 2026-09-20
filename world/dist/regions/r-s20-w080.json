@@ -1,0 +1,85 @@
+{
+  "id": "r-s20-w080",
+  "nodes": [
+    {
+      "id": "cl-arica",
+      "name": "Arica",
+      "countryCode": "CL",
+      "latitude": -18.47552,
+      "longitude": -70.30058,
+      "population": 241653,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3899361"
+    },
+    {
+      "id": "pe-arequipa",
+      "name": "Arequipa",
+      "countryCode": "PE",
+      "latitude": -16.39899,
+      "longitude": -71.53747,
+      "population": 1195700,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3947322"
+    },
+    {
+      "id": "pe-lima",
+      "name": "Lima",
+      "countryCode": "PE",
+      "latitude": -12.04318,
+      "longitude": -77.02824,
+      "population": 7737002,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3936456"
+    }
+  ],
+  "portals": [
+    {
+      "id": "pe-trujillo",
+      "name": "Trujillo",
+      "countryCode": "PE",
+      "latitude": -8.11599,
+      "longitude": -79.02998,
+      "population": 1067700,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3691175"
+    }
+  ],
+  "links": [
+    {
+      "id": "plan:pacific:05",
+      "from": "cl-arica",
+      "to": "pe-arequipa",
+      "corridorId": "pacific",
+      "distanceKm": 265.6,
+      "estimatedSlices": 54,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    },
+    {
+      "id": "plan:pacific:06",
+      "from": "pe-arequipa",
+      "to": "pe-lima",
+      "corridorId": "pacific",
+      "distanceKm": 764.6,
+      "estimatedSlices": 153,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    },
+    {
+      "id": "plan:pacific:07",
+      "from": "pe-lima",
+      "to": "pe-trujillo",
+      "corridorId": "pacific",
+      "distanceKm": 488.6,
+      "estimatedSlices": 98,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    }
+  ]
+}

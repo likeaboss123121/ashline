@@ -1,0 +1,63 @@
+{
+  "id": "r-s10-w070",
+  "nodes": [
+    {
+      "id": "br-manaus",
+      "name": "Manaus",
+      "countryCode": "BR",
+      "latitude": -3.10194,
+      "longitude": -60.025,
+      "population": 2219580,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3663517"
+    },
+    {
+      "id": "br-porto-velho",
+      "name": "Porto Velho",
+      "countryCode": "BR",
+      "latitude": -8.76194,
+      "longitude": -63.90389,
+      "population": 548952,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3662762"
+    }
+  ],
+  "portals": [
+    {
+      "id": "br-boa-vista",
+      "name": "Boa Vista",
+      "countryCode": "BR",
+      "latitude": 2.81972,
+      "longitude": -60.67333,
+      "population": 419652,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3664980"
+    }
+  ],
+  "links": [
+    {
+      "id": "plan:central-amazon:08",
+      "from": "br-porto-velho",
+      "to": "br-manaus",
+      "corridorId": "central-amazon",
+      "distanceKm": 761.6,
+      "estimatedSlices": 153,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    },
+    {
+      "id": "plan:central-amazon:09",
+      "from": "br-manaus",
+      "to": "br-boa-vista",
+      "corridorId": "central-amazon",
+      "distanceKm": 662.4,
+      "estimatedSlices": 133,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "id": "r-s50-w070",
+  "nodes": [],
+  "portals": [
+    {
+      "id": "ar-bahia-blanca",
+      "name": "Bahía Blanca",
+      "countryCode": "AR",
+      "latitude": -38.7176,
+      "longitude": -62.26545,
+      "population": 299101,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3865086"
+    },
+    {
+      "id": "ar-rio-gallegos",
+      "name": "Río Gallegos",
+      "countryCode": "AR",
+      "latitude": -51.6253,
+      "longitude": -69.25229,
+      "population": 95796,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3838859"
+    }
+  ],
+  "links": [
+    {
+      "id": "plan:atlantic:02",
+      "from": "ar-rio-gallegos",
+      "to": "ar-bahia-blanca",
+      "corridorId": "atlantic",
+      "distanceKm": 1534.5,
+      "estimatedSlices": 307,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    }
+  ]
+}

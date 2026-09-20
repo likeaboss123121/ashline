@@ -389,6 +389,7 @@ setup.showCreditsDialog = function() {
 	}
 	Dialog.setup('Credits');
 	Dialog.wiki('<p><strong>Created by:</strong> likea</p><p><a href="http://likeaserver.myddns.me/" target="_blank" rel="noopener noreferrer">Official Website</a></p><p><a href="https://github.com/likeaboss123121" target="_blank" rel="noopener noreferrer">GitHub</a></p>'
+		+ '<p><strong>World data:</strong> City names, coordinates and population from <a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer">GeoNames</a>, licensed under CC BY 4.0.</p>'
 		+ '<p><strong>AI Generated Content Disclosure:</strong></p>'
 		+ '<p>AI was used to make code and .svg art for this game. Diffusion (what people commonly refer to as AI Image Generation) was not used for this game. '
 		+ 'Read more about how AI was used and my opinions about AI in video games at '
@@ -2931,6 +2932,10 @@ Macro.add('debugTools', {
 		wrapper.appendChild(conditionValue);
 		wrapper.appendChild(conditionBtn);
 		wrapper.appendChild(document.createElement('br'));
+		// The worldwide graph spike is separate from the current playable procedural world. Its planning chords are
+		// deliberately non-navigable until real railway geometry and terrain data have been compiled and reviewed.
+		startSection('Worldwide graph prototype');
+		setup.worldGraph.appendDebugOverview(wrapper);
 		// The generated world between this station and the next, read straight from the seed. Deliberately plain:
 		// it is here to check what the generator produced, not to be a player-facing map.
 		startSection('World map');

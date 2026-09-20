@@ -1,0 +1,341 @@
+{
+  "formatVersion": 1,
+  "datasetVersion": "sa-spike-0.1.0",
+  "tileKm": 5,
+  "sources": [
+    {
+      "id": "geonames-cities15000-2026-09-20",
+      "name": "GeoNames cities15000",
+      "url": "https://download.geonames.org/export/dump/cities15000.zip",
+      "retrieved": "2026-09-20",
+      "license": "CC BY 4.0",
+      "attribution": "City names, coordinates and population: GeoNames (https://www.geonames.org/)",
+      "status": "ingested",
+      "use": "Stable external IDs and coordinates for authored South America waypoints"
+    },
+    {
+      "id": "openstreetmap-rail",
+      "name": "OpenStreetMap",
+      "url": "https://planet.openstreetmap.org/",
+      "license": "ODbL 1.0",
+      "attribution": "© OpenStreetMap contributors",
+      "status": "planned",
+      "use": "Current, disused, abandoned and razed railway geometry and infrastructure"
+    },
+    {
+      "id": "openhistoricalmap-rail",
+      "name": "OpenHistoricalMap",
+      "url": "https://www.openhistoricalmap.org/",
+      "license": "Mostly CC0; inspect license tags on imported features",
+      "attribution": "OpenHistoricalMap contributors",
+      "status": "planned",
+      "use": "Supplementary historical railway alignments"
+    },
+    {
+      "id": "copernicus-dem-glo90",
+      "name": "Copernicus DEM GLO-90",
+      "url": "https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM",
+      "license": "Copernicus WorldDEM-90 free and open licence; prescribed notice required",
+      "attribution": "Produced using Copernicus WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved",
+      "status": "planned",
+      "use": "Elevation profiles and grades"
+    },
+    {
+      "id": "chelsa-climatologies-2.1",
+      "name": "CHELSA climatologies 2.1",
+      "url": "https://www.chelsa-climate.org/datasets/chelsa_climatologies",
+      "license": "CC0 1.0",
+      "attribution": "CHELSA climatologies, Karger et al.",
+      "status": "planned",
+      "use": "Temperature and relative-humidity normals"
+    },
+    {
+      "id": "hydrorivers-1",
+      "name": "HydroRIVERS version 1",
+      "url": "https://www.hydrosheds.org/products/hydrorivers",
+      "license": "HydroSHEDS licence; attribution required",
+      "attribution": "Lehner and Grill (2013), HydroRIVERS / HydroSHEDS",
+      "status": "planned",
+      "use": "River intersections and crossing importance for missing/generated lines"
+    }
+  ],
+  "regions": [
+    {
+      "id": "r-n00-w060",
+      "file": "regions/r-n00-w060.json",
+      "nodeCount": 1,
+      "portalCount": 1,
+      "linkCount": 1
+    },
+    {
+      "id": "r-n00-w070",
+      "file": "regions/r-n00-w070.json",
+      "nodeCount": 2,
+      "portalCount": 3,
+      "linkCount": 4
+    },
+    {
+      "id": "r-n00-w080",
+      "file": "regions/r-n00-w080.json",
+      "nodeCount": 4,
+      "portalCount": 2,
+      "linkCount": 7
+    },
+    {
+      "id": "r-n10-w070",
+      "file": "regions/r-n10-w070.json",
+      "nodeCount": 1,
+      "portalCount": 0,
+      "linkCount": 0
+    },
+    {
+      "id": "r-n10-w080",
+      "file": "regions/r-n10-w080.json",
+      "nodeCount": 1,
+      "portalCount": 1,
+      "linkCount": 1
+    },
+    {
+      "id": "r-s10-w040",
+      "file": "regions/r-s10-w040.json",
+      "nodeCount": 1,
+      "portalCount": 1,
+      "linkCount": 1
+    },
+    {
+      "id": "r-s10-w050",
+      "file": "regions/r-s10-w050.json",
+      "nodeCount": 1,
+      "portalCount": 1,
+      "linkCount": 1
+    },
+    {
+      "id": "r-s10-w070",
+      "file": "regions/r-s10-w070.json",
+      "nodeCount": 2,
+      "portalCount": 1,
+      "linkCount": 2
+    },
+    {
+      "id": "r-s10-w080",
+      "file": "regions/r-s10-w080.json",
+      "nodeCount": 3,
+      "portalCount": 0,
+      "linkCount": 2
+    },
+    {
+      "id": "r-s20-w040",
+      "file": "regions/r-s20-w040.json",
+      "nodeCount": 1,
+      "portalCount": 0,
+      "linkCount": 0
+    },
+    {
+      "id": "r-s20-w050",
+      "file": "regions/r-s20-w050.json",
+      "nodeCount": 0,
+      "portalCount": 2,
+      "linkCount": 1
+    },
+    {
+      "id": "r-s20-w070",
+      "file": "regions/r-s20-w070.json",
+      "nodeCount": 1,
+      "portalCount": 1,
+      "linkCount": 1
+    },
+    {
+      "id": "r-s20-w080",
+      "file": "regions/r-s20-w080.json",
+      "nodeCount": 3,
+      "portalCount": 1,
+      "linkCount": 3
+    },
+    {
+      "id": "r-s30-w050",
+      "file": "regions/r-s30-w050.json",
+      "nodeCount": 2,
+      "portalCount": 1,
+      "linkCount": 2
+    },
+    {
+      "id": "r-s30-w060",
+      "file": "regions/r-s30-w060.json",
+      "nodeCount": 1,
+      "portalCount": 0,
+      "linkCount": 0
+    },
+    {
+      "id": "r-s30-w070",
+      "file": "regions/r-s30-w070.json",
+      "nodeCount": 0,
+      "portalCount": 3,
+      "linkCount": 2
+    },
+    {
+      "id": "r-s30-w080",
+      "file": "regions/r-s30-w080.json",
+      "nodeCount": 1,
+      "portalCount": 2,
+      "linkCount": 2
+    },
+    {
+      "id": "r-s40-w060",
+      "file": "regions/r-s40-w060.json",
+      "nodeCount": 2,
+      "portalCount": 0,
+      "linkCount": 1
+    },
+    {
+      "id": "r-s40-w070",
+      "file": "regions/r-s40-w070.json",
+      "nodeCount": 3,
+      "portalCount": 1,
+      "linkCount": 2
+    },
+    {
+      "id": "r-s40-w080",
+      "file": "regions/r-s40-w080.json",
+      "nodeCount": 1,
+      "portalCount": 3,
+      "linkCount": 2
+    },
+    {
+      "id": "r-s50-w070",
+      "file": "regions/r-s50-w070.json",
+      "nodeCount": 0,
+      "portalCount": 2,
+      "linkCount": 1
+    },
+    {
+      "id": "r-s50-w080",
+      "file": "regions/r-s50-w080.json",
+      "nodeCount": 2,
+      "portalCount": 2,
+      "linkCount": 2
+    },
+    {
+      "id": "r-s60-w070",
+      "file": "regions/r-s60-w070.json",
+      "nodeCount": 1,
+      "portalCount": 0,
+      "linkCount": 0
+    },
+    {
+      "id": "r-s60-w080",
+      "file": "regions/r-s60-w080.json",
+      "nodeCount": 1,
+      "portalCount": 1,
+      "linkCount": 2
+    }
+  ],
+  "corridors": [
+    {
+      "id": "atlantic",
+      "label": "Atlantic coast",
+      "waypoints": [
+        "cl-punta-arenas",
+        "ar-rio-gallegos",
+        "ar-bahia-blanca",
+        "ar-buenos-aires",
+        "br-porto-alegre",
+        "br-sao-paulo",
+        "br-rio-de-janeiro",
+        "br-salvador",
+        "br-fortaleza",
+        "br-belem",
+        "gy-georgetown",
+        "ve-ciudad-guayana",
+        "ve-caracas",
+        "co-cartagena",
+        "pa-panama-city"
+      ],
+      "planningLinkIds": [
+        "plan:atlantic:01",
+        "plan:atlantic:02",
+        "plan:atlantic:03",
+        "plan:atlantic:04",
+        "plan:atlantic:05",
+        "plan:atlantic:06",
+        "plan:atlantic:07",
+        "plan:atlantic:08",
+        "plan:atlantic:09",
+        "plan:atlantic:10",
+        "plan:atlantic:11",
+        "plan:atlantic:12",
+        "plan:atlantic:13",
+        "plan:atlantic:14"
+      ]
+    },
+    {
+      "id": "central-amazon",
+      "label": "Central and Amazon",
+      "waypoints": [
+        "cl-punta-arenas",
+        "ar-rio-gallegos",
+        "ar-bariloche",
+        "ar-mendoza",
+        "ar-cordoba",
+        "py-asuncion",
+        "bo-santa-cruz",
+        "br-porto-velho",
+        "br-manaus",
+        "br-boa-vista",
+        "ve-ciudad-guayana",
+        "co-bogota",
+        "co-medellin",
+        "pa-panama-city"
+      ],
+      "planningLinkIds": [
+        "plan:central-amazon:01",
+        "plan:central-amazon:02",
+        "plan:central-amazon:03",
+        "plan:central-amazon:04",
+        "plan:central-amazon:05",
+        "plan:central-amazon:06",
+        "plan:central-amazon:07",
+        "plan:central-amazon:08",
+        "plan:central-amazon:09",
+        "plan:central-amazon:10",
+        "plan:central-amazon:11",
+        "plan:central-amazon:12",
+        "plan:central-amazon:13"
+      ]
+    },
+    {
+      "id": "pacific",
+      "label": "Pacific coast",
+      "waypoints": [
+        "cl-punta-arenas",
+        "cl-puerto-montt",
+        "cl-santiago",
+        "cl-antofagasta",
+        "cl-arica",
+        "pe-arequipa",
+        "pe-lima",
+        "pe-trujillo",
+        "ec-guayaquil",
+        "ec-quito",
+        "co-cali",
+        "co-medellin",
+        "co-cartagena",
+        "pa-panama-city"
+      ],
+      "planningLinkIds": [
+        "plan:pacific:01",
+        "plan:pacific:02",
+        "plan:pacific:03",
+        "plan:pacific:04",
+        "plan:pacific:05",
+        "plan:pacific:06",
+        "plan:pacific:07",
+        "plan:pacific:08",
+        "plan:pacific:09",
+        "plan:pacific:10",
+        "plan:pacific:11",
+        "plan:pacific:12",
+        "plan:pacific:13"
+      ]
+    }
+  ]
+}

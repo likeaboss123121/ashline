@@ -1,0 +1,153 @@
+{
+  "id": "r-n00-w080",
+  "nodes": [
+    {
+      "id": "co-bogota",
+      "name": "Bogotá",
+      "countryCode": "CO",
+      "latitude": 4.60971,
+      "longitude": -74.08175,
+      "population": 7674366,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3688689"
+    },
+    {
+      "id": "co-cali",
+      "name": "Cali",
+      "countryCode": "CO",
+      "latitude": 3.43054,
+      "longitude": -76.5199,
+      "population": 2392877,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3687925"
+    },
+    {
+      "id": "co-medellin",
+      "name": "Medellín",
+      "countryCode": "CO",
+      "latitude": 6.245,
+      "longitude": -75.57151,
+      "population": 1999979,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3674962"
+    },
+    {
+      "id": "pa-panama-city",
+      "name": "Panama City",
+      "countryCode": "PA",
+      "latitude": 8.9936,
+      "longitude": -79.51973,
+      "population": 408168,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3703443"
+    }
+  ],
+  "portals": [
+    {
+      "id": "co-cartagena",
+      "name": "Cartagena",
+      "countryCode": "CO",
+      "latitude": 10.39817,
+      "longitude": -75.49328,
+      "population": 914552,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3687238"
+    },
+    {
+      "id": "ec-quito",
+      "name": "Quito",
+      "countryCode": "EC",
+      "latitude": -0.22985,
+      "longitude": -78.52495,
+      "population": 2781641,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3652462"
+    }
+  ],
+  "links": [
+    {
+      "id": "plan:atlantic:14",
+      "from": "co-cartagena",
+      "to": "pa-panama-city",
+      "corridorId": "atlantic",
+      "distanceKm": 468.1,
+      "estimatedSlices": 94,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    },
+    {
+      "id": "plan:central-amazon:12",
+      "from": "co-bogota",
+      "to": "co-medellin",
+      "corridorId": "central-amazon",
+      "distanceKm": 245.5,
+      "estimatedSlices": 50,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    },
+    {
+      "id": "plan:central-amazon:13",
+      "from": "co-medellin",
+      "to": "pa-panama-city",
+      "corridorId": "central-amazon",
+      "distanceKm": 531.7,
+      "estimatedSlices": 107,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    },
+    {
+      "id": "plan:pacific:10",
+      "from": "ec-quito",
+      "to": "co-cali",
+      "corridorId": "pacific",
+      "distanceKm": 464,
+      "estimatedSlices": 93,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    },
+    {
+      "id": "plan:pacific:11",
+      "from": "co-cali",
+      "to": "co-medellin",
+      "corridorId": "pacific",
+      "distanceKm": 330.1,
+      "estimatedSlices": 67,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    },
+    {
+      "id": "plan:pacific:12",
+      "from": "co-medellin",
+      "to": "co-cartagena",
+      "corridorId": "pacific",
+      "distanceKm": 461.9,
+      "estimatedSlices": 93,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    },
+    {
+      "id": "plan:pacific:13",
+      "from": "co-cartagena",
+      "to": "pa-panama-city",
+      "corridorId": "pacific",
+      "distanceKm": 468.1,
+      "estimatedSlices": 94,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    }
+  ]
+}

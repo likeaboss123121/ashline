@@ -1,0 +1,62 @@
+{
+  "id": "r-s10-w080",
+  "nodes": [
+    {
+      "id": "ec-guayaquil",
+      "name": "Guayaquil",
+      "countryCode": "EC",
+      "latitude": -2.19616,
+      "longitude": -79.88621,
+      "population": 2723665,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3657509"
+    },
+    {
+      "id": "ec-quito",
+      "name": "Quito",
+      "countryCode": "EC",
+      "latitude": -0.22985,
+      "longitude": -78.52495,
+      "population": 2781641,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3652462"
+    },
+    {
+      "id": "pe-trujillo",
+      "name": "Trujillo",
+      "countryCode": "PE",
+      "latitude": -8.11599,
+      "longitude": -79.02998,
+      "population": 1067700,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3691175"
+    }
+  ],
+  "portals": [],
+  "links": [
+    {
+      "id": "plan:pacific:08",
+      "from": "pe-trujillo",
+      "to": "ec-guayaquil",
+      "corridorId": "pacific",
+      "distanceKm": 665,
+      "estimatedSlices": 133,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    },
+    {
+      "id": "plan:pacific:09",
+      "from": "ec-guayaquil",
+      "to": "ec-quito",
+      "corridorId": "pacific",
+      "distanceKm": 265.9,
+      "estimatedSlices": 54,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    }
+  ]
+}

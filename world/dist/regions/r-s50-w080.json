@@ -1,0 +1,73 @@
+{
+  "id": "r-s50-w080",
+  "nodes": [
+    {
+      "id": "ar-bariloche",
+      "name": "San Carlos de Bariloche",
+      "countryCode": "AR",
+      "latitude": -41.14557,
+      "longitude": -71.30822,
+      "population": 95394,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "7647007"
+    },
+    {
+      "id": "cl-puerto-montt",
+      "name": "Puerto Montt",
+      "countryCode": "CL",
+      "latitude": -41.4693,
+      "longitude": -72.94237,
+      "population": 245902,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3874960"
+    }
+  ],
+  "portals": [
+    {
+      "id": "ar-rio-gallegos",
+      "name": "Río Gallegos",
+      "countryCode": "AR",
+      "latitude": -51.6253,
+      "longitude": -69.25229,
+      "population": 95796,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3838859"
+    },
+    {
+      "id": "cl-punta-arenas",
+      "name": "Punta Arenas",
+      "countryCode": "CL",
+      "latitude": -53.16282,
+      "longitude": -70.90922,
+      "population": 117430,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3874787"
+    }
+  ],
+  "links": [
+    {
+      "id": "plan:central-amazon:02",
+      "from": "ar-rio-gallegos",
+      "to": "ar-bariloche",
+      "corridorId": "central-amazon",
+      "distanceKm": 1175.8,
+      "estimatedSlices": 236,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    },
+    {
+      "id": "plan:pacific:01",
+      "from": "cl-punta-arenas",
+      "to": "cl-puerto-montt",
+      "corridorId": "pacific",
+      "distanceKm": 1309.1,
+      "estimatedSlices": 262,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    }
+  ]
+}

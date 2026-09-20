@@ -1,0 +1,60 @@
+{
+  "datasetVersion": "sa-spike-0.1.0",
+  "sources": [
+    {
+      "id": "geonames-cities15000-2026-09-20",
+      "name": "GeoNames cities15000",
+      "url": "https://download.geonames.org/export/dump/cities15000.zip",
+      "retrieved": "2026-09-20",
+      "license": "CC BY 4.0",
+      "attribution": "City names, coordinates and population: GeoNames (https://www.geonames.org/)",
+      "status": "ingested",
+      "use": "Stable external IDs and coordinates for authored South America waypoints"
+    },
+    {
+      "id": "openstreetmap-rail",
+      "name": "OpenStreetMap",
+      "url": "https://planet.openstreetmap.org/",
+      "license": "ODbL 1.0",
+      "attribution": "© OpenStreetMap contributors",
+      "status": "planned",
+      "use": "Current, disused, abandoned and razed railway geometry and infrastructure"
+    },
+    {
+      "id": "openhistoricalmap-rail",
+      "name": "OpenHistoricalMap",
+      "url": "https://www.openhistoricalmap.org/",
+      "license": "Mostly CC0; inspect license tags on imported features",
+      "attribution": "OpenHistoricalMap contributors",
+      "status": "planned",
+      "use": "Supplementary historical railway alignments"
+    },
+    {
+      "id": "copernicus-dem-glo90",
+      "name": "Copernicus DEM GLO-90",
+      "url": "https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM",
+      "license": "Copernicus WorldDEM-90 free and open licence; prescribed notice required",
+      "attribution": "Produced using Copernicus WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved",
+      "status": "planned",
+      "use": "Elevation profiles and grades"
+    },
+    {
+      "id": "chelsa-climatologies-2.1",
+      "name": "CHELSA climatologies 2.1",
+      "url": "https://www.chelsa-climate.org/datasets/chelsa_climatologies",
+      "license": "CC0 1.0",
+      "attribution": "CHELSA climatologies, Karger et al.",
+      "status": "planned",
+      "use": "Temperature and relative-humidity normals"
+    },
+    {
+      "id": "hydrorivers-1",
+      "name": "HydroRIVERS version 1",
+      "url": "https://www.hydrosheds.org/products/hydrorivers",
+      "license": "HydroSHEDS licence; attribution required",
+      "attribution": "Lehner and Grill (2013), HydroRIVERS / HydroSHEDS",
+      "status": "planned",
+      "use": "River intersections and crossing importance for missing/generated lines"
+    }
+  ]
+}

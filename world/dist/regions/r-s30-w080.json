@@ -1,0 +1,63 @@
+{
+  "id": "r-s30-w080",
+  "nodes": [
+    {
+      "id": "cl-antofagasta",
+      "name": "Antofagasta",
+      "countryCode": "CL",
+      "latitude": -23.65094,
+      "longitude": -70.39752,
+      "population": 401096,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3899539"
+    }
+  ],
+  "portals": [
+    {
+      "id": "cl-arica",
+      "name": "Arica",
+      "countryCode": "CL",
+      "latitude": -18.47552,
+      "longitude": -70.30058,
+      "population": 241653,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3899361"
+    },
+    {
+      "id": "cl-santiago",
+      "name": "Santiago",
+      "countryCode": "CL",
+      "latitude": -33.45694,
+      "longitude": -70.64827,
+      "population": 4837295,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3871336"
+    }
+  ],
+  "links": [
+    {
+      "id": "plan:pacific:03",
+      "from": "cl-santiago",
+      "to": "cl-antofagasta",
+      "corridorId": "pacific",
+      "distanceKm": 1090.7,
+      "estimatedSlices": 219,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    },
+    {
+      "id": "plan:pacific:04",
+      "from": "cl-antofagasta",
+      "to": "cl-arica",
+      "corridorId": "pacific",
+      "distanceKm": 575.6,
+      "estimatedSlices": 116,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    }
+  ]
+}

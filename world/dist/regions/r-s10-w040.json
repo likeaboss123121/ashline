@@ -1,0 +1,41 @@
+{
+  "id": "r-s10-w040",
+  "nodes": [
+    {
+      "id": "br-fortaleza",
+      "name": "Fortaleza",
+      "countryCode": "BR",
+      "latitude": -3.71722,
+      "longitude": -38.54306,
+      "population": 2400000,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3399415"
+    }
+  ],
+  "portals": [
+    {
+      "id": "br-salvador",
+      "name": "Salvador",
+      "countryCode": "BR",
+      "latitude": -12.97563,
+      "longitude": -38.49096,
+      "population": 2711840,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3450554"
+    }
+  ],
+  "links": [
+    {
+      "id": "plan:atlantic:08",
+      "from": "br-salvador",
+      "to": "br-fortaleza",
+      "corridorId": "atlantic",
+      "distanceKm": 1029.5,
+      "estimatedSlices": 206,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    }
+  ]
+}

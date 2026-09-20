@@ -1,0 +1,41 @@
+{
+  "id": "r-s10-w050",
+  "nodes": [
+    {
+      "id": "br-belem",
+      "name": "Belém",
+      "countryCode": "BR",
+      "latitude": -1.45583,
+      "longitude": -48.50444,
+      "population": 1499641,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3405870"
+    }
+  ],
+  "portals": [
+    {
+      "id": "br-fortaleza",
+      "name": "Fortaleza",
+      "countryCode": "BR",
+      "latitude": -3.71722,
+      "longitude": -38.54306,
+      "population": 2400000,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3399415"
+    }
+  ],
+  "links": [
+    {
+      "id": "plan:atlantic:09",
+      "from": "br-fortaleza",
+      "to": "br-belem",
+      "corridorId": "atlantic",
+      "distanceKm": 1134.7,
+      "estimatedSlices": 227,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    }
+  ]
+}

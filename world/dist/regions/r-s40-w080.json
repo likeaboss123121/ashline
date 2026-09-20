@@ -1,0 +1,73 @@
+{
+  "id": "r-s40-w080",
+  "nodes": [
+    {
+      "id": "cl-santiago",
+      "name": "Santiago",
+      "countryCode": "CL",
+      "latitude": -33.45694,
+      "longitude": -70.64827,
+      "population": 4837295,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3871336"
+    }
+  ],
+  "portals": [
+    {
+      "id": "ar-bariloche",
+      "name": "San Carlos de Bariloche",
+      "countryCode": "AR",
+      "latitude": -41.14557,
+      "longitude": -71.30822,
+      "population": 95394,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "7647007"
+    },
+    {
+      "id": "ar-mendoza",
+      "name": "Mendoza",
+      "countryCode": "AR",
+      "latitude": -32.88946,
+      "longitude": -68.84582,
+      "population": 114893,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3844421"
+    },
+    {
+      "id": "cl-puerto-montt",
+      "name": "Puerto Montt",
+      "countryCode": "CL",
+      "latitude": -41.4693,
+      "longitude": -72.94237,
+      "population": 245902,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3874960"
+    }
+  ],
+  "links": [
+    {
+      "id": "plan:central-amazon:03",
+      "from": "ar-bariloche",
+      "to": "ar-mendoza",
+      "corridorId": "central-amazon",
+      "distanceKm": 943.6,
+      "estimatedSlices": 189,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    },
+    {
+      "id": "plan:pacific:02",
+      "from": "cl-puerto-montt",
+      "to": "cl-santiago",
+      "corridorId": "pacific",
+      "distanceKm": 913.6,
+      "estimatedSlices": 183,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    }
+  ]
+}

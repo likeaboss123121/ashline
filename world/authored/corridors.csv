@@ -1,0 +1,44 @@
+corridor_id,sequence,place_id,label
+pacific,1,cl-punta-arenas,Pacific coast
+pacific,2,cl-puerto-montt,Pacific coast
+pacific,3,cl-santiago,Pacific coast
+pacific,4,cl-antofagasta,Pacific coast
+pacific,5,cl-arica,Pacific coast
+pacific,6,pe-arequipa,Pacific coast
+pacific,7,pe-lima,Pacific coast
+pacific,8,pe-trujillo,Pacific coast
+pacific,9,ec-guayaquil,Pacific coast
+pacific,10,ec-quito,Pacific coast
+pacific,11,co-cali,Pacific coast
+pacific,12,co-medellin,Pacific coast
+pacific,13,co-cartagena,Pacific coast
+pacific,14,pa-panama-city,Pacific coast
+central-amazon,1,cl-punta-arenas,Central and Amazon
+central-amazon,2,ar-rio-gallegos,Central and Amazon
+central-amazon,3,ar-bariloche,Central and Amazon
+central-amazon,4,ar-mendoza,Central and Amazon
+central-amazon,5,ar-cordoba,Central and Amazon
+central-amazon,6,py-asuncion,Central and Amazon
+central-amazon,7,bo-santa-cruz,Central and Amazon
+central-amazon,8,br-porto-velho,Central and Amazon
+central-amazon,9,br-manaus,Central and Amazon
+central-amazon,10,br-boa-vista,Central and Amazon
+central-amazon,11,ve-ciudad-guayana,Central and Amazon
+central-amazon,12,co-bogota,Central and Amazon
+central-amazon,13,co-medellin,Central and Amazon
+central-amazon,14,pa-panama-city,Central and Amazon
+atlantic,1,cl-punta-arenas,Atlantic coast
+atlantic,2,ar-rio-gallegos,Atlantic coast
+atlantic,3,ar-bahia-blanca,Atlantic coast
+atlantic,4,ar-buenos-aires,Atlantic coast
+atlantic,5,br-porto-alegre,Atlantic coast
+atlantic,6,br-sao-paulo,Atlantic coast
+atlantic,7,br-rio-de-janeiro,Atlantic coast
+atlantic,8,br-salvador,Atlantic coast
+atlantic,9,br-fortaleza,Atlantic coast
+atlantic,10,br-belem,Atlantic coast
+atlantic,11,gy-georgetown,Atlantic coast
+atlantic,12,ve-ciudad-guayana,Atlantic coast
+atlantic,13,ve-caracas,Atlantic coast
+atlantic,14,co-cartagena,Atlantic coast
+atlantic,15,pa-panama-city,Atlantic coast

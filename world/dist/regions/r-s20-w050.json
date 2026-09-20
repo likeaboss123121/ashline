@@ -1,0 +1,40 @@
+{
+  "id": "r-s20-w050",
+  "nodes": [],
+  "portals": [
+    {
+      "id": "br-rio-de-janeiro",
+      "name": "Rio de Janeiro",
+      "countryCode": "BR",
+      "latitude": -22.90642,
+      "longitude": -43.18223,
+      "population": 6747815,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3451190"
+    },
+    {
+      "id": "br-salvador",
+      "name": "Salvador",
+      "countryCode": "BR",
+      "latitude": -12.97563,
+      "longitude": -38.49096,
+      "population": 2711840,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3450554"
+    }
+  ],
+  "links": [
+    {
+      "id": "plan:atlantic:07",
+      "from": "br-rio-de-janeiro",
+      "to": "br-salvador",
+      "corridorId": "atlantic",
+      "distanceKm": 1210.3,
+      "estimatedSlices": 243,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    }
+  ]
+}

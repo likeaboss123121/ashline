@@ -1,0 +1,73 @@
+{
+  "id": "r-s40-w070",
+  "nodes": [
+    {
+      "id": "ar-bahia-blanca",
+      "name": "Bahía Blanca",
+      "countryCode": "AR",
+      "latitude": -38.7176,
+      "longitude": -62.26545,
+      "population": 299101,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3865086"
+    },
+    {
+      "id": "ar-cordoba",
+      "name": "Córdoba",
+      "countryCode": "AR",
+      "latitude": -31.40648,
+      "longitude": -64.18853,
+      "population": 2106734,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3860259"
+    },
+    {
+      "id": "ar-mendoza",
+      "name": "Mendoza",
+      "countryCode": "AR",
+      "latitude": -32.88946,
+      "longitude": -68.84582,
+      "population": 114893,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3844421"
+    }
+  ],
+  "portals": [
+    {
+      "id": "ar-buenos-aires",
+      "name": "Buenos Aires",
+      "countryCode": "AR",
+      "latitude": -34.61315,
+      "longitude": -58.37723,
+      "population": 2891082,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3435910"
+    }
+  ],
+  "links": [
+    {
+      "id": "plan:atlantic:03",
+      "from": "ar-bahia-blanca",
+      "to": "ar-buenos-aires",
+      "corridorId": "atlantic",
+      "distanceKm": 573.1,
+      "estimatedSlices": 115,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    },
+    {
+      "id": "plan:central-amazon:04",
+      "from": "ar-mendoza",
+      "to": "ar-cordoba",
+      "corridorId": "central-amazon",
+      "distanceKm": 468.4,
+      "estimatedSlices": 94,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    }
+  ]
+}

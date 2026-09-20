@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://likeaserver.myddns.me/ashlinegame/schema/world-graph-1.json",
+  "title": "Ashline compiled world graph bundle",
+  "type": "object",
+  "required": ["formatVersion", "datasetVersion", "tileKm", "sources", "regions", "corridors", "chunks"],
+  "properties": {
+    "formatVersion": { "const": 1 },
+    "datasetVersion": { "type": "string", "minLength": 1 },
+    "tileKm": { "const": 5 },
+    "sources": { "type": "array", "items": { "type": "object", "required": ["id", "license", "status"] } },
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "file", "nodeCount", "portalCount", "linkCount"],
+        "properties": {
+          "id": { "type": "string" },
+          "file": { "type": "string" },
+          "nodeCount": { "type": "integer", "minimum": 0 },
+          "portalCount": { "type": "integer", "minimum": 0 },
+          "linkCount": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "corridors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "waypoints", "planningLinkIds"],
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "waypoints": { "type": "array", "minItems": 2, "items": { "type": "string" } },
+          "planningLinkIds": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "chunks": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["id", "nodes", "portals", "links"],
+        "properties": {
+          "id": { "type": "string" },
+          "nodes": { "type": "array", "items": { "$ref": "#/$defs/node" } },
+          "portals": { "type": "array", "items": { "$ref": "#/$defs/node" } },
+          "links": { "type": "array", "items": { "$ref": "#/$defs/link" } }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "required": ["id", "name", "countryCode", "latitude", "longitude", "population", "sourceId", "sourceFeatureId"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "countryCode": { "type": "string", "pattern": "^[A-Z]{2}$" },
+        "latitude": { "type": "number", "minimum": -90, "maximum": 90 },
+        "longitude": { "type": "number", "minimum": -180, "maximum": 180 },
+        "population": { "type": "integer", "minimum": 0 },
+        "sourceId": { "type": "string" },
+        "sourceFeatureId": { "type": "string" }
+      }
+    },
+    "link": {
+      "type": "object",
+      "required": ["id", "from", "to", "corridorId", "distanceKm", "estimatedSlices", "status", "navigable", "reviewRequired", "geometrySource"],
+      "properties": {
+        "id": { "type": "string" },
+        "from": { "type": "string" },
+        "to": { "type": "string" },
+        "corridorId": { "type": "string" },
+        "distanceKm": { "type": "number", "exclusiveMinimum": 0 },
+        "estimatedSlices": { "type": "integer", "minimum": 1 },
+        "status": { "const": "planning" },
+        "navigable": { "const": false },
+        "reviewRequired": { "const": true },
+        "geometrySource": { "const": "authored-waypoint-chord" }
+      }
+    }
+  }
+}

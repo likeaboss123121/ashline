@@ -1,0 +1,17 @@
+{
+  "id": "r-s30-w060",
+  "nodes": [
+    {
+      "id": "py-asuncion",
+      "name": "Asunción",
+      "countryCode": "PY",
+      "latitude": -25.28646,
+      "longitude": -57.647,
+      "population": 1482200,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3439389"
+    }
+  ],
+  "portals": [],
+  "links": []
+}

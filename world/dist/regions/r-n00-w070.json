@@ -1,0 +1,107 @@
+{
+  "id": "r-n00-w070",
+  "nodes": [
+    {
+      "id": "br-boa-vista",
+      "name": "Boa Vista",
+      "countryCode": "BR",
+      "latitude": 2.81972,
+      "longitude": -60.67333,
+      "population": 419652,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3664980"
+    },
+    {
+      "id": "ve-ciudad-guayana",
+      "name": "Ciudad Guayana",
+      "countryCode": "VE",
+      "latitude": 8.35122,
+      "longitude": -62.64102,
+      "population": 978202,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3645528"
+    }
+  ],
+  "portals": [
+    {
+      "id": "co-bogota",
+      "name": "Bogotá",
+      "countryCode": "CO",
+      "latitude": 4.60971,
+      "longitude": -74.08175,
+      "population": 7674366,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3688689"
+    },
+    {
+      "id": "gy-georgetown",
+      "name": "Georgetown",
+      "countryCode": "GY",
+      "latitude": 6.80448,
+      "longitude": -58.15527,
+      "population": 235017,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3378644"
+    },
+    {
+      "id": "ve-caracas",
+      "name": "Caracas",
+      "countryCode": "VE",
+      "latitude": 10.48801,
+      "longitude": -66.87919,
+      "population": 3000000,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3646738"
+    }
+  ],
+  "links": [
+    {
+      "id": "plan:atlantic:11",
+      "from": "gy-georgetown",
+      "to": "ve-ciudad-guayana",
+      "corridorId": "atlantic",
+      "distanceKm": 523.5,
+      "estimatedSlices": 105,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    },
+    {
+      "id": "plan:atlantic:12",
+      "from": "ve-ciudad-guayana",
+      "to": "ve-caracas",
+      "corridorId": "atlantic",
+      "distanceKm": 522.1,
+      "estimatedSlices": 105,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    },
+    {
+      "id": "plan:central-amazon:10",
+      "from": "br-boa-vista",
+      "to": "ve-ciudad-guayana",
+      "corridorId": "central-amazon",
+      "distanceKm": 652.5,
+      "estimatedSlices": 131,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    },
+    {
+      "id": "plan:central-amazon:11",
+      "from": "ve-ciudad-guayana",
+      "to": "co-bogota",
+      "corridorId": "central-amazon",
+      "distanceKm": 1330.5,
+      "estimatedSlices": 267,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "id": "r-s30-w070",
+  "nodes": [],
+  "portals": [
+    {
+      "id": "ar-cordoba",
+      "name": "Córdoba",
+      "countryCode": "AR",
+      "latitude": -31.40648,
+      "longitude": -64.18853,
+      "population": 2106734,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3860259"
+    },
+    {
+      "id": "bo-santa-cruz",
+      "name": "Santa Cruz de la Sierra",
+      "countryCode": "BO",
+      "latitude": -17.78629,
+      "longitude": -63.18117,
+      "population": 1831434,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3904906"
+    },
+    {
+      "id": "py-asuncion",
+      "name": "Asunción",
+      "countryCode": "PY",
+      "latitude": -25.28646,
+      "longitude": -57.647,
+      "population": 1482200,
+      "sourceId": "geonames-cities15000-2026-09-20",
+      "sourceFeatureId": "3439389"
+    }
+  ],
+  "links": [
+    {
+      "id": "plan:central-amazon:05",
+      "from": "ar-cordoba",
+      "to": "py-asuncion",
+      "corridorId": "central-amazon",
+      "distanceKm": 933.9,
+      "estimatedSlices": 187,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    },
+    {
+      "id": "plan:central-amazon:06",
+      "from": "py-asuncion",
+      "to": "bo-santa-cruz",
+      "corridorId": "central-amazon",
+      "distanceKm": 1011.2,
+      "estimatedSlices": 203,
+      "status": "planning",
+      "navigable": false,
+      "reviewRequired": true,
+      "geometrySource": "authored-waypoint-chord"
+    }
+  ]
+}
