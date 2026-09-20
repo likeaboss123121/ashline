@@ -8,6 +8,7 @@ playwright-report/
 # Third-party tooling and docs: installed locally, not distributed
 tweego-*/
 tool docs/
+tests/
 
 # Compiled build output: published on the Releases page
 index.html
