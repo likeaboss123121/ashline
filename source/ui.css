@@ -272,6 +272,19 @@
 /* The lesson highlights normal actions; it never supplies a second set of movement rules. */
 .tutorial-next-action { border-left: 3px solid #dec38a; padding-left: 0.4em; }
 .railyard-view .tutorial-next-target { stroke: #dec38a; stroke-width: 2px; stroke-dasharray: 4 3; fill: rgba(222, 195, 138, 0.08); }
+.pack-grid { display: block; width: min(100%, 300px); height: auto; font-family: inherit; }
+#developer-tabs { position: fixed; left: 0; top: 6rem; z-index: 150; }
+.developer-tab-buttons { display: flex; flex-direction: column; width: 2rem; }
+.developer-tab-buttons button { writing-mode: vertical-rl; padding: .6rem .25rem; font: inherit; background: #252728; }
+.developer-tab-buttons button[aria-expanded="true"] { color: #dec38a; }
+.developer-panel { position: fixed; left: 2rem; top: 0; bottom: 0; width: min(640px, calc(100vw - 2rem)); box-sizing: border-box; overflow: auto; padding: 1rem; background: #191b1c; border-right: 1px solid #777; }
+.developer-panel[hidden] { display: none; }
+.developer-panel .debug-container { margin: 0; padding: 0; border: 0; }
+.recovery-controls p { margin: .25rem 0; }
+.passage > br + br { display: none; }
+.passage p { margin: .5em 0; }
+.passage h2, .passage h3, .passage h4 { margin: .65em 0 .35em; }
+.train-primary-controls { display: flex; flex-wrap: wrap; gap: .3em 1em; margin: .5em 0; }
 .consist-car-target { fill: transparent; cursor: pointer; }
 .consist-car-target:hover, .consist-car-target:focus { stroke: #dec38a; stroke-width: 1; outline: none; }
 .consist-details { margin-top: 0.4em; }

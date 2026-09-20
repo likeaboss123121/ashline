@@ -27,12 +27,12 @@
 <polygon points="3,3 47,3 47,10 3,10" fill="#92968a"/>
 </g>
 <g id="windows">
-<polygon points="7,13 11,13 11,11 7,11" fill="#dec38a"/>
-<polygon points="13,13 17,13 17,11 13,11" fill="#dec38a"/>
-<polygon points="19,13 23,13 23,11 19,11" fill="#dec38a"/>
-<polygon points="25,13 29,13 29,11 25,11" fill="#dec38a"/>
-<polygon points="31,13 35,13 35,11 31,11" fill="#dec38a"/>
-<polygon points="37,13 41,13 41,11 37,11" fill="#dec38a"/>
+<polygon points="7,13 11,13 11,11 7,11" fill="#273c3e"/>
+<polygon points="13,13 17,13 17,11 13,11" fill="#273c3e"/>
+<polygon points="19,13 23,13 23,11 19,11" fill="#273c3e"/>
+<polygon points="25,13 29,13 29,11 25,11" fill="#273c3e"/>
+<polygon points="31,13 35,13 35,11 31,11" fill="#273c3e"/>
+<polygon points="37,13 41,13 41,11 37,11" fill="#273c3e"/>
 </g>
 <g id="doors">
 <polygon points="4,11 5,11 5,17 4,17" fill="#b8b6a0"/>

@@ -32,7 +32,6 @@ setup.worldmap = {
 	// under the westerlies, and dry over the poles.
 	HUMIDITY_BY_LATITUDE: [[0, 0.88], [12, 0.72], [25, 0.3], [33, 0.28], [45, 0.62], [58, 0.7], [70, 0.45], [90, 0.3]],
 	TUNNEL_METRES: 1450,
-
 	// Compass directions, 45 degrees apart, so index arithmetic gives turns: a step of 1 is 45 degrees.
 	DIRECTIONS: [
 		{ name: 'n', dx: 0, dy: 1 }, { name: 'ne', dx: 1, dy: 1 },
@@ -40,10 +39,8 @@ setup.worldmap = {
 		{ name: 's', dx: 0, dy: -1 }, { name: 'sw', dx: -1, dy: -1 },
 		{ name: 'w', dx: -1, dy: 0 }, { name: 'nw', dx: -1, dy: 1 }
 	],
-
 	SHAPES: ['straight-ns', 'straight-ew', 'straight-nwse', 'straight-nesw',
 		'turn-45', 'turn-90', 't-junction', 'y-junction', 'cross', 'dead-end'],
-
 	// What each terrain will carry. Mountains are too tight for a three or four way junction, a bridge or a
 	// tunnel holds one straight track and nothing else, and water carries no track at all: the line bridges it.
 	TERRAIN_RULES: {
@@ -56,14 +53,11 @@ setup.worldmap = {
 		tunnel: { straightOnly: true },
 		water: { noTrack: true }
 	},
-
 	TERRAIN_COLOURS: {
 		plains: '#3f4a36', forest: '#2c4a2e', desert: '#6b5a36', arctic: '#5d6a72', mountain: '#4a4340',
 		bridge: '#5a4a3a', tunnel: '#332f2c', water: '#24384a'
 	},
-
 	// --- seeded values -------------------------------------------------------------------------------------
-
 	getSeed: function() {
 		return String((State.variables && State.variables.randomSeed) || 'ashline');
 	},
@@ -158,7 +152,6 @@ setup.worldmap = {
 		}
 		return 'plains';
 	},
-
 	// Whether there is water to pump from: the tile itself is water (the line is bridging it), or one of the eight
 	// tiles around it is.
 	isBesideWater: function(seed, x, y) {
@@ -171,9 +164,7 @@ setup.worldmap = {
 		}
 		return false;
 	},
-
 	// --- directions and track shapes ----------------------------------------------------------------------
-
 	// The compass name a player would use for a direction, rather than the two letters the map stores.
 	COMPASS_NAMES: { n: 'north', ne: 'north-east', e: 'east', se: 'south-east', s: 'south', sw: 'south-west', w: 'west', nw: 'north-west' },
 	describeDirection: function(index) {
@@ -233,9 +224,7 @@ setup.worldmap = {
 		}
 		return 'dead-end';
 	},
-
 	// --- generation ---------------------------------------------------------------------------------------
-
 	cache: {},
 	cacheFor: function(seed) {
 		if (!this.cache[seed]) {
@@ -296,7 +285,6 @@ setup.worldmap = {
 		var travel = this.directionIndex(headingName);
 		var x = start.x;
 		var y = start.y;
-
 		var addTile = function(tile) {
 			tiles.push(tile);
 			byKey[self.key(tile.x, tile.y)] = tile;
@@ -351,7 +339,6 @@ setup.worldmap = {
 			x: x, y: y, ends: endEnds, shape: this.getShape(endEnds), terrain: this.trackTerrain(seed, x, y, true) || 'bridge',
 			elevation: this.getElevationMetres(seed, x, y), grade: 0, out: -1, station: legIndex + 1
 		});
-
 		var branches = this.addBranches(seed, legIndex, tiles, byKey, rng);
 		return {
 			index: legIndex, tiles: tiles, byKey: byKey, branches: branches,
@@ -399,7 +386,6 @@ setup.worldmap = {
 				byKey[self.key(branchTile.x, branchTile.y)] = branchTile;
 			});
 			branches.push(this.finishBranch(legIndex, branches.length, i, branchDirection, branch));
-
 			// Now and then a second branch leaves the far side of the same tile, and the lines cross there.
 			var acrossDirection = this.opposite(branchDirection);
 			if (rng() < 0.2 && tile.ends.indexOf(acrossDirection) === -1) {
@@ -492,7 +478,7 @@ setup.worldmap = {
 				x: position.x, y: position.y, ends: ends, shape: shape, terrain: terrain,
 				elevation: this.getElevationMetres(seed, position.x, position.y),
 				grade: out === -1 ? 0 : this.getGradePercent(seed, position.x, position.y, out),
-				out: out, station: 0, branch: true
+				out: out, incoming: this.opposite(travel), station: 0, branch: true
 			});
 			if (out === -1) {
 				break;
@@ -502,7 +488,7 @@ setup.worldmap = {
 		}
 		if (made.length && rejoinIndex === null) {
 			var end = made[made.length - 1];
-			end.ends = [end.ends[0]];
+			end.ends = [end.incoming];
 			end.shape = 'dead-end';
 			end.out = -1;
 			end.grade = 0;
@@ -513,14 +499,12 @@ setup.worldmap = {
 			var toward = this.directionBetween(last, meetTile);
 			if (toward === -1) {
 				rejoinIndex = null;
-				last.ends = [last.ends[0]];
+				last.ends = [last.incoming];
 				last.shape = 'dead-end';
 				last.out = -1;
 				last.grade = 0;
 			} else {
-				last.ends = [this.opposite(last.out === -1 ? this.opposite(last.ends[0]) : last.ends[0]), toward]
-					.sort(function(a, b) { return a - b; });
-				last.ends = [last.ends[0], last.ends[last.ends.length - 1]];
+				last.ends = [last.incoming, toward].sort(function(a, b) { return a - b; });
 				last.shape = this.getShape(last.ends);
 				last.out = toward;
 				last.grade = this.getGradePercent(seed, last.x, last.y, toward);
@@ -548,9 +532,7 @@ setup.worldmap = {
 		});
 		return { x0: x0 - pad, y0: y0 - pad, x1: x1 + pad, y1: y1 + pad };
 	},
-
 	// --- driving the line ---------------------------------------------------------------------------------
-
 	// The leg's main line, station tile to station tile, as the positions a train can stand on. Branch tiles are
 	// not part of it: they lead nowhere yet.
 	getMainLine: function(seed, legIndex) {
@@ -583,9 +565,7 @@ setup.worldmap = {
 	getStepGrade: function(tiles, fromIndex, toIndex) {
 		return toIndex > fromIndex ? tiles[fromIndex].grade : -tiles[toIndex].grade;
 	},
-
 	// --- a journey in progress -----------------------------------------------------------------------------
-
 	getJourney: function() {
 		var journey = State.variables && State.variables.journey;
 		return journey && typeof journey.legIndex === 'number' ? journey : null;
@@ -688,7 +668,6 @@ setup.worldmap = {
 		}
 		var tiles = path.tiles;
 		var from = Math.max(0, Math.min(journey.tileIndex, tiles.length - 1));
-
 		if (path.branch) {
 			var branch = path.branch;
 			var out = from + (direction >= 0 ? 1 : -1);
@@ -713,7 +692,6 @@ setup.worldmap = {
 					arrivesAt: (out === tiles.length - 1 && branch.stationId) ? branch.stationId : 0,
 					heading: this.describeDirection(out > from ? tiles[from].out : this.opposite(tiles[out].out)) });
 		}
-
 		var to = from + (journey.forward ? 1 : -1) * (direction >= 0 ? 1 : -1);
 		if (to < 0 || to >= tiles.length) {
 			return null;
@@ -741,7 +719,6 @@ setup.worldmap = {
 			branch.tiles[0].terrain, { fromIndex: journey.tileIndex, toIndex: 0, toBranch: branch.id,
 				heading: this.describeDirection(branch.direction) });
 	},
-
 	getTrainWeightKg: function(train) {
 		if (!Array.isArray(train)) return 0;
 		var cargoTypes = (State.variables && State.variables.cargoTypes) || {};
@@ -838,9 +815,7 @@ setup.worldmap = {
 		}
 		return '';
 	},
-
 	// --- debug map ----------------------------------------------------------------------------------------
-
 	// A deliberately plain top-down map for debug mode: terrain as coloured cells and track as lines through
 	// them. It is a look at what the generator produced, not a player-facing map.
 	buildDebugMap: function(stationId, cellSize) {
@@ -861,7 +836,6 @@ setup.worldmap = {
 		// Screen y grows downwards while map y grows north, so rows are drawn from the top of the rectangle down.
 		var left = function(x) { return (x - rect.x0) * cell; };
 		var top = function(y) { return (rect.y1 - y) * cell; };
-
 		for (var y = rect.y0; y <= rect.y1; y++) {
 			for (var x = rect.x0; x <= rect.x1; x++) {
 				var tile = leg.byKey[this.key(x, y)];

@@ -9,7 +9,6 @@ setup.tutorial = {
 	STUB_TRACK: 0,
 	SETOUT_TRACK: 2,
 	EXIT_TRACK: 3,
-
 	isFinished: function() {
 		return !!State.variables.tutorialDone;
 	},
@@ -81,7 +80,7 @@ setup.tutorial = {
 		if (!aboard) {
 			return {
 				id: 'board',
-				text: 'Click on the locomotive below to drive the train, or use the links underneath.'
+				text: 'Click on the locomotive above to drive the train, or use the links underneath.'
 			};
 		}
 		var flatcarTrack = this.getFlatcarTrackIndex(tracks);
@@ -119,7 +118,6 @@ setup.tutorial = {
 		};
 	}
 };
-
 // The tutorial hint for wherever the player is standing in the first station.
 Macro.add('tutorialHint', {
 	handler: function() {

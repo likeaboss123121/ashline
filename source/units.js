@@ -50,7 +50,6 @@ setup.units = {
 		return worldmap.getClimate(worldmap.getSeed(), tile.x, tile.y).temperature;
 	}
 };
-
 // The outside temperature, under the clock in the sidebar.
 Macro.add('outsideTemperature', {
 	handler: function() {

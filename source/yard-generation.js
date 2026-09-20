@@ -1,13 +1,27 @@
 // Generation-only guarantees. A reserved through road stays empty; the other road holds accessible fuel.
 setup.yardGeneration = {
+	BROKEN_FREIGHT_CHANCE: 0.12,
+	BROKEN_PASSENGER_CHANCE: 0.6,
+	breakStock: function(tracks, stationId, seed) {
+		var self = this, rng = setup.worldmap.rngFor(seed, 'broken-stock', stationId);
+		tracks.forEach(function(track) { track.trains.forEach(function(train) { train.forEach(function(car) {
+			var passenger = /coach|observation|kitchen|private/.test(car.type);
+			if (rng() >= (passenger ? self.BROKEN_PASSENGER_CHANCE : self.BROKEN_FREIGHT_CHANCE)) return;
+			car.broken = true; car.hasInterior = false; car.cargo = []; car.inventory = [];
+			car.acceptedCargo = []; car.fireboxEnabled = false; car.steamStoredLiters = 0;
+		}); }); });
+	},
 	reserve: function(tracks, stationId, seed) {
 		var yard = setup.railyard, world = setup.worldmap;
+		this.breakStock(tracks, stationId, seed);
+		setup.recovery.ensureStock(tracks);
 		var stockTrack = tracks.slice(1, -1).find(function(track) { return !track.reservedClearance && yard.getTrackFreeLength(track) >= 9; });
 		if (!stockTrack) throw new Error('Generated yard has no room for its reserved locomotive.');
 		var engine = yard.createLocomotiveCar('dieselShunter');
 		// Price the escape consist with a full tank and a loaded freight car, not an empty locomotive.
 		engine.cargo = [{ type: 'diesel', amount: 1500, grade: 80 }];
 		engine.inventory = [{ item: 'pump', count: 1 }];
+		engine.fuelReserve = true;
 		var freight = yard.cloneCar(State.variables.defaultTrains.flatcar);
 		freight.cargo = [{ type: 'timber', amount: 20000, grade: 60 }];
 		var train = [engine, freight], minutes;

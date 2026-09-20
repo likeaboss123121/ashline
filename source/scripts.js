@@ -14,23 +14,20 @@ Macro.add('settingsStart', {
 			</details>
 			<br>
 			[[Continue|${State.variables.settingsExitPassage}]]
-		`);
+		`.replace(/\r?\n\s*/g, ''));
 	}
 });
-
 // Small shared helpers used throughout initialization and shunting logic.
 setup.initializeStateVar = function(name, defaultValue) {
 	if (typeof State.variables[name] === 'undefined') {
 		State.variables[name] = typeof defaultValue === 'function' ? defaultValue() : defaultValue;
 	}
 };
-
 // Safely parses user-provided values and falls back to a known numeric default when parsing fails.
 setup.safeParseInt = function(value, fallback) {
 	var parsed = parseInt(value, 10);
 	return isNaN(parsed) ? (typeof fallback === 'number' ? fallback : 0) : parsed;
 };
-
 // Passage back/forward controls duplicate actions in a stateful simulation, so they stay off unless the player
 // deliberately asks for them. SugarCube reads this configuration live when it renders the UI.
 setup.applyHistorySetting = function() {
@@ -41,9 +38,7 @@ setup.applyHistorySetting = function() {
 	Config.history.controls = enabled;
 	Config.history.maxStates = enabled ? 100 : 1;
 };
-
 setup.applyHistorySetting();
-
 // Centralized time utilities for clock state, formatting, and reusable time-cost UI labels.
 setup.time = {
 	startTimestampMs: Date.UTC(2000, 6, 24, 9, 0, 0, 0),
@@ -207,7 +202,6 @@ setup.time = {
 		return String(baseLabel) + ' (' + this.formatDuration(minutes) + ')';
 	}
 };
-
 // Container macro for clickable actions with a visible time cost and automatic clock increment.
 // Example: <<timedlink "Board Train 1" 1>>...actions...<</timedlink>>
 // Example: <<timedlink "Reverse Consist" Math.ceil($currentTrain.length / 2)>>...<</timedlink>>
@@ -220,7 +214,6 @@ Macro.add('timedlink', {
 		if (!this.payload || !this.payload.length) {
 			return this.error('timedlink must wrap link content.');
 		}
-
 		var label = String(this.args[0]);
 		var minutes = setup.time.resolveMinutes(this.args[1]);
 		var actionType = this.args.length > 2 ? String(this.args[2]) : 'generic';
@@ -233,14 +226,12 @@ Macro.add('timedlink', {
 		var safeActionType = actionType
 			.replace(/\\/g, '\\\\')
 			.replace(/"/g, '\\"');
-
 		new Wikifier(
 			this.output,
 			'<<link "' + renderedLabel + '">><<set _timedActionAllowed = setup.time.advanceMinutesWithSystems(' + minutes + ', "' + safeActionType + '")>><<if _timedActionAllowed>>' + this.payload[0].contents + '<<else>><<run Dialog.setup("Action unavailable")>><<run Dialog.wiki(State.variables.timedActionFailure)>><<run Dialog.open()>><</if>><</link>>' + setup.effects.describeHtml(effects)
 		);
 	}
 });
-
 // Normalizes persistent settings variables so every new session starts from a known state.
 Macro.add('initsettings', {
 	handler: function() {
@@ -255,6 +246,7 @@ Macro.add('initsettings', {
 		setup.initializeStateVar('imperialUnits', false);
 		setup.initializeStateVar('showYardTargets', false);
 		setup.initializeStateVar('autosaveOnSleep', true);
+		setup.initializeStateVar('preserveScroll', true);
 		setup.initializeStateVar('enableHistoryControls', false);
 		setup.initializeStateVar('debugMode', false);
 		setup.initializeStateVar('debugSelectedTrackIndex', 0);
@@ -263,14 +255,13 @@ Macro.add('initsettings', {
 		setup.applyHistorySetting();
 	}
 });
-
 // The title screen always begins a fresh run.  Settings stay available there, but no visited yards, journey
 // position, tutorial state, or carried train can leak out of the browser's cached story state into the next game.
 setup.startNewRun = function() {
 	var v = State.variables;
 	// Preferences and static catalogues survive a new run; everything else belongs to that run.
 	var keep = ['settingsMode', 'settingsExitPassage', 'randomSeed', 'use24HourTime', 'dateFormat',
-		'imperialUnits', 'showYardTargets', 'autosaveOnSleep', 'enableHistoryControls', 'debugMode',
+		'imperialUnits', 'showYardTargets', 'autosaveOnSleep', 'preserveScroll', 'enableHistoryControls', 'debugMode',
 		'defaultTrains', 'cargoTypes'];
 	Object.keys(v).forEach(function(key) { if (keep.indexOf(key) === -1) delete v[key]; });
 	Object.assign(v, { player: { fatigue: 0, health: 100, immunity: 100, sanity: 100, hunger: 100, thirst: 100 },
@@ -281,9 +272,9 @@ setup.startNewRun = function() {
 	if (setup.railyardView) setup.railyardView.zoomLevel = 'fit';
 	if (setup.bugReport) setup.bugReport.recent = [];
 	setup.debugReturnToPanel = false;
+	if (setup.journal) setup.journal.get();
 };
 Macro.add('startNewGame', { handler: function() { setup.startNewRun(); } });
-
 // Release metadata is used both for the title screen and build-integrity popup.
 setup.releaseVersion = '0.2.0';
 setup.buildCheckDone = false;
@@ -291,7 +282,6 @@ setup.enableBuildChangeAlert = true;
 setup.buildCacheStorageKey = 'ashline.buildMeta';
 setup.currentBuildChecksum = '';
 setup.cachedBuildChecksum = '';
-
 // Build checksums warn players when a save is being opened against a newer story build.
 // Uses a lightweight FNV-style hash to fingerprint the current story source.
 setup.hashString = function(str) {
@@ -302,7 +292,6 @@ setup.hashString = function(str) {
 	}
 	return (h >>> 0).toString(16);
 };
-
 // Reads the current `tw-storydata` payload and hashes it so saves can detect source changes.
 setup.getBuildChecksum = function() {
 	var storyData = document.querySelector('tw-storydata');
@@ -312,7 +301,6 @@ setup.getBuildChecksum = function() {
 	var source = storyData.outerHTML || storyData.innerHTML || '';
 	return this.hashString(source);
 };
-
 // Reads cached build metadata from local storage if it exists and is structurally valid.
 setup.readCachedBuildMeta = function() {
 	try {
@@ -329,7 +317,6 @@ setup.readCachedBuildMeta = function() {
 		return null;
 	}
 };
-
 // Persists build metadata locally so future sessions can compare old and current builds.
 setup.writeCachedBuildMeta = function(meta) {
 	try {
@@ -338,13 +325,11 @@ setup.writeCachedBuildMeta = function(meta) {
 		// Ignore cache write failures (private mode/storage restrictions).
 	}
 };
-
 // Performs a one-time per-session build mismatch check and stores both warning and last-known build values.
 setup.runBuildIntegrityCheck = function() {
 	if (this.buildCheckDone) {
 		return State.variables.pendingBuildNotice || '';
 	}
-
 	this.buildCheckDone = true;
 	var currentChecksum = this.getBuildChecksum();
 	var currentVersion = this.releaseVersion;
@@ -355,14 +340,12 @@ setup.runBuildIntegrityCheck = function() {
 		console.log('[Ashline Build Check] Cached checksum:', this.cachedBuildChecksum || '(none)');
 		console.log('[Ashline Build Check] Detected checksum:', this.currentBuildChecksum || '(unavailable)');
 	}
-
 	var previousChecksum = State.variables.lastPlayedBuildChecksum;
 	var previousVersion = State.variables.lastPlayedReleaseVersion;
 	if (typeof previousChecksum !== 'string' && cachedMeta && typeof cachedMeta.checksum === 'string') {
 		previousChecksum = cachedMeta.checksum;
 		previousVersion = cachedMeta.version || previousVersion;
 	}
-
 	var notice = '';
 	if (typeof previousChecksum === 'string' && previousChecksum !== currentChecksum) {
 		var currentShort = currentChecksum.slice(0, 8);
@@ -372,20 +355,16 @@ setup.runBuildIntegrityCheck = function() {
 			window.alert(notice);
 		}
 	}
-
 	State.variables.pendingBuildNotice = notice;
 	State.variables.lastPlayedBuildChecksum = currentChecksum;
 	State.variables.lastPlayedReleaseVersion = currentVersion;
 	this.writeCachedBuildMeta({ checksum: currentChecksum, version: currentVersion, checkedAt: Date.now() });
-
 	return notice;
 };
-
 // Runs the build check once the story is ready so warning state is available before gameplay passages.
 jQuery(document).one(':storyready', function () {
 	setup.runBuildIntegrityCheck();
 });
-
 // Loading another save in the same tab must compare that save's build metadata too.
 Save.onLoad.add(function (save) {
 	setup.buildCheckDone = false;
@@ -401,7 +380,6 @@ Save.onLoad.add(function (save) {
 		});
 	}
 });
-
 // Forces the build-integrity check to run when a passage asks for it, but leaves the warning popup-only.
 Macro.add('buildIntegrityNotice', {
 	handler: function() {
@@ -413,7 +391,6 @@ Macro.add('buildIntegrityNotice', {
 		}
 	}
 });
-
 // Opens an external-links credits dialog from the story menu.
 setup.showCreditsDialog = function() {
 	if (typeof Dialog === 'undefined') {
@@ -428,9 +405,9 @@ setup.showCreditsDialog = function() {
 		+ 'Ashline\'s Page on my Website</a>.</p>');
 	Dialog.open();
 };
-
 // Opens gameplay options currently focused on time-display preferences.
 setup.showOptionsDialog = function() {
+	setup.initializeStateVar('preserveScroll', true);
 	if (typeof Dialog === 'undefined') {
 		return;
 	}
@@ -445,13 +422,13 @@ setup.showOptionsDialog = function() {
 		+ '<label><<checkbox "$imperialUnits" false true autocheck>> Show distances, weights and temperatures in imperial</label>'
 		+ '<p><strong>The rail yard</strong></p>'
 		+ '<label><<checkbox "$showYardTargets" false true autocheck>> Show clickable areas on railyard</label>'
+		+ '<p><label><<checkbox "$preserveScroll" false true autocheck>> Keep page and map position for actions on the same page</label></p>'
 		+ '<p><strong>Saving</strong></p>'
 		+ '<label><<checkbox "$autosaveOnSleep" false true autocheck>> Autosave when you sleep</label><br>'
 		+ '<label><<checkbox "$enableHistoryControls" false true autocheck>> Enable passage back and forward controls</label>');
 	jQuery('#ui-dialog-body input').on('change', function() { setup.applyHistorySetting(); UIBar.update(); });
 	Dialog.open();
 };
-
 // Default rolling-stock definitions.
 State.variables.defaultTrains = {
 	// Locomotives: type says how a locomotive works (steam or diesel), model says which one it is. Each model sets
@@ -600,7 +577,6 @@ State.variables.defaultTrains = {
 		acceptedCargo: ['rigid'], fuelConsumption: [], tractiveCapacity: 0, length: 22
 	}
 };
-
 // Default cargo definitions.
 // Tags: 'aggregate'=loose bulk, 'rigid'=discrete items, 'liquid'=fluids,
 //        'solid fuel'/'liquid fuel'=loco-specific fuels
@@ -614,7 +590,6 @@ State.variables.cargoTypes = {
 	firewood:      { density: 0.4,  rarity: 'common',   tags: ['aggregate', 'solid fuel'] },
 	diesel:        { density: 0.85, rarity: 'uncommon', tags: ['liquid', 'liquid fuel'] }
 };
-
 // Core railyard helpers power train generation, placement, shunting, and debug tooling.
 setup.railyard = {
 	locomotiveKeys: ['dieselShunter', 'dieselRoad', 'steamShunter', 'steamPrairie'],
@@ -891,7 +866,13 @@ setup.railyard = {
 			return;
 		}
 		this.ensureSteamLocomotiveState(car);
+		if (enabled && !this.canLightFirebox(car)) return false;
 		car.fireboxEnabled = !!enabled;
+		return true;
+	},
+	canLightFirebox: function(car) {
+		return this.isSteamLocomotiveCar(car) && !car.broken && !setup.fuel.planSolidFuelMinute(car).starved
+			&& this.getCargoAmount(car, 'water') >= setup.fuel.WATER_LITRES_PER_MINUTE * setup.fuel.getFireboxScale(car);
 	},
 	// Toggles steam firebox state by index in the current consist.
 	toggleSteamFireboxByIndex: function(train, index) {
@@ -902,7 +883,7 @@ setup.railyard = {
 			return;
 		}
 		this.ensureSteamLocomotiveState(train[index]);
-		train[index].fireboxEnabled = !train[index].fireboxEnabled;
+		return this.setSteamFireboxEnabled(train[index], !train[index].fireboxEnabled);
 	},
 	// Steam production slows as pressure rises while the firebox still eats the same fuel, so the last few bar are
 	// the slow ones: a shunter is at working pressure in about three quarters of an hour and full in about two.
@@ -927,7 +908,7 @@ setup.railyard = {
 	},
 	// Runs one minute of steam-firebox simulation and handles auto-shutdown on missing fuel/water.
 	processSteamFireboxMinuteForCar: function(car) {
-		if (!this.isSteamLocomotiveCar(car)) {
+		if (!this.isSteamLocomotiveCar(car) || car.broken) {
 			return;
 		}
 		this.ensureSteamLocomotiveState(car);
@@ -960,11 +941,11 @@ setup.railyard = {
 			return -1;
 		}
 		var index = Number(State.variables && State.variables.currentCarIndex);
-		if (train[index] && train[index].tractiveCapacity > 0) {
+		if (train[index] && !train[index].broken && train[index].tractiveCapacity > 0) {
 			return index;
 		}
 		for (var i = 0; i < train.length; i++) {
-			if (train[i] && train[i].tractiveCapacity > 0) {
+			if (train[i] && !train[i].broken && train[i].tractiveCapacity > 0) {
 				return i;
 			}
 		}
@@ -977,7 +958,7 @@ setup.railyard = {
 	// Whether the locomotive being driven can provide traction right now.
 	isTrainDriveCapable: function(train) {
 		var car = this.getControllingLocomotive(train);
-		if (!car) {
+		if (!car || car.broken) {
 			return false;
 		}
 		if (this.isDieselLocomotiveCar(car)) {
@@ -1127,6 +1108,7 @@ setup.railyard = {
 		car.cargo = [];
 		car.acceptedCargo = [];
 		car.derelict = true;
+		car.broken = true;
 		car.name = 'derelict ' + car.type;
 		car.hasInterior = false;
 		car.facing = rng() < 0.5 ? -1 : 1;
@@ -1604,6 +1586,7 @@ setup.railyard = {
 			variables.travellingForward = !!towardExit;
 		}
 		variables.currentStation = destination;
+		if (setup.journal) setup.journal.visit(destination);
 		variables.drivingTrackIndex = arrivalTrackIndex;
 		variables.enteredTrainIndex = this.getDefaultEnteredTrainIndex(tracks, variables.drivingTrackIndex);
 		variables.journey = null;
@@ -1655,6 +1638,7 @@ setup.railyard = {
 		}
 		var journey = setup.worldmap.getJourney();
 		journey.branch = branchId;
+		if (setup.journal) setup.journal.travel();
 		journey.tileIndex = 0;
 		State.variables.journey = journey;
 		return true;
@@ -1670,6 +1654,7 @@ setup.railyard = {
 			journey.branch = null;
 		}
 		journey.tileIndex = step.toIndex;
+		if (setup.journal) setup.journal.travel();
 		State.variables.journey = journey;
 		if (step.arrivesAt) {
 			// Arriving forward means coming in on the next station's entry lead, and backing in means its exit lead.
@@ -1702,7 +1687,6 @@ setup.railyard = {
 				this.insertTrainIntoTrack(stationTracks, preferredTrackIndex, train, insertAt);
 				return true;
 			}
-
 			// If the preferred track is a finite yard track, allow overflow into entry/exit.
 			if (this.isYardTrackIndex(stationTracks, preferredTrackIndex) && !preferredTrack.infinite) {
 				var availableLength = Math.max(0, preferredTrack.length - this.getTrackOccupiedLength(preferredTrack));
@@ -1714,10 +1698,8 @@ setup.railyard = {
 						this.markTrainVisited(primaryPart);
 						this.markTrainVisited(overflowPart);
 					}
-
 					var insertAtSplit = Math.max(0, Math.min(preferredTrainIndex || 0, preferredTrack.trains.length));
 					this.insertTrainIntoTrack(stationTracks, preferredTrackIndex, primaryPart, insertAtSplit);
-
 					var resolvedOverflowIndex;
 					if (this.trackExists(stationTracks, overflowTrackIndex)) {
 						resolvedOverflowIndex = overflowTrackIndex;
@@ -1736,7 +1718,6 @@ setup.railyard = {
 				}
 			}
 		}
-
 		var yardIndices = this.getYardTrackIndices(stationTracks);
 		for (var yi = 0; yi < yardIndices.length; yi++) {
 			var yardTrack = stationTracks[yardIndices[yi]];
@@ -1745,7 +1726,6 @@ setup.railyard = {
 				return true;
 			}
 		}
-
 		if (this.trackExists(stationTracks, this.getEntryTrackIndex())) {
 			this.insertTrainIntoTrack(stationTracks, this.getEntryTrackIndex(), train);
 			return true;
@@ -1859,13 +1839,11 @@ setup.railyard = {
 		if (!tracks || !tracks[trackIndex] || !tracks[trackIndex].trains[trainIndex]) {
 			return;
 		}
-
 		if (carIndex === -1) {
 			tracks[trackIndex].trains.splice(trainIndex, 1);
 		} else {
 			tracks[trackIndex].trains[trainIndex].splice(carIndex, 1);
 		}
-
 		for (var i = 0; i < tracks.length; i++) {
 			tracks[i].trains = tracks[i].trains.filter(function(train) {
 				return train && train.length > 0;
@@ -2014,12 +1992,10 @@ setup.railyard = {
 		if (!tracks) {
 			return { ok: false, reason: 'No station tracks available.' };
 		}
-
 		aTrackIndex = parseInt(aTrackIndex, 10);
 		aTrainIndex = parseInt(aTrainIndex, 10);
 		bTrackIndex = parseInt(bTrackIndex, 10);
 		bTrainIndex = parseInt(bTrainIndex, 10);
-
 		if (isNaN(aTrackIndex) || isNaN(aTrainIndex) || isNaN(bTrackIndex) || isNaN(bTrainIndex)) {
 			return { ok: false, reason: 'Invalid train selection.' };
 		}
@@ -2032,7 +2008,6 @@ setup.railyard = {
 		if (aTrackIndex === bTrackIndex && aTrainIndex === bTrainIndex) {
 			return { ok: false, reason: 'Select two different trains.' };
 		}
-
 		var trainA = tracks[aTrackIndex].trains[aTrainIndex];
 		var trainB = tracks[bTrackIndex].trains[bTrainIndex];
 		if (aTrackIndex === bTrackIndex) {
@@ -2040,19 +2015,16 @@ setup.railyard = {
 			tracks[aTrackIndex].trains[bTrainIndex] = trainA;
 			return { ok: true };
 		}
-
 		var occupiedAWithoutA = this.getTrackOccupiedLength(tracks[aTrackIndex]) - this.getTrainLength(trainA);
 		var occupiedBWithoutB = this.getTrackOccupiedLength(tracks[bTrackIndex]) - this.getTrainLength(trainB);
 		var lengthA = this.getTrainLength(trainA);
 		var lengthB = this.getTrainLength(trainB);
-
 		if (!tracks[aTrackIndex].infinite && occupiedAWithoutA + lengthB > tracks[aTrackIndex].length) {
 			return { ok: false, reason: 'Train B does not fit on ' + this.getTrackLabel(tracks, aTrackIndex) + '.' };
 		}
 		if (!tracks[bTrackIndex].infinite && occupiedBWithoutB + lengthA > tracks[bTrackIndex].length) {
 			return { ok: false, reason: 'Train A does not fit on ' + this.getTrackLabel(tracks, bTrackIndex) + '.' };
 		}
-
 		tracks[aTrackIndex].trains[aTrainIndex] = trainB;
 		tracks[bTrackIndex].trains[bTrainIndex] = trainA;
 		return { ok: true };
@@ -2062,7 +2034,6 @@ setup.railyard = {
 		var train = [];
 		var trainLength = 0;
 		var forcedTrackBreak = false;
-
 		if (canSpawnLoco && rng() < 1 / 15) {
 			var locoKey = this.randomChoice(rng, this.locomotiveKeys);
 			var loco = this.createLocomotiveCar(locoKey);
@@ -2071,11 +2042,9 @@ setup.railyard = {
 				trainLength += loco.length;
 			}
 		}
-
 		var minCars = train.length ? 1 : 1;
 		var maxCars = this.randomInt(rng, 1, 3);
 		var carAttempts = 0;
-
 		while (carAttempts < maxCars) {
 			var carKey = this.randomChoice(rng, this.carKeys);
 			var car = this.cloneCar(State.variables.defaultTrains[carKey]);
@@ -2084,20 +2053,16 @@ setup.railyard = {
 				forcedTrackBreak = true;
 				break;
 			}
-
 			train.push(car);
 			trainLength += car.length;
 			carAttempts++;
-
 			if (carAttempts >= minCars && rng() < 0.35) {
 				break;
 			}
 		}
-
 		if (!train.length) {
 			return null;
 		}
-
 		return {train: train, forceNextTrack: forcedTrackBreak};
 	},
 	// Procedurally generates middle-yard tracks and train placements from a deterministic seed.
@@ -2110,7 +2075,6 @@ setup.railyard = {
 		// A clear road is the yard's escape valve: without one, every boundary crossover is locked and a player can
 		// be forced to couple an unrelated car merely to leave.  Reserve it before placing stock, not afterward.
 		var clearTrackIndex = Number.isInteger(reservedIndex) ? reservedIndex : this.randomInt(rng, 0, Math.max(0, trackCount - 1));
-
 		// Weighted toward fewer trains: 0 and 1 are most common, 4 is rare.
 		var pickTrainCount = function(rngFn) {
 			var r = rngFn();
@@ -2120,22 +2084,18 @@ setup.railyard = {
 			if (r < 0.93) return 3;
 			return 4;
 		};
-
 		for (var i = 0; i < trackCount; i++) {
 			var trackLength = lengths[i];
 			var track = {length: trackLength, trains: [], reservedClearance: i === clearTrackIndex};
 			var remaining = trackLength;
 			var trainsToGenerate = i === clearTrackIndex ? 0 : pickTrainCount(rng);
-
 			for (var t = 0; t < trainsToGenerate; t++) {
 				if (remaining < 12) {
 					break;
 				}
-
 				var train = [];
 				var trainLength = 0;
 				var carTarget = this.randomInt(rng, 1, 10);
-
 				// Occasional locomotive, or force one if none have spawned yet.
 				var shouldStartWithLoco = (!hasLoco && rng() < 0.45) || (hasLoco && rng() < 0.12);
 				if (shouldStartWithLoco) {
@@ -2147,7 +2107,6 @@ setup.railyard = {
 						hasLoco = true;
 					}
 				}
-
 				for (var c = train.length; c < carTarget; c++) {
 					var carKey = this.randomChoice(rng, this.carKeys);
 					var car = this.cloneCar(State.variables.defaultTrains[carKey]);
@@ -2158,7 +2117,6 @@ setup.railyard = {
 					train.push(car);
 					trainLength += car.length;
 				}
-
 				if (train.length) {
 					// Cars stand whichever way they were last left, and the drawing reads that rather than guessing.
 					for (var fi = 0; fi < train.length; fi++) {
@@ -2168,10 +2126,8 @@ setup.railyard = {
 					remaining -= trainLength;
 				}
 			}
-
 			tracks.push(track);
 		}
-
 		if (!hasLoco) {
 			for (var ti = 0; ti < tracks.length; ti++) {
 				if (ti === clearTrackIndex) continue;
@@ -2184,7 +2140,6 @@ setup.railyard = {
 				}
 			}
 		}
-
 		return tracks;
 	},
 	// Builds a full station layout (entry + generated yard + exit), with a fixed tutorial station at id 1.
@@ -2209,11 +2164,9 @@ setup.railyard = {
 				{ length: 999999, infinite: true, trains: [[tutorialFlatcar]], direction: this.getLegHeading(1, baseSeed) }
 			];
 		}
-
 		if (setup.worldmap.isBranchStation(stationId)) {
 			return this.generateBranchTerminus(stationId, baseSeed);
 		}
-
 		// The yard's shape is settled first: how many tracks it has, which track each lead runs along, and how
 		// long its longest track is. Every other length follows from that geometry, so no track is drawn at a
 		// length its switches could not give it.
@@ -2258,14 +2211,11 @@ setup.railyard = {
 		var tracks = [{ length: 999999, infinite: true, trains: [] }]
 			.concat(yardTracks)
 			.concat([{ length: 999999, infinite: true, trains: [] }]);
-
 		tracks[0].leadTrack = entryRow;
 		tracks[tracks.length - 1].leadTrack = exitRow;
-
 		// Each lead is named for where it points: ahead along the next leg, and back down the one just travelled.
 		tracks[0].direction = this.oppositeDirection(this.getLegHeading(stationId - 1, baseSeed));
 		tracks[tracks.length - 1].direction = this.getLegHeading(stationId, baseSeed);
-
 		setup.yardGeneration.reserve(tracks, stationId, baseSeed);
 		this.addDerelict(tracks, shapeRng);
 		setup.yardGeneration.validate(tracks);
@@ -2311,18 +2261,16 @@ setup.railyard = {
 				return i;
 			}
 		}
-
 		for (var j = 0; j < train.length; j++) {
 			if (train[j].hasInterior) {
 				return j;
 			}
 		}
-
 		return 0;
 	},
 	// Returns a grammatically correct location string for the current car.
 	getCarLocationText: function(car) {
-		return (car.hasInterior ? 'in the ' : 'on the ') + (car.name || car.type);
+		return (car.hasInterior ? 'in the ' : 'on the ') + (car.broken ? 'broken ' : '') + (car.name || car.type);
 	},
 	// Serializes car type names for compact consist labels.
 	getTrainCarListText: function(train) {
@@ -2390,7 +2338,7 @@ setup.railyard = {
 			return 'Unknown railcar';
 		}
 		if (car.name) {
-			return car.name.replace(/\b\w/g, function(letter) { return letter.toUpperCase(); });
+			return (car.broken ? 'Broken ' : '') + car.name.replace(/\b\w/g, function(letter) { return letter.toUpperCase(); });
 		}
 		var names = {
 			boxcar: 'Boxcar', flatcar: 'Flatcar', gondola: 'Gondola', 'tanker car': 'Tank car',
@@ -2398,7 +2346,7 @@ setup.railyard = {
 			'observation car': 'Passenger observation car', 'kitchen car': 'Passenger kitchen car',
 			'private car': 'Private rail car'
 		};
-		return names[car.type] || String(car.type || 'Railcar').replace(/\b\w/g, function(letter) { return letter.toUpperCase(); });
+		return (car.broken ? 'Broken ' : '') + (names[car.type] || String(car.type || 'Railcar').replace(/\b\w/g, function(letter) { return letter.toUpperCase(); }));
 	},
 	trainSummaryHtml: function(train, index) {
 		var trainLength = this.getTrainLength(train);
@@ -2429,7 +2377,6 @@ setup.railyard = {
 		return html;
 	}
 };
-
 // Presents the current station as a browseable list of tracks and trains, and lets the player board one.
 Macro.add('railyardButtons', {
 	handler: function() {
@@ -2458,7 +2405,6 @@ Macro.add('railyardButtons', {
 				output += '<p><em>Empty track (' + remaining + ' free).</em></p>';
 				continue;
 			}
-
 			// Boarding removes the selected train from the yard and turns it into the player's active consist.
 			for (var j = 0; j < tracks[i].trains.length; j++) {
 				output += setup.railyard.trainSummaryHtml(tracks[i].trains[j], displayNumber - 1);
@@ -2470,7 +2416,6 @@ Macro.add('railyardButtons', {
 		new Wikifier(this.output, output);
 	}
 });
-
 // Builds the full shunting UI from the player's current gap: cross-track moves, coupling, and push options.
 Macro.add('drivingMergeButtons', {
 	handler: function() {
@@ -2485,7 +2430,6 @@ Macro.add('drivingMergeButtons', {
 		}, this);
 	}
 });
-
 // Says where the consist stands on the line: how far along the leg, on what ground, and facing what grade.
 Macro.add('lineStatus', {
 	handler: function() {
@@ -2507,7 +2451,6 @@ Macro.add('lineStatus', {
 		new Wikifier(this.output, output);
 	}
 });
-
 // The moves available on the line: one 5 km tile at a time, onward or back the way you came.
 Macro.add('lineControls', {
 	handler: function() {
@@ -2530,6 +2473,7 @@ Macro.add('lineControls', {
 				+ 'Enter the train and work the firebox.</em></p>';
 			output += escapeLink;
 			output += '<<link "Enter the train">><<goto "TrainInterior">><</link>><br>';
+			output += '<<timedlink "Climb down from the train" 2 "generic">><<run setup.onfoot.climbDown()>><<goto "OnFoot">><</timedlink>><br>';
 			new Wikifier(this.output, output);
 			return;
 		}
@@ -2577,7 +2521,6 @@ Macro.add('lineControls', {
 		new Wikifier(this.output, output);
 	}
 });
-
 // Ensures driving mode always has a valid station, track, and player gap before any driving UI renders.
 Macro.add('initDrivingModeState', {
 	handler: function() {
@@ -2609,7 +2552,6 @@ Macro.add('initDrivingModeState', {
 		}
 	}
 });
-
 // Renders inter-station travel controls and explains why departure is blocked when the yard state forbids it.
 Macro.add('drivingTravelButtons', {
 	handler: function() {
@@ -2664,7 +2606,6 @@ Macro.add('drivingTravelButtons', {
 		new Wikifier(this.output, output);
 	}
 });
-
 // Lets the player split their current consist around the occupied car/gap and leave each section on the track layout.
 // Where the consist stands, which way it faces, and what it has left to burn.
 Macro.add('drivingStatus', {
@@ -2685,7 +2626,6 @@ Macro.add('drivingStatus', {
 		new Wikifier(this.output, output);
 	}
 });
-
 Macro.add('drivingShuntingControls', {
 	handler: function() {
 		[true, false].forEach(function(front) {
@@ -2699,12 +2639,10 @@ Macro.add('drivingShuntingControls', {
 		}, this);
 	}
 });
-
 // Debug tools are passage-aware: each passage gets only the controls that make sense for its current state.
 Macro.add('debugTools', {
 	handler: function() {
 		if (!State.variables.debugMode) return;
-
 		// This wrapper keeps all debug DOM isolated from story markup and makes it easy to rebuild on passage refresh.
 		var currentPassage = State.passage;
 		var panel = document.createElement('div');
@@ -2716,12 +2654,7 @@ Macro.add('debugTools', {
 		panel.appendChild(reportButton);
 		// Running a debug tool replays the passage. Without this the page would jump back to the top every time,
 		// which makes the tools unusable at the bottom of a long yard.
-		if (setup.debugReturnToPanel && typeof requestAnimationFrame === 'function') {
-			setup.debugReturnToPanel = false;
-			requestAnimationFrame(function() {
-				panel.scrollIntoView({ block: 'start' });
-			});
-		}
+		setup.debugReturnToPanel = false;
 		// Everything written from here lands in the section opened last, so each block of tools carries its own
 		// heading and can be folded out of the way. wrapper is reassigned rather than replaced so the many
 		// appendChild calls below need no rewriting.
@@ -2753,12 +2686,10 @@ Macro.add('debugTools', {
 			}
 			return { weightUsed: weightUsed, volumeUsed: volumeUsed };
 		};
-
 		var getMaxAmountForCargo = function (car, cargoType) {
 			var limits = getCapacityLimitsForCargo(car, cargoType);
 			return limits.max;
 		};
-
 		var getCapacityLimitsForCargo = function (car, cargoType) {
 			var load = getCurrentCargoLoad(car);
 			var density = (State.variables.cargoTypes[cargoType] || { density: 1 }).density;
@@ -2777,7 +2708,6 @@ Macro.add('debugTools', {
 				max: Math.max(0, Math.min(maxByWeightL, maxByVolumeL))
 			};
 		};
-
 		// Builds an interactive cargo editor for the selected car, including dynamic capacity limits and validation.
 		var buildAddCargoSection = function (car) {
 			if (!car || !car.acceptedCargo || !car.acceptedCargo.length) return;
@@ -2786,7 +2716,6 @@ Macro.add('debugTools', {
 			var h4 = document.createElement('h4');
 			h4.textContent = 'Add Cargo';
 			wrapper.appendChild(h4);
-
 			var typeLabel = document.createElement('label');
 			typeLabel.textContent = 'Type: ';
 			var typeSelect = document.createElement('select');
@@ -2799,7 +2728,6 @@ Macro.add('debugTools', {
 			}
 			typeLabel.appendChild(typeSelect);
 			wrapper.appendChild(typeLabel);
-
 			var qtyLabel = document.createElement('label');
 			qtyLabel.textContent = ' Amount: ';
 			var qtyInput = document.createElement('input');
@@ -2817,7 +2745,6 @@ Macro.add('debugTools', {
 			breakdown.style.fontSize = '0.9em';
 			breakdown.style.opacity = '0.9';
 			breakdown.textContent = 'Weight limit: ' + initLimits.weight + 'L | Volume limit: ' + initLimits.volume + 'L | Applied max: ' + initLimits.max + 'L';
-
 			typeSelect.addEventListener('change', function () {
 				var limits = getCapacityLimitsForCargo(car, this.value);
 				var newMax = limits.max;
@@ -2828,7 +2755,6 @@ Macro.add('debugTools', {
 					qtyInput.value = String(Math.max(0, newMax));
 				}
 			});
-
 			qtyLabel.appendChild(qtyInput);
 			wrapper.appendChild(qtyLabel);
 			var gradeLabel = document.createElement('label');
@@ -2847,7 +2773,6 @@ Macro.add('debugTools', {
 			wrapper.appendChild(document.createElement('br'));
 			wrapper.appendChild(breakdown);
 			wrapper.appendChild(document.createElement('br'));
-
 			var addBtn = document.createElement('button');
 			addBtn.textContent = 'Add Cargo';
 			addBtn.addEventListener('click', function () {
@@ -2879,10 +2804,10 @@ Macro.add('debugTools', {
 			+ (cachedBuild && cachedBuild.checksum && cachedBuild.checksum !== currentBuildChecksum
 				? ' (last played ' + cachedBuild.checksum.slice(0, 8) + ')' : '');
 		panel.appendChild(status);
-
 		// A live reference sheet for balancing and debugging. Every value comes straight from the definitions the game
 		// is using, so it cannot drift from the train, fuel or pack systems as a separately written wiki would.
 		startSection('Reference data');
+		wrapper.parentElement.classList.add('procedural-wiki');
 		var addReferenceTable = function(title, headings, rows) {
 			var block = document.createElement('details');
 			var summary = document.createElement('summary');
@@ -2931,7 +2856,19 @@ Macro.add('debugTools', {
 			var item = catalogue[key];
 			return [item.name || key, (item.width || 1) + ' × ' + (item.height || 1), (item.weightKg || 0) + ' kg', item.stack || 1];
 		}));
-
+		addReferenceTable('Food preparation', ['Rule', 'Value'], [
+			['Raw portion', setup.food.PORTION_KG + ' kg / +' + setup.food.RAW_HUNGER + ' Hunger'],
+			['Recipe input', setup.food.RECIPE_PORTIONS * setup.food.PORTION_KG + ' kg food'],
+			['Basic yield', setup.food.BASIC_YIELD + ' rations'], ['Intact kitchen yield', setup.food.KITCHEN_YIELD + ' rations'],
+			['Ration', '+' + setup.condition.RATION_HUNGER + ' Hunger']
+		]);
+		addReferenceTable('Station depots', ['Resource', 'Initial volume'], Object.keys(setup.recovery.INITIAL_STOCK).map(function(type) {
+			return [type, setup.recovery.INITIAL_STOCK[type] + ' L'];
+		}));
+		addReferenceTable('Broken stock', ['Stock', 'Probability'], [
+			['Passenger', setup.yardGeneration.BROKEN_PASSENGER_CHANCE * 100 + '%'],
+			['Other generated stock', setup.yardGeneration.BROKEN_FREIGHT_CHANCE * 100 + '%'], ['Reserved escape engine', '0%']
+		]);
 		// Time of day drives the lighting of the yard and driving views, so debug can jump the clock to any hour.
 		startSection('Clock and light', true);
 		var lightInfo = document.createElement('p');
@@ -2958,7 +2895,6 @@ Macro.add('debugTools', {
 		});
 		lightInfo.appendChild(hourButton);
 		wrapper.appendChild(lightInfo);
-
 		// The player's condition, for setting a stat straight to a value worth testing against.
 		startSection('Condition');
 		var conditionLabel = document.createElement('label');
@@ -2992,12 +2928,10 @@ Macro.add('debugTools', {
 		wrapper.appendChild(conditionValue);
 		wrapper.appendChild(conditionBtn);
 		wrapper.appendChild(document.createElement('br'));
-
 		// The generated world between this station and the next, read straight from the seed. Deliberately plain:
 		// it is here to check what the generator produced, not to be a player-facing map.
 		startSection('World map');
 		setup.worldmap.appendDebugMap(wrapper, State.variables.currentStation);
-
 		// TrainInterior debug mode focuses on cargo editing for the active consist and current car.
 		if (currentPassage === 'TrainInterior') {
 			startSection('Cargo', true);
@@ -3006,24 +2940,20 @@ Macro.add('debugTools', {
 				wiki('<p><em>No active train available.</em></p>');
 				return;
 			}
-
 			var currentCarIndex = State.variables.currentCarIndex;
 			if (typeof currentCarIndex === 'undefined' || currentCarIndex < 0 || currentCarIndex >= currentTrain.length) {
 				currentCarIndex = setup.railyard.getBoardingCarIndex(currentTrain);
 				State.variables.currentCarIndex = currentCarIndex;
 			}
-
 			var currentCar = currentTrain[currentCarIndex];
 			var interiorInfo = document.createElement('p');
 			interiorInfo.textContent = 'Current car: ' + currentCar.type + ' (car ' + (currentCarIndex + 1) + ' of ' + currentTrain.length + ')';
 			wrapper.appendChild(interiorInfo);
-
 			wiki('<<link "Clear Current Car Cargo">><<run setup.debugReturnToPanel = true>><<run State.variables.currentTrain[State.variables.currentCarIndex].cargo = []>><<goto "TrainInterior">><</link>><br>');
 			wiki('<<link "Clear Current Train Cargo">><<run setup.debugReturnToPanel = true>><<run (function() { for (var i = 0; i < State.variables.currentTrain.length; i++) { State.variables.currentTrain[i].cargo = []; } })()>><<goto "TrainInterior">><</link>><br>');
 			buildAddCargoSection(currentCar);
 			return;
 		}
-
 		// DrivingMode debug output is intentionally read-only for now so shunting logic is not bypassed accidentally.
 		if (currentPassage === 'DrivingMode') {
 			startSection('Consist', true);
@@ -3038,38 +2968,31 @@ Macro.add('debugTools', {
 			}
 			return;
 		}
-
 		// The railyard debug panel is the full editor: selection, deletion, cargo editing, swapping, and track management.
 		if (currentPassage !== 'Railyard') {
 			startSection('Yard', true);
 			wiki('<p><em>This passage has no yard tools.</em></p>');
 			return;
 		}
-
 		var stationId = State.variables.currentStation;
 		if (typeof State.variables.stationTracks[stationId] === 'undefined') {
 			startSection('Yard', true);
 			wiki('<p><em>No station track data available.</em></p>');
 			return;
 		}
-
 		var tracks = State.variables.stationTracks[stationId];
-
 		// Count total trains
 		var totalTrains = 0;
 		for (var t = 0; t < tracks.length; t++) {
 			totalTrains += tracks[t].trains.length;
 		}
-
 		if (!totalTrains) {
 			startSection('Yard', true);
 			wiki('<p><em>No trains in this yard.</em></p>');
 		}
-
 		// Build the train/car selectors first so every later debug action has a stable target.
 		if (totalTrains > 0) {
 			startSection('Train and car selection', true);
-
 			// Build train dropdown
 			var trainEntries = [];
 			var trainNumber = 1;
@@ -3084,7 +3007,6 @@ Macro.add('debugTools', {
 					trainNumber++;
 				}
 			}
-
 			var selectedTrackIndex = Math.max(0, Math.min(State.variables.debugSelectedTrackIndex || 0, tracks.length - 1));
 			var selectedTrack = tracks[selectedTrackIndex];
 			var selectedTrainIndex = selectedTrack && selectedTrack.trains.length > 0
@@ -3094,10 +3016,8 @@ Macro.add('debugTools', {
 				selectedTrackIndex = trainEntries[0].trackIndex;
 				selectedTrainIndex = trainEntries[0].trainIndex;
 			}
-
 			State.variables.debugSelectedTrackIndex = selectedTrackIndex;
 			State.variables.debugSelectedTrainIndex = selectedTrainIndex;
-
 			var trainLabel = document.createElement('label');
 			trainLabel.textContent = 'Select Train: ';
 			var trainSelect = document.createElement('select');
@@ -3123,11 +3043,9 @@ Macro.add('debugTools', {
 			wrapper.appendChild(trainLabel);
 			wrapper.appendChild(document.createElement('br'));
 			wrapper.appendChild(document.createElement('br'));
-
 			// Re-resolve selected references after dropdown normalization to avoid stale indices.
 			selectedTrack = tracks[State.variables.debugSelectedTrackIndex];
 			var selectedTrain = selectedTrack && selectedTrack.trains[State.variables.debugSelectedTrainIndex];
-
 			if (selectedTrain) {
 				// Car-level targeting supports both whole-train and single-car actions.
 				var selectedCarIndex = State.variables.debugSelectedCarIndex;
@@ -3135,7 +3053,6 @@ Macro.add('debugTools', {
 				selectedCarIndex = -1;
 				State.variables.debugSelectedCarIndex = -1;
 			}
-
 			var carLabel = document.createElement('label');
 			carLabel.textContent = 'Select Target: ';
 			var carSelect = document.createElement('select');
@@ -3161,9 +3078,7 @@ Macro.add('debugTools', {
 			wrapper.appendChild(carLabel);
 			wrapper.appendChild(document.createElement('br'));
 			wrapper.appendChild(document.createElement('br'));
-
 			var targetName = State.variables.debugSelectedCarIndex === -1 ? 'Train' : 'Car ' + (State.variables.debugSelectedCarIndex + 1);
-
 				startSection('Actions on the selected train', true);
 				wiki('<<link "Delete ' + targetName + '">><<run setup.railyard.deleteDebugTarget(State.variables.currentStation, State.variables.debugSelectedTrackIndex, State.variables.debugSelectedTrainIndex, State.variables.debugSelectedCarIndex)>><<goto "Railyard">><</link>><br>');
 				wiki('<<link "Clear Cargo of ' + targetName + '">><<run (function() { if (State.variables.debugSelectedCarIndex === -1) { var train = State.variables.stationTracks[State.variables.currentStation][State.variables.debugSelectedTrackIndex].trains[State.variables.debugSelectedTrainIndex]; for (var i = 0; i < train.length; i++) { train[i].cargo = []; } } else { State.variables.stationTracks[State.variables.currentStation][State.variables.debugSelectedTrackIndex].trains[State.variables.debugSelectedTrainIndex][State.variables.debugSelectedCarIndex].cargo = []; } })()>><<goto "Railyard">><</link>><br><br>');
@@ -3172,7 +3087,6 @@ Macro.add('debugTools', {
 				}
 			}
 		}
-
 		// Swapping is separated from deletion/editing because it needs two train selections and fit validation.
 		if (totalTrains >= 2) {
 			startSection('Swap two trains');
@@ -3189,7 +3103,6 @@ Macro.add('debugTools', {
 					swapNumber++;
 				}
 			}
-
 			var swapALabel = document.createElement('label');
 			swapALabel.textContent = 'Train A: ';
 			var swapASelect = document.createElement('select');
@@ -3203,7 +3116,6 @@ Macro.add('debugTools', {
 			swapALabel.appendChild(swapASelect);
 			wrapper.appendChild(swapALabel);
 			wrapper.appendChild(document.createElement('br'));
-
 			var swapBLabel = document.createElement('label');
 			swapBLabel.textContent = 'Train B: ';
 			var swapBSelect = document.createElement('select');
@@ -3220,12 +3132,10 @@ Macro.add('debugTools', {
 			swapBLabel.appendChild(swapBSelect);
 			wrapper.appendChild(swapBLabel);
 			wrapper.appendChild(document.createElement('br'));
-
 			var swapStatus = document.createElement('div');
 			swapStatus.className = 'small-description';
 			swapStatus.style.margin = '6px 0';
 			wrapper.appendChild(swapStatus);
-
 			var swapBtn = document.createElement('button');
 			swapBtn.textContent = 'Swap Selected Trains';
 			swapBtn.addEventListener('click', function () {
@@ -3248,7 +3158,6 @@ Macro.add('debugTools', {
 			wrapper.appendChild(document.createElement('br'));
 			wrapper.appendChild(document.createElement('br'));
 		}
-
 		// Placement and track management live at the end because they mutate the yard layout itself.
 		startSection('Place a new train');
 		var placeTrackLabel = document.createElement('label');
@@ -3269,7 +3178,6 @@ Macro.add('debugTools', {
 		placeTrackLabel.appendChild(placeTrackSelect);
 		wrapper.appendChild(placeTrackLabel);
 		wrapper.appendChild(document.createElement('br'));
-
 		var trainTypeLabel = document.createElement('label');
 		trainTypeLabel.textContent = 'Select Car Type: ';
 		var trainTypeSelect = document.createElement('select');
@@ -3284,9 +3192,7 @@ Macro.add('debugTools', {
 		trainTypeLabel.appendChild(trainTypeSelect);
 		wrapper.appendChild(trainTypeLabel);
 		wrapper.appendChild(document.createElement('br'));
-
 		wiki('<<link "Place Train">><<run (function() { var trackIdx = parseInt(document.getElementById("debugPlaceTrackSelect").value, 10); var carType = document.getElementById("debugTrainTypeSelect").value; var newTrain = setup.railyard.createTrainFromPreset(carType); if (!newTrain.length) { return; } setup.railyard.placeTrainInStationTracks(State.variables.stationTracks[State.variables.currentStation], newTrain, trackIdx); })()>><<goto "Railyard">><</link>><br>');
-
 		startSection('Track management');
 		var deleteTrackLabel = document.createElement('label');
 		deleteTrackLabel.textContent = 'Delete Yard Track: ';
@@ -3303,7 +3209,6 @@ Macro.add('debugTools', {
 		deleteTrackLabel.appendChild(deleteTrackSelect);
 		wrapper.appendChild(deleteTrackLabel);
 		wrapper.appendChild(document.createElement('br'));
-
 		var deleteTrackBtn = document.createElement('button');
 		deleteTrackBtn.textContent = 'Delete Track';
 		deleteTrackBtn.disabled = deleteTrackSelect.options.length <= 1;
@@ -3316,7 +3221,6 @@ Macro.add('debugTools', {
 		wrapper.appendChild(deleteTrackBtn);
 		wrapper.appendChild(document.createElement('br'));
 		wrapper.appendChild(document.createElement('br'));
-
 		var connectionTrackLabel = document.createElement('label');
 		connectionTrackLabel.textContent = 'Track Connections: ';
 		var connectionTrackSelect = document.createElement('select');
@@ -3355,7 +3259,6 @@ Macro.add('debugTools', {
 		wrapper.appendChild(connectionBtn);
 		wrapper.appendChild(document.createElement('br'));
 		wrapper.appendChild(document.createElement('br'));
-
 		var leadLabel = document.createElement('label');
 		leadLabel.textContent = 'Lead Tracks: ' + setup.railyard.getTrackLabel(tracks, 0) + ' on ';
 		wrapper.appendChild(leadLabel);
@@ -3390,7 +3293,6 @@ Macro.add('debugTools', {
 		wrapper.appendChild(leadBtn);
 		wrapper.appendChild(document.createElement('br'));
 		wrapper.appendChild(document.createElement('br'));
-
 		// Options that would strand the player (no entry and no exit) or lose trains are listed but disabled.
 		var leadModesLabel = document.createElement('label');
 		leadModesLabel.textContent = 'Station Leads: ';
@@ -3423,7 +3325,6 @@ Macro.add('debugTools', {
 		wrapper.appendChild(leadModesBtn);
 		wrapper.appendChild(document.createElement('br'));
 		wrapper.appendChild(document.createElement('br'));
-
 		// The headings the two leads point along. Generated stations take these from the route's own legs.
 		var directionsLabel = document.createElement('label');
 		directionsLabel.textContent = 'Lead Directions: back ';
@@ -3455,7 +3356,6 @@ Macro.add('debugTools', {
 		wrapper.appendChild(directionsBtn);
 		wrapper.appendChild(document.createElement('br'));
 		wrapper.appendChild(document.createElement('br'));
-
 		var addTrackLabel = document.createElement('label');
 		addTrackLabel.textContent = 'New Track Length (m): ';
 		var addTrackInput = document.createElement('input');
@@ -3467,7 +3367,6 @@ Macro.add('debugTools', {
 		addTrackLabel.appendChild(addTrackInput);
 		wrapper.appendChild(addTrackLabel);
 		wrapper.appendChild(document.createElement('br'));
-
 		var addTrackBtn = document.createElement('button');
 		addTrackBtn.textContent = 'Add Track';
 		addTrackBtn.disabled = setup.railyard.getYardTrackIndices(tracks).length >= 15;

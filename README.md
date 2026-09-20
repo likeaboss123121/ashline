@@ -19,6 +19,17 @@ consist and recent actions. Review it before sharing; it includes your current g
 
 ## Building from source
 
+### 0.2.0 development systems
+
+- `source/food.js`: portable raw food, rations, kitchen yield and carried water.
+- `source/recovery.js`: finite depot stocks and weight-limited on-foot fuel recovery. Default depot volumes
+  are 12,000 L diesel, 5,000 L coal and 30,000 L water; nearby exhausted depots require longer supply runs.
+- `source/saves.js`: live-state snapshots, independent sleep autosave, confirmations and validated file imports.
+- `source/interface.js`: separate debug/wiki side tabs and optional same-passage scroll retention.
+- `source/journal.js`: saved journey counters. Help and Journal passages intentionally contain authoring placeholders.
+
+Test saves still share storage with the main game by design. Schema migration and production release remain deferred.
+
 The game compiles to a single HTML file with [Tweego](https://github.com/tmedwards/tweego), a command-line compiler for Twine stories. Tweego is not included in this repository.
 
 ### Requirements

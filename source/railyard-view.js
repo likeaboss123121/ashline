@@ -19,7 +19,6 @@ setup.railyardView = {
 	GROUND_HALF_WIDTH_UNITS: 16, // how far the ground reaches past each track's centreline
 	PADDING: 6,
 	LABEL_OFFSET_UNITS: 22, // track labels sit this far left of the entry ladder, clear of the ground's edge
-
 	getTemplate: function(name) {
 		if (!this.templatesByName) {
 			this.templatesByName = {};
@@ -30,7 +29,6 @@ setup.railyardView = {
 		}
 		return this.templatesByName[name] || null;
 	},
-
 	// Tweego bundles each template SVG as an image passage whose text is a data URI.
 	getImageSource: function(name) {
 		if (!Story.has(name)) {
@@ -39,13 +37,11 @@ setup.railyardView = {
 		var passage = Story.get(name);
 		return passage.tags.includes('Twine.image') ? String(passage.text).trim() : '';
 	},
-
 	// Named parts that belong on the rail layer. Everything else in a track piece is its bed.
 	TRACK_HIT_HALF_BAND: 14, // one consistent finger/mouse band for rails and parked trains
 	TRAIN_HIT_HALF_BAND: 14,
 	GROUND_COLOUR: '#2b302d', // .railyard-ground in railyard.css, graded here at dusk and night
 	RAIL_PARTS: ['rails', 'diagonal-rails', 'diagonal-up-rails', 'branch-rails', 'selection'],
-
 	// Copies a template's shapes out of its image passage. Returns a <g> with the whole template, plus
 	// separate bed, branch-rail, ladder-rail, and straight-rail groups, painted in that order across the yard.
 	createTemplateGroups: function(name, id) {
@@ -89,11 +85,9 @@ setup.railyardView = {
 		}
 		return groups;
 	},
-
 	project: function(u, v) {
 		return { x: u - v, y: (u + v) / 2 };
 	},
-
 	// Every car records which way it physically points (setup.railyard.getCarFacing): 1 towards the station's
 	// exit, -1 the other way. Shunting never turns a car round, so the facing survives coupling, decoupling and
 	// travel; seeing the yard from its other end is what swaps left for right on screen.
@@ -111,11 +105,9 @@ setup.railyardView = {
 		if (passenger[type]) return 'railyard-car-' + passenger[type];
 		return 'railyard-car-boxcar';
 	},
-
 	getTrackBadge: function(index) {
 		return (index < 10 ? '0' : '') + index;
 	},
-
 	// The trains on one track in entry-to-exit order, with the player's consist in its gap.
 	getTrainGroups: function(track, trackIndex, player) {
 		var trains = Array.isArray(track.trains) ? track.trains : [];
@@ -131,7 +123,6 @@ setup.railyardView = {
 		}
 		return groups;
 	},
-
 	getGroupsLength: function(groups) {
 		var total = 0;
 		for (var g = 0; g < groups.length; g++) {
@@ -139,7 +130,6 @@ setup.railyardView = {
 		}
 		return total + Math.max(0, groups.length - 1) * this.TRAIN_GAP_METRES;
 	},
-
 	// Lays trains out toward the exit (+u) from startMetres. Each car array runs front to rear,
 	// so a train's last car comes first.
 	packForward: function(groups, startMetres, v, cars, trackIndex, reversed) {
@@ -161,7 +151,6 @@ setup.railyardView = {
 			}
 		}
 	},
-
 	// Lays trains out toward the entry (-u), ending at endMetres. Used on the entry lead,
 	// where the last train in the list is the one nearest the yard.
 	packBackward: function(groups, endMetres, v, cars, trackIndex, reversed) {
@@ -181,7 +170,6 @@ setup.railyardView = {
 			}
 		}
 	},
-
 	// Places every track piece, car, and label in world coordinates (u in metres, v in units).
 	//
 	// The yard is always drawn the same way round, with the entry lead on the left, whatever compass headings the
@@ -213,7 +201,6 @@ setup.railyardView = {
 		};
 		tracks.forEach(function(track) { result.trainCount += Array.isArray(track.trains) ? track.trains.length : 0; });
 		var r;
-
 		var rowV = function(row) { return (Math.max(1, row) - 1) * spacing; };
 		// The yard is drawn from the player's point of view: the lead they arrived on is always at the top left and
 		// the way onward runs to the bottom right, so driving on is always to the right. Arriving from the other end
@@ -241,7 +228,6 @@ setup.railyardView = {
 		};
 		var entryRow = leadRowAt('entry');
 		var exitRow = leadRowAt('exit');
-
 		// Every yard track is drawn at its own length, so a 350 m track is visibly a third of a 950 m one. The
 		// generator lays out lengths that fit the ladder, so the merges come out one junction apart; a length
 		// that does not fit is still drawn honestly, and the track it cannot reach gets a buffer stop.
@@ -253,7 +239,6 @@ setup.railyardView = {
 			var stated = trackAt(r).infinite ? content + this.FREE_STUB_METRES : Number(trackAt(r).length) || 0;
 			sections[r] = roundUp(Math.max(this.MIN_SECTION_METRES, stated, content));
 		}
-
 		// A ladder runs from its lead's track to the farthest tracks, above and below, that connect on its side.
 		var extents = function(side, leadRow) {
 			var ext = { top: leadRow, bottom: leadRow, any: false };
@@ -302,7 +287,6 @@ setup.railyardView = {
 		// rail out to its ladder; the renderer must never invent a buffer on a route the planner permits.
 		var reachesLadder = function(row) { return row >= 1 && row <= yardCount && connects(row).exit; };
 		var deadExit = {};
-
 		// Entry lead: arrives from off the map along the entry track's line and ends at the ladder (u = 0).
 		var entryV = rowV(entryRow);
 		if (leads.entry) {
@@ -334,7 +318,6 @@ setup.railyardView = {
 				+ ' free of ' + setup.units.metres(entryTrack.length) : entryName,
 				u: -entryLead, v: entryV, dx: -3, dy: 2, anchor: 'end', player: isOn(arrivalIndex) });
 		}
-
 		// Entry ladders. The lead's own track gets a Y switch (or one branching both ways); tracks the ladder
 		// continues past get YY switches; tracks that do not connect are passed with a plain diagonal.
 		var hasEntryStraight = {};
@@ -358,7 +341,6 @@ setup.railyardView = {
 			for (r = entryRow + 1; r < entry.bottom; r++) piece(entryPiece(r, false), entryJunction(r), rowV(r));
 			for (r = entryRow - 1; r > entry.top; r--) piece(entryPiece(r, true), entryJunction(r), rowV(r));
 		}
-
 		// Exit ladders. A merge piece sits where a track leaves toward the exit track, and carries the straight
 		// of the track it joins. When ladders join the exit track from both sides, one piece joins both.
 		var hasExitStraight = {};
@@ -396,7 +378,6 @@ setup.railyardView = {
 				hasExitStraight[exitRow] = true;
 			}
 		}
-
 		// Yard tracks.
 		for (r = 1; r <= yardCount; r++) {
 			var v = rowV(r);
@@ -441,7 +422,6 @@ setup.railyardView = {
 				u1: ends.exit || !exitStubRoom ? end : end + tile,
 				v: v
 			});
-
 			// Each label sits beside the junction where its track meets the entry ladder, where no car can cover it,
 			// and clear of the rails: to the left of the junction for the entry track and nearer tracks, and further
 			// out to the left for tracks up the ladder, whose junctions share one screen row. Putting those above
@@ -460,7 +440,6 @@ setup.railyardView = {
 				u1: ends.exit || !exitStubRoom ? end : end + tile, v: v
 			});
 		}
-
 		// Exit lead: leaves the ladder along the exit track's line and runs off the map.
 		if (leads.exit) {
 			var exitV = rowV(exitRow);
@@ -495,7 +474,6 @@ setup.railyardView = {
 		result.flipped = flipped;
 		return result;
 	},
-
 	// The view opens at the drawing's own size where that fits, and fitted where it does not, which is most yards on
 	// a phone: opening scrolled into a corner of a yard four times the width of the screen tells the player nothing.
 	// Fit squeezes a whole yard in. The level lives on setup rather than in the save: it is how the player is
@@ -590,7 +568,6 @@ setup.railyardView = {
 		}
 		return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 	},
-
 	// What clicking a target would do: the text links that match it, or the reason there are none. Nothing is
 	// decided here; these are the same links the controls below the view are showing.
 	actionsFor: function(svg, target) {
@@ -623,7 +600,6 @@ setup.railyardView = {
 			reason: links.length ? '' : (reason || 'Nothing can be done there from where you are standing.')
 		};
 	},
-
 	// A click on the drawing runs the text action that matches what was clicked. Nothing is decided here either:
 	// the link's own rules and time cost apply, and where there is no link the view repeats the reason the text
 	// list already gives, so the picture and the list can never disagree about what is possible.
@@ -673,7 +649,6 @@ setup.railyardView = {
 			self.showChoice(message, target, actions.links);
 		});
 	},
-
 	// The choice sits under the drawing rather than over it, so it never hides the yard and reads the same on a
 	// phone. Each button runs the text link it was built from, wording and time cost included.
 	// Marks the target a choice is about, so a touch screen shows what was tapped while the buttons are up. A tap
@@ -721,7 +696,6 @@ setup.railyardView = {
 		message.appendChild(document.createTextNode(' '));
 		message.appendChild(cancel);
 	},
-
 	// A compass in the yard's own projection: the lead the player is heading for runs to the bottom right, so the
 	// heading it carries points that way and the other three follow it round the ground plane. It turns with the
 	// view, so when the yard is drawn from its other end the compass is drawn from there too.
@@ -760,7 +734,6 @@ setup.railyardView = {
 		});
 		return svg;
 	},
-
 	// Dragging scrolls a zoomed-in yard, which is the only practical way to move around one on a phone.
 	addDragToPan: function(wrapper) {
 		var dragging = false;
@@ -790,7 +763,6 @@ setup.railyardView = {
 			});
 		});
 	},
-
 	convexHull: function(points) {
 		var pts = points.slice().sort(function(a, b) { return a.x - b.x || a.y - b.y; });
 		if (pts.length < 3) {
@@ -809,7 +781,6 @@ setup.railyardView = {
 		}
 		return lower.slice(0, -1).concat(upper.slice(0, -1));
 	},
-
 	render: function(tracks, player) {
 		var M = setup.railyardTemplates.unitsPerMetre;
 		var layout = this.layout(tracks, player);
@@ -817,7 +788,6 @@ setup.railyardView = {
 		var byDepth = function(a, b) { return a.v - b.v || a.u - b.u; };
 		var images = [];
 		var marker = null;
-
 		var place = function(name, uMetres, v, title, flat) {
 			var template = self.getTemplate(name);
 			if (!template) {
@@ -828,7 +798,6 @@ setup.railyardView = {
 			images.push(item);
 			return item;
 		};
-
 		// Paint back to front: all flat track pieces first, then cars from the farthest track to the nearest.
 		layout.flat.sort(byDepth).forEach(function(piece) {
 			place(piece.name, piece.u, piece.v, '', true);
@@ -861,7 +830,7 @@ setup.railyardView = {
 			if (entry.isPlayer && player && entry.carIndex === player.carIndex) {
 				// The car the player is in is the one with a lamp lit in it, drawn from its own definition so its
 				// windows keep their glow while every other cab stays dark.
-				item.lit = true;
+				item.lit = setup.items.isLocomotive(entry.car) && !entry.car.broken && !State.variables.onFoot;
 				if (item.template.top) {
 					marker = { x: item.left + item.template.top[0], y: item.top + item.template.top[1] };
 				}
@@ -880,7 +849,6 @@ setup.railyardView = {
 			});
 		});
 		var grounds = groundPoints.length >= 3 ? [this.convexHull(groundPoints)] : [];
-
 		// Size the drawing to fit the ground, every image, and every label.
 		var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
 		var extend = function(x0, y0, x1, y1) {
@@ -898,7 +866,6 @@ setup.railyardView = {
 		minY = Math.floor(minY - this.PADDING);
 		var width = Math.ceil(maxX + this.PADDING) - minX;
 		var height = Math.ceil(maxY + this.PADDING) - minY;
-
 		var ns = this.SVG_NS;
 		var svg = document.createElementNS(ns, 'svg');
 		svg.setAttribute('class', 'railyard-view');
@@ -908,14 +875,12 @@ setup.railyardView = {
 		svg.setAttribute('shape-rendering', 'crispEdges');
 		svg.setAttribute('role', 'img');
 		svg.setAttribute('aria-label', 'Rail yard: ' + tracks.length + ' tracks, ' + layout.trainCount + ' train' + (layout.trainCount === 1 ? '' : 's'));
-
 		// The light of the time of day grades every colour in the drawing; lit windows keep their glow.
 		var light = setup.daylight.getLight();
 		var graded = setup.daylight.isGraded(light);
 		var grader = graded ? setup.daylight.createGrader(light, 'subject') : null;
 		var litGrader = graded ? setup.daylight.createGrader(light, 'subject', true) : null;
 		svg.setAttribute('data-light', light.phase);
-
 		grounds.forEach(function(shape) {
 			var groundShape = document.createElementNS(ns, 'polygon');
 			groundShape.setAttribute('class', 'railyard-ground');
@@ -925,7 +890,6 @@ setup.railyardView = {
 			groundShape.setAttribute('points', shape.map(function(p) { return p.x + ',' + p.y; }).join(' '));
 			svg.appendChild(groundShape);
 		});
-
 		// Every template is drawn inline from one shared definition, so the whole yard is a single vector
 		// drawing that snaps to pixels together. Separate <image> elements each snapped on their own,
 		// which doubled rails and left seams where pieces meet whenever the view was scaled.
@@ -940,6 +904,7 @@ setup.railyardView = {
 				return;
 			}
 			var groups = self.createTemplateGroups(item.name, idPrefix + item.name);
+			groups.all.querySelectorAll('[fill="#dec38a"]').forEach(function(window) { window.setAttribute('fill', '#273c3e'); });
 			if (grader) {
 				['all', 'bed', 'branch', 'ladder', 'rails'].forEach(function(key) {
 					setup.daylight.applyToElement(groups[key], grader);
@@ -1002,12 +967,15 @@ setup.railyardView = {
 		trackPieces.forEach(function(item) { if (layers[item.name].branch) addUse(item, '-branch', false); });
 		trackPieces.forEach(function(item) { if (layers[item.name].ladder) addUse(item, '-ladder', false); });
 		trackPieces.forEach(function(item) { if (layers[item.name].rails) addUse(item, '-rails', false); });
+		var tutorialLayer = document.createElementNS(ns, 'g');
+		tutorialLayer.setAttribute('class', 'tutorial-ground');
+		tutorialLayer.setAttribute('pointer-events', 'none');
+		svg.appendChild(tutorialLayer);
 		images.forEach(function(item) {
 			if (!(item.flat && hasRails[item.name])) {
 				addUse(item, item.lit ? '-lit' : '', true);
 			}
 		});
-
 		labels.forEach(function(label) {
 			// A plate behind the text, because a label up the ladder has to sit over its own rails: the junctions
 			// there share one screen row, and there is no clear ground between the tracks to put it on.
@@ -1027,7 +995,6 @@ setup.railyardView = {
 			text.textContent = label.text;
 			svg.appendChild(text);
 		});
-
 		if (marker) {
 			var arrow = document.createElementNS(ns, 'polygon');
 			arrow.setAttribute('class', 'railyard-player-marker');
@@ -1037,7 +1004,6 @@ setup.railyardView = {
 			arrow.appendChild(arrowTitle);
 			svg.appendChild(arrow);
 		}
-
 		// The drawing scrolls inside its own box, while the zoom controls sit on the frame around it, so they stay
 		// in the corner of the view rather than sliding away with the yard.
 		// Click targets, drawn last so they sit on top. Track bands only appear while the player is aboard, which
@@ -1083,7 +1049,13 @@ setup.railyardView = {
 			hitLayer.appendChild(area);
 		});
 		svg.appendChild(hitLayer);
-
+		hitLayer.querySelectorAll('.tutorial-next-target').forEach(function(target) {
+			var ground = target.cloneNode(false);
+			ground.removeAttribute('data-yard-target');
+			ground.setAttribute('class', 'tutorial-next-target');
+			tutorialLayer.appendChild(ground);
+			target.classList.remove('tutorial-next-target');
+		});
 		var wrapper = document.createElement('div');
 		wrapper.className = 'railyard-view-wrapper';
 		var scroll = document.createElement('div');
@@ -1116,7 +1088,6 @@ setup.railyardView = {
 		return wrapper;
 	}
 };
-
 // Draws the current station's rail yard. Reads game state only; it never changes it.
 Macro.add('railyardView', {
 	handler: function() {
@@ -1125,7 +1096,6 @@ Macro.add('railyardView', {
 		if (!Array.isArray(tracks) || tracks.length < 2 || typeof setup.railyardTemplates === 'undefined') {
 			return;
 		}
-
 		// While the player is aboard a train, it is held outside the track arrays at a gap position.
 		var player = null;
 		var trackIndex = parseInt(variables.drivingTrackIndex, 10);
@@ -1143,7 +1113,6 @@ Macro.add('railyardView', {
 				carIndex: parseInt(variables.currentCarIndex, 10)
 			};
 		}
-
 		try {
 			this.output.appendChild(setup.railyardView.render(tracks, player));
 		} catch (error) {

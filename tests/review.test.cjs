@@ -2,6 +2,184 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { loadGame } = require('./helpers.cjs');
 
+test('raw food can be packed and eaten; ration yield improves only with an intact kitchen', () => {
+  const g = game([lead(), road(), lead()]), { setup:s, State:{variables:v} }=g;
+  const box=s.railyard.cloneCar(v.defaultTrains.boxcar); box.cargo=[{type:'food',amount:20,grade:60}];
+  v.currentTrain.push(box); v.player.hunger=0;
+  assert.equal(s.food.take(),true);
+  assert.equal(s.food.count('rawFood'),1);
+  assert.equal(s.items.getPlayerCarriedKg(),0.5);
+  assert.equal(box.cargo[0].amount,19);
+  assert.equal(s.food.eatRaw(),true); assert.equal(v.player.hunger,8);
+  assert.equal(s.food.craftPlan().count,2);
+  assert.equal(s.food.craft(),true); assert.equal(s.food.count('rations'),2);
+  assert.equal(s.condition.eat(v.currentTrain),true); assert.equal(v.player.hunger,42);
+  v.currentTrain.push(s.railyard.cloneCar(v.defaultTrains.kitchenCar));
+  assert.equal(s.food.craftPlan().count,3);
+  v.currentTrain.at(-1).broken=true;
+  assert.equal(s.food.craftPlan().count,2);
+});
+
+test('food preparation validates weight and grid before taking ingredients; carried food works away from train', () => {
+  const {setup:s,State:{variables:v}}=game([lead(),road(),lead()]);
+  v.currentTrain[0].cargo.push({type:'food',amount:20});
+  v.player.carried=Array.from({length:16},()=>({item:'rations',count:6}));
+  const before=JSON.stringify(v.player.carried), food=v.currentTrain[0].cargo[1].amount;
+  assert.equal(s.food.craft(),false); assert.equal(JSON.stringify(v.player.carried),before);
+  assert.equal(v.currentTrain[0].cargo[1].amount,food);
+  v.player.carried=[{item:'rawFood',count:3,grade:45}];
+  v.player.carriedCargo=[{type:'water',amount:2,grade:35}];
+  v.journey={legIndex:1,tileIndex:0,forward:true}; v.onFoot={tileIndex:1,branch:null};
+  assert.equal(s.food.craft(),true);
+  v.player.hunger=0; assert.equal(s.condition.eat(v.currentTrain),true); assert.equal(v.player.hunger,34);
+  v.player.thirst=0; assert.equal(s.condition.drink(v.currentTrain),true); assert.equal(v.player.thirst,40);
+  assert.equal(s.items.getPlayerCargo().length,0);
+  assert.equal(s.food.take(),false,'cannot reach train cargo remotely');
+});
+
+test('firebox refuses absent fuel or water at the model boundary',()=>{
+  const {setup:s}=game([lead(),road(),lead()]); const engine=s.railyard.createLocomotiveCar('steamShunter');
+  engine.cargo=[]; assert.equal(s.railyard.setSteamFireboxEnabled(engine,true),false);
+  engine.cargo=[{type:'coal',amount:50,grade:80}]; assert.equal(s.railyard.setSteamFireboxEnabled(engine,true),false);
+  engine.cargo.push({type:'water',amount:300}); assert.equal(s.railyard.setSteamFireboxEnabled(engine,true),true);
+  assert.equal(s.railyard.setSteamFireboxEnabled(engine,false),true);
+});
+
+test('empty engines can collect finite station fuel and recover from the line without propulsion',()=>{
+  const {setup:s,State:{variables:v}}=game([lead(),road(),lead()]);
+  v.currentTrain[0].cargo=[];
+  const before=s.recovery.stock(2).diesel;
+  assert.equal(s.recovery.collect(2,'diesel',true),true);
+  assert.equal(s.recovery.stock(2).diesel,before-400);
+  assert.equal(s.railyard.isTrainDriveCapable(v.currentTrain),true);
+  v.currentTrain[0].cargo=[];v.journey={legIndex:1,tileIndex:2,forward:true};
+  assert.equal(s.onfoot.climbDown(),true);
+  const route=s.recovery.stations()[0],clock=s.time.getCurrentTimestampMs();
+  assert.equal(s.recovery.collect(route.station,'diesel',false),true);
+  assert.ok(s.time.getCurrentTimestampMs()>clock);
+  assert.ok(s.items.getPlayerCarriedKg()<=50);
+  assert.equal(s.recovery.load('diesel'),true);
+  assert.equal(s.railyard.isTrainDriveCapable(v.currentTrain),true);
+  assert.equal(s.items.getPlayerCargo().length,0);
+  v.player.carriedCargo=[{type:'water',amount:50}];
+  assert.equal(s.recovery.plan(route.station,'diesel',false),null);
+});
+
+test('generated broken stock cannot provide supplies, storage, or power and never destroys escape reserves',()=>{
+  const {setup:s,State:{variables:v}}=game([lead(),road(),lead()]);
+  let coaches=0, brokenCoaches=0, freight=0, brokenFreight=0;
+  for(let i=2;i<42;i++) {
+    const tracks=s.railyard.generateStationTracks(i,'broken-review');
+    assert.equal(s.yardGeneration.validate(tracks),true);
+    assert.equal(tracks[0].supplies.diesel,s.recovery.INITIAL_STOCK.diesel);
+    for(const track of tracks) for(const train of track.trains) for(const car of train) {
+      if(/coach|observation|kitchen|private/.test(car.type)) {coaches++;if(car.broken)brokenCoaches++;}
+      else if(!car.fuelReserve) {freight++;if(car.broken)brokenFreight++;}
+      if(car.broken) {assert.equal(car.cargo.length,0);assert.equal(s.refuel.getRoom(car,'food'),0); assert.equal(s.items.getKit(car).length,0);}
+      if(car.fuelReserve) assert.ok(!car.broken);
+    }
+  }
+  assert.ok(brokenCoaches/coaches>brokenFreight/freight+0.2);
+  v.currentTrain[0].broken=true; assert.equal(s.railyard.isTrainDriveCapable(v.currentTrain),false);
+});
+
+test('reported seed and branch termini draw their true incoming connection, not the first sorted end',()=>{
+  const {setup:s}=game([lead(),road(),lead()]);
+  for(const seed of ['1832963771','review','branch-check']) for(let leg=1;leg<12;leg++) {
+    const generated=s.worldmap.getLeg(seed,leg),main=s.worldmap.getMainLine(seed,leg);
+    for(const b of generated.branches) {
+      b.tiles.forEach((tile,i)=>{
+        const previous=i?b.tiles[i-1]:main[b.fromIndex];
+        assert.ok(tile.ends.includes(s.worldmap.directionBetween(tile,previous)),`${seed} (${tile.x},${tile.y}) connects back`);
+      });
+    }
+  }
+});
+
+test('journal records actual moves and visits and resets for a new run',()=>{
+  const {setup:s,State:{variables:v}}=game([lead(),road(),lead()]);
+  s.journal.travel();s.journal.visit(2);s.journal.visit(2);s.journal.visit('L1B1');
+  assert.equal(v.journal.kilometres,5);assert.equal(v.journal.stations.length,3);
+  const restored=JSON.parse(JSON.stringify(v.journal));assert.equal(restored.stations[2],'L1B1');
+  s.startNewRun();assert.equal(v.journal.kilometres,0);assert.equal(v.journal.stations.length,1);
+});
+
+test('save wrappers respect failed storage writes and keep autosaves outside manual slots',()=>{
+  const g=game([lead(),road(),lead()]),s=g.setup.saves;
+  s.refresh=()=>{};let count=0,manual=0,auto=0;s.countSave=()=>count++;
+  g.Save.slots={save:()=>{manual++;return false;}};
+  assert.equal(s.save(0),false);assert.equal(count,0);assert.match(s.message,/Save failed/);
+  g.Save.autosave={save:()=>{auto++;return true;}};
+  assert.equal(s.save(0,true),true);assert.equal(manual,1);assert.equal(auto,1);assert.equal(count,1);
+  g.Save.slots.save=()=>{throw new Error('quota');};assert.equal(s.save(0),false);assert.equal(count,1);
+});
+
+test('depleted depots lead to a longer supply run without replenishing looted fuel',()=>{
+  const {setup:s,State:{variables:v}}=game([lead(),road(),lead()]);
+  s.recovery.stock(2).diesel=0;
+  const route=s.recovery.supplyRoutes('diesel').at(-1);
+  assert.equal(route.station,3);assert.ok(route.distance>0);
+  assert.equal(s.recovery.plan(3,'diesel',true),null,'cannot carry a bulk tank fill on foot');
+  assert.ok(s.recovery.plan(3,'diesel',false));
+  assert.equal(s.recovery.stock(2).diesel,0);
+  assert.equal(s.recovery.collect(3,'diesel',false),true);
+  assert.ok(s.items.getPlayerCarriedKg()<=50);
+});
+
+test('a steam bunker filled with only one resource can be unloaded to make room for the other',()=>{
+  const {setup:s,State:{variables:v}}=game([lead(),road(),lead()]);
+  const engine=s.railyard.createLocomotiveCar('steamShunter');engine.cargo=[{type:'coal',amount:7000,grade:80}];
+  v.currentTrain=[engine];assert.equal(s.refuel.getRoom(engine,'water'),0);
+  assert.equal(s.recovery.drain('coal'),true);assert.ok(s.refuel.getRoom(engine,'water')>0);
+  assert.equal(s.recovery.collect(2,'water',true),true);assert.equal(s.railyard.canLightFirebox(engine),true);
+});
+
+test('food quality survives kit transfers and zero-grade carried water is not purified by blending',()=>{
+  const {setup:s,State:{variables:v}}=game([lead(),road(),lead()]),car=v.currentTrain[0];
+  v.player.carried=[{item:'rations',count:1,grade:0}];
+  assert.equal(s.items.giveToCar(car,'rations'),true);
+  assert.equal(s.items.takeFromCar(car,'rations'),true);
+  assert.equal(v.player.carried[0].grade,0);
+  s.items.addPlayerCargo('water',2,0);s.items.addPlayerCargo('water',2,100);
+  assert.equal(s.items.getPlayerCargo()[0].grade,50);
+});
+
+test('diesel and steam can complete multi-station runs on generated depot supplies',()=>{
+  for(const model of ['dieselShunter','dieselRoad','steamShunter','steamPrairie']) {
+    const {setup:s,State:{variables:v}}=game([lead(),road(),lead()]);v.randomSeed='release-route-'+model;
+    v.currentTrain=[s.railyard.createLocomotiveCar(model)];v.currentTrain[0].cargo=[];
+    for(let station=2;station<12;station++) {
+      v.currentStation=station;v.stationTracks[station]=s.railyard.generateStationTracks(station,v.randomSeed);
+      v.drivingTrackIndex=0;v.enteredTrainIndex=0;v.journey=null;
+      const steam=model.startsWith('steam'),engine=v.currentTrain[0];
+      engine.fireboxEnabled=false;
+      if(steam) {
+        // Keep the bunker balanced so coal cannot fill all of the shared tank capacity.
+        const waterTarget=model==='steamShunter'?4800:16000;
+        const coalTarget=model==='steamShunter'?1500:5000;
+        for(const [type,target] of [['water',waterTarget],['coal',coalTarget]])
+          while(s.railyard.getCargoAmount(engine,type)<target && s.recovery.plan(station,type,true)) s.recovery.collect(station,type,true);
+        assert.equal(s.railyard.setSteamFireboxEnabled(engine,true),true);
+        s.time.advanceMinutesWithSystems(model==='steamShunter'?120:540,'generic');
+      } else while(s.recovery.plan(station,'diesel',true)) s.recovery.collect(station,'diesel',true);
+      assert.equal(s.railyard.departOntoLine(true),true,model+' depart '+station);
+      let guard=0;
+      while(v.journey && guard++<100) {
+        const step=s.worldmap.getJourneyStep(1);assert.ok(step&&!step.blocked);
+        if(!s.time.advanceMinutesWithSystems(step.minutes,'travel')) {
+          assert.ok(steam,'diesel reserve covers the route');
+          assert.ok(engine.fireboxEnabled,'steam has fuel and water');
+          s.time.advanceMinutesWithSystems(30,'generic');continue;
+        }
+        assert.equal(s.railyard.moveAlongLine(1),true);
+      }
+      assert.ok(guard<100,model+' finishes '+station);
+      assert.equal(v.currentStation,station+1);
+    }
+    assert.ok(v.journal.kilometres>=400);
+  }
+});
+
 const lead = extra => Object.assign({ length: 999999, infinite: true, trains: [] }, extra);
 const road = extra => Object.assign({ length: 120, trains: [] }, extra);
 function game(tracks, from = 1) {

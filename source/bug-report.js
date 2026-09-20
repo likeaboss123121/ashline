@@ -39,7 +39,6 @@ setup.bugReport = {
 		Dialog.open();
 	}
 };
-
 if (typeof document.addEventListener === 'function') {
 	document.addEventListener('click', function(event) {
 		var node = event.target.closest && event.target.closest('#passages a, #passages button, [data-yard-target], [data-car-index]');

@@ -37,7 +37,6 @@ setup.condition = {
 	DRINK_THIRST: 40,
 	// How far a meal or a drink can move immunity, at quality 100 and quality 0.
 	CONSUMABLE_IMMUNITY: { best: 1.5, worst: -6 },
-
 	// Fractions carry between minutes so a rate slower than one point a minute still arrives. They live on the
 	// player, because they are part of the body's state, not of the world.
 	getCarry: function() {
@@ -86,7 +85,6 @@ setup.condition = {
 		var hour = new Date(setup.time.getCurrentTimestampMs()).getUTCHours();
 		return hour >= this.NIGHT_FROM_HOUR && hour < this.NIGHT_TO_HOUR;
 	},
-
 	// One minute of being alive. mode is 'sleep' while the player is asleep or out cold, and anything else awake.
 	tickMinute: function(mode) {
 		if (!State.variables.player) {
@@ -94,16 +92,14 @@ setup.condition = {
 		}
 		var asleep = mode === 'sleep';
 		var stats = setup.stats;
-
 		if (asleep) {
 			this.apply('fatigue', -this.FATIGUE_RECOVERED_PER_MINUTE_ASLEEP * this.getRestEfficiency());
 		} else {
-			this.apply('fatigue', this.FATIGUE_PER_MINUTE_AWAKE * this.getFatigueMultiplier());
+			var work = mode === 'walk' ? setup.onfoot.FATIGUE_PER_MINUTE : (setup.time.MODE_FATIGUE_EXTRA[mode] || 0);
+			this.apply('fatigue', (this.FATIGUE_PER_MINUTE_AWAKE + work) * this.getFatigueMultiplier());
 		}
-
 		this.apply('hunger', -this.HUNGER_PER_MINUTE * (asleep ? 0.6 : 1));
 		this.apply('thirst', -this.THIRST_PER_MINUTE * (asleep ? 0.6 : 1));
-
 		// The small hours are hard on a mind that should be asleep, and kind to one that is.
 		if (this.isNight()) {
 			this.apply('sanity', asleep
@@ -112,7 +108,6 @@ setup.condition = {
 		} else {
 			this.apply('sanity', this.SANITY_MEND_PER_MINUTE * (asleep ? this.SANITY_ASLEEP_MULTIPLIER : 1));
 		}
-
 		// An empty stomach or a dry throat starts taking it out of the body itself.
 		var starved = this.getNeedPressure('hunger');
 		var parched = this.getNeedPressure('thirst');
@@ -125,9 +120,7 @@ setup.condition = {
 			this.apply('immunity', this.IMMUNITY_MEND_PER_MINUTE * (asleep ? 2 : 1));
 		}
 	},
-
 	// --- collapsing ------------------------------------------------------------------------------------------
-
 	isCollapsed: function() {
 		return !!State.variables.player && setup.stats.getValue('fatigue') >= setup.stats.MAX;
 	},
@@ -154,9 +147,7 @@ setup.condition = {
 		};
 		return State.variables.pendingCollapse;
 	},
-
 	// --- what the player can do ------------------------------------------------------------------------------
-
 	// Moves immunity by the quality of what was just eaten or drunk: good stuff helps a little, bad stuff hurts.
 	applyConsumableQuality: function(quality) {
 		var scale = Math.max(0, Math.min(100, Number(quality) || 0)) / 100;
@@ -166,8 +157,9 @@ setup.condition = {
 	// The best water the consist can offer: a locomotive's tank or any coupled tanker. Water carries a grade, which
 	// is how clean it is, so river water drunk straight is a gamble.
 	findDrink: function(train) {
-		var best = null;
-		(Array.isArray(train) ? train : []).forEach(function(car) {
+		var carried = setup.items.getPlayerCargo().find(function(s) { return s.type === 'water' && s.amount >= setup.condition.DRINK_LITRES; });
+		var best = carried ? { carried: true, grade: carried.grade == null ? 100 : carried.grade, litres: carried.amount } : null;
+		setup.food.accessibleTrain(train).forEach(function(car) {
 			var litres = setup.railyard.getCargoAmount(car, 'water');
 			if (litres >= setup.condition.DRINK_LITRES) {
 				var grade = setup.fuel.getGrade(car, 'water');
@@ -179,24 +171,27 @@ setup.condition = {
 		return best;
 	},
 	countRations: function(train) {
-		return (Array.isArray(train) ? train : []).reduce(function(total, car) {
+		return setup.food.accessibleTrain(train).reduce(function(total, car) {
 			return total + setup.items.countItem(car, 'rations');
-		}, 0);
+		}, setup.food.count('rations'));
 	},
 	eat: function(train) {
-		var car = (Array.isArray(train) ? train : []).filter(function(candidate) {
-			return setup.items.countItem(candidate, 'rations') > 0;
-		})[0];
-		if (!car || !setup.items.remove(car, 'rations', 1)) {
-			return false;
+		var quality = this.RATION_QUALITY;
+		if (setup.food.count('rations')) quality = setup.food.remove(setup.items.getPlayerKit(), 'rations', 1).quality;
+		else {
+			var car = setup.food.accessibleTrain(train).find(function(candidate) { return setup.items.countItem(candidate, 'rations') > 0; });
+			if (!car) return false;
+			quality = setup.food.remove(setup.items.getKit(car), 'rations', 1).quality;
 		}
 		setup.stats.adjust('hunger', this.RATION_HUNGER);
-		this.applyConsumableQuality(this.RATION_QUALITY);
+		this.applyConsumableQuality(quality);
 		return true;
 	},
 	drink: function(train) {
 		var source = this.findDrink(train);
-		if (!source || !setup.railyard.consumeCargoAmount(source.car, 'water', this.DRINK_LITRES)) {
+		if (!source) return false;
+		if (source.carried) setup.items.removePlayerCargo('water', this.DRINK_LITRES);
+		else if (!setup.railyard.consumeCargoAmount(source.car, 'water', this.DRINK_LITRES)) {
 			return false;
 		}
 		setup.stats.adjust('thirst', this.DRINK_THIRST);
@@ -204,7 +199,7 @@ setup.condition = {
 		return true;
 	},
 	hasBedroll: function(train) {
-		return setup.items.consistHas(train, 'sleepingBag');
+		return setup.items.playerHas('sleepingBag') || setup.items.consistHas(setup.food.accessibleTrain(train), 'sleepingBag');
 	},
 	// How long until the player would wake up rested, capped so "until rested" can never run for ever.
 	getMinutesUntilRested: function() {
@@ -225,40 +220,34 @@ setup.condition = {
 		return setup.saves.save(this.AUTOSAVE_SLOT, true);
 	}
 };
-
 // The eating, drinking and sleeping controls, shown wherever the player is standing in their train.
 Macro.add('conditionControls', {
 	handler: function() {
 		var train = State.variables.currentTrain;
-		if (!Array.isArray(train) || !train.length) {
-			return;
-		}
 		var condition = setup.condition;
 		var rations = condition.countRations(train);
 		var drink = condition.findDrink(train);
 		var output = '<h4>Rest and rations</h4>';
-
 		var offered = 0;
 		if (rations > 0) {
 			offered++;
 			output += '<<timedlink "Eat a ration" 10 "rest" "hunger:+2">><<run setup.condition.eat($currentTrain)>>'
-				+ '<<goto "TrainInterior">><</timedlink>> <span class="small-description">('
+				+ '<<run Engine.play(State.passage)>><</timedlink>> <span class="small-description">('
 				+ rations + ' left)</span><br>';
 		}
 		if (drink) {
 			offered++;
 			output += '<<timedlink "Drink" 2 "rest" "thirst:+2">><<run setup.condition.drink($currentTrain)>>'
-				+ '<<goto "TrainInterior">><</timedlink>> <span class="small-description">(water at grade '
+				+ '<<run Engine.play(State.passage)>><</timedlink>> <span class="small-description">(water at grade '
 				+ Math.round(drink.grade) + '%)</span><br>';
 		}
 		if (condition.hasBedroll(train)) {
 			offered++;
-			output += '<<link "Lie down to sleep">><<goto "Sleep">><</link>><br>';
+			output += '<<link "Lie down to sleep">><<set $sleepReturn = passage()>><<goto "Sleep">><</link>><br>';
 		}
 		new Wikifier(this.output, offered ? output : '');
 	}
 });
-
 // The sleep screen: a handful of hours, or as long as it takes.
 Macro.add('sleepChoices', {
 	handler: function() {
@@ -267,14 +256,13 @@ Macro.add('sleepChoices', {
 		var output = '';
 		for (var hours = 1; hours <= 8; hours++) {
 			output += '<<timedlink "Sleep ' + hours + ' hour' + (hours === 1 ? '' : 's') + '" ' + (hours * 60)
-				+ ' "sleep" "fatigue:-3">><<run setup.condition.autosaveAfterSleep()>><<goto "TrainInterior">><</timedlink>><br>';
+				+ ' "sleep" "fatigue:-3">><<run setup.condition.autosaveAfterSleep()>><<run Engine.play($sleepReturn || "TrainInterior")>><</timedlink>><br>';
 		}
 		output += '<<timedlink "Sleep until rested" ' + untilRested + ' "sleep" "fatigue:-3">>'
-			+ '<<run setup.condition.autosaveAfterSleep()>><<goto "TrainInterior">><</timedlink>><br>';
+			+ '<<run setup.condition.autosaveAfterSleep()>><<run Engine.play($sleepReturn || "TrainInterior")>><</timedlink>><br>';
 		new Wikifier(this.output, output);
 	}
 });
-
 // What the player reads after waking from a collapse, shown once wherever they come round.
 Macro.add('collapseNotice', {
 	handler: function() {

@@ -14,7 +14,6 @@ setup.refuel = {
 	GREEN_WOOD_GRADE: 50,
 	STATION_WATER_GRADE: 75, // a kept tank is fit to drink
 	RIVER_WATER_GRADE: 40, // water out of a river is not
-
 	// Every job, in the order the cab lists them.
 	//   loco        which locomotives it is for: 'diesel', 'steam', or 'any'
 	//   tool        the kit item it needs anywhere in the consist, if any
@@ -53,11 +52,10 @@ setup.refuel = {
 		{ id: 'siphon-firewood', label: 'Carry firewood across from', loco: 'steam', cargo: 'firewood',
 			unit: 'kg', rate: 25, batch: 200, fatigue: 0.4 }
 	],
-
 	// How much more of a cargo a car can take: the lesser of what its volume and its weight limits still allow.
 	getRoom: function(car, cargoType) {
 		var railyard = setup.railyard;
-		if (!car || railyard.getAcceptedCargoTypes(car).indexOf(cargoType) === -1) {
+		if (!car || car.broken || railyard.getAcceptedCargoTypes(car).indexOf(cargoType) === -1) {
 			return 0;
 		}
 		var usedVolume = 0;
@@ -75,7 +73,7 @@ setup.refuel = {
 	findSource: function(train, carType, cargoType, except) {
 		var best = null;
 		(train || []).forEach(function(car) {
-			if (car && car !== except && (!carType || car.type === carType)) {
+			if (car && !car.broken && car !== except && (!carType || car.type === carType)) {
 				var amount = setup.railyard.getCargoAmount(car, cargoType);
 				if (amount > 0 && (!best || amount > best.amount)) {
 					best = { car: car, amount: amount };
@@ -137,14 +135,13 @@ setup.refuel = {
 		var density = setup.railyard.getCargoDensityKgPerLiter(job.into);
 		return job.unit === 'L' ? Math.round(kg / density) + ' L' : Math.round(kg) + ' kg';
 	},
-
 	// The locomotives the player could take fuel from: every other engine standing on this track, and every engine
 	// coupled into the consist. Each is offered separately, because which one to drain is the player's choice.
 	getSiphonSources: function(train, loco) {
 		var sources = [];
 		var seen = [];
 		var add = function(car, where) {
-			if (!car || car === loco || !setup.items.isLocomotive(car) || seen.indexOf(car) !== -1) {
+			if (!car || car.broken || car === loco || !setup.items.isLocomotive(car) || seen.indexOf(car) !== -1) {
 				return;
 			}
 			seen.push(car);
@@ -166,7 +163,7 @@ setup.refuel = {
 		var loco = Array.isArray(train) ? train[locoIndex] : null;
 		var railyard = setup.railyard;
 		var self = this;
-		if (!setup.items.isLocomotive(loco)) {
+		if (!setup.items.isLocomotive(loco) || loco.broken) {
 			return [];
 		}
 		var kind = railyard.isSteamLocomotiveCar(loco) ? 'steam' : railyard.isDieselLocomotiveCar(loco) ? 'diesel' : '';
@@ -229,7 +226,6 @@ setup.refuel = {
 		setup.stats.adjust('fatigue', option.fatigue);
 		return true;
 	},
-
 	// Every refuelling job that applies to this locomotive. Each is ready to run, with its amount, time and effort,
 	// or carries the reason it cannot be done, so the player learns what each one needs.
 	getOptions: function(train, locoIndex) {
@@ -242,7 +238,6 @@ setup.refuel = {
 		var kind = railyard.isSteamLocomotiveCar(loco) ? 'steam' : railyard.isDieselLocomotiveCar(loco) ? 'diesel' : '';
 		var around = this.getSurroundings();
 		var options = [];
-
 		this.JOBS.forEach(function(job) {
 			if (job.loco !== 'any' && job.loco !== kind) {
 				return;
@@ -256,13 +251,11 @@ setup.refuel = {
 			var destination = job.intoCar ? self.findDestinationCar(train, job.into) : null;
 			var room = job.intoCar ? (destination ? destination.room : 0) : self.getRoom(loco, job.into);
 			var toolName = job.tool ? (setup.items.CATALOGUE[job.tool] || {}).name : '';
-
 			var reason = job.tool && !setup.items.consistHas(train, job.tool) ? 'you need the ' + toolName.toLowerCase()
 				: job.from && !source ? 'no ' + (job.from.carType || 'car') + ' in your consist holds ' + job.from.cargo
 				: worldReason ? worldReason
 				: room <= 0 ? (job.intoCar ? 'no car in your consist has room for ' + job.into : 'the locomotive can take no more ' + job.into)
 				: '';
-
 			var kg = 0;
 			if (!reason) {
 				var batchKg = job.unit === 'L' ? job.batch * intoDensity : job.batch;
@@ -281,7 +274,6 @@ setup.refuel = {
 		});
 		return options;
 	},
-
 	// Carries out one batch. The amount is worked out again from the current state, so a batch can never overfill
 	// or overdraw anything. Weight is kept: a kilogram of timber cut up is a kilogram of firewood, stacked looser.
 	perform: function(id, locoIndex) {
@@ -306,7 +298,6 @@ setup.refuel = {
 		return true;
 	}
 };
-
 // The refuelling jobs for the locomotive the player is standing in.
 Macro.add('refuelControls', {
 	handler: function() {

@@ -12,7 +12,6 @@ setup.stats = {
 	MIN: 0,
 	MAX: 100,
 	BAND_COUNT: 5, // fine, mild, moderate, severe, critical
-
 	LIST: [
 		{
 			key: 'fatigue', label: 'Fatigue', kind: 'burden',
@@ -45,7 +44,6 @@ setup.stats = {
 			driver: 'Thirst will kill you if you are not careful. Make sure to carry plenty of water.'
 		}
 	],
-
 	getStat: function(key) {
 		for (var i = 0; i < this.LIST.length; i++) {
 			if (this.LIST[i].key === key) {
@@ -96,7 +94,6 @@ setup.stats = {
 	adjust: function(key, delta) {
 		return this.setValue(key, this.getValue(key) + (Number(delta) || 0));
 	},
-
 	// How bad things are, 0 (fine) to 4 (critical). A burden is worse the higher it climbs and a reserve the
 	// further it falls, so this is the one place that knows which way each stat runs.
 	getSeverity: function(key, value) {
@@ -135,9 +132,7 @@ setup.stats = {
 		});
 		return worst;
 	},
-
 	SEVERITY_NAMES: ['fine', 'mild', 'moderate', 'severe', 'critical'],
-
 	// The sidebar panel: a row per stat, its name and how it stands, over a bar as long as the number itself.
 	createPanel: function() {
 		var self = this;
@@ -148,7 +143,6 @@ setup.stats = {
 			row.className = 'stat-row';
 			row.setAttribute('data-stat', reading.key);
 			row.title = reading.label + ': ' + reading.band + ' (' + reading.value + '/' + self.MAX + '). ' + reading.driver;
-
 			var head = document.createElement('div');
 			head.className = 'stat-head';
 			var label = document.createElement('span');
@@ -159,12 +153,10 @@ setup.stats = {
 			band.textContent = reading.band;
 			head.appendChild(label);
 			head.appendChild(band);
-
 			var value = document.createElement('span');
 			value.className = 'stat-value';
 			value.textContent = reading.value + '/' + self.getMax(reading.key);
 			head.appendChild(value);
-
 			var track = document.createElement('div');
 			track.className = 'stat-track';
 			var fill = document.createElement('div');
@@ -176,7 +168,6 @@ setup.stats = {
 			pin.className = 'stat-pin';
 			pin.style.left = self.getThresholdPercent(reading.key) + '%';
 			track.appendChild(pin);
-
 			row.appendChild(head);
 			row.appendChild(track);
 			panel.appendChild(row);
@@ -190,7 +181,6 @@ setup.stats = {
 		return panel;
 	}
 };
-
 // Opens the full condition screen: every stat with its reading and what drives it.
 setup.showConditionDialog = function() {
 	if (typeof Dialog === 'undefined') {
@@ -222,7 +212,6 @@ setup.showConditionDialog = function() {
 	Dialog.append(body);
 	Dialog.open();
 };
-
 // The sidebar's condition panel, under the clock.
 Macro.add('playerStats', {
 	handler: function() {

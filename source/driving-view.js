@@ -13,7 +13,6 @@ setup.drivingView = {
 	MARGIN_UNITS: 30, // track and terrain drawn past each end of the consist
 	PADDING: 2,
 	MAX_TILT_DEGREES: 3,
-
 	getTemplate: function(name) {
 		if (!this.templatesByName) {
 			this.templatesByName = {};
@@ -24,7 +23,6 @@ setup.drivingView = {
 		}
 		return this.templatesByName[name] || null;
 	},
-
 	// Tweego bundles each template SVG as an image passage whose text is a data URI.
 	getImageSource: function(name) {
 		if (!Story.has(name)) {
@@ -33,7 +31,6 @@ setup.drivingView = {
 		var passage = Story.get(name);
 		return passage.tags.includes('Twine.image') ? String(passage.text).trim() : '';
 	},
-
 	// Copies a template's shapes out of its image passage into a <g> the view can place with <use>.
 	createTemplateGroup: function(name, id) {
 		if (!this.templateDocuments) {
@@ -64,7 +61,6 @@ setup.drivingView = {
 		}
 		return group;
 	},
-
 	// Right on screen is the direction of travel, and every car keeps its own facing, so a locomotive pointing the
 	// other way is drawn with the mirrored texture. Running a leg backwards mirrors the whole consist with it.
 	getCarTemplateName: function(car, reversed) {
@@ -81,18 +77,15 @@ setup.drivingView = {
 		if (passenger[type]) return 'driving-car-' + passenger[type];
 		return 'driving-car-boxcar';
 	},
-
 	// Water never carries track, so a tile the train is standing on always has a backdrop to draw.
 	getTerrainTemplateName: function(terrain) {
 		var known = ['plains', 'forest', 'desert', 'arctic', 'mountain', 'bridge', 'tunnel', 'yard'];
 		return 'driving-terrain-' + (known.indexOf(terrain) === -1 ? 'plains' : terrain);
 	},
-
 	getCarLengthUnits: function(car) {
 		var metres = Number(car && car.length) || 12;
 		return metres * setup.drivingTemplates.unitsPerMetre;
 	},
-
 	// Places the consist with the car leading the way at the right, and works out how wide the scene has to be.
 	layout: function(train, carIndex, reversed) {
 		var self = this;
@@ -117,7 +110,6 @@ setup.drivingView = {
 		}
 		return { cars: placed, width: total + this.MARGIN_UNITS * 2, consistUnits: total };
 	},
-
 	// A scatter of stars in the sky part of a backdrop, behind its skyline. Positions are fixed per template, so the
 	// sky does not shimmer from one tile to the next.
 	addStars: function(group, template, night) {
@@ -178,7 +170,6 @@ setup.drivingView = {
 		bulb.setAttribute('fill', '#fff4d0');
 		parent.appendChild(bulb);
 	},
-
 	render: function(view, train, carIndex, interactive) {
 		var data = setup.drivingTemplates;
 		var ns = this.SVG_NS;
@@ -191,7 +182,6 @@ setup.drivingView = {
 		svg.setAttribute('role', interactive ? 'group' : 'img');
 		svg.setAttribute('aria-label', 'Your consist on ' + (view.terrain || 'plains') + ' terrain, grade '
 			+ view.grade.toFixed(1) + ' percent');
-
 		this.renderCount = (this.renderCount || 0) + 1;
 		var idPrefix = 'driving-view-' + this.renderCount + '-';
 		var defs = document.createElementNS(ns, 'defs');
@@ -210,6 +200,7 @@ setup.drivingView = {
 			var id = name + (lit ? '-lit' : '');
 			if (!defined[id]) {
 				var group = self.createTemplateGroup(name, idPrefix + id);
+				if (!lit) group.querySelectorAll('[fill="#dec38a"]').forEach(function(window) { window.setAttribute('fill', '#273c3e'); });
 				if (grader && name !== 'driving-terrain-tunnel') {
 					setup.daylight.applyToElement(group, lit ? litGrader
 						: /^driving-terrain-/.test(name) ? backdropGrader : grader);
@@ -242,7 +233,6 @@ setup.drivingView = {
 			parent.appendChild(use);
 			return template;
 		};
-
 		// The backdrop stays level: it is scenery, not the line the train is standing on.
 		var terrainName = this.getTerrainTemplateName(view.terrain);
 		var terrainTemplate = this.getTemplate(terrainName);
@@ -251,7 +241,6 @@ setup.drivingView = {
 		for (var t = -data.terrainTileUnits; t < width + data.terrainTileUnits; t += data.terrainTileUnits) {
 			place(backdrop, terrainName, t, 0, null);
 		}
-
 		// Track and train tilt together by the tile's grade, so a climb reads as a climb. Forward is to
 		// the right, so a positive grade lifts the right-hand end.
 		var tilt = Math.max(-this.MAX_TILT_DEGREES, Math.min(this.MAX_TILT_DEGREES, Math.atan(view.grade / 100) * 180 / Math.PI));
@@ -261,12 +250,12 @@ setup.drivingView = {
 		for (var r = -data.trackTileUnits; r < width + data.trackTileUnits; r += data.trackTileUnits) {
 			place(line, 'driving-track', r, 0, null);
 		}
-
 		var marker = null;
 		layout.cars.forEach(function(entry) {
 			var title = String(entry.car.type || 'car') + ', ' + entry.car.length + ' m'
 				+ (entry.isPlayer ? ' (you are here)' : '');
-			var template = place(line, entry.name, entry.u, 0, title, entry.isPlayer);
+			var template = place(line, entry.name, entry.u, 0, title,
+				entry.isPlayer && setup.items.isLocomotive(entry.car) && !entry.car.broken && !State.variables.onFoot);
 			if (interactive) {
 				var index = train.indexOf(entry.car);
 				var target = document.createElementNS(ns, 'rect');
@@ -321,7 +310,6 @@ setup.drivingView = {
 			arrow.appendChild(arrowTitle);
 			line.appendChild(arrow);
 		}
-
 		// Size the view around everything drawn, once the tilt has moved things about.
 		var top = -terrainTemplate.anchorY - this.PADDING;
 		var bottom = terrainTemplate.height - terrainTemplate.anchorY + this.PADDING;
@@ -329,7 +317,6 @@ setup.drivingView = {
 		svg.setAttribute('viewBox', [0, top, width, height].join(' '));
 		svg.setAttribute('width', width * this.SCALE);
 		svg.setAttribute('height', height * this.SCALE);
-
 		var wrapper = document.createElement('div');
 		wrapper.className = 'driving-view-wrapper';
 		wrapper.appendChild(svg);
@@ -344,7 +331,6 @@ setup.drivingView = {
 		return wrapper;
 	}
 };
-
 // Draws the consist where it stands on the line. Reads game state only; it never changes it.
 Macro.add('drivingView', {
 	handler: function() {
@@ -364,7 +350,6 @@ Macro.add('drivingView', {
 		}
 	}
 });
-
 Macro.add('consistView', {
 	handler: function() {
 		var v = State.variables;

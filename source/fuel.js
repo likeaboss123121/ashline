@@ -24,7 +24,6 @@ setup.fuel = {
 	FIREBOX_HEAT_PER_MINUTE: 1,
 	GRATE_KG_PER_MINUTE: 2,
 	WATER_LITRES_PER_MINUTE: 3,
-
 	isGraded: function(cargoType) {
 		return this.GRADED.indexOf(cargoType) !== -1;
 	},
@@ -96,9 +95,7 @@ setup.fuel = {
 			: 'very poor';
 		return value + '% (' + word + ')';
 	},
-
 	// --- diesel ---------------------------------------------------------------------------------------------
-
 	// Full power down to DIESEL_FULL_POWER_GRADE, then falling in a straight line to DIESEL_POWER_AT_MIN_GRADE at the
 	// lowest grade the engine will run on, and nothing below that.
 	getDieselPowerFactor: function(grade) {
@@ -116,6 +113,7 @@ setup.fuel = {
 	},
 	// Whether a diesel locomotive's engine can run: fuel enough for a minute, of a grade it will burn.
 	canDieselRun: function(car) {
+		if (!car || car.broken) return false;
 		return setup.railyard.getCargoAmount(car, 'diesel') >= this.getDieselLitresPerMinute(car)
 			&& this.getGrade(car, 'diesel') >= this.DIESEL_MIN_GRADE;
 	},
@@ -133,9 +131,7 @@ setup.fuel = {
 		}
 		return rated;
 	},
-
 	// --- the firebox --------------------------------------------------------------------------------------
-
 	getFireboxScale: function(car) {
 		return Number(car && car.fireboxScale) > 0 ? Number(car.fireboxScale) : 1;
 	},

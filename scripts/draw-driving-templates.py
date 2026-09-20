@@ -232,7 +232,7 @@ def passenger_car(kind, length_m):
     step = 7 if kind == 'sleeper' else 6
     for u in range(5, L - 5, step):
         width = 2 if kind == 'kitchen' else 4
-        s.slab(u, u + width, 10, 14, P['window'])
+        s.slab(u, u + width, 10, 14, '#273c3e')
     s.part('doors')
     for u in (2, L - 4):
         s.line_z(u, 5, 5, 14, '#b8b6a0')

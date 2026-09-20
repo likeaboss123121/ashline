@@ -27,9 +27,7 @@ setup.daylight = {
 		lift: [0.006, 0.008, 0.016] // keeps the darkest colours from crushing to black
 	},
 	GOLDEN: { tint: [1.0, 0.86, 0.7], brightness: 0.85 },
-
 	// --- where the sun is -----------------------------------------------------------------------------------
-
 	getLatitude: function() {
 		var worldmap = setup.worldmap;
 		var view = worldmap && worldmap.getJourneyView ? worldmap.getJourneyView() : null;
@@ -68,9 +66,7 @@ setup.daylight = {
 		var phase = night >= 0.999 ? 'night' : night > 0.001 ? 'dusk' : golden > 0.001 ? 'golden' : 'day';
 		return { elevation: elevation, night: night, golden: golden, phase: phase };
 	},
-
 	// --- colour ---------------------------------------------------------------------------------------------
-
 	toLinear: function(channel) {
 		var c = channel / 255;
 		return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);

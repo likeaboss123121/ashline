@@ -12,7 +12,6 @@ setup.onfoot = {
 	CHOP_MINUTES: 30,
 	CHOP_KG: 60, // what one session of felling and dragging yields, which is about what a person can carry
 	CHOP_GRADE: 50, // green wood, the same as felling from the train
-
 	get: function() {
 		var foot = State.variables.onFoot;
 		return foot && typeof foot.tileIndex === 'number' ? foot : null;
@@ -145,7 +144,6 @@ setup.onfoot = {
 		return moved > 0;
 	}
 };
-
 // What the player can do standing on the ballast.
 Macro.add('onFootControls', {
 	handler: function() {
@@ -182,7 +180,6 @@ Macro.add('onFootControls', {
 		new Wikifier(this.output, output);
 	}
 });
-
 // Where the player is standing, and what they have on them.
 Macro.add('onFootStatus', {
 	handler: function() {

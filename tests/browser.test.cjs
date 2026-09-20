@@ -75,6 +75,126 @@ test('maps are first on desktop and mobile; wide view stays inside the viewport 
   }
 });
 
+test('portable food, kitchen preparation and SVG inventory work through ordinary controls', async t => {
+  const page=await openGame(t); await begin(page); await board(page);
+  await page.evaluate(()=>{
+    const v=SugarCube.State.variables,s=SugarCube.setup;
+    const box=s.railyard.cloneCar(v.defaultTrains.boxcar);box.cargo=[{type:'food',amount:30,grade:70}];
+    v.currentTrain.push(box,s.railyard.cloneCar(v.defaultTrains.kitchenCar));v.player.hunger=10;
+    SugarCube.Engine.play('TrainInterior');
+  });
+  await choose(page,'Pack raw food (0.5 kg) (0:01)','TrainInterior');
+  await choose(page,'Eat raw food (0:05)','TrainInterior');
+  assert.ok(await page.evaluate(()=>SugarCube.State.variables.player.hunger>10));
+  await choose(page,'Prepare 3 rations in the kitchen car (1.5 kg food) (0:15)','TrainInterior');
+  assert.equal(await page.evaluate(()=>SugarCube.setup.food.count('rations')),3);
+  await page.getByText('Inventory',{exact:true}).click();
+  assert.equal(await page.locator('#ui-dialog-body svg.pack-grid').count(),1);
+  assert.match(await page.locator('#ui-dialog-body').innerText(),/Rations/);
+});
+
+test('empty locomotive menus expose on-foot recovery and return carried fuel to the engine',async t=>{
+  const page=await openGame(t);await begin(page);await board(page);
+  await page.evaluate(()=>{
+    const v=SugarCube.State.variables;v.journey={legIndex:1,tileIndex:1,forward:true};
+    v.currentTrain[0].cargo=[];SugarCube.Engine.play('OnTheLine');
+  });
+  await choose(page,'Climb down from the train (0:02)','OnFoot');
+  await page.locator('.recovery-controls a').filter({hasText:/diesel/}).first().click();
+  await passage(page,'OnFoot');
+  assert.ok(await page.evaluate(()=>SugarCube.setup.items.getPlayerCargo().some(s=>s.type==='diesel'&&s.amount>0)));
+  await page.getByText('Load carried diesel into the locomotive',{exact:true}).click();
+  await passage(page,'OnFoot');
+  await choose(page,'Climb back aboard (0:02)','OnTheLine');
+  assert.ok(await page.evaluate(()=>SugarCube.setup.railyard.isTrainDriveCapable(SugarCube.State.variables.currentTrain)));
+});
+
+test('save confirmations, dedicated autosave, real export/import and invalid files preserve the run',async t=>{
+  const page=await openGame(t);await begin(page);await board(page);
+  await page.locator('#menu-item-saves a').click();
+  const row=page.locator('.saves-slot[data-slot="0"]');
+  await row.getByText('Save',{exact:true}).click();
+  await row.getByText('Overwrite',{exact:true}).click();
+  await page.getByRole('button',{name:'Cancel',exact:true}).click();
+  await page.evaluate(()=>{SugarCube.State.variables.player.hunger=37;SugarCube.setup.condition.autosaveAfterSleep();});
+  assert.notEqual(await page.evaluate(()=>SugarCube.Save.slots.get(0).state.delta[0].variables.player.hunger),37);
+  assert.equal(await page.evaluate(()=>SugarCube.Save.autosave.get().state.delta[0].variables.player.hunger),37);
+  const downloadPromise=page.waitForEvent('download');
+  await page.getByRole('button',{name:'Save to disk',exact:true}).click();
+  const download=await downloadPromise, exported=await download.path();
+  assert.ok(fs.statSync(exported).size>0);
+  await page.evaluate(()=>{SugarCube.State.variables.player.hunger=12;});
+  await page.locator('.saves-file input').setInputFiles(exported);
+  await page.getByRole('button',{name:'Confirm',exact:true}).click();
+  await page.waitForFunction(()=>SugarCube.State.variables.player.hunger===37);
+  await page.locator('#menu-item-saves a').click();
+  await page.locator('.saves-file input').setInputFiles({name:'invalid.save',mimeType:'text/plain',buffer:Buffer.from('not a save')});
+  await page.getByRole('button',{name:'Confirm',exact:true}).click();
+  await page.getByText(/^Import failed\./).waitFor();
+  assert.equal(await page.evaluate(()=>SugarCube.State.variables.player.hunger),37);
+  assert.ok(await page.evaluate(()=>!!SugarCube.Save.slots.get(0)));
+  await row.getByText('Delete',{exact:true}).click();
+  await page.getByRole('button',{name:'Cancel',exact:true}).click();
+  assert.ok(await page.evaluate(()=>!!SugarCube.Save.slots.get(0)));
+});
+
+test('help and journal are placeholders, debug tabs are separate, and same-page scrolling respects its option',async t=>{
+  const page=await openGame(t,{viewport:{width:1000,height:650}});await enableDebug(page);await begin(page);await board(page);
+  assert.equal(await page.locator('#passages .debug-container').count(),0);
+  await page.getByRole('button',{name:'Wiki',exact:true}).click();
+  assert.equal(await page.locator('#developer-Wiki').isVisible(),true);
+  assert.equal(await page.locator('#developer-Debug').isVisible(),false);
+  await page.keyboard.press('Escape');
+  await page.getByText('Help',{exact:true}).click();await passage(page,'Help');
+  assert.match(await page.locator('#passages').innerText(),/TEMP HELP/);
+  await choose(page,'Back','TrainInterior');
+  await page.getByText('Journal',{exact:true}).click();await passage(page,'Journal');
+  assert.match(await page.locator('#passages').innerText(),/TEMP JOURNAL/);
+  await page.evaluate(()=>{
+    const v=SugarCube.State.variables;delete v.journal;
+    v.gameTimeTimestampMs=SugarCube.setup.time.startTimestampMs+3*86400000;
+    SugarCube.Engine.play('Journal');
+  });
+  assert.equal(await page.locator('#passages dd').first().innerText(),'3','old runs retain their elapsed survival days');
+  await choose(page,'Back','TrainInterior');
+  const before=await page.evaluate(()=>{window.scrollTo(0,300);return scrollY;});
+  await page.evaluate(()=>SugarCube.Engine.play('TrainInterior'));
+  await page.waitForTimeout(100);
+  assert.equal(await page.evaluate(()=>scrollY),before);
+  await page.evaluate(()=>{SugarCube.State.variables.preserveScroll=false;SugarCube.Engine.play('TrainInterior');});
+  await page.waitForTimeout(100);
+  assert.equal(await page.evaluate(()=>scrollY),0);
+  await page.evaluate(()=>{SugarCube.State.variables.debugMode=false;SugarCube.Engine.play('TrainInterior');});
+  assert.equal(await page.locator('#developer-tabs').count(),0);
+});
+
+test('tutorial highlight is below stock, empty cabs and passenger cars are unlit, and map scroll is retained',async t=>{
+  const page=await openGame(t);await beginTutorial(page);
+  assert.match(await page.locator('.tutorial-hint').innerText(),/locomotive above/);
+  assert.ok(await page.evaluate(()=>{
+    const ground=document.querySelector('.tutorial-ground');
+    const car=document.querySelector('use[data-template^="railyard-loco-"]');
+    return ground.querySelector('.tutorial-next-target') && !!(ground.compareDocumentPosition(car)&Node.DOCUMENT_POSITION_FOLLOWING)
+      && !document.querySelector('.railyard-hits .tutorial-next-target')
+      && !document.querySelector('.railyard-view defs [fill="#dec38a"]');
+  }));
+  await board(page);
+  await page.evaluate(()=>{
+    const v=SugarCube.State.variables,s=SugarCube.setup;v.currentTrain.push(s.railyard.cloneCar(v.defaultTrains.kitchenCar));
+    v.currentCarIndex=1;v.gameTimeTimestampMs=Date.UTC(2000,6,24,1);SugarCube.Engine.play('TrainInterior');
+  });
+  assert.equal(await page.locator('.consist-view-wrapper use[href$="-lit"]').count(),0);
+  assert.equal(await page.locator('.consist-view-wrapper defs [fill="#dec38a"]').count(),0);
+  await page.evaluate(()=>{SugarCube.State.variables.currentCarIndex=0;SugarCube.Engine.play('DrivingMode');});
+  await page.getByTitle('Zoom in',{exact:true}).click();
+  await page.getByTitle('Zoom in',{exact:true}).click();
+  const position=await page.locator('.railyard-view-scroll').evaluate(e=>{e.scrollLeft=120;return e.scrollLeft;});
+  assert.ok(position>0);
+  await page.evaluate(()=>SugarCube.Engine.play('DrivingMode'));
+  await page.waitForTimeout(100);
+  assert.equal(await page.locator('.railyard-view-scroll').evaluate(e=>e.scrollLeft),position);
+});
+
 test('onboard preview selects passenger cars with mouse or keyboard, shows contents, and uncouples a cold train', async t => {
   const page = await openGame(t);
   await begin(page);
@@ -127,6 +247,7 @@ test('push-detach-return is an ordinary validated yard action, including on a sh
 test('debug bug report exports seed, layout and recent actions with a selectable clipboard fallback', async t => {
   const page = await openGame(t);
   await enableDebug(page); await begin(page); await board(page);
+  await page.getByRole('button', { name: 'Debug', exact: true }).click();
   await page.locator('.debug-container').getByRole('button', { name: 'Copy bug report', exact: true }).click();
   const reportText = page.getByRole('textbox', { name: 'Bug report' });
   const report = JSON.parse(await reportText.inputValue());
@@ -321,6 +442,7 @@ test('the yard and the line are drawn by the light of the time of day', async t 
   await enableDebug(page);
   await begin(page);
   // The debug clock jumps to any hour of the day.
+  await page.getByRole('button', { name: 'Debug', exact: true }).click();
   const setHour = async hour => {
     await page.locator('#debugClockHour').selectOption(String(hour));
     const turn = await page.evaluate(() => SugarCube.State.turns);
@@ -344,7 +466,8 @@ test('the yard and the line are drawn by the light of the time of day', async t 
   assert.notEqual(drawn.ground, '', 'the ground is graded at night');
   assert.equal(drawn.windows, 0, 'an empty cab is dark at night');
   assert.equal(drawn.lit, 0);
-  assert.match(await page.locator('#passages').innerText(), /Light: night, sun -\d/);
+  assert.match(await page.locator('#developer-Debug').innerText(), /Light: night, sun -\d/);
+  await page.getByRole('button', { name: 'Debug', exact: true }).click();
 
   // Once the player is aboard, the cab they are in is the one with a light on.
   await board(page);
@@ -557,7 +680,7 @@ test('the saves menu shows what each slot holds, and asks for a backup when one 
   await page.locator('#menu-item-saves a').click();
   await page.locator('.saves-menu').waitFor({ state: 'visible' });
   const slots = await page.locator('.saves-slot').count();
-  assert.equal(slots, 8);
+  assert.equal(slots, 9);
   assert.match(await page.locator('.saves-backup').innerText(), /No backup has been saved to disk/);
 
   // Saving into a slot records where the train is and when.
@@ -591,6 +714,7 @@ test('the saves menu shows what each slot holds, and asks for a backup when one 
   await page.locator('#menu-item-saves a').click();
   await page.locator('.saves-menu').waitFor({ state: 'visible' });
   await page.locator('.saves-slot[data-slot="0"] .saves-danger').click();
+  await page.getByRole('button', { name: 'Confirm', exact: true }).click();
   assert.match(await page.locator('.saves-slot[data-slot="0"]').innerText(), /Empty/);
 });
 
@@ -637,7 +761,7 @@ test('sleeping saves the game, unless the player would rather it did not', async
   await choose(page, 'Lie down to sleep', 'Sleep');
   await choose(page, 'Sleep 2 hours (2:00)', 'TrainInterior');
   const auto = await page.evaluate(() => {
-    const save = SugarCube.Save.slots.get(0);
+    const save = SugarCube.Save.autosave.get();
     return save ? { title: save.title, automatic: save.metadata.automatic, place: save.metadata.place } : null;
   });
   assert.equal(auto.automatic, true);
@@ -645,12 +769,12 @@ test('sleeping saves the game, unless the player would rather it did not', async
 
   // Turned off, sleeping leaves the slot alone.
   await page.evaluate(() => {
-    SugarCube.Save.slots.delete(0);
+    SugarCube.Save.autosave.delete();
     SugarCube.State.variables.autosaveOnSleep = false;
   });
   await choose(page, 'Lie down to sleep', 'Sleep');
   await choose(page, 'Sleep 2 hours (2:00)', 'TrainInterior');
-  assert.equal(await page.evaluate(() => !!SugarCube.Save.slots.get(0)), false);
+  assert.equal(await page.evaluate(() => !!SugarCube.Save.autosave.get()), false);
 });
 
 test('the player can get down from the train out on the line and walk the track', async t => {
@@ -703,6 +827,7 @@ test('debug cargo editor targets the initially selected train', async t => {
   const page = await openGame(t);
   await enableDebug(page);
   await begin(page);
+  await page.getByRole('button', { name: 'Debug', exact: true }).click();
   await page.locator('#debugCarSelect').selectOption('0');
   await passage(page, 'Railyard');
   const quantity = page.locator('#debugCargoAmount');
@@ -1116,7 +1241,7 @@ test('debug mode draws the generated world map for the leg ahead', async t => {
   });
   await passage(page, 'Railyard');
   const map = await page.evaluate(() => {
-    const svg = document.querySelector('#passages svg.worldmap-debug');
+    const svg = document.querySelector('#developer-Debug svg.worldmap-debug');
     if (!svg) return null;
     return {
       cells: svg.querySelectorAll('rect').length,
@@ -1132,7 +1257,7 @@ test('debug mode draws the generated world map for the leg ahead', async t => {
   assert.ok(map.stations >= 2, JSON.stringify(map));
   assert.match(map.heading, /World map, leg 1 \(station 1 to 2\): \d+ tiles, \d+ km/);
   const reference = page.locator('details.debug-section').filter({ has: page.getByText('Reference data', { exact: true }) });
-  await reference.locator(':scope > summary').click();
+  await page.getByRole('button', { name: 'Wiki', exact: true }).click();
   await reference.getByText('Railcars', { exact: true }).click();
   await reference.getByText('Fuel', { exact: true }).click();
   await reference.getByText('Pack items', { exact: true }).click();
@@ -1184,10 +1309,10 @@ test('driving the line goes one 5 km tile at a time, and draws the consist on it
   assert.ok(minutes >= 3 && minutes <= 20, `a tile should cost a few minutes, got ${minutes}`);
   assert.equal(moved.fuel, start.fuel - minutes);
 
-  // There is no getting off between stations, but backing up returns to the tile before.
+  // The interior offers a way down even between stations; reversing still returns to the previous tile.
   await choose(page, 'Enter the train', 'TrainInterior');
   const interior = await page.locator('#passages').innerText();
-  assert.match(interior, /You are out on the line between stations/);
+  assert.match(interior, /Climb down from the train/);
   assert.doesNotMatch(interior, /Leave Train/);
   await choose(page, 'Start driving', 'OnTheLine');
 

@@ -6,7 +6,6 @@
 // nothing: the clock already tells them that.
 setup.effects = {
 	LEVELS: ['', '+', '++', '+++'],
-
 	parse: function(spec) {
 		if (!spec || typeof spec !== 'string') {
 			return [];

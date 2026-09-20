@@ -4,15 +4,21 @@
 // itself takes them with it, and the player has no warning. So the menu here shows what each slot actually holds
 // (where the train is, what the date is, how long has been played), keeps saving and loading in one place, and a
 // banner asks for a backup to disk when it has been a while since the last one.
+if (typeof Config !== 'undefined') Config.saves.slots = 8;
+// SugarCube 2.36 serializes the passage-entry history snapshot, not the live variables.
+// Capture completed in-passage actions too, particularly sleep before its return navigation.
+if (typeof Save !== 'undefined' && Save.onSave) Save.onSave.add(function(save) {
+	if (save.state && save.state.history && save.state.history[save.state.index]) {
+		save.state.history[save.state.index].variables = JSON.parse(JSON.stringify(State.variables));
+	}
+});
 setup.saves = {
 	SLOT_COUNT: 8,
 	REMIND_AFTER_DAYS: 3,
 	REMIND_AFTER_SAVES: 8,
 	EXPORT_KEY: 'ashline.saves.lastExport',
 	SAVES_SINCE_KEY: 'ashline.saves.sinceExport',
-
 	// --- the engine, whichever version of its API is present ---------------------------------------------------
-
 	slotApi: function() {
 		if (typeof Save === 'undefined') {
 			return null;
@@ -26,6 +32,9 @@ setup.saves = {
 		return Save.disk || { save: Save.export, load: Save.import };
 	},
 	getSlot: function(index) {
+		if (index === 'auto') {
+			try { return Save.autosave.get(); } catch (error) { return null; }
+		}
 		var slots = this.slotApi();
 		try {
 			return slots && slots.get ? slots.get(index) : null;
@@ -37,7 +46,7 @@ setup.saves = {
 	describeCurrent: function() {
 		var variables = State.variables;
 		var parts = setup.time.getCurrentDateParts();
-		var station = Number(variables.currentStation) || 1;
+		var station = variables.currentStation || 1;
 		var place = variables.journey ? 'On the line past Station ' + station : 'Station ' + station;
 		return {
 			place: place,
@@ -46,35 +55,81 @@ setup.saves = {
 		};
 	},
 	save: function(index, automatic) {
-		var slots = this.slotApi();
-		if (!slots || !slots.save) {
-			return false;
-		}
-		var detail = this.describeCurrent();
-		detail.automatic = !!automatic;
-		slots.save(index, (automatic ? 'Autosave: ' : '') + detail.place, detail);
-		this.countSave();
-		return true;
+		try {
+			var detail = this.describeCurrent(), slots = this.slotApi();
+			detail.automatic = !!automatic;
+			var ok = automatic ? Save.autosave.save('Autosave: ' + detail.place, detail)
+				: slots.save(index, detail.place, detail);
+			if (ok !== true) return this.fail('Save failed. Export a backup to disk; browser storage may be full or unavailable.');
+			this.countSave(); this.error = false; this.message = automatic ? 'Autosaved.' : 'Saved.';
+			return true;
+		} catch (error) { return this.fail('Save failed. Export a backup to disk. ' + error.message); }
 	},
 	load: function(index) {
-		var slots = this.slotApi();
-		if (slots && slots.load) {
-			slots.load(index);
-			return true;
-		}
-		return false;
+		try {
+			if (!this.getSlot(index)) return this.fail('No save was found in this slot.');
+			this.error = false; this.message = '';
+			var ok = index === 'auto' ? Save.autosave.load() : this.slotApi().load(index);
+			if (ok !== true) return this.fail('Load failed. The current game has not been replaced.');
+			Dialog.close(); return true;
+		} catch (error) { return this.fail('Load failed. ' + error.message); }
 	},
 	remove: function(index) {
-		var slots = this.slotApi();
-		if (slots && slots.delete) {
-			slots.delete(index);
-			return true;
-		}
+		try {
+			var ok = index === 'auto' ? Save.autosave.delete() : this.slotApi().delete(index);
+			if (ok !== true) return this.fail('Delete failed.');
+			this.error = false; this.message = 'Deleted.'; return true;
+		} catch (error) { return this.fail('Delete failed. ' + error.message); }
+	},
+	fail: function(message) {
+		this.error = true;
+		this.message = message;
+		this.refresh();
 		return false;
 	},
-
+	confirm: function(message, action) {
+		var self = this;
+		Dialog.setup('Confirm');
+		var body = document.createElement('div'), text = document.createElement('p');
+		text.textContent = message; body.appendChild(text);
+		body.appendChild(this.button('Confirm', message, function() { if (action() !== true) self.showDialog(); }));
+		body.appendChild(this.button('Cancel', 'Keep the existing save', function() { self.showDialog(); }));
+		Dialog.append(body); Dialog.open();
+	},
+	exportFile: function() {
+		try {
+			if (Config.saves.isAllowed && !Config.saves.isAllowed()) return this.fail('Saving is unavailable here.');
+			Save.export('ashline-' + new Date().toISOString().slice(0, 10), this.describeCurrent());
+			this.markExported(); this.error = false; this.message = 'Backup download requested. Keep the downloaded file.';
+			this.refresh(); return true;
+		} catch (error) { return this.fail('Export failed. ' + error.message); }
+	},
+	importText: function(text) {
+		try {
+			if (typeof text !== 'string' || text.length > 20 * 1024 * 1024) throw new Error('Invalid or oversized file.');
+			var data = JSON.parse(/^\s*\{/.test(text) ? text : LZString.decompressFromBase64(text.trim()));
+			if (!data || data.id !== Config.saves.id || !data.state || !Array.isArray(data.state.delta) || !data.state.delta.length)
+				throw new Error('This is not an Ashline save.');
+			var history = State.deltaDecode(data.state.delta), state = history[data.state.index];
+			if (!state || !Story.has(state.title) || !state.variables || typeof state.variables.player !== 'object'
+				|| !state.variables.player || typeof state.variables.stationTracks !== 'object' || !state.variables.stationTracks)
+				throw new Error('The save is incomplete.');
+			var v = state.variables;
+			if (['TrainInterior', 'DrivingMode', 'OnTheLine', 'OnFoot', 'Sleep'].indexOf(state.title) >= 0
+				&& (!Array.isArray(v.currentTrain) || !v.currentTrain.length)) throw new Error('The train is missing.');
+			if (v.currentTrain && (!Array.isArray(v.currentTrain) || v.currentTrain.some(function(car) {
+				return !car || typeof car.type !== 'string' || !(Number(car.length) > 0)
+					|| (car.cargo != null && !Array.isArray(car.cargo)) || (car.inventory != null && !Array.isArray(car.inventory));
+			}))) throw new Error('Invalid train data.');
+			if (v.player.carried != null && !Array.isArray(v.player.carried)) throw new Error('Invalid inventory data.');
+			if (data.metadata == null) data.metadata = {};
+			this.error = false; this.message = '';
+			var result = Save.deserialize(LZString.compressToBase64(JSON.stringify(data)));
+			if (result === null) return this.fail('Import failed.');
+			Dialog.close(); return true;
+		} catch (error) { return this.fail('Import failed. ' + error.message); }
+	},
 	// --- the backup reminder ------------------------------------------------------------------------------------
-
 	readNumber: function(key) {
 		try {
 			return Number(localStorage.getItem(key)) || 0;
@@ -124,9 +179,7 @@ setup.saves = {
 		return 'It has been ' + Math.floor(days) + ' day' + (Math.floor(days) === 1 ? '' : 's') + ' and ' + saves
 			+ ' save' + (saves === 1 ? '' : 's') + ' since your last backup. Saves live in this browser only.';
 	},
-
 	// --- the menu ------------------------------------------------------------------------------------------------
-
 	button: function(label, title, onClick, className) {
 		var button = document.createElement('button');
 		button.type = 'button';
@@ -140,7 +193,11 @@ setup.saves = {
 		var self = this;
 		var body = document.createElement('div');
 		body.className = 'saves-menu';
-
+		if (this.message) {
+			var feedback = document.createElement('p');
+			feedback.className = 'saves-feedback'; feedback.setAttribute('role', 'status');
+			feedback.textContent = this.message; body.appendChild(feedback);
+		}
 		var backup = document.createElement('div');
 		backup.className = 'saves-backup';
 		var days = this.getDaysSinceExport();
@@ -151,14 +208,8 @@ setup.saves = {
 			: 'Last backup to disk: ' + (days < 1 ? 'today' : Math.floor(days) + ' day' + (Math.floor(days) === 1 ? '' : 's') + ' ago') + '.';
 		backup.appendChild(summary);
 		backup.appendChild(this.button('Save to disk', 'Write a backup file you can keep', function() {
-			var disk = self.diskApi();
-			if (disk && disk.save) {
-				disk.save('ashline-' + new Date().toISOString().slice(0, 10));
-				self.markExported();
-				self.refresh();
-			}
+			self.exportFile();
 		}, 'saves-primary'));
-
 		var fileLabel = document.createElement('label');
 		fileLabel.className = 'saves-button saves-file';
 		fileLabel.textContent = 'Load from disk';
@@ -166,17 +217,19 @@ setup.saves = {
 		file.type = 'file';
 		file.accept = '.save,.json,application/json';
 		file.addEventListener('change', function(event) {
-			var disk = self.diskApi();
-			if (disk && disk.load) {
-				disk.load(event);
-			}
+			var selected = event.target.files[0];
+			if (!selected) return;
+			if (selected.size > 20 * 1024 * 1024) { self.fail('Import failed. The file exceeds 20 MB.'); return; }
+			self.confirm('Load this file and replace the current unsaved game?', function() {
+				selected.text().then(function(text) { self.importText(text); }, function() { self.fail('Could not read the file.'); });
+			});
 		});
 		fileLabel.appendChild(file);
 		backup.appendChild(fileLabel);
 		body.appendChild(backup);
-
 		var list = document.createElement('div');
 		list.className = 'saves-slots';
+		list.appendChild(this.buildSlotRow('auto'));
 		for (var index = 0; index < this.SLOT_COUNT; index++) {
 			list.appendChild(this.buildSlotRow(index));
 		}
@@ -189,13 +242,12 @@ setup.saves = {
 		var row = document.createElement('div');
 		row.className = 'saves-slot' + (save ? '' : ' saves-slot-empty');
 		row.dataset.slot = String(index);
-
 		var detail = document.createElement('div');
 		detail.className = 'saves-detail';
 		var heading = document.createElement('span');
 		heading.className = 'saves-slot-name';
 		var meta = save && save.metadata ? save.metadata : {};
-		heading.textContent = 'Slot ' + (index + 1) + (meta.automatic ? ' (autosave)' : '');
+		heading.textContent = index === 'auto' ? 'Sleep autosave' : 'Slot ' + (index + 1) + (meta.automatic ? ' (legacy autosave)' : '');
 		detail.appendChild(heading);
 		var line = document.createElement('span');
 		line.className = 'small-description';
@@ -209,23 +261,18 @@ setup.saves = {
 		}
 		detail.appendChild(line);
 		row.appendChild(detail);
-
 		var actions = document.createElement('div');
 		actions.className = 'saves-actions';
-		actions.appendChild(this.button(save ? 'Overwrite' : 'Save', 'Save the game into this slot', function() {
-			self.save(index);
-			self.refresh();
+		if (index !== 'auto') actions.appendChild(this.button(save ? 'Overwrite' : 'Save', 'Save the game into this slot', function() {
+			if (save) self.confirm('Overwrite Slot ' + (index + 1) + '? The existing save will be replaced.', function() { self.save(index); });
+			else { self.save(index); self.refresh(); }
 		}, 'saves-primary'));
 		if (save) {
 			actions.appendChild(this.button('Load', 'Load this save', function() {
-				if (typeof Dialog !== 'undefined') {
-					Dialog.close();
-				}
-				self.load(index);
+				self.confirm('Load this save and replace the current unsaved game?', function() { return self.load(index); });
 			}));
 			actions.appendChild(this.button('Delete', 'Delete this save', function() {
-				self.remove(index);
-				self.refresh();
+				self.confirm('Delete this save? This cannot be undone without an exported backup.', function() { self.remove(index); });
 			}, 'saves-danger'));
 		}
 		row.appendChild(actions);
@@ -246,10 +293,15 @@ setup.saves = {
 		Dialog.open();
 	}
 };
-
 // The backup reminder, at the top of the screen where it cannot be missed.
 Macro.add('saveReminder', {
 	handler: function() {
+		if (setup.saves.error) {
+			var warning = document.createElement('p'); warning.className = 'save-reminder'; warning.setAttribute('role', 'alert');
+			warning.textContent = setup.saves.message + ' ';
+			warning.appendChild(setup.saves.button('Saves', 'Open saves and export a backup', function() { setup.saves.showDialog(); }));
+			this.output.appendChild(warning);
+		}
 		if (!setup.saves.shouldRemind()) {
 			return;
 		}
@@ -268,7 +320,6 @@ Macro.add('saveReminder', {
 		this.output.appendChild(notice);
 	}
 });
-
 // The sidebar's Saves button opens this menu rather than the engine's plain slot list.
 jQuery(document).one(':storyready', function() {
 	jQuery(document).on('click', '#menu-item-saves a', function(event) {
