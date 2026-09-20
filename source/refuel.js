@@ -307,7 +307,7 @@ Macro.add('refuelControls', {
 		if (!options.length) {
 			return;
 		}
-		var output = '<h4>Refuelling</h4>';
+		var output = '';
 		var offered = 0;
 		setup.refuel.getSiphonOptions(variables.currentTrain, locoIndex).forEach(function(option) {
 			offered++;

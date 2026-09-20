@@ -113,6 +113,6 @@ Macro.add('foodControls', {
 		if (food.count('rawFood') || food.source('food', food.portionLitres())) out += link('Eat raw food', 'eatRaw', 5, 'hunger:+1');
 		if (craft) out += link('Prepare ' + craft.count + ' rations' + (craft.kitchen ? ' in the kitchen car' : '') + ' (1.5 kg food)', 'craft', 15, 'fatigue:+1');
 		if (food.waterPlan()) out += link('Pack 2 L of drinking water', 'takeWater', 1);
-		new Wikifier(this.output, out ? '<h4>Food and supplies</h4>' + out : '');
+		new Wikifier(this.output, out);
 	}
 });

@@ -2352,6 +2352,9 @@ setup.railyard = {
 		var trainLength = this.getTrainLength(train);
 		var html = '<div class="railyard-train">';
 		html += '<h3>Train ' + (index + 1) + ' · ' + trainLength + ' m</h3>';
+		html += '<p>' + train.slice(0, 2).map(function(car) { return setup.railyard.getCarDescription(car); }).join(', ')
+			+ (train.length > 2 ? ' and ' + (train.length - 2) + ' more' : '') + '.</p>';
+		html += '<details class="loco-panel"><summary>Car details (' + train.length + ')</summary><div class="loco-stats">';
 		html += '<ol>';
 		for (var j = 0; j < train.length; j++) {
 			var car = train[j];
@@ -2372,7 +2375,7 @@ setup.railyard = {
 			}
 			html += '</li>';
 		}
-		html += '</ol>';
+		html += '</ol></div></details>';
 		html += '</div>';
 		return html;
 	}
@@ -2400,9 +2403,8 @@ Macro.add('railyardButtons', {
 			var remaining = tracks[i].infinite ? 'infinite' : Math.max(0, tracks[i].length - occupied) + 'm';
 			var trackLabel = setup.railyard.getTrackLabel(tracks, i);
 			var deadEndText = setup.railyard.isYardTrackIndex(tracks, i) ? setup.railyard.getDeadEndText(tracks, i) : '';
-			output += '<h3>' + trackLabel + ' (' + (tracks[i].infinite ? 'Infinite' : tracks[i].length + 'm') + ' long, ' + remaining + ' free' + (deadEndText ? ', ' + deadEndText : '') + ')</h3>';
+			output += '<h3>' + trackLabel + '</h3><p class="small-description">' + (tracks[i].infinite ? 'Infinite' : tracks[i].length + 'm') + ' long, ' + remaining + ' free' + (deadEndText ? ', ' + deadEndText : '') + '.</p>';
 			if (!tracks[i].trains.length) {
-				output += '<p><em>Empty track (' + remaining + ' free).</em></p>';
 				continue;
 			}
 			// Boarding removes the selected train from the yard and turns it into the player's active consist.
@@ -2649,6 +2651,7 @@ Macro.add('debugTools', {
 		panel.className = 'debug-container';
 		this.output.appendChild(panel);
 		var reportButton = document.createElement('button');
+		reportButton.className = 'saves-button';
 		reportButton.textContent = 'Copy bug report';
 		reportButton.addEventListener('click', function() { setup.bugReport.show(); });
 		panel.appendChild(reportButton);
@@ -2810,6 +2813,7 @@ Macro.add('debugTools', {
 		wrapper.parentElement.classList.add('procedural-wiki');
 		var addReferenceTable = function(title, headings, rows) {
 			var block = document.createElement('details');
+			block.className = 'debug-section';
 			var summary = document.createElement('summary');
 			summary.textContent = title;
 			block.appendChild(summary);

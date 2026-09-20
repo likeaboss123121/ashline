@@ -108,7 +108,8 @@ Macro.add('recoveryControls', {
 		box.className = 'recovery-controls';
 		function link(label, action, effects) {
 			var p = document.createElement('p'), a = document.createElement('a');
-			a.href = '#'; a.className = 'link-internal'; a.textContent = label;
+			a.tabIndex = 0; a.setAttribute('role', 'button'); a.className = 'link-internal'; a.textContent = label;
+			a.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); a.click(); } });
 			a.addEventListener('click', function(e) { e.preventDefault(); if (action()) Engine.play(State.passage); });
 			p.appendChild(a); if (effects) new Wikifier(p, setup.effects.describeHtml(effects)); box.appendChild(p);
 		}
@@ -132,6 +133,6 @@ Macro.add('recoveryControls', {
 				if (stack.amount > 0) link('Take ' + stack.type + ' from the locomotive into carried supplies', function() { return recovery.drain(stack.type); });
 			});
 		}
-		if (box.children.length) { var h = document.createElement('h4'); h.textContent = 'Station supplies'; box.prepend(h); this.output.appendChild(box); }
+		if (box.children.length) this.output.appendChild(box);
 	}
 });

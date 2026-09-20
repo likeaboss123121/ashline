@@ -83,6 +83,7 @@ test('portable food, kitchen preparation and SVG inventory work through ordinary
     v.currentTrain.push(box,s.railyard.cloneCar(v.defaultTrains.kitchenCar));v.player.hunger=10;
     SugarCube.Engine.play('TrainInterior');
   });
+  await openSection(page,'food');
   await choose(page,'Pack raw food (0.5 kg) (0:01)','TrainInterior');
   await choose(page,'Eat raw food (0:05)','TrainInterior');
   assert.ok(await page.evaluate(()=>SugarCube.State.variables.player.hunger>10));
@@ -91,6 +92,26 @@ test('portable food, kitchen preparation and SVG inventory work through ordinary
   await page.getByText('Inventory',{exact:true}).click();
   assert.equal(await page.locator('#ui-dialog-body svg.pack-grid').count(),1);
   assert.match(await page.locator('#ui-dialog-body').innerText(),/Rations/);
+});
+
+test('optional cab sections remember ongoing work and expose fuel recovery when stranded',async t=>{
+  const page=await openGame(t);await begin(page);await board(page);
+  const pack=page.locator('[data-ui-section="inventory"]');
+  const supplies=page.locator('[data-ui-section="supplies"]');
+  assert.equal(await pack.evaluate(el=>el.open),false);
+  assert.equal(await supplies.evaluate(el=>el.open),false);
+  assert.equal(await page.getByText('Eat a ration (0:10)',{exact:true}).isVisible(),true);
+  await pack.locator(':scope > summary').focus();await page.keyboard.press('Enter');
+  await choose(page,'Take the axe and bow saw','TrainInterior');
+  assert.equal(await pack.evaluate(el=>el.open),true,'inventory stays open after a transfer');
+  await choose(page,'Start driving','DrivingMode');
+  await page.evaluate(()=>{SugarCube.State.variables.currentTrain[0].cargo=[];});
+  await choose(page,'Stop driving','TrainInterior');
+  assert.equal(await supplies.evaluate(el=>el.open),true,'stranded players immediately see supply actions');
+  const collect=supplies.locator('a').filter({hasText:/Collect from.*diesel/}).first();
+  await collect.focus();await page.keyboard.press('Enter');
+  await page.waitForFunction(()=>SugarCube.setup.railyard.getCargoAmount(SugarCube.State.variables.currentTrain[0],'diesel')>0);
+  assert.equal(await supplies.evaluate(el=>el.open),true,'supply actions remain open after collection');
 });
 
 test('empty locomotive menus expose on-foot recovery and return carried fuel to the engine',async t=>{
@@ -290,6 +311,10 @@ async function choose(page, text, next) {
     await passage(page, next);
   }
 }
+async function openSection(page, name) {
+  const section=page.locator('details[data-ui-section="'+name+'"]');
+  if(!await section.evaluate(el=>el.open)) await section.locator(':scope > summary').click();
+}
 // Runs a whole leg the way a player does: depart, then one move per 5 km tile until the yard at the far end.
 async function travelLeg(page, heading) {
   await page.locator('#passages').getByText(new RegExp('^Depart ' + heading + ' toward Station')).first().click();
@@ -392,6 +417,7 @@ test('steam controls render, burn fuel once per minute, and survive save/load', 
   await passage(page, 'Railyard');
   cargo = await page.evaluate(() => SugarCube.State.variables.stationTracks[1][1].trains[0][0].cargo);
   assert.deepEqual(cargo.map(c => c.amount), [98.75, 297]);
+  await page.getByText('Car details (1)',{exact:true}).first().click();
   assert.match(await page.locator('#passages').innerText(), /Coal: 98.75\./);
 });
 
@@ -407,10 +433,12 @@ test('the first locomotive carries a kit, and pumps diesel from a coupled tanker
   });
   await passage(page, 'Railyard');
   await board(page);
+  await openSection(page,'inventory');
   const text = await page.locator('#passages').innerText();
   assert.match(text, /Kit \(5\/6 slots\): Toolkit · Axe and bow saw · Hand pump · Sleeping bag · Rations ×3/);
   assert.match(text, /Diesel: 400.00 L/);
   const before = await page.evaluate(() => SugarCube.setup.time.getCurrentTimestampMs());
+  await openSection(page,'refuelling');
   await choose(page, 'Pump diesel from the tanker, 400 L (0:20)', 'TrainInterior');
   const after = await page.evaluate(start => {
     const v = SugarCube.State.variables;
@@ -451,6 +479,7 @@ test('a Prairie is drawn as itself, shows its graded fuel, and cuts timber from 
   assert.ok(stats.some(row => /Top speed.*90 km\/h/.test(row)), stats.join(' | '));
   assert.match(text, /Coal: 500 L, grade 30% \(very poor\)/);
   assert.match(text, /the grate gives 60% of the steam/);
+  await openSection(page,'refuelling');
   await choose(page, 'Cut timber into firewood, 150 kg (0:10)', 'TrainInterior');
   text = await page.locator('#passages').innerText();
   assert.match(text, /Coal: 500 L, grade 30% \(very poor\); Firewood: 375 L, grade 80% \(fair\)/);
@@ -837,6 +866,7 @@ test('the player can get down from the train out on the line and walk the track'
 
   // The pack is in the cab, and the axe can be moved between it and the locomotive's kit.
   await choose(page, 'Enter the train', 'TrainInterior');
+  await openSection(page,'inventory');
   assert.match(await page.locator('.player-pack').innerText(), /You are carrying \(0\/16 squares, 0 kg\/50 kg\): nothing/);
   await choose(page, 'Take the axe and bow saw', 'TrainInterior');
   assert.match(await page.locator('.player-pack').innerText(), /Axe and bow saw/);
@@ -1138,9 +1168,9 @@ test('rail yard view draws dead ends where tracks do not connect to the entry or
   });
   // Entry ladder reaches track 3: Y split at 1, diagonal past 2. Exit ladder starts at track 2: YY merge at 3, Y merge into 4.
   assert.deepEqual(counts, { splits: 1, yySplits: 0, merges: 1, yyMerges: 1, diagonals: 1, startStops: 2, endStops: 1 });
-  const headers = await page.locator('#passages h3').allTextContents();
-  assert.ok(headers.includes('Yard Track 1 (100m long, 100m free, no link to the Northbound Track)'), headers.join(' | '));
-  assert.ok(headers.includes('Yard Track 4 (100m long, 100m free, no link to the Southbound Track)'), headers.join(' | '));
+  const trackInfo=await page.locator('#passages h3 + p.small-description').allTextContents();
+  assert.ok(trackInfo.includes('100m long, 100m free, no link to the Northbound Track.'),trackInfo.join(' | '));
+  assert.ok(trackInfo.includes('100m long, 100m free, no link to the Southbound Track.'),trackInfo.join(' | '));
   // A track may not be closed at both ends, or its trains could never leave.
   const rule = await page.evaluate(() => {
     const railyard = SugarCube.setup.railyard;

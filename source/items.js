@@ -411,7 +411,7 @@ Macro.add('playerPack', {
 					+ '<<run Engine.play(State.passage)>><</link>>');
 			});
 			if (moves.length) {
-				output += '<p class="small-description">' + moves.join(' &middot; ') + '</p>';
+				output += '<ul><li>' + moves.join('</li><li>') + '</li></ul>';
 			}
 		}
 		new Wikifier(this.output, output);

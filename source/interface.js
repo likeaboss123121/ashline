@@ -4,14 +4,42 @@ setup.pages = {
 	open: function(name) {
 		if (State.passage !== 'Help' && State.passage !== 'Journal') State.variables.utilityReturn = State.passage;
 		Engine.play(name);
+	},
+	disclosures: function(root) {
+		root.querySelectorAll('details').forEach(function(section) {
+			var summary = section.querySelector(':scope > summary');
+			if (!summary || summary.querySelector('[data-disclosure-label]')) return;
+			var label = document.createElement('span'); label.dataset.disclosureLabel = '';
+			while (summary.firstChild) label.appendChild(summary.firstChild);
+			var marker = document.createElement('span'); marker.setAttribute('aria-hidden', 'true');
+			summary.appendChild(marker); summary.appendChild(label);
+			function update() { marker.textContent = section.open ? '− ' : '+ '; }
+			section.addEventListener('toggle', update); update();
+		});
 	}
 };
+// Reuse the existing locomotive disclosure style for optional passage controls.
+Macro.add('uiSection', {
+	tags: null,
+	handler: function() {
+		var body = document.createElement('div'); body.className = 'loco-stats';
+		new Wikifier(body, this.payload[0].contents);
+		if (!body.textContent.trim()) return;
+		var section = document.createElement('details'); section.className = 'loco-panel';
+		section.dataset.uiSection = this.args[0];
+		var saved = setup.pendingSections || {};
+		section.open = Object.prototype.hasOwnProperty.call(saved, this.args[0]) ? saved[this.args[0]] : this.args[2] === true;
+		var summary = document.createElement('summary');
+		summary.textContent = this.args[1];
+		section.appendChild(summary); section.appendChild(body); this.output.appendChild(section);
+	}
+});
 setup.sideTabs = {
 	active: null,
 	refresh: function() {
 		var old = document.getElementById('developer-tabs'), previous = old && old.querySelector('.developer-panel:not([hidden])');
 		var scroll = previous ? previous.scrollTop : 0;
-		var opened = old ? Array.from(old.querySelectorAll('details[open] > summary')).map(function(s) { return s.textContent; }) : [];
+		var opened = old ? Array.from(old.querySelectorAll('details[open] > summary')).map(function(s) { return (s.querySelector('[data-disclosure-label]') || s).textContent; }) : [];
 		if (old) old.remove();
 		document.querySelectorAll('#menu-story .developer-menu-item').forEach(function(item) { item.remove(); });
 		if (!State.variables.debugMode || State.passage === 'Start') { this.active = null; return; }
@@ -43,15 +71,21 @@ setup.sideTabs = {
 		root.querySelectorAll('details > summary').forEach(function(s) { if (opened.indexOf(s.textContent) >= 0) s.parentElement.open = true; });
 		root.addEventListener('keydown', function(e) { if (e.key === 'Escape') close(); });
 		document.body.appendChild(root);
+		setup.pages.disclosures(root);
 		var current = root.querySelector('.developer-panel:not([hidden])'); if (current) current.scrollTop = scroll;
 	}
 };
 jQuery(document).on(':passageinit.ashline-ui', function(event) {
+	setup.pendingSections = {};
+	if (State.passage === event.passage.title) document.querySelectorAll('#passages details[data-ui-section]').forEach(function(section) {
+		setup.pendingSections[section.dataset.uiSection] = section.open;
+	});
 	var map = document.querySelector('.railyard-view-scroll');
 	setup.pendingScroll = State.variables.preserveScroll !== false && State.passage === event.passage.title
 		? { x: window.scrollX, y: window.scrollY, mapX: map ? map.scrollLeft : 0, mapY: map ? map.scrollTop : 0 } : null;
 });
 jQuery(document).on(':passageend.ashline-ui', function() {
+	setup.pages.disclosures(document.getElementById('passages'));
 	setup.sideTabs.refresh();
 	var saved = setup.pendingScroll; setup.pendingScroll = null;
 	if (saved) requestAnimationFrame(function() {

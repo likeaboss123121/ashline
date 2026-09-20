@@ -183,7 +183,8 @@ setup.yardActions = {
 			span.className = 'tutorial-next-action';
 			span.setAttribute('data-tutorial-action', 'true');
 		}
-		link.href = '#';
+		link.tabIndex = 0; link.setAttribute('role', 'button');
+		link.addEventListener('keydown', function(event) { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); link.click(); } });
 		link.className = 'link-internal';
 		link.textContent = setup.time.formatLinkLabel(option.label, option.plan.minutes);
 		link.addEventListener('click', function(event) {
