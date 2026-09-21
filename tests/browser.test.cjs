@@ -1113,28 +1113,33 @@ test('an active consist can drive and save on the real central Chile rail pilot'
   const section = page.locator('#developer-Debug details').filter({ hasText: 'Global rail map and pilot' });
   await section.locator(':scope > summary').click();
   await section.getByRole('button', { name: /Drive Padre Hurtado.*Melipilla pilot/ }).click();
-  await passage(page, 'WorldPilot');
-  const map = await page.locator('#passages svg.real-world-pilot-map').boundingBox();
+  await passage(page, 'OnTheLine');
+  const map = await page.locator('#passages .driving-view-wrapper').boundingBox();
   assert.ok(map && map.y < 100, JSON.stringify(map));
-  assert.match(await page.locator('#passages').innerText(), /At Padre Hurtado.*0\.0 of 42\.0 km/s);
+  assert.match(await page.locator('#passages').innerText(), /Padre Hurtado.*Melipilla pilot.*Tile 1 of 10/s);
   await page.locator('#passages a').filter({ hasText: /^Drive 5 km/ }).first().click();
-  await passage(page, 'WorldPilot');
-  assert.equal(await page.evaluate(() => SugarCube.State.variables.realWorldJourney.position), 1);
+  await passage(page, 'OnTheLine');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.journey.tileIndex), 1);
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.journey.realWorldCorridorId), 'cl-padre-hurtado-melipilla');
+  const terrain = await page.evaluate(() => SugarCube.setup.worldmap.getJourneyView().tile);
+  assert.ok(Number.isFinite(terrain.elevation) && Number.isFinite(terrain.elevationStdDevM));
   assert.ok(await page.evaluate(time => SugarCube.setup.time.getCurrentTimestampMs() > time, before.time));
   assert.ok(await page.evaluate(fuel => SugarCube.setup.railyard.getCargoAmount(SugarCube.State.variables.currentTrain[0], 'diesel') < fuel, before.fuel));
   assert.equal(await page.evaluate(() => SugarCube.setup.saves.save(0)), true);
-  await page.evaluate(() => { SugarCube.State.variables.realWorldJourney.position = 4; });
+  await page.evaluate(() => { SugarCube.State.variables.journey.tileIndex = 4; });
   assert.equal(await page.evaluate(() => SugarCube.setup.saves.load(0)), true);
-  await passage(page, 'WorldPilot');
-  assert.equal(await page.evaluate(() => SugarCube.State.variables.realWorldJourney.position), 1);
+  await passage(page, 'OnTheLine');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.journey.tileIndex), 1);
   assert.equal(await page.evaluate(train => {
     const current = JSON.parse(JSON.stringify(SugarCube.State.variables.currentTrain));
     const original = JSON.parse(train);
     current[0].cargo = original[0].cargo;
     return JSON.stringify(current) === JSON.stringify(original);
   }, before.train), true, 'the same consist and car order enter the pilot');
-  await choose(page, 'Leave real-world pilot', 'TrainInterior');
-  assert.equal(await page.evaluate(() => SugarCube.State.variables.realWorldJourney), null);
+  await page.locator('#passages a').filter({ hasText: /^Reverse 5 km/ }).first().click();
+  await passage(page, 'OnTheLine');
+  await choose(page, 'Leave the sourced route at Padre Hurtado', 'TrainInterior');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.journey), null);
 });
 
 test('seed text remains literal when revisiting settings', async t => {
@@ -1569,11 +1574,11 @@ test('debug mode draws the generated world map for the leg ahead', async t => {
   assert.match(await prototype.innerText(), /not claimed railway geometry/);
   assert.equal(await prototype.locator('svg.world-graph-debug polyline').count(), 3);
   assert.equal(await prototype.locator('svg.world-graph-debug circle').count(), 35);
-  assert.match(await prototype.innerText(), /1,553 sourced OSM ways, 20,297 coordinates and 1,047 km/);
+  assert.match(await prototype.innerText(), /1,581 sourced OSM ways, 21,391 coordinates and 1,160 km/);
   const previewCounts = await prototype.locator('svg.rail-geometry-preview path[data-way-count]').evaluateAll(paths =>
     paths.map(path => Number(path.getAttribute('data-way-count'))));
-  assert.equal(previewCounts.reduce((sum, count) => sum + count, 0), 1553);
-  assert.ok(previewCounts.length <= 10, JSON.stringify(previewCounts));
+  assert.equal(previewCounts.reduce((sum, count) => sum + count, 0), 1581);
+  assert.ok(previewCounts.length <= 12, JSON.stringify(previewCounts));
   const reference = page.locator('details.debug-section').filter({ has: page.getByText('Reference data', { exact: true }) });
   await page.getByRole('button', { name: 'Wiki', exact: true }).click();
   await reference.getByText('Railcars', { exact: true }).click();

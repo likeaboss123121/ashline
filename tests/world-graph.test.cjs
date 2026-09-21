@@ -26,8 +26,8 @@ test('world graph loads all regional chunks without entering save state', () => 
     linkCount: 40,
     corridorCount: 3,
     railGeometrySetCount: 1,
-    railWayCount: 1553,
-    railCoordinateCount: 20297,
+    railWayCount: 1581,
+    railCoordinateCount: 21391,
     playableRailCorridorCount: 1
   });
   assert.equal(graph.loadAll(), true);
@@ -81,7 +81,8 @@ test('three authored Punta Arenas to Panama corridors are independently queryabl
   assert.notDeepEqual(routes[1].waypoints.map(node => node.id), routes[2].waypoints.map(node => node.id));
   assert.deepEqual(JSON.parse(JSON.stringify(graph.getAttributions())), [
     'City names, coordinates and population: GeoNames (https://www.geonames.org/)',
-    '© OpenStreetMap contributors; extract provided by Geofabrik'
+    '© OpenStreetMap contributors; extract provided by Geofabrik',
+    'Produced using Copernicus WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved'
   ]);
 });
 
@@ -93,20 +94,26 @@ test('OSM importer retains provenance and operational tags while refusing naviga
       geometry: { type: 'LineString', coordinates: [[-71.4, -33.05], [-71.3, -33.0]] } },
     { type: 'Feature', properties: { '@id': 44, railway: 'subway' },
       geometry: { type: 'LineString', coordinates: [[-71, -33], [-70.9, -33]] } },
+    { type: 'Feature', properties: { '@id': 46, railway: 'proposed', name: 'Future line' },
+      geometry: { type: 'LineString', coordinates: [[-71.3, -33], [-71.2, -33]] } },
+    { type: 'Feature', properties: { '@id': 47, 'abandoned:railway': 'rail', name: 'Namespaced old line' },
+      geometry: { type: 'LineString', coordinates: [[-71.2, -33], [-71.1, -33]] } },
     { type: 'Feature', properties: { '@id': 45, railway: 'station', name: 'Test Station' },
       geometry: { type: 'Point', coordinates: [-71.4, -33.05] } }
   ] }, { id: 'fixture', label: 'Fixture', sourceId: 'osm-fixture', sourceInputSha256: 'abc' });
-  assert.equal(geometry.stats.wayCount, 2);
-  assert.equal(geometry.stats.coordinateCount, 4);
+  assert.equal(geometry.stats.wayCount, 4);
+  assert.equal(geometry.stats.coordinateCount, 8);
   assert.equal(geometry.stats.pointCount, 1);
   assert.equal(geometry.points[0].tags.name, 'Test Station');
-  assert.deepEqual(JSON.parse(JSON.stringify(geometry.stats.statusCounts)), { abandoned: 1, current: 1 });
+  assert.deepEqual(JSON.parse(JSON.stringify(geometry.stats.statusCounts)), { abandoned: 2, current: 1, proposed: 1 });
   assert.equal(geometry.ways[0].coordinates.length, 2, 'consecutive duplicate coordinates are removed');
   assert.deepEqual(JSON.parse(JSON.stringify(geometry.ways[0].tags)), { usage: 'main', gauge: '1676', bridge: 'yes' });
   geometry.ways.forEach(way => {
     assert.equal(way.navigable, false);
     assert.equal(way.reviewRequired, true);
   });
+  const importedGraph = require('../scripts/world/build-rail-topology.cjs').buildCoordinateGraph(geometry);
+  assert.equal(importedGraph.segments.length, 4, 'all railway lifecycle statuses are mechanically routable');
 });
 
 test('central Chile pilot geometry is sourced, bounded and internally consistent', () => {
@@ -132,6 +139,7 @@ test('authored Chile rail topology follows connected OSM track in five-kilometre
   assert.equal(corridor.debugOnly, true);
   assert.equal(corridor.navigable, true);
   assert.equal(corridor.sliceCount, 11);
+  assert.equal(corridor.gridSliceCount, 9);
   assert.equal(corridor.distanceKm, 42);
   const knownWays = new Set(geometry.ways.map(way => way.id));
   corridor.legs.forEach(leg => {
@@ -144,6 +152,8 @@ test('authored Chile rail topology follows connected OSM track in five-kilometre
     });
     assert.ok(Math.abs(leg.slices.reduce((sum, slice) => sum + slice.distanceKm, 0) - leg.distanceKm) < 0.01);
   });
+  assert.equal(corridor.gridSlices.slice(0, -1).every(slice => slice.distanceKm === 5), true);
+  assert.ok(corridor.gridSlices.at(-1).distanceKm > 0 && corridor.gridSlices.at(-1).distanceKm < 5);
   assert.deepEqual(topology, buildTopology(geometry, authored), 'topology compilation is deterministic');
 });
 
@@ -153,14 +163,32 @@ test('real-world pilot moves the active consist without copying static world dat
   game.State.variables.currentTrain = [{ type: 'test locomotive', length: 10, cargo: [], inventory: [], topSpeedKmh: 60 }];
   const train = game.State.variables.currentTrain;
   assert.equal(game.setup.realWorldPilot.start('cl-padre-hurtado-melipilla'), true);
-  assert.deepEqual(JSON.parse(JSON.stringify(game.State.variables.realWorldJourney)),
-    { corridorId: 'cl-padre-hurtado-melipilla', position: 0 });
-  const step = game.setup.realWorldPilot.getStep(1);
+  assert.deepEqual(JSON.parse(JSON.stringify(game.State.variables.journey)),
+    { legIndex: 0, tileIndex: 0, forward: true, realWorldCorridorId: 'cl-padre-hurtado-melipilla' });
+  const route = game.setup.realWorldPilot.getGridRoute('cl-padre-hurtado-melipilla');
+  assert.equal(route.tiles.length, 10);
+  assert.ok(route.tiles.every(tile => Number.isFinite(tile.elevation) && Number.isFinite(tile.elevationStdDevM)));
+  assert.ok(route.tiles.every(tile => tile.terrain === 'plains' || tile.terrain === 'bridge' || tile.terrain === 'tunnel'));
+  assert.equal(route.tiles[0].elevation, 436.2);
+  assert.equal(route.tiles[0].elevationStdDevM, 15);
+  assert.equal(route.tiles[0].grade, -0.5);
+  assert.equal(game.setup.realWorldPilot.terrainFor({ bridge: false, tunnel: false },
+    { meanElevationM: 3000, elevationStdDevM: 20 }, 120), 'plains', 'high and flat is not mountainous');
+  assert.equal(game.setup.realWorldPilot.terrainFor({ bridge: false, tunnel: false },
+    { meanElevationM: 200, elevationStdDevM: 180 }, 120), 'mountain', 'ruggedness is independent of altitude');
+  const step = game.setup.worldmap.getJourneyStep(1);
   assert.ok(step.distanceKm > 0 && step.distanceKm <= 5);
-  assert.equal(game.setup.realWorldPilot.move(1), true);
-  assert.equal(game.State.variables.realWorldJourney.position, 1);
+  assert.equal(game.setup.railyard.moveAlongLine(1), true);
+  assert.equal(game.State.variables.journey.tileIndex, 1);
   assert.equal(game.State.variables.currentTrain, train);
+  assert.equal(game.setup.onfoot.climbDown(), true);
+  assert.equal(game.setup.onfoot.getTile().elevation, route.tiles[1].elevation);
+  assert.equal(game.setup.onfoot.walk(-1), true);
+  assert.equal(game.State.variables.onFoot.tileIndex, 0);
+  assert.equal(game.State.variables.journey.tileIndex, 1, 'walking does not move the consist');
+  assert.equal(game.setup.onfoot.walk(1), true);
+  assert.equal(game.setup.onfoot.climbAboard(), true);
   assert.equal(JSON.stringify(game.State.variables).includes('sourceWayIds'), false);
-  assert.equal(game.setup.realWorldPilot.stop(), true);
-  assert.equal(game.State.variables.realWorldJourney, null);
+  assert.equal(game.setup.realWorldPilot.finish(), true);
+  assert.equal(game.State.variables.journey, null);
 });

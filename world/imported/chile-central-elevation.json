@@ -1,0 +1,137 @@
+{
+  "formatVersion": 1,
+  "sourceId": "copernicus-dem-glo90",
+  "geometryId": "chile-central-pilot",
+  "topologyBuildId": "e6be4f25faba72c0",
+  "tileKm": 5,
+  "aggregation": "mean-and-population-standard-deviation-within-geographic-tile",
+  "mountainStdDevM": 120,
+  "sourceFiles": [
+    {
+      "name": "Copernicus_DSM_COG_30_S34_00_W072_00_DEM.tif",
+      "sha256": "fcf124ef487f22838b23eaec56b142f4c83b745a8212d55bfc772ffa0afdfe27"
+    },
+    {
+      "name": "Copernicus_DSM_COG_30_S34_00_W071_00_DEM.tif",
+      "sha256": "5fec8634dd8d5433b13c1766a4948518457dba29a90f4cb676cf7852dd71a800"
+    }
+  ],
+  "corridors": [
+    {
+      "corridorId": "cl-padre-hurtado-melipilla",
+      "positions": [
+        {
+          "position": 0,
+          "coordinate": [
+            -70.8156797,
+            -33.5678013
+          ],
+          "stationId": "osm-node:3988525027",
+          "meanElevationM": 436.2,
+          "elevationStdDevM": 15,
+          "sampleCount": 3510
+        },
+        {
+          "position": 1,
+          "coordinate": [
+            -70.8522496,
+            -33.6007311
+          ],
+          "incomingSliceId": "cl-padre-hurtado-melipilla:leg-grid:slice-01",
+          "meanElevationM": 409,
+          "elevationStdDevM": 14.3,
+          "sampleCount": 3510
+        },
+        {
+          "position": 2,
+          "coordinate": [
+            -70.8836296,
+            -33.6373242
+          ],
+          "incomingSliceId": "cl-padre-hurtado-melipilla:leg-grid:slice-02",
+          "meanElevationM": 385.9,
+          "elevationStdDevM": 14.7,
+          "sampleCount": 3510
+        },
+        {
+          "position": 3,
+          "coordinate": [
+            -70.9290072,
+            -33.6599109
+          ],
+          "incomingSliceId": "cl-padre-hurtado-melipilla:leg-grid:slice-03",
+          "meanElevationM": 354.5,
+          "elevationStdDevM": 51.7,
+          "sampleCount": 3510
+        },
+        {
+          "position": 4,
+          "coordinate": [
+            -70.9787355,
+            -33.6745907
+          ],
+          "incomingSliceId": "cl-padre-hurtado-melipilla:leg-grid:slice-04",
+          "meanElevationM": 298.8,
+          "elevationStdDevM": 24.1,
+          "sampleCount": 3510
+        },
+        {
+          "position": 5,
+          "coordinate": [
+            -71.0305995,
+            -33.6847724
+          ],
+          "incomingSliceId": "cl-padre-hurtado-melipilla:leg-grid:slice-05",
+          "meanElevationM": 264.5,
+          "elevationStdDevM": 20.2,
+          "sampleCount": 3510
+        },
+        {
+          "position": 6,
+          "coordinate": [
+            -71.0843171,
+            -33.6896444
+          ],
+          "incomingSliceId": "cl-padre-hurtado-melipilla:leg-grid:slice-06",
+          "meanElevationM": 227.3,
+          "elevationStdDevM": 27.9,
+          "sampleCount": 3510
+        },
+        {
+          "position": 7,
+          "coordinate": [
+            -71.1367492,
+            -33.6790695
+          ],
+          "incomingSliceId": "cl-padre-hurtado-melipilla:leg-grid:slice-07",
+          "meanElevationM": 202.9,
+          "elevationStdDevM": 30.4,
+          "sampleCount": 3510
+        },
+        {
+          "position": 8,
+          "coordinate": [
+            -71.1900428,
+            -33.6778279
+          ],
+          "incomingSliceId": "cl-padre-hurtado-melipilla:leg-grid:slice-08",
+          "meanElevationM": 199.5,
+          "elevationStdDevM": 60.7,
+          "sampleCount": 3510
+        },
+        {
+          "position": 9,
+          "coordinate": [
+            -71.2109877,
+            -33.6796771
+          ],
+          "stationId": "osm-node:3988557682",
+          "incomingSliceId": "cl-padre-hurtado-melipilla:leg-grid:slice-09",
+          "meanElevationM": 184.2,
+          "elevationStdDevM": 48.4,
+          "sampleCount": 3510
+        }
+      ]
+    }
+  ]
+}

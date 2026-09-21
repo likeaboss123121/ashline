@@ -19,6 +19,7 @@ debug mode; ordinary gameplay continues to use the procedural world.
 - `authored/playable-corridors.json` names the OSM station sequence approved for debug navigation.
 - `imports.json` lists normalized geometry sets included by the compiler.
 - `imported/chile-central-rail.json` is the first real-geometry pilot, derived from the dated Chile OSM extract.
+- `imported/chile-central-elevation.json` contains mean elevation and elevation standard deviation for each pilot grid tile.
 - `sources.json` records data versions, licences, attribution and whether each source is actually ingested yet.
 - `schema/world-graph.schema.json` documents the compiled bundle contract.
 
@@ -33,8 +34,9 @@ and position. No raw map, compiled chunk, cache or generated topology belongs in
 `scripts/world/import-osm-geojson.cjs` normalizes an Osmium GeoJSON export. Raw `.osm.pbf` and intermediate
 GeoJSON files remain outside the repository. The central Chile pilot was produced from the 2026-09-20 Geofabrik
 extract by filtering railway ways first, then taking a complete-way bounding box around Santiago and Valparaíso.
-Every imported way retains its OSM ID and useful operational tags and remains `reviewRequired: true` and
-`navigable: false`. `build-rail-topology.cjs` connects current-track coordinates, routes between authored station
+Every imported way retains its OSM ID, lifecycle status and useful operational tags and remains `reviewRequired: true` and
+`navigable: false`. Ashline deliberately treats current, proposed, construction, disused, abandoned, dismantled
+and razed alignments identically when building the gameplay graph. `build-rail-topology.cjs` connects their coordinates, routes between authored station
 nodes, and emits sourced slices no longer than 5 km. Only the resulting authored debug corridor is navigable;
 importing a way never makes it playable by itself.
 
@@ -42,6 +44,7 @@ With `osmium-tool` installed and the dated Chile extract downloaded, reproduce i
 
 ```sh
 npm run world:extract:chile -- --input /path/to/chile-260920.osm.pbf
+npm run world:elevation:chile -- --dem /path/to/S34_W072.tif,/path/to/S34_W071.tif --output world/imported/chile-central-elevation.json
 npm run world:build
 npm run world:benchmark
 ```
@@ -60,6 +63,8 @@ the complete-way extractor exceed this server's memory on the 59-million-node co
 
 The repository currently implements the input contract, deterministic compilation, regional partitioning,
 runtime loading/querying, the planning-corridor debug view, and a routed Padre Hurtado–Melipilla pilot. The pilot
-uses eleven sourced slices across five real stations and consumes the active consist's time and fuel. It does not
-yet include elevation/climate sampling, destination yards, or reviewed gap fills, and it does not claim that the
+uses nine continuous gameplay steps (eight 5 km steps and the final remainder) across five real stations inside the ordinary grid, `OnTheLine` passage, driving view,
+walking, save, time and fuel systems. Copernicus GLO-90 samples provide each tile's mean elevation for grade and
+within-tile elevation standard deviation for ruggedness: high flat land stays plains, while locally varied land
+becomes mountain. It does not yet include climate sampling, destination yards, or reviewed gap fills, and it does not claim that the
 worldwide waypoint chords are rail.

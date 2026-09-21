@@ -20,7 +20,7 @@
       "license": "ODbL 1.0",
       "attribution": "© OpenStreetMap contributors; extract provided by Geofabrik",
       "status": "ingested",
-      "use": "Current, disused, abandoned, razed and construction railway geometry in the central Chile pilot",
+      "use": "Current, proposed, construction, disused, abandoned, dismantled, razed and other mapped railway alignments in the central Chile pilot",
       "transformation": "Osmium tag filter, complete-way bounding-box extract, GeoJSON export, deterministic normalization"
     },
     {
@@ -38,8 +38,10 @@
       "url": "https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM",
       "license": "Copernicus WorldDEM-90 free and open licence; prescribed notice required",
       "attribution": "Produced using Copernicus WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved",
-      "status": "planned",
-      "use": "Elevation profiles and grades"
+      "status": "ingested",
+      "retrieved": "2026-09-21",
+      "use": "Mean elevation, within-tile elevation standard deviation, terrain ruggedness and grades",
+      "transformation": "Copernicus GLO-90 COG samples aggregated over 5 km geographic tiles using mean and population standard deviation"
     },
     {
       "id": "chelsa-climatologies-2.1",

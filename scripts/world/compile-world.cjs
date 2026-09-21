@@ -197,6 +197,21 @@ function compile() {
     return geometry;
   });
   const railTopology = railGeometry.map(geometry => buildTopology(geometry, authoredPlayableCorridors));
+  const elevationByGeometry = Object.fromEntries((importManifest.elevation || []).map(entry => {
+    const elevation = JSON.parse(read(entry.file));
+    assert(elevation.geometryId === entry.geometryId, 'Elevation import geometry mismatch: ' + entry.file);
+    return [entry.geometryId, elevation];
+  }));
+  railTopology.forEach(topology => {
+    const elevation = elevationByGeometry[topology.geometryId];
+    assert(elevation, 'Missing elevation import for topology: ' + topology.geometryId);
+    validateElevation(elevation, topology, sourceManifest.sources);
+    const byCorridor = Object.fromEntries(elevation.corridors.map(corridor => [corridor.corridorId, corridor]));
+    topology.corridors.forEach(corridor => { corridor.elevation = byCorridor[corridor.id].positions; });
+    topology.elevationSourceId = elevation.sourceId;
+    topology.elevationAggregation = elevation.aggregation;
+    topology.mountainStdDevM = elevation.mountainStdDevM;
+  });
   const bundle = {
     formatVersion: 1,
     datasetVersion: sourceManifest.datasetVersion,
@@ -238,6 +253,30 @@ function validateRailGeometry(geometry, sources) {
   assert(Array.isArray(geometry.points) && geometry.points.length === geometry.stats.pointCount, 'Rail point count mismatch: ' + geometry.id);
   assert(coordinateCount === geometry.stats.coordinateCount, 'Rail coordinate count mismatch: ' + geometry.id);
   assert(Math.abs(Math.round(lengthKm * 10) / 10 - geometry.stats.lengthKm) < 0.11, 'Rail length mismatch: ' + geometry.id);
+}
+
+function validateElevation(elevation, topology, sources) {
+  assert(elevation.formatVersion === 1 && elevation.tileKm === tileKm, 'Invalid elevation header: ' + elevation.geometryId);
+  assert(elevation.topologyBuildId === topology.buildId, 'Elevation is stale for topology: ' + elevation.geometryId);
+  const source = sources.find(candidate => candidate.id === elevation.sourceId);
+  assert(source && source.status === 'ingested', 'Elevation has no ingested source: ' + elevation.geometryId);
+  assert(elevation.aggregation === 'mean-and-population-standard-deviation-within-geographic-tile',
+    'Unexpected elevation aggregation: ' + elevation.geometryId);
+  assert(Number.isFinite(elevation.mountainStdDevM) && elevation.mountainStdDevM > 0,
+    'Invalid mountain ruggedness threshold: ' + elevation.geometryId);
+  const corridors = Object.fromEntries(elevation.corridors.map(corridor => [corridor.corridorId, corridor]));
+  topology.corridors.forEach(corridor => {
+    const samples = corridors[corridor.id] && corridors[corridor.id].positions;
+    assert(Array.isArray(samples) && samples.length === corridor.gridSliceCount + 1,
+      'Elevation position count mismatch: ' + corridor.id);
+    samples.forEach((sample, index) => {
+      assert(sample.position === index && Array.isArray(sample.coordinate) && sample.coordinate.length === 2,
+        'Invalid elevation position: ' + corridor.id + ':' + index);
+      assert(Number.isFinite(sample.meanElevationM) && Number.isFinite(sample.elevationStdDevM) &&
+        sample.elevationStdDevM >= 0 && Number.isInteger(sample.sampleCount) && sample.sampleCount > 0,
+      'Invalid elevation statistics: ' + corridor.id + ':' + index);
+    });
+  });
 }
 
 function validateBundle(bundle) {
@@ -300,6 +339,8 @@ function validateBundle(bundle) {
           assert(slice.navigable === true && slice.reviewStatus === 'authored-debug-pilot', 'Unsafe topology slice: ' + slice.id);
           assert(slice.distanceKm > 0 && slice.distanceKm <= bundle.tileKm + 0.001, 'Invalid topology slice length: ' + slice.id);
           assert(slice.coordinates.length >= 2 && slice.sourceWayIds.length > 0, 'Topology slice lacks provenance: ' + slice.id);
+          assert(Array.isArray(slice.railwayStatuses) && slice.railwayStatuses.length > 0,
+            'Topology slice lacks lifecycle provenance: ' + slice.id);
           if (sliceIndex) {
             const previous = leg.slices[sliceIndex - 1];
             assert(JSON.stringify(previous.coordinates.at(-1)) === JSON.stringify(slice.coordinates[0]),
@@ -311,6 +352,13 @@ function validateBundle(bundle) {
         corridorDistance += leg.distanceKm;
       });
       assert(sliceIds.size === corridor.sliceCount, 'Topology slice count mismatch: ' + corridor.id);
+      assert(Array.isArray(corridor.gridSlices) && corridor.gridSlices.length === corridor.gridSliceCount,
+        'Topology grid slice count mismatch: ' + corridor.id);
+      corridor.gridSlices.forEach(slice => {
+        assert(slice.distanceKm > 0 && slice.distanceKm <= bundle.tileKm + 0.001 &&
+          Array.isArray(slice.railwayStatuses) && slice.railwayStatuses.length > 0,
+        'Invalid gameplay grid slice: ' + slice.id);
+      });
       assert(Math.abs(Math.round(corridorDistance * 10) / 10 - corridor.distanceKm) < 0.01,
         'Topology corridor distance mismatch: ' + corridor.id);
     });

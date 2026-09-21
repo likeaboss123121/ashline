@@ -49,7 +49,10 @@ setup.saves = {
 		var variables = State.variables;
 		var parts = setup.time.getCurrentDateParts();
 		var station = variables.currentStation || 1;
-		var place = variables.journey ? 'On the line past Station ' + station : 'Station ' + station;
+		var realCorridor = variables.journey && variables.journey.realWorldCorridorId
+			? setup.realWorldPilot.getCorridor(variables.journey.realWorldCorridorId) : null;
+		var place = realCorridor ? 'On ' + realCorridor.label
+			: variables.journey ? 'On the line past Station ' + station : 'Station ' + station;
 		return {
 			place: place,
 			when: setup.time.formatDate(parts) + ', ' + setup.time.formatClock(parts),
@@ -148,6 +151,11 @@ setup.saves = {
 			if (v.realWorldJourney != null && (!object(v.realWorldJourney) ||
 				typeof v.realWorldJourney.corridorId !== 'string' || !Number.isInteger(v.realWorldJourney.position) ||
 				v.realWorldJourney.position < 0)) throw new Error('Invalid real-world journey data.');
+			if (v.journey && v.journey.realWorldCorridorId && (typeof v.journey.realWorldCorridorId !== 'string' ||
+				!Number.isInteger(v.journey.tileIndex) || v.journey.tileIndex < 0 ||
+				!setup.realWorldPilot.getGridRoute(v.journey.realWorldCorridorId) ||
+				v.journey.tileIndex >= setup.realWorldPilot.getGridRoute(v.journey.realWorldCorridorId).tiles.length))
+				throw new Error('Invalid sourced-route journey data.');
 			if (!stacks(v.player.carried, false) || !stacks(v.player.carriedCargo, true)) throw new Error('Invalid inventory data.');
 			Object.keys(v.stationTracks).forEach(function(station) {
 				var tracks = v.stationTracks[station];

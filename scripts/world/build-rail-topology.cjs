@@ -62,7 +62,7 @@ function buildCoordinateGraph(geometry) {
     if (!nodes.has(id)) nodes.set(id, { key: id, coordinate, segments: [] });
     return nodes.get(id);
   }
-  geometry.ways.filter(way => way.railwayStatus === 'current').forEach(way => {
+  geometry.ways.forEach(way => {
     for (let index = 1; index < way.coordinates.length; index++) {
       const from = node(way.coordinates[index - 1]);
       const to = node(way.coordinates[index]);
@@ -110,8 +110,8 @@ function componentStats(graph) {
 }
 
 function shortestPath(graph, start, goal) {
-  assert(graph.nodes.has(start), 'Route station is not on current rail: ' + start);
-  assert(graph.nodes.has(goal), 'Route station is not on current rail: ' + goal);
+  assert(graph.nodes.has(start), 'Route station is not on imported rail: ' + start);
+  assert(graph.nodes.has(goal), 'Route station is not on imported rail: ' + goal);
   const distances = new Map([[start, 0]]);
   const previous = new Map();
   const heap = new MinHeap();
@@ -133,7 +133,7 @@ function shortestPath(graph, start, goal) {
       }
     });
   }
-  assert(previous.has(goal) || start === goal, 'No current-rail route between authored stations');
+  assert(previous.has(goal) || start === goal, 'No imported-rail route between authored stations');
   const path = [];
   let cursor = goal;
   while (cursor !== start) {
@@ -162,12 +162,13 @@ function slicesForPath(path, corridorId, legIndex) {
   let coordinates = [path[0].fromCoordinate];
   let distanceKm = 0;
   let sourceWayIds = new Set();
-  let flags = { bridge: false, tunnel: false, service: true };
+  let flags = { bridge: false, tunnel: false, service: true, statuses: new Set() };
   function addWay(way) {
     sourceWayIds.add(way.id);
     flags.bridge = flags.bridge || (!!way.tags.bridge && way.tags.bridge !== 'no');
     flags.tunnel = flags.tunnel || (!!way.tags.tunnel && way.tags.tunnel !== 'no');
     flags.service = flags.service && !!way.tags.service;
+    flags.statuses.add(way.railwayStatus);
   }
   function emit() {
     if (!(distanceKm > 0)) return;
@@ -180,13 +181,14 @@ function slicesForPath(path, corridorId, legIndex) {
       bridge: flags.bridge,
       tunnel: flags.tunnel,
       service: flags.service,
+      railwayStatuses: Array.from(flags.statuses).sort(),
       navigable: true,
       reviewStatus: 'authored-debug-pilot'
     });
     coordinates = [coordinates[coordinates.length - 1]];
     distanceKm = 0;
     sourceWayIds = new Set();
-    flags = { bridge: false, tunnel: false, service: true };
+    flags = { bridge: false, tunnel: false, service: true, statuses: new Set() };
   }
   path.forEach(step => {
     let from = step.fromCoordinate;
@@ -222,12 +224,14 @@ function buildTopology(geometry, authored) {
     const stations = corridor.stationPointIds.map(id => {
       const point = pointsById[id];
       assert(point && point.tags.name, 'Missing named station point: ' + id);
-      assert(graph.nodes.has(key(point.coordinates)), 'Station does not lie on current rail: ' + point.tags.name);
+      assert(graph.nodes.has(key(point.coordinates)), 'Station does not lie on imported rail: ' + point.tags.name);
       return { id: point.id, name: point.tags.name, coordinates: point.coordinates };
     });
     const legs = [];
+    const corridorPath = [];
     for (let index = 0; index < stations.length - 1; index++) {
       const path = shortestPath(graph, key(stations[index].coordinates), key(stations[index + 1].coordinates));
+      corridorPath.push(...path);
       const slices = slicesForPath(path, corridor.id, index + 1);
       legs.push({
         id: corridor.id + ':leg-' + (index + 1),
@@ -238,6 +242,7 @@ function buildTopology(geometry, authored) {
         slices
       });
     }
+    const gridSlices = slicesForPath(corridorPath, corridor.id, 'grid');
     return {
       id: corridor.id,
       label: corridor.label,
@@ -247,21 +252,24 @@ function buildTopology(geometry, authored) {
       reviewStatus: 'authored-debug-pilot',
       stations,
       legs,
+      gridSlices,
       distanceKm: Math.round(legs.reduce((sum, leg) => sum + leg.distanceKm, 0) * 10) / 10,
-      sliceCount: legs.reduce((sum, leg) => sum + leg.slices.length, 0)
+      sliceCount: legs.reduce((sum, leg) => sum + leg.slices.length, 0),
+      gridSliceCount: gridSlices.length
     };
   });
   return {
     formatVersion: 1,
     geometryId: geometry.id,
     tileKm: TILE_KM,
-    buildId: crypto.createHash('sha256').update(JSON.stringify({ geometry: geometry.sourceInputSha256, authored })).digest('hex').slice(0, 16),
+    buildId: crypto.createHash('sha256').update(JSON.stringify({ topologyVersion: 2,
+      geometry: geometry.sourceInputSha256, authored })).digest('hex').slice(0, 16),
     stats: {
-      currentCoordinateNodes: graph.nodes.size,
-      currentSegments: graph.segments.length,
+      railwayCoordinateNodes: graph.nodes.size,
+      railwaySegments: graph.segments.length,
       componentCount: components.length,
       largestComponentNodes: components[0] ? components[0].nodeCount : 0,
-      currentLengthKm: Math.round(graph.segments.reduce((sum, segment) => sum + segment.distanceKm, 0) * 10) / 10
+      railwayLengthKm: Math.round(graph.segments.reduce((sum, segment) => sum + segment.distanceKm, 0) * 10) / 10
     },
     components,
     corridors

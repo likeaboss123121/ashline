@@ -34,7 +34,7 @@ setup.onfoot = {
 	getPosition: function() {
 		var foot = this.get(), journey = setup.worldmap.getJourney();
 		return foot && journey ? { legIndex: journey.legIndex, tileIndex: foot.tileIndex,
-			branch: foot.branch || null, forward: true } : null;
+			branch: foot.branch || null, forward: true, realWorldCorridorId: journey.realWorldCorridorId } : null;
 	},
 	// The tile the player is standing on, which is not always the one the train is on.
 	getTile: function() {

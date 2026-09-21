@@ -14,20 +14,29 @@ seeded generator. The next pipeline stage replaces chords with normalized presen
 reviewed gap-fill proposals, then samples accepted edges into approximately 5 km gameplay slices.
 
 The first real-geometry pilot uses the dated 2026-09-20 Geofabrik Chile extract. A central-Chile box around
-Santiago and Valparaíso normalizes 1,553 OSM railway ways, 20,297 coordinates and 1,047 km of current,
-construction, disused, abandoned and razed track. Every source way retains provenance and operational tags and
-remains review-required and non-navigable. The authored Padre Hurtado–Malloco–Talagante–El Monte–Melipilla debug
-corridor routes over connected current-track coordinates and compiles to eleven slices of at most 5 km. That
-derived corridor alone is navigable. The compiled geometry is about 186 KiB gzipped and parses in roughly 7.7 ms
-under Node on the development server. That is small regionally but too costly to extrapolate into one global
-HTML payload, reinforcing the plan to load detailed geometry as regional chunks.
+Santiago and Valparaíso normalizes 1,581 OSM railway ways, 21,391 coordinates and about 1,160 km of current,
+proposed, construction, disused, abandoned and razed track. Every source way retains provenance and operational
+tags. Lifecycle status does not restrict gameplay routing: the setting restores all mapped railway alignments.
+The authored Padre Hurtado–Malloco–Talagante–El Monte–Melipilla debug corridor routes over that connected graph
+and retains eleven station-bounded provenance slices. Gameplay reslices the complete 41.96 km corridor
+continuously into eight 5 km steps and one final remainder, rather than creating short tiles at every station.
+That derived corridor alone is navigable.
 
 Static graph data always lives in `setup`; pilot saves keep only the stable corridor ID and numeric position.
-The active `currentTrain` remains the same consist, so ordinary time and fuel systems apply to each move. Run
+The sourced corridor is adapted into the same integer grid tiles used by the generated world and runs through
+`OnTheLine`, its normal driving view, walking, save, time and fuel systems. The active `currentTrain` remains the
+same consist. Run
 `npm run world:build` to regenerate outputs and `npm run world:check` to verify them.
 
 The world between stations is a grid of 5 km by 5 km tiles, each carrying one piece of track. It lives in
 [`source/worldmap.js`](../source/worldmap.js) as `setup.worldmap`.
+
+For sourced tiles, Copernicus GLO-90 samples are aggregated over the full 5 km geographic square. The arithmetic
+mean is the tile elevation and grade is the difference between adjacent means divided by their route distance.
+Population standard deviation measures within-tile relief; `120 m` currently separates plains from mountain.
+Absolute altitude is not a terrain classifier, so a high, flat plateau remains plains. Bridges and tunnels from
+OSM override the relief classification. Raw DEM rasters stay outside the repository; the small aggregate is
+compiled into static world data.
 
 ## It is never saved
 

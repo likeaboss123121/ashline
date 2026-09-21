@@ -37,8 +37,14 @@ function main() {
   const extracted = path.join(temporary, 'central-rail.osm.pbf');
   const geojson = path.join(temporary, 'central-rail.geojson');
   try {
+    const trackValues = 'rail,narrow_gauge,light_rail';
     run('osmium', ['tags-filter', '--overwrite', '-o', filtered, input,
-      'w/railway=rail,narrow_gauge,light_rail,disused,abandoned,razed,preserved,construction']);
+      'w/railway=rail,narrow_gauge,light_rail,disused,abandoned,dismantled,razed,demolished,removed,preserved,construction,proposed,planned,historic',
+      'w/disused:railway=' + trackValues, 'w/abandoned:railway=' + trackValues,
+      'w/dismantled:railway=' + trackValues, 'w/razed:railway=' + trackValues,
+      'w/demolished:railway=' + trackValues, 'w/removed:railway=' + trackValues,
+      'w/construction:railway=' + trackValues, 'w/proposed:railway=' + trackValues,
+      'w/planned:railway=' + trackValues, 'w/historic:railway=' + trackValues]);
     run('osmium', ['extract', '--bbox=-72.2,-34.0,-70.0,-32.5', '--strategy=complete_ways', '--overwrite',
       '-o', extracted, filtered]);
     run('osmium', ['export', '--overwrite', '--add-unique-id=type_id', '--attributes=type,id,version,timestamp',

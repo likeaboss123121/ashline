@@ -66,19 +66,22 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["formatVersion", "geometryId", "tileKm", "buildId", "stats", "components", "corridors"],
+        "required": ["formatVersion", "geometryId", "tileKm", "buildId", "stats", "components", "corridors", "elevationSourceId", "elevationAggregation", "mountainStdDevM"],
         "properties": {
           "formatVersion": { "const": 1 },
           "geometryId": { "type": "string" },
           "tileKm": { "const": 5 },
           "buildId": { "type": "string" },
+          "elevationSourceId": { "type": "string" },
+          "elevationAggregation": { "const": "mean-and-population-standard-deviation-within-geographic-tile" },
+          "mountainStdDevM": { "type": "number", "exclusiveMinimum": 0 },
           "stats": { "type": "object" },
           "components": { "type": "array", "items": { "type": "object" } },
           "corridors": {
             "type": "array",
             "items": {
               "type": "object",
-              "required": ["id", "label", "geometryId", "debugOnly", "navigable", "reviewStatus", "stations", "legs", "distanceKm", "sliceCount"]
+              "required": ["id", "label", "geometryId", "debugOnly", "navigable", "reviewStatus", "stations", "legs", "gridSlices", "distanceKm", "sliceCount", "gridSliceCount", "elevation"]
             }
           }
         }

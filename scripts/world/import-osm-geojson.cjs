@@ -3,7 +3,13 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '../..');
-const allowedRailway = new Set(['rail', 'narrow_gauge', 'light_rail', 'disused', 'abandoned', 'razed', 'preserved', 'construction']);
+// Ashline's setting restores every mapped railway alignment. Lifecycle tags remain attached as provenance, but
+// none of them make a line mechanically inferior or unroutable in the game.
+const allowedRailway = new Set(['rail', 'narrow_gauge', 'light_rail', 'disused', 'abandoned', 'dismantled',
+  'razed', 'demolished', 'removed', 'preserved', 'construction', 'proposed', 'planned', 'historic']);
+const lifecyclePrefixes = ['disused', 'abandoned', 'dismantled', 'razed', 'demolished', 'removed',
+  'construction', 'proposed', 'planned', 'historic'];
+const trackValues = new Set(['rail', 'narrow_gauge', 'light_rail']);
 const retainedTags = ['name', 'usage', 'service', 'gauge', 'electrified', 'tracks', 'bridge', 'tunnel', 'operator', 'maxspeed'];
 const retainedPointRailway = new Set(['station', 'halt', 'stop', 'switch', 'junction', 'buffer_stop']);
 
@@ -27,8 +33,17 @@ function haversineKm(a, b) {
 }
 
 function railwayStatus(railway) {
-  if (railway === 'disused' || railway === 'abandoned' || railway === 'razed' || railway === 'construction') return railway;
+  if (lifecyclePrefixes.includes(railway)) return railway;
   return 'current';
+}
+
+function classifyRailway(properties) {
+  if (allowedRailway.has(properties.railway)) return { railway: properties.railway, status: railwayStatus(properties.railway) };
+  for (const prefix of lifecyclePrefixes) {
+    const tag = prefix + ':railway';
+    if (trackValues.has(properties[tag])) return { railway: prefix, status: prefix, lifecycleTag: tag, lifecycleValue: properties[tag] };
+  }
+  return null;
 }
 
 function formatJson(value) {
@@ -48,7 +63,8 @@ function normalizeGeoJson(input, options) {
   input.features.forEach(feature => {
     if (!feature || !feature.geometry || feature.geometry.type !== 'LineString') return;
     const properties = feature.properties || {};
-    if (!allowedRailway.has(properties.railway)) return;
+    const classification = classifyRailway(properties);
+    if (!classification) return;
     const osmWayId = Number(properties['@id']);
     assert(Number.isSafeInteger(osmWayId) && osmWayId > 0, 'Railway LineString has no valid OSM way ID');
     const id = 'osm-way:' + osmWayId;
@@ -76,12 +92,13 @@ function normalizeGeoJson(input, options) {
     retainedTags.forEach(tag => {
       if (properties[tag] !== undefined && properties[tag] !== '') tags[tag] = String(properties[tag]);
     });
-    const status = railwayStatus(properties.railway);
+    const status = classification.status;
+    if (classification.lifecycleTag) tags[classification.lifecycleTag] = String(classification.lifecycleValue);
     statusCounts[status] = (statusCounts[status] || 0) + 1;
     ways.push({
       id,
       sourceFeatureId: String(osmWayId),
-      railway: properties.railway,
+      railway: classification.railway,
       railwayStatus: status,
       navigable: false,
       reviewRequired: true,
@@ -180,4 +197,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { formatJson, normalizeGeoJson, railwayStatus };
+module.exports = { formatJson, normalizeGeoJson, railwayStatus, classifyRailway };

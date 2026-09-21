@@ -194,7 +194,7 @@ setup.worldGraph = (function () {
 			var summary = document.createElement('p');
 			summary.textContent = geometry.stats.wayCount.toLocaleString() + ' sourced OSM ways, '
 				+ geometry.stats.coordinateCount.toLocaleString() + ' coordinates and '
-				+ Math.round(geometry.stats.lengthKm).toLocaleString() + ' km of mapped track. Actual geometry; review-required and not playable yet.';
+				+ Math.round(geometry.stats.lengthKm).toLocaleString() + ' km of mapped track. All lifecycle statuses are routable by game policy; only authored routes are playable.';
 			parent.appendChild(summary);
 			var width = 520, height = 600, padding = 16;
 			var bounds = geometry.bounds;
@@ -222,7 +222,9 @@ setup.worldGraph = (function () {
 			svg.style.height = 'auto';
 			svg.style.background = '#151719';
 			svg.style.border = '1px solid #555';
-			var colors = { current: '#d8d2c4', construction: '#d9b45d', disused: '#9a825b', abandoned: '#745f4a', razed: '#684d4d' };
+			var colors = { current: '#d8d2c4', construction: '#d9b45d', proposed: '#8ca9c4', planned: '#8ca9c4',
+				disused: '#9a825b', abandoned: '#745f4a', dismantled: '#705747', historic: '#705747',
+				razed: '#684d4d', demolished: '#684d4d', removed: '#684d4d' };
 			// Thousands of individual SVG nodes made opening Debug needlessly expensive. Batch ways with the same
 			// visual meaning into one path; the normalized source still retains each OSM way and its tags.
 			var pathGroups = {};
@@ -252,7 +254,7 @@ setup.worldGraph = (function () {
 			});
 			parent.appendChild(svg);
 			var legend = document.createElement('p');
-			legend.textContent = 'Current · construction · disused · abandoned · razed. Service, yard, siding and spur tracks are drawn faintly.';
+			legend.textContent = 'Current · proposed · construction · disused · abandoned · dismantled · razed. Status is historical provenance, not a gameplay restriction. Service, yard, siding and spur tracks are drawn faintly.';
 			parent.appendChild(legend);
 		});
 	}

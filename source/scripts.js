@@ -391,6 +391,7 @@ setup.showCreditsDialog = function() {
 	Dialog.setup('Credits');
 	Dialog.wiki('<p><strong>Created by:</strong> likea</p><p><a href="http://likeaserver.myddns.me/" target="_blank" rel="noopener noreferrer">Official Website</a></p><p><a href="https://github.com/likeaboss123121" target="_blank" rel="noopener noreferrer">GitHub</a></p>'
 		+ '<p><strong>World data:</strong> City names, coordinates and population from <a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer">GeoNames</a>, licensed under CC BY 4.0. Railway geometry © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>, provided by <a href="https://download.geofabrik.de/" target="_blank" rel="noopener noreferrer">Geofabrik</a> under ODbL 1.0.</p>'
+		+ '<p><strong>Elevation data:</strong> Produced using Copernicus WorldDEM-90 © DLR e.V. 2010–2014 and © Airbus Defence and Space GmbH 2014–2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.</p>'
 		+ '<p><strong>AI Generated Content Disclosure:</strong></p>'
 		+ '<p>AI was used to make code and .svg art for this game. Diffusion (what people commonly refer to as AI Image Generation) was not used for this game. '
 		+ 'Read more about how AI was used and my opinions about AI in video games at '
@@ -2450,11 +2451,15 @@ Macro.add('lineStatus', {
 		var slope = grade > 0 ? 'climbing ' + grade.toFixed(1) + '%'
 			: grade < 0 ? 'descending ' + Math.abs(grade).toFixed(1) + '%' : 'level';
 		var output = '<h2>On the line</h2>';
+		if (view.realWorld) output += '<p><strong>' + setup.realWorldPilot.getCorridor(view.corridorId).label + '</strong></p>';
 		output += '<p>Tile ' + (Math.min(view.tileIndex, view.tileCount - 1) + 1) + ' of ' + view.tileCount
 			+ ' &middot; ' + view.terrain + ' &middot; ' + slope + '</p>';
 		output += '<p class="small-description">' + (view.branch
 			? setup.units.kilometres(view.kilometresDone) + ' from the junction.'
 			: setup.units.kilometres(view.kilometresDone) + ' behind you, ' + setup.units.kilometres(view.kilometresLeft) + ' to run.') + '</p>';
+		if (view.realWorld && State.variables.debugMode) output += '<p class="small-description">Mean elevation '
+			+ view.tile.elevation.toFixed(1) + ' m &middot; within-tile relief &sigma; '
+			+ view.tile.elevationStdDevM.toFixed(1) + ' m.</p>';
 		output += setup.railyard.getFuelReadout(State.variables.currentTrain);
 		new Wikifier(this.output, output);
 	}
@@ -2470,7 +2475,11 @@ Macro.add('lineControls', {
 		// On a station's own tile the yard is right there, so backing in ends the journey at no cost. It is also
 		// the way out for a consist that cannot move at all, which is why it is offered before anything else.
 		var escapeLink = '';
-		if (!setup.worldmap.getJourneyStep(-1)) {
+		var realEndpoint = setup.realWorldPilot.endpointForView(view);
+		if (realEndpoint) {
+			escapeLink = '<<link "Leave the sourced route at ' + realEndpoint.name + '">>'
+				+ '<<run setup.realWorldPilot.finish()>><<goto "TrainInterior">><</link>><br>';
+		} else if (!view.realWorld && !setup.worldmap.getJourneyStep(-1)) {
 			var backStation = view.forward ? view.legIndex : view.legIndex + 1;
 			escapeLink = '<<link "Back into Station ' + backStation + '">>'
 				+ '<<run setup.railyard.arriveAtStation(' + backStation + ', ' + (!view.forward) + ')>>'
@@ -2489,7 +2498,8 @@ Macro.add('lineControls', {
 			if (!step) {
 				return;
 			}
-			var label = (direction > 0 ? 'Drive ' : 'Reverse ') + setup.units.kilometres(setup.worldmap.TILE_KM)
+			var stepDistance = step.distanceKm || setup.worldmap.TILE_KM;
+			var label = (direction > 0 ? 'Drive ' : 'Reverse ') + setup.units.kilometres(stepDistance)
 				+ ' ' + (step.heading || 'on');
 			var slope = step.grade > 0 ? 'climbs ' + step.grade.toFixed(1) + '%'
 				: step.grade < 0 ? 'falls ' + Math.abs(step.grade).toFixed(1) + '%' : 'runs level';
@@ -2502,6 +2512,7 @@ Macro.add('lineControls', {
 				+ '<<set _linePassage = State.variables.journey ? "OnTheLine" : "DrivingMode">>'
 				+ '<<goto _linePassage>><</timedlink>><br>';
 			output += '<span class="small-description">Into ' + step.terrain + ', ' + slope
+				+ (step.destinationName ? ', reaching ' + step.destinationName : '')
 				+ (step.arrivesAt ? ', arriving at Station ' + step.arrivesAt : '') + '.</span><br>';
 		});
 		// At a junction the player knows only which way the rails immediately run. Whether a track reconnects or

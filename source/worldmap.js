@@ -568,7 +568,7 @@ setup.worldmap = {
 	// --- a journey in progress -----------------------------------------------------------------------------
 	getJourney: function() {
 		var journey = State.variables && State.variables.journey;
-		return journey && typeof journey.legIndex === 'number' ? journey : null;
+		return journey && (typeof journey.legIndex === 'number' || journey.realWorldCorridorId) ? journey : null;
 	},
 	// The run of tiles the train is standing on: the leg's main line, or a branch off it if the player took one.
 	getJourneyPath: function(position) {
@@ -576,6 +576,8 @@ setup.worldmap = {
 		if (!journey) {
 			return null;
 		}
+		var realRoute = setup.realWorldPilot && setup.realWorldPilot.getJourneyRoute(journey);
+		if (realRoute) return { tiles: realRoute.tiles, branch: null, leg: realRoute.leg };
 		var leg = this.getLeg(this.getSeed(), journey.legIndex);
 		if (journey.branch) {
 			var taken = (leg.branches || []).filter(function(branch) { return branch.id === journey.branch; })[0];
@@ -613,6 +615,19 @@ setup.worldmap = {
 		}
 		var path = this.getJourneyPath(journey);
 		var tiles = path.tiles;
+		if (path.leg.realWorld) {
+			var realIndex = Math.max(0, Math.min(journey.tileIndex, tiles.length - 1));
+			var done = tiles.slice(0, realIndex).reduce(function (sum, tile) { return sum + tile.distanceKm; }, 0);
+			var left = tiles.slice(realIndex).reduce(function (sum, tile) { return sum + tile.distanceKm; }, 0);
+			return {
+				realWorld: true, corridorId: journey.realWorldCorridorId, legIndex: journey.legIndex,
+				tileIndex: realIndex, tileCount: tiles.length, forward: journey.forward !== false,
+				tile: tiles[realIndex], terrain: tiles[realIndex].terrain, shape: tiles[realIndex].shape,
+				grade: tiles[realIndex].grade, kilometresDone: done, kilometresLeft: left,
+				fromStation: path.leg.corridor.stations[0].name,
+				toStation: path.leg.corridor.stations[path.leg.corridor.stations.length - 1].name
+			};
+		}
 		if (path.branch) {
 			var onBranch = Math.max(0, Math.min(journey.tileIndex, tiles.length - 1));
 			var branchTile = tiles[onBranch];
@@ -668,6 +683,19 @@ setup.worldmap = {
 		}
 		var tiles = path.tiles;
 		var from = Math.max(0, Math.min(journey.tileIndex, tiles.length - 1));
+		if (path.leg.realWorld) {
+			var realTo = from + (direction >= 0 ? 1 : -1);
+			if (realTo < 0 || realTo >= tiles.length) return null;
+			var forwardStep = realTo > from;
+			var distanceKm = forwardStep ? tiles[from].distanceKm : tiles[realTo].distanceKm;
+			var realStep = this.describeStep(forwardStep ? tiles[from].grade : -tiles[realTo].grade, tiles[realTo].terrain, {
+				fromIndex: from, toIndex: realTo, realWorld: true, distanceKm: distanceKm,
+				heading: this.describeDirection(forwardStep ? tiles[from].out : this.opposite(tiles[realTo].out)),
+				destinationName: tiles[realTo].station || ''
+			});
+			realStep.minutes = Math.max(1, Math.round(realStep.minutes * distanceKm / this.TILE_KM));
+			return realStep;
+		}
 		if (path.branch) {
 			var branch = path.branch;
 			var out = from + (direction >= 0 ? 1 : -1);
