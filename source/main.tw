@@ -67,9 +67,19 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 <</if>>
 <<if $debugMode>><<run (function () { if (typeof console !== 'undefined' && typeof console.log === 'function') { console.log('[Ashline Debug] Station ' + State.variables.currentStation + ' railyard tracks:', State.variables.stationTracks[State.variables.currentStation]); } })()>><</if>>
 <</silently>><<railyardView>><<saveReminder>><<buildIntegrityNotice>>
+<<if $onFoot && $onFoot.inRailyard>>
+You have entered the railyard on foot. Your train remains parked out on the line.
+<p><<link "Return to the station track">><<run setup.onfoot.leaveRailyard()>><<goto "OnFoot">><</link>></p>
+<<else>>
 You step into the railyard. Several trains are parked here, each with its own mix of cars and cargo.
+<</if>>
 <<tutorialHint>>
 <<railyardButtons>>
+<<if $onFoot && $onFoot.inRailyard>>
+<<conditionControls>>
+<<uiSection "inventory" "Inventory and equipment">><<playerPack>><</uiSection>>
+<<uiSection "supplies" "Station supplies">><<recoveryControls>><</uiSection>>
+<</if>>
 :: TrainInterior
 <<silently>>/% On-board navigation passage: tracks current car position, movement through consist, and transition into driving mode. %/
 <<if typeof $currentCarIndex === 'undefined'>>

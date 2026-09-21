@@ -2408,6 +2408,10 @@ Macro.add('railyardButtons', {
 		}
 		var output = '<h2>' + setup.worldmap.getStationName(State.variables.currentStation) + '</h2>';
 		output += '<p>There ' + (totalTrains === 1 ? 'is ' : 'are ') + totalTrains + ' train' + (totalTrains === 1 ? '' : 's') + ' staged across ' + trackCount + ' track' + (trackCount === 1 ? '' : 's') + '.</p>';
+		var remoteTrain = setup.onfoot && setup.onfoot.isInRailyard() && Array.isArray(State.variables.currentTrain)
+			&& State.variables.currentTrain.length > 0;
+		if (remoteTrain) output += '<p class="small-description">Return to your train before boarding another; '
+			+ 'the active consist is still parked on the line.</p>';
 		var displayNumber = 1;
 		// Each track is rendered independently so empty tracks, finite length, and train numbering stay readable.
 		for (var i = 0; i < tracks.length; i++) {
@@ -2425,7 +2429,9 @@ Macro.add('railyardButtons', {
 			// Boarding removes the selected train from the yard and turns it into the player's active consist.
 			for (var j = 0; j < tracks[i].trains.length; j++) {
 				output += setup.railyard.trainSummaryHtml(tracks[i].trains[j], displayNumber - 1);
-				output += '<span data-yard-action="board:' + i + ':' + j + '">'
+				if (remoteTrain) output += '<span class="yard-reason" data-yard-reason="board:' + i + ':' + j
+					+ '"><em>Your train is still parked on the line.</em></span><br>';
+				else output += '<span data-yard-action="board:' + i + ':' + j + '">'
 					+ '<<timedlink "Board Train ' + displayNumber + '" 1>><<run setup.railyard.boardTrain($currentStation, ' + i + ', ' + j + ')>><<goto "TrainInterior">><</timedlink>></span><br>';
 				displayNumber++;
 			}

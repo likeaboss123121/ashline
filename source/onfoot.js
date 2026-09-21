@@ -19,6 +19,34 @@ setup.onfoot = {
 	isOnFoot: function() {
 		return !!this.get();
 	},
+	isInRailyard: function() {
+		var foot = this.get();
+		return !!foot && foot.inRailyard === true;
+	},
+	getStationId: function() {
+		var tile = this.getTile();
+		return tile && Number(tile.stationIndex) > 0 ? Number(tile.stationIndex) : 0;
+	},
+	enterRailyard: function() {
+		var foot = this.get(), stationId = this.getStationId();
+		if (!foot || !stationId) return false;
+		State.variables.currentStation = stationId;
+		if (this.getTrainPosition()) {
+			foot.inRailyard = true;
+			State.variables.onFoot = foot;
+		} else {
+			State.variables.journey = null;
+			State.variables.onFoot = null;
+		}
+		return true;
+	},
+	leaveRailyard: function() {
+		var foot = this.get();
+		if (!foot || !foot.inRailyard) return false;
+		delete foot.inRailyard;
+		State.variables.onFoot = foot;
+		return true;
+	},
 	// Where the train is standing, which is where the player climbed down.
 	getTrainPosition: function() {
 		if (!Array.isArray(State.variables.currentTrain) || !State.variables.currentTrain.length) return null;
@@ -61,7 +89,7 @@ setup.onfoot = {
 	// One tile up or down the line. The walk is the cost: an hour, and the legs to go with it.
 	getWalk: function(direction, branchId) {
 		var position = this.getPosition(), world = setup.worldmap;
-		if (!position) return null;
+		if (!position || this.isInRailyard()) return null;
 		var step;
 		if (branchId != null) {
 			if (position.branch) return null;
@@ -158,6 +186,11 @@ Macro.add('onFootControls', {
 			return;
 		}
 		var output = '';
+		var stationId = onfoot.getStationId();
+		if (stationId) {
+			output += '<<link "Enter ' + setup.worldmap.getStationName(stationId) + ' railyard">>'
+				+ '<<if setup.onfoot.enterRailyard()>><<goto "Railyard">><</if>><</link>><br>';
+		}
 		[1, -1].forEach(function(direction) {
 			var walk = onfoot.getWalk(direction);
 			if (!walk) {

@@ -108,7 +108,10 @@ and keyboard teleport target; an exact-tile selector provides the same operation
 dense to click comfortably. Narrow maps are visually enlarged without changing their tile coordinates.
 Teleporting while aboard moves `journey`, so the complete active consist moves;
 teleporting on foot changes only `onFoot`, leaving the train's journey position alone. A trainless teleport creates
-only the route context walking needs and never invents a boardable train. The map is deliberately plain, and is
+only the route context walking needs and never invents a boardable train. Station cells enter the actual railyard:
+an on-foot player may inspect the yard and use its supplies, then return to the station track without moving the
+remote consist. Boarding another train is disabled until the player returns, because only one off-yard consist can
+currently be represented safely. The map is deliberately plain, and is
 there to inspect compiled data rather than to be a player-facing map.
 
 ## Not done yet

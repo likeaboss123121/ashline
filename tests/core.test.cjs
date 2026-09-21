@@ -358,14 +358,31 @@ test('debug teleport treats a station cell as the station rather than a line end
   v.journey={legIndex:2,tileIndex:1,forward:true};v.onFoot={legIndex:2,tileIndex:1,branch:null};
   const parked=JSON.stringify(v.journey);
   result=setup.worldmap.debugTeleportToTile(0,tiles[4].x,tiles[4].y);
-  assert.equal(result.stationId,4);assert.equal(result.passage,'OnFoot');
+  assert.equal(result.stationId,4);assert.equal(result.passage,'Railyard');
   assert.equal(v.currentStation,4);assert.equal(JSON.stringify(v.journey),parked,'the remote train stays parked');
   assert.deepEqual([v.onFoot.legIndex,v.onFoot.tileIndex],[3,1]);
+  assert.equal(v.onFoot.inRailyard,true);
 
   v.currentTrain=null;v.onFoot=null;v.journey=null;
   result=setup.worldmap.debugTeleportToTile(0,tiles[8].x,tiles[8].y);
   assert.equal(result.stationId,5);assert.equal(result.passage,'Railyard');
   assert.equal(v.currentStation,5);assert.equal(v.journey,null);assert.equal(v.onFoot,null);
+});
+
+test('a walker can enter a sourced station yard without moving or losing the parked train', () => {
+  const { setup, State } = loadGame();setup.startNewRun();
+  const v=State.variables,train=[setup.railyard.cloneCar(v.defaultTrains.dieselShunter)];
+  v.currentStation=2;v.currentTrain=train;v.journey={legIndex:2,tileIndex:1,forward:true};
+  assert.equal(setup.onfoot.climbDown(),true);
+  assert.equal(setup.onfoot.walk(1),true);
+  assert.equal(setup.onfoot.getStationId(),3);
+  const parked=JSON.stringify(v.journey);
+  assert.equal(setup.onfoot.enterRailyard(),true);
+  assert.equal(v.currentStation,3);assert.equal(setup.onfoot.isInRailyard(),true);
+  assert.equal(JSON.stringify(v.journey),parked);assert.equal(v.currentTrain,train);
+  assert.equal(setup.onfoot.getWalk(-1),null,'walking controls are unavailable while inside the yard');
+  assert.equal(setup.onfoot.leaveRailyard(),true);assert.equal(setup.onfoot.isInRailyard(),false);
+  assert.ok(setup.onfoot.getWalk(-1));
 });
 
 test('the sourced rail grid joins end to end in fixed five-kilometre moves', () => {

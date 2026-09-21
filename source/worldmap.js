@@ -900,8 +900,8 @@ setup.worldmap = {
 			// Walkers keep their remote train parked; an onboard consist enters an available station lead.
 			if (activeTrain && onFoot) {
 				variables.currentStation = stationId;
-				variables.onFoot = { legIndex: target.legIndex, tileIndex: target.tileIndex, branch: null };
-				return { mode: 'player', passage: 'OnFoot', target: target, stationId: stationId };
+				variables.onFoot = { legIndex: target.legIndex, tileIndex: target.tileIndex, branch: null, inRailyard: true };
+				return { mode: 'player', passage: 'Railyard', target: target, stationId: stationId };
 			}
 			if (activeTrain) {
 				var finalStation = setup.realWorldPilot.getGridRoute().corridor.stations.length;

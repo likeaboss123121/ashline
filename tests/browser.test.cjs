@@ -242,6 +242,16 @@ test('walking the sourced line leads back to the parked train',async t=>{
   const leave=await page.evaluate(()=>`Walk 5 km ${SugarCube.setup.onfoot.getWalk(1).heading} (1:00)`);
   await choose(page,leave,'OnFoot');
   assert.equal(await page.locator('#passages a').filter({hasText:/onto the branch/}).count(),0);
+  const parked=await page.evaluate(()=>JSON.stringify(SugarCube.State.variables.journey));
+  await choose(page,'Enter Talagante railyard','Railyard');
+  assert.equal(await page.evaluate(()=>SugarCube.State.variables.currentStation),3);
+  assert.equal(await page.evaluate(()=>JSON.stringify(SugarCube.State.variables.journey)),parked);
+  assert.equal(await page.evaluate(()=>SugarCube.State.variables.onFoot.inRailyard),true);
+  assert.match(await page.locator('#passages').innerText(),/Your train remains parked out on the line/);
+  assert.match(await page.locator('#passages').innerText(),/Return to your train before boarding another/);
+  assert.equal(await page.locator('#passages a').filter({hasText:/^Board Train/}).count(),0);
+  assert.equal(await page.locator('.railyard-player-marker').count(),0,'the remote train is not drawn inside the yard');
+  await choose(page,'Return to the station track','OnFoot');
   const returnToTrain=await page.evaluate(()=>`Walk 5 km ${SugarCube.setup.onfoot.getWalk(-1).heading} (1:00)`);
   await choose(page,returnToTrain,'OnFoot');
   assert.equal(await page.evaluate(()=>SugarCube.setup.onfoot.isBesideTrain()),true);

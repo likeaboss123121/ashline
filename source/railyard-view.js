@@ -1079,7 +1079,8 @@ setup.railyardView = {
 			area.setAttribute('data-yard-target', 'train:' + spanKey);
 			setup.tutorial.markTarget(area);
 			var areaTitle = document.createElementNS(ns, 'title');
-			areaTitle.textContent = (player ? 'Parked train on ' : 'Board the train on ')
+			var visitingOnFoot = setup.onfoot && setup.onfoot.isInRailyard();
+			areaTitle.textContent = (player || visitingOnFoot ? 'Parked train on ' : 'Board the train on ')
 				+ setup.railyard.getTrackLabel(tracks, span.trackIndex);
 			area.appendChild(areaTitle);
 			hitLayer.appendChild(area);
@@ -1135,7 +1136,8 @@ Macro.add('railyardView', {
 		// While the player is aboard a train, it is held outside the track arrays at a gap position.
 		var player = null;
 		var trackIndex = parseInt(variables.drivingTrackIndex, 10);
-		if (Array.isArray(variables.currentTrain) && variables.currentTrain.length && !isNaN(trackIndex)) {
+		if (Array.isArray(variables.currentTrain) && variables.currentTrain.length && !isNaN(trackIndex)
+			&& !(setup.onfoot && setup.onfoot.isInRailyard())) {
 			trackIndex = Math.max(0, Math.min(trackIndex, tracks.length - 1));
 			var trackTrains = Array.isArray(tracks[trackIndex].trains) ? tracks[trackIndex].trains : [];
 			var gapIndex = parseInt(variables.enteredTrainIndex, 10);
