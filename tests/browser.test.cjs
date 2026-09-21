@@ -1531,6 +1531,11 @@ test('debug mode draws the generated world map for the leg ahead', async t => {
   assert.match(await prototype.innerText(), /not claimed railway geometry/);
   assert.equal(await prototype.locator('svg.world-graph-debug polyline').count(), 3);
   assert.equal(await prototype.locator('svg.world-graph-debug circle').count(), 35);
+  assert.match(await prototype.innerText(), /1,553 sourced OSM ways, 20,297 coordinates and 1,047 km/);
+  const previewCounts = await prototype.locator('svg.rail-geometry-preview path[data-way-count]').evaluateAll(paths =>
+    paths.map(path => Number(path.getAttribute('data-way-count'))));
+  assert.equal(previewCounts.reduce((sum, count) => sum + count, 0), 1553);
+  assert.ok(previewCounts.length <= 10, JSON.stringify(previewCounts));
   const reference = page.locator('details.debug-section').filter({ has: page.getByText('Reference data', { exact: true }) });
   await page.getByRole('button', { name: 'Wiki', exact: true }).click();
   await reference.getByText('Railcars', { exact: true }).click();
@@ -1687,6 +1692,9 @@ test('the credits dialog discloses how AI was used', async t => {
   // The credits that were there before are untouched.
   assert.match(shown, /Created by: likea/);
   assert.match(shown, /Official Website/);
+	assert.match(shown, /OpenStreetMap contributors/);
+	assert.match(shown, /Geofabrik/);
+	assert.match(shown, /ODbL 1\.0/);
   assert.doesNotMatch(shown, /Discord/);
 });
 

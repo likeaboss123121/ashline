@@ -24,3 +24,7 @@ docs/
 __pycache__/
 *.pyc
 development materials/
+
+# Raw geographic inputs are far too large to ship; normalized attributed outputs live under world/ instead.
+world/raw/
+*.osm.pbf

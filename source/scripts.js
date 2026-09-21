@@ -390,7 +390,7 @@ setup.showCreditsDialog = function() {
 	}
 	Dialog.setup('Credits');
 	Dialog.wiki('<p><strong>Created by:</strong> likea</p><p><a href="http://likeaserver.myddns.me/" target="_blank" rel="noopener noreferrer">Official Website</a></p><p><a href="https://github.com/likeaboss123121" target="_blank" rel="noopener noreferrer">GitHub</a></p>'
-		+ '<p><strong>World data:</strong> City names, coordinates and population from <a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer">GeoNames</a>, licensed under CC BY 4.0.</p>'
+		+ '<p><strong>World data:</strong> City names, coordinates and population from <a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer">GeoNames</a>, licensed under CC BY 4.0. Railway geometry © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>, provided by <a href="https://download.geofabrik.de/" target="_blank" rel="noopener noreferrer">Geofabrik</a> under ODbL 1.0.</p>'
 		+ '<p><strong>AI Generated Content Disclosure:</strong></p>'
 		+ '<p>AI was used to make code and .svg art for this game. Diffusion (what people commonly refer to as AI Image Generation) was not used for this game. '
 		+ 'Read more about how AI was used and my opinions about AI in video games at '

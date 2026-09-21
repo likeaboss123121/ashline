@@ -3,7 +3,7 @@
   "$id": "https://likeaserver.myddns.me/ashlinegame/schema/world-graph-1.json",
   "title": "Ashline compiled world graph bundle",
   "type": "object",
-  "required": ["formatVersion", "datasetVersion", "tileKm", "sources", "regions", "corridors", "chunks"],
+  "required": ["formatVersion", "datasetVersion", "tileKm", "sources", "regions", "corridors", "railGeometry", "chunks"],
   "properties": {
     "formatVersion": { "const": 1 },
     "datasetVersion": { "type": "string", "minLength": 1 },
@@ -33,6 +33,31 @@
           "label": { "type": "string" },
           "waypoints": { "type": "array", "minItems": 2, "items": { "type": "string" } },
           "planningLinkIds": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "railGeometry": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["formatVersion", "id", "label", "sourceId", "bounds", "geometrySource", "navigable", "reviewRequired", "stats", "ways"],
+        "properties": {
+          "formatVersion": { "const": 1 },
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "sourceId": { "type": "string" },
+          "bounds": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number" } },
+          "geometrySource": { "const": "openstreetmap-way" },
+          "navigable": { "const": false },
+          "reviewRequired": { "const": true },
+          "stats": { "type": "object" },
+          "ways": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "sourceFeatureId", "railway", "railwayStatus", "navigable", "reviewRequired", "lengthKm", "tags", "coordinates"]
+            }
+          }
         }
       }
     },
