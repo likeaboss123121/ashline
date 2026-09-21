@@ -370,3 +370,26 @@
 	stroke-width: 2;
 	outline: none;
 }
+
+.debug-map-teleport-controls {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.45em;
+	align-items: center;
+}
+
+.debug-map-teleport-controls label {
+	display: flex;
+	flex: 1 1 18em;
+	gap: 0.35em;
+	align-items: center;
+}
+
+.debug-map-teleport-controls select {
+	min-width: 0;
+	flex: 1 1 auto;
+}
+
+.debug-teleport-notice {
+	color: #e5c58a;
+}

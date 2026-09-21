@@ -884,6 +884,10 @@ setup.worldmap = {
 		svg.setAttribute('width', width);
 		svg.setAttribute('height', height);
 		svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+		// A mostly north-south leg may only be a handful of native 9 px cells wide. Enlarge the rendered map while
+		// retaining its viewBox so mouse and touch targets are usable without altering generated geometry.
+		svg.style.width = 'min(100%, ' + Math.max(280, width) + 'px)';
+		svg.style.height = 'auto';
 		// Screen y grows downwards while map y grows north, so rows are drawn from the top of the rectangle down.
 		var left = function(x) { return (x - rect.x0) * cell; };
 		var top = function(y) { return (rect.y1 - y) * cell; };
@@ -948,7 +952,8 @@ setup.worldmap = {
 		});
 		// Where the train is standing, and which way it is going, so the map can be read against the journey.
 		var here = this.getJourneyView();
-		if (here && here.legIndex === legIndex) {
+		var hasTrain = Array.isArray(State.variables.currentTrain) && State.variables.currentTrain.length > 0;
+		if (hasTrain && here && here.legIndex === legIndex) {
 			var marker = document.createElementNS(ns, 'polygon');
 			var mx = left(here.tile.x) + cell / 2;
 			var my = top(here.tile.y) + cell / 2;
@@ -967,6 +972,24 @@ setup.worldmap = {
 			marker.appendChild(markerTitle);
 			svg.appendChild(marker);
 		}
+		// Walking has a position separate from the parked train. Draw it even when there is no active consist, rather
+		// than presenting the route-context journey as a phantom train.
+		var footPosition = setup.onfoot && setup.onfoot.getPosition ? setup.onfoot.getPosition() : null;
+		var footView = footPosition && this.getJourneyView(footPosition);
+		if (footView && footView.legIndex === legIndex) {
+			var footMarker = document.createElementNS(ns, 'circle');
+			footMarker.setAttribute('cx', left(footView.tile.x) + cell / 2);
+			footMarker.setAttribute('cy', top(footView.tile.y) + cell / 2);
+			footMarker.setAttribute('r', cell * 0.42);
+			footMarker.setAttribute('fill', 'none');
+			footMarker.setAttribute('stroke', '#e0625c');
+			footMarker.setAttribute('stroke-width', '1.5');
+			footMarker.setAttribute('pointer-events', 'none');
+			var footTitle = document.createElementNS(ns, 'title');
+			footTitle.textContent = 'You are here on foot';
+			footMarker.appendChild(footTitle);
+			svg.appendChild(footMarker);
+		}
 		return { svg: svg, leg: leg, rect: rect };
 	},
 	// Adds the map plus a line of numbers to a debug panel.
@@ -977,6 +1000,7 @@ setup.worldmap = {
 		try {
 			var built = this.buildDebugMap(stationId);
 			var heading = document.createElement('p');
+			heading.className = 'debug-map-heading';
 			var leg = built.leg;
 			var mainLine = leg.tiles.filter(function(tile) { return !tile.branch; });
 			var grades = mainLine.map(function(tile) { return tile.grade; });
@@ -986,26 +1010,74 @@ setup.worldmap = {
 				+ (leg.tiles.length - mainLine.length) + ' branch tiles. Seed ' + this.getSeed() + '.';
 			parent.appendChild(heading);
 			var instructions = document.createElement('p');
-			instructions.textContent = 'Debug teleport: click or focus a track tile and press Enter. If you are aboard, your entire consist moves with you; on foot, only you move.';
+			instructions.textContent = 'Debug teleport: select a track tile on the map or choose one below. If you are aboard, your entire consist moves with you; on foot, only you move.';
 			var self = this;
+			var teleport = function(legIndex, x, y) {
+				var result = self.debugTeleportToTile(Number(legIndex), Number(x), Number(y));
+				if (!result) return;
+				setup.debugTeleportNotice = 'Teleported ' + (result.mode === 'consist' ? 'the complete consist' : 'you')
+					+ ' to leg ' + result.target.legIndex + ', ' + (result.target.branch ? 'branch ' + result.target.branch + ', ' : '')
+					+ 'tile ' + (result.target.tileIndex + 1) + ' at ' + result.target.tile.x + ', ' + result.target.tile.y + '.';
+				setup.debugReturnToPanel = true;
+				Engine.play(result.passage);
+			};
 			built.svg.querySelectorAll('[data-debug-teleport]').forEach(function(cellRect) {
-				var teleport = function() {
+				var activate = function() {
 					var parts = cellRect.getAttribute('data-debug-teleport').split(':');
-					var result = self.debugTeleportToTile(Number(parts[0]), Number(parts[1]), Number(parts[2]));
-					if (!result) return;
-					setup.debugReturnToPanel = true;
-					Engine.play(result.passage);
+					teleport(parts[0], parts[1], parts[2]);
 				};
-				cellRect.addEventListener('click', teleport);
+				cellRect.addEventListener('click', activate);
 				cellRect.addEventListener('keydown', function(event) {
 					if (event.key === 'Enter' || event.key === ' ') {
 						event.preventDefault();
-						teleport();
+						activate();
 					}
 				});
 			});
 			parent.appendChild(built.svg);
 			parent.appendChild(instructions);
+			var controls = document.createElement('div');
+			controls.className = 'debug-map-teleport-controls';
+			var label = document.createElement('label');
+			label.textContent = 'Exact track tile: ';
+			var select = document.createElement('select');
+			select.setAttribute('aria-label', 'Exact track tile');
+			mainLine.forEach(function(tile, index) {
+				var option = document.createElement('option');
+				option.value = leg.index + ',' + tile.x + ',' + tile.y;
+				option.textContent = 'Main ' + (index + 1) + '/' + mainLine.length + ' — ' + tile.x + ', ' + tile.y + ' — ' + tile.terrain;
+				select.appendChild(option);
+			});
+			leg.branches.forEach(function(branch) {
+				branch.tiles.forEach(function(tile, index) {
+					var option = document.createElement('option');
+					option.value = leg.index + ',' + tile.x + ',' + tile.y;
+					option.textContent = 'Branch ' + branch.id + ' ' + (index + 1) + '/' + branch.tiles.length
+						+ ' — ' + tile.x + ', ' + tile.y + ' — ' + tile.terrain;
+					select.appendChild(option);
+				});
+			});
+			label.appendChild(select);
+			controls.appendChild(label);
+			var teleportButton = document.createElement('button');
+			teleportButton.type = 'button';
+			teleportButton.textContent = 'Teleport';
+			teleportButton.addEventListener('click', function() {
+				var address = select.value.split(',');
+				teleport(address[0], address[1], address[2]);
+			});
+			controls.appendChild(teleportButton);
+			parent.appendChild(controls);
+			// Keep the precision control visible before a tall north-south map on phones.
+			parent.insertBefore(instructions, built.svg);
+			parent.insertBefore(controls, built.svg);
+			if (setup.debugTeleportNotice) {
+				var notice = document.createElement('p');
+				notice.className = 'debug-teleport-notice';
+				notice.setAttribute('role', 'status');
+				notice.textContent = setup.debugTeleportNotice;
+				parent.insertBefore(notice, built.svg);
+			}
 			var legend = document.createElement('p');
 			legend.textContent = 'plains, forest, desert, arctic, mountain, bridge, tunnel, water. Hover a tile for its terrain, shape and grade; outlined track tiles are teleport targets.';
 			parent.appendChild(legend);

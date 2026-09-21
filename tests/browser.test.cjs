@@ -374,6 +374,9 @@ test('red developer sidebar menus work on mobile with keyboard and close control
   await debug.focus();await page.keyboard.press('Enter');
   assert.equal(await page.locator('#developer-Debug').isVisible(),true);
   const box=await page.locator('#developer-Debug').boundingBox();assert.ok(box.x>=0 && box.x+box.width<=391);assert.ok(box.width>=389,JSON.stringify(box));
+  const debugMapBox=await page.locator('#developer-Debug svg.worldmap-debug').boundingBox();
+  assert.ok(debugMapBox.width>=260&&debugMapBox.width<=340,JSON.stringify(debugMapBox));
+  assert.ok(await page.locator('#developer-Debug select[aria-label="Exact track tile"] option').count()>1);
   const closeDebug=page.getByRole('button',{name:'Close Debug',exact:true});
   assert.equal(await closeDebug.evaluate(el=>getComputedStyle(el).textTransform),'uppercase');
   assert.ok(await closeDebug.evaluate(el=>el.offsetWidth/el.parentElement.clientWidth>.9));
@@ -1512,7 +1515,7 @@ test('debug mode draws the generated world map for the leg ahead', async t => {
       cells: svg.querySelectorAll('rect').length,
       track: svg.querySelectorAll('line').length,
       stations: svg.querySelectorAll('circle').length,
-      heading: svg.previousElementSibling.textContent
+      heading: svg.closest('details').querySelector('.debug-map-heading').textContent
     };
   });
   assert.ok(map, 'the debug panel should draw a world map');
@@ -1522,7 +1525,7 @@ test('debug mode draws the generated world map for the leg ahead', async t => {
   assert.ok(map.stations >= 2, JSON.stringify(map));
   assert.match(map.heading, /World map, leg 1 \(station 1 to 2\): \d+ tiles, \d+ km/);
   const prototype = page.locator('details.debug-section').filter({
-    has: page.getByText('Worldwide graph prototype', { exact: true })
+    has: page.getByText('Global graph preview (not playable)', { exact: true })
   });
   assert.match(await prototype.innerText(), /35 places, 40 non-navigable links in 24 regional chunks/);
   assert.match(await prototype.innerText(), /not claimed railway geometry/);
@@ -1553,11 +1556,11 @@ test('debug map teleport carries an onboard consist to the selected tile', async
   const mapSection = page.locator('details.debug-section').filter({
     has: page.getByText('World map', { exact: true })
   });
-  await mapSection.locator(':scope > summary').click();
+  if (!await mapSection.evaluate(element => element.open)) await mapSection.locator(':scope > summary').click();
+  assert.ok(await mapSection.locator('select[aria-label="Exact track tile"] option').count() > 1);
   const target = mapSection.locator('svg.worldmap-debug [data-debug-teleport]').nth(3);
   const address = (await target.getAttribute('data-debug-teleport')).split(':').map(Number);
-  await target.focus();
-  await page.keyboard.press('Enter');
+  await target.click();
   await passage(page, 'TrainInterior');
   const moved = await page.evaluate(() => ({
     consist: JSON.stringify(SugarCube.State.variables.currentTrain),
@@ -1573,6 +1576,7 @@ test('debug map teleport carries an onboard consist to the selected tile', async
   assert.equal(moved.journey.tileIndex, expected.tileIndex);
   assert.equal(moved.journey.branch || null, expected.branch);
   assert.equal(moved.onFoot, null);
+  assert.match(await page.locator('.debug-teleport-notice').innerText(), /Teleported the complete consist/);
 });
 
 test('driving the line goes one 5 km tile at a time, and draws the consist on it', async t => {

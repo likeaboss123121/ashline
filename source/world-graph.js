@@ -123,7 +123,7 @@ setup.worldGraph = (function () {
 		svg.setAttribute('viewBox', '0 0 520 650');
 		svg.setAttribute('role', 'img');
 		svg.setAttribute('aria-label', 'Three planning corridors from Punta Arenas to Panama City');
-		svg.style.width = 'min(100%, 520px)';
+		svg.style.width = 'min(100%, 420px)';
 		svg.style.height = 'auto';
 		svg.style.background = '#151719';
 		svg.style.border = '1px solid #555';

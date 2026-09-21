@@ -277,6 +277,7 @@ setup.startNewRun = function() {
 	if (setup.bugReport) setup.bugReport.recent = [];
 	if (setup.saveMigrations) { setup.saveMigrations.notice = ''; setup.saveMigrations.recovery = null; }
 	setup.debugReturnToPanel = false;
+	setup.debugTeleportNotice = '';
 };
 Macro.add('startNewGame', { handler: function() { setup.startNewRun(); } });
 // Release metadata is used both for the title screen and build-integrity popup.
@@ -2932,14 +2933,14 @@ Macro.add('debugTools', {
 		wrapper.appendChild(conditionValue);
 		wrapper.appendChild(conditionBtn);
 		wrapper.appendChild(document.createElement('br'));
-		// The worldwide graph spike is separate from the current playable procedural world. Its planning chords are
-		// deliberately non-navigable until real railway geometry and terrain data have been compiled and reviewed.
-		startSection('Worldwide graph prototype');
-		setup.worldGraph.appendDebugOverview(wrapper);
 		// The generated world between this station and the next, read straight from the seed. Deliberately plain:
 		// it is here to check what the generator produced, not to be a player-facing map.
-		startSection('World map');
+		startSection('World map', true);
 		setup.worldmap.appendDebugMap(wrapper, State.variables.currentStation);
+		// The worldwide graph spike is separate from the current playable procedural world. Its planning chords are
+		// deliberately non-navigable until real railway geometry and terrain data have been compiled and reviewed.
+		startSection('Global graph preview (not playable)');
+		setup.worldGraph.appendDebugOverview(wrapper);
 		// TrainInterior debug mode focuses on cargo editing for the active consist and current car.
 		if (currentPassage === 'TrainInterior') {
 			startSection('Cargo', true);
