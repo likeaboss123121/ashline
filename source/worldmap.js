@@ -894,6 +894,30 @@ setup.worldmap = {
 		var activeTrain = Array.isArray(variables.currentTrain) && variables.currentTrain.length > 0;
 		var onFoot = !!variables.onFoot;
 		var currentJourney = this.getJourney();
+		var stationId = target.tile && Number(target.tile.stationIndex) || 0;
+		if (stationId) {
+			// A station marker is an arrival, not a train standing on an endpoint which only happens to share its cell.
+			// Walkers keep their remote train parked; an onboard consist enters an available station lead.
+			if (activeTrain && onFoot) {
+				variables.currentStation = stationId;
+				variables.onFoot = { legIndex: target.legIndex, tileIndex: target.tileIndex, branch: null };
+				return { mode: 'player', passage: 'OnFoot', target: target, stationId: stationId };
+			}
+			if (activeTrain) {
+				var finalStation = setup.realWorldPilot.getGridRoute().corridor.stations.length;
+				var arriveFromPrevious = stationId === 1 ? false : stationId === finalStation ? true
+					: variables.travellingForward !== false;
+				if (!setup.railyard.arriveAtStation(stationId, arriveFromPrevious)
+					&& !setup.railyard.arriveAtStation(stationId, !arriveFromPrevious)) return null;
+				variables.onFoot = null;
+				return { mode: 'consist', passage: State.passage === 'TrainInterior' ? 'TrainInterior' : 'DrivingMode',
+					target: target, stationId: stationId };
+			}
+			variables.currentStation = stationId;
+			variables.journey = null;
+			variables.onFoot = null;
+			return { mode: 'player', passage: 'Railyard', target: target, stationId: stationId };
+		}
 		if (activeTrain && onFoot) {
 			variables.onFoot = { legIndex: target.legIndex, tileIndex: target.tileIndex, branch: target.branch };
 			return { mode: 'player', passage: 'OnFoot', target: target };
@@ -954,6 +978,7 @@ setup.worldmap = {
 				if (tile) {
 					cellRect.setAttribute('class', 'debug-teleport-tile');
 					cellRect.setAttribute('data-debug-teleport', '0:' + x + ':' + y);
+					if (tile.stationIndex) cellRect.setAttribute('data-station-index', String(tile.stationIndex));
 					cellRect.setAttribute('tabindex', '0');
 					cellRect.setAttribute('role', 'button');
 					cellRect.setAttribute('aria-label', 'Teleport to track tile ' + x + ', ' + y);
@@ -1063,9 +1088,10 @@ setup.worldmap = {
 				var result = self.debugTeleportToTile(Number(legIndex), Number(x), Number(y));
 				if (!result) return;
 				setup.debugTeleportNotice = 'Teleported ' + (result.mode === 'consist' ? 'the complete consist' : 'you')
-					+ ' to ' + setup.worldmap.getStationName(result.target.legIndex) + '–'
-					+ setup.worldmap.getStationName(result.target.legIndex + 1) + ', tile '
-					+ (result.target.tileIndex + 1) + ' at ' + result.target.tile.x + ', ' + result.target.tile.y + '.';
+					+ (result.stationId ? ' to ' + setup.worldmap.getStationName(result.stationId) + ' station.'
+						: ' to ' + setup.worldmap.getStationName(result.target.legIndex) + '–'
+							+ setup.worldmap.getStationName(result.target.legIndex + 1) + ', tile '
+							+ (result.target.tileIndex + 1) + ' at ' + result.target.tile.x + ', ' + result.target.tile.y + '.');
 				setup.debugReturnToPanel = true;
 				Engine.play(result.passage);
 			};

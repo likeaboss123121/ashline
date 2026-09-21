@@ -1596,7 +1596,7 @@ test('debug mode draws the complete sourced rail grid', async t => {
   assert.match(referenceText, /Hand pump/);
 });
 
-test('debug map teleport carries an onboard consist to the selected tile', async t => {
+test('debug map teleport carries an onboard consist into a station on the selected tile', async t => {
   const page = await openGame(t);
   await begin(page);
   await board(page);
@@ -1612,25 +1612,27 @@ test('debug map teleport carries an onboard consist to the selected tile', async
   });
   if (!await mapSection.evaluate(element => element.open)) await mapSection.locator(':scope > summary').click();
   assert.ok(await mapSection.locator('select[aria-label="Exact track tile"] option').count() > 1);
-  const target = mapSection.locator('svg.worldmap-debug [data-debug-teleport]').nth(3);
+  const target = mapSection.locator('svg.worldmap-debug [data-station-index="3"]');
   const address = (await target.getAttribute('data-debug-teleport')).split(':').map(Number);
   await target.click();
   await passage(page, 'TrainInterior');
   const moved = await page.evaluate(() => ({
     consist: JSON.stringify(SugarCube.State.variables.currentTrain),
     journey: JSON.parse(JSON.stringify(SugarCube.State.variables.journey)),
-    onFoot: SugarCube.State.variables.onFoot
+    onFoot: SugarCube.State.variables.onFoot,
+    station: SugarCube.State.variables.currentStation
   }));
   const expected = await page.evaluate(([legIndex, x, y]) => {
     const target = SugarCube.setup.worldmap.getDebugTeleportTarget(legIndex, x, y);
-    return { legIndex: target.legIndex, tileIndex: target.tileIndex, branch: target.branch };
+    return { legIndex: target.legIndex, tileIndex: target.tileIndex, branch: target.branch,
+      stationIndex: target.tile.stationIndex };
   }, address);
   assert.equal(moved.consist, consistBefore);
-  assert.equal(moved.journey.legIndex, expected.legIndex);
-  assert.equal(moved.journey.tileIndex, expected.tileIndex);
-  assert.equal(moved.journey.branch || null, expected.branch);
+  assert.equal(expected.stationIndex, 3);
+  assert.equal(moved.station, 3);
+  assert.equal(moved.journey, null);
   assert.equal(moved.onFoot, null);
-  assert.match(await page.locator('.debug-teleport-notice').innerText(), /Teleported the complete consist/);
+  assert.match(await page.locator('.debug-teleport-notice').innerText(), /Teleported the complete consist to Talagante station/);
 });
 
 test('driving the line goes one 5 km tile at a time, and draws the consist on it', async t => {

@@ -315,15 +315,15 @@ test('debug teleport moves an onboard consist but moves a walker without their p
   const train = [{ type: 'dieselShunter', length: 12 }, { type: 'boxcar', length: 12 }];
   v.currentTrain = train;
   v.onFoot = null;
-  let result = setup.worldmap.debugTeleportToTile(0, tiles[3].x, tiles[3].y);
+  let result = setup.worldmap.debugTeleportToTile(0, tiles[2].x, tiles[2].y);
   assert.equal(result.mode, 'consist');
   assert.equal(v.currentTrain, train, 'the whole active consist remains together');
   assert.deepEqual({ legIndex: v.journey.legIndex, tileIndex: v.journey.tileIndex, branch: v.journey.branch || null },
-    { legIndex: 2, tileIndex: 2, branch: null });
+    { legIndex: 2, tileIndex: 1, branch: null });
   assert.equal(v.onFoot, null);
 
   // Once outside, journey is the parked consist and onFoot is the player. Clicking another tile moves only onFoot.
-  v.onFoot = { legIndex: 2, tileIndex: 2, branch: null };
+  v.onFoot = { legIndex: 2, tileIndex: 1, branch: null };
   const parked = JSON.stringify(v.journey);
   result = setup.worldmap.debugTeleportToTile(0, tiles[6].x, tiles[6].y);
   assert.equal(result.mode, 'player');
@@ -334,14 +334,38 @@ test('debug teleport moves an onboard consist but moves a walker without their p
   // A player without a train still gets valid walking context, but is never offered a phantom train to board.
   v.currentTrain = null;
   v.onFoot = null;
-  result = setup.worldmap.debugTeleportToTile(0, tiles[2].x, tiles[2].y);
+  result = setup.worldmap.debugTeleportToTile(0, tiles[7].x, tiles[7].y);
   assert.equal(result.passage, 'OnFoot');
-  assert.deepEqual([v.onFoot.legIndex, v.onFoot.tileIndex], [2, 1]);
+  assert.deepEqual([v.onFoot.legIndex, v.onFoot.tileIndex], [4, 3]);
   assert.equal(setup.onfoot.getTrainPosition(), null);
   assert.equal(setup.onfoot.isBesideTrain(), false);
   v.debugMode = false;
   assert.equal(setup.worldmap.debugTeleportToTile(0, tiles[4].x, tiles[4].y), null);
-  assert.equal(v.onFoot.tileIndex, 1);
+  assert.equal(v.onFoot.tileIndex, 3);
+});
+
+test('debug teleport treats a station cell as the station rather than a line endpoint', () => {
+  const { setup, State } = loadGame();
+  setup.startNewRun();
+  const v = State.variables, tiles = setup.realWorldPilot.getGridRoute().tiles;
+  Object.assign(v, { randomSeed: 'station-teleport', debugMode: true, travellingForward: true,
+    currentStation: 1, currentTrain: [{ type: 'dieselShunter', length: 12 }], onFoot: null });
+  let result = setup.worldmap.debugTeleportToTile(0, tiles[3].x, tiles[3].y);
+  assert.equal(result.stationId, 3);assert.equal(result.passage, 'DrivingMode');
+  assert.equal(v.currentStation, 3);assert.equal(v.journey, null);
+  assert.equal(v.drivingTrackIndex, 0,'a forward teleport arrives on Talagante\'s entry lead');
+
+  v.journey={legIndex:2,tileIndex:1,forward:true};v.onFoot={legIndex:2,tileIndex:1,branch:null};
+  const parked=JSON.stringify(v.journey);
+  result=setup.worldmap.debugTeleportToTile(0,tiles[4].x,tiles[4].y);
+  assert.equal(result.stationId,4);assert.equal(result.passage,'OnFoot');
+  assert.equal(v.currentStation,4);assert.equal(JSON.stringify(v.journey),parked,'the remote train stays parked');
+  assert.deepEqual([v.onFoot.legIndex,v.onFoot.tileIndex],[3,1]);
+
+  v.currentTrain=null;v.onFoot=null;v.journey=null;
+  result=setup.worldmap.debugTeleportToTile(0,tiles[8].x,tiles[8].y);
+  assert.equal(result.stationId,5);assert.equal(result.passage,'Railyard');
+  assert.equal(v.currentStation,5);assert.equal(v.journey,null);assert.equal(v.onFoot,null);
 });
 
 test('the sourced rail grid joins end to end in fixed five-kilometre moves', () => {
