@@ -2937,10 +2937,11 @@ Macro.add('debugTools', {
 		// it is here to check what the generator produced, not to be a player-facing map.
 		startSection('World map', true);
 		setup.worldmap.appendDebugMap(wrapper, State.variables.currentStation);
-		// The worldwide graph spike is separate from the current playable procedural world. Its planning chords are
-		// deliberately non-navigable until real railway geometry and terrain data have been compiled and reviewed.
-		startSection('Global graph preview (not playable)');
+		// The worldwide planning chords remain non-navigable. Explicitly authored OSM pilot corridors are offered
+		// below the overview and require an active train so the consist and its fuel remain authoritative.
+		startSection('Global rail map and pilot');
 		setup.worldGraph.appendDebugOverview(wrapper);
+		setup.realWorldPilot.appendDebugControls(wrapper);
 		// TrainInterior debug mode focuses on cargo editing for the active consist and current car.
 		if (currentPassage === 'TrainInterior') {
 			startSection('Cargo', true);

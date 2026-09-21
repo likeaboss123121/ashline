@@ -5,6 +5,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '../..');
 const allowedRailway = new Set(['rail', 'narrow_gauge', 'light_rail', 'disused', 'abandoned', 'razed', 'preserved', 'construction']);
 const retainedTags = ['name', 'usage', 'service', 'gauge', 'electrified', 'tracks', 'bridge', 'tunnel', 'operator', 'maxspeed'];
+const retainedPointRailway = new Set(['station', 'halt', 'stop', 'switch', 'junction', 'buffer_stop']);
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -39,6 +40,7 @@ function normalizeGeoJson(input, options) {
   assert(input && input.type === 'FeatureCollection' && Array.isArray(input.features), 'Input must be a GeoJSON FeatureCollection');
   assert(options && options.id && options.sourceId, 'Import ID and source ID are required');
   const ways = [];
+  const points = [];
   const seenIds = new Set();
   const bounds = [Infinity, Infinity, -Infinity, -Infinity];
   const statusCounts = {};
@@ -89,7 +91,29 @@ function normalizeGeoJson(input, options) {
     });
   });
 
+  input.features.forEach(feature => {
+    if (!feature || !feature.geometry || feature.geometry.type !== 'Point') return;
+    const properties = feature.properties || {};
+    if (!retainedPointRailway.has(properties.railway)) return;
+    const osmNodeId = Number(properties['@id']);
+    assert(Number.isSafeInteger(osmNodeId) && osmNodeId > 0, 'Railway Point has no valid OSM node ID');
+    const coordinate = feature.geometry.coordinates;
+    assert(Array.isArray(coordinate) && coordinate.length >= 2, 'Invalid railway point coordinate');
+    const tags = {};
+    ['name', 'ref', 'operator', 'public_transport'].forEach(tag => {
+      if (properties[tag] !== undefined && properties[tag] !== '') tags[tag] = String(properties[tag]);
+    });
+    points.push({
+      id: 'osm-node:' + osmNodeId,
+      sourceFeatureId: String(osmNodeId),
+      railway: properties.railway,
+      coordinates: [roundCoordinate(coordinate[0]), roundCoordinate(coordinate[1])],
+      tags
+    });
+  });
+
   ways.sort((a, b) => Number(a.sourceFeatureId) - Number(b.sourceFeatureId));
+  points.sort((a, b) => Number(a.sourceFeatureId) - Number(b.sourceFeatureId));
   assert(ways.length > 0, 'No accepted railway LineStrings found');
   return {
     formatVersion: 1,
@@ -104,11 +128,13 @@ function normalizeGeoJson(input, options) {
     reviewRequired: true,
     stats: {
       wayCount: ways.length,
+      pointCount: points.length,
       coordinateCount: ways.reduce((total, way) => total + way.coordinates.length, 0),
       lengthKm: Math.round(ways.reduce((total, way) => total + way.lengthKm, 0) * 10) / 10,
       statusCounts: Object.fromEntries(Object.entries(statusCounts).sort(([a], [b]) => a.localeCompare(b)))
     },
-    ways
+    ways,
+    points
   };
 }
 
@@ -141,7 +167,7 @@ function run(argv) {
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, formatJson(normalized));
   console.log('Imported ' + normalized.label + ': ' + normalized.stats.wayCount + ' ways, ' +
-    normalized.stats.coordinateCount.toLocaleString('en-US') + ' coordinates, ' +
+    normalized.stats.pointCount + ' railway points, ' + normalized.stats.coordinateCount.toLocaleString('en-US') + ' coordinates, ' +
     normalized.stats.lengthKm.toLocaleString('en-US') + ' km');
 }
 

@@ -141,10 +141,13 @@ setup.saves = {
 			if (['fatigue', 'health', 'immunity', 'sanity', 'hunger', 'thirst'].some(function(key) {
 				return !amount(v.player[key]) || v.player[key] > 100;
 			})) throw new Error('Invalid player data.');
-			if (['TrainInterior', 'DrivingMode', 'OnTheLine', 'OnFoot', 'Sleep'].indexOf(state.title) >= 0
+			if (['TrainInterior', 'DrivingMode', 'OnTheLine', 'OnFoot', 'Sleep', 'WorldPilot'].indexOf(state.title) >= 0
 				&& (!Array.isArray(v.currentTrain) || !v.currentTrain.length)) throw new Error('The train is missing.');
 			if ((v.currentTrain != null && !train(v.currentTrain)) || (v.leavingTrain != null && !train(v.leavingTrain)))
 				throw new Error('Invalid train data.');
+			if (v.realWorldJourney != null && (!object(v.realWorldJourney) ||
+				typeof v.realWorldJourney.corridorId !== 'string' || !Number.isInteger(v.realWorldJourney.position) ||
+				v.realWorldJourney.position < 0)) throw new Error('Invalid real-world journey data.');
 			if (!stacks(v.player.carried, false) || !stacks(v.player.carriedCargo, true)) throw new Error('Invalid inventory data.');
 			Object.keys(v.stationTracks).forEach(function(station) {
 				var tracks = v.stationTracks[station];

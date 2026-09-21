@@ -1099,6 +1099,44 @@ test('debug cargo editor targets the initially selected train', async t => {
   assert.equal(await page.evaluate(() => SugarCube.State.variables.stationTracks[1][1].trains[0][0].cargo[0].amount), 410);
 });
 
+test('an active consist can drive and save on the real central Chile rail pilot', async t => {
+  const page = await openGame(t, { viewport: { width: 1000, height: 700 } });
+  await enableDebug(page);
+  await begin(page);
+  await board(page);
+  const before = await page.evaluate(() => ({
+    train: JSON.stringify(SugarCube.State.variables.currentTrain),
+    time: SugarCube.setup.time.getCurrentTimestampMs(),
+    fuel: SugarCube.setup.railyard.getCargoAmount(SugarCube.State.variables.currentTrain[0], 'diesel')
+  }));
+  await page.getByRole('button', { name: 'Debug', exact: true }).click();
+  const section = page.locator('#developer-Debug details').filter({ hasText: 'Global rail map and pilot' });
+  await section.locator(':scope > summary').click();
+  await section.getByRole('button', { name: /Drive Padre Hurtado.*Melipilla pilot/ }).click();
+  await passage(page, 'WorldPilot');
+  const map = await page.locator('#passages svg.real-world-pilot-map').boundingBox();
+  assert.ok(map && map.y < 100, JSON.stringify(map));
+  assert.match(await page.locator('#passages').innerText(), /At Padre Hurtado.*0\.0 of 42\.0 km/s);
+  await page.locator('#passages a').filter({ hasText: /^Drive 5 km/ }).first().click();
+  await passage(page, 'WorldPilot');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.realWorldJourney.position), 1);
+  assert.ok(await page.evaluate(time => SugarCube.setup.time.getCurrentTimestampMs() > time, before.time));
+  assert.ok(await page.evaluate(fuel => SugarCube.setup.railyard.getCargoAmount(SugarCube.State.variables.currentTrain[0], 'diesel') < fuel, before.fuel));
+  assert.equal(await page.evaluate(() => SugarCube.setup.saves.save(0)), true);
+  await page.evaluate(() => { SugarCube.State.variables.realWorldJourney.position = 4; });
+  assert.equal(await page.evaluate(() => SugarCube.setup.saves.load(0)), true);
+  await passage(page, 'WorldPilot');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.realWorldJourney.position), 1);
+  assert.equal(await page.evaluate(train => {
+    const current = JSON.parse(JSON.stringify(SugarCube.State.variables.currentTrain));
+    const original = JSON.parse(train);
+    current[0].cargo = original[0].cargo;
+    return JSON.stringify(current) === JSON.stringify(original);
+  }, before.train), true, 'the same consist and car order enter the pilot');
+  await choose(page, 'Leave real-world pilot', 'TrainInterior');
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.realWorldJourney), null);
+});
+
 test('seed text remains literal when revisiting settings', async t => {
   const page = await openGame(t);
   const seed = 'seed " quote <<set $seedInjected = true>>';
@@ -1525,7 +1563,7 @@ test('debug mode draws the generated world map for the leg ahead', async t => {
   assert.ok(map.stations >= 2, JSON.stringify(map));
   assert.match(map.heading, /World map, leg 1 \(station 1 to 2\): \d+ tiles, \d+ km/);
   const prototype = page.locator('details.debug-section').filter({
-    has: page.getByText('Global graph preview (not playable)', { exact: true })
+		has: page.getByText('Global rail map and pilot', { exact: true })
   });
   assert.match(await prototype.innerText(), /35 places, 40 non-navigable links in 24 regional chunks/);
   assert.match(await prototype.innerText(), /not claimed railway geometry/);

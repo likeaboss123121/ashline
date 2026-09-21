@@ -16,6 +16,7 @@
   "reviewRequired": true,
   "stats": {
     "wayCount": 1553,
+    "pointCount": 572,
     "coordinateCount": 20297,
     "lengthKm": 1047,
     "statusCounts": {
@@ -46914,6 +46915,4530 @@
         [-70.6961836, -33.3817026],
         [-70.6962268, -33.3815535]
       ]
+    }
+  ],
+  "points": [
+    {
+      "id": "osm-node:253282187",
+      "sourceFeatureId": "253282187",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6788863, -33.4519732],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:253282260",
+      "sourceFeatureId": "253282260",
+      "railway": "switch",
+      "coordinates": [-70.6802416, -33.4678943],
+      "tags": {
+        "ref": "6017AL"
+      }
+    },
+    {
+      "id": "osm-node:253282263",
+      "sourceFeatureId": "253282263",
+      "railway": "switch",
+      "coordinates": [-70.6799644, -33.4664387],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:253296088",
+      "sourceFeatureId": "253296088",
+      "railway": "switch",
+      "coordinates": [-70.6774119, -33.4734615],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:253296089",
+      "sourceFeatureId": "253296089",
+      "railway": "switch",
+      "coordinates": [-70.6778651, -33.4732272],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:253296093",
+      "sourceFeatureId": "253296093",
+      "railway": "switch",
+      "coordinates": [-70.6799901, -33.4714475],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:253297448",
+      "sourceFeatureId": "253297448",
+      "railway": "switch",
+      "coordinates": [-70.6795697, -33.4724307],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:253297982",
+      "sourceFeatureId": "253297982",
+      "railway": "switch",
+      "coordinates": [-70.6802604, -33.4722371],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:253298127",
+      "sourceFeatureId": "253298127",
+      "railway": "switch",
+      "coordinates": [-70.6774259, -33.4723635],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:253298322",
+      "sourceFeatureId": "253298322",
+      "railway": "switch",
+      "coordinates": [-70.6766038, -33.4736964],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:253298333",
+      "sourceFeatureId": "253298333",
+      "railway": "switch",
+      "coordinates": [-70.6761233, -33.4737019],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:253298335",
+      "sourceFeatureId": "253298335",
+      "railway": "switch",
+      "coordinates": [-70.6775316, -33.4733296],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:253298359",
+      "sourceFeatureId": "253298359",
+      "railway": "switch",
+      "coordinates": [-70.6757247, -33.4737294],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:253298361",
+      "sourceFeatureId": "253298361",
+      "railway": "switch",
+      "coordinates": [-70.6775822, -33.4731533],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:254526523",
+      "sourceFeatureId": "254526523",
+      "railway": "stop",
+      "coordinates": [-71.575264, -33.0271133],
+      "tags": {
+        "name": "Recreo",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:254527402",
+      "sourceFeatureId": "254527402",
+      "railway": "stop",
+      "coordinates": [-71.5615165, -33.0248906],
+      "tags": {
+        "name": "Miramar",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:254527418",
+      "sourceFeatureId": "254527418",
+      "railway": "stop",
+      "coordinates": [-71.5518519, -33.0263446],
+      "tags": {
+        "name": "Viña del Mar",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:254527475",
+      "sourceFeatureId": "254527475",
+      "railway": "stop",
+      "coordinates": [-71.5429358, -33.0285111],
+      "tags": {
+        "name": "Hospital",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:254527808",
+      "sourceFeatureId": "254527808",
+      "railway": "stop",
+      "coordinates": [-71.5328276, -33.03334],
+      "tags": {
+        "name": "Chorrillos",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:265608306",
+      "sourceFeatureId": "265608306",
+      "railway": "stop",
+      "coordinates": [-70.7245068, -33.7134482],
+      "tags": {
+        "name": "Buin Zoo",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:270176122",
+      "sourceFeatureId": "270176122",
+      "railway": "switch",
+      "coordinates": [-71.5989257, -33.0354886],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:280845237",
+      "sourceFeatureId": "280845237",
+      "railway": "switch",
+      "coordinates": [-70.7704638, -33.2898283],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:280845239",
+      "sourceFeatureId": "280845239",
+      "railway": "switch",
+      "coordinates": [-70.7667656, -33.294095],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:286548206",
+      "sourceFeatureId": "286548206",
+      "railway": "switch",
+      "coordinates": [-70.8125678, -33.2417772],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:286553662",
+      "sourceFeatureId": "286553662",
+      "railway": "switch",
+      "coordinates": [-70.9283945, -33.0884368],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:288032742",
+      "sourceFeatureId": "288032742",
+      "railway": "buffer_stop",
+      "coordinates": [-71.473947, -32.7520654],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:297617550",
+      "sourceFeatureId": "297617550",
+      "railway": "station",
+      "coordinates": [-71.6304056, -33.0324728],
+      "tags": {
+        "name": "Ascensor Artillería"
+      }
+    },
+    {
+      "id": "osm-node:308151333",
+      "sourceFeatureId": "308151333",
+      "railway": "stop",
+      "coordinates": [-70.7435577, -33.8160324],
+      "tags": {
+        "name": "Paine",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:308151569",
+      "sourceFeatureId": "308151569",
+      "railway": "stop",
+      "coordinates": [-70.7348259, -33.763489],
+      "tags": {
+        "name": "Linderos",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:502100736",
+      "sourceFeatureId": "502100736",
+      "railway": "switch",
+      "coordinates": [-70.6966285, -33.5643556],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:1278210784",
+      "sourceFeatureId": "1278210784",
+      "railway": "switch",
+      "coordinates": [-70.6059415, -32.8225402],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:1278210807",
+      "sourceFeatureId": "1278210807",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6069909, -32.8220676],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:1278210812",
+      "sourceFeatureId": "1278210812",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6070731, -32.8221633],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:1278210853",
+      "sourceFeatureId": "1278210853",
+      "railway": "switch",
+      "coordinates": [-70.6037583, -32.8239552],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:1278210858",
+      "sourceFeatureId": "1278210858",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6071126, -32.8222117],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:1278210860",
+      "sourceFeatureId": "1278210860",
+      "railway": "switch",
+      "coordinates": [-70.6013264, -32.8248913],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:1278210861",
+      "sourceFeatureId": "1278210861",
+      "railway": "switch",
+      "coordinates": [-70.6024079, -32.8244574],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:1278210873",
+      "sourceFeatureId": "1278210873",
+      "railway": "switch",
+      "coordinates": [-70.6041913, -32.8237792],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:1278210877",
+      "sourceFeatureId": "1278210877",
+      "railway": "switch",
+      "coordinates": [-70.6059028, -32.8231418],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:1802188810",
+      "sourceFeatureId": "1802188810",
+      "railway": "switch",
+      "coordinates": [-70.3043596, -32.9087869],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:1802188858",
+      "sourceFeatureId": "1802188858",
+      "railway": "switch",
+      "coordinates": [-70.3068476, -32.9107518],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:1802188995",
+      "sourceFeatureId": "1802188995",
+      "railway": "switch",
+      "coordinates": [-70.3120803, -32.9136965],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:1802189024",
+      "sourceFeatureId": "1802189024",
+      "railway": "buffer_stop",
+      "coordinates": [-70.314245, -32.9144317],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:1830803417",
+      "sourceFeatureId": "1830803417",
+      "railway": "stop",
+      "coordinates": [-70.7245471, -33.7134421],
+      "tags": {
+        "name": "Buin Zoo",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:1937775752",
+      "sourceFeatureId": "1937775752",
+      "railway": "station",
+      "coordinates": [-71.6193421, -33.0495114],
+      "tags": {
+        "name": "Ascensor Florida",
+        "public_transport": "station"
+      }
+    },
+    {
+      "id": "osm-node:1937775754",
+      "sourceFeatureId": "1937775754",
+      "railway": "station",
+      "coordinates": [-71.6205031, -33.0502255],
+      "tags": {
+        "name": "Ascensor Florida",
+        "public_transport": "station"
+      }
+    },
+    {
+      "id": "osm-node:1937775756",
+      "sourceFeatureId": "1937775756",
+      "railway": "station",
+      "coordinates": [-71.6025932, -33.0464974],
+      "tags": {
+        "name": "Ascensor Larraín",
+        "public_transport": "station"
+      }
+    },
+    {
+      "id": "osm-node:1937775761",
+      "sourceFeatureId": "1937775761",
+      "railway": "station",
+      "coordinates": [-71.6019749, -33.0466813],
+      "tags": {
+        "name": "Ascensor Larraín",
+        "public_transport": "station"
+      }
+    },
+    {
+      "id": "osm-node:1937775763",
+      "sourceFeatureId": "1937775763",
+      "railway": "station",
+      "coordinates": [-71.6028661, -33.0444221],
+      "tags": {
+        "name": "Ascensor Cerro Los Lecheros",
+        "public_transport": "station"
+      }
+    },
+    {
+      "id": "osm-node:1946784661",
+      "sourceFeatureId": "1946784661",
+      "railway": "switch",
+      "coordinates": [-70.8211179, -32.952756],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:2118707971",
+      "sourceFeatureId": "2118707971",
+      "railway": "station",
+      "coordinates": [-71.6301186, -33.0337231],
+      "tags": {
+        "name": "Ascensor Artillería"
+      }
+    },
+    {
+      "id": "osm-node:2838918631",
+      "sourceFeatureId": "2838918631",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6789776, -33.4519683],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:3025612326",
+      "sourceFeatureId": "3025612326",
+      "railway": "stop",
+      "coordinates": [-70.608113, -33.4207589],
+      "tags": {
+        "name": "Los Leones",
+        "operator": "Metro de Santiago",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:3192100743",
+      "sourceFeatureId": "3192100743",
+      "railway": "stop",
+      "coordinates": [-71.6130823, -33.0438266],
+      "tags": {
+        "name": "Francia",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:3192100755",
+      "sourceFeatureId": "3192100755",
+      "railway": "buffer_stop",
+      "coordinates": [-71.6263019, -33.039006],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:3457670068",
+      "sourceFeatureId": "3457670068",
+      "railway": "station",
+      "coordinates": [-71.6034463, -33.0447631],
+      "tags": {
+        "public_transport": "station"
+      }
+    },
+    {
+      "id": "osm-node:3531582977",
+      "sourceFeatureId": "3531582977",
+      "railway": "station",
+      "coordinates": [-71.6132226, -33.05258],
+      "tags": {
+        "name": "Ascensor Cerro la Cruz",
+        "public_transport": "station"
+      }
+    },
+    {
+      "id": "osm-node:3531582978",
+      "sourceFeatureId": "3531582978",
+      "railway": "station",
+      "coordinates": [-71.6125197, -33.0531706],
+      "tags": {
+        "name": "Ascensor Cerro la Cruz",
+        "public_transport": "station"
+      }
+    },
+    {
+      "id": "osm-node:3802292815",
+      "sourceFeatureId": "3802292815",
+      "railway": "switch",
+      "coordinates": [-70.305998, -32.9101196],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:3802292818",
+      "sourceFeatureId": "3802292818",
+      "railway": "switch",
+      "coordinates": [-70.3063085, -32.9103789],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:3802292819",
+      "sourceFeatureId": "3802292819",
+      "railway": "switch",
+      "coordinates": [-70.3054847, -32.9097513],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:3802292820",
+      "sourceFeatureId": "3802292820",
+      "railway": "buffer_stop",
+      "coordinates": [-70.304384, -32.9088613],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:3802298794",
+      "sourceFeatureId": "3802298794",
+      "railway": "switch",
+      "coordinates": [-70.3045182, -32.9089115],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:3803312628",
+      "sourceFeatureId": "3803312628",
+      "railway": "switch",
+      "coordinates": [-70.3047781, -32.9091739],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:3803342325",
+      "sourceFeatureId": "3803342325",
+      "railway": "switch",
+      "coordinates": [-70.454021, -32.8563202],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:3803342328",
+      "sourceFeatureId": "3803342328",
+      "railway": "switch",
+      "coordinates": [-70.4503813, -32.8581194],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:3803397214",
+      "sourceFeatureId": "3803397214",
+      "railway": "switch",
+      "coordinates": [-70.5962527, -32.8280216],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:3803397234",
+      "sourceFeatureId": "3803397234",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6070348, -32.8221177],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:3873602031",
+      "sourceFeatureId": "3873602031",
+      "railway": "buffer_stop",
+      "coordinates": [-71.2780588, -32.9845171],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:3873603063",
+      "sourceFeatureId": "3873603063",
+      "railway": "buffer_stop",
+      "coordinates": [-71.2769694, -32.9838943],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:3873603087",
+      "sourceFeatureId": "3873603087",
+      "railway": "buffer_stop",
+      "coordinates": [-71.2780443, -32.9844474],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:3873603104",
+      "sourceFeatureId": "3873603104",
+      "railway": "switch",
+      "coordinates": [-71.2823875, -32.9852349],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:3873603130",
+      "sourceFeatureId": "3873603130",
+      "railway": "buffer_stop",
+      "coordinates": [-71.2769182, -32.9838882],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:3873603141",
+      "sourceFeatureId": "3873603141",
+      "railway": "switch",
+      "coordinates": [-71.281842, -32.9853891],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:3874928736",
+      "sourceFeatureId": "3874928736",
+      "railway": "stop",
+      "coordinates": [-71.444702, -33.0452698],
+      "tags": {
+        "name": "Quilpué",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:3874928742",
+      "sourceFeatureId": "3874928742",
+      "railway": "stop",
+      "coordinates": [-71.4447033, -33.0452394],
+      "tags": {
+        "name": "Quilpué",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:3903790497",
+      "sourceFeatureId": "3903790497",
+      "railway": "stop",
+      "coordinates": [-71.5917669, -33.0328049],
+      "tags": {
+        "name": "Portales",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:3988525027",
+      "sourceFeatureId": "3988525027",
+      "railway": "station",
+      "coordinates": [-70.8156797, -33.5678013],
+      "tags": {
+        "name": "Padre Hurtado",
+        "operator": "EFE Central"
+      }
+    },
+    {
+      "id": "osm-node:3988532179",
+      "sourceFeatureId": "3988532179",
+      "railway": "stop",
+      "coordinates": [-70.796231, -33.553922],
+      "tags": {
+        "name": "Ciudad Satélite",
+        "operator": "EFE"
+      }
+    },
+    {
+      "id": "osm-node:3988544087",
+      "sourceFeatureId": "3988544087",
+      "railway": "stop",
+      "coordinates": [-70.7711749, -33.5367468],
+      "tags": {
+        "name": "Tres Poniente",
+        "operator": "EFE"
+      }
+    },
+    {
+      "id": "osm-node:3988544088",
+      "sourceFeatureId": "3988544088",
+      "railway": "stop",
+      "coordinates": [-70.7357814, -33.5009513],
+      "tags": {
+        "name": "Américo Vespucio",
+        "ref": "4",
+        "operator": "EFE"
+      }
+    },
+    {
+      "id": "osm-node:3988557678",
+      "sourceFeatureId": "3988557678",
+      "railway": "stop",
+      "coordinates": [-70.7222334, -33.4901853],
+      "tags": {
+        "name": "Lo Errázuriz",
+        "ref": "3",
+        "operator": "EFE"
+      }
+    },
+    {
+      "id": "osm-node:3988557680",
+      "sourceFeatureId": "3988557680",
+      "railway": "station",
+      "coordinates": [-70.9272695, -33.6592519],
+      "tags": {
+        "name": "Talagante",
+        "operator": "EFE Central"
+      }
+    },
+    {
+      "id": "osm-node:3988557681",
+      "sourceFeatureId": "3988557681",
+      "railway": "station",
+      "coordinates": [-70.9896895, -33.6792851],
+      "tags": {
+        "name": "El Monte",
+        "operator": "EFE Central"
+      }
+    },
+    {
+      "id": "osm-node:3988557682",
+      "sourceFeatureId": "3988557682",
+      "railway": "station",
+      "coordinates": [-71.2109877, -33.6796771],
+      "tags": {
+        "name": "Melipilla",
+        "operator": "EFE Central"
+      }
+    },
+    {
+      "id": "osm-node:4210849564",
+      "sourceFeatureId": "4210849564",
+      "railway": "buffer_stop",
+      "coordinates": [-71.6263913, -33.0390721],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4210849565",
+      "sourceFeatureId": "4210849565",
+      "railway": "switch",
+      "coordinates": [-71.6255835, -33.0397688],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4210849569",
+      "sourceFeatureId": "4210849569",
+      "railway": "switch",
+      "coordinates": [-71.6232026, -33.0417901],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4449953828",
+      "sourceFeatureId": "4449953828",
+      "railway": "station",
+      "coordinates": [-71.6300422, -33.0313965],
+      "tags": {
+        "name": "Ascensor Villaseca",
+        "public_transport": "station"
+      }
+    },
+    {
+      "id": "osm-node:4601251291",
+      "sourceFeatureId": "4601251291",
+      "railway": "stop",
+      "coordinates": [-70.3049287, -32.9092424],
+      "tags": {
+        "name": "Río Blanco",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4601251387",
+      "sourceFeatureId": "4601251387",
+      "railway": "switch",
+      "coordinates": [-70.305305, -32.9096003],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4602934480",
+      "sourceFeatureId": "4602934480",
+      "railway": "buffer_stop",
+      "coordinates": [-70.3006001, -32.9086664],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4727180416",
+      "sourceFeatureId": "4727180416",
+      "railway": "halt",
+      "coordinates": [-71.1943705, -32.777142],
+      "tags": {
+        "name": "J.J. Godoy",
+        "operator": "Ferronor",
+        "public_transport": "halt"
+      }
+    },
+    {
+      "id": "osm-node:4746169814",
+      "sourceFeatureId": "4746169814",
+      "railway": "switch",
+      "coordinates": [-70.6965742, -33.5639141],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4746169933",
+      "sourceFeatureId": "4746169933",
+      "railway": "switch",
+      "coordinates": [-70.6971792, -33.5520993],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4746169934",
+      "sourceFeatureId": "4746169934",
+      "railway": "switch",
+      "coordinates": [-70.6968533, -33.5521518],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4746169985",
+      "sourceFeatureId": "4746169985",
+      "railway": "switch",
+      "coordinates": [-70.6941865, -33.5481186],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4746169999",
+      "sourceFeatureId": "4746169999",
+      "railway": "switch",
+      "coordinates": [-70.694052, -33.5479582],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4746170000",
+      "sourceFeatureId": "4746170000",
+      "railway": "switch",
+      "coordinates": [-70.6938415, -33.5476978],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4746170001",
+      "sourceFeatureId": "4746170001",
+      "railway": "switch",
+      "coordinates": [-70.6936416, -33.5474564],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4746170002",
+      "sourceFeatureId": "4746170002",
+      "railway": "switch",
+      "coordinates": [-70.6950572, -33.5511101],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4746170013",
+      "sourceFeatureId": "4746170013",
+      "railway": "switch",
+      "coordinates": [-70.6934595, -33.5472595],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4746170027",
+      "sourceFeatureId": "4746170027",
+      "railway": "switch",
+      "coordinates": [-70.6927499, -33.54548],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4746170035",
+      "sourceFeatureId": "4746170035",
+      "railway": "switch",
+      "coordinates": [-70.6911578, -33.5385979],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4748617010",
+      "sourceFeatureId": "4748617010",
+      "railway": "switch",
+      "coordinates": [-70.7027251, -33.6277258],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4748617015",
+      "sourceFeatureId": "4748617015",
+      "railway": "switch",
+      "coordinates": [-70.702801, -33.6280115],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4748617522",
+      "sourceFeatureId": "4748617522",
+      "railway": "switch",
+      "coordinates": [-70.7034104, -33.6295007],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4748617523",
+      "sourceFeatureId": "4748617523",
+      "railway": "switch",
+      "coordinates": [-70.703545, -33.6299156],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4748617552",
+      "sourceFeatureId": "4748617552",
+      "railway": "switch",
+      "coordinates": [-70.7056039, -33.6346318],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4748617680",
+      "sourceFeatureId": "4748617680",
+      "railway": "buffer_stop",
+      "coordinates": [-70.7066446, -33.6370387],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4748617698",
+      "sourceFeatureId": "4748617698",
+      "railway": "switch",
+      "coordinates": [-70.7049199, -33.6331095],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4748617704",
+      "sourceFeatureId": "4748617704",
+      "railway": "switch",
+      "coordinates": [-70.7052907, -33.633703],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4753976850",
+      "sourceFeatureId": "4753976850",
+      "railway": "switch",
+      "coordinates": [-70.6799792, -33.4681562],
+      "tags": {
+        "ref": "18AL"
+      }
+    },
+    {
+      "id": "osm-node:4753976863",
+      "sourceFeatureId": "4753976863",
+      "railway": "switch",
+      "coordinates": [-70.6799959, -33.4668189],
+      "tags": {
+        "ref": "32AL"
+      }
+    },
+    {
+      "id": "osm-node:4753976915",
+      "sourceFeatureId": "4753976915",
+      "railway": "switch",
+      "coordinates": [-70.6799942, -33.4726024],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4753976918",
+      "sourceFeatureId": "4753976918",
+      "railway": "switch",
+      "coordinates": [-70.6801209, -33.4724206],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4753976937",
+      "sourceFeatureId": "4753976937",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6787631, -33.4750856],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4753976949",
+      "sourceFeatureId": "4753976949",
+      "railway": "switch",
+      "coordinates": [-70.6802349, -33.473367],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4753976958",
+      "sourceFeatureId": "4753976958",
+      "railway": "switch",
+      "coordinates": [-70.6802818, -33.4730269],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4753976971",
+      "sourceFeatureId": "4753976971",
+      "railway": "switch",
+      "coordinates": [-70.6802429, -33.4729408],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4753976974",
+      "sourceFeatureId": "4753976974",
+      "railway": "switch",
+      "coordinates": [-70.6802949, -33.4726452],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4753976992",
+      "sourceFeatureId": "4753976992",
+      "railway": "switch",
+      "coordinates": [-70.6801142, -33.4728893],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4753977005",
+      "sourceFeatureId": "4753977005",
+      "railway": "switch",
+      "coordinates": [-70.680145, -33.4725917],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4753977008",
+      "sourceFeatureId": "4753977008",
+      "railway": "switch",
+      "coordinates": [-70.680194, -33.4723557],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4753977009",
+      "sourceFeatureId": "4753977009",
+      "railway": "switch",
+      "coordinates": [-70.6802121, -33.4721376],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4753977012",
+      "sourceFeatureId": "4753977012",
+      "railway": "switch",
+      "coordinates": [-70.6802329, -33.4718333],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4754072448",
+      "sourceFeatureId": "4754072448",
+      "railway": "buffer_stop",
+      "coordinates": [-70.7064756, -33.6365335],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4756972829",
+      "sourceFeatureId": "4756972829",
+      "railway": "stop",
+      "coordinates": [-70.6807083, -33.4772118],
+      "tags": {
+        "name": "Lo Valledor",
+        "ref": "2",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4756972830",
+      "sourceFeatureId": "4756972830",
+      "railway": "stop",
+      "coordinates": [-70.6805975, -33.4772151],
+      "tags": {
+        "name": "Lo Valledor",
+        "ref": "9",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4756972831",
+      "sourceFeatureId": "4756972831",
+      "railway": "stop",
+      "coordinates": [-70.6818467, -33.4927284],
+      "tags": {
+        "name": "Pedro Aguirre Cerda",
+        "ref": "3",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4756972832",
+      "sourceFeatureId": "4756972832",
+      "railway": "stop",
+      "coordinates": [-70.6817229, -33.4927283],
+      "tags": {
+        "name": "Pedro Aguirre Cerda",
+        "ref": "8",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4756972833",
+      "sourceFeatureId": "4756972833",
+      "railway": "stop",
+      "coordinates": [-70.68596, -33.5145435],
+      "tags": {
+        "name": "Lo Espejo",
+        "ref": "4",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4756972834",
+      "sourceFeatureId": "4756972834",
+      "railway": "stop",
+      "coordinates": [-70.685836, -33.514564],
+      "tags": {
+        "name": "Lo Espejo",
+        "ref": "7",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4756972835",
+      "sourceFeatureId": "4756972835",
+      "railway": "stop",
+      "coordinates": [-70.6983512, -33.5726939],
+      "tags": {
+        "name": "Lo Blanco",
+        "ref": "5",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4756972836",
+      "sourceFeatureId": "4756972836",
+      "railway": "stop",
+      "coordinates": [-70.6982573, -33.5727297],
+      "tags": {
+        "name": "Lo Blanco",
+        "ref": "6",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4756972837",
+      "sourceFeatureId": "4756972837",
+      "railway": "stop",
+      "coordinates": [-70.6984974, -33.5867199],
+      "tags": {
+        "name": "Freire",
+        "ref": "6",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4756972838",
+      "sourceFeatureId": "4756972838",
+      "railway": "stop",
+      "coordinates": [-70.6983908, -33.5867193],
+      "tags": {
+        "name": "Freire",
+        "ref": "5",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4756972839",
+      "sourceFeatureId": "4756972839",
+      "railway": "stop",
+      "coordinates": [-70.6977953, -33.594993],
+      "tags": {
+        "name": "San Bernardo",
+        "ref": "7",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4756972840",
+      "sourceFeatureId": "4756972840",
+      "railway": "stop",
+      "coordinates": [-70.6976909, -33.5949854],
+      "tags": {
+        "name": "San Bernardo",
+        "ref": "4",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4756972841",
+      "sourceFeatureId": "4756972841",
+      "railway": "stop",
+      "coordinates": [-70.6970707, -33.6063755],
+      "tags": {
+        "name": "Maestranza",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4756972842",
+      "sourceFeatureId": "4756972842",
+      "railway": "stop",
+      "coordinates": [-70.6969671, -33.6063707],
+      "tags": {
+        "name": "Maestranza",
+        "ref": "3",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4756972843",
+      "sourceFeatureId": "4756972843",
+      "railway": "stop",
+      "coordinates": [-70.7006814, -33.6232403],
+      "tags": {
+        "name": "5 Pinos",
+        "ref": "9",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4756972844",
+      "sourceFeatureId": "4756972844",
+      "railway": "stop",
+      "coordinates": [-70.7005782, -33.6232802],
+      "tags": {
+        "name": "5 Pinos",
+        "ref": "2",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4756972845",
+      "sourceFeatureId": "4756972845",
+      "railway": "stop",
+      "coordinates": [-70.7046605, -33.6322424],
+      "tags": {
+        "name": "Nos",
+        "ref": "10",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4756972846",
+      "sourceFeatureId": "4756972846",
+      "railway": "stop",
+      "coordinates": [-70.7045711, -33.6322866],
+      "tags": {
+        "name": "Nos",
+        "ref": "1",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4757130340",
+      "sourceFeatureId": "4757130340",
+      "railway": "switch",
+      "coordinates": [-70.678757, -33.4602154],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130353",
+      "sourceFeatureId": "4757130353",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6792194, -33.4519555],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130363",
+      "sourceFeatureId": "4757130363",
+      "railway": "switch",
+      "coordinates": [-70.6789166, -33.4562569],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130370",
+      "sourceFeatureId": "4757130370",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6791227, -33.4519607],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130379",
+      "sourceFeatureId": "4757130379",
+      "railway": "switch",
+      "coordinates": [-70.6789193, -33.4555335],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130380",
+      "sourceFeatureId": "4757130380",
+      "railway": "switch",
+      "coordinates": [-70.6788374, -33.456159],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130391",
+      "sourceFeatureId": "4757130391",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6790797, -33.4519629],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130402",
+      "sourceFeatureId": "4757130402",
+      "railway": "switch",
+      "coordinates": [-70.6787516, -33.4565646],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130403",
+      "sourceFeatureId": "4757130403",
+      "railway": "switch",
+      "coordinates": [-70.6787221, -33.4567979],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130409",
+      "sourceFeatureId": "4757130409",
+      "railway": "switch",
+      "coordinates": [-70.6788716, -33.4565741],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130414",
+      "sourceFeatureId": "4757130414",
+      "railway": "switch",
+      "coordinates": [-70.6786933, -33.4577886],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130416",
+      "sourceFeatureId": "4757130416",
+      "railway": "switch",
+      "coordinates": [-70.6798915, -33.4659936],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130824",
+      "sourceFeatureId": "4757130824",
+      "railway": "switch",
+      "coordinates": [-70.678694, -33.4594239],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130829",
+      "sourceFeatureId": "4757130829",
+      "railway": "switch",
+      "coordinates": [-70.6786349, -33.4593215],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130833",
+      "sourceFeatureId": "4757130833",
+      "railway": "switch",
+      "coordinates": [-70.6787194, -33.4597461],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130849",
+      "sourceFeatureId": "4757130849",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6787731, -33.4535598],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130857",
+      "sourceFeatureId": "4757130857",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6788193, -33.4535654],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130864",
+      "sourceFeatureId": "4757130864",
+      "railway": "switch",
+      "coordinates": [-70.6786269, -33.4552163],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130867",
+      "sourceFeatureId": "4757130867",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6788433, -33.4519754],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130880",
+      "sourceFeatureId": "4757130880",
+      "railway": "switch",
+      "coordinates": [-70.6786168, -33.4558798],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130900",
+      "sourceFeatureId": "4757130900",
+      "railway": "switch",
+      "coordinates": [-70.6792223, -33.4631831],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130913",
+      "sourceFeatureId": "4757130913",
+      "railway": "switch",
+      "coordinates": [-70.6787912, -33.4553998],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130919",
+      "sourceFeatureId": "4757130919",
+      "railway": "switch",
+      "coordinates": [-70.6785833, -33.4575542],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130921",
+      "sourceFeatureId": "4757130921",
+      "railway": "switch",
+      "coordinates": [-70.6785753, -33.4579598],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130935",
+      "sourceFeatureId": "4757130935",
+      "railway": "switch",
+      "coordinates": [-70.6794852, -33.4637431],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130943",
+      "sourceFeatureId": "4757130943",
+      "railway": "switch",
+      "coordinates": [-70.678647, -33.4559671],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130944",
+      "sourceFeatureId": "4757130944",
+      "railway": "switch",
+      "coordinates": [-70.6786061, -33.4563151],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130951",
+      "sourceFeatureId": "4757130951",
+      "railway": "switch",
+      "coordinates": [-70.678533, -33.457486],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757130968",
+      "sourceFeatureId": "4757130968",
+      "railway": "switch",
+      "coordinates": [-70.6797937, -33.4651869],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163484",
+      "sourceFeatureId": "4757163484",
+      "railway": "switch",
+      "coordinates": [-70.6798158, -33.4642247],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163491",
+      "sourceFeatureId": "4757163491",
+      "railway": "switch",
+      "coordinates": [-70.6791453, -33.4560113],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163493",
+      "sourceFeatureId": "4757163493",
+      "railway": "switch",
+      "coordinates": [-70.6791392, -33.4563391],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163494",
+      "sourceFeatureId": "4757163494",
+      "railway": "switch",
+      "coordinates": [-70.6791358, -33.4566161],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163514",
+      "sourceFeatureId": "4757163514",
+      "railway": "switch",
+      "coordinates": [-70.6789649, -33.4573528],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163524",
+      "sourceFeatureId": "4757163524",
+      "railway": "switch",
+      "coordinates": [-70.6791299, -33.4569176],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163557",
+      "sourceFeatureId": "4757163557",
+      "railway": "switch",
+      "coordinates": [-70.6791332, -33.4616873],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163564",
+      "sourceFeatureId": "4757163564",
+      "railway": "switch",
+      "coordinates": [-70.6791352, -33.4614551],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163571",
+      "sourceFeatureId": "4757163571",
+      "railway": "switch",
+      "coordinates": [-70.6790829, -33.4615955],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163576",
+      "sourceFeatureId": "4757163576",
+      "railway": "switch",
+      "coordinates": [-70.6790104, -33.4612226],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163582",
+      "sourceFeatureId": "4757163582",
+      "railway": "switch",
+      "coordinates": [-70.6802362, -33.4594563],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163588",
+      "sourceFeatureId": "4757163588",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6801066, -33.4596169],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163590",
+      "sourceFeatureId": "4757163590",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6800525, -33.4594116],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163604",
+      "sourceFeatureId": "4757163604",
+      "railway": "switch",
+      "coordinates": [-70.6794014, -33.4591553],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163606",
+      "sourceFeatureId": "4757163606",
+      "railway": "switch",
+      "coordinates": [-70.6794242, -33.4588258],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163608",
+      "sourceFeatureId": "4757163608",
+      "railway": "switch",
+      "coordinates": [-70.679443, -33.4585422],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163611",
+      "sourceFeatureId": "4757163611",
+      "railway": "switch",
+      "coordinates": [-70.6794624, -33.458211],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163614",
+      "sourceFeatureId": "4757163614",
+      "railway": "switch",
+      "coordinates": [-70.6797534, -33.4582026],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163618",
+      "sourceFeatureId": "4757163618",
+      "railway": "switch",
+      "coordinates": [-70.6799828, -33.4639087],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163624",
+      "sourceFeatureId": "4757163624",
+      "railway": "switch",
+      "coordinates": [-70.6796716, -33.4584085],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163627",
+      "sourceFeatureId": "4757163627",
+      "railway": "switch",
+      "coordinates": [-70.6796233, -33.4581679],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163630",
+      "sourceFeatureId": "4757163630",
+      "railway": "switch",
+      "coordinates": [-70.6794249, -33.4573349],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163631",
+      "sourceFeatureId": "4757163631",
+      "railway": "switch",
+      "coordinates": [-70.6792639, -33.4548588],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163639",
+      "sourceFeatureId": "4757163639",
+      "railway": "switch",
+      "coordinates": [-70.6794007, -33.4628402],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163649",
+      "sourceFeatureId": "4757163649",
+      "railway": "switch",
+      "coordinates": [-70.6792304, -33.4590026],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163655",
+      "sourceFeatureId": "4757163655",
+      "railway": "switch",
+      "coordinates": [-70.679394, -33.4573344],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163656",
+      "sourceFeatureId": "4757163656",
+      "railway": "switch",
+      "coordinates": [-70.6793791, -33.457086],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163657",
+      "sourceFeatureId": "4757163657",
+      "railway": "switch",
+      "coordinates": [-70.6793155, -33.4584924],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163676",
+      "sourceFeatureId": "4757163676",
+      "railway": "switch",
+      "coordinates": [-70.6791949, -33.4549226],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163681",
+      "sourceFeatureId": "4757163681",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6793932, -33.4540135],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163682",
+      "sourceFeatureId": "4757163682",
+      "railway": "switch",
+      "coordinates": [-70.6791855, -33.4553461],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163683",
+      "sourceFeatureId": "4757163683",
+      "railway": "switch",
+      "coordinates": [-70.6791566, -33.4555749],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163699",
+      "sourceFeatureId": "4757163699",
+      "railway": "switch",
+      "coordinates": [-70.678698, -33.4587414],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757163706",
+      "sourceFeatureId": "4757163706",
+      "railway": "switch",
+      "coordinates": [-70.6791499, -33.4619284],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757181519",
+      "sourceFeatureId": "4757181519",
+      "railway": "stop",
+      "coordinates": [-70.6790013, -33.45228],
+      "tags": {
+        "name": "Alameda",
+        "ref": "1",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4757181520",
+      "sourceFeatureId": "4757181520",
+      "railway": "stop",
+      "coordinates": [-70.6789101, -33.4522868],
+      "tags": {
+        "name": "Alameda",
+        "ref": "10",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4757436115",
+      "sourceFeatureId": "4757436115",
+      "railway": "stop",
+      "coordinates": [-71.5917528, -33.0328459],
+      "tags": {
+        "name": "Portales",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4757436150",
+      "sourceFeatureId": "4757436150",
+      "railway": "switch",
+      "coordinates": [-71.6148905, -33.0433325],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757436155",
+      "sourceFeatureId": "4757436155",
+      "railway": "switch",
+      "coordinates": [-71.6173883, -33.0432836],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757436186",
+      "sourceFeatureId": "4757436186",
+      "railway": "switch",
+      "coordinates": [-71.5983785, -33.0351693],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757436261",
+      "sourceFeatureId": "4757436261",
+      "railway": "switch",
+      "coordinates": [-71.6233225, -33.0415348],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757436290",
+      "sourceFeatureId": "4757436290",
+      "railway": "switch",
+      "coordinates": [-71.622912, -33.0418149],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757436302",
+      "sourceFeatureId": "4757436302",
+      "railway": "switch",
+      "coordinates": [-71.6207703, -33.0428795],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757436304",
+      "sourceFeatureId": "4757436304",
+      "railway": "switch",
+      "coordinates": [-71.6195485, -33.0431077],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757436398",
+      "sourceFeatureId": "4757436398",
+      "railway": "switch",
+      "coordinates": [-71.6203381, -33.0430049],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757436409",
+      "sourceFeatureId": "4757436409",
+      "railway": "switch",
+      "coordinates": [-71.6171791, -33.0433444],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757436441",
+      "sourceFeatureId": "4757436441",
+      "railway": "stop",
+      "coordinates": [-71.6130931, -33.043871],
+      "tags": {
+        "name": "Francia",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4757436468",
+      "sourceFeatureId": "4757436468",
+      "railway": "switch",
+      "coordinates": [-71.6179941, -33.0433753],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757436477",
+      "sourceFeatureId": "4757436477",
+      "railway": "switch",
+      "coordinates": [-71.6237646, -33.0412826],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757436498",
+      "sourceFeatureId": "4757436498",
+      "railway": "switch",
+      "coordinates": [-71.6257414, -33.0393365],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757436506",
+      "sourceFeatureId": "4757436506",
+      "railway": "switch",
+      "coordinates": [-71.6247767, -33.0403735],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757436517",
+      "sourceFeatureId": "4757436517",
+      "railway": "switch",
+      "coordinates": [-71.6252227, -33.0399565],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:4757466792",
+      "sourceFeatureId": "4757466792",
+      "railway": "stop",
+      "coordinates": [-71.5328597, -33.0333638],
+      "tags": {
+        "name": "Chorrillos",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4757466812",
+      "sourceFeatureId": "4757466812",
+      "railway": "stop",
+      "coordinates": [-71.5429486, -33.0285454],
+      "tags": {
+        "name": "Hospital",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4757466819",
+      "sourceFeatureId": "4757466819",
+      "railway": "stop",
+      "coordinates": [-71.5518605, -33.0263798],
+      "tags": {
+        "name": "Viña del Mar",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4757467723",
+      "sourceFeatureId": "4757467723",
+      "railway": "stop",
+      "coordinates": [-71.561524, -33.024926],
+      "tags": {
+        "name": "Miramar",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669147",
+      "sourceFeatureId": "4758669147",
+      "railway": "stop",
+      "coordinates": [-71.6262935, -33.0391564],
+      "tags": {
+        "name": "Puerto",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669148",
+      "sourceFeatureId": "4758669148",
+      "railway": "stop",
+      "coordinates": [-71.6262102, -33.0390872],
+      "tags": {
+        "name": "Puerto",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669149",
+      "sourceFeatureId": "4758669149",
+      "railway": "stop",
+      "coordinates": [-71.620422, -33.0431164],
+      "tags": {
+        "name": "Bellavista",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669150",
+      "sourceFeatureId": "4758669150",
+      "railway": "stop",
+      "coordinates": [-71.6204138, -33.0430793],
+      "tags": {
+        "name": "Bellavista",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669151",
+      "sourceFeatureId": "4758669151",
+      "railway": "stop",
+      "coordinates": [-71.6055943, -33.0421465],
+      "tags": {
+        "name": "Barón",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669152",
+      "sourceFeatureId": "4758669152",
+      "railway": "stop",
+      "coordinates": [-71.6055487, -33.0421667],
+      "tags": {
+        "name": "Barón",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669153",
+      "sourceFeatureId": "4758669153",
+      "railway": "stop",
+      "coordinates": [-71.5752407, -33.0271328],
+      "tags": {
+        "name": "Recreo",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669158",
+      "sourceFeatureId": "4758669158",
+      "railway": "stop",
+      "coordinates": [-71.5209417, -33.0414199],
+      "tags": {
+        "name": "El Salto",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669159",
+      "sourceFeatureId": "4758669159",
+      "railway": "stop",
+      "coordinates": [-71.520916, -33.0413921],
+      "tags": {
+        "name": "El Salto",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669162",
+      "sourceFeatureId": "4758669162",
+      "railway": "stop",
+      "coordinates": [-71.4285233, -33.0396456],
+      "tags": {
+        "name": "El Sol",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669163",
+      "sourceFeatureId": "4758669163",
+      "railway": "stop",
+      "coordinates": [-71.428514, -33.0396117],
+      "tags": {
+        "name": "El Sol",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669164",
+      "sourceFeatureId": "4758669164",
+      "railway": "stop",
+      "coordinates": [-71.4067703, -33.0431198],
+      "tags": {
+        "name": "El Belloto",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669165",
+      "sourceFeatureId": "4758669165",
+      "railway": "stop",
+      "coordinates": [-71.4067565, -33.0430878],
+      "tags": {
+        "name": "El Belloto",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669166",
+      "sourceFeatureId": "4758669166",
+      "railway": "stop",
+      "coordinates": [-71.3951296, -33.0440019],
+      "tags": {
+        "name": "Las Américas",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669167",
+      "sourceFeatureId": "4758669167",
+      "railway": "stop",
+      "coordinates": [-71.3951363, -33.0439725],
+      "tags": {
+        "name": "Las Américas",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669168",
+      "sourceFeatureId": "4758669168",
+      "railway": "stop",
+      "coordinates": [-71.3823976, -33.0416899],
+      "tags": {
+        "name": "La Concepción",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669169",
+      "sourceFeatureId": "4758669169",
+      "railway": "stop",
+      "coordinates": [-71.3824009, -33.0416569],
+      "tags": {
+        "name": "La Concepción",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669172",
+      "sourceFeatureId": "4758669172",
+      "railway": "stop",
+      "coordinates": [-71.3732213, -33.0425294],
+      "tags": {
+        "name": "Villa Alemana",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669173",
+      "sourceFeatureId": "4758669173",
+      "railway": "stop",
+      "coordinates": [-71.3732216, -33.0424944],
+      "tags": {
+        "name": "Villa Alemana",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669174",
+      "sourceFeatureId": "4758669174",
+      "railway": "stop",
+      "coordinates": [-71.3662812, -33.0421208],
+      "tags": {
+        "name": "Sargento Aldea",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669175",
+      "sourceFeatureId": "4758669175",
+      "railway": "stop",
+      "coordinates": [-71.3662859, -33.0420893],
+      "tags": {
+        "name": "Sargento Aldea",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669176",
+      "sourceFeatureId": "4758669176",
+      "railway": "stop",
+      "coordinates": [-71.3528177, -33.0402039],
+      "tags": {
+        "name": "Peñablanca",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669177",
+      "sourceFeatureId": "4758669177",
+      "railway": "stop",
+      "coordinates": [-71.3528377, -33.0401756],
+      "tags": {
+        "name": "Peñablanca",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669178",
+      "sourceFeatureId": "4758669178",
+      "railway": "stop",
+      "coordinates": [-71.2783813, -32.9847412],
+      "tags": {
+        "name": "Limache",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:4758669179",
+      "sourceFeatureId": "4758669179",
+      "railway": "stop",
+      "coordinates": [-71.2784156, -32.984717],
+      "tags": {
+        "name": "Limache",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:5213406941",
+      "sourceFeatureId": "5213406941",
+      "railway": "stop",
+      "coordinates": [-70.6979447, -33.5950052],
+      "tags": {
+        "name": "San Bernardo",
+        "ref": "2",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:5213406942",
+      "sourceFeatureId": "5213406942",
+      "railway": "stop",
+      "coordinates": [-70.6979006, -33.5950025],
+      "tags": {
+        "name": "San Bernardo",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:5213447509",
+      "sourceFeatureId": "5213447509",
+      "railway": "stop",
+      "coordinates": [-70.7284563, -33.7323628],
+      "tags": {
+        "name": "Buin",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:5213447510",
+      "sourceFeatureId": "5213447510",
+      "railway": "stop",
+      "coordinates": [-70.7284134, -33.7323676],
+      "tags": {
+        "name": "Buin",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:5215345801",
+      "sourceFeatureId": "5215345801",
+      "railway": "switch",
+      "coordinates": [-70.7274301, -33.7276056],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215345814",
+      "sourceFeatureId": "5215345814",
+      "railway": "switch",
+      "coordinates": [-70.7286568, -33.733789],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215345818",
+      "sourceFeatureId": "5215345818",
+      "railway": "switch",
+      "coordinates": [-70.7287864, -33.7341577],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215345940",
+      "sourceFeatureId": "5215345940",
+      "railway": "stop",
+      "coordinates": [-70.7348688, -33.7634831],
+      "tags": {
+        "name": "Linderos",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:5215608564",
+      "sourceFeatureId": "5215608564",
+      "railway": "switch",
+      "coordinates": [-70.6800746, -33.4642734],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215608567",
+      "sourceFeatureId": "5215608567",
+      "railway": "switch",
+      "coordinates": [-70.6802067, -33.4639713],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215608575",
+      "sourceFeatureId": "5215608575",
+      "railway": "switch",
+      "coordinates": [-70.6807096, -33.4628603],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215608589",
+      "sourceFeatureId": "5215608589",
+      "railway": "switch",
+      "coordinates": [-70.6798956, -33.4647757],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215608592",
+      "sourceFeatureId": "5215608592",
+      "railway": "switch",
+      "coordinates": [-70.6799036, -33.4644966],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215608594",
+      "sourceFeatureId": "5215608594",
+      "railway": "switch",
+      "coordinates": [-70.6801437, -33.4639819],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215608601",
+      "sourceFeatureId": "5215608601",
+      "railway": "switch",
+      "coordinates": [-70.6801839, -33.4634393],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215608607",
+      "sourceFeatureId": "5215608607",
+      "railway": "switch",
+      "coordinates": [-70.6802738, -33.4635355],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215608608",
+      "sourceFeatureId": "5215608608",
+      "railway": "switch",
+      "coordinates": [-70.6802161, -33.4636877],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610227",
+      "sourceFeatureId": "5215610227",
+      "railway": "switch",
+      "coordinates": [-70.6803736, -33.4608173],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610244",
+      "sourceFeatureId": "5215610244",
+      "railway": "switch",
+      "coordinates": [-70.6803207, -33.4632077],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610256",
+      "sourceFeatureId": "5215610256",
+      "railway": "switch",
+      "coordinates": [-70.6804683, -33.4622998],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610260",
+      "sourceFeatureId": "5215610260",
+      "railway": "switch",
+      "coordinates": [-70.6804521, -33.4619357],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610261",
+      "sourceFeatureId": "5215610261",
+      "railway": "switch",
+      "coordinates": [-70.6804267, -33.4615166],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610283",
+      "sourceFeatureId": "5215610283",
+      "railway": "switch",
+      "coordinates": [-70.6799914, -33.4582731],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610311",
+      "sourceFeatureId": "5215610311",
+      "railway": "switch",
+      "coordinates": [-70.6796689, -33.4574278],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610321",
+      "sourceFeatureId": "5215610321",
+      "railway": "switch",
+      "coordinates": [-70.6798688, -33.457881],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610330",
+      "sourceFeatureId": "5215610330",
+      "railway": "switch",
+      "coordinates": [-70.6797025, -33.4571341],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610339",
+      "sourceFeatureId": "5215610339",
+      "railway": "switch",
+      "coordinates": [-70.6801061, -33.4585696],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610347",
+      "sourceFeatureId": "5215610347",
+      "railway": "switch",
+      "coordinates": [-70.6797775, -33.4576756],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610362",
+      "sourceFeatureId": "5215610362",
+      "railway": "switch",
+      "coordinates": [-70.6799942, -33.4644776],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610364",
+      "sourceFeatureId": "5215610364",
+      "railway": "switch",
+      "coordinates": [-70.6800465, -33.4642488],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610374",
+      "sourceFeatureId": "5215610374",
+      "railway": "switch",
+      "coordinates": [-70.6797098, -33.4585909],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610376",
+      "sourceFeatureId": "5215610376",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6799881, -33.4591386],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610381",
+      "sourceFeatureId": "5215610381",
+      "railway": "switch",
+      "coordinates": [-70.67985, -33.4586328],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610394",
+      "sourceFeatureId": "5215610394",
+      "railway": "switch",
+      "coordinates": [-70.6794848, -33.4585119],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610400",
+      "sourceFeatureId": "5215610400",
+      "railway": "switch",
+      "coordinates": [-70.6799117, -33.4650392],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610403",
+      "sourceFeatureId": "5215610403",
+      "railway": "switch",
+      "coordinates": [-70.6799291, -33.4647203],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610406",
+      "sourceFeatureId": "5215610406",
+      "railway": "switch",
+      "coordinates": [-70.6796803, -33.4586188],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610418",
+      "sourceFeatureId": "5215610418",
+      "railway": "switch",
+      "coordinates": [-70.6799566, -33.4642801],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610448",
+      "sourceFeatureId": "5215610448",
+      "railway": "switch",
+      "coordinates": [-70.6795402, -33.4587727],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610472",
+      "sourceFeatureId": "5215610472",
+      "railway": "switch",
+      "coordinates": [-70.6791962, -33.4594345],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610489",
+      "sourceFeatureId": "5215610489",
+      "railway": "switch",
+      "coordinates": [-70.679571, -33.4634135],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610518",
+      "sourceFeatureId": "5215610518",
+      "railway": "switch",
+      "coordinates": [-70.6792686, -33.4591268],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610519",
+      "sourceFeatureId": "5215610519",
+      "railway": "switch",
+      "coordinates": [-70.67929, -33.4588348],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610622",
+      "sourceFeatureId": "5215610622",
+      "railway": "switch",
+      "coordinates": [-70.6793062, -33.4586152],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5215610637",
+      "sourceFeatureId": "5215610637",
+      "railway": "switch",
+      "coordinates": [-70.6797414, -33.4634729],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5857221386",
+      "sourceFeatureId": "5857221386",
+      "railway": "switch",
+      "coordinates": [-70.7129771, -33.9709628],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:5857228996",
+      "sourceFeatureId": "5857228996",
+      "railway": "switch",
+      "coordinates": [-70.7457128, -33.8650218],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6233156325",
+      "sourceFeatureId": "6233156325",
+      "railway": "switch",
+      "coordinates": [-70.7070161, -33.3622559],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6233159162",
+      "sourceFeatureId": "6233159162",
+      "railway": "switch",
+      "coordinates": [-70.7075679, -33.3617978],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6233159165",
+      "sourceFeatureId": "6233159165",
+      "railway": "switch",
+      "coordinates": [-70.7079273, -33.3612725],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6233159168",
+      "sourceFeatureId": "6233159168",
+      "railway": "switch",
+      "coordinates": [-70.705054, -33.3646737],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6233159170",
+      "sourceFeatureId": "6233159170",
+      "railway": "switch",
+      "coordinates": [-70.7023745, -33.3638829],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6233159171",
+      "sourceFeatureId": "6233159171",
+      "railway": "buffer_stop",
+      "coordinates": [-70.7046846, -33.3650959],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6233159173",
+      "sourceFeatureId": "6233159173",
+      "railway": "switch",
+      "coordinates": [-70.7045344, -33.3651446],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6233159174",
+      "sourceFeatureId": "6233159174",
+      "railway": "switch",
+      "coordinates": [-70.7040143, -33.3639761],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6233159178",
+      "sourceFeatureId": "6233159178",
+      "railway": "buffer_stop",
+      "coordinates": [-70.7047476, -33.365097],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6233159179",
+      "sourceFeatureId": "6233159179",
+      "railway": "switch",
+      "coordinates": [-70.7084236, -33.3606463],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6233159180",
+      "sourceFeatureId": "6233159180",
+      "railway": "switch",
+      "coordinates": [-70.703906, -33.365796],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6320869309",
+      "sourceFeatureId": "6320869309",
+      "railway": "switch",
+      "coordinates": [-70.74566, -33.8663288],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6320869310",
+      "sourceFeatureId": "6320869310",
+      "railway": "switch",
+      "coordinates": [-70.7456827, -33.8720641],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6320869311",
+      "sourceFeatureId": "6320869311",
+      "railway": "switch",
+      "coordinates": [-70.7455625, -33.8713685],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6320869318",
+      "sourceFeatureId": "6320869318",
+      "railway": "switch",
+      "coordinates": [-70.745664, -33.8659558],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6320869319",
+      "sourceFeatureId": "6320869319",
+      "railway": "switch",
+      "coordinates": [-70.7456701, -33.8652869],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6320869320",
+      "sourceFeatureId": "6320869320",
+      "railway": "switch",
+      "coordinates": [-70.745489, -33.8707852],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6320999048",
+      "sourceFeatureId": "6320999048",
+      "railway": "switch",
+      "coordinates": [-70.7435832, -33.8150588],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6320999050",
+      "sourceFeatureId": "6320999050",
+      "railway": "switch",
+      "coordinates": [-70.7434622, -33.8145645],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6320999054",
+      "sourceFeatureId": "6320999054",
+      "railway": "switch",
+      "coordinates": [-70.7442111, -33.8195764],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6320999055",
+      "sourceFeatureId": "6320999055",
+      "railway": "switch",
+      "coordinates": [-70.7432884, -33.8136378],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6320999057",
+      "sourceFeatureId": "6320999057",
+      "railway": "switch",
+      "coordinates": [-70.7433904, -33.8141124],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6320999060",
+      "sourceFeatureId": "6320999060",
+      "railway": "switch",
+      "coordinates": [-70.7442105, -33.8199054],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6320999062",
+      "sourceFeatureId": "6320999062",
+      "railway": "switch",
+      "coordinates": [-70.7442466, -33.8205479],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6325398991",
+      "sourceFeatureId": "6325398991",
+      "railway": "switch",
+      "coordinates": [-70.9229768, -33.6576413],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6325399073",
+      "sourceFeatureId": "6325399073",
+      "railway": "switch",
+      "coordinates": [-70.9226392, -33.657576],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6326070899",
+      "sourceFeatureId": "6326070899",
+      "railway": "switch",
+      "coordinates": [-70.8572701, -33.6065955],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6326070908",
+      "sourceFeatureId": "6326070908",
+      "railway": "switch",
+      "coordinates": [-70.8594487, -33.6090701],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6326070909",
+      "sourceFeatureId": "6326070909",
+      "railway": "switch",
+      "coordinates": [-70.8597015, -33.6094383],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6326070916",
+      "sourceFeatureId": "6326070916",
+      "railway": "switch",
+      "coordinates": [-70.8599174, -33.6096838],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6326070917",
+      "sourceFeatureId": "6326070917",
+      "railway": "switch",
+      "coordinates": [-70.8570112, -33.6062855],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6355803528",
+      "sourceFeatureId": "6355803528",
+      "railway": "buffer_stop",
+      "coordinates": [-70.8133542, -32.9229384],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6360859945",
+      "sourceFeatureId": "6360859945",
+      "railway": "buffer_stop",
+      "coordinates": [-70.8124262, -32.9138757],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6525658053",
+      "sourceFeatureId": "6525658053",
+      "railway": "switch",
+      "coordinates": [-70.6924759, -33.5438765],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6525658054",
+      "sourceFeatureId": "6525658054",
+      "railway": "switch",
+      "coordinates": [-70.6922731, -33.5433485],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6528513561",
+      "sourceFeatureId": "6528513561",
+      "railway": "stop",
+      "coordinates": [-70.6791461, -33.4522692],
+      "tags": {
+        "name": "Alameda",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:6528513562",
+      "sourceFeatureId": "6528513562",
+      "railway": "stop",
+      "coordinates": [-70.6791032, -33.4522724],
+      "tags": {
+        "name": "Alameda",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:6528513563",
+      "sourceFeatureId": "6528513563",
+      "railway": "stop",
+      "coordinates": [-70.6792427, -33.452262],
+      "tags": {
+        "name": "Alameda",
+        "operator": "EFE",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:6538354420",
+      "sourceFeatureId": "6538354420",
+      "railway": "switch",
+      "coordinates": [-70.6917825, -33.54108],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:6538354426",
+      "sourceFeatureId": "6538354426",
+      "railway": "switch",
+      "coordinates": [-70.6922217, -33.5431093],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7217490497",
+      "sourceFeatureId": "7217490497",
+      "railway": "switch",
+      "coordinates": [-70.6801002, -33.4712246],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373955520",
+      "sourceFeatureId": "7373955520",
+      "railway": "switch",
+      "coordinates": [-70.6765571, -33.4736019],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373955521",
+      "sourceFeatureId": "7373955521",
+      "railway": "switch",
+      "coordinates": [-70.6760962, -33.4736629],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373955524",
+      "sourceFeatureId": "7373955524",
+      "railway": "switch",
+      "coordinates": [-70.6752171, -33.4738916],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373955533",
+      "sourceFeatureId": "7373955533",
+      "railway": "switch",
+      "coordinates": [-70.6780301, -33.4730034],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373955538",
+      "sourceFeatureId": "7373955538",
+      "railway": "switch",
+      "coordinates": [-70.6761372, -33.4737435],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373955546",
+      "sourceFeatureId": "7373955546",
+      "railway": "switch",
+      "coordinates": [-70.6763523, -33.4736881],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373955556",
+      "sourceFeatureId": "7373955556",
+      "railway": "switch",
+      "coordinates": [-70.6753982, -33.4741696],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373955559",
+      "sourceFeatureId": "7373955559",
+      "railway": "switch",
+      "coordinates": [-70.6757315, -33.4740399],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373955560",
+      "sourceFeatureId": "7373955560",
+      "railway": "switch",
+      "coordinates": [-70.6760667, -33.4739079],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373955569",
+      "sourceFeatureId": "7373955569",
+      "railway": "switch",
+      "coordinates": [-70.6768908, -33.4735874],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373955581",
+      "sourceFeatureId": "7373955581",
+      "railway": "switch",
+      "coordinates": [-70.6768868, -33.4735426],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373955582",
+      "sourceFeatureId": "7373955582",
+      "railway": "switch",
+      "coordinates": [-70.6772281, -33.473452],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373956397",
+      "sourceFeatureId": "7373956397",
+      "railway": "switch",
+      "coordinates": [-70.6765375, -33.474041],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373956402",
+      "sourceFeatureId": "7373956402",
+      "railway": "switch",
+      "coordinates": [-70.6765904, -33.4738989],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373956405",
+      "sourceFeatureId": "7373956405",
+      "railway": "switch",
+      "coordinates": [-70.6771074, -33.4736265],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373956407",
+      "sourceFeatureId": "7373956407",
+      "railway": "switch",
+      "coordinates": [-70.6777986, -33.4731955],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373956408",
+      "sourceFeatureId": "7373956408",
+      "railway": "switch",
+      "coordinates": [-70.6782326, -33.4730347],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373956421",
+      "sourceFeatureId": "7373956421",
+      "railway": "switch",
+      "coordinates": [-70.6753002, -33.4734878],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373956429",
+      "sourceFeatureId": "7373956429",
+      "railway": "switch",
+      "coordinates": [-70.6774695, -33.473122],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373956431",
+      "sourceFeatureId": "7373956431",
+      "railway": "switch",
+      "coordinates": [-70.6783707, -33.4728172],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373956444",
+      "sourceFeatureId": "7373956444",
+      "railway": "switch",
+      "coordinates": [-70.67687, -33.4736797],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373956461",
+      "sourceFeatureId": "7373956461",
+      "railway": "switch",
+      "coordinates": [-70.6796642, -33.4718523],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373956463",
+      "sourceFeatureId": "7373956463",
+      "railway": "switch",
+      "coordinates": [-70.6801685, -33.4707901],
+      "tags": {
+        "ref": "6020AL"
+      }
+    },
+    {
+      "id": "osm-node:7373956464",
+      "sourceFeatureId": "7373956464",
+      "railway": "switch",
+      "coordinates": [-70.6801951, -33.4691175],
+      "tags": {
+        "ref": "22AL"
+      }
+    },
+    {
+      "id": "osm-node:7373956465",
+      "sourceFeatureId": "7373956465",
+      "railway": "switch",
+      "coordinates": [-70.6801003, -33.4685599],
+      "tags": {
+        "ref": "24AL"
+      }
+    },
+    {
+      "id": "osm-node:7373956466",
+      "sourceFeatureId": "7373956466",
+      "railway": "switch",
+      "coordinates": [-70.6801507, -33.4695793],
+      "tags": {
+        "ref": "14AL"
+      }
+    },
+    {
+      "id": "osm-node:7373956467",
+      "sourceFeatureId": "7373956467",
+      "railway": "switch",
+      "coordinates": [-70.6800473, -33.4679646],
+      "tags": {
+        "ref": "28AL"
+      }
+    },
+    {
+      "id": "osm-node:7373956489",
+      "sourceFeatureId": "7373956489",
+      "railway": "switch",
+      "coordinates": [-70.6798748, -33.464515],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373956490",
+      "sourceFeatureId": "7373956490",
+      "railway": "switch",
+      "coordinates": [-70.6798741, -33.4656946],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7373956491",
+      "sourceFeatureId": "7373956491",
+      "railway": "switch",
+      "coordinates": [-70.6799412, -33.4654677],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7375990630",
+      "sourceFeatureId": "7375990630",
+      "railway": "switch",
+      "coordinates": [-70.6788608, -33.4725453],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7375990645",
+      "sourceFeatureId": "7375990645",
+      "railway": "switch",
+      "coordinates": [-70.6744265, -33.4739734],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7375990649",
+      "sourceFeatureId": "7375990649",
+      "railway": "switch",
+      "coordinates": [-70.6747954, -33.4737596],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7375990666",
+      "sourceFeatureId": "7375990666",
+      "railway": "switch",
+      "coordinates": [-70.6772342, -33.4732467],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376168993",
+      "sourceFeatureId": "7376168993",
+      "railway": "switch",
+      "coordinates": [-70.6790862, -33.4733983],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376168997",
+      "sourceFeatureId": "7376168997",
+      "railway": "switch",
+      "coordinates": [-70.6794242, -33.4727344],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376168999",
+      "sourceFeatureId": "7376168999",
+      "railway": "switch",
+      "coordinates": [-70.6795925, -33.472476],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376169007",
+      "sourceFeatureId": "7376169007",
+      "railway": "switch",
+      "coordinates": [-70.6799304, -33.47201],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376169008",
+      "sourceFeatureId": "7376169008",
+      "railway": "switch",
+      "coordinates": [-70.680084, -33.4717539],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376169022",
+      "sourceFeatureId": "7376169022",
+      "railway": "switch",
+      "coordinates": [-70.6792371, -33.4728977],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376169046",
+      "sourceFeatureId": "7376169046",
+      "railway": "switch",
+      "coordinates": [-70.679111, -33.4729033],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376169076",
+      "sourceFeatureId": "7376169076",
+      "railway": "switch",
+      "coordinates": [-70.6778239, -33.4757399],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376169083",
+      "sourceFeatureId": "7376169083",
+      "railway": "switch",
+      "coordinates": [-70.6782635, -33.4751266],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376169085",
+      "sourceFeatureId": "7376169085",
+      "railway": "switch",
+      "coordinates": [-70.6777786, -33.4755601],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376169097",
+      "sourceFeatureId": "7376169097",
+      "railway": "switch",
+      "coordinates": [-70.6775205, -33.4759578],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376169104",
+      "sourceFeatureId": "7376169104",
+      "railway": "switch",
+      "coordinates": [-70.6781069, -33.4757134],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376169111",
+      "sourceFeatureId": "7376169111",
+      "railway": "switch",
+      "coordinates": [-70.6778028, -33.4758856],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376169113",
+      "sourceFeatureId": "7376169113",
+      "railway": "switch",
+      "coordinates": [-70.676626, -33.4760736],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376169116",
+      "sourceFeatureId": "7376169116",
+      "railway": "switch",
+      "coordinates": [-70.6775845, -33.475863],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376169120",
+      "sourceFeatureId": "7376169120",
+      "railway": "switch",
+      "coordinates": [-70.6787785, -33.4754043],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376169125",
+      "sourceFeatureId": "7376169125",
+      "railway": "switch",
+      "coordinates": [-70.6789581, -33.4752771],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376169138",
+      "sourceFeatureId": "7376169138",
+      "railway": "switch",
+      "coordinates": [-70.6803502, -33.4727903],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376169156",
+      "sourceFeatureId": "7376169156",
+      "railway": "switch",
+      "coordinates": [-70.6755108, -33.4760993],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376169181",
+      "sourceFeatureId": "7376169181",
+      "railway": "switch",
+      "coordinates": [-70.6777428, -33.4731553],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376201389",
+      "sourceFeatureId": "7376201389",
+      "railway": "switch",
+      "coordinates": [-70.6799975, -33.4715318],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7376823185",
+      "sourceFeatureId": "7376823185",
+      "railway": "switch",
+      "coordinates": [-70.680194, -33.4712862],
+      "tags": {
+        "ref": "6021AL"
+      }
+    },
+    {
+      "id": "osm-node:7376994355",
+      "sourceFeatureId": "7376994355",
+      "railway": "switch",
+      "coordinates": [-70.6794128, -33.4724374],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7380106869",
+      "sourceFeatureId": "7380106869",
+      "railway": "switch",
+      "coordinates": [-70.6777927, -33.4738491],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7380132294",
+      "sourceFeatureId": "7380132294",
+      "railway": "switch",
+      "coordinates": [-70.6794443, -33.4720822],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7380132295",
+      "sourceFeatureId": "7380132295",
+      "railway": "switch",
+      "coordinates": [-70.678602, -33.4729457],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7385889044",
+      "sourceFeatureId": "7385889044",
+      "railway": "stop",
+      "coordinates": [-70.7436278, -33.816031],
+      "tags": {
+        "name": "Paine",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:7423862076",
+      "sourceFeatureId": "7423862076",
+      "railway": "switch",
+      "coordinates": [-70.7670582, -33.2937493],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7423900153",
+      "sourceFeatureId": "7423900153",
+      "railway": "switch",
+      "coordinates": [-70.812897, -33.2414087],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7423900161",
+      "sourceFeatureId": "7423900161",
+      "railway": "switch",
+      "coordinates": [-70.8160013, -33.2378603],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7423900162",
+      "sourceFeatureId": "7423900162",
+      "railway": "switch",
+      "coordinates": [-70.8163059, -33.2375124],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7423901889",
+      "sourceFeatureId": "7423901889",
+      "railway": "switch",
+      "coordinates": [-70.7701868, -33.2901409],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7423901903",
+      "sourceFeatureId": "7423901903",
+      "railway": "switch",
+      "coordinates": [-70.7459141, -33.3178969],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7423901904",
+      "sourceFeatureId": "7423901904",
+      "railway": "switch",
+      "coordinates": [-70.745314, -33.3184421],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7423901906",
+      "sourceFeatureId": "7423901906",
+      "railway": "switch",
+      "coordinates": [-70.7426868, -33.3214247],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7423901907",
+      "sourceFeatureId": "7423901907",
+      "railway": "switch",
+      "coordinates": [-70.7421885, -33.3221509],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7423923185",
+      "sourceFeatureId": "7423923185",
+      "railway": "switch",
+      "coordinates": [-70.8881674, -33.1683038],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7423923201",
+      "sourceFeatureId": "7423923201",
+      "railway": "switch",
+      "coordinates": [-70.9278863, -33.083146],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7423923206",
+      "sourceFeatureId": "7423923206",
+      "railway": "switch",
+      "coordinates": [-70.9279226, -33.0835468],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7693112822",
+      "sourceFeatureId": "7693112822",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6918502, -33.3954545],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7693123629",
+      "sourceFeatureId": "7693123629",
+      "railway": "switch",
+      "coordinates": [-70.6967714, -33.3794025],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7693123642",
+      "sourceFeatureId": "7693123642",
+      "railway": "switch",
+      "coordinates": [-70.6953485, -33.3842095],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7693127489",
+      "sourceFeatureId": "7693127489",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6916946, -33.3954221],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7693127491",
+      "sourceFeatureId": "7693127491",
+      "railway": "switch",
+      "coordinates": [-70.6915025, -33.3972634],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7693127496",
+      "sourceFeatureId": "7693127496",
+      "railway": "switch",
+      "coordinates": [-70.6897856, -33.4031225],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7693127502",
+      "sourceFeatureId": "7693127502",
+      "railway": "switch",
+      "coordinates": [-70.6905205, -33.4004812],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7693127510",
+      "sourceFeatureId": "7693127510",
+      "railway": "switch",
+      "coordinates": [-70.6889132, -33.4012375],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7693127514",
+      "sourceFeatureId": "7693127514",
+      "railway": "switch",
+      "coordinates": [-70.6896615, -33.4008725],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7693127531",
+      "sourceFeatureId": "7693127531",
+      "railway": "switch",
+      "coordinates": [-70.6905063, -33.3991304],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7693127532",
+      "sourceFeatureId": "7693127532",
+      "railway": "switch",
+      "coordinates": [-70.690548, -33.3997025],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7699690128",
+      "sourceFeatureId": "7699690128",
+      "railway": "switch",
+      "coordinates": [-70.7036137, -33.366123],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7699690131",
+      "sourceFeatureId": "7699690131",
+      "railway": "buffer_stop",
+      "coordinates": [-70.7022236, -33.3676194],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:7699690153",
+      "sourceFeatureId": "7699690153",
+      "railway": "switch",
+      "coordinates": [-70.7005291, -33.369641],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:8726033551",
+      "sourceFeatureId": "8726033551",
+      "railway": "station",
+      "coordinates": [-71.6173522, -33.0501424],
+      "tags": {
+        "name": "Ascensor Mariposas",
+        "public_transport": "station"
+      }
+    },
+    {
+      "id": "osm-node:8726507492",
+      "sourceFeatureId": "8726507492",
+      "railway": "station",
+      "coordinates": [-71.6309116, -33.0300873],
+      "tags": {
+        "name": "Ascensor Villaseca",
+        "public_transport": "station"
+      }
+    },
+    {
+      "id": "osm-node:9063606505",
+      "sourceFeatureId": "9063606505",
+      "railway": "station",
+      "coordinates": [-70.8584126, -33.6079272],
+      "tags": {
+        "name": "Malloco",
+        "operator": "EFE Central"
+      }
+    },
+    {
+      "id": "osm-node:9136393747",
+      "sourceFeatureId": "9136393747",
+      "railway": "switch",
+      "coordinates": [-70.7097899, -33.6442469],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9136393753",
+      "sourceFeatureId": "9136393753",
+      "railway": "switch",
+      "coordinates": [-70.7085215, -33.6411933],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9794504602",
+      "sourceFeatureId": "9794504602",
+      "railway": "stop",
+      "coordinates": [-70.7457303, -33.8680891],
+      "tags": {
+        "name": "Hospital",
+        "operator": "EFE Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:9794504603",
+      "sourceFeatureId": "9794504603",
+      "railway": "stop",
+      "coordinates": [-70.7133031, -33.9769949],
+      "tags": {
+        "name": "San Francisco",
+        "operator": "EFE Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:9796058233",
+      "sourceFeatureId": "9796058233",
+      "railway": "switch",
+      "coordinates": [-70.6975227, -33.5993231],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9796058234",
+      "sourceFeatureId": "9796058234",
+      "railway": "switch",
+      "coordinates": [-70.6975351, -33.5997339],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9796058236",
+      "sourceFeatureId": "9796058236",
+      "railway": "switch",
+      "coordinates": [-70.697519, -33.6005716],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9796058237",
+      "sourceFeatureId": "9796058237",
+      "railway": "switch",
+      "coordinates": [-70.697515, -33.5999712],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9796058239",
+      "sourceFeatureId": "9796058239",
+      "railway": "buffer_stop",
+      "coordinates": [-70.7065118, -33.6364989],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9796090659",
+      "sourceFeatureId": "9796090659",
+      "railway": "stop",
+      "coordinates": [-70.7132032, -33.9764972],
+      "tags": {
+        "name": "San Francisco",
+        "operator": "EFE Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:9796090660",
+      "sourceFeatureId": "9796090660",
+      "railway": "stop",
+      "coordinates": [-70.7456806, -33.8677482],
+      "tags": {
+        "name": "Hospital",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:9828535396",
+      "sourceFeatureId": "9828535396",
+      "railway": "buffer_stop",
+      "coordinates": [-71.2823245, -32.9851572],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9828535397",
+      "sourceFeatureId": "9828535397",
+      "railway": "switch",
+      "coordinates": [-71.2829525, -32.9851125],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9828535401",
+      "sourceFeatureId": "9828535401",
+      "railway": "buffer_stop",
+      "coordinates": [-71.2831924, -32.9850132],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9828535406",
+      "sourceFeatureId": "9828535406",
+      "railway": "switch",
+      "coordinates": [-71.2825707, -32.9851536],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9828535407",
+      "sourceFeatureId": "9828535407",
+      "railway": "switch",
+      "coordinates": [-71.2834724, -32.9849965],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9828535408",
+      "sourceFeatureId": "9828535408",
+      "railway": "switch",
+      "coordinates": [-71.2839906, -32.984919],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9828557735",
+      "sourceFeatureId": "9828557735",
+      "railway": "buffer_stop",
+      "coordinates": [-71.2778081, -32.9834556],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9828557736",
+      "sourceFeatureId": "9828557736",
+      "railway": "buffer_stop",
+      "coordinates": [-71.2777468, -32.9834857],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9828557737",
+      "sourceFeatureId": "9828557737",
+      "railway": "buffer_stop",
+      "coordinates": [-71.2776888, -32.9835148],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9828557747",
+      "sourceFeatureId": "9828557747",
+      "railway": "switch",
+      "coordinates": [-71.2789588, -32.9848701],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9828557748",
+      "sourceFeatureId": "9828557748",
+      "railway": "switch",
+      "coordinates": [-71.2787352, -32.984681],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9828557750",
+      "sourceFeatureId": "9828557750",
+      "railway": "buffer_stop",
+      "coordinates": [-71.277642, -32.9835949],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9828557757",
+      "sourceFeatureId": "9828557757",
+      "railway": "buffer_stop",
+      "coordinates": [-71.2776022, -32.9841011],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:9828557758",
+      "sourceFeatureId": "9828557758",
+      "railway": "buffer_stop",
+      "coordinates": [-71.2775595, -32.9841179],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:10284080812",
+      "sourceFeatureId": "10284080812",
+      "railway": "stop",
+      "coordinates": [-70.6683774, -33.432076],
+      "tags": {
+        "name": "Parque de los Reyes",
+        "ref": "9",
+        "operator": "Metro de Santiago",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:10284080824",
+      "sourceFeatureId": "10284080824",
+      "railway": "stop",
+      "coordinates": [-70.6933119, -33.4311403],
+      "tags": {
+        "name": "General Velásquez",
+        "ref": "7",
+        "operator": "China Railway 16th Bureau Group",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:10284080831",
+      "sourceFeatureId": "10284080831",
+      "railway": "stop",
+      "coordinates": [-70.7039328, -33.428478],
+      "tags": {
+        "name": "Radal",
+        "ref": "6",
+        "operator": "China Railway 16th Bureau Group",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:10284080837",
+      "sourceFeatureId": "10284080837",
+      "railway": "stop",
+      "coordinates": [-70.7189083, -33.4255585],
+      "tags": {
+        "name": "Cerro Navia",
+        "ref": "5",
+        "operator": "Metro de Santiago",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:10288131057",
+      "sourceFeatureId": "10288131057",
+      "railway": "stop",
+      "coordinates": [-70.6511987, -33.4332068],
+      "tags": {
+        "name": "Puente Cal y Canto",
+        "ref": "10",
+        "operator": "Metro de Santiago",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:10288131083",
+      "sourceFeatureId": "10288131083",
+      "railway": "stop",
+      "coordinates": [-70.613793, -33.4246841],
+      "tags": {
+        "name": "Pedro de Valdivia",
+        "ref": "12",
+        "operator": "Metro de Santiago",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:10288134212",
+      "sourceFeatureId": "10288134212",
+      "railway": "stop",
+      "coordinates": [-70.598562, -33.4061599],
+      "tags": {
+        "name": "Vitacura",
+        "ref": "14",
+        "operator": "Metro de Santiago",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:10288134237",
+      "sourceFeatureId": "10288134237",
+      "railway": "stop",
+      "coordinates": [-70.574165, -33.402495],
+      "tags": {
+        "name": "Parque Araucano",
+        "ref": "16",
+        "operator": "Metro de Santiago",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:10866044651",
+      "sourceFeatureId": "10866044651",
+      "railway": "stop",
+      "coordinates": [-70.6347661, -33.4367182],
+      "tags": {
+        "name": "Baquedano",
+        "ref": "11",
+        "operator": "Metro de Santiago",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:10866044658",
+      "sourceFeatureId": "10866044658",
+      "railway": "stop",
+      "coordinates": [-70.6813802, -33.432978],
+      "tags": {
+        "name": "Matucana",
+        "ref": "8",
+        "operator": "Metro de Santiago",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:10983440388",
+      "sourceFeatureId": "10983440388",
+      "railway": "switch",
+      "coordinates": [-70.6981813, -33.5904456],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:10983440389",
+      "sourceFeatureId": "10983440389",
+      "railway": "switch",
+      "coordinates": [-70.6982524, -33.5900508],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:10983440390",
+      "sourceFeatureId": "10983440390",
+      "railway": "switch",
+      "coordinates": [-70.6982769, -33.5897021],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:10983440391",
+      "sourceFeatureId": "10983440391",
+      "railway": "switch",
+      "coordinates": [-70.6983675, -33.5891784],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:10983440392",
+      "sourceFeatureId": "10983440392",
+      "railway": "switch",
+      "coordinates": [-70.6984189, -33.5885314],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:10983440393",
+      "sourceFeatureId": "10983440393",
+      "railway": "switch",
+      "coordinates": [-70.6984927, -33.5881231],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:10983440499",
+      "sourceFeatureId": "10983440499",
+      "railway": "switch",
+      "coordinates": [-70.6899149, -33.5327528],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:10983440500",
+      "sourceFeatureId": "10983440500",
+      "railway": "switch",
+      "coordinates": [-70.6899842, -33.5333624],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:10983440502",
+      "sourceFeatureId": "10983440502",
+      "railway": "switch",
+      "coordinates": [-70.6903314, -33.534705],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:10983440503",
+      "sourceFeatureId": "10983440503",
+      "railway": "switch",
+      "coordinates": [-70.6901068, -33.5339471],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:10991095645",
+      "sourceFeatureId": "10991095645",
+      "railway": "switch",
+      "coordinates": [-70.6800341, -33.4673237],
+      "tags": {
+        "ref": "30AL"
+      }
+    },
+    {
+      "id": "osm-node:10991095647",
+      "sourceFeatureId": "10991095647",
+      "railway": "switch",
+      "coordinates": [-70.6801294, -33.4688589],
+      "tags": {
+        "ref": "16AL"
+      }
+    },
+    {
+      "id": "osm-node:10991095651",
+      "sourceFeatureId": "10991095651",
+      "railway": "switch",
+      "coordinates": [-70.6801003, -33.4694718],
+      "tags": {
+        "ref": "8AL"
+      }
+    },
+    {
+      "id": "osm-node:10991095652",
+      "sourceFeatureId": "10991095652",
+      "railway": "switch",
+      "coordinates": [-70.6801128, -33.4700707],
+      "tags": {
+        "ref": "6AL"
+      }
+    },
+    {
+      "id": "osm-node:10991166163",
+      "sourceFeatureId": "10991166163",
+      "railway": "switch",
+      "coordinates": [-70.679936, -33.4660355],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:10991166166",
+      "sourceFeatureId": "10991166166",
+      "railway": "switch",
+      "coordinates": [-70.6788468, -33.4606725],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:10991503356",
+      "sourceFeatureId": "10991503356",
+      "railway": "switch",
+      "coordinates": [-70.6790909, -33.4559962],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:10991503380",
+      "sourceFeatureId": "10991503380",
+      "railway": "switch",
+      "coordinates": [-70.6790983, -33.4556107],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:10991652861",
+      "sourceFeatureId": "10991652861",
+      "railway": "stop",
+      "coordinates": [-70.6788672, -33.45229],
+      "tags": {
+        "name": "Alameda",
+        "operator": "Tren Central",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:11013129232",
+      "sourceFeatureId": "11013129232",
+      "railway": "switch",
+      "coordinates": [-70.7134961, -33.9784129],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11013129259",
+      "sourceFeatureId": "11013129259",
+      "railway": "switch",
+      "coordinates": [-70.7130708, -33.9706356],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11013129267",
+      "sourceFeatureId": "11013129267",
+      "railway": "switch",
+      "coordinates": [-70.7129095, -33.9715454],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11072545727",
+      "sourceFeatureId": "11072545727",
+      "railway": "switch",
+      "coordinates": [-70.680076, -33.4637559],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11072545747",
+      "sourceFeatureId": "11072545747",
+      "railway": "switch",
+      "coordinates": [-70.6797702, -33.4638611],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11072545753",
+      "sourceFeatureId": "11072545753",
+      "railway": "switch",
+      "coordinates": [-70.6795516, -33.4631811],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11072545762",
+      "sourceFeatureId": "11072545762",
+      "railway": "switch",
+      "coordinates": [-70.6795157, -33.4631241],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11072545764",
+      "sourceFeatureId": "11072545764",
+      "railway": "switch",
+      "coordinates": [-70.6796148, -33.4635759],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11072545777",
+      "sourceFeatureId": "11072545777",
+      "railway": "switch",
+      "coordinates": [-70.6795229, -33.4633291],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11076305426",
+      "sourceFeatureId": "11076305426",
+      "railway": "switch",
+      "coordinates": [-70.6974828, -33.6010701],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11076305427",
+      "sourceFeatureId": "11076305427",
+      "railway": "switch",
+      "coordinates": [-70.6974907, -33.6015597],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11508922373",
+      "sourceFeatureId": "11508922373",
+      "railway": "buffer_stop",
+      "coordinates": [-71.2839926, -32.9451504],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11510441145",
+      "sourceFeatureId": "11510441145",
+      "railway": "buffer_stop",
+      "coordinates": [-71.4739671, -32.7520345],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11510441146",
+      "sourceFeatureId": "11510441146",
+      "railway": "buffer_stop",
+      "coordinates": [-71.4742456, -32.7520927],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11510441151",
+      "sourceFeatureId": "11510441151",
+      "railway": "buffer_stop",
+      "coordinates": [-71.4743075, -32.7520704],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11510441162",
+      "sourceFeatureId": "11510441162",
+      "railway": "buffer_stop",
+      "coordinates": [-71.4738757, -32.7522675],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11510489525",
+      "sourceFeatureId": "11510489525",
+      "railway": "buffer_stop",
+      "coordinates": [-71.4413224, -32.919028],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11511370692",
+      "sourceFeatureId": "11511370692",
+      "railway": "switch",
+      "coordinates": [-70.5991563, -32.8262348],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11511370697",
+      "sourceFeatureId": "11511370697",
+      "railway": "buffer_stop",
+      "coordinates": [-70.606234, -32.8223798],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11511370698",
+      "sourceFeatureId": "11511370698",
+      "railway": "buffer_stop",
+      "coordinates": [-70.6047968, -32.8230261],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11518525250",
+      "sourceFeatureId": "11518525250",
+      "railway": "switch",
+      "coordinates": [-70.3073961, -32.9109141],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11518567984",
+      "sourceFeatureId": "11518567984",
+      "railway": "buffer_stop",
+      "coordinates": [-70.2861434, -32.9270269],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11518567994",
+      "sourceFeatureId": "11518567994",
+      "railway": "buffer_stop",
+      "coordinates": [-70.286455, -32.9270197],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11545476560",
+      "sourceFeatureId": "11545476560",
+      "railway": "halt",
+      "coordinates": [-71.1931695, -32.7863696],
+      "tags": {
+        "name": "Caupolicán",
+        "operator": "Ferronor",
+        "public_transport": "halt"
+      }
+    },
+    {
+      "id": "osm-node:11587541543",
+      "sourceFeatureId": "11587541543",
+      "railway": "switch",
+      "coordinates": [-70.7138512, -33.9798445],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11587541544",
+      "sourceFeatureId": "11587541544",
+      "railway": "switch",
+      "coordinates": [-70.7137571, -33.9796107],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11587541546",
+      "sourceFeatureId": "11587541546",
+      "railway": "switch",
+      "coordinates": [-70.7458131, -33.8729483],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11587541547",
+      "sourceFeatureId": "11587541547",
+      "railway": "switch",
+      "coordinates": [-70.7460306, -33.8736223],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11587541548",
+      "sourceFeatureId": "11587541548",
+      "railway": "switch",
+      "coordinates": [-70.7457159, -33.8645591],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11587541549",
+      "sourceFeatureId": "11587541549",
+      "railway": "switch",
+      "coordinates": [-70.7457564, -33.8642239],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11587541550",
+      "sourceFeatureId": "11587541550",
+      "railway": "switch",
+      "coordinates": [-70.7444964, -33.8223315],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11587541551",
+      "sourceFeatureId": "11587541551",
+      "railway": "switch",
+      "coordinates": [-70.7445243, -33.8229344],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11587541552",
+      "sourceFeatureId": "11587541552",
+      "railway": "switch",
+      "coordinates": [-70.7432422, -33.8133126],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11587541553",
+      "sourceFeatureId": "11587541553",
+      "railway": "switch",
+      "coordinates": [-70.7431058, -33.8127642],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11587541554",
+      "sourceFeatureId": "11587541554",
+      "railway": "switch",
+      "coordinates": [-70.7288337, -33.734388],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11587541555",
+      "sourceFeatureId": "11587541555",
+      "railway": "switch",
+      "coordinates": [-70.729009, -33.7350251],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11587541556",
+      "sourceFeatureId": "11587541556",
+      "railway": "switch",
+      "coordinates": [-70.7273108, -33.726771],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11587541557",
+      "sourceFeatureId": "11587541557",
+      "railway": "switch",
+      "coordinates": [-70.7273735, -33.727317],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11587541558",
+      "sourceFeatureId": "11587541558",
+      "railway": "switch",
+      "coordinates": [-70.7053598, -33.6336583],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11587541559",
+      "sourceFeatureId": "11587541559",
+      "railway": "switch",
+      "coordinates": [-70.7051633, -33.6332971],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11589073974",
+      "sourceFeatureId": "11589073974",
+      "railway": "switch",
+      "coordinates": [-71.51896, -33.0427327],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11589073975",
+      "sourceFeatureId": "11589073975",
+      "railway": "switch",
+      "coordinates": [-71.5195526, -33.0422929],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11589073976",
+      "sourceFeatureId": "11589073976",
+      "railway": "switch",
+      "coordinates": [-71.5185656, -33.0429997],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11589073977",
+      "sourceFeatureId": "11589073977",
+      "railway": "switch",
+      "coordinates": [-71.518173, -33.0433245],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11589073979",
+      "sourceFeatureId": "11589073979",
+      "railway": "switch",
+      "coordinates": [-71.5145595, -33.0457719],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11589073980",
+      "sourceFeatureId": "11589073980",
+      "railway": "switch",
+      "coordinates": [-71.5140271, -33.0461027],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11589073981",
+      "sourceFeatureId": "11589073981",
+      "railway": "switch",
+      "coordinates": [-71.5128112, -33.0469472],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11589073982",
+      "sourceFeatureId": "11589073982",
+      "railway": "switch",
+      "coordinates": [-71.5123418, -33.0472163],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:11592147769",
+      "sourceFeatureId": "11592147769",
+      "railway": "stop",
+      "coordinates": [-70.7681329, -33.5345194],
+      "tags": {
+        "name": "Estación Tres Poniente",
+        "ref": "5",
+        "operator": "EFE"
+      }
+    },
+    {
+      "id": "osm-node:11989097201",
+      "sourceFeatureId": "11989097201",
+      "railway": "switch",
+      "coordinates": [-70.6885014, -33.4013545],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:12001896558",
+      "sourceFeatureId": "12001896558",
+      "railway": "switch",
+      "coordinates": [-70.6793363, -33.4543788],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:12001952494",
+      "sourceFeatureId": "12001952494",
+      "railway": "switch",
+      "coordinates": [-70.680261, -33.4585925],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:12001952503",
+      "sourceFeatureId": "12001952503",
+      "railway": "switch",
+      "coordinates": [-70.6802409, -33.459124],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:12001952516",
+      "sourceFeatureId": "12001952516",
+      "railway": "switch",
+      "coordinates": [-70.6800064, -33.4588739],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:12001952527",
+      "sourceFeatureId": "12001952527",
+      "railway": "switch",
+      "coordinates": [-70.6797937, -33.4589383],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:12001952560",
+      "sourceFeatureId": "12001952560",
+      "railway": "switch",
+      "coordinates": [-70.6791184, -33.4573383],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:12001952578",
+      "sourceFeatureId": "12001952578",
+      "railway": "switch",
+      "coordinates": [-70.6789394, -33.4578116],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:12001952585",
+      "sourceFeatureId": "12001952585",
+      "railway": "switch",
+      "coordinates": [-70.6802161, -33.4630612],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:12001952587",
+      "sourceFeatureId": "12001952587",
+      "railway": "switch",
+      "coordinates": [-70.6801692, -33.4594009],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:12001977993",
+      "sourceFeatureId": "12001977993",
+      "railway": "switch",
+      "coordinates": [-70.6803293, -33.4601323],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:12001977999",
+      "sourceFeatureId": "12001977999",
+      "railway": "switch",
+      "coordinates": [-70.6803489, -33.4604219],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:12001978005",
+      "sourceFeatureId": "12001978005",
+      "railway": "switch",
+      "coordinates": [-70.6804, -33.461155],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:12046949045",
+      "sourceFeatureId": "12046949045",
+      "railway": "stop",
+      "coordinates": [-70.6080912, -33.4207846],
+      "tags": {
+        "name": "Los Leones",
+        "operator": "Metro de Santiago",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:12047009870",
+      "sourceFeatureId": "12047009870",
+      "railway": "stop",
+      "coordinates": [-70.7189173, -33.425589],
+      "tags": {
+        "name": "Cerro Navia",
+        "ref": "5",
+        "operator": "Metro de Santiago",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:12047009876",
+      "sourceFeatureId": "12047009876",
+      "railway": "stop",
+      "coordinates": [-70.7039408, -33.4285087],
+      "tags": {
+        "name": "Radal",
+        "ref": "6",
+        "operator": "China Railway 16th Bureau Group",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:12047009888",
+      "sourceFeatureId": "12047009888",
+      "railway": "stop",
+      "coordinates": [-70.6933295, -33.4311682],
+      "tags": {
+        "name": "General Velásquez",
+        "ref": "7",
+        "operator": "China Railway 16th Bureau Group",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:12047009902",
+      "sourceFeatureId": "12047009902",
+      "railway": "stop",
+      "coordinates": [-70.6813818, -33.4330094],
+      "tags": {
+        "name": "Matucana",
+        "ref": "8",
+        "operator": "Metro de Santiago",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:12047009913",
+      "sourceFeatureId": "12047009913",
+      "railway": "stop",
+      "coordinates": [-70.6683765, -33.4321075],
+      "tags": {
+        "name": "Parque de los Reyes",
+        "ref": "9",
+        "operator": "Metro de Santiago",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:12047009940",
+      "sourceFeatureId": "12047009940",
+      "railway": "stop",
+      "coordinates": [-70.6511998, -33.4332382],
+      "tags": {
+        "name": "Puente Cal y Canto",
+        "ref": "10",
+        "operator": "Metro de Santiago",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:12047009960",
+      "sourceFeatureId": "12047009960",
+      "railway": "stop",
+      "coordinates": [-70.6347636, -33.4367496],
+      "tags": {
+        "name": "Baquedano",
+        "ref": "11",
+        "operator": "Metro de Santiago",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:12047010018",
+      "sourceFeatureId": "12047010018",
+      "railway": "stop",
+      "coordinates": [-70.6137649, -33.424705],
+      "tags": {
+        "name": "Pedro de Valdivia",
+        "ref": "12",
+        "operator": "Metro de Santiago",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:12047010074",
+      "sourceFeatureId": "12047010074",
+      "railway": "stop",
+      "coordinates": [-70.5985341, -33.406181],
+      "tags": {
+        "name": "Vitacura",
+        "ref": "14",
+        "operator": "Metro de Santiago",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:12047010111",
+      "sourceFeatureId": "12047010111",
+      "railway": "stop",
+      "coordinates": [-70.5741561, -33.4025255],
+      "tags": {
+        "name": "Parque Araucano",
+        "ref": "16",
+        "operator": "Metro de Santiago",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:12047964676",
+      "sourceFeatureId": "12047964676",
+      "railway": "switch",
+      "coordinates": [-70.6792136, -33.4726175],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:12398692026",
+      "sourceFeatureId": "12398692026",
+      "railway": "buffer_stop",
+      "coordinates": [-71.6113017, -33.5519029],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:12834963098",
+      "sourceFeatureId": "12834963098",
+      "railway": "buffer_stop",
+      "coordinates": [-70.7066862, -33.3624436],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:12834994202",
+      "sourceFeatureId": "12834994202",
+      "railway": "switch",
+      "coordinates": [-70.7064079, -33.3628154],
+      "tags": {}
+    },
+    {
+      "id": "osm-node:13271111718",
+      "sourceFeatureId": "13271111718",
+      "railway": "stop",
+      "coordinates": [-71.4690417, -33.0399453],
+      "tags": {
+        "name": "Valencia",
+        "operator": "Metro Regional de Valparaíso S.A.",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:13271111719",
+      "sourceFeatureId": "13271111719",
+      "railway": "stop",
+      "coordinates": [-71.4690089, -33.0399284],
+      "tags": {
+        "name": "Valencia",
+        "operator": "Metro Regional de Valparaíso S.A.",
+        "public_transport": "stop_position"
+      }
+    },
+    {
+      "id": "osm-node:13675366135",
+      "sourceFeatureId": "13675366135",
+      "railway": "switch",
+      "coordinates": [-70.6800488, -33.4680021],
+      "tags": {
+        "ref": "26AL"
+      }
+    },
+    {
+      "id": "osm-node:13675366136",
+      "sourceFeatureId": "13675366136",
+      "railway": "switch",
+      "coordinates": [-70.6800752, -33.4687384],
+      "tags": {
+        "ref": "20AL"
+      }
+    },
+    {
+      "id": "osm-node:13675366137",
+      "sourceFeatureId": "13675366137",
+      "railway": "switch",
+      "coordinates": [-70.68008, -33.4687926],
+      "tags": {
+        "ref": "12AL"
+      }
+    },
+    {
+      "id": "osm-node:13675366138",
+      "sourceFeatureId": "13675366138",
+      "railway": "switch",
+      "coordinates": [-70.6800973, -33.4694162],
+      "tags": {
+        "ref": "10AL"
+      }
+    },
+    {
+      "id": "osm-node:13675366140",
+      "sourceFeatureId": "13675366140",
+      "railway": "switch",
+      "coordinates": [-70.680155, -33.4696296],
+      "tags": {
+        "ref": "4AL"
+      }
+    },
+    {
+      "id": "osm-node:13675366141",
+      "sourceFeatureId": "13675366141",
+      "railway": "switch",
+      "coordinates": [-70.6801692, -33.4702891],
+      "tags": {
+        "ref": "2AL"
+      }
     }
   ]
 }

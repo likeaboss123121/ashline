@@ -3,7 +3,7 @@
   "$id": "https://likeaserver.myddns.me/ashlinegame/schema/world-graph-1.json",
   "title": "Ashline compiled world graph bundle",
   "type": "object",
-  "required": ["formatVersion", "datasetVersion", "tileKm", "sources", "regions", "corridors", "railGeometry", "chunks"],
+  "required": ["formatVersion", "datasetVersion", "tileKm", "sources", "regions", "corridors", "railGeometry", "railTopology", "chunks"],
   "properties": {
     "formatVersion": { "const": 1 },
     "datasetVersion": { "type": "string", "minLength": 1 },
@@ -40,7 +40,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["formatVersion", "id", "label", "sourceId", "bounds", "geometrySource", "navigable", "reviewRequired", "stats", "ways"],
+        "required": ["formatVersion", "id", "label", "sourceId", "bounds", "geometrySource", "navigable", "reviewRequired", "stats", "ways", "points"],
         "properties": {
           "formatVersion": { "const": 1 },
           "id": { "type": "string" },
@@ -56,6 +56,29 @@
             "items": {
               "type": "object",
               "required": ["id", "sourceFeatureId", "railway", "railwayStatus", "navigable", "reviewRequired", "lengthKm", "tags", "coordinates"]
+            }
+          },
+          "points": { "type": "array", "items": { "type": "object" } }
+        }
+      }
+    },
+    "railTopology": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["formatVersion", "geometryId", "tileKm", "buildId", "stats", "components", "corridors"],
+        "properties": {
+          "formatVersion": { "const": 1 },
+          "geometryId": { "type": "string" },
+          "tileKm": { "const": 5 },
+          "buildId": { "type": "string" },
+          "stats": { "type": "object" },
+          "components": { "type": "array", "items": { "type": "object" } },
+          "corridors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "label", "geometryId", "debugOnly", "navigable", "reviewStatus", "stations", "legs", "distanceKm", "sliceCount"]
             }
           }
         }

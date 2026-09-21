@@ -1,0 +1,17 @@
+{
+  "corridors": [
+    {
+      "id": "cl-padre-hurtado-melipilla",
+      "label": "Padre Hurtado–Melipilla pilot",
+      "geometryId": "chile-central-pilot",
+      "debugOnly": true,
+      "stationPointIds": [
+        "osm-node:3988525027",
+        "osm-node:9063606505",
+        "osm-node:3988557680",
+        "osm-node:3988557681",
+        "osm-node:3988557682"
+      ]
+    }
+  ]
+}

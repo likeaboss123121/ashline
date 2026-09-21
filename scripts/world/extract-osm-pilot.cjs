@@ -53,8 +53,8 @@ function main() {
     });
     fs.mkdirSync(path.dirname(output), { recursive: true });
     fs.writeFileSync(output, formatJson(normalized));
-    console.log('Extracted ' + normalized.stats.wayCount + ' ways and ' + normalized.stats.coordinateCount +
-      ' coordinates to ' + path.relative(root, output));
+    console.log('Extracted ' + normalized.stats.wayCount + ' ways, ' + normalized.stats.pointCount + ' railway points and '
+      + normalized.stats.coordinateCount + ' coordinates to ' + path.relative(root, output));
   } finally {
     fs.rmSync(temporary, { recursive: true, force: true });
   }

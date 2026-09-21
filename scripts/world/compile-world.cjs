@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const { buildTopology } = require('./build-rail-topology.cjs');
 
 const root = path.resolve(__dirname, '../..');
 const checkOnly = process.argv.includes('--check');
@@ -74,6 +75,7 @@ function stableJson(value) {
 function compile() {
   const sourceManifest = JSON.parse(read('world/sources.json'));
   const importManifest = JSON.parse(read('world/imports.json'));
+  const authoredPlayableCorridors = JSON.parse(read('world/authored/playable-corridors.json'));
   const placeRows = parseCsv(read('world/authored/places.csv'));
   const corridorRows = parseCsv(read('world/authored/corridors.csv'));
   const placeIds = new Set();
@@ -188,6 +190,13 @@ function compile() {
 	portalCount: value.portals.length,
     linkCount: value.links.length
   }));
+  const railGeometry = importManifest.railGeometry.map(entry => {
+    const geometry = JSON.parse(read(entry.file));
+    assert(geometry.id === entry.id, 'Rail geometry import ID mismatch: ' + entry.file);
+    validateRailGeometry(geometry, sourceManifest.sources);
+    return geometry;
+  });
+  const railTopology = railGeometry.map(geometry => buildTopology(geometry, authoredPlayableCorridors));
   const bundle = {
     formatVersion: 1,
     datasetVersion: sourceManifest.datasetVersion,
@@ -195,12 +204,8 @@ function compile() {
     sources: sourceManifest.sources,
     regions,
     corridors,
-    railGeometry: importManifest.railGeometry.map(entry => {
-      const geometry = JSON.parse(read(entry.file));
-      assert(geometry.id === entry.id, 'Rail geometry import ID mismatch: ' + entry.file);
-      validateRailGeometry(geometry, sourceManifest.sources);
-      return geometry;
-    }),
+    railGeometry,
+    railTopology,
     chunks: sortedChunks
   };
   validateBundle(bundle);
@@ -230,6 +235,7 @@ function validateRailGeometry(geometry, sources) {
     lengthKm += way.lengthKm;
   });
   assert(ids.size === geometry.stats.wayCount, 'Rail way count mismatch: ' + geometry.id);
+  assert(Array.isArray(geometry.points) && geometry.points.length === geometry.stats.pointCount, 'Rail point count mismatch: ' + geometry.id);
   assert(coordinateCount === geometry.stats.coordinateCount, 'Rail coordinate count mismatch: ' + geometry.id);
   assert(Math.abs(Math.round(lengthKm * 10) / 10 - geometry.stats.lengthKm) < 0.11, 'Rail length mismatch: ' + geometry.id);
 }
@@ -272,6 +278,42 @@ function validateBundle(bundle) {
     corridor.waypoints.forEach(id => assert(nodeIds.has(id), 'Corridor has missing waypoint: ' + id));
     corridor.planningLinkIds.forEach(id => assert(linkIds.has(id), 'Corridor has missing link: ' + id));
     assert(corridor.planningLinkIds.length === corridor.waypoints.length - 1, 'Wrong link count: ' + corridor.id);
+  });
+  const topologyGeometryIds = new Set();
+  bundle.railTopology.forEach(topology => {
+    assert(!topologyGeometryIds.has(topology.geometryId), 'Duplicate rail topology: ' + topology.geometryId);
+    topologyGeometryIds.add(topology.geometryId);
+    assert(topology.formatVersion === 1 && topology.tileKm === bundle.tileKm, 'Invalid topology header: ' + topology.geometryId);
+    topology.corridors.forEach(corridor => {
+      assert(corridor.debugOnly === true && corridor.navigable === true,
+        'Only explicitly authored debug corridors may be navigable: ' + corridor.id);
+      assert(corridor.stations.length === corridor.legs.length + 1, 'Wrong station/leg count: ' + corridor.id);
+      const sliceIds = new Set();
+      let corridorDistance = 0;
+      corridor.legs.forEach((leg, legIndex) => {
+        assert(leg.fromStationId === corridor.stations[legIndex].id &&
+          leg.toStationId === corridor.stations[legIndex + 1].id, 'Disconnected topology leg: ' + leg.id);
+        let legDistance = 0;
+        leg.slices.forEach((slice, sliceIndex) => {
+          assert(!sliceIds.has(slice.id), 'Duplicate topology slice: ' + slice.id);
+          sliceIds.add(slice.id);
+          assert(slice.navigable === true && slice.reviewStatus === 'authored-debug-pilot', 'Unsafe topology slice: ' + slice.id);
+          assert(slice.distanceKm > 0 && slice.distanceKm <= bundle.tileKm + 0.001, 'Invalid topology slice length: ' + slice.id);
+          assert(slice.coordinates.length >= 2 && slice.sourceWayIds.length > 0, 'Topology slice lacks provenance: ' + slice.id);
+          if (sliceIndex) {
+            const previous = leg.slices[sliceIndex - 1];
+            assert(JSON.stringify(previous.coordinates.at(-1)) === JSON.stringify(slice.coordinates[0]),
+              'Disconnected topology slices: ' + slice.id);
+          }
+          legDistance += slice.distanceKm;
+        });
+        assert(Math.abs(legDistance - leg.distanceKm) < 0.01, 'Topology leg distance mismatch: ' + leg.id);
+        corridorDistance += leg.distanceKm;
+      });
+      assert(sliceIds.size === corridor.sliceCount, 'Topology slice count mismatch: ' + corridor.id);
+      assert(Math.abs(Math.round(corridorDistance * 10) / 10 - corridor.distanceKm) < 0.01,
+        'Topology corridor distance mismatch: ' + corridor.id);
+    });
   });
 }
 
@@ -320,6 +362,9 @@ function outputsFor(bundle) {
   bundle.railGeometry.forEach(geometry => {
     outputs.set('world/dist/geometry/' + geometry.id + '.json', stableJson(geometry));
   });
+  bundle.railTopology.forEach(topology => {
+    outputs.set('world/dist/topology/' + topology.geometryId + '.json', stableJson(topology));
+  });
   return outputs;
 }
 
@@ -354,7 +399,8 @@ try {
   console.log(action + ' world ' + bundle.datasetVersion + ': ' + nodeCount + ' nodes, ' + linkCount +
     ' planning links, ' + bundle.regions.length + ' regions, ' + Math.round(distanceKm).toLocaleString('en-US') +
     ' km; ' + bundle.railGeometry.reduce((sum, geometry) => sum + geometry.stats.wayCount, 0).toLocaleString('en-US') +
-    ' sourced rail ways');
+    ' sourced rail ways, ' + bundle.railTopology.reduce((sum, topology) => sum + topology.corridors.length, 0) +
+    ' playable debug corridor(s)');
 } catch (error) {
   console.error(error.stack || error.message);
   process.exitCode = 1;

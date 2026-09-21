@@ -135,6 +135,10 @@ You step into the railyard. Several trains are parked here, each with its own mi
 <<drivingTravelButtons>>
 <<drivingShuntingControls>>
 <<drivingMergeButtons>>
+:: WorldPilot
+<<silently>><<if !setup.realWorldPilot.getJourney() || !$currentTrain>><<goto "TrainInterior">><</if>><</silently>><<realWorldPilotView>><<saveReminder>><<buildIntegrityNotice>>
+<<realWorldPilotStatus>>
+<<realWorldPilotControls>>
 :: Sleep
 /% The sleep screen: how long to lie down for. Sleeping needs a bedroll somewhere in the consist. %/
 <<if !setup.condition.hasBedroll($currentTrain)>>

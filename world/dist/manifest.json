@@ -360,6 +360,7 @@
       "reviewRequired": true,
       "stats": {
         "wayCount": 1553,
+        "pointCount": 572,
         "coordinateCount": 20297,
         "lengthKm": 1047,
         "statusCounts": {
@@ -371,6 +372,979 @@
         }
       },
       "file": "geometry/chile-central-pilot.json"
+    }
+  ],
+  "railTopology": [
+    {
+      "formatVersion": 1,
+      "geometryId": "chile-central-pilot",
+      "tileKm": 5,
+      "buildId": "c4f948702efab0e6",
+      "stats": {
+        "currentCoordinateNodes": 13986,
+        "currentSegments": 14094,
+        "componentCount": 81,
+        "largestComponentNodes": 13613,
+        "currentLengthKm": 813.4
+      },
+      "components": [
+        {
+          "nodeCount": 13613,
+          "segmentCount": 13801,
+          "lengthKm": 798.8
+        },
+        {
+          "nodeCount": 215,
+          "segmentCount": 214,
+          "lengthKm": 12.1
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        },
+        {
+          "nodeCount": 2,
+          "segmentCount": 1,
+          "lengthKm": 0
+        }
+      ],
+      "corridors": [
+        {
+          "id": "cl-padre-hurtado-melipilla",
+          "label": "Padre Hurtado–Melipilla pilot",
+          "geometryId": "chile-central-pilot",
+          "debugOnly": true,
+          "navigable": true,
+          "reviewStatus": "authored-debug-pilot",
+          "stations": [
+            {
+              "id": "osm-node:3988525027",
+              "name": "Padre Hurtado",
+              "coordinates": [-70.8156797, -33.5678013]
+            },
+            {
+              "id": "osm-node:9063606505",
+              "name": "Malloco",
+              "coordinates": [-70.8584126, -33.6079272]
+            },
+            {
+              "id": "osm-node:3988557680",
+              "name": "Talagante",
+              "coordinates": [-70.9272695, -33.6592519]
+            },
+            {
+              "id": "osm-node:3988557681",
+              "name": "El Monte",
+              "coordinates": [-70.9896895, -33.6792851]
+            },
+            {
+              "id": "osm-node:3988557682",
+              "name": "Melipilla",
+              "coordinates": [-71.2109877, -33.6796771]
+            }
+          ],
+          "legs": [
+            {
+              "id": "cl-padre-hurtado-melipilla:leg-1",
+              "fromStationId": "osm-node:3988525027",
+              "toStationId": "osm-node:9063606505",
+              "distanceKm": 5.983,
+              "sourceSegmentCount": 47,
+              "slices": [
+                {
+                  "id": "cl-padre-hurtado-melipilla:leg-1:slice-01",
+                  "distanceKm": 5,
+                  "coordinates": [
+                    [-70.8156797, -33.5678013],
+                    [-70.8162088, -33.5681812],
+                    [-70.8165605, -33.5684245],
+                    [-70.8175594, -33.5691446],
+                    [-70.8176109, -33.5691797],
+                    [-70.8193289, -33.5704007],
+                    [-70.8194985, -33.5705185],
+                    [-70.8204735, -33.5712117],
+                    [-70.8212366, -33.5717542],
+                    [-70.8223403, -33.5725459],
+                    [-70.8227453, -33.5728341],
+                    [-70.8230229, -33.5730492],
+                    [-70.8233535, -33.5733174],
+                    [-70.82366, -33.5735822],
+                    [-70.8239959, -33.573885],
+                    [-70.8250916, -33.574884],
+                    [-70.8270657, -33.5766851],
+                    [-70.8293322, -33.5787466],
+                    [-70.8301898, -33.5795253],
+                    [-70.8319031, -33.5810795],
+                    [-70.833387, -33.5824308],
+                    [-70.8345611, -33.5834995],
+                    [-70.8359727, -33.584781],
+                    [-70.8375545, -33.5862199],
+                    [-70.8388299, -33.5873863],
+                    [-70.839939, -33.5883895],
+                    [-70.8407349, -33.5891062],
+                    [-70.8416678, -33.5899407],
+                    [-70.8450325, -33.5929946],
+                    [-70.8465251, -33.5943596],
+                    [-70.8467836, -33.5945874],
+                    [-70.8470371, -33.594819],
+                    [-70.8472855, -33.5950544],
+                    [-70.8475995, -33.5953646],
+                    [-70.8479048, -33.5956808],
+                    [-70.8483236, -33.5961559],
+                    [-70.849833, -33.5979097],
+                    [-70.8507764, -33.5990139],
+                    [-70.8515449, -33.5999053],
+                    [-70.8522496, -33.6007311]
+                  ],
+                  "sourceWayIds": [
+                    "osm-way:1388433621",
+                    "osm-way:1388433622",
+                    "osm-way:679992664",
+                    "osm-way:679992671",
+                    "osm-way:857554423"
+                  ],
+                  "bridge": true,
+                  "tunnel": false,
+                  "service": false,
+                  "navigable": true,
+                  "reviewStatus": "authored-debug-pilot"
+                },
+                {
+                  "id": "cl-padre-hurtado-melipilla:leg-1:slice-02",
+                  "distanceKm": 0.983,
+                  "coordinates": [
+                    [-70.8522496, -33.6007311],
+                    [-70.8527821, -33.6013552],
+                    [-70.8537301, -33.6024594],
+                    [-70.8545993, -33.6034758],
+                    [-70.8553758, -33.60438],
+                    [-70.856342, -33.6055109],
+                    [-70.8568704, -33.6061241],
+                    [-70.8570112, -33.6062855],
+                    [-70.8572701, -33.6065955],
+                    [-70.8584126, -33.6079272]
+                  ],
+                  "sourceWayIds": [
+                    "osm-way:679992664"
+                  ],
+                  "bridge": false,
+                  "tunnel": false,
+                  "service": false,
+                  "navigable": true,
+                  "reviewStatus": "authored-debug-pilot"
+                }
+              ]
+            },
+            {
+              "id": "cl-padre-hurtado-melipilla:leg-2",
+              "fromStationId": "osm-node:9063606505",
+              "toStationId": "osm-node:3988557680",
+              "distanceKm": 8.84,
+              "sourceSegmentCount": 62,
+              "slices": [
+                {
+                  "id": "cl-padre-hurtado-melipilla:leg-2:slice-01",
+                  "distanceKm": 5,
+                  "coordinates": [
+                    [-70.8584126, -33.6079272],
+                    [-70.8597015, -33.6094383],
+                    [-70.8599174, -33.6096838],
+                    [-70.8600575, -33.6098433],
+                    [-70.860084, -33.6098723],
+                    [-70.8601859, -33.6099846],
+                    [-70.8602072, -33.6100095],
+                    [-70.8624414, -33.6126212],
+                    [-70.8647804, -33.6153524],
+                    [-70.8650565, -33.6156775],
+                    [-70.8660141, -33.6167971],
+                    [-70.8665693, -33.6174404],
+                    [-70.8671688, -33.6181429],
+                    [-70.8678339, -33.6189224],
+                    [-70.8690584, -33.6203435],
+                    [-70.8697611, -33.6211571],
+                    [-70.8708085, -33.6223821],
+                    [-70.8716078, -33.6232789],
+                    [-70.8731058, -33.6250344],
+                    [-70.8739521, -33.6260131],
+                    [-70.8741217, -33.6262097],
+                    [-70.8764905, -33.6290065],
+                    [-70.8765279, -33.6290501],
+                    [-70.8788283, -33.6317277],
+                    [-70.8788763, -33.631784],
+                    [-70.8797269, -33.6327806],
+                    [-70.8805174, -33.6336985],
+                    [-70.8811746, -33.63447],
+                    [-70.8822086, -33.635672],
+                    [-70.8835503, -33.6372313],
+                    [-70.8836087, -33.6373],
+                    [-70.8852676, -33.6392216],
+                    [-70.8866108, -33.640812],
+                    [-70.8886707, -33.6432147],
+                    [-70.8890212, -33.6436035],
+                    [-70.8892366, -33.6438395],
+                    [-70.8895184, -33.6441307],
+                    [-70.8898247, -33.6444137],
+                    [-70.8898825, -33.6444634]
+                  ],
+                  "sourceWayIds": [
+                    "osm-way:1178255909",
+                    "osm-way:1178255910",
+                    "osm-way:1178255911",
+                    "osm-way:1178255912",
+                    "osm-way:126821574",
+                    "osm-way:142155307",
+                    "osm-way:175547582",
+                    "osm-way:175547584",
+                    "osm-way:23393762",
+                    "osm-way:679992664",
+                    "osm-way:973183057",
+                    "osm-way:973183058"
+                  ],
+                  "bridge": true,
+                  "tunnel": false,
+                  "service": false,
+                  "navigable": true,
+                  "reviewStatus": "authored-debug-pilot"
+                },
+                {
+                  "id": "cl-padre-hurtado-melipilla:leg-2:slice-02",
+                  "distanceKm": 3.84,
+                  "coordinates": [
+                    [-70.8898825, -33.6444634],
+                    [-70.8900046, -33.6445685],
+                    [-70.8901803, -33.644719],
+                    [-70.8904188, -33.6449047],
+                    [-70.8906649, -33.6450882],
+                    [-70.8909289, -33.6452683],
+                    [-70.891136, -33.645404],
+                    [-70.8913585, -33.6455423],
+                    [-70.8916062, -33.6456915],
+                    [-70.891884, -33.6458408],
+                    [-70.8921934, -33.6460043],
+                    [-70.8924402, -33.6461234],
+                    [-70.8927739, -33.6462715],
+                    [-70.8944129, -33.6469066],
+                    [-70.9019949, -33.6497265],
+                    [-70.9030935, -33.6501504],
+                    [-70.917027, -33.6553963],
+                    [-70.9227695, -33.6575649],
+                    [-70.9229768, -33.6576413],
+                    [-70.9231784, -33.6577142],
+                    [-70.9239413, -33.6579902],
+                    [-70.9241607, -33.6580729],
+                    [-70.9245493, -33.6582195],
+                    [-70.924671, -33.6582649],
+                    [-70.9250505, -33.658409],
+                    [-70.9272695, -33.6592519]
+                  ],
+                  "sourceWayIds": [
+                    "osm-way:175547584"
+                  ],
+                  "bridge": false,
+                  "tunnel": false,
+                  "service": false,
+                  "navigable": true,
+                  "reviewStatus": "authored-debug-pilot"
+                }
+              ]
+            },
+            {
+              "id": "cl-padre-hurtado-melipilla:leg-3",
+              "fromStationId": "osm-node:3988557680",
+              "toStationId": "osm-node:3988557681",
+              "distanceKm": 6.317,
+              "sourceSegmentCount": 55,
+              "slices": [
+                {
+                  "id": "cl-padre-hurtado-melipilla:leg-3:slice-01",
+                  "distanceKm": 5,
+                  "coordinates": [
+                    [-70.9272695, -33.6592519],
+                    [-70.9273244, -33.6592727],
+                    [-70.9289161, -33.6598773],
+                    [-70.9298623, -33.660226],
+                    [-70.9300072, -33.6602751],
+                    [-70.930152, -33.6603142],
+                    [-70.9303277, -33.6603589],
+                    [-70.9304605, -33.660389],
+                    [-70.9306093, -33.6604158],
+                    [-70.9307689, -33.660437],
+                    [-70.9309151, -33.6604549],
+                    [-70.9310908, -33.6604671],
+                    [-70.9312316, -33.6604716],
+                    [-70.931355, -33.6604727],
+                    [-70.9315079, -33.6604683],
+                    [-70.9318713, -33.6604515],
+                    [-70.9328789, -33.6604086],
+                    [-70.9341516, -33.6603526],
+                    [-70.9374606, -33.6602085],
+                    [-70.9401383, -33.6600838],
+                    [-70.9412017, -33.660054],
+                    [-70.9416482, -33.6600364],
+                    [-70.9420949, -33.6600272],
+                    [-70.9423202, -33.6600254],
+                    [-70.9425456, -33.6600263],
+                    [-70.9429212, -33.6600336],
+                    [-70.9432965, -33.6600483],
+                    [-70.9435961, -33.6600706],
+                    [-70.9438947, -33.6601008],
+                    [-70.9441946, -33.6601393],
+                    [-70.9444928, -33.6601857],
+                    [-70.9446746, -33.6602167],
+                    [-70.9448553, -33.660252],
+                    [-70.9450346, -33.6602917],
+                    [-70.9452497, -33.6603455],
+                    [-70.9454624, -33.6604056],
+                    [-70.9457304, -33.6604843],
+                    [-70.9459949, -33.6605708],
+                    [-70.9461903, -33.6606406],
+                    [-70.9463835, -33.6607146],
+                    [-70.9465742, -33.6607929],
+                    [-70.9510557, -33.6627109],
+                    [-70.9581753, -33.6657817],
+                    [-70.9649929, -33.6687034],
+                    [-70.9670086, -33.6695584],
+                    [-70.9689814, -33.6703966],
+                    [-70.9706111, -33.6711016],
+                    [-70.9739354, -33.6725261],
+                    [-70.9770389, -33.6738609]
+                  ],
+                  "sourceWayIds": [
+                    "osm-way:172665765",
+                    "osm-way:175547584",
+                    "osm-way:675434003",
+                    "osm-way:675434011",
+                    "osm-way:80624886"
+                  ],
+                  "bridge": true,
+                  "tunnel": false,
+                  "service": false,
+                  "navigable": true,
+                  "reviewStatus": "authored-debug-pilot"
+                },
+                {
+                  "id": "cl-padre-hurtado-melipilla:leg-3:slice-02",
+                  "distanceKm": 1.317,
+                  "coordinates": [
+                    [-70.9770389, -33.6738609],
+                    [-70.9773292, -33.6739858],
+                    [-70.9790202, -33.6747132],
+                    [-70.9797887, -33.6750378],
+                    [-70.9814329, -33.6757443],
+                    [-70.9855901, -33.6775308],
+                    [-70.9856587, -33.6775601],
+                    [-70.9866622, -33.6779878],
+                    [-70.9896895, -33.6792851]
+                  ],
+                  "sourceWayIds": [
+                    "osm-way:80624886"
+                  ],
+                  "bridge": false,
+                  "tunnel": false,
+                  "service": false,
+                  "navigable": true,
+                  "reviewStatus": "authored-debug-pilot"
+                }
+              ]
+            },
+            {
+              "id": "cl-padre-hurtado-melipilla:leg-4",
+              "fromStationId": "osm-node:3988557681",
+              "toStationId": "osm-node:3988557682",
+              "distanceKm": 20.819,
+              "sourceSegmentCount": 112,
+              "slices": [
+                {
+                  "id": "cl-padre-hurtado-melipilla:leg-4:slice-01",
+                  "distanceKm": 5,
+                  "coordinates": [
+                    [-70.9896895, -33.6792851],
+                    [-70.9923678, -33.6804329],
+                    [-70.9924421, -33.6804647],
+                    [-70.9925091, -33.6804934],
+                    [-70.9931018, -33.6807474],
+                    [-70.9933882, -33.6808614],
+                    [-70.9936786, -33.6809681],
+                    [-70.9939727, -33.6810675],
+                    [-70.9942702, -33.6811595],
+                    [-70.994571, -33.681244],
+                    [-70.994866, -33.6813189],
+                    [-70.9951636, -33.6813866],
+                    [-70.9954634, -33.681447],
+                    [-70.9957651, -33.6815],
+                    [-70.9960687, -33.6815458],
+                    [-70.9963736, -33.6815841],
+                    [-70.9966913, -33.6816168],
+                    [-70.9993485, -33.6818647],
+                    [-70.9994178, -33.6818712],
+                    [-71.0116136, -33.6830069],
+                    [-71.0238984, -33.6841493],
+                    [-71.0428457, -33.6859112]
+                  ],
+                  "sourceWayIds": [
+                    "osm-way:80624886"
+                  ],
+                  "bridge": false,
+                  "tunnel": false,
+                  "service": false,
+                  "navigable": true,
+                  "reviewStatus": "authored-debug-pilot"
+                },
+                {
+                  "id": "cl-padre-hurtado-melipilla:leg-4:slice-02",
+                  "distanceKm": 5,
+                  "coordinates": [
+                    [-71.0428457, -33.6859112],
+                    [-71.044878, -33.6861002],
+                    [-71.0516403, -33.6867395],
+                    [-71.0519059, -33.6867635],
+                    [-71.064041, -33.6878871],
+                    [-71.0718817, -33.6886019],
+                    [-71.0801107, -33.6893786],
+                    [-71.0805039, -33.6894091],
+                    [-71.083375, -33.6896319],
+                    [-71.0837462, -33.6896434],
+                    [-71.0841177, -33.6896468],
+                    [-71.0844891, -33.6896424],
+                    [-71.0848603, -33.6896299],
+                    [-71.085231, -33.6896096],
+                    [-71.0856119, -33.6895803],
+                    [-71.0859917, -33.6895427],
+                    [-71.0863701, -33.6894967],
+                    [-71.086747, -33.6894423],
+                    [-71.0868481, -33.6894254],
+                    [-71.087122, -33.6893797],
+                    [-71.0892745, -33.6889172],
+                    [-71.0895898, -33.6888492],
+                    [-71.0962616, -33.6872392]
+                  ],
+                  "sourceWayIds": [
+                    "osm-way:1169449450",
+                    "osm-way:1169449451",
+                    "osm-way:1169449452",
+                    "osm-way:80624886",
+                    "osm-way:969447185"
+                  ],
+                  "bridge": true,
+                  "tunnel": false,
+                  "service": false,
+                  "navigable": true,
+                  "reviewStatus": "authored-debug-pilot"
+                },
+                {
+                  "id": "cl-padre-hurtado-melipilla:leg-4:slice-03",
+                  "distanceKm": 5,
+                  "coordinates": [
+                    [-71.0962616, -33.6872392],
+                    [-71.0974047, -33.6869634],
+                    [-71.0997746, -33.6864049],
+                    [-71.1022184, -33.6858364],
+                    [-71.1036748, -33.6854977],
+                    [-71.1039815, -33.6854256],
+                    [-71.1077351, -33.6845427],
+                    [-71.1098723, -33.6839894],
+                    [-71.1126009, -33.6833388],
+                    [-71.1139394, -33.6830195],
+                    [-71.1140574, -33.6829905],
+                    [-71.1145058, -33.6828683],
+                    [-71.1164318, -33.6824298],
+                    [-71.119334, -33.6817356],
+                    [-71.1199978, -33.6815783],
+                    [-71.1203612, -33.6815001],
+                    [-71.1205969, -33.6814531],
+                    [-71.1208333, -33.6814086],
+                    [-71.1211372, -33.6813557],
+                    [-71.1214422, -33.6813071],
+                    [-71.1225164, -33.681143],
+                    [-71.124166, -33.6809109],
+                    [-71.1258878, -33.6806511],
+                    [-71.1277302, -33.6803786],
+                    [-71.1316996, -33.6798081],
+                    [-71.1405305, -33.6785164],
+                    [-71.1444677, -33.6779276],
+                    [-71.1488869, -33.6773056]
+                  ],
+                  "sourceWayIds": [
+                    "osm-way:1169449452",
+                    "osm-way:1169449453",
+                    "osm-way:80624887"
+                  ],
+                  "bridge": true,
+                  "tunnel": false,
+                  "service": false,
+                  "navigable": true,
+                  "reviewStatus": "authored-debug-pilot"
+                },
+                {
+                  "id": "cl-padre-hurtado-melipilla:leg-4:slice-04",
+                  "distanceKm": 5,
+                  "coordinates": [
+                    [-71.1488869, -33.6773056],
+                    [-71.1519671, -33.6768721],
+                    [-71.1543623, -33.6765172],
+                    [-71.15812, -33.6759681],
+                    [-71.1610292, -33.6755462],
+                    [-71.1641349, -33.6750685],
+                    [-71.1647518, -33.6749804],
+                    [-71.1651916, -33.6749178],
+                    [-71.1654854, -33.6748788],
+                    [-71.1657444, -33.6748501],
+                    [-71.1660899, -33.6748208],
+                    [-71.1664362, -33.6747996],
+                    [-71.166799, -33.6747861],
+                    [-71.1671621, -33.6747817],
+                    [-71.1674206, -33.6747882],
+                    [-71.167679, -33.6747994],
+                    [-71.1679369, -33.6748152],
+                    [-71.1681914, -33.6748353],
+                    [-71.1684454, -33.6748598],
+                    [-71.1686987, -33.6748888],
+                    [-71.1693133, -33.6749806],
+                    [-71.1726066, -33.6754312],
+                    [-71.1751467, -33.6757761],
+                    [-71.1779991, -33.6761733],
+                    [-71.1804669, -33.6765094],
+                    [-71.1828366, -33.6768364],
+                    [-71.1851151, -33.67715],
+                    [-71.1892987, -33.6777253],
+                    [-71.1971408, -33.6788061],
+                    [-71.1999471, -33.6791917],
+                    [-71.2021986, -33.6795039]
+                  ],
+                  "sourceWayIds": [
+                    "osm-way:80624887"
+                  ],
+                  "bridge": false,
+                  "tunnel": false,
+                  "service": false,
+                  "navigable": true,
+                  "reviewStatus": "authored-debug-pilot"
+                },
+                {
+                  "id": "cl-padre-hurtado-melipilla:leg-4:slice-05",
+                  "distanceKm": 0.819,
+                  "coordinates": [
+                    [-71.2021986, -33.6795039],
+                    [-71.2038027, -33.6797263],
+                    [-71.2047402, -33.6798524],
+                    [-71.2049887, -33.6798845],
+                    [-71.2052379, -33.679912],
+                    [-71.2054878, -33.679935],
+                    [-71.2058204, -33.6799583],
+                    [-71.2061537, -33.6799735],
+                    [-71.2064489, -33.6799798],
+                    [-71.2067443, -33.6799794],
+                    [-71.2070395, -33.6799724],
+                    [-71.2077429, -33.67993],
+                    [-71.2078022, -33.6799268],
+                    [-71.2080435, -33.6799079],
+                    [-71.2083651, -33.6798827],
+                    [-71.2107833, -33.6796931],
+                    [-71.2109877, -33.6796771]
+                  ],
+                  "sourceWayIds": [
+                    "osm-way:80624887",
+                    "osm-way:937049678"
+                  ],
+                  "bridge": false,
+                  "tunnel": false,
+                  "service": false,
+                  "navigable": true,
+                  "reviewStatus": "authored-debug-pilot"
+                }
+              ]
+            }
+          ],
+          "distanceKm": 42,
+          "sliceCount": 11
+        }
+      ]
     }
   ]
 }

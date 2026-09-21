@@ -26,6 +26,7 @@ setup.worldGraph = (function () {
 		assert(Array.isArray(data.regions) && data.chunks, 'missing region catalogue');
 		assert(Array.isArray(data.corridors), 'missing corridor catalogue');
 		assert(Array.isArray(data.railGeometry), 'missing sourced rail geometry catalogue');
+		assert(Array.isArray(data.railTopology), 'missing compiled rail topology catalogue');
 		return true;
 	}
 
@@ -103,7 +104,8 @@ setup.worldGraph = (function () {
 			corridorCount: data.corridors.length,
 			railGeometrySetCount: data.railGeometry.length,
 			railWayCount: data.railGeometry.reduce(function (sum, geometry) { return sum + geometry.stats.wayCount; }, 0),
-			railCoordinateCount: data.railGeometry.reduce(function (sum, geometry) { return sum + geometry.stats.coordinateCount; }, 0)
+			railCoordinateCount: data.railGeometry.reduce(function (sum, geometry) { return sum + geometry.stats.coordinateCount; }, 0),
+			playableRailCorridorCount: data.railTopology.reduce(function (sum, topology) { return sum + topology.corridors.length; }, 0)
 		};
 	}
 
