@@ -314,6 +314,43 @@ test('the world map is the same every time and never enters save data', () => {
   assert.ok(!JSON.stringify(State.variables).includes('terrain'), 'generated tiles must stay out of the save');
 });
 
+test('debug teleport moves an onboard consist but moves a walker without their parked train', () => {
+  const { setup, State } = loadGame();
+  const v = State.variables;
+  Object.assign(v, { randomSeed: 'debug-teleport', debugMode: true, travellingForward: true });
+  const tiles = setup.worldmap.getMainLine(v.randomSeed, 1);
+  const train = [{ type: 'dieselShunter', length: 12 }, { type: 'boxcar', length: 12 }];
+  v.currentTrain = train;
+  v.onFoot = null;
+  let result = setup.worldmap.debugTeleportToTile(1, tiles[3].x, tiles[3].y);
+  assert.equal(result.mode, 'consist');
+  assert.equal(v.currentTrain, train, 'the whole active consist remains together');
+  assert.deepEqual({ legIndex: v.journey.legIndex, tileIndex: v.journey.tileIndex, branch: v.journey.branch || null },
+    { legIndex: 1, tileIndex: 3, branch: null });
+  assert.equal(v.onFoot, null);
+
+  // Once outside, journey is the parked consist and onFoot is the player. Clicking another tile moves only onFoot.
+  v.onFoot = { tileIndex: 3, branch: null };
+  const parked = JSON.stringify(v.journey);
+  result = setup.worldmap.debugTeleportToTile(1, tiles[6].x, tiles[6].y);
+  assert.equal(result.mode, 'player');
+  assert.equal(JSON.stringify(v.journey), parked);
+  assert.equal(v.onFoot.tileIndex, 6);
+  assert.equal(v.currentTrain, train);
+
+  // A player without a train still gets valid walking context, but is never offered a phantom train to board.
+  v.currentTrain = null;
+  v.onFoot = null;
+  result = setup.worldmap.debugTeleportToTile(1, tiles[2].x, tiles[2].y);
+  assert.equal(result.passage, 'OnFoot');
+  assert.equal(v.onFoot.tileIndex, 2);
+  assert.equal(setup.onfoot.getTrainPosition(), null);
+  assert.equal(setup.onfoot.isBesideTrain(), false);
+  v.debugMode = false;
+  assert.equal(setup.worldmap.debugTeleportToTile(1, tiles[4].x, tiles[4].y), null);
+  assert.equal(v.onFoot.tileIndex, 2);
+});
+
 test('generated track joins up end to end and obeys the terrain rules', () => {
   const { setup } = loadGame();
   const straights = ['straight-ns', 'straight-ew', 'straight-nwse', 'straight-nesw'];

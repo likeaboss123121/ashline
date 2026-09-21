@@ -21,6 +21,7 @@ setup.onfoot = {
 	},
 	// Where the train is standing, which is where the player climbed down.
 	getTrainPosition: function() {
+		if (!Array.isArray(State.variables.currentTrain) || !State.variables.currentTrain.length) return null;
 		var journey = setup.worldmap.getJourney();
 		return journey ? { tileIndex: journey.tileIndex, branch: journey.branch || null } : null;
 	},
@@ -197,8 +198,10 @@ Macro.add('onFootStatus', {
 		if (!tile) {
 			return;
 		}
+		var hasTrain = Array.isArray(State.variables.currentTrain) && State.variables.currentTrain.length > 0;
 		var output = '<p>' + (onfoot.isBesideTrain() ? 'You are on the ballast beside your train.'
-			: 'You are walking the track. Your train is standing somewhere behind you.') + '</p>';
+			: hasTrain ? 'You are walking the track. Your train is standing somewhere behind you.'
+				: 'You are walking the track without a train.') + '</p>';
 		output += '<p class="small-description">' + tile.terrain + ', '
 			+ setup.units.temperature(setup.worldmap.getClimate(setup.worldmap.getSeed(), tile.x, tile.y).temperature)
 			+ '.</p>';

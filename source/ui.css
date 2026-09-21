@@ -360,3 +360,13 @@
 #ui-dialog-body textarea { max-width: 100%; box-sizing: border-box; }
 .saves-detail { min-width: min(12em, 100%); }
 .saves-actions { flex-wrap: wrap; max-width: 100%; }
+.worldmap-debug .debug-teleport-tile {
+	cursor: pointer;
+}
+
+.worldmap-debug .debug-teleport-tile:hover,
+.worldmap-debug .debug-teleport-tile:focus {
+	stroke: #e0625c;
+	stroke-width: 2;
+	outline: none;
+}

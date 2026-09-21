@@ -815,6 +815,57 @@ setup.worldmap = {
 		}
 		return '';
 	},
+	// Resolves one generated track tile into the journey coordinates used by trains and walkers. Debug tools use
+	// coordinates rather than array offsets so the map remains the source of truth for what was clicked.
+	getDebugTeleportTarget: function(legIndex, x, y) {
+		var leg = this.getLeg(this.getSeed(), legIndex);
+		var mainLine = this.getMainLine(this.getSeed(), legIndex);
+		for (var mainIndex = 0; mainIndex < mainLine.length; mainIndex++) {
+			if (mainLine[mainIndex].x === x && mainLine[mainIndex].y === y) {
+				return { legIndex: legIndex, tileIndex: mainIndex, branch: null, tile: mainLine[mainIndex] };
+			}
+		}
+		for (var branchIndex = 0; branchIndex < leg.branches.length; branchIndex++) {
+			var branch = leg.branches[branchIndex];
+			for (var tileIndex = 0; tileIndex < branch.tiles.length; tileIndex++) {
+				if (branch.tiles[tileIndex].x === x && branch.tiles[tileIndex].y === y) {
+					return { legIndex: legIndex, tileIndex: tileIndex, branch: branch.id, tile: branch.tiles[tileIndex] };
+				}
+			}
+		}
+		return null;
+	},
+	// Debug-only, zero-time movement. An onboard player takes the active consist; a player on foot moves alone and
+	// leaves its journey position untouched. With no active train, journey supplies the walking route context only.
+	debugTeleportToTile: function(legIndex, x, y) {
+		var variables = State.variables;
+		if (!variables.debugMode) return null;
+		var target = this.getDebugTeleportTarget(Number(legIndex), Number(x), Number(y));
+		if (!target) return null;
+		var activeTrain = Array.isArray(variables.currentTrain) && variables.currentTrain.length > 0;
+		var onFoot = !!variables.onFoot;
+		var currentJourney = this.getJourney();
+		if (activeTrain && onFoot) {
+			// The walking model stores the parked train in journey and the player in onFoot. It cannot represent them
+			// on different legs, so a map for any other leg must not silently move the train as a side effect.
+			if (!currentJourney || currentJourney.legIndex !== target.legIndex) return null;
+			variables.onFoot = { tileIndex: target.tileIndex, branch: target.branch };
+			return { mode: 'player', passage: 'OnFoot', target: target };
+		}
+		var forward = currentJourney && currentJourney.legIndex === target.legIndex
+			? currentJourney.forward !== false : variables.travellingForward !== false;
+		variables.currentStation = forward ? target.legIndex : target.legIndex + 1;
+		variables.journey = {
+			legIndex: target.legIndex, tileIndex: target.tileIndex, forward: forward
+		};
+		if (target.branch) variables.journey.branch = target.branch;
+		if (activeTrain) {
+			variables.onFoot = null;
+			return { mode: 'consist', passage: State.passage === 'TrainInterior' ? 'TrainInterior' : 'OnTheLine', target: target };
+		}
+		variables.onFoot = { tileIndex: target.tileIndex, branch: target.branch };
+		return { mode: 'player', passage: 'OnFoot', target: target };
+	},
 	// --- debug map ----------------------------------------------------------------------------------------
 	// A deliberately plain top-down map for debug mode: terrain as coloured cells and track as lines through
 	// them. It is a look at what the generator produced, not a player-facing map.
@@ -848,6 +899,13 @@ setup.worldmap = {
 				cellRect.setAttribute('fill', this.TERRAIN_COLOURS[terrain] || '#000');
 				cellRect.setAttribute('stroke', '#1b1d1f');
 				cellRect.setAttribute('stroke-width', '0.5');
+				if (tile) {
+					cellRect.setAttribute('class', 'debug-teleport-tile');
+					cellRect.setAttribute('data-debug-teleport', legIndex + ':' + x + ':' + y);
+					cellRect.setAttribute('tabindex', '0');
+					cellRect.setAttribute('role', 'button');
+					cellRect.setAttribute('aria-label', 'Teleport to track tile ' + x + ', ' + y);
+				}
 				var title = document.createElementNS(ns, 'title');
 				var climate = this.getClimate(seed, x, y);
 				title.textContent = x + ',' + y + ' ' + terrain
@@ -872,6 +930,7 @@ setup.worldmap = {
 				line.setAttribute('y2', cy - direction.dy * cell / 2);
 				line.setAttribute('stroke', tile.branch ? '#8a7a55' : '#d8d2c4');
 				line.setAttribute('stroke-width', tile.branch ? '1' : '1.5');
+				line.setAttribute('pointer-events', 'none');
 				svg.appendChild(line);
 			});
 			if (tile.station) {
@@ -880,6 +939,7 @@ setup.worldmap = {
 				marker.setAttribute('cy', cy);
 				marker.setAttribute('r', cell / 3);
 				marker.setAttribute('fill', '#e5c58a');
+				marker.setAttribute('pointer-events', 'none');
 				var markerTitle = document.createElementNS(ns, 'title');
 				markerTitle.textContent = 'Station ' + tile.station;
 				marker.appendChild(markerTitle);
@@ -901,6 +961,7 @@ setup.worldmap = {
 			};
 			marker.setAttribute('points', [point(cell * 0.55, 0), point(cell * 0.45, 2.5), point(cell * 0.45, -2.5)].join(' '));
 			marker.setAttribute('fill', '#e0625c');
+			marker.setAttribute('pointer-events', 'none');
 			var markerTitle = document.createElementNS(ns, 'title');
 			markerTitle.textContent = 'Your train, heading ' + this.describeDirection(facing);
 			marker.appendChild(markerTitle);
@@ -924,9 +985,29 @@ setup.worldmap = {
 				+ Math.min.apply(null, grades).toFixed(1) + '% to ' + Math.max.apply(null, grades).toFixed(1) + '%, '
 				+ (leg.tiles.length - mainLine.length) + ' branch tiles. Seed ' + this.getSeed() + '.';
 			parent.appendChild(heading);
+			var instructions = document.createElement('p');
+			instructions.textContent = 'Debug teleport: click or focus a track tile and press Enter. If you are aboard, your entire consist moves with you; on foot, only you move.';
+			var self = this;
+			built.svg.querySelectorAll('[data-debug-teleport]').forEach(function(cellRect) {
+				var teleport = function() {
+					var parts = cellRect.getAttribute('data-debug-teleport').split(':');
+					var result = self.debugTeleportToTile(Number(parts[0]), Number(parts[1]), Number(parts[2]));
+					if (!result) return;
+					setup.debugReturnToPanel = true;
+					Engine.play(result.passage);
+				};
+				cellRect.addEventListener('click', teleport);
+				cellRect.addEventListener('keydown', function(event) {
+					if (event.key === 'Enter' || event.key === ' ') {
+						event.preventDefault();
+						teleport();
+					}
+				});
+			});
 			parent.appendChild(built.svg);
+			parent.appendChild(instructions);
 			var legend = document.createElement('p');
-			legend.textContent = 'plains, forest, desert, arctic, mountain, bridge, tunnel, water. Hover a tile for its terrain, shape and grade.';
+			legend.textContent = 'plains, forest, desert, arctic, mountain, bridge, tunnel, water. Hover a tile for its terrain, shape and grade; outlined track tiles are teleport targets.';
 			parent.appendChild(legend);
 		} catch (error) {
 			var failure = document.createElement('p');

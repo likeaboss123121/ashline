@@ -1539,6 +1539,42 @@ test('debug mode draws the generated world map for the leg ahead', async t => {
   assert.match(referenceText, /Hand pump/);
 });
 
+test('debug map teleport carries an onboard consist to the selected tile', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await board(page);
+  await page.evaluate(() => {
+    SugarCube.State.variables.debugMode = true;
+    SugarCube.Engine.play('TrainInterior');
+  });
+  await passage(page, 'TrainInterior');
+  const consistBefore = await page.evaluate(() => JSON.stringify(SugarCube.State.variables.currentTrain));
+  await page.getByRole('button', { name: 'Debug', exact: true }).click();
+  const mapSection = page.locator('details.debug-section').filter({
+    has: page.getByText('World map', { exact: true })
+  });
+  await mapSection.locator(':scope > summary').click();
+  const target = mapSection.locator('svg.worldmap-debug [data-debug-teleport]').nth(3);
+  const address = (await target.getAttribute('data-debug-teleport')).split(':').map(Number);
+  await target.focus();
+  await page.keyboard.press('Enter');
+  await passage(page, 'TrainInterior');
+  const moved = await page.evaluate(() => ({
+    consist: JSON.stringify(SugarCube.State.variables.currentTrain),
+    journey: JSON.parse(JSON.stringify(SugarCube.State.variables.journey)),
+    onFoot: SugarCube.State.variables.onFoot
+  }));
+  const expected = await page.evaluate(([legIndex, x, y]) => {
+    const target = SugarCube.setup.worldmap.getDebugTeleportTarget(legIndex, x, y);
+    return { legIndex: target.legIndex, tileIndex: target.tileIndex, branch: target.branch };
+  }, address);
+  assert.equal(moved.consist, consistBefore);
+  assert.equal(moved.journey.legIndex, expected.legIndex);
+  assert.equal(moved.journey.tileIndex, expected.tileIndex);
+  assert.equal(moved.journey.branch || null, expected.branch);
+  assert.equal(moved.onFoot, null);
+});
+
 test('driving the line goes one 5 km tile at a time, and draws the consist on it', async t => {
   const page = await openGame(t);
   await begin(page);
