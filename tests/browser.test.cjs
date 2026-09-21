@@ -1738,6 +1738,9 @@ test('the credits dialog discloses how AI was used', async t => {
 	assert.match(shown, /OpenStreetMap contributors/);
 	assert.match(shown, /Geofabrik/);
 	assert.match(shown, /ODbL 1\.0/);
+	assert.match(shown, /World data: City names/);
+	assert.match(shown, /Elevation data: Produced using Copernicus/);
+	assert.doesNotMatch(shown, /<\/?(?:strong|p)>/);
   assert.doesNotMatch(shown, /Discord/);
 });
 
