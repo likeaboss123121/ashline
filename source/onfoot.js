@@ -23,17 +23,18 @@ setup.onfoot = {
 	getTrainPosition: function() {
 		if (!Array.isArray(State.variables.currentTrain) || !State.variables.currentTrain.length) return null;
 		var journey = setup.worldmap.getJourney();
-		return journey ? { tileIndex: journey.tileIndex, branch: journey.branch || null } : null;
+		return journey ? { legIndex: journey.legIndex, tileIndex: journey.tileIndex, branch: journey.branch || null } : null;
 	},
 	isBesideTrain: function() {
 		var foot = this.get();
 		var train = this.getTrainPosition();
-		return !!foot && !!train && foot.tileIndex === train.tileIndex && (foot.branch || null) === train.branch;
+		return !!foot && !!train && (foot.legIndex || train.legIndex) === train.legIndex
+			&& foot.tileIndex === train.tileIndex && (foot.branch || null) === train.branch;
 	},
 	// Query the walker's route without temporarily moving the parked train.
 	getPosition: function() {
 		var foot = this.get(), journey = setup.worldmap.getJourney();
-		return foot && journey ? { legIndex: journey.legIndex, tileIndex: foot.tileIndex,
+		return foot && journey ? { legIndex: foot.legIndex || journey.legIndex, tileIndex: foot.tileIndex,
 			branch: foot.branch || null, forward: true, realWorldCorridorId: journey.realWorldCorridorId } : null;
 	},
 	// The tile the player is standing on, which is not always the one the train is on.
@@ -47,7 +48,7 @@ setup.onfoot = {
 		if (!train || this.isOnFoot()) {
 			return false;
 		}
-		State.variables.onFoot = { tileIndex: train.tileIndex, branch: train.branch };
+		State.variables.onFoot = { legIndex: train.legIndex, tileIndex: train.tileIndex, branch: train.branch };
 		return true;
 	},
 	climbAboard: function() {
@@ -92,7 +93,7 @@ setup.onfoot = {
 		if (!walk) {
 			return false;
 		}
-		State.variables.onFoot = { tileIndex: walk.toIndex, branch: walk.branch };
+		State.variables.onFoot = { legIndex: this.getPosition().legIndex, tileIndex: walk.toIndex, branch: walk.branch };
 		return true;
 	},
 	// A tool counts as to hand if the player is carrying it, or if the train is right there to fetch it from.

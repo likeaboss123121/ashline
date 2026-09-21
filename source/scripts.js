@@ -1235,6 +1235,10 @@ setup.railyard = {
 		['southeast', 5], ['south', 5], ['southwest', 5]
 	],
 	getLegHeading: function(stationId, baseSeed) {
+		if (setup.realWorldPilot && setup.realWorldPilot.getLegHeading) {
+			var sourcedHeading = setup.realWorldPilot.getLegHeading(stationId);
+			if (sourcedHeading) return sourcedHeading;
+		}
 		// Keep the opening journey north through Patagonia. Later legs can use every compass point.
 		if (stationId < 10) {
 			return 'north';
@@ -1531,13 +1535,13 @@ setup.railyard = {
 			return 'This station has no ' + this.getTrackLabel(tracks, towardExit ? this.getExitTrackIndex(tracks) : this.getEntryTrackIndex()) + '.';
 		}
 		var destination = Number(stationId) + (towardExit ? 1 : -1);
-		if (destination < 1) {
-			return 'There is no station before this one.';
+		if (!setup.realWorldPilot.getStation(destination)) {
+			return 'There is no railway beyond ' + setup.worldmap.getStationName(stationId) + ' in that direction.';
 		}
 		// A station not generated yet always has the lead the player arrives on (only station 1 lacks one).
 		var destinationTracks = State.variables.stationTracks[destination];
 		if (destinationTracks && !(towardExit ? this.getLeads(destinationTracks).entry : this.getLeads(destinationTracks).exit)) {
-			return 'Station ' + destination + ' has no '
+			return setup.worldmap.getStationName(destination) + ' has no '
 				+ this.getTrackLabel(destinationTracks, towardExit ? this.getEntryTrackIndex() : this.getExitTrackIndex(destinationTracks))
 				+ ' to arrive on.';
 		}
@@ -1575,7 +1579,7 @@ setup.railyard = {
 	travelToStation: function(towardExit) {
 		var variables = State.variables;
 		var destination = variables.currentStation + (towardExit ? 1 : -1);
-		if (destination < 1 || this.getDepartureBlockReason(variables.currentStation, variables.drivingTrackIndex, towardExit)) {
+		if (!setup.realWorldPilot.getStation(destination) || this.getDepartureBlockReason(variables.currentStation, variables.drivingTrackIndex, towardExit)) {
 			return false;
 		}
 		return this.arriveAtStation(destination, towardExit);
@@ -1620,6 +1624,7 @@ setup.railyard = {
 			return false;
 		}
 		var tiles = setup.worldmap.getMainLine(setup.worldmap.getSeed(), legIndex);
+		if (!tiles || tiles.length < 2) return false;
 		variables.travellingForward = !!towardExit;
 		variables.journey = { legIndex: legIndex, tileIndex: towardExit ? 0 : tiles.length - 1, forward: !!towardExit };
 		return true;
@@ -2401,7 +2406,7 @@ Macro.add('railyardButtons', {
 			totalTrains += tracks[t].trains.length;
 			trackCount += setup.railyard.trackExists(tracks, t) ? 1 : 0;
 		}
-		var output = '<h2>Station ' + State.variables.currentStation + '</h2>';
+		var output = '<h2>' + setup.worldmap.getStationName(State.variables.currentStation) + '</h2>';
 		output += '<p>There ' + (totalTrains === 1 ? 'is ' : 'are ') + totalTrains + ' train' + (totalTrains === 1 ? '' : 's') + ' staged across ' + trackCount + ' track' + (trackCount === 1 ? '' : 's') + '.</p>';
 		var displayNumber = 1;
 		// Each track is rendered independently so empty tracks, finite length, and train numbering stay readable.
@@ -2454,7 +2459,7 @@ Macro.add('lineStatus', {
 		var slope = grade > 0 ? 'climbing ' + grade.toFixed(1) + '%'
 			: grade < 0 ? 'descending ' + Math.abs(grade).toFixed(1) + '%' : 'level';
 		var output = '<h2>On the line</h2>';
-		if (view.realWorld) output += '<p><strong>' + setup.realWorldPilot.getCorridor(view.corridorId).label + '</strong></p>';
+		if (view.realWorld) output += '<p><strong>' + view.fromStation + ' to ' + view.toStation + '</strong></p>';
 		output += '<p>Tile ' + (Math.min(view.tileIndex, view.tileCount - 1) + 1) + ' of ' + view.tileCount
 			+ ' &middot; ' + view.terrain + ' &middot; ' + slope + '</p>';
 		output += '<p class="small-description">' + (view.branch
@@ -2478,13 +2483,9 @@ Macro.add('lineControls', {
 		// On a station's own tile the yard is right there, so backing in ends the journey at no cost. It is also
 		// the way out for a consist that cannot move at all, which is why it is offered before anything else.
 		var escapeLink = '';
-		var realEndpoint = setup.realWorldPilot.endpointForView(view);
-		if (realEndpoint) {
-			escapeLink = '<<link "Leave the sourced route at ' + realEndpoint.name + '">>'
-				+ '<<run setup.realWorldPilot.finish()>><<goto "TrainInterior">><</link>><br>';
-		} else if (!view.realWorld && !setup.worldmap.getJourneyStep(-1)) {
+		if (!setup.worldmap.getJourneyStep(-1)) {
 			var backStation = view.forward ? view.legIndex : view.legIndex + 1;
-			escapeLink = '<<link "Back into Station ' + backStation + '">>'
+			escapeLink = '<<link "Back into ' + setup.worldmap.getStationName(backStation) + '">>'
 				+ '<<run setup.railyard.arriveAtStation(' + backStation + ', ' + (!view.forward) + ')>>'
 				+ '<<goto "DrivingMode">><</link>><br>';
 		}
@@ -2516,7 +2517,7 @@ Macro.add('lineControls', {
 				+ '<<goto _linePassage>><</timedlink>><br>';
 			output += '<span class="small-description">Into ' + step.terrain + ', ' + slope
 				+ (step.destinationName ? ', reaching ' + step.destinationName : '')
-				+ (step.arrivesAt ? ', arriving at Station ' + step.arrivesAt : '') + '.</span><br>';
+				+ (step.arrivesAt ? ', arriving at ' + setup.worldmap.getStationName(step.arrivesAt) : '') + '.</span><br>';
 		});
 		// At a junction the player knows only which way the rails immediately run. Whether a track reconnects or
 		// ends is deliberately not exposed: there is no map to consult out here.
@@ -2604,7 +2605,9 @@ Macro.add('drivingTravelButtons', {
 			if (!towardExit && stationId <= 1) return;
 			// Travelling reads as the heading the lead track is named for, not as next and previous.
 			var heading = setup.railyard.getDirectionName(setup.railyard.getLeadDirection(tracks, towardExit ? 'exit' : 'entry'));
-			var label = 'Depart ' + heading + ' toward Station ' + (stationId + (towardExit ? 1 : -1));
+			var destination = stationId + (towardExit ? 1 : -1);
+			if (!setup.realWorldPilot.getStation(destination)) return;
+			var label = 'Depart ' + heading + ' toward ' + setup.worldmap.getStationName(destination);
 			// The leg is a run of 5 km world tiles: climbing one costs more time, and so more fuel, than rolling
 			// along a flat one, and a heavy consist is slower over all of them.
 			var minutes = setup.worldmap.getTravelMinutes(stationId, towardExit, State.variables.currentTrain);
@@ -2616,7 +2619,7 @@ Macro.add('drivingTravelButtons', {
 			} else {
 				// Departing costs nothing by itself: the time and the fuel are spent tile by tile out on the line.
 				output += '<span data-yard-action="depart:' + (towardExit ? 'exit' : 'entry') + '">'
-					+ '<<link "Depart ' + heading + ' toward Station ' + (stationId + (towardExit ? 1 : -1)) + '">>'
+					+ '<<link "Depart ' + heading + ' toward ' + setup.worldmap.getStationName(destination) + '">>'
 					+ '<<if setup.tutorial.requestExit(' + towardExit + ')>><<run setup.railyard.departOntoLine(' + towardExit + ')>><<goto "OnTheLine">><</if>><</link>></span><br>';
 				output += '<span class="small-description">' + summary + ' About ' + setup.time.formatDuration(minutes) + ' at this weight.</span><br>';
 			}
@@ -2947,13 +2950,11 @@ Macro.add('debugTools', {
 		wrapper.appendChild(conditionValue);
 		wrapper.appendChild(conditionBtn);
 		wrapper.appendChild(document.createElement('br'));
-		// The generated world between this station and the next, read straight from the seed. Deliberately plain:
-		// it is here to check what the generator produced, not to be a player-facing map.
-		startSection('World map', true);
+		// The complete sourced gameplay grid, with every cell available as a teleport target.
+		startSection('World rail grid', true);
 		setup.worldmap.appendDebugMap(wrapper, State.variables.currentStation);
-		// The worldwide planning chords remain non-navigable. Explicitly authored OSM pilot corridors are offered
-		// below the overview and require an active train so the consist and its fuel remain authoritative.
-		startSection('Global rail map and pilot');
+		// Worldwide planning chords and the underlying imported geometry remain useful pipeline diagnostics.
+		startSection('Global rail data');
 		setup.worldGraph.appendDebugOverview(wrapper);
 		setup.realWorldPilot.appendDebugControls(wrapper);
 		// TrainInterior debug mode focuses on cargo editing for the active consist and current car.

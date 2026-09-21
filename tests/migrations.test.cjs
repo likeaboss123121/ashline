@@ -64,7 +64,7 @@ test('every history moment migrates and a bad or future moment rejects the entir
   assert.throws(()=>s.saveMigrations.upgradeState(bad), /train/i);
 });
 
-test('unversioned v0.2.0 saves retain survival, journey, campfire, inventory and finite depot state', () => {
+test('v0.2.0 saves retain survival state while old branches move onto the sourced line', () => {
   const { setup:s, State:{variables:v} } = loadGame();s.startNewRun();
   delete v.saveSchemaVersion;v.lastPlayedReleaseVersion='0.2.0';
   v.player.hunger=23;v.player.health=0;v.player.carried=[{item:'jerrycan',count:1}];
@@ -76,10 +76,26 @@ test('unversioned v0.2.0 saves retain survival, journey, campfire, inventory and
   v.stationTracks[2]=[{length:999999,infinite:true,trains:[],supplies:{diesel:0,coal:0,water:12}},
     {length:100,trains:[]},{length:999999,infinite:true,trains:[]}];
   const result=s.saveMigrations.upgradeState(state(v,'OnFoot')).state.history[0].variables;
-  for(const key of ['player','journey','onFoot','campfires','gameTimeTimestampMs','stationTracks'])
+  for(const key of ['player','campfires','gameTimeTimestampMs','stationTracks'])
     assert.equal(JSON.stringify(result[key]),JSON.stringify(v[key]),key);
+  assert.equal(JSON.stringify(result.journey),JSON.stringify({legIndex:2,tileIndex:0,forward:false}));
+  assert.equal(JSON.stringify(result.onFoot),JSON.stringify({legIndex:2,tileIndex:2,branch:null}));
   assert.equal(result.currentTrain[0].model,'diesel-road');
   assert.equal(result.currentTrain[0].inventory.length,0,'no gifts to newer or already-depleted kits');
+});
+
+test('v0.2.0 saves outside the sourced corridor keep their train and return safely to Padre Hurtado', () => {
+  const {setup:s,State:{variables:v}}=loadGame();s.startNewRun();
+  v.saveSchemaVersion=1;v.currentStation=27;
+  v.currentTrain=[s.railyard.cloneCar(v.defaultTrains.dieselShunter)];
+  v.journey={legIndex:27,tileIndex:7,branch:'27:2:1',forward:true};
+  v.onFoot={tileIndex:3,branch:'27:2:1'};
+  const result=s.saveMigrations.upgradeState(state(v,'OnFoot'),1).state.history[0];
+  assert.equal(result.title,'TrainInterior');
+  assert.equal(result.variables.currentStation,1);
+  assert.equal(result.variables.journey,null);assert.equal(result.variables.onFoot,null);
+  assert.equal(result.variables.currentTrain[0].model,'diesel-shunter');
+  assert.equal(result.variables.saveSchemaVersion,2);
 });
 
 test('legacy steam engines and pending placement retain loads and order while adopting shunter specs', () => {

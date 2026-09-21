@@ -2,7 +2,7 @@
 // All upgrades run on a detached copy; failed upgrades never modify a slot/file or
 // replace the live run. Add the next numbered step instead of rewriting old steps.
 setup.saveMigrations = {
-	CURRENT: 1,
+	CURRENT: 2,
 	notice: '',
 	recovery: null,
 	copy: function(value) { return JSON.parse(JSON.stringify(value)); },
@@ -129,6 +129,52 @@ setup.saveMigrations = {
 		v.defaultTrains = this.copy(setup.currentDefinitions.defaultTrains);
 		v.cargoTypes = Object.assign({}, v.cargoTypes, this.copy(setup.currentDefinitions.cargoTypes));
 	},
+	// Schema 2 removes the seeded fictional world. Keep every train and yard, but translate any active position
+	// onto the sourced Padre Hurtado–Melipilla grid so an old station or branch cannot strand the player.
+	upgradeSourcedWorld: function(moment) {
+		var v = moment.variables;
+		var route = setup.realWorldPilot && setup.realWorldPilot.getGridRoute
+			? setup.realWorldPilot.getGridRoute() : null;
+		if (!route || !route.legs || !route.corridor || !route.corridor.stations.length)
+			throw new Error('The sourced world is unavailable.');
+		function targetAt(position) {
+			var globalIndex = Math.max(0, Math.min(Math.floor(Number(position) || 0), route.tiles.length - 1));
+			var legIndex = 1;
+			while (route.legs[legIndex] && globalIndex > route.legs[legIndex].endPosition) legIndex++;
+			if (!route.legs[legIndex]) legIndex = route.corridor.stations.length - 1;
+			var leg = route.legs[legIndex];
+			return { legIndex: legIndex,
+				tileIndex: Math.max(0, Math.min(globalIndex - leg.startPosition, leg.tiles.length - 1)), forward: true };
+		}
+		var journey = v.journey;
+		if (v.realWorldJourney) {
+			journey = targetAt(v.realWorldJourney.position);
+		} else if (journey && journey.realWorldCorridorId) {
+			journey = targetAt(journey.tileIndex);
+		} else if (journey && Number.isInteger(journey.legIndex) && route.legs[journey.legIndex]) {
+			var leg = route.legs[journey.legIndex];
+			journey = { legIndex: journey.legIndex,
+				tileIndex: Math.max(0, Math.min(Math.floor(Number(journey.tileIndex) || 0), leg.tiles.length - 1)),
+				forward: journey.forward !== false };
+		} else if (journey) {
+			journey = null;
+			v.currentStation = 1;
+		}
+		v.journey = journey || null;
+		v.realWorldJourney = null;
+		if (!Number.isInteger(v.currentStation) || v.currentStation < 1
+			|| v.currentStation > route.corridor.stations.length)
+			v.currentStation = 1;
+		if (v.onFoot) {
+			if (!v.journey) v.onFoot = null;
+			else v.onFoot = { legIndex: v.journey.legIndex,
+				tileIndex: Math.max(0, Math.min(Math.floor(Number(v.onFoot.tileIndex) || 0),
+					route.legs[v.journey.legIndex].tiles.length - 1)), branch: null };
+		}
+		if (moment.title === 'WorldPilot') moment.title = v.journey ? 'OnTheLine' : 'TrainInterior';
+		if ((moment.title === 'OnTheLine' || moment.title === 'OnFoot') && !v.journey)
+			moment.title = Array.isArray(v.currentTrain) && v.currentTrain.length ? 'TrainInterior' : 'Railyard';
+	},
 	steps: {},
 	afterUpgrade: function(upgraded) {
 		this.recovery = null;
@@ -171,6 +217,7 @@ setup.saveMigrations = {
 	}
 };
 setup.saveMigrations.steps[0] = function(moment) { setup.saveMigrations.upgradeUnversioned(moment); };
+setup.saveMigrations.steps[1] = function(moment) { setup.saveMigrations.upgradeSourcedWorld(moment); };
 if (typeof Config !== 'undefined') {
 	Config.saves.version = setup.saveMigrations.CURRENT;
 	Config.saves.isAllowed = function() { return State.passage !== 'SaveRecovery'; };

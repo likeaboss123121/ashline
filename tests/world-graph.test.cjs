@@ -136,7 +136,7 @@ test('authored Chile rail topology follows connected OSM track in five-kilometre
   const corridor = topology.corridors[0];
   assert.deepEqual(corridor.stations.map(station => station.name),
     ['Padre Hurtado', 'Malloco', 'Talagante', 'El Monte', 'Melipilla']);
-  assert.equal(corridor.debugOnly, true);
+  assert.equal(corridor.debugOnly, false);
   assert.equal(corridor.navigable, true);
   assert.equal(corridor.sliceCount, 11);
   assert.equal(corridor.gridSliceCount, 9);
@@ -157,16 +157,18 @@ test('authored Chile rail topology follows connected OSM track in five-kilometre
   assert.deepEqual(topology, buildTopology(geometry, authored), 'topology compilation is deterministic');
 });
 
-test('real-world pilot moves the active consist without copying static world data into saves', () => {
+test('the sourced grid is the default playable world without copying static data into saves', () => {
   const game = loadGame();
   game.State.variables.debugMode = true;
   game.State.variables.currentTrain = [{ type: 'test locomotive', length: 10, cargo: [], inventory: [], topSpeedKmh: 60 }];
   const train = game.State.variables.currentTrain;
   assert.equal(game.setup.realWorldPilot.start('cl-padre-hurtado-melipilla'), true);
   assert.deepEqual(JSON.parse(JSON.stringify(game.State.variables.journey)),
-    { legIndex: 0, tileIndex: 0, forward: true, realWorldCorridorId: 'cl-padre-hurtado-melipilla' });
+    { legIndex: 1, tileIndex: 0, forward: true });
   const route = game.setup.realWorldPilot.getGridRoute('cl-padre-hurtado-melipilla');
-  assert.equal(route.tiles.length, 10);
+  assert.equal(route.tiles.length, 9);
+  assert.ok(route.slices.every(slice => slice.distanceKm === 5));
+  assert.deepEqual(JSON.parse(JSON.stringify(route.stationPositions)), [0, 1, 3, 4, 8]);
   assert.ok(route.tiles.every(tile => Number.isFinite(tile.elevation) && Number.isFinite(tile.elevationStdDevM)));
   assert.ok(route.tiles.every(tile => tile.terrain === 'plains' || tile.terrain === 'bridge' || tile.terrain === 'tunnel'));
   assert.equal(route.tiles[0].elevation, 436.2);
@@ -176,13 +178,14 @@ test('real-world pilot moves the active consist without copying static world dat
     { meanElevationM: 3000, elevationStdDevM: 20 }, 120), 'plains', 'high and flat is not mountainous');
   assert.equal(game.setup.realWorldPilot.terrainFor({ bridge: false, tunnel: false },
     { meanElevationM: 200, elevationStdDevM: 180 }, 120), 'mountain', 'ruggedness is independent of altitude');
+  game.State.variables.journey = { legIndex: 2, tileIndex: 0, forward: true };
   const step = game.setup.worldmap.getJourneyStep(1);
-  assert.ok(step.distanceKm > 0 && step.distanceKm <= 5);
+  assert.equal(step.distanceKm, 5);
   assert.equal(game.setup.railyard.moveAlongLine(1), true);
   assert.equal(game.State.variables.journey.tileIndex, 1);
   assert.equal(game.State.variables.currentTrain, train);
   assert.equal(game.setup.onfoot.climbDown(), true);
-  assert.equal(game.setup.onfoot.getTile().elevation, route.tiles[1].elevation);
+  assert.equal(game.setup.onfoot.getTile().elevation, route.tiles[2].elevation);
   assert.equal(game.setup.onfoot.walk(-1), true);
   assert.equal(game.State.variables.onFoot.tileIndex, 0);
   assert.equal(game.State.variables.journey.tileIndex, 1, 'walking does not move the consist');

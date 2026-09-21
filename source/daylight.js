@@ -1,8 +1,8 @@
 // Time of day in the pictures: the rail yard and driving views are recoloured by where the sun is.
 //
 // The sun's elevation comes from the game clock and date, read as local solar time, at the latitude of wherever
-// the player is: the world runs north from Punta Arenas, so the far south has long summer evenings and short winter
-// days. The light is graded from that elevation:
+// the player is. Sourced tiles carry their real latitude, so seasons and day length follow the playable route.
+// The light is graded from that elevation:
 //   day      above 12 degrees     the art as drawn
 //   golden   12 to -2 degrees     warmer and a little darker as the sun gets low
 //   dusk     -2 to -12 degrees    sliding into night
@@ -31,12 +31,12 @@ setup.daylight = {
 	getLatitude: function() {
 		var worldmap = setup.worldmap;
 		var view = worldmap && worldmap.getJourneyView ? worldmap.getJourneyView() : null;
-		var y = 0;
-		if (view) {
-			y = view.tile.y;
-		} else if (worldmap && State.variables && State.variables.currentStation) {
-			y = worldmap.getStationTile(worldmap.getSeed(), Number(State.variables.currentStation) || 1).y;
+		var tile = view ? view.tile : worldmap && State.variables && State.variables.currentStation
+			? worldmap.getStationTile(worldmap.getSeed(), Number(State.variables.currentStation) || 1) : null;
+		if (tile && Array.isArray(tile.geoCoordinate) && isFinite(Number(tile.geoCoordinate[1]))) {
+			return Math.max(-66, Math.min(66, Number(tile.geoCoordinate[1])));
 		}
+		var y = tile && isFinite(Number(tile.y)) ? Number(tile.y) : 0;
 		return Math.max(-66, Math.min(66, this.BASE_LATITUDE + (y * worldmap.TILE_KM) / this.KM_PER_DEGREE));
 	},
 	// The sun's elevation in degrees, from the usual approximation of its declination through the year.

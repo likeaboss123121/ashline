@@ -324,8 +324,8 @@ function validateBundle(bundle) {
     topologyGeometryIds.add(topology.geometryId);
     assert(topology.formatVersion === 1 && topology.tileKm === bundle.tileKm, 'Invalid topology header: ' + topology.geometryId);
     topology.corridors.forEach(corridor => {
-      assert(corridor.debugOnly === true && corridor.navigable === true,
-        'Only explicitly authored debug corridors may be navigable: ' + corridor.id);
+      assert(corridor.debugOnly === false && corridor.navigable === true,
+		'Authored gameplay corridor is not navigable: ' + corridor.id);
       assert(corridor.stations.length === corridor.legs.length + 1, 'Wrong station/leg count: ' + corridor.id);
       const sliceIds = new Set();
       let corridorDistance = 0;
@@ -336,7 +336,7 @@ function validateBundle(bundle) {
         leg.slices.forEach((slice, sliceIndex) => {
           assert(!sliceIds.has(slice.id), 'Duplicate topology slice: ' + slice.id);
           sliceIds.add(slice.id);
-          assert(slice.navigable === true && slice.reviewStatus === 'authored-debug-pilot', 'Unsafe topology slice: ' + slice.id);
+          assert(slice.navigable === true && slice.reviewStatus === 'authored-gameplay-route', 'Unsafe topology slice: ' + slice.id);
           assert(slice.distanceKm > 0 && slice.distanceKm <= bundle.tileKm + 0.001, 'Invalid topology slice length: ' + slice.id);
           assert(slice.coordinates.length >= 2 && slice.sourceWayIds.length > 0, 'Topology slice lacks provenance: ' + slice.id);
           assert(Array.isArray(slice.railwayStatuses) && slice.railwayStatuses.length > 0,
@@ -448,7 +448,7 @@ try {
     ' planning links, ' + bundle.regions.length + ' regions, ' + Math.round(distanceKm).toLocaleString('en-US') +
     ' km; ' + bundle.railGeometry.reduce((sum, geometry) => sum + geometry.stats.wayCount, 0).toLocaleString('en-US') +
     ' sourced rail ways, ' + bundle.railTopology.reduce((sum, topology) => sum + topology.corridors.length, 0) +
-    ' playable debug corridor(s)');
+    ' playable sourced corridor(s)');
 } catch (error) {
   console.error(error.stack || error.message);
   process.exitCode = 1;

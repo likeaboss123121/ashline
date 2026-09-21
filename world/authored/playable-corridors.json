@@ -2,9 +2,9 @@
   "corridors": [
     {
       "id": "cl-padre-hurtado-melipilla",
-      "label": "Padre Hurtado–Melipilla pilot",
+      "label": "Padre Hurtado–Melipilla rail grid",
       "geometryId": "chile-central-pilot",
-      "debugOnly": true,
+      "debugOnly": false,
       "stationPointIds": [
         "osm-node:3988525027",
         "osm-node:9063606505",

@@ -183,7 +183,7 @@ function slicesForPath(path, corridorId, legIndex) {
       service: flags.service,
       railwayStatuses: Array.from(flags.statuses).sort(),
       navigable: true,
-      reviewStatus: 'authored-debug-pilot'
+      reviewStatus: 'authored-gameplay-route'
     });
     coordinates = [coordinates[coordinates.length - 1]];
     distanceKm = 0;
@@ -248,8 +248,8 @@ function buildTopology(geometry, authored) {
       label: corridor.label,
       geometryId: geometry.id,
       debugOnly: corridor.debugOnly === true,
-      navigable: corridor.debugOnly === true,
-      reviewStatus: 'authored-debug-pilot',
+      navigable: true,
+      reviewStatus: 'authored-gameplay-route',
       stations,
       legs,
       gridSlices,
@@ -262,7 +262,7 @@ function buildTopology(geometry, authored) {
     formatVersion: 1,
     geometryId: geometry.id,
     tileKm: TILE_KM,
-    buildId: crypto.createHash('sha256').update(JSON.stringify({ topologyVersion: 2,
+    buildId: crypto.createHash('sha256').update(JSON.stringify({ topologyVersion: 3,
       geometry: geometry.sourceInputSha256, authored })).digest('hex').slice(0, 16),
     stats: {
       railwayCoordinateNodes: graph.nodes.size,

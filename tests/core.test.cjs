@@ -244,7 +244,7 @@ test('travel refuses a lead the station or the one it would arrive at does not h
   State.variables.enteredTrainIndex = 0;
   assert.match(setup.railyard.getDepartureBlockReason(1, 1, false), /no Southbound Track/);
   assert.equal(setup.railyard.getDepartureBlockReason(1, 1, true), '');
-  assert.match(setup.railyard.getDepartureBlockReason(2, 1, true), /Station 3 has no Southbound Track/);
+  assert.match(setup.railyard.getDepartureBlockReason(2, 1, true), /Talagante has no Southbound Track/);
   assert.equal(setup.railyard.getDepartureBlockReason(2, 1, false), '');
   State.variables.currentStation = 2;
   State.variables.currentTrain = [{ length: 18 }];
@@ -275,22 +275,14 @@ test('lead tracks take their names from the route heading, not from entry and ex
   const { setup } = loadGame();
   const first = setup.railyard.generateStationTracks(1, 'compass');
   assert.equal(setup.railyard.getTrackLabel(first, 0), 'South Stub');
-  assert.equal(setup.railyard.getTrackLabel(first, first.length - 1), 'Northbound Track');
+  assert.equal(setup.railyard.getTrackLabel(first, first.length - 1), 'South-westbound Track');
   // Arriving at a station means its other lead points back down the leg just travelled.
   const second = setup.railyard.generateStationTracks(2, 'compass');
   assert.equal(setup.railyard.getLeadDirection(second, 'entry'),
     setup.railyard.oppositeDirection(setup.railyard.getLegHeading(1, 'compass')));
   assert.equal(setup.railyard.getLeadDirection(second, 'exit'), setup.railyard.getLegHeading(2, 'compass'));
-  const headings = new Set();
-  for (let seed = 0; seed < 10; seed++) {
-    for (let stationId = 10; stationId <= 100; stationId++) {
-      const heading = setup.railyard.getLegHeading(stationId, 'compass:' + seed);
-      assert.ok(setup.railyard.HEADINGS.includes(heading), heading);
-      headings.add(heading);
-      assert.equal(heading, setup.railyard.getLegHeading(stationId, 'compass:' + seed));
-    }
-  }
-  assert.deepEqual([...headings].sort(), [...setup.railyard.HEADINGS].sort());
+  const headings = [1, 2, 3, 4].map(stationId => setup.railyard.getLegHeading(stationId, 'ignored'));
+  assert.deepEqual(headings, ['southwest', 'southwest', 'west', 'west']);
   assert.equal(setup.railyard.getDirectionName('northeast'), 'North-eastbound');
   assert.equal(setup.railyard.getDirectionName('southwest'), 'South-westbound');
   // A station where the route turns is named for its own two headings.
@@ -307,10 +299,11 @@ test('the world map is the same every time and never enters save data', () => {
   const first = JSON.stringify(setup.worldmap.getLeg('world-a', 1));
   setup.worldmap.clearCache();
   assert.equal(JSON.stringify(setup.worldmap.getLeg('world-a', 1)), first);
-  assert.notEqual(JSON.stringify(setup.worldmap.getLeg('world-b', 1)), first);
+  assert.equal(JSON.stringify(setup.worldmap.getLeg('world-b', 1)), first, 'rail geometry is independent of the yard seed');
   // Stations stand where their legs end, so the world is one continuous line from the origin.
-  assert.deepEqual({ ...setup.worldmap.getStationTile('world-a', 1) }, { x: 0, y: 0 });
-  assert.deepEqual({ ...setup.worldmap.getStationTile('world-a', 3) }, { ...setup.worldmap.getLeg('world-a', 2).end });
+  assert.deepEqual([setup.worldmap.getStationTile('world-a', 1).x, setup.worldmap.getStationTile('world-a', 1).y], [0, 0]);
+  assert.deepEqual([setup.worldmap.getStationTile('world-a', 3).x, setup.worldmap.getStationTile('world-a', 3).y],
+    [setup.worldmap.getLeg('world-a', 2).end.x, setup.worldmap.getLeg('world-a', 2).end.y]);
   assert.ok(!JSON.stringify(State.variables).includes('terrain'), 'generated tiles must stay out of the save');
 });
 
@@ -318,56 +311,48 @@ test('debug teleport moves an onboard consist but moves a walker without their p
   const { setup, State } = loadGame();
   const v = State.variables;
   Object.assign(v, { randomSeed: 'debug-teleport', debugMode: true, travellingForward: true });
-  const tiles = setup.worldmap.getMainLine(v.randomSeed, 1);
+  const tiles = setup.realWorldPilot.getGridRoute().tiles;
   const train = [{ type: 'dieselShunter', length: 12 }, { type: 'boxcar', length: 12 }];
   v.currentTrain = train;
   v.onFoot = null;
-  let result = setup.worldmap.debugTeleportToTile(1, tiles[3].x, tiles[3].y);
+  let result = setup.worldmap.debugTeleportToTile(0, tiles[3].x, tiles[3].y);
   assert.equal(result.mode, 'consist');
   assert.equal(v.currentTrain, train, 'the whole active consist remains together');
   assert.deepEqual({ legIndex: v.journey.legIndex, tileIndex: v.journey.tileIndex, branch: v.journey.branch || null },
-    { legIndex: 1, tileIndex: 3, branch: null });
+    { legIndex: 2, tileIndex: 2, branch: null });
   assert.equal(v.onFoot, null);
 
   // Once outside, journey is the parked consist and onFoot is the player. Clicking another tile moves only onFoot.
-  v.onFoot = { tileIndex: 3, branch: null };
+  v.onFoot = { legIndex: 2, tileIndex: 2, branch: null };
   const parked = JSON.stringify(v.journey);
-  result = setup.worldmap.debugTeleportToTile(1, tiles[6].x, tiles[6].y);
+  result = setup.worldmap.debugTeleportToTile(0, tiles[6].x, tiles[6].y);
   assert.equal(result.mode, 'player');
   assert.equal(JSON.stringify(v.journey), parked);
-  assert.equal(v.onFoot.tileIndex, 6);
+  assert.deepEqual([v.onFoot.legIndex, v.onFoot.tileIndex], [4, 2]);
   assert.equal(v.currentTrain, train);
 
   // A player without a train still gets valid walking context, but is never offered a phantom train to board.
   v.currentTrain = null;
   v.onFoot = null;
-  result = setup.worldmap.debugTeleportToTile(1, tiles[2].x, tiles[2].y);
+  result = setup.worldmap.debugTeleportToTile(0, tiles[2].x, tiles[2].y);
   assert.equal(result.passage, 'OnFoot');
-  assert.equal(v.onFoot.tileIndex, 2);
+  assert.deepEqual([v.onFoot.legIndex, v.onFoot.tileIndex], [2, 1]);
   assert.equal(setup.onfoot.getTrainPosition(), null);
   assert.equal(setup.onfoot.isBesideTrain(), false);
   v.debugMode = false;
-  assert.equal(setup.worldmap.debugTeleportToTile(1, tiles[4].x, tiles[4].y), null);
-  assert.equal(v.onFoot.tileIndex, 2);
+  assert.equal(setup.worldmap.debugTeleportToTile(0, tiles[4].x, tiles[4].y), null);
+  assert.equal(v.onFoot.tileIndex, 1);
 });
 
-test('generated track joins up end to end and obeys the terrain rules', () => {
+test('the sourced rail grid joins end to end in fixed five-kilometre moves', () => {
   const { setup } = loadGame();
-  const straights = ['straight-ns', 'straight-ew', 'straight-nwse', 'straight-nesw'];
-  for (const seed of ['alpha', 'beta', 'gamma']) {
-    for (let legIndex = 1; legIndex <= 6; legIndex++) {
-      const leg = setup.worldmap.getLeg(seed, legIndex);
-      const mainLine = leg.tiles.filter(tile => !tile.branch);
-      assert.ok(mainLine.length >= 9, `leg ${legIndex} has ${mainLine.length} tiles`);
+  for (let legIndex = 1; legIndex <= 4; legIndex++) {
+      const leg = setup.worldmap.getLeg('ignored', legIndex);
+      const mainLine = leg.tiles;
+      assert.ok(mainLine.length >= 2, `leg ${legIndex} has ${mainLine.length} tiles`);
       for (const tile of leg.tiles) {
         assert.notEqual(tile.terrain, 'water', 'no track is ever laid on water');
         assert.ok(setup.worldmap.SHAPES.includes(tile.shape), tile.shape);
-        if (tile.terrain === 'bridge' || tile.terrain === 'tunnel') {
-          assert.ok(straights.includes(tile.shape) || tile.shape === 'dead-end', `${tile.terrain} carries ${tile.shape}`);
-        }
-        if (tile.terrain === 'mountain') {
-          assert.ok(!['t-junction', 'y-junction', 'cross'].includes(tile.shape), `mountain carries ${tile.shape}`);
-        }
         assert.equal(tile.grade, Math.round(tile.grade / 0.5) * 0.5, `grade ${tile.grade}`);
         assert.ok(Math.abs(tile.grade) <= 5, `grade ${tile.grade}`);
       }
@@ -379,8 +364,8 @@ test('generated track joins up end to end and obeys the terrain rules', () => {
           `leg ${legIndex} tile ${i} steps off the line`);
         assert.ok(mainLine[i + 1].ends.includes(setup.worldmap.opposite(tile.out)),
           `leg ${legIndex} tile ${i + 1} does not join the one before it`);
+        assert.equal(tile.distanceKm, 5);
       }
-    }
   }
 });
 
@@ -414,29 +399,25 @@ test('a consist too heavy for the grades ahead is told so instead of travelling'
   State.variables.randomSeed = 'climb';
   const loco = setup.railyard.createLocomotiveCar('dieselShunter');
   loco.cargo = [{ type: 'diesel', amount: 400 }];
-  const heavy = [loco].concat([...Array(20)].map(() => {
+  const heavy = [loco].concat([...Array(100)].map(() => {
     const car = JSON.parse(JSON.stringify(State.variables.defaultTrains.boxcar));
     car.cargo = [{ type: 'coal', amount: 3000 }];
     return car;
   }));
   // Find a leg this consist genuinely cannot pull, so the test is about the rule and not about the seed.
-  let stationId = 1;
-  while (stationId < 40 && setup.worldmap.getClimbBlockReason(stationId, true, heavy) === '') {
-    stationId++;
-  }
-  assert.ok(stationId < 40, 'expected some leg to be too steep for a 20 car consist');
+  const stationId = 2;
   const lead = () => ({ length: 999999, infinite: true, trains: [] });
   State.variables.stationTracks = { [stationId]: [lead(), { length: 400, trains: [] }, lead()] };
   State.variables.currentStation = stationId;
   State.variables.drivingTrackIndex = 1;
   State.variables.enteredTrainIndex = 0;
   State.variables.currentTrain = heavy;
-  assert.match(setup.railyard.getDepartureBlockReason(stationId, 1, true), /climbs \d+\.\d% on the way/);
-  assert.equal(setup.railyard.travelToStation(true), false);
+  assert.match(setup.railyard.getDepartureBlockReason(stationId, 1, false), /climbs \d+\.\d% on the way/);
+  assert.equal(setup.railyard.travelToStation(false), false);
   assert.equal(State.variables.currentStation, stationId);
   // The same line is no trouble for the locomotive on its own.
   State.variables.currentTrain = [loco];
-  assert.equal(setup.worldmap.getClimbBlockReason(stationId, true, [loco]), '');
+  assert.equal(setup.worldmap.getClimbBlockReason(stationId, false, [loco]), '');
 });
 
 test('a journey runs tile by tile and ends by arriving at the station at either end', () => {
@@ -477,8 +458,8 @@ test('backing up on the line returns to the tile before, and the grades reverse 
   const loco = setup.railyard.createLocomotiveCar('dieselShunter');
   loco.cargo = [{ type: 'diesel', amount: 400 }];
   const lead = () => ({ length: 999999, infinite: true, trains: [] });
-  State.variables.stationTracks = { 2: [lead(), { length: 400, trains: [] }, lead()] };
-  State.variables.currentStation = 2;
+  State.variables.stationTracks = { 4: [lead(), { length: 400, trains: [] }, lead()] };
+  State.variables.currentStation = 4;
   State.variables.drivingTrackIndex = 1;
   State.variables.currentTrain = [loco];
   setup.railyard.departOntoLine(true);
@@ -490,7 +471,7 @@ test('backing up on the line returns to the tile before, and the grades reverse 
   assert.equal(back.toIndex, 1);
   assert.equal(State.variables.journey.tileIndex, 2);
   // The step back is the step just taken, downhill where that one climbed.
-  const tiles = setup.worldmap.getMainLine('journey', 2);
+  const tiles = setup.worldmap.getMainLine('journey', 4);
   assert.equal(back.grade, -tiles[1].grade);
   assert.equal(ahead.grade, tiles[2].grade);
   assert.equal(setup.railyard.moveAlongLine(-1), true);
@@ -770,7 +751,7 @@ test('water for a steam engine can come from a station tank or from beside the l
   // Out on the line, water is there to pump only where the map puts water next to the track.
   const seed = setup.worldmap.getSeed();
   const found = { wet: null, dry: null };
-  for (let legIndex = 1; legIndex < 30 && !(found.wet && found.dry); legIndex++) {
+  for (let legIndex = 1; legIndex <= 4 && !(found.wet && found.dry); legIndex++) {
     setup.worldmap.getMainLine(seed, legIndex).forEach((tile, tileIndex) => {
       const kind = setup.worldmap.isBesideWater(seed, tile.x, tile.y) ? 'wet' : 'dry';
       if (!found[kind]) found[kind] = { legIndex, tileIndex, forward: true };
@@ -872,15 +853,9 @@ test('wood comes from gondolas, is cut from timber aboard, and is felled green i
   // There is nothing to fell in a station, and out on the line only in a forest.
   assert.match(job('chop-trees').reason, /no trees/);
   const seed = setup.worldmap.getSeed();
-  let forest = null;
-  let open = null;
-  for (let legIndex = 1; legIndex < 40 && !(forest && open); legIndex++) {
-    setup.worldmap.getMainLine(seed, legIndex).forEach((tile, tileIndex) => {
-      if (tile.terrain === 'forest' && !forest) forest = { legIndex, tileIndex, forward: true };
-      if (tile.terrain !== 'forest' && !open) open = { legIndex, tileIndex, forward: true };
-    });
-  }
-  assert.ok(forest && open, 'the line runs through forest and out of it');
+  const open = { legIndex: 4, tileIndex: 0, forward: true };
+  const forest = { legIndex: 4, tileIndex: 1, forward: true };
+  setup.worldmap.getMainLine(seed, 4)[1].terrain = 'forest';
   State.variables.journey = open;
   assert.match(job('chop-trees').reason, /no trees/);
   State.variables.journey = forest;
@@ -970,8 +945,11 @@ test('forests grow on the map, carry any track, and are drawn', () => {
 });
 
 test('the sun follows the clock, the season and the latitude, and grades the pictures without flattening them', () => {
-  const { setup } = loadGame();
+  const { setup, State } = loadGame();
   const light = setup.daylight;
+  State.variables.currentStation = 1;
+  assert.ok(light.getLatitude() > -34 && light.getLatitude() < -33,
+    `daylight should use Padre Hurtado's sourced latitude, got ${light.getLatitude()}`);
   const at = (month, day, hour) => Date.UTC(2000, month, day, hour);
   // Punta Arenas: a high summer sun, a low winter one, and the sun well down at midnight.
   assert.ok(Math.abs(light.getSunElevation(at(11, 21, 12), -53.2) - 60) < 2);
@@ -1191,102 +1169,30 @@ test('a cold boiler reaches working pressure in the time a real one would', () =
   assert.equal(old.boilerSteamVolumeLiters, 5000);
 });
 
-test('a branch is a route the player can take, and some of them find the main line again', () => {
+test('the playable world contains only sourced rail and no fictional generated branches', () => {
   const { setup, State } = loadGame();
-  State.variables.player = { fatigue: 0, health: 100, immunity: 100, sanity: 100, hunger: 100, thirst: 100 };
-  State.variables.randomSeed = 'branchy';
-  const loco = setup.railyard.createLocomotiveCar('dieselShunter');
-  loco.cargo = [{ type: 'diesel', amount: 4000 }];
-  State.variables.currentTrain = [loco];
-
-  // Across a stretch of the world, branches both dead-end and rejoin, and every rejoin lands further along.
-  let dead = 0, rejoining = 0;
-  for (let legIndex = 1; legIndex < 40; legIndex++) {
-    setup.worldmap.getLeg('branchy', legIndex).branches.forEach(branch => {
-      assert.ok(branch.tiles.length > 0);
-      if (branch.rejoinIndex === null) { dead++; return; }
-      rejoining++;
-      assert.ok(branch.rejoinIndex > branch.fromIndex, `${branch.id} rejoins at ${branch.rejoinIndex}`);
-    });
+  for (let legIndex = 1; legIndex <= 4; legIndex++) {
+    const leg = setup.worldmap.getLeg('ignored', legIndex);
+    assert.equal(leg.realWorld, true);
+    assert.deepEqual([...leg.branches], []);
+    assert.ok(leg.tiles.every(tile => tile.sourceSliceId && tile.geoCoordinate));
   }
-  assert.ok(dead > 0 && rejoining > 0, `${dead} dead ends and ${rejoining} rejoining branches`);
-
-  // Find a leg with a branch, stand on its junction, and take it.
-  let found = null;
-  for (let legIndex = 1; legIndex < 40 && !found; legIndex++) {
-    const branch = setup.worldmap.getLeg('branchy', legIndex).branches.find(candidate => candidate.rejoinIndex !== null);
-    if (branch) found = { legIndex, branch };
-  }
-  assert.ok(found, 'some leg has a rejoining branch');
-  State.variables.journey = { legIndex: found.legIndex, tileIndex: found.branch.fromIndex, forward: true };
-
-  const choices = setup.worldmap.getBranchChoices();
-  assert.ok(choices.some(choice => choice.id === found.branch.id), JSON.stringify(choices));
-  assert.equal(choices[0].tiles, setup.worldmap.getLeg('branchy', found.legIndex).branches
-    .find(branch => branch.id === choices[0].id).tiles.length);
-
-  // Taking it puts the train on the branch, where the view and the steps follow the branch instead of the line.
-  assert.equal(setup.railyard.takeBranch(found.branch.id), true);
-  assert.equal(setup.worldmap.getJourneyView().branch, found.branch.id);
-  assert.equal(setup.worldmap.getJourneyView().tileCount, found.branch.tiles.length);
-  assert.equal(setup.worldmap.getBranchChoices().length, 0, 'no branching off a branch');
-
-  // Backing up from the first tile returns to the junction on the main line.
-  const back = setup.worldmap.getJourneyStep(-1);
-  assert.equal(back.toMain, found.branch.fromIndex);
-  assert.equal(setup.railyard.moveAlongLine(-1), true);
-  assert.equal(State.variables.journey.branch, null);
-  assert.equal(State.variables.journey.tileIndex, found.branch.fromIndex);
-
-  // Running the branch to its far end puts the train back on the main line further along.
-  setup.railyard.takeBranch(found.branch.id);
-  for (let guard = 0; guard < 20 && State.variables.journey.branch; guard++) {
-    assert.equal(setup.railyard.moveAlongLine(1), true);
-  }
-  assert.equal(State.variables.journey.branch, null);
-  assert.equal(State.variables.journey.tileIndex, found.branch.rejoinIndex);
-  assert.ok(found.branch.rejoinIndex > found.branch.fromIndex);
+  State.variables.journey = { legIndex: 2, tileIndex: 1, forward: true };
+  assert.deepEqual([...setup.worldmap.getBranchChoices()], []);
 });
 
-test('terrain is read off a tile climate of latitude, longitude, height, warmth and damp', () => {
+test('sourced tiles report their real coordinates and sampled elevation', () => {
   const { setup } = loadGame();
   const world = setup.worldmap;
-
-  // Station 1 stands at Punta Arenas, and the map runs north from it.
   const home = world.getClimate('climate', 0, 0);
-  assert.ok(Math.abs(home.latitude - (-53.2)) < 0.01);
-  assert.ok(Math.abs(home.longitude - (-70.9)) < 0.01);
-  const north = world.getClimate('climate', 0, 200);
-  assert.ok(north.latitude > home.latitude, 'north is north');
-  assert.ok(Math.abs(north.latitude - (-53.2 + 200 * 5 / 111)) < 0.01);
-
-  // It is warmer at the equator than at either end of the world, and colder up a mountain than beside it.
-  const equator = Math.round((53.2 * 111) / 5);
-  const warm = world.getClimate('climate', 0, equator);
-  assert.ok(warm.temperature > home.temperature + 10, `${warm.temperature} vs ${home.temperature}`);
-  const flat = { ...world.getClimate('climate', 3, equator) };
-  const high = world.getClimate('climate', 3, equator);
-  assert.equal(Math.round(high.temperature - (flat.temperature)), 0, 'the same tile reads the same every time');
-
-  // The dry belt sits where the trade winds put it, and the equator is wet.
-  const dryBelt = world.getClimate('climate', 0, Math.round(((53.2 - 27) * 111) / 5));
-  assert.ok(dryBelt.humidity < warm.humidity, `${dryBelt.humidity} vs ${warm.humidity}`);
-
-  // Terrain follows those numbers: no deserts in the wet, no forests in the ice.
-  let checked = 0;
-  for (let x = -20; x < 20; x++) {
-    for (let y = 0; y < 2600; y += 37) {
-      const terrain = world.getBaseTerrain('climate', x, y);
-      if (terrain === 'water') continue;
-      const climate = world.getClimate('climate', x, y);
-      checked++;
-      if (terrain === 'desert') assert.ok(climate.humidity < world.DESERT_HUMIDITY && climate.temperature >= world.ARCTIC_TEMPERATURE);
-      if (terrain === 'forest') assert.ok(climate.humidity > world.FOREST_HUMIDITY && climate.temperature >= world.ARCTIC_TEMPERATURE);
-      if (terrain === 'arctic') assert.ok(climate.temperature < world.ARCTIC_TEMPERATURE);
-      if (terrain === 'mountain') assert.ok(climate.elevation > world.MOUNTAIN_METRES);
-    }
-  }
-  assert.ok(checked > 1000, `${checked} tiles checked`);
+  assert.ok(Math.abs(home.latitude - (-33.5678013)) < 0.00001);
+  assert.ok(Math.abs(home.longitude - (-70.8156797)) < 0.00001);
+  assert.equal(home.elevation, 436.2);
+  assert.equal(world.getBaseTerrain('climate', 0, 0), 'bridge');
+  const melipilla = setup.realWorldPilot.getStationTile(5);
+  const west = world.getClimate('climate', melipilla.x, melipilla.y);
+  assert.equal(west.elevation, 184.2);
+  assert.ok(west.longitude < home.longitude);
 });
 
 test('each locomotive is worth choosing: range, speed and pull sit in sensible bands', () => {
@@ -1411,58 +1317,18 @@ test('the date can be written four ways, and the clock behind it never changes',
   assert.equal(setup.time.getCurrentTimestampMs(), Date.UTC(2000, 6, 4, 15, 7));
 });
 
-test('a branch that never finds the main line ends at a station of its own', () => {
-  const { setup, State } = loadGame();
-  State.variables.player = { fatigue: 0, health: 100, immunity: 100, sanity: 100, hunger: 100, thirst: 100 };
-  State.variables.randomSeed = 'termini';
-  State.variables.stationTracks = {};
-  const loco = setup.railyard.createLocomotiveCar('dieselShunter');
-  loco.cargo = [{ type: 'diesel', amount: 1400 }];
-  State.variables.currentTrain = [loco];
-  State.variables.currentCarIndex = 0;
-
-  // Every branch either rejoins the line or runs to a terminus; none of them simply stops in open country.
-  let terminus = null;
-  for (let legIndex = 1; legIndex < 25; legIndex++) {
-    setup.worldmap.getLeg('termini', legIndex).branches.forEach(branch => {
-      assert.ok(branch.rejoinIndex !== null || branch.stationId, `${branch.id} leads nowhere`);
-      if (branch.stationId && !terminus) terminus = { legIndex, branch };
-      if (branch.stationId) {
-        const last = branch.tiles[branch.tiles.length - 1];
-        assert.equal(last.station, branch.stationId, 'the last tile is the station');
-      }
-    });
+test('all playable stations come from the authored sourced corridor', () => {
+  const { setup } = loadGame();
+  assert.deepEqual([1, 2, 3, 4, 5].map(id => setup.worldmap.getStationName(id)),
+    ['Padre Hurtado', 'Malloco', 'Talagante', 'El Monte', 'Melipilla']);
+  assert.equal(setup.realWorldPilot.getStation(6), null);
+  for (let legIndex = 1; legIndex <= 4; legIndex++) {
+    const leg = setup.worldmap.getLeg('ignored', legIndex);
+    assert.equal(leg.fromStation.name, setup.worldmap.getStationName(legIndex));
+    assert.equal(leg.toStation.name, setup.worldmap.getStationName(legIndex + 1));
+    assert.equal(leg.tiles[0].station, leg.fromStation.name);
+    assert.equal(leg.tiles.at(-1).station, leg.toStation.name);
   }
-  assert.ok(terminus, 'some branch runs to a terminus');
-  assert.match(terminus.branch.stationId, /^L\d+B\d+$/);
-  assert.equal(setup.worldmap.isBranchStation(terminus.branch.stationId), true);
-  assert.equal(setup.worldmap.isBranchStation(4), false);
-  assert.equal(setup.worldmap.getStationName(terminus.branch.stationId), 'Station ' + terminus.branch.stationId.slice(1));
-
-  // The terminus is a real station: a yard to shunt in, with one way in and out.
-  const tracks = setup.railyard.generateStationTracks(terminus.branch.stationId, 'termini');
-  assert.ok(tracks.length >= 4, `${tracks.length} tracks`);
-  const leads = setup.railyard.getLeads(tracks);
-  assert.equal(leads.entry, true);
-  assert.equal(leads.exit, false, 'a terminus has no way on');
-  assert.ok(setup.railyard.HEADINGS.includes(tracks[0].direction), tracks[0].direction);
-
-  // Driving out to the end of the branch arrives there, and leaving again puts the train back on the branch.
-  State.variables.journey = { legIndex: terminus.legIndex, tileIndex: terminus.branch.fromIndex, forward: true };
-  assert.equal(setup.railyard.takeBranch(terminus.branch.id), true);
-  for (let guard = 0; guard < 20 && State.variables.journey; guard++) {
-    if (!setup.railyard.moveAlongLine(1)) break;
-  }
-  assert.equal(State.variables.journey, null, 'the journey ends at the terminus');
-  assert.equal(State.variables.currentStation, terminus.branch.stationId);
-  assert.ok(State.variables.stationTracks[terminus.branch.stationId], 'its yard was generated on arrival');
-
-  assert.equal(setup.railyard.departOntoLine(false), true);
-  assert.equal(State.variables.journey.branch, terminus.branch.id);
-  assert.equal(State.variables.journey.tileIndex, terminus.branch.tiles.length - 1);
-  // And from there the only way is back toward the junction.
-  assert.equal(setup.worldmap.getJourneyStep(1), null);
-  assert.ok(setup.worldmap.getJourneyStep(-1));
 });
 
 test('a dead car in the road has to be shunted, and another engine can be robbed of its fuel', () => {
@@ -1535,17 +1401,10 @@ test('the player can climb down, walk the line, fell trees by hand, and carry wh
   State.variables.currentTrain = [loco, flatcar];
   State.variables.currentCarIndex = 0;
 
-  // Find a leg with a forest tile on it, and stand the train there.
+  // Stand on a sourced tile marked as forest for this isolated forestry interaction test.
   const seed = setup.worldmap.getSeed();
-  let spot = null;
-  for (let legIndex = 1; legIndex < 30 && !spot; legIndex++) {
-    setup.worldmap.getMainLine(seed, legIndex).forEach((tile, tileIndex) => {
-      if (!spot && tile.terrain === 'forest' && tileIndex > 0 && tileIndex < setup.worldmap.getMainLine(seed, legIndex).length - 1) {
-        spot = { legIndex, tileIndex };
-      }
-    });
-  }
-  assert.ok(spot, 'the line runs through a forest somewhere');
+  const spot = { legIndex: 4, tileIndex: 1 };
+  setup.worldmap.getMainLine(seed, spot.legIndex)[spot.tileIndex].terrain = 'forest';
   State.variables.journey = { legIndex: spot.legIndex, tileIndex: spot.tileIndex, forward: true };
 
   // Climbing down puts the player beside the train, where the train's tools are still to hand.

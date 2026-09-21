@@ -1,13 +1,8 @@
-// The world between stations: a grid of 5 km tiles, each carrying one piece of track.
+// The playable world between stations: sourced rail geometry resampled into fixed 5 km grid moves.
 //
-// Everything here is a pure function of the world seed. Nothing is ever written into State.variables, so the map
-// costs nothing in a save and cannot drift out of step with one: ask for the same seed and you get the same world
-// back, every time. Results are memoised in setup.worldmap.cache, which SugarCube does not persist.
-//
-// Coordinates are whole tiles, x east and y north, with station 1 at the origin. A leg is the run of track from
-// station N to station N + 1; its heading comes from setup.railyard.getLegHeading, so the map and the compass
-// names the player reads are the same route. Each tile records the directions its track points (its ends), the
-// terrain it crosses, and the grade of the step leaving it, quantised to the half percent between -5% and 5%.
+// setup.realWorldPilot owns the active route and station topology. This module supplies the common movement,
+// grade, rendering and debug-map APIs used by the passages. The older seeded generator helpers remain below only
+// as compatibility code for old saves and tests; getLeg() and getStationTile() always select the sourced route.
 setup.worldmap = {
 	TILE_KM: 5,
 	TILE_METRES: 5000,
@@ -104,6 +99,13 @@ setup.worldmap = {
 	// numbers rather than rolled separately, so the world makes sense as you cross it: the dry belt sits where the
 	// dry belt belongs, forests follow the rain, and it gets colder as you climb or leave the temperate latitudes.
 	getClimate: function(seed, x, y) {
+		var sourced = setup.realWorldPilot && setup.realWorldPilot.getGridRoute
+			? setup.realWorldPilot.getGridRoute().tiles.filter(function(tile) { return tile.x === x && tile.y === y; })[0] : null;
+		if (sourced) {
+			var sourcedLatitude = sourced.geoCoordinate[1], sourcedElevation = sourced.elevation;
+			return { latitude: sourcedLatitude, longitude: sourced.geoCoordinate[0], elevation: sourcedElevation,
+				temperature: 34 - 0.48 * Math.abs(sourcedLatitude) - sourcedElevation * 0.0065, humidity: 0.5 };
+		}
 		var latitude = this.BASE_LATITUDE + (y * this.TILE_KM) / this.KM_PER_DEGREE;
 		// A degree of longitude is shorter the further from the equator you stand.
 		var shrink = Math.max(0.25, Math.cos(latitude * Math.PI / 180));
@@ -133,6 +135,9 @@ setup.worldmap = {
 		return band[band.length - 1][1];
 	},
 	getBaseTerrain: function(seed, x, y) {
+		var sourced = setup.realWorldPilot && setup.realWorldPilot.getGridRoute
+			? setup.realWorldPilot.getGridRoute().tiles.filter(function(tile) { return tile.x === x && tile.y === y; })[0] : null;
+		if (sourced) return sourced.terrain;
 		// Water is where the land is not, and is decided before any climate question.
 		if (this.smoothNoise(seed, 'water', x, y, 7) > 0.74) {
 			return 'water';
@@ -155,6 +160,9 @@ setup.worldmap = {
 	// Whether there is water to pump from: the tile itself is water (the line is bridging it), or one of the eight
 	// tiles around it is.
 	isBesideWater: function(seed, x, y) {
+		var route = setup.realWorldPilot && setup.realWorldPilot.getGridRoute ? setup.realWorldPilot.getGridRoute() : null;
+		var sourced = route && route.tiles.filter(function(tile) { return tile.x === x && tile.y === y; })[0];
+		if (sourced) return sourced.terrain === 'bridge';
 		for (var dx = -1; dx <= 1; dx++) {
 			for (var dy = -1; dy <= 1; dy++) {
 				if (this.getBaseTerrain(seed, x + dx, y + dy) === 'water') {
@@ -237,6 +245,9 @@ setup.worldmap = {
 	},
 	// Station 1 sits at the origin; every station after it stands at the end of the leg that reaches it.
 	getStationTile: function(seed, stationId) {
+		if (setup.realWorldPilot && setup.realWorldPilot.getStationTile) {
+			return setup.realWorldPilot.getStationTile(stationId) || { x: 0, y: 0 };
+		}
 		if (this.isBranchStation(stationId)) {
 			var branch = this.getBranchForStation(seed, stationId);
 			return branch ? branch.tiles[branch.tiles.length - 1] : { x: 0, y: 0 };
@@ -253,6 +264,7 @@ setup.worldmap = {
 		return cache.stations[id];
 	},
 	getLeg: function(seed, legIndex) {
+		if (setup.realWorldPilot && setup.realWorldPilot.getLeg) return setup.realWorldPilot.getLeg(legIndex);
 		var cache = this.cacheFor(seed);
 		if (!cache.legs[legIndex]) {
 			cache.legs[legIndex] = this.buildLeg(seed, legIndex);
@@ -434,6 +446,10 @@ setup.worldmap = {
 	},
 	// What the player calls a station.
 	getStationName: function(stationId) {
+		if (setup.realWorldPilot && setup.realWorldPilot.getStation) {
+			var station = setup.realWorldPilot.getStation(stationId);
+			if (station) return station.name;
+		}
 		return 'Station ' + String(stationId).replace(/^L/, '').replace('B', 'B');
 	},
 	// One branch off the main line. Most wander a few tiles and stop at a buffer stop; some bend back and meet the
@@ -536,6 +552,8 @@ setup.worldmap = {
 	// The leg's main line, station tile to station tile, as the positions a train can stand on. Branch tiles are
 	// not part of it: they lead nowhere yet.
 	getMainLine: function(seed, legIndex) {
+		var sourcedLeg = this.getLeg(seed, legIndex);
+		if (sourcedLeg && sourcedLeg.realWorld) return sourcedLeg.tiles;
 		var cache = this.cacheFor(seed);
 		if (!cache.mainLines) {
 			cache.mainLines = {};
@@ -576,9 +594,8 @@ setup.worldmap = {
 		if (!journey) {
 			return null;
 		}
-		var realRoute = setup.realWorldPilot && setup.realWorldPilot.getJourneyRoute(journey);
-		if (realRoute) return { tiles: realRoute.tiles, branch: null, leg: realRoute.leg };
 		var leg = this.getLeg(this.getSeed(), journey.legIndex);
+		if (!leg) return null;
 		if (journey.branch) {
 			var taken = (leg.branches || []).filter(function(branch) { return branch.id === journey.branch; })[0];
 			if (taken) {
@@ -617,15 +634,16 @@ setup.worldmap = {
 		var tiles = path.tiles;
 		if (path.leg.realWorld) {
 			var realIndex = Math.max(0, Math.min(journey.tileIndex, tiles.length - 1));
-			var done = tiles.slice(0, realIndex).reduce(function (sum, tile) { return sum + tile.distanceKm; }, 0);
-			var left = tiles.slice(realIndex).reduce(function (sum, tile) { return sum + tile.distanceKm; }, 0);
+			var travelled = journey.forward !== false ? realIndex : tiles.length - 1 - realIndex;
 			return {
-				realWorld: true, corridorId: journey.realWorldCorridorId, legIndex: journey.legIndex,
+				realWorld: true, corridorId: path.leg.corridorId, legIndex: journey.legIndex,
 				tileIndex: realIndex, tileCount: tiles.length, forward: journey.forward !== false,
 				tile: tiles[realIndex], terrain: tiles[realIndex].terrain, shape: tiles[realIndex].shape,
-				grade: tiles[realIndex].grade, kilometresDone: done, kilometresLeft: left,
-				fromStation: path.leg.corridor.stations[0].name,
-				toStation: path.leg.corridor.stations[path.leg.corridor.stations.length - 1].name
+				grade: journey.forward !== false ? tiles[realIndex].grade : -tiles[Math.max(0, realIndex - 1)].grade,
+				kilometresDone: travelled * this.TILE_KM,
+				kilometresLeft: (tiles.length - 1 - travelled) * this.TILE_KM,
+				fromStation: journey.forward !== false ? path.leg.fromStation.name : path.leg.toStation.name,
+				toStation: journey.forward !== false ? path.leg.toStation.name : path.leg.fromStation.name
 			};
 		}
 		if (path.branch) {
@@ -684,16 +702,15 @@ setup.worldmap = {
 		var tiles = path.tiles;
 		var from = Math.max(0, Math.min(journey.tileIndex, tiles.length - 1));
 		if (path.leg.realWorld) {
-			var realTo = from + (direction >= 0 ? 1 : -1);
+			var realTo = from + (journey.forward !== false ? 1 : -1) * (direction >= 0 ? 1 : -1);
 			if (realTo < 0 || realTo >= tiles.length) return null;
 			var forwardStep = realTo > from;
-			var distanceKm = forwardStep ? tiles[from].distanceKm : tiles[realTo].distanceKm;
 			var realStep = this.describeStep(forwardStep ? tiles[from].grade : -tiles[realTo].grade, tiles[realTo].terrain, {
-				fromIndex: from, toIndex: realTo, realWorld: true, distanceKm: distanceKm,
+				fromIndex: from, toIndex: realTo, realWorld: true, distanceKm: this.TILE_KM,
 				heading: this.describeDirection(forwardStep ? tiles[from].out : this.opposite(tiles[realTo].out)),
-				destinationName: tiles[realTo].station || ''
+				destinationName: tiles[realTo].station || '',
+				arrivesAt: realTo === 0 ? journey.legIndex : (realTo === tiles.length - 1 ? journey.legIndex + 1 : 0)
 			});
-			realStep.minutes = Math.max(1, Math.round(realStep.minutes * distanceKm / this.TILE_KM));
 			return realStep;
 		}
 		if (path.branch) {
@@ -791,9 +808,12 @@ setup.worldmap = {
 	// little. Fuel follows from the clock, because the time system burns fuel by the minute while travelling.
 	getLegTravel: function(seed, legIndex, train, reverse) {
 		var leg = this.getLeg(seed, legIndex);
+		if (!leg) return { minutes: 0, tiles: 0, kilometres: 0, steepestClimb: 0,
+			climbLimit: this.getClimbLimitPercent(train) };
 		// Every tile but the last carries one step to its neighbour, and that step's grade. The same steps are
 		// travelled either way round, so running the leg backwards is the same list of grades negated.
-		var steps = leg.tiles.filter(function(tile) { return !tile.branch && tile.out !== -1; });
+		var steps = leg.realWorld ? leg.tiles.slice(0, -1)
+			: leg.tiles.filter(function(tile) { return !tile.branch && tile.out !== -1; });
 		var minutes = 0;
 		var steepestClimb = 0;
 		for (var i = 0; i < steps.length; i++) {
@@ -846,6 +866,7 @@ setup.worldmap = {
 	// Resolves one generated track tile into the journey coordinates used by trains and walkers. Debug tools use
 	// coordinates rather than array offsets so the map remains the source of truth for what was clicked.
 	getDebugTeleportTarget: function(legIndex, x, y) {
+		if (setup.realWorldPilot && setup.realWorldPilot.debugTarget) return setup.realWorldPilot.debugTarget(x, y);
 		var leg = this.getLeg(this.getSeed(), legIndex);
 		var mainLine = this.getMainLine(this.getSeed(), legIndex);
 		for (var mainIndex = 0; mainIndex < mainLine.length; mainIndex++) {
@@ -874,10 +895,7 @@ setup.worldmap = {
 		var onFoot = !!variables.onFoot;
 		var currentJourney = this.getJourney();
 		if (activeTrain && onFoot) {
-			// The walking model stores the parked train in journey and the player in onFoot. It cannot represent them
-			// on different legs, so a map for any other leg must not silently move the train as a side effect.
-			if (!currentJourney || currentJourney.legIndex !== target.legIndex) return null;
-			variables.onFoot = { tileIndex: target.tileIndex, branch: target.branch };
+			variables.onFoot = { legIndex: target.legIndex, tileIndex: target.tileIndex, branch: target.branch };
 			return { mode: 'player', passage: 'OnFoot', target: target };
 		}
 		var forward = currentJourney && currentJourney.legIndex === target.legIndex
@@ -891,7 +909,7 @@ setup.worldmap = {
 			variables.onFoot = null;
 			return { mode: 'consist', passage: State.passage === 'TrainInterior' ? 'TrainInterior' : 'OnTheLine', target: target };
 		}
-		variables.onFoot = { tileIndex: target.tileIndex, branch: target.branch };
+		variables.onFoot = { legIndex: target.legIndex, tileIndex: target.tileIndex, branch: target.branch };
 		return { mode: 'player', passage: 'OnFoot', target: target };
 	},
 	// --- debug map ----------------------------------------------------------------------------------------
@@ -899,9 +917,11 @@ setup.worldmap = {
 	// them. It is a look at what the generator produced, not a player-facing map.
 	buildDebugMap: function(stationId, cellSize) {
 		var seed = this.getSeed();
-		var branchHere = this.getBranchForStation(seed, stationId);
-		var legIndex = branchHere ? branchHere.legIndex : Math.max(1, Math.floor(stationId));
-		var leg = this.getLeg(seed, legIndex);
+		var route = setup.realWorldPilot.getGridRoute();
+		var legIndex = Math.max(1, Math.min(Math.floor(Number(stationId)) || 1, route.corridor.stations.length - 1));
+		var leg = { index: route.corridor.id, tiles: route.tiles, byKey: {}, branches: [], rect: route.rect,
+			realWorld: true, corridor: route.corridor };
+		route.tiles.forEach(function(tile) { leg.byKey[setup.worldmap.key(tile.x, tile.y)] = tile; });
 		var rect = leg.rect;
 		var cell = cellSize || 9;
 		var width = (rect.x1 - rect.x0 + 1) * cell;
@@ -922,7 +942,7 @@ setup.worldmap = {
 		for (var y = rect.y0; y <= rect.y1; y++) {
 			for (var x = rect.x0; x <= rect.x1; x++) {
 				var tile = leg.byKey[this.key(x, y)];
-				var terrain = tile ? tile.terrain : this.getBaseTerrain(seed, x, y);
+				var terrain = tile ? tile.terrain : 'plains';
 				var cellRect = document.createElementNS(ns, 'rect');
 				cellRect.setAttribute('x', left(x));
 				cellRect.setAttribute('y', top(y));
@@ -933,18 +953,17 @@ setup.worldmap = {
 				cellRect.setAttribute('stroke-width', '0.5');
 				if (tile) {
 					cellRect.setAttribute('class', 'debug-teleport-tile');
-					cellRect.setAttribute('data-debug-teleport', legIndex + ':' + x + ':' + y);
+					cellRect.setAttribute('data-debug-teleport', '0:' + x + ':' + y);
 					cellRect.setAttribute('tabindex', '0');
 					cellRect.setAttribute('role', 'button');
 					cellRect.setAttribute('aria-label', 'Teleport to track tile ' + x + ', ' + y);
 				}
 				var title = document.createElementNS(ns, 'title');
-				var climate = this.getClimate(seed, x, y);
-				title.textContent = x + ',' + y + ' ' + terrain
-					+ (tile ? ' ' + tile.shape + ' ' + tile.grade.toFixed(1) + '%' : '')
-					+ ' | ' + climate.latitude.toFixed(1) + '\u00b0, ' + climate.longitude.toFixed(1) + '\u00b0'
-					+ ' | ' + climate.elevation + ' m, ' + climate.temperature.toFixed(1) + '\u00b0C, humidity '
-					+ climate.humidity.toFixed(2);
+				title.textContent = tile ? ((tile.station ? tile.station + ' | ' : '') + 'grid ' + x + ',' + y + ' '
+					+ tile.terrain + ' ' + tile.shape + ' ' + tile.grade.toFixed(1) + '% | '
+					+ tile.geoCoordinate[1].toFixed(4) + '\u00b0, ' + tile.geoCoordinate[0].toFixed(4) + '\u00b0 | mean '
+					+ tile.elevation.toFixed(1) + ' m, relief \u03c3 ' + tile.elevationStdDevM.toFixed(1) + ' m')
+					: 'No playable rail in grid cell ' + x + ',' + y;
 				cellRect.appendChild(title);
 				svg.appendChild(cellRect);
 			}
@@ -973,7 +992,7 @@ setup.worldmap = {
 				marker.setAttribute('fill', '#e5c58a');
 				marker.setAttribute('pointer-events', 'none');
 				var markerTitle = document.createElementNS(ns, 'title');
-				markerTitle.textContent = 'Station ' + tile.station;
+				markerTitle.textContent = tile.station;
 				marker.appendChild(markerTitle);
 				svg.appendChild(marker);
 			}
@@ -981,7 +1000,7 @@ setup.worldmap = {
 		// Where the train is standing, and which way it is going, so the map can be read against the journey.
 		var here = this.getJourneyView();
 		var hasTrain = Array.isArray(State.variables.currentTrain) && State.variables.currentTrain.length > 0;
-		if (hasTrain && here && here.legIndex === legIndex) {
+		if (hasTrain && here && here.realWorld) {
 			var marker = document.createElementNS(ns, 'polygon');
 			var mx = left(here.tile.x) + cell / 2;
 			var my = top(here.tile.y) + cell / 2;
@@ -1004,7 +1023,7 @@ setup.worldmap = {
 		// than presenting the route-context journey as a phantom train.
 		var footPosition = setup.onfoot && setup.onfoot.getPosition ? setup.onfoot.getPosition() : null;
 		var footView = footPosition && this.getJourneyView(footPosition);
-		if (footView && footView.legIndex === legIndex) {
+		if (footView && footView.realWorld) {
 			var footMarker = document.createElementNS(ns, 'circle');
 			footMarker.setAttribute('cx', left(footView.tile.x) + cell / 2);
 			footMarker.setAttribute('cy', top(footView.tile.y) + cell / 2);
@@ -1030,12 +1049,12 @@ setup.worldmap = {
 			var heading = document.createElement('p');
 			heading.className = 'debug-map-heading';
 			var leg = built.leg;
-			var mainLine = leg.tiles.filter(function(tile) { return !tile.branch; });
+			var mainLine = leg.tiles;
 			var grades = mainLine.map(function(tile) { return tile.grade; });
-			heading.textContent = 'World map, leg ' + leg.index + ' (station ' + leg.index + ' to ' + (leg.index + 1) + '): '
-				+ mainLine.length + ' tiles, ' + (mainLine.length * this.TILE_KM) + ' km, grades '
+			heading.textContent = leg.corridor.label + ': ' + mainLine.length + ' grid positions, '
+				+ ((mainLine.length - 1) * this.TILE_KM) + ' playable km, grades '
 				+ Math.min.apply(null, grades).toFixed(1) + '% to ' + Math.max.apply(null, grades).toFixed(1) + '%, '
-				+ (leg.tiles.length - mainLine.length) + ' branch tiles. Seed ' + this.getSeed() + '.';
+				+ leg.corridor.stations.length + ' sourced stations. Yard contents still use seed ' + this.getSeed() + '.';
 			parent.appendChild(heading);
 			var instructions = document.createElement('p');
 			instructions.textContent = 'Debug teleport: select a track tile on the map or choose one below. If you are aboard, your entire consist moves with you; on foot, only you move.';
@@ -1044,8 +1063,9 @@ setup.worldmap = {
 				var result = self.debugTeleportToTile(Number(legIndex), Number(x), Number(y));
 				if (!result) return;
 				setup.debugTeleportNotice = 'Teleported ' + (result.mode === 'consist' ? 'the complete consist' : 'you')
-					+ ' to leg ' + result.target.legIndex + ', ' + (result.target.branch ? 'branch ' + result.target.branch + ', ' : '')
-					+ 'tile ' + (result.target.tileIndex + 1) + ' at ' + result.target.tile.x + ', ' + result.target.tile.y + '.';
+					+ ' to ' + setup.worldmap.getStationName(result.target.legIndex) + '–'
+					+ setup.worldmap.getStationName(result.target.legIndex + 1) + ', tile '
+					+ (result.target.tileIndex + 1) + ' at ' + result.target.tile.x + ', ' + result.target.tile.y + '.';
 				setup.debugReturnToPanel = true;
 				Engine.play(result.passage);
 			};
@@ -1072,18 +1092,10 @@ setup.worldmap = {
 			select.setAttribute('aria-label', 'Exact track tile');
 			mainLine.forEach(function(tile, index) {
 				var option = document.createElement('option');
-				option.value = leg.index + ',' + tile.x + ',' + tile.y;
-				option.textContent = 'Main ' + (index + 1) + '/' + mainLine.length + ' — ' + tile.x + ', ' + tile.y + ' — ' + tile.terrain;
+				option.value = '0,' + tile.x + ',' + tile.y;
+				option.textContent = (index + 1) + '/' + mainLine.length + ' — ' + tile.x + ', ' + tile.y + ' — '
+					+ tile.terrain + (tile.station ? ' — ' + tile.station : '');
 				select.appendChild(option);
-			});
-			leg.branches.forEach(function(branch) {
-				branch.tiles.forEach(function(tile, index) {
-					var option = document.createElement('option');
-					option.value = leg.index + ',' + tile.x + ',' + tile.y;
-					option.textContent = 'Branch ' + branch.id + ' ' + (index + 1) + '/' + branch.tiles.length
-						+ ' — ' + tile.x + ', ' + tile.y + ' — ' + tile.terrain;
-					select.appendChild(option);
-				});
 			});
 			label.appendChild(select);
 			controls.appendChild(label);
@@ -1107,7 +1119,7 @@ setup.worldmap = {
 				parent.insertBefore(notice, built.svg);
 			}
 			var legend = document.createElement('p');
-			legend.textContent = 'plains, forest, desert, arctic, mountain, bridge, tunnel, water. Hover a tile for its terrain, shape and grade; outlined track tiles are teleport targets.';
+			legend.textContent = 'Each outlined cell is one fixed 5 km gameplay move. Hover it for its sourced coordinates, terrain, grade, mean elevation and relief; every rail cell is a teleport target.';
 			parent.appendChild(legend);
 		} catch (error) {
 			var failure = document.createElement('p');

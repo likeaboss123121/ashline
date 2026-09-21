@@ -31259,7 +31259,7 @@ setup.worldGraphData = {
       "formatVersion": 1,
       "geometryId": "chile-central-pilot",
       "tileKm": 5,
-      "buildId": "e6be4f25faba72c0",
+      "buildId": "40d1929019847e9c",
       "stats": {
         "railwayCoordinateNodes": 19743,
         "railwaySegments": 19810,
@@ -31997,11 +31997,11 @@ setup.worldGraphData = {
       "corridors": [
         {
           "id": "cl-padre-hurtado-melipilla",
-          "label": "Padre Hurtado–Melipilla pilot",
+          "label": "Padre Hurtado–Melipilla rail grid",
           "geometryId": "chile-central-pilot",
-          "debugOnly": true,
+          "debugOnly": false,
           "navigable": true,
-          "reviewStatus": "authored-debug-pilot",
+          "reviewStatus": "authored-gameplay-route",
           "stations": [
             {
               "id": "osm-node:3988525027",
@@ -32096,7 +32096,7 @@ setup.worldGraphData = {
                     "current"
                   ],
                   "navigable": true,
-                  "reviewStatus": "authored-debug-pilot"
+                  "reviewStatus": "authored-gameplay-route"
                 },
                 {
                   "id": "cl-padre-hurtado-melipilla:leg-1:slice-02",
@@ -32123,7 +32123,7 @@ setup.worldGraphData = {
                     "current"
                   ],
                   "navigable": true,
-                  "reviewStatus": "authored-debug-pilot"
+                  "reviewStatus": "authored-gameplay-route"
                 }
               ]
             },
@@ -32199,7 +32199,7 @@ setup.worldGraphData = {
                     "current"
                   ],
                   "navigable": true,
-                  "reviewStatus": "authored-debug-pilot"
+                  "reviewStatus": "authored-gameplay-route"
                 },
                 {
                   "id": "cl-padre-hurtado-melipilla:leg-2:slice-02",
@@ -32242,7 +32242,7 @@ setup.worldGraphData = {
                     "current"
                   ],
                   "navigable": true,
-                  "reviewStatus": "authored-debug-pilot"
+                  "reviewStatus": "authored-gameplay-route"
                 }
               ]
             },
@@ -32321,7 +32321,7 @@ setup.worldGraphData = {
                     "current"
                   ],
                   "navigable": true,
-                  "reviewStatus": "authored-debug-pilot"
+                  "reviewStatus": "authored-gameplay-route"
                 },
                 {
                   "id": "cl-padre-hurtado-melipilla:leg-3:slice-02",
@@ -32347,7 +32347,7 @@ setup.worldGraphData = {
                     "current"
                   ],
                   "navigable": true,
-                  "reviewStatus": "authored-debug-pilot"
+                  "reviewStatus": "authored-gameplay-route"
                 }
               ]
             },
@@ -32395,7 +32395,7 @@ setup.worldGraphData = {
                     "current"
                   ],
                   "navigable": true,
-                  "reviewStatus": "authored-debug-pilot"
+                  "reviewStatus": "authored-gameplay-route"
                 },
                 {
                   "id": "cl-padre-hurtado-melipilla:leg-4:slice-02",
@@ -32439,7 +32439,7 @@ setup.worldGraphData = {
                     "current"
                   ],
                   "navigable": true,
-                  "reviewStatus": "authored-debug-pilot"
+                  "reviewStatus": "authored-gameplay-route"
                 },
                 {
                   "id": "cl-padre-hurtado-melipilla:leg-4:slice-03",
@@ -32486,7 +32486,7 @@ setup.worldGraphData = {
                     "current"
                   ],
                   "navigable": true,
-                  "reviewStatus": "authored-debug-pilot"
+                  "reviewStatus": "authored-gameplay-route"
                 },
                 {
                   "id": "cl-padre-hurtado-melipilla:leg-4:slice-04",
@@ -32534,7 +32534,7 @@ setup.worldGraphData = {
                     "current"
                   ],
                   "navigable": true,
-                  "reviewStatus": "authored-debug-pilot"
+                  "reviewStatus": "authored-gameplay-route"
                 },
                 {
                   "id": "cl-padre-hurtado-melipilla:leg-4:slice-05",
@@ -32569,7 +32569,7 @@ setup.worldGraphData = {
                     "current"
                   ],
                   "navigable": true,
-                  "reviewStatus": "authored-debug-pilot"
+                  "reviewStatus": "authored-gameplay-route"
                 }
               ]
             }
@@ -32634,7 +32634,7 @@ setup.worldGraphData = {
                 "current"
               ],
               "navigable": true,
-              "reviewStatus": "authored-debug-pilot"
+              "reviewStatus": "authored-gameplay-route"
             },
             {
               "id": "cl-padre-hurtado-melipilla:leg-grid:slice-02",
@@ -32703,7 +32703,7 @@ setup.worldGraphData = {
                 "current"
               ],
               "navigable": true,
-              "reviewStatus": "authored-debug-pilot"
+              "reviewStatus": "authored-gameplay-route"
             },
             {
               "id": "cl-padre-hurtado-melipilla:leg-grid:slice-03",
@@ -32757,7 +32757,7 @@ setup.worldGraphData = {
                 "current"
               ],
               "navigable": true,
-              "reviewStatus": "authored-debug-pilot"
+              "reviewStatus": "authored-gameplay-route"
             },
             {
               "id": "cl-padre-hurtado-melipilla:leg-grid:slice-04",
@@ -32825,7 +32825,7 @@ setup.worldGraphData = {
                 "current"
               ],
               "navigable": true,
-              "reviewStatus": "authored-debug-pilot"
+              "reviewStatus": "authored-gameplay-route"
             },
             {
               "id": "cl-padre-hurtado-melipilla:leg-grid:slice-05",
@@ -32871,7 +32871,7 @@ setup.worldGraphData = {
                 "current"
               ],
               "navigable": true,
-              "reviewStatus": "authored-debug-pilot"
+              "reviewStatus": "authored-gameplay-route"
             },
             {
               "id": "cl-padre-hurtado-melipilla:leg-grid:slice-06",
@@ -32902,7 +32902,7 @@ setup.worldGraphData = {
                 "current"
               ],
               "navigable": true,
-              "reviewStatus": "authored-debug-pilot"
+              "reviewStatus": "authored-gameplay-route"
             },
             {
               "id": "cl-padre-hurtado-melipilla:leg-grid:slice-07",
@@ -32960,7 +32960,7 @@ setup.worldGraphData = {
                 "current"
               ],
               "navigable": true,
-              "reviewStatus": "authored-debug-pilot"
+              "reviewStatus": "authored-gameplay-route"
             },
             {
               "id": "cl-padre-hurtado-melipilla:leg-grid:slice-08",
@@ -33008,7 +33008,7 @@ setup.worldGraphData = {
                 "current"
               ],
               "navigable": true,
-              "reviewStatus": "authored-debug-pilot"
+              "reviewStatus": "authored-gameplay-route"
             },
             {
               "id": "cl-padre-hurtado-melipilla:leg-grid:slice-09",
@@ -33045,7 +33045,7 @@ setup.worldGraphData = {
                 "current"
               ],
               "navigable": true,
-              "reviewStatus": "authored-debug-pilot"
+              "reviewStatus": "authored-gameplay-route"
             }
           ],
           "distanceKm": 42,

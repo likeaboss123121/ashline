@@ -52,7 +52,8 @@ setup.saves = {
 		var realCorridor = variables.journey && variables.journey.realWorldCorridorId
 			? setup.realWorldPilot.getCorridor(variables.journey.realWorldCorridorId) : null;
 		var place = realCorridor ? 'On ' + realCorridor.label
-			: variables.journey ? 'On the line past Station ' + station : 'Station ' + station;
+			: variables.journey ? 'On the line past ' + setup.worldmap.getStationName(station)
+				: setup.worldmap.getStationName(station);
 		return {
 			place: place,
 			when: setup.time.formatDate(parts) + ', ' + setup.time.formatClock(parts),

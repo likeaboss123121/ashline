@@ -158,16 +158,11 @@ test('generated broken stock cannot provide supplies, storage, or power and neve
   v.currentTrain[0].broken=true; assert.equal(s.railyard.isTrainDriveCapable(v.currentTrain),false);
 });
 
-test('reported seed and branch termini draw their true incoming connection, not the first sorted end',()=>{
+test('sourced grid cells draw their true incoming connection',()=>{
   const {setup:s}=game([lead(),road(),lead()]);
-  for(const seed of ['1832963771','review','branch-check']) for(let leg=1;leg<12;leg++) {
-    const generated=s.worldmap.getLeg(seed,leg),main=s.worldmap.getMainLine(seed,leg);
-    for(const b of generated.branches) {
-      b.tiles.forEach((tile,i)=>{
-        const previous=i?b.tiles[i-1]:main[b.fromIndex];
-        assert.ok(tile.ends.includes(s.worldmap.directionBetween(tile,previous)),`${seed} (${tile.x},${tile.y}) connects back`);
-      });
-    }
+  const tiles=s.realWorldPilot.getGridRoute().tiles;
+  for(let i=1;i<tiles.length;i++) {
+    assert.ok(tiles[i].ends.includes(s.worldmap.directionBetween(tiles[i],tiles[i-1])),`(${tiles[i].x},${tiles[i].y}) connects back`);
   }
 });
 
@@ -222,7 +217,7 @@ test('diesel and steam can complete multi-station runs on generated depot suppli
   for(const model of ['dieselShunter','dieselRoad','steamShunter','steamPrairie']) {
     const {setup:s,State:{variables:v}}=game([lead(),road(),lead()]);v.randomSeed='release-route-'+model;
     v.currentTrain=[s.railyard.createLocomotiveCar(model)];v.currentTrain[0].cargo=[];
-    for(let station=2;station<12;station++) {
+    for(let station=2;station<5;station++) {
       v.currentStation=station;v.stationTracks[station]=s.railyard.generateStationTracks(station,v.randomSeed);
       v.drivingTrackIndex=0;v.enteredTrainIndex=0;v.journey=null;
       const steam=model.startsWith('steam'),engine=v.currentTrain[0];
@@ -413,22 +408,15 @@ test('completed generated yards preserve a usable clear road, accessible reserve
   for (const type of ['passenger coach', 'sleeper coach', 'observation car', 'kitchen car', 'private car']) assert.ok(types.has(type), type);
 });
 
-test('branch terminus headings retain all eight directions and their generated escape route', () => {
+test('station lead headings follow the sourced rail grid', () => {
   const g = loadGame(), world = g.setup.worldmap, yard = g.setup.railyard;
-  g.State.variables.randomSeed = 'termini';
-  let diagonal = false;
-  for (let leg = 1; leg < 15; leg++) {
-    for (const branch of world.getLeg('termini', leg).branches) {
-      if (!branch.stationId) continue;
-      const tracks = yard.generateStationTracks(branch.stationId, 'termini');
-      const end = branch.tiles.at(-1).ends[0];
-      const expected = world.describeDirection(end).replace('-', '');
-      assert.equal(tracks[0].direction, expected);
-      assert.ok(g.setup.yardGeneration.validate(tracks));
-      if (end % 2) diagonal = true;
-    }
+  for (let station = 2; station <= 5; station++) {
+    const tracks = yard.generateStationTracks(station, 'ignored');
+    assert.equal(tracks[0].direction, yard.oppositeDirection(yard.getLegHeading(station - 1)));
+    assert.ok(g.setup.yardGeneration.validate(tracks));
   }
-  assert.ok(diagonal);
+  assert.equal(yard.getLegHeading(1), 'southwest');
+  assert.equal(world.getStationName(5), 'Melipilla');
 });
 
 test('passenger templates exist at their catalogue lengths in both projections', () => {
