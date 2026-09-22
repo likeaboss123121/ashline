@@ -393,3 +393,10 @@
 .debug-teleport-notice {
 	color: #e5c58a;
 }
+
+/* The debug map covers the whole routed line, so it scrolls in a box that opens on the playable corridor. */
+.debug-map-frame {
+	max-height: 70vh;
+	overflow: auto;
+	border: 1px solid #3a2a2e;
+}

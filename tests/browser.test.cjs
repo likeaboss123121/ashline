@@ -1582,6 +1582,23 @@ test('debug mode draws the complete sourced rail grid', async t => {
   assert.ok(map.cells > 50, JSON.stringify(map));
   assert.ok(map.track > 10, JSON.stringify(map));
   assert.equal(map.stations, 5, JSON.stringify(map));
+  // The routed Chile lines are drawn around the corridor on the same 5 km grid, as context only: never teleport
+  // targets, and never mistaken for playable track.
+  const context = await page.evaluate(() => {
+    const svg = document.querySelector('svg.worldmap-debug');
+    const cells = [...svg.querySelectorAll('.debug-context-tile')];
+    return {
+      rail: cells.filter(cell => !cell.classList.contains('debug-context-gap')).length,
+      gap: svg.querySelectorAll('.debug-context-gap').length,
+      teleportable: cells.filter(cell => cell.hasAttribute('data-debug-teleport')).length,
+      labels: [...svg.querySelectorAll('.debug-context-label')].map(label => label.textContent).sort(),
+      line: (document.querySelector('.debug-map-context') || {}).textContent || ''
+    };
+  });
+  assert.ok(context.rail > 500 && context.gap > 100, JSON.stringify(context));
+  assert.equal(context.teleportable, 0);
+  assert.deepEqual(context.labels, ['Antofagasta', 'Arica', 'Puerto Montt', 'Punta Arenas', 'Santiago']);
+  assert.match(context.line, /^Around it: 4 routed planning links drawn on a geographic 5 km grid, \d+ cells of mapped rail \(grey\) and \d+ of proposed gap fill \(red\)\. Not playable and not teleport targets\.$/);
   assert.match(map.heading, /Padre Hurtado.*Melipilla rail grid: 9 grid positions, 40 playable km/);
   const prototype = page.locator('details.debug-section').filter({
 		has: page.getByText('Global rail data', { exact: true })

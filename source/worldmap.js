@@ -939,6 +939,41 @@ setup.worldmap = {
 	// --- debug map ----------------------------------------------------------------------------------------
 	// A deliberately plain top-down map for debug mode: terrain as coloured cells and track as lines through
 	// them. It is a look at what the generator produced, not a player-facing map.
+	// Planning links routed over real rail (see docs/WORLDMAP.md) are drawn around the playable corridor so the debug
+	// map shows where the route goes next. The playable grid is a walk of 5 km steps rather than a projection, so the
+	// routes are placed on a geographic 5 km grid whose origin is the corridor's first tile; over the corridor's few
+	// dozen kilometres the two agree to within a cell. Returns the occupied cells only, keyed by grid position.
+	getDebugContextCells: function(origin) {
+		var routes = (setup.worldGraphData && setup.worldGraphData.routedLinks) || [];
+		var lon0 = origin[0], lat0 = origin[1];
+		var kmPerLon = 111.32 * Math.cos(lat0 * Math.PI / 180), kmPerLat = 110.57, tile = this.TILE_KM;
+		var toCell = function(point) {
+			return { x: Math.round((point[0] - lon0) * kmPerLon / tile), y: Math.round((point[1] - lat0) * kmPerLat / tile) };
+		};
+		var cells = {}, self = this;
+		routes.forEach(function(route) {
+			route.runs.forEach(function(run) {
+				// Walk each run in steps of about a kilometre and mark every cell it passes through.
+				for (var index = 1; index < run.coordinates.length; index++) {
+					var a = run.coordinates[index - 1], b = run.coordinates[index];
+					var km = Math.hypot((b[0] - a[0]) * kmPerLon, (b[1] - a[1]) * kmPerLat);
+					var steps = Math.max(1, Math.ceil(km));
+					for (var step = 0; step <= steps; step++) {
+						var cell = toCell([a[0] + (b[0] - a[0]) * step / steps, a[1] + (b[1] - a[1]) * step / steps]);
+						var key = self.key(cell.x, cell.y);
+						var existing = cells[key];
+						if (!existing) {
+							cells[key] = { x: cell.x, y: cell.y, gapFill: run.gapFill, routeIds: [route.id] };
+						} else {
+							existing.gapFill = existing.gapFill && run.gapFill; // mapped rail wins a shared cell
+							if (existing.routeIds.indexOf(route.id) === -1) existing.routeIds.push(route.id);
+						}
+					}
+				}
+			});
+		});
+		return { cells: cells, routes: routes, toCell: toCell };
+	},
 	buildDebugMap: function(stationId, cellSize) {
 		var seed = this.getSeed();
 		var route = setup.realWorldPilot.getGridRoute();
@@ -946,8 +981,14 @@ setup.worldmap = {
 		var leg = { index: route.corridor.id, tiles: route.tiles, byKey: {}, branches: [], rect: route.rect,
 			realWorld: true, corridor: route.corridor };
 		route.tiles.forEach(function(tile) { leg.byKey[setup.worldmap.key(tile.x, tile.y)] = tile; });
-		var rect = leg.rect;
-		var cell = cellSize || 9;
+		var context = this.getDebugContextCells(route.tiles[0].geoCoordinate);
+		var rect = { x0: leg.rect.x0, y0: leg.rect.y0, x1: leg.rect.x1, y1: leg.rect.y1 };
+		Object.keys(context.cells).forEach(function(key) {
+			var contextCell = context.cells[key];
+			rect.x0 = Math.min(rect.x0, contextCell.x - 2); rect.x1 = Math.max(rect.x1, contextCell.x + 2);
+			rect.y0 = Math.min(rect.y0, contextCell.y - 2); rect.y1 = Math.max(rect.y1, contextCell.y + 2);
+		});
+		var cell = cellSize || (Object.keys(context.cells).length ? 7 : 9);
 		var width = (rect.x1 - rect.x0 + 1) * cell;
 		var height = (rect.y1 - rect.y0 + 1) * cell;
 		var ns = 'http://www.w3.org/2000/svg';
@@ -963,9 +1004,63 @@ setup.worldmap = {
 		// Screen y grows downwards while map y grows north, so rows are drawn from the top of the rectangle down.
 		var left = function(x) { return (x - rect.x0) * cell; };
 		var top = function(y) { return (rect.y1 - y) * cell; };
+		// One background for the empty ground: drawing every empty cell of a map this size would be tens of thousands
+		// of elements for nothing.
+		var ground = document.createElementNS(ns, 'rect');
+		ground.setAttribute('x', 0);
+		ground.setAttribute('y', 0);
+		ground.setAttribute('width', width);
+		ground.setAttribute('height', height);
+		ground.setAttribute('fill', '#1b1d1f');
+		ground.setAttribute('class', 'debug-map-ground');
+		svg.appendChild(ground);
+		// The routed lines around the corridor: context only, never teleport targets.
+		var self = this;
+		Object.keys(context.cells).sort().forEach(function(key) {
+			if (leg.byKey[key]) return;
+			var contextCell = context.cells[key];
+			var contextRect = document.createElementNS(ns, 'rect');
+			contextRect.setAttribute('x', left(contextCell.x));
+			contextRect.setAttribute('y', top(contextCell.y));
+			contextRect.setAttribute('width', cell);
+			contextRect.setAttribute('height', cell);
+			contextRect.setAttribute('fill', contextCell.gapFill ? '#5a2b28' : '#3d4a47');
+			contextRect.setAttribute('class', 'debug-context-tile' + (contextCell.gapFill ? ' debug-context-gap' : ''));
+			var contextTitle = document.createElementNS(ns, 'title');
+			contextTitle.textContent = (contextCell.gapFill ? 'Proposed gap fill' : 'Mapped rail') + ', not playable | '
+				+ contextCell.routeIds.map(function(id) { return id.replace('route:', ''); }).join(', ')
+				+ ' | grid ' + contextCell.x + ',' + contextCell.y;
+			contextRect.appendChild(contextTitle);
+			svg.appendChild(contextRect);
+		});
+		// The cities the routed lines join, named where they sit.
+		var placeNames = {};
+		(setup.worldGraphData && setup.worldGraphData.chunks ? Object.keys(setup.worldGraphData.chunks) : []).forEach(function(id) {
+			setup.worldGraphData.chunks[id].nodes.forEach(function(node) { placeNames[node.id] = node; });
+		});
+		var labelled = {};
+		context.routes.forEach(function(routed) {
+			[routed.from, routed.to].forEach(function(placeId) {
+				var place = placeNames[placeId];
+				if (!place || labelled[placeId]) return;
+				labelled[placeId] = true;
+				var at = context.toCell([place.longitude, place.latitude]);
+				var label = document.createElementNS(ns, 'text');
+				label.setAttribute('x', left(at.x) + cell * 1.6);
+				label.setAttribute('y', top(at.y) + cell);
+				label.setAttribute('fill', '#c7c5b9');
+				label.setAttribute('font-size', String(cell * 1.6));
+				label.setAttribute('font-family', 'sans-serif');
+				label.setAttribute('pointer-events', 'none');
+				label.setAttribute('class', 'debug-context-label');
+				label.textContent = place.name;
+				svg.appendChild(label);
+			});
+		});
 		for (var y = rect.y0; y <= rect.y1; y++) {
 			for (var x = rect.x0; x <= rect.x1; x++) {
 				var tile = leg.byKey[this.key(x, y)];
+				if (!tile) continue;
 				var terrain = tile ? tile.terrain : 'plains';
 				var cellRect = document.createElementNS(ns, 'rect');
 				cellRect.setAttribute('x', left(x));
@@ -988,7 +1083,7 @@ setup.worldmap = {
 					+ tile.terrain + ' ' + tile.shape + ' ' + tile.grade.toFixed(1) + '% | '
 					+ tile.geoCoordinate[1].toFixed(4) + '\u00b0, ' + tile.geoCoordinate[0].toFixed(4) + '\u00b0 | mean '
 					+ tile.elevation.toFixed(1) + ' m, relief \u03c3 ' + tile.elevationStdDevM.toFixed(1) + ' m')
-					: 'No playable rail in grid cell ' + x + ',' + y;
+					: '';
 				cellRect.appendChild(title);
 				svg.appendChild(cellRect);
 			}
@@ -1062,7 +1157,8 @@ setup.worldmap = {
 			footMarker.appendChild(footTitle);
 			svg.appendChild(footMarker);
 		}
-		return { svg: svg, leg: leg, rect: rect };
+		return { svg: svg, leg: leg, rect: rect, context: context, cell: cell,
+			corridorCentre: { x: left((leg.rect.x0 + leg.rect.x1) / 2), y: top((leg.rect.y0 + leg.rect.y1) / 2) } };
 	},
 	// Adds the map plus a line of numbers to a debug panel.
 	appendDebugMap: function(parent, stationId) {
@@ -1108,7 +1204,35 @@ setup.worldmap = {
 					}
 				});
 			});
-			parent.appendChild(built.svg);
+			var frame = document.createElement('div');
+			frame.className = 'debug-map-frame';
+			frame.appendChild(built.svg);
+			parent.appendChild(frame);
+			var railCells = 0, gapCells = 0;
+			Object.keys(built.context.cells).forEach(function(key) {
+				if (built.leg.byKey[key]) return;
+				if (built.context.cells[key].gapFill) gapCells++; else railCells++;
+			});
+			if (railCells || gapCells) {
+				var contextLine = document.createElement('p');
+				contextLine.className = 'debug-map-context';
+				contextLine.textContent = 'Around it: ' + built.context.routes.length + ' routed planning links drawn on a geographic 5 km grid, '
+					+ railCells + ' cells of mapped rail (grey) and ' + gapCells + ' of proposed gap fill (red). Not playable and not teleport targets.';
+				parent.appendChild(contextLine);
+			}
+			// The debug tools are built inside a hidden panel and a folded section, so the map has no size until the
+			// player opens both. Centre it on the playable corridor the first time it actually appears.
+			var centre = function() {
+				if (!frame.clientHeight) return false;
+				var scale = built.svg.getBoundingClientRect().width / Math.max(1, Number(built.svg.getAttribute('width')));
+				frame.scrollTop = Math.max(0, built.corridorCentre.y * scale - frame.clientHeight / 2);
+				frame.scrollLeft = Math.max(0, built.corridorCentre.x * scale - frame.clientWidth / 2);
+				return true;
+			};
+			if (typeof ResizeObserver === 'function') {
+				var watcher = new ResizeObserver(function() { if (centre()) watcher.disconnect(); });
+				watcher.observe(frame);
+			}
 			parent.appendChild(instructions);
 			var controls = document.createElement('div');
 			controls.className = 'debug-map-teleport-controls';
@@ -1135,14 +1259,14 @@ setup.worldmap = {
 			controls.appendChild(teleportButton);
 			parent.appendChild(controls);
 			// Keep the precision control visible before a tall north-south map on phones.
-			parent.insertBefore(instructions, built.svg);
-			parent.insertBefore(controls, built.svg);
+			parent.insertBefore(instructions, frame);
+			parent.insertBefore(controls, frame);
 			if (setup.debugTeleportNotice) {
 				var notice = document.createElement('p');
 				notice.className = 'debug-teleport-notice';
 				notice.setAttribute('role', 'status');
 				notice.textContent = setup.debugTeleportNotice;
-				parent.insertBefore(notice, built.svg);
+				parent.insertBefore(notice, frame);
 			}
 			var legend = document.createElement('p');
 			legend.textContent = 'Each outlined cell is one fixed 5 km gameplay move. Hover it for its sourced coordinates, terrain, grade, mean elevation and relief; every rail cell is a teleport target.';
