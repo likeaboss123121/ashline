@@ -157,6 +157,28 @@ setup.worldGraph = (function () {
 			polyline.appendChild(title);
 			svg.appendChild(polyline);
 		});
+		// Planning links routed over real rail: mapped track solid, proposed gap fills dashed. They are drawn over the
+		// chords they replace so the difference between a straight guess and the actual railway is plain to see.
+		(data.routedLinks || []).forEach(function (route) {
+			assert(route.navigable === false && route.reviewRequired === true, 'unsafe routed link ' + route.id);
+			route.runs.forEach(function (run) {
+				var line = document.createElementNS(namespace, 'polyline');
+				line.setAttribute('class', run.gapFill ? 'world-route-gap' : 'world-route-rail');
+				line.setAttribute('points', run.coordinates.map(function (coordinate) {
+					var location = point({ longitude: coordinate[0], latitude: coordinate[1] });
+					return location.x.toFixed(1) + ',' + location.y.toFixed(1);
+				}).join(' '));
+				line.setAttribute('fill', 'none');
+				line.setAttribute('stroke', run.gapFill ? '#d9624f' : '#f0ead6');
+				line.setAttribute('stroke-width', run.gapFill ? '2' : '1.5');
+				if (run.gapFill) line.setAttribute('stroke-dasharray', '4 3');
+				var title = document.createElementNS(namespace, 'title');
+				title.textContent = route.from + ' to ' + route.to + ': ' + route.routedKm + ' km routed, ' + route.railKm +
+					' km on mapped rail, ' + route.gapKm + ' km of proposed gap fill in ' + route.gapCount + ' — for review, not playable';
+				line.appendChild(title);
+				svg.appendChild(line);
+			});
+		});
 		Object.keys(nodes).sort().forEach(function (id) {
 			var node = nodes[id];
 			var location = point(node);
@@ -181,6 +203,15 @@ setup.worldGraph = (function () {
 			legend.appendChild(key);
 		});
 		parent.appendChild(legend);
+		if ((data.routedLinks || []).length) {
+			var routedSummary = document.createElement('p');
+			var railKm = data.routedLinks.reduce(function (sum, route) { return sum + route.railKm; }, 0);
+			var gapKm = data.routedLinks.reduce(function (sum, route) { return sum + route.gapKm; }, 0);
+			routedSummary.textContent = data.routedLinks.length + ' planning links routed over mapped rail: ' +
+				Math.round(railKm).toLocaleString('en-US') + ' km on real track (solid) and ' +
+				Math.round(gapKm).toLocaleString('en-US') + ' km of proposed gap fill (dashed). None of it is playable until reviewed.';
+			parent.appendChild(routedSummary);
+		}
 		appendRailGeometryPreview(parent);
 	}
 

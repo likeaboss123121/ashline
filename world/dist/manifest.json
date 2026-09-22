@@ -2263,5 +2263,83 @@
       "elevationAggregation": "mean-and-population-standard-deviation-within-geographic-tile",
       "mountainStdDevM": 120
     }
+  ],
+  "routedLinks": [
+    {
+      "id": "route:cl-punta-arenas>cl-puerto-montt",
+      "proposalSetId": "chile-routed-links",
+      "from": "cl-punta-arenas",
+      "to": "cl-puerto-montt",
+      "planningLinkIds": [
+        "plan:pacific:01"
+      ],
+      "status": "rail-with-gap-proposals",
+      "chordKm": 1309.1,
+      "routedKm": 1311.5,
+      "railKm": 4.6,
+      "gapKm": 1306.8,
+      "gapCount": 1,
+      "sliceCount": 263,
+      "stationCount": 0,
+      "navigable": false,
+      "reviewRequired": true
+    },
+    {
+      "id": "route:cl-puerto-montt>cl-santiago",
+      "proposalSetId": "chile-routed-links",
+      "from": "cl-puerto-montt",
+      "to": "cl-santiago",
+      "planningLinkIds": [
+        "plan:pacific:02"
+      ],
+      "status": "rail-with-gap-proposals",
+      "chordKm": 913.6,
+      "routedKm": 1098.2,
+      "railKm": 1090.2,
+      "gapKm": 8,
+      "gapCount": 2,
+      "sliceCount": 220,
+      "stationCount": 11,
+      "navigable": false,
+      "reviewRequired": true
+    },
+    {
+      "id": "route:cl-santiago>cl-antofagasta",
+      "proposalSetId": "chile-routed-links",
+      "from": "cl-santiago",
+      "to": "cl-antofagasta",
+      "planningLinkIds": [
+        "plan:pacific:03"
+      ],
+      "status": "rail-with-gap-proposals",
+      "chordKm": 1090.7,
+      "routedKm": 1654.2,
+      "railKm": 1646,
+      "gapKm": 8.2,
+      "gapCount": 3,
+      "sliceCount": 331,
+      "stationCount": 2,
+      "navigable": false,
+      "reviewRequired": true
+    },
+    {
+      "id": "route:cl-antofagasta>cl-arica",
+      "proposalSetId": "chile-routed-links",
+      "from": "cl-antofagasta",
+      "to": "cl-arica",
+      "planningLinkIds": [
+        "plan:pacific:04"
+      ],
+      "status": "rail-with-gap-proposals",
+      "chordKm": 575.6,
+      "routedKm": 730.3,
+      "railKm": 609.1,
+      "gapKm": 121.2,
+      "gapCount": 1,
+      "sliceCount": 147,
+      "stationCount": 0,
+      "navigable": false,
+      "reviewRequired": true
+    }
   ]
 }

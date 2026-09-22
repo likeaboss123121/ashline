@@ -10,5 +10,11 @@
       "geometryId": "chile-central-pilot",
       "file": "world/imported/chile-central-elevation.json"
     }
+  ],
+  "routedLinks": [
+    {
+      "id": "chile-routed-links",
+      "file": "world/proposals/chile-routed-links.json"
+    }
   ]
 }

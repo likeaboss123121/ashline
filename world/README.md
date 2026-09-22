@@ -49,6 +49,18 @@ npm run world:build
 npm run world:benchmark
 ```
 
+The national network and the routed planning-link proposals come from the same extract:
+
+```sh
+npm run world:extract:chile:national -- --input /path/to/chile-260920.osm.pbf
+npm run world:route:chile
+npm run world:build
+```
+
+`world/imported/chile-rail.json` is gitignored because of its size; `world/proposals/` holds the committed routed
+proposals and their review report. Routed proposals are never navigable: they are candidates for a reviewed
+corridor, not track the player can use.
+
 The extractor deliberately filters railway ways before the bounding-box pass. Reversing those operations made
 the complete-way extractor exceed this server's memory on the 59-million-node country file.
 

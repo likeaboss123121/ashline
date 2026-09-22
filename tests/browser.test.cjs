@@ -1588,7 +1588,12 @@ test('debug mode draws the complete sourced rail grid', async t => {
   });
   assert.match(await prototype.innerText(), /35 places, 40 non-navigable links in 24 regional chunks/);
   assert.match(await prototype.innerText(), /not claimed railway geometry/);
-  assert.equal(await prototype.locator('svg.world-graph-debug polyline').count(), 3);
+  // The three planning chords, with the Chile links routed over mapped rail drawn on top: real track solid, gap
+  // fills dashed, and the whole of it marked as unplayable until reviewed.
+  assert.equal(await prototype.locator('svg.world-graph-debug polyline:not(.world-route-rail):not(.world-route-gap)').count(), 3);
+  assert.ok(await prototype.locator('svg.world-graph-debug polyline.world-route-rail').count() >= 4);
+  assert.ok(await prototype.locator('svg.world-graph-debug polyline.world-route-gap').count() >= 2);
+  assert.match(await prototype.innerText(), /4 planning links routed over mapped rail: [\d,]+ km on real track \(solid\) and [\d,]+ km of proposed gap fill \(dashed\)\. None of it is playable until reviewed\./);
   assert.equal(await prototype.locator('svg.world-graph-debug circle').count(), 35);
   assert.match(await prototype.innerText(), /1,581 sourced OSM ways, 21,391 coordinates and 1,160 km/);
   const previewCounts = await prototype.locator('svg.rail-geometry-preview path[data-way-count]').evaluateAll(paths =>

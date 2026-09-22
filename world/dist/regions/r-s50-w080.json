@@ -67,7 +67,8 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": "route:cl-punta-arenas>cl-puerto-montt"
     }
   ]
 }

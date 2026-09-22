@@ -13,7 +13,9 @@
     "world:benchmark": "node scripts/world/benchmark-world.cjs",
     "test": "node --test tests/core.test.cjs tests/review.test.cjs tests/migrations.test.cjs tests/world-graph.test.cjs",
     "test:browser": "node scripts/build.cjs && node --test tests/browser.test.cjs",
-    "verify": "npm run build && npm test && npm run test:browser"
+    "verify": "npm run build && npm test && npm run test:browser",
+    "world:extract:chile:national": "node scripts/world/extract-osm-pilot.cjs --scope national",
+    "world:route:chile": "node scripts/world/route-planning-links.cjs"
   },
   "engines": {
     "node": ">=22"

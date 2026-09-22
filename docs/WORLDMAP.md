@@ -38,6 +38,31 @@ Absolute altitude is not a terrain classifier, so a high, flat plateau remains p
 OSM override the relief classification. Raw DEM rasters stay outside the repository; the small aggregate is
 compiled into static world data.
 
+## Routing planning links over real rail
+
+`scripts/world/route-planning-links.cjs` (`npm run world:route:chile`) is pipeline stage 4. It reads the whole
+Chilean network (`world/imported/chile-rail.json`, produced by `npm run world:extract:chile:national` and gitignored
+at 11.7 MB), and routes every planning link whose two cities lie in Chile:
+
+- **Anchors.** A city is reached at a named station within 8 km, otherwise its nearest mainline track within 20 km,
+  otherwise the city itself.
+- **Repairs.** Loose ends within 50 m of other track are snapped: digitizing breaks, not missing railway.
+- **Gap fills.** Loose ends of separate networks within 30 km are offered as joins that cost four times their
+  length, so mapped rail always wins where it exists. If two cities' networks never meet at all, the single
+  shortest join between them is proposed as a long gap.
+- **Slices.** Routes are cut into slices of at most 5 km carrying their source OSM ways, lifecycle statuses,
+  bridge/tunnel flags, rail and gap kilometres, and named stations passed within 300 m.
+
+Output is `world/proposals/chile-routed-links.json` and a human review report beside it. Every route and slice is
+`navigable: false`: routing a link over real rail does not make it playable, and every gap fill is new track that
+needs Likea's review before an authored corridor may adopt it. The compiler validates these flags, records on each
+covered planning link which route replaced it (`routedBy`), and embeds only a simplified drawing for the debug
+overview, where mapped rail is solid and gap fills are dashed.
+
+Current result: Puerto Montt–Santiago runs entirely on mapped rail; Santiago–Antofagasta almost entirely; Antofagasta–Arica
+needs a 121 km join where no railway ever linked Iquique and Arica; and Punta Arenas–Puerto Montt is a 1,306 km
+proposal, because Patagonia has never had a connecting railway.
+
 ## Static world data is never saved
 
 Compiled rail cells and station records live in `setup`, not `State.variables`. Saves contain only stable route

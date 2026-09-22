@@ -26,12 +26,33 @@ function sha256(bytes) {
   return crypto.createHash('sha256').update(bytes).digest('hex');
 }
 
+// Two scopes share one extractor. The central pilot is a bounding box around Santiago and Valparaíso and feeds the
+// playable corridor; the national scope keeps every railway way in the country and feeds the routing stage that
+// replaces planning chords with real rail. Both filter railway ways before anything else, because the reverse order
+// exhausts this server's memory on the full country file.
+const SCOPES = {
+  central: {
+    output: 'world/imported/chile-central-rail.json',
+    bbox: '-72.2,-34.0,-70.0,-32.5',
+    id: 'chile-central-pilot',
+    label: 'Central Chile railway geometry pilot'
+  },
+  national: {
+    output: 'world/imported/chile-rail.json',
+    bbox: null,
+    id: 'chile-national-rail',
+    label: 'Chile national railway geometry'
+  }
+};
+
 function main() {
   const inputArgument = argument('input');
-  assert(inputArgument, 'Usage: npm run world:extract:chile -- --input /path/to/chile-260920.osm.pbf');
+  assert(inputArgument, 'Usage: npm run world:extract:chile -- --input /path/to/chile-260920.osm.pbf [--scope national]');
   const input = path.resolve(root, inputArgument);
   assert(fs.existsSync(input), 'PBF input does not exist: ' + input);
-  const output = path.join(root, 'world/imported/chile-central-rail.json');
+  const scope = SCOPES[argument('scope') || 'central'];
+  assert(scope, 'Unknown scope: ' + argument('scope') + ' (use central or national)');
+  const output = path.join(root, scope.output);
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'ashline-osm-pilot-'));
   const filtered = path.join(temporary, 'chile-rail.osm.pbf');
   const extracted = path.join(temporary, 'central-rail.osm.pbf');
@@ -45,14 +66,18 @@ function main() {
       'w/demolished:railway=' + trackValues, 'w/removed:railway=' + trackValues,
       'w/construction:railway=' + trackValues, 'w/proposed:railway=' + trackValues,
       'w/planned:railway=' + trackValues, 'w/historic:railway=' + trackValues]);
-    run('osmium', ['extract', '--bbox=-72.2,-34.0,-70.0,-32.5', '--strategy=complete_ways', '--overwrite',
-      '-o', extracted, filtered]);
+    if (scope.bbox) {
+      run('osmium', ['extract', '--bbox=' + scope.bbox, '--strategy=complete_ways', '--overwrite',
+        '-o', extracted, filtered]);
+    } else {
+      fs.copyFileSync(filtered, extracted);
+    }
     run('osmium', ['export', '--overwrite', '--add-unique-id=type_id', '--attributes=type,id,version,timestamp',
       '-o', geojson, extracted]);
     const geojsonBytes = fs.readFileSync(geojson);
     const normalized = normalizeGeoJson(JSON.parse(geojsonBytes.toString('utf8')), {
-      id: 'chile-central-pilot',
-      label: 'Central Chile railway geometry pilot',
+      id: scope.id,
+      label: scope.label,
       sourceId: 'openstreetmap-geofabrik-2026-09-20',
       sourceSnapshotSha256: sha256(fs.readFileSync(input)),
       sourceInputSha256: sha256(geojsonBytes)

@@ -1,6 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { buildTopology } = require('./build-rail-topology.cjs');
+const { simplify } = require('./route-planning-links.cjs');
 
 const root = path.resolve(__dirname, '../..');
 const checkOnly = process.argv.includes('--check');
@@ -212,6 +213,23 @@ function compile() {
     topology.elevationAggregation = elevation.aggregation;
     topology.mountainStdDevM = elevation.mountainStdDevM;
   });
+  // Planning links routed over real rail by scripts/world/route-planning-links.cjs. They are proposals: the compiler
+  // refuses any that claim to be navigable, and a planning link only learns which route covers it, never loses its
+  // own planning status.
+  const routedLinks = (importManifest.routedLinks || []).flatMap(entry => {
+    const routed = JSON.parse(read(entry.file));
+    assert(routed.id === entry.id, 'Routed link import ID mismatch: ' + entry.file);
+    return routed.links.map(link => ({ ...link, proposalSetId: routed.id, geometryId: routed.geometryId,
+      sourceId: routed.sourceId }));
+  });
+  const linksById = Object.fromEntries(links.map(link => [link.id, link]));
+  routedLinks.forEach(route => {
+    route.planningLinkIds.forEach(id => {
+      assert(linksById[id], 'Routed link covers unknown planning link: ' + id);
+      assert(!linksById[id].routedBy, 'Planning link routed twice: ' + id);
+      linksById[id].routedBy = route.id;
+    });
+  });
   const bundle = {
     formatVersion: 1,
     datasetVersion: sourceManifest.datasetVersion,
@@ -221,6 +239,7 @@ function compile() {
     corridors,
     railGeometry,
     railTopology,
+    routedLinks,
     chunks: sortedChunks
   };
   validateBundle(bundle);
@@ -318,6 +337,30 @@ function validateBundle(bundle) {
     corridor.planningLinkIds.forEach(id => assert(linkIds.has(id), 'Corridor has missing link: ' + id));
     assert(corridor.planningLinkIds.length === corridor.waypoints.length - 1, 'Wrong link count: ' + corridor.id);
   });
+  const routedIds = new Set();
+  (bundle.routedLinks || []).forEach(route => {
+    assert(!routedIds.has(route.id), 'Duplicate routed link: ' + route.id);
+    routedIds.add(route.id);
+    assert(route.navigable === false && route.reviewRequired === true, 'Routed link claims to be playable: ' + route.id);
+    assert(route.planningLinkIds.every(id => linkIds.has(id)), 'Routed link covers a missing planning link: ' + route.id);
+    assert(route.slices.length === route.sliceCount && route.sliceCount > 0, 'Routed link slice count mismatch: ' + route.id);
+    let routed = 0;
+    route.slices.forEach((slice, index) => {
+      assert(slice.navigable === false, 'Routed slice claims to be playable: ' + slice.id);
+      assert(['routed-rail-proposal', 'gap-fill-proposal'].includes(slice.reviewStatus), 'Unknown slice review status: ' + slice.id);
+      assert(slice.gapFill === (slice.gapKm > 0) && (slice.reviewStatus === 'gap-fill-proposal') === slice.gapFill,
+        'Gap flags disagree: ' + slice.id);
+      assert(slice.distanceKm > 0 && slice.distanceKm <= bundle.tileKm + 0.001, 'Invalid routed slice length: ' + slice.id);
+      assert(Math.abs(slice.railKm + slice.gapKm - slice.distanceKm) < 0.01, 'Routed slice parts do not add up: ' + slice.id);
+      assert(slice.coordinates.length >= 2, 'Routed slice has no shape: ' + slice.id);
+      if (index) {
+        assert(JSON.stringify(route.slices[index - 1].coordinates.at(-1)) === JSON.stringify(slice.coordinates[0]),
+          'Disconnected routed slices: ' + slice.id);
+      }
+      routed += slice.distanceKm;
+    });
+    assert(Math.abs(Math.round(routed * 10) / 10 - route.routedKm) < 0.2, 'Routed link distance mismatch: ' + route.id);
+  });
   const topologyGeometryIds = new Set();
   bundle.railTopology.forEach(topology => {
     assert(!topologyGeometryIds.has(topology.geometryId), 'Duplicate rail topology: ' + topology.geometryId);
@@ -365,6 +408,24 @@ function validateBundle(bundle) {
   });
 }
 
+// Consecutive slices of the same kind merged into one polyline, simplified to about 200 m: the browser only draws these
+// on a continent-sized debug overview, so the full slice geometry stays in the committed proposal file.
+function runsOf(slices) {
+  const runs = [];
+  slices.forEach(slice => {
+    const last = runs[runs.length - 1];
+    if (last && last.gapFill === slice.gapFill) {
+      last.coordinates.push(...slice.coordinates.slice(1));
+    } else {
+      runs.push({ gapFill: slice.gapFill, coordinates: slice.coordinates.slice() });
+    }
+  });
+  return runs.map(run => ({
+    gapFill: run.gapFill,
+    coordinates: simplify(run.coordinates, 0.002).map(point => [Math.round(point[0] * 1e3) / 1e3, Math.round(point[1] * 1e3) / 1e3])
+  }));
+}
+
 function outputsFor(bundle) {
   const manifest = { ...bundle };
   delete manifest.chunks;
@@ -400,6 +461,18 @@ function outputsFor(bundle) {
       coordinates: way.coordinates
     }))
   })) };
+  manifest.routedLinks = bundle.routedLinks.map(route => ({
+    id: route.id, proposalSetId: route.proposalSetId, from: route.from, to: route.to,
+    planningLinkIds: route.planningLinkIds, status: route.status, chordKm: route.chordKm, routedKm: route.routedKm,
+    railKm: route.railKm, gapKm: route.gapKm, gapCount: route.gaps.length, sliceCount: route.sliceCount,
+    stationCount: route.stations.length, navigable: route.navigable, reviewRequired: route.reviewRequired
+  }));
+  browserBundle.routedLinks = bundle.routedLinks.map(route => ({
+    id: route.id, from: route.from, to: route.to, status: route.status, chordKm: route.chordKm,
+    routedKm: route.routedKm, railKm: route.railKm, gapKm: route.gapKm, gapCount: route.gaps.length,
+    sliceCount: route.sliceCount, navigable: route.navigable, reviewRequired: route.reviewRequired,
+    runs: runsOf(route.slices)
+  }));
   const outputs = new Map([
     ['world/dist/manifest.json', stableJson(manifest)],
     ['source/world-data.js', '// Generated by scripts/world/compile-world.cjs. Do not edit.\nsetup.worldGraphData = ' + stableJson(browserBundle).trimEnd() + ';\n']
@@ -448,7 +521,7 @@ try {
     ' planning links, ' + bundle.regions.length + ' regions, ' + Math.round(distanceKm).toLocaleString('en-US') +
     ' km; ' + bundle.railGeometry.reduce((sum, geometry) => sum + geometry.stats.wayCount, 0).toLocaleString('en-US') +
     ' sourced rail ways, ' + bundle.railTopology.reduce((sum, topology) => sum + topology.corridors.length, 0) +
-    ' playable sourced corridor(s)');
+    ' playable sourced corridor(s), ' + bundle.routedLinks.length + ' routed planning link proposal(s)');
 } catch (error) {
   console.error(error.stack || error.message);
   process.exitCode = 1;
