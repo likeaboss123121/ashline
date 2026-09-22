@@ -55,7 +55,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:ar-bahia-blanca>ar-buenos-aires"
+      ]
     },
     {
       "id": "plan:central-amazon:04",
@@ -67,7 +70,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:ar-mendoza>ar-cordoba"
+      ]
     }
   ]
 }

@@ -79,7 +79,8 @@ test('three authored Punta Arenas to Panama corridors are independently queryabl
   });
   assert.notDeepEqual(routes[0].waypoints.map(node => node.id), routes[1].waypoints.map(node => node.id));
   assert.notDeepEqual(routes[1].waypoints.map(node => node.id), routes[2].waypoints.map(node => node.id));
-  assert.deepEqual(JSON.parse(JSON.stringify(graph.getAttributions())), [
+  // Both OSM extracts carry the same attribution line, so it appears once per ingested source.
+  assert.deepEqual([...new Set(JSON.parse(JSON.stringify(graph.getAttributions())))], [
     'City names, coordinates and population: GeoNames (https://www.geonames.org/)',
     '© OpenStreetMap contributors; extract provided by Geofabrik',
     'Produced using Copernicus WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved'
@@ -278,29 +279,40 @@ test('routed Chile proposals stay proposals, and the main line that plays them i
   const game = loadGame();
   const data = game.setup.worldGraphData;
   const routes = data.routedLinks;
-  assert.deepEqual([...routes].map(route => route.id), [
+  // The Chile network routes the four Pacific links the main line plays; the continental network routes all 38 links
+  // of all three corridors, and its copies of the four are qualified by their set.
+  const chile = [...routes].filter(route => route.proposalSetId !== 'south-america-routed-links');
+  assert.deepEqual(chile.map(route => route.id), [
     'route:cl-punta-arenas>cl-puerto-montt', 'route:cl-puerto-montt>cl-santiago',
     'route:cl-santiago>cl-antofagasta', 'route:cl-antofagasta>cl-arica'
   ]);
+  const continental = [...routes].filter(route => route.proposalSetId === 'south-america-routed-links');
+  assert.equal(continental.length, 38);
+  assert.ok(continental.every(route => !route.playableCorridorId), 'nothing continental is playable yet');
+  assert.ok(continental.some(route => route.id.startsWith('south-america-routed-links/route:cl-')), 'qualified IDs');
   routes.forEach(route => {
     assert.equal(route.navigable, false);
     assert.equal(route.reviewRequired, true);
     assert.ok(route.runs.length > 0 && route.runs.every(run => run.coordinates.length >= 2));
   });
   // Puerto Montt to Santiago runs almost entirely on mapped rail; Patagonia has none.
-  const south = routes.find(route => route.id === 'route:cl-puerto-montt>cl-santiago');
+  const south = chile.find(route => route.id === 'route:cl-puerto-montt>cl-santiago');
   assert.ok(south.railKm / south.routedKm > 0.95, JSON.stringify(south));
-  const patagonia = routes.find(route => route.id === 'route:cl-punta-arenas>cl-puerto-montt');
+  const patagonia = chile.find(route => route.id === 'route:cl-punta-arenas>cl-puerto-montt');
   assert.ok(patagonia.gapKm > 1000, JSON.stringify(patagonia));
   // Routing alone never makes a line playable: the authored main line lists the links it plays.
   const playable = [...data.railTopology].flatMap(topology => [...topology.corridors]).map(corridor => corridor.id);
   assert.deepEqual(playable, ['cl-padre-hurtado-melipilla', 'cl-main-line']);
-  routes.forEach(route => assert.equal(route.playableCorridorId, 'cl-main-line'));
-  // Every chunked planning link that a route covers knows it. Only the Pacific corridor stays inside Chile: the
-  // other two leave Punta Arenas for Río Gallegos in Argentina, which the Chile network cannot route.
-  const covered = Object.values(data.chunks).flatMap(chunk => [...chunk.links]).filter(link => link.routedBy);
-  assert.deepEqual(covered.map(link => link.id).sort(),
-    ['plan:pacific:01', 'plan:pacific:02', 'plan:pacific:03', 'plan:pacific:04']);
+  chile.forEach(route => assert.equal(route.playableCorridorId, 'cl-main-line'));
+  // Every chunked planning link now knows which routes replaced it: the continental network covers all 40, including
+  // the two into Panama City, which it reaches by a proposed line because the extract stops at the border.
+  const links = Object.values(data.chunks).flatMap(chunk => [...chunk.links]);
+  const covered = links.filter(link => link.routedBy);
+  assert.equal(covered.length, links.length);
+  assert.ok(covered.every(link => Array.isArray(link.routedBy) && link.routedBy.length));
+  ['plan:pacific:01', 'plan:pacific:02', 'plan:pacific:03', 'plan:pacific:04'].forEach(id => {
+    assert.equal(links.find(link => link.id === id).routedBy.length, 2, id + ' is routed by both networks');
+  });
 });
 
 test('the main line joins the routed links into one line that can be driven from Punta Arenas to Arica', () => {

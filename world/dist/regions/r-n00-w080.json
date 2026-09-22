@@ -75,7 +75,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:co-cartagena>pa-panama-city"
+      ]
     },
     {
       "id": "plan:central-amazon:12",
@@ -87,7 +90,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:co-bogota>co-medellin"
+      ]
     },
     {
       "id": "plan:central-amazon:13",
@@ -99,7 +105,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:co-medellin>pa-panama-city"
+      ]
     },
     {
       "id": "plan:pacific:10",
@@ -111,7 +120,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:ec-quito>co-cali"
+      ]
     },
     {
       "id": "plan:pacific:11",
@@ -123,7 +135,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:co-cali>co-medellin"
+      ]
     },
     {
       "id": "plan:pacific:12",
@@ -135,7 +150,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:co-medellin>co-cartagena"
+      ]
     },
     {
       "id": "plan:pacific:13",
@@ -147,7 +165,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:co-cartagena>pa-panama-city"
+      ]
     }
   ]
 }

@@ -65,7 +65,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:gy-georgetown>ve-ciudad-guayana"
+      ]
     },
     {
       "id": "plan:atlantic:12",
@@ -77,7 +80,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:ve-ciudad-guayana>ve-caracas"
+      ]
     },
     {
       "id": "plan:central-amazon:10",
@@ -89,7 +95,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:br-boa-vista>ve-ciudad-guayana"
+      ]
     },
     {
       "id": "plan:central-amazon:11",
@@ -101,7 +110,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:ve-ciudad-guayana>co-bogota"
+      ]
     }
   ]
 }

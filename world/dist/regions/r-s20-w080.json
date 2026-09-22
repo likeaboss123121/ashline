@@ -55,7 +55,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:cl-arica>pe-arequipa"
+      ]
     },
     {
       "id": "plan:pacific:06",
@@ -67,7 +70,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:pe-arequipa>pe-lima"
+      ]
     },
     {
       "id": "plan:pacific:07",
@@ -79,7 +85,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:pe-lima>pe-trujillo"
+      ]
     }
   ]
 }

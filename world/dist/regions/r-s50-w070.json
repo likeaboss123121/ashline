@@ -34,7 +34,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:ar-rio-gallegos>ar-bahia-blanca"
+      ]
     }
   ]
 }

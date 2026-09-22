@@ -55,7 +55,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:ar-bariloche>ar-mendoza"
+      ]
     },
     {
       "id": "plan:pacific:02",
@@ -68,7 +71,10 @@
       "navigable": false,
       "reviewRequired": true,
       "geometrySource": "authored-waypoint-chord",
-      "routedBy": "route:cl-puerto-montt>cl-santiago"
+      "routedBy": [
+        "route:cl-puerto-montt>cl-santiago",
+        "south-america-routed-links/route:cl-puerto-montt>cl-santiago"
+      ]
     }
   ]
 }

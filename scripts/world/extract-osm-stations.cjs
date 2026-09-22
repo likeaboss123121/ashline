@@ -11,7 +11,12 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '../..');
-const OUTPUT = 'world/imported/chile-stations.json';
+const SCOPES = {
+  chile: { output: 'world/imported/chile-stations.json', id: 'chile-stations', label: 'Chile railway stations',
+    sourceId: 'openstreetmap-geofabrik-2026-09-20' },
+  'south-america': { output: 'world/imported/south-america-stations.json', id: 'south-america-stations',
+    label: 'South America railway stations', sourceId: 'openstreetmap-geofabrik-south-america-2026-09-21' }
+};
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -68,8 +73,10 @@ function osmId(id) {
 }
 
 function main() {
+  const scope = SCOPES[argument('scope') || 'chile'];
+  assert(scope, 'Unknown scope: ' + argument('scope') + ' (use ' + Object.keys(SCOPES).join(' or ') + ')');
   const input = argument('input') && path.resolve(root, argument('input'));
-  assert(input && fs.existsSync(input), 'Usage: npm run world:extract:chile:stations -- --input /path/to/chile-260920.osm.pbf');
+  assert(input && fs.existsSync(input), 'Usage: npm run world:extract:chile:stations -- --input /path/to/extract.osm.pbf');
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'ashline-osm-stations-'));
   const filtered = path.join(temporary, 'stations.osm.pbf');
   const geojson = path.join(temporary, 'stations.geojsonseq');
@@ -98,19 +105,19 @@ function main() {
     stations.forEach(station => { counts[station.status] = (counts[station.status] || 0) + 1; });
     const artifact = {
       formatVersion: 1,
-      id: 'chile-stations',
-      label: 'Chile railway stations',
-      sourceId: 'openstreetmap-geofabrik-2026-09-20',
+      id: scope.id,
+      label: scope.label,
+      sourceId: scope.sourceId,
       sourceSnapshotSha256: sha256File(input),
       navigable: false,
       stats: { stationCount: stations.length, statusCounts: counts },
       stations
     };
-    const target = path.join(root, OUTPUT);
+    const target = path.join(root, scope.output);
     fs.writeFileSync(target, '{\n' + Object.entries(artifact).filter(([key]) => key !== 'stations')
       .map(([key, value]) => '  ' + JSON.stringify(key) + ': ' + JSON.stringify(value)).join(',\n') +
       ',\n  "stations": [\n' + stations.map(station => '    ' + JSON.stringify(station)).join(',\n') + '\n  ]\n}\n');
-    console.log('Wrote ' + stations.length + ' named stations to ' + OUTPUT + ' (' +
+    console.log('Wrote ' + stations.length + ' named stations to ' + scope.output + ' (' +
       Object.entries(counts).map(([status, count]) => count + ' ' + status).join(', ') + ')');
   } finally {
     fs.rmSync(temporary, { recursive: true, force: true });

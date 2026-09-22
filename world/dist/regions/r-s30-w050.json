@@ -45,7 +45,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:br-porto-alegre>br-sao-paulo"
+      ]
     },
     {
       "id": "plan:atlantic:06",
@@ -57,7 +60,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:br-sao-paulo>br-rio-de-janeiro"
+      ]
     }
   ]
 }

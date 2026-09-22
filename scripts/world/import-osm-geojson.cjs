@@ -51,8 +51,9 @@ function formatJson(value) {
   return (JSON.stringify(value, null, 2).replace(/\[\n\s+(-?\d+(?:\.\d+)?),\n\s+(-?\d+(?:\.\d+)?)\n\s+\]/g, '[$1, $2]') + '\n');
 }
 
-function normalizeGeoJson(input, options) {
-  assert(input && input.type === 'FeatureCollection' && Array.isArray(input.features), 'Input must be a GeoJSON FeatureCollection');
+// An incremental normalizer, so a continent-sized export can be read feature by feature: the whole GeoJSON of
+// South America's railways is larger than the longest string this runtime can hold.
+function createNormalizer(options) {
   assert(options && options.id && options.sourceId, 'Import ID and source ID are required');
   const ways = [];
   const points = [];
@@ -60,12 +61,11 @@ function normalizeGeoJson(input, options) {
   const bounds = [Infinity, Infinity, -Infinity, -Infinity];
   const statusCounts = {};
 
-  input.features.forEach(feature => {
-    if (!feature || !feature.geometry || feature.geometry.type !== 'LineString') return;
+  function addWay(feature) {
     const properties = feature.properties || {};
     const classification = classifyRailway(properties);
     if (!classification) return;
-    const osmWayId = Number(properties['@id']);
+    const osmWayId = Number(properties['@id'] ?? properties.id);
     assert(Number.isSafeInteger(osmWayId) && osmWayId > 0, 'Railway LineString has no valid OSM way ID');
     const id = 'osm-way:' + osmWayId;
     assert(!seenIds.has(id), 'Duplicate OSM way: ' + id);
@@ -106,13 +106,12 @@ function normalizeGeoJson(input, options) {
       tags,
       coordinates
     });
-  });
+  }
 
-  input.features.forEach(feature => {
-    if (!feature || !feature.geometry || feature.geometry.type !== 'Point') return;
+  function addPoint(feature) {
     const properties = feature.properties || {};
     if (!retainedPointRailway.has(properties.railway)) return;
-    const osmNodeId = Number(properties['@id']);
+    const osmNodeId = Number(properties['@id'] ?? properties.id);
     assert(Number.isSafeInteger(osmNodeId) && osmNodeId > 0, 'Railway Point has no valid OSM node ID');
     const coordinate = feature.geometry.coordinates;
     assert(Array.isArray(coordinate) && coordinate.length >= 2, 'Invalid railway point coordinate');
@@ -127,32 +126,68 @@ function normalizeGeoJson(input, options) {
       coordinates: [roundCoordinate(coordinate[0]), roundCoordinate(coordinate[1])],
       tags
     });
-  });
+  }
 
-  ways.sort((a, b) => Number(a.sourceFeatureId) - Number(b.sourceFeatureId));
-  points.sort((a, b) => Number(a.sourceFeatureId) - Number(b.sourceFeatureId));
-  assert(ways.length > 0, 'No accepted railway LineStrings found');
   return {
-    formatVersion: 1,
-    id: options.id,
-    label: options.label || options.id,
-    sourceId: options.sourceId,
-    sourceSnapshotSha256: options.sourceSnapshotSha256 || '',
-    sourceInputSha256: options.sourceInputSha256 || '',
-    bounds: bounds.map(roundCoordinate),
-    geometrySource: 'openstreetmap-way',
-    navigable: false,
-    reviewRequired: true,
-    stats: {
-      wayCount: ways.length,
-      pointCount: points.length,
-      coordinateCount: ways.reduce((total, way) => total + way.coordinates.length, 0),
-      lengthKm: Math.round(ways.reduce((total, way) => total + way.lengthKm, 0) * 10) / 10,
-      statusCounts: Object.fromEntries(Object.entries(statusCounts).sort(([a], [b]) => a.localeCompare(b)))
+    add(feature) {
+      if (!feature || !feature.geometry) return;
+      if (feature.geometry.type === 'LineString') addWay(feature);
+      else if (feature.geometry.type === 'Point') addPoint(feature);
     },
-    ways,
-    points
+    finish(extra = {}) {
+      ways.sort((a, b) => Number(a.sourceFeatureId) - Number(b.sourceFeatureId));
+      points.sort((a, b) => Number(a.sourceFeatureId) - Number(b.sourceFeatureId));
+      assert(ways.length > 0, 'No accepted railway LineStrings found');
+      return {
+        formatVersion: 1,
+        id: options.id,
+        label: options.label || options.id,
+        sourceId: options.sourceId,
+        sourceSnapshotSha256: options.sourceSnapshotSha256 || extra.sourceSnapshotSha256 || '',
+        sourceInputSha256: options.sourceInputSha256 || extra.sourceInputSha256 || '',
+        bounds: bounds.map(roundCoordinate),
+        geometrySource: 'openstreetmap-way',
+        navigable: false,
+        reviewRequired: true,
+        stats: {
+          wayCount: ways.length,
+          pointCount: points.length,
+          coordinateCount: ways.reduce((total, way) => total + way.coordinates.length, 0),
+          lengthKm: Math.round(ways.reduce((total, way) => total + way.lengthKm, 0) * 10) / 10,
+          statusCounts: Object.fromEntries(Object.entries(statusCounts).sort(([a], [b]) => a.localeCompare(b)))
+        },
+        ways,
+        points
+      };
+    }
   };
+}
+
+function normalizeGeoJson(input, options) {
+  assert(input && input.type === 'FeatureCollection' && Array.isArray(input.features), 'Input must be a GeoJSON FeatureCollection');
+  const normalizer = createNormalizer(options);
+  input.features.forEach(feature => normalizer.add(feature));
+  return normalizer.finish();
+}
+
+// Writes a normalized geometry file without ever holding it as one string: a continental set runs to hundreds of
+// megabytes. Ways and points are one compact record per line, which also keeps their diffs readable.
+function writeNormalizedJson(target, normalized) {
+  const stream = fs.createWriteStream(target);
+  const header = Object.entries(normalized).filter(([key]) => key !== 'ways' && key !== 'points');
+  stream.write('{\n' + header.map(([key, value]) => '  ' + JSON.stringify(key) + ': ' + JSON.stringify(value)).join(',\n'));
+  ['ways', 'points'].forEach(key => {
+    stream.write(',\n  ' + JSON.stringify(key) + ': [\n');
+    normalized[key].forEach((record, index) => {
+      stream.write((index ? ',\n' : '') + '    ' + JSON.stringify(record));
+    });
+    stream.write('\n  ]');
+  });
+  stream.write('\n}\n');
+  return new Promise((resolve, reject) => {
+    stream.on('error', reject);
+    stream.end(resolve);
+  });
 }
 
 function parseArguments(argv) {
@@ -197,4 +232,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { formatJson, normalizeGeoJson, railwayStatus, classifyRailway };
+module.exports = { formatJson, normalizeGeoJson, createNormalizer, writeNormalizedJson, railwayStatus, classifyRailway };

@@ -45,7 +45,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:br-porto-velho>br-manaus"
+      ]
     },
     {
       "id": "plan:central-amazon:09",
@@ -57,7 +60,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:br-manaus>br-boa-vista"
+      ]
     }
   ]
 }

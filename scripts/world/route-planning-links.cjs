@@ -256,7 +256,15 @@ function reachable(graph, start) {
   return seen;
 }
 
-function dijkstra(graph, start, goal) {
+// corridor, when given, is an ellipse around the two cities: a node is only searched if the sum of its distances to
+// both of them is within it. Without that bound the cheapest path over a continent can be a tour of another country,
+// since real track always costs less per kilometre than a proposed gap fill.
+function dijkstra(graph, start, goal, corridor) {
+  const allowed = key => {
+    if (!corridor) return true;
+    const coordinate = graph.nodes.get(key).coordinate;
+    return haversineKm(coordinate, corridor.from) + haversineKm(coordinate, corridor.to) <= corridor.limitKm;
+  };
   const distances = new Map([[start, 0]]);
   const previous = new Map();
   const heap = [{ key: start, distance: 0 }];
@@ -295,6 +303,7 @@ function dijkstra(graph, start, goal) {
     graph.nodes.get(current.key).segments.forEach(index => {
       const segment = graph.segments[index];
       const next = segment.from === current.key ? segment.to : segment.from;
+      if (next !== goal && !allowed(next)) return;
       const distance = current.distance + segmentCost(segment);
       if (distance < (distances.get(next) ?? Infinity)) {
         distances.set(next, distance);
@@ -336,6 +345,10 @@ function keysNear(graph, keys, coordinate, km) {
 // this finds the pair on an even sample of each network first and then refines it among the nodes near that pair.
 const COARSE_SAMPLE = 1500;
 const REFINE_KM = 25;
+// How far off the straight line between two cities a route may wander, as a multiple of the distance between them.
+const DETOUR_FACTORS = [1.4, 2, 3];
+// Beyond this multiple of the straight line, a route is reported as a detour rather than a plausible corridor.
+const DETOUR_REPORT = 2.5;
 function closestPair(graph, setA, setB) {
   const sample = keys => {
     const sorted = Array.from(keys).sort();
@@ -357,16 +370,31 @@ function closestPair(graph, setA, setB) {
 }
 
 function routeLink(graph, from, to) {
-  let steps = dijkstra(graph, from.key, to.key);
+  // The bound starts close to the straight line and is relaxed until a route exists, so a link is never refused for
+  // being twisty; it only stops a route from crossing the continent to avoid a gap fill.
+  const fromCoordinate = graph.nodes.get(from.key).coordinate, toCoordinate = graph.nodes.get(to.key).coordinate;
+  const chordKm = haversineKm(fromCoordinate, toCoordinate);
+  let steps = null;
+  for (const factor of DETOUR_FACTORS) {
+    steps = dijkstra(graph, from.key, to.key,
+      { from: fromCoordinate, to: toCoordinate, limitKm: Math.max(60, chordKm * factor) });
+    if (steps) break;
+  }
   const longGaps = [];
   // Where the two cities' networks do not meet at all, propose the single shortest line that joins them, then route
-  // again. Repeating allows for a chain of islands, though one join covers every link in the current spike.
-  for (let attempt = 0; !steps && attempt < 4; attempt++) {
+  // again. Repeating allows for a chain of islands. The bound stays on: a network joined by a new line is still not
+  // a reason to cross the continent.
+  // Each attempt joins the nearest pair of unconnected networks and widens the bound, so a city with no railway
+  // anywhere near it, such as Panama City, is still reached without the route touring the continent first.
+  for (let attempt = 0; !steps && attempt < 8; attempt++) {
     const pair = closestPair(graph, reachable(graph, from.key), reachable(graph, to.key));
     assert(pair, 'No gap can join ' + from.key + ' and ' + to.key);
     addSegment(graph, pair.a, pair.b, 'long-gap', {});
     longGaps.push(pair);
-    steps = dijkstra(graph, from.key, to.key);
+    // The last attempt drops the bound entirely, so a link is never refused. Where that happens the route is a
+    // detour of its own making and is flagged as one in the proposal.
+    steps = dijkstra(graph, from.key, to.key, attempt >= 6 ? null : { from: fromCoordinate, to: toCoordinate,
+      limitKm: Math.max(200, chordKm * (DETOUR_FACTORS.at(-1) + attempt)) });
   }
   assert(steps, 'Could not route between ' + from.key + ' and ' + to.key);
   return { steps, longGaps };
@@ -490,7 +518,9 @@ function stationsAlong(graph, steps, stationGrid) {
 
 // --- the stage ----------------------------------------------------------------------------------------------
 
-function routeLinks(geometry, places, corridorRows, countryCode) {
+// countryCodes limits routing to links whose two cities both lie in those countries; null routes every link the
+// geometry might cover, which is what a continental network is for.
+function routeLinks(geometry, places, corridorRows, countryCodes) {
   const graph = buildCoordinateGraph(geometry);
   graph.segments.forEach(segment => { segment.kind = 'rail'; });
   const grid = new Grid();
@@ -512,15 +542,14 @@ function routeLinks(geometry, places, corridorRows, countryCode) {
     if (!byCorridor.has(row.corridor_id)) byCorridor.set(row.corridor_id, []);
     byCorridor.get(row.corridor_id).push(row);
   });
-  // Every link whose two cities both lie in the country the geometry covers. Links shared by several corridors
-  // (they all leave Punta Arenas) are routed once.
+  // Links shared by several corridors (they all leave Punta Arenas) are routed once.
   const pairs = new Map();
   Array.from(byCorridor.keys()).sort().forEach(corridorId => {
     const rows = byCorridor.get(corridorId).sort((a, b) => Number(a.sequence) - Number(b.sequence));
     for (let index = 0; index < rows.length - 1; index++) {
       const from = placesById[rows[index].place_id];
       const to = placesById[rows[index + 1].place_id];
-      if (from.countryCode !== countryCode || to.countryCode !== countryCode) continue;
+      if (countryCodes && !(countryCodes.includes(from.countryCode) && countryCodes.includes(to.countryCode))) continue;
       const pairId = from.id + '>' + to.id;
       if (!pairs.has(pairId)) pairs.set(pairId, { from, to, planningLinkIds: [] });
       pairs.get(pairId).planningLinkIds.push('plan:' + corridorId + ':' + String(index + 1).padStart(2, '0'));
@@ -553,6 +582,10 @@ function routeLinks(geometry, places, corridorRows, countryCode) {
       railKm: round(railKm, 1),
       gapKm: round(gapKm, 1),
       status: gapKm > 0 ? 'rail-with-gap-proposals' : 'rail-routed',
+      // A route much longer than the straight line means the mapped networks do not run this way at all; the router
+      // followed whatever track existed instead. Useful as data, but not a corridor anyone would build.
+      detour: railKm + gapKm > DETOUR_REPORT * haversineKm([pair.from.longitude, pair.from.latitude],
+        [pair.to.longitude, pair.to.latitude]),
       fromAnchor: { ...fromAnchor, key: undefined },
       toAnchor: { ...toAnchor, key: undefined },
       gaps,
@@ -571,7 +604,7 @@ function reportMarkdown(result) {
   const lines = [
     '# ' + result.label,
     '',
-    'Generated by `npm run world:route:chile`. Nothing here is playable: every route is a proposal for review, and',
+    'Generated by `' + result.command + '`. Nothing here is playable: every route is a proposal for review, and',
     'every gap is new track that does not exist in OpenStreetMap. Rail figures include all lifecycle statuses.',
     '',
     '| Link | Chord | Routed | On rail | Gap fills | Stations on route |',
@@ -581,6 +614,11 @@ function reportMarkdown(result) {
     lines.push('| ' + link.from + ' → ' + link.to + ' | ' + link.chordKm + ' km | ' + link.routedKm + ' km | ' +
       link.railKm + ' km | ' + link.gapKm + ' km in ' + link.gaps.length + ' | ' + link.stations.length + ' |');
   });
+  const detours = result.links.filter(link => link.detour);
+  if (detours.length) {
+    lines.push('', 'Detours (no mapped network runs this way; the router followed what track exists): ' +
+      detours.map(link => link.from + ' → ' + link.to).join(', ') + '.');
+  }
   lines.push('', 'Network repairs: ' + result.stats.snaps + ' digitizing breaks under ' + SNAP_M + ' m snapped; ' +
     result.stats.shortGaps + ' candidate short gaps under ' + GAP_KM + ' km offered to routing (rail costs ' +
     GAP_PENALTY + '× less than a gap per km).', '');
@@ -603,10 +641,34 @@ function reportMarkdown(result) {
   return lines.join('\n');
 }
 
+// Which network is routed, and which links over it.
+const SCOPES = {
+  chile: {
+    geometry: 'world/imported/chile-rail.json',
+    output: 'world/proposals/chile-routed-links.json',
+    id: 'chile-routed-links',
+    label: 'Chile planning links routed over OpenStreetMap rail',
+    countries: ['CL'],
+    command: 'npm run world:route:chile',
+    extract: 'npm run world:extract:chile:national -- --input /path/to/chile-260920.osm.pbf'
+  },
+  'south-america': {
+    geometry: 'world/imported/south-america-rail.json',
+    output: 'world/proposals/south-america-routed-links.json',
+    id: 'south-america-routed-links',
+    label: 'South America planning links routed over OpenStreetMap rail',
+    countries: null,
+    command: 'npm run world:route:south-america',
+    extract: 'npm run world:extract:south-america -- --input /path/to/south-america-260921.osm.pbf'
+  }
+};
+
 function main() {
-  const geometryPath = path.join(root, 'world/imported/chile-rail.json');
-  assert(fs.existsSync(geometryPath),
-    'Missing ' + path.relative(root, geometryPath) + '. Run: npm run world:extract:chile:national -- --input /path/to/chile-260920.osm.pbf');
+  const scopeName = process.argv.includes('--scope') ? process.argv[process.argv.indexOf('--scope') + 1] : 'chile';
+  const scope = SCOPES[scopeName];
+  assert(scope, 'Unknown scope: ' + scopeName + ' (use ' + Object.keys(SCOPES).join(' or ') + ')');
+  const geometryPath = path.join(root, scope.geometry);
+  assert(fs.existsSync(geometryPath), 'Missing ' + scope.geometry + '. Run: ' + scope.extract);
   const bytes = fs.readFileSync(geometryPath);
   const geometry = JSON.parse(bytes.toString('utf8'));
   const places = parseCsv(fs.readFileSync(path.join(root, 'world/authored/places.csv'), 'utf8')).map(row => ({
@@ -614,11 +676,12 @@ function main() {
     latitude: Number(row.latitude), longitude: Number(row.longitude)
   }));
   const corridorRows = parseCsv(fs.readFileSync(path.join(root, 'world/authored/corridors.csv'), 'utf8'));
-  const routed = routeLinks(geometry, places, corridorRows, 'CL');
+  const routed = routeLinks(geometry, places, corridorRows, scope.countries);
   const result = {
     formatVersion: 1,
-    id: 'chile-routed-links',
-    label: 'Chile planning links routed over OpenStreetMap rail',
+    id: scope.id,
+    label: scope.label,
+    command: scope.command,
     geometryId: geometry.id,
     sourceId: geometry.sourceId,
     geometrySha256: crypto.createHash('sha256').update(bytes).digest('hex'),
@@ -630,10 +693,10 @@ function main() {
     stats: { snaps: routed.snaps, shortGaps: routed.shortGaps, linkCount: routed.links.length },
     links: routed.links
   };
-  const outputPath = path.join(root, 'world/proposals/chile-routed-links.json');
+  const outputPath = path.join(root, scope.output);
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, formatJson(result));
-  const reportPath = path.join(root, 'world/proposals/chile-routed-links.md');
+  const reportPath = outputPath.replace(/\.json$/, '.md');
   fs.writeFileSync(reportPath, reportMarkdown(result) + '\n');
   result.links.forEach(link => {
     console.log(link.from + ' → ' + link.to + ': ' + link.routedKm + ' km routed (' + link.railKm + ' km rail, ' +

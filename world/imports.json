@@ -19,12 +19,20 @@
     {
       "id": "chile-routed-links",
       "file": "world/proposals/chile-routed-links.json"
+    },
+    {
+      "id": "south-america-routed-links",
+      "file": "world/proposals/south-america-routed-links.json"
     }
   ],
   "stations": [
     {
       "id": "chile-stations",
       "file": "world/imported/chile-stations.json"
+    },
+    {
+      "id": "south-america-stations",
+      "file": "world/imported/south-america-stations.json"
     }
   ]
 }

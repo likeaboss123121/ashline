@@ -55,7 +55,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:ar-rio-gallegos>ar-bariloche"
+      ]
     },
     {
       "id": "plan:pacific:01",
@@ -68,7 +71,10 @@
       "navigable": false,
       "reviewRequired": true,
       "geometrySource": "authored-waypoint-chord",
-      "routedBy": "route:cl-punta-arenas>cl-puerto-montt"
+      "routedBy": [
+        "route:cl-punta-arenas>cl-puerto-montt",
+        "south-america-routed-links/route:cl-punta-arenas>cl-puerto-montt"
+      ]
     }
   ]
 }

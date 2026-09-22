@@ -35,7 +35,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:cl-punta-arenas>ar-rio-gallegos"
+      ]
     },
     {
       "id": "plan:central-amazon:01",
@@ -47,7 +50,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:cl-punta-arenas>ar-rio-gallegos"
+      ]
     }
   ]
 }

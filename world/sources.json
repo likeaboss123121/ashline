@@ -24,6 +24,18 @@
       "transformation": "Osmium tag filter, complete-way bounding-box extract, GeoJSON export, deterministic normalization"
     },
     {
+      "id": "openstreetmap-geofabrik-south-america-2026-09-21",
+      "name": "OpenStreetMap South America extract via Geofabrik",
+      "url": "https://download.geofabrik.de/south-america-latest.osm.pbf",
+      "retrieved": "2026-09-22",
+      "snapshotTimestamp": "2026-09-21T22:21:56Z",
+      "license": "ODbL 1.0",
+      "attribution": "© OpenStreetMap contributors; extract provided by Geofabrik",
+      "status": "ingested",
+      "use": "Every mapped railway alignment and named station in South America, for routing the continental planning links",
+      "transformation": "Osmium tag filter, GeoJSON sequence export, deterministic streaming normalization"
+    },
+    {
       "id": "openhistoricalmap-rail",
       "name": "OpenHistoricalMap",
       "url": "https://www.openhistoricalmap.org/",

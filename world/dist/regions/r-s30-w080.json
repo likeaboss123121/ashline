@@ -46,7 +46,10 @@
       "navigable": false,
       "reviewRequired": true,
       "geometrySource": "authored-waypoint-chord",
-      "routedBy": "route:cl-santiago>cl-antofagasta"
+      "routedBy": [
+        "route:cl-santiago>cl-antofagasta",
+        "south-america-routed-links/route:cl-santiago>cl-antofagasta"
+      ]
     },
     {
       "id": "plan:pacific:04",
@@ -59,7 +62,10 @@
       "navigable": false,
       "reviewRequired": true,
       "geometrySource": "authored-waypoint-chord",
-      "routedBy": "route:cl-antofagasta>cl-arica"
+      "routedBy": [
+        "route:cl-antofagasta>cl-arica",
+        "south-america-routed-links/route:cl-antofagasta>cl-arica"
+      ]
     }
   ]
 }

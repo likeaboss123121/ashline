@@ -44,7 +44,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:ar-cordoba>py-asuncion"
+      ]
     },
     {
       "id": "plan:central-amazon:06",
@@ -56,7 +59,10 @@
       "status": "planning",
       "navigable": false,
       "reviewRequired": true,
-      "geometrySource": "authored-waypoint-chord"
+      "geometrySource": "authored-waypoint-chord",
+      "routedBy": [
+        "route:py-asuncion>bo-santa-cruz"
+      ]
     }
   ]
 }

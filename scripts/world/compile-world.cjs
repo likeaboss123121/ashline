@@ -201,11 +201,17 @@ function compile() {
   // Planning links routed over real rail by scripts/world/route-planning-links.cjs. They are proposals: the compiler
   // refuses any that claim to be navigable, and a planning link only learns which route covers it, never loses its
   // own planning status.
+  // Two sets can route the same pair of cities over different networks. The first set keeps the plain ID and the
+  // rest are qualified by their set, so both stay inspectable and an authored corridor still names one exactly.
+  const routedIds = new Set();
   const routedLinks = (importManifest.routedLinks || []).flatMap(entry => {
     const routed = JSON.parse(read(entry.file));
     assert(routed.id === entry.id, 'Routed link import ID mismatch: ' + entry.file);
-    return routed.links.map(link => ({ ...link, proposalSetId: routed.id, geometryId: routed.geometryId,
-      sourceId: routed.sourceId }));
+    return routed.links.map(link => {
+      const id = routedIds.has(link.id) ? routed.id + '/' + link.id : link.id;
+      routedIds.add(id);
+      return { ...link, id, proposalSetId: routed.id, geometryId: routed.geometryId, sourceId: routed.sourceId };
+    });
   });
   const linksById = Object.fromEntries(links.map(link => [link.id, link]));
   routedLinks.forEach(route => {
@@ -216,8 +222,8 @@ function compile() {
     if (playable.length) route.playableCorridorId = playable[0].id;
     route.planningLinkIds.forEach(id => {
       assert(linksById[id], 'Routed link covers unknown planning link: ' + id);
-      assert(!linksById[id].routedBy, 'Planning link routed twice: ' + id);
-      linksById[id].routedBy = route.id;
+      // A link can be routed by more than one set: the Chile network and the continental one both cover Chile.
+      linksById[id].routedBy = (linksById[id].routedBy || []).concat(route.id);
     });
   });
   const bundle = {
@@ -484,7 +490,8 @@ function outputsFor(bundle) {
     ...(route.playableCorridorId ? { playableCorridorId: route.playableCorridorId } : {})
   }));
   browserBundle.routedLinks = bundle.routedLinks.map(route => ({
-    id: route.id, from: route.from, to: route.to, status: route.status, chordKm: route.chordKm,
+    id: route.id, proposalSetId: route.proposalSetId, from: route.from, to: route.to, status: route.status,
+    ...(route.detour ? { detour: true } : {}), chordKm: route.chordKm,
     routedKm: route.routedKm, railKm: route.railKm, gapKm: route.gapKm, gapCount: route.gaps.length,
     sliceCount: route.sliceCount, navigable: route.navigable, reviewRequired: route.reviewRequired,
     ...(route.playableCorridorId ? { playableCorridorId: route.playableCorridorId } : {}),

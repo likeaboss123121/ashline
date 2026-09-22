@@ -1583,18 +1583,21 @@ test('debug mode draws the complete sourced rail grid', async t => {
   assert.ok(map.cells > 50, JSON.stringify(map));
   assert.ok(map.track > 10, JSON.stringify(map));
   assert.equal(map.stations, 286, JSON.stringify(map));
-  // The main line plays every routed Chile link, so none is drawn again as context; its cities are named on it.
+  // The main line plays every routed Chile link, so those are not drawn again; the continental network around it is,
+  // as context: a whole continent of proposals on the same 5 km grid, none of them teleport targets.
   const context = await page.evaluate(() => {
     const svg = document.querySelector('svg.worldmap-debug');
     return {
       cells: svg.querySelectorAll('.debug-context-tile').length,
+      teleportable: [...svg.querySelectorAll('.debug-context-tile')].filter(cell => cell.hasAttribute('data-debug-teleport')).length,
       labels: [...svg.querySelectorAll('.debug-station-label')].map(label => label.textContent).sort(),
       gapTiles: [...svg.querySelectorAll('.debug-teleport-tile title')].filter(title => /gap fill \|/.test(title.textContent)).length,
       line: (document.querySelector('.debug-map-context') || {}).textContent || ''
     };
   });
-  assert.equal(context.cells, 0, JSON.stringify(context));
-  assert.equal(context.line, '');
+  assert.ok(context.cells > 3000, JSON.stringify(context));
+  assert.equal(context.teleportable, 0, JSON.stringify(context));
+  assert.match(context.line, /^Around it: 38 routed planning links drawn on a geographic 5 km grid, \d+ cells of mapped rail \(grey\) and \d+ of proposed gap fill \(red\)\. Not playable and not teleport targets\.$/);
   assert.deepEqual(context.labels, ['Antofagasta', 'Arica', 'Puerto Montt', 'Punta Arenas', 'Santiago']);
   assert.ok(context.gapTiles > 250, JSON.stringify(context));
   assert.match(map.heading, /^Chilean main line: 958 grid positions, 4785 playable km/);
@@ -1606,9 +1609,11 @@ test('debug mode draws the complete sourced rail grid', async t => {
   // The three planning chords, with the Chile links routed over mapped rail drawn on top: real track solid, gap
   // fills dashed, and all of it played by the main line.
   assert.equal(await prototype.locator('svg.world-graph-debug polyline:not(.world-route-rail):not(.world-route-gap)').count(), 3);
+  // Every corridor of the continent is routed now, not only the Chilean one.
+  assert.ok(await prototype.locator('svg.world-graph-debug polyline.world-route-rail').count() > 100);
   assert.ok(await prototype.locator('svg.world-graph-debug polyline.world-route-rail').count() >= 4);
   assert.ok(await prototype.locator('svg.world-graph-debug polyline.world-route-gap').count() >= 2);
-  assert.match(await prototype.innerText(), /4 planning links routed over mapped rail: [\d,]+ km on real track \(solid\) and [\d,]+ km of gap fill \(dashed\)\. All of them are playable\./);
+  assert.match(await prototype.innerText(), /42 planning links routed over mapped rail: [\d,]+ km on real track \(solid\) and [\d,]+ km of gap fill \(dashed\)\. 4 of them are playable; the rest are unreviewed\./);
   assert.equal(await prototype.locator('svg.world-graph-debug circle').count(), 35);
   assert.match(await prototype.innerText(), /1,581 sourced OSM ways, 21,391 coordinates and 1,160 km/);
   const previewCounts = await prototype.locator('svg.rail-geometry-preview path[data-way-count]').evaluateAll(paths =>
