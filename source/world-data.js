@@ -33139,6 +33139,24288 @@ setup.worldGraphData = {
       "elevationSourceId": "copernicus-dem-glo90",
       "elevationAggregation": "mean-and-population-standard-deviation-within-geographic-tile",
       "mountainStdDevM": 120
+    },
+    {
+      "formatVersion": 1,
+      "geometryId": "chile-routed-links",
+      "routed": true,
+      "tileKm": 5,
+      "buildId": "c2ec6ae9c54680f2",
+      "corridors": [
+        {
+          "id": "cl-main-line",
+          "label": "Chilean main line",
+          "geometryId": "chile-routed-links",
+          "debugOnly": false,
+          "navigable": true,
+          "reviewStatus": "authored-gameplay-route",
+          "routedLinkIds": [
+            "route:cl-punta-arenas>cl-puerto-montt",
+            "route:cl-puerto-montt>cl-santiago",
+            "route:cl-santiago>cl-antofagasta",
+            "route:cl-antofagasta>cl-arica"
+          ],
+          "stations": [
+            {
+              "id": "place:cl-punta-arenas",
+              "name": "Punta Arenas",
+              "status": "city",
+              "coordinates": [-70.90114, -53.16472],
+              "alongKm": 0
+            },
+            {
+              "id": "halt:cl-main-line:km-94",
+              "name": "Km 94",
+              "status": "kilometre-post",
+              "coordinates": [-71.0433497, -52.3272907],
+              "alongKm": 93.609
+            },
+            {
+              "id": "halt:cl-main-line:km-187",
+              "name": "Km 187",
+              "status": "kilometre-post",
+              "coordinates": [-71.1855367, -51.4900306],
+              "alongKm": 187.218
+            },
+            {
+              "id": "halt:cl-main-line:km-281",
+              "name": "Km 281",
+              "status": "kilometre-post",
+              "coordinates": [-71.32769, -50.6529402],
+              "alongKm": 280.826
+            },
+            {
+              "id": "halt:cl-main-line:km-374",
+              "name": "Km 374",
+              "status": "kilometre-post",
+              "coordinates": [-71.4698162, -49.8160207],
+              "alongKm": 374.435
+            },
+            {
+              "id": "halt:cl-main-line:km-468",
+              "name": "Km 468",
+              "status": "kilometre-post",
+              "coordinates": [-71.6119179, -48.9792734],
+              "alongKm": 468.044
+            },
+            {
+              "id": "halt:cl-main-line:km-562",
+              "name": "Km 562",
+              "status": "kilometre-post",
+              "coordinates": [-71.7539875, -48.1426981],
+              "alongKm": 561.653
+            },
+            {
+              "id": "halt:cl-main-line:km-655",
+              "name": "Km 655",
+              "status": "kilometre-post",
+              "coordinates": [-71.8960234, -47.3062953],
+              "alongKm": 655.261
+            },
+            {
+              "id": "halt:cl-main-line:km-749",
+              "name": "Km 749",
+              "status": "kilometre-post",
+              "coordinates": [-72.038036, -46.4700661],
+              "alongKm": 748.87
+            },
+            {
+              "id": "halt:cl-main-line:km-842",
+              "name": "Km 842",
+              "status": "kilometre-post",
+              "coordinates": [-72.1800156, -45.63401],
+              "alongKm": 842.479
+            },
+            {
+              "id": "halt:cl-main-line:km-936",
+              "name": "Km 936",
+              "status": "kilometre-post",
+              "coordinates": [-72.3219694, -44.7981276],
+              "alongKm": 936.088
+            },
+            {
+              "id": "halt:cl-main-line:km-1030",
+              "name": "Km 1030",
+              "status": "kilometre-post",
+              "coordinates": [-72.4638894, -43.962418],
+              "alongKm": 1029.696
+            },
+            {
+              "id": "halt:cl-main-line:km-1123",
+              "name": "Km 1123",
+              "status": "kilometre-post",
+              "coordinates": [-72.6057776, -43.1268813],
+              "alongKm": 1123.305
+            },
+            {
+              "id": "halt:cl-main-line:km-1217",
+              "name": "Km 1217",
+              "status": "kilometre-post",
+              "coordinates": [-72.747641, -42.2915176],
+              "alongKm": 1216.914
+            },
+            {
+              "id": "place:cl-puerto-montt",
+              "name": "Puerto Montt",
+              "status": "city",
+              "coordinates": [-72.91952, -41.47546],
+              "alongKm": 1310.523
+            },
+            {
+              "id": "osm-node:1107682659",
+              "name": "La Paloma",
+              "status": "active",
+              "coordinates": [-72.9169887, -41.4587535],
+              "alongKm": 1321.69
+            },
+            {
+              "id": "osm-node:8788040383",
+              "name": "Alerce",
+              "status": "active",
+              "coordinates": [-72.9194769, -41.39948],
+              "alongKm": 1328.586
+            },
+            {
+              "id": "osm-node:8715496993",
+              "name": "Puerto Varas",
+              "status": "active",
+              "coordinates": [-72.9839074, -41.3129965],
+              "alongKm": 1341.407
+            },
+            {
+              "id": "osm-node:801682415",
+              "name": "Llanquihue",
+              "status": "active",
+              "coordinates": [-73.0062557, -41.252927],
+              "alongKm": 1349.139
+            },
+            {
+              "id": "osm-node:12801571335",
+              "name": "Los Pellines",
+              "status": "disused",
+              "coordinates": [-73.0675331, -41.1874563],
+              "alongKm": 1359.339
+            },
+            {
+              "id": "osm-node:8713368984",
+              "name": "Frutillar",
+              "status": "active",
+              "coordinates": [-73.061198, -41.1253652],
+              "alongKm": 1366.388
+            },
+            {
+              "id": "osm-node:8819298793",
+              "name": "Casma",
+              "status": "active",
+              "coordinates": [-73.1268597, -41.0077268],
+              "alongKm": 1380.676
+            },
+            {
+              "id": "osm-node:8843878871",
+              "name": "Purranque",
+              "status": "active",
+              "coordinates": [-73.1632094, -40.9119785],
+              "alongKm": 1392.142
+            },
+            {
+              "id": "osm-node:1492329889",
+              "name": "Río Negro",
+              "status": "active",
+              "coordinates": [-73.2128164, -40.7937269],
+              "alongKm": 1406.707
+            },
+            {
+              "id": "osm-node:8861862732",
+              "name": "Chahuilco",
+              "status": "disused",
+              "coordinates": [-73.2145657, -40.7190697],
+              "alongKm": 1415.807
+            },
+            {
+              "id": "osm-node:8880517344",
+              "name": "Sagllúe",
+              "status": "disused",
+              "coordinates": [-73.2036348, -40.6478529],
+              "alongKm": 1424.557
+            },
+            {
+              "id": "osm-node:8902910228",
+              "name": "Osorno",
+              "status": "active",
+              "coordinates": [-73.1411708, -40.575041],
+              "alongKm": 1434.746
+            },
+            {
+              "id": "osm-node:8937085849",
+              "name": "Chacayal",
+              "status": "disused",
+              "coordinates": [-73.12522, -40.4989189],
+              "alongKm": 1445.938
+            },
+            {
+              "id": "osm-node:8952643802",
+              "name": "Caracol",
+              "status": "active",
+              "coordinates": [-73.1245932, -40.4395833],
+              "alongKm": 1452.985
+            },
+            {
+              "id": "osm-node:12801520315",
+              "name": "Trumao",
+              "status": "disused",
+              "coordinates": [-73.1609596, -40.3611314],
+              "alongKm": 1464.806
+            },
+            {
+              "id": "osm-node:11506003307",
+              "name": "La Unión",
+              "status": "active",
+              "coordinates": [-73.0726794, -40.2986226],
+              "alongKm": 1477.529
+            },
+            {
+              "id": "osm-node:12801520308",
+              "name": "Rapaco",
+              "status": "active",
+              "coordinates": [-73.0160395, -40.2495431],
+              "alongKm": 1485.922
+            },
+            {
+              "id": "osm-node:12801520307",
+              "name": "Los Conales",
+              "status": "disused",
+              "coordinates": [-72.9563306, -40.2121875],
+              "alongKm": 1493.031
+            },
+            {
+              "id": "osm-node:1500315734",
+              "name": "Pichi Ropulli",
+              "status": "active",
+              "coordinates": [-72.8978383, -40.1512175],
+              "alongKm": 1501.876
+            },
+            {
+              "id": "osm-node:982910005",
+              "name": "Paillaco",
+              "status": "active",
+              "coordinates": [-72.8779006, -40.0710984],
+              "alongKm": 1511.53
+            },
+            {
+              "id": "osm-node:960923831",
+              "name": "Reumén",
+              "status": "active",
+              "coordinates": [-72.8357926, -39.9889923],
+              "alongKm": 1521.939
+            },
+            {
+              "id": "osm-node:12801520309",
+              "name": "Lipingüe",
+              "status": "disused",
+              "coordinates": [-72.8106852, -39.9250054],
+              "alongKm": 1530.874
+            },
+            {
+              "id": "osm-node:11505941309",
+              "name": "Los Lagos",
+              "status": "active",
+              "coordinates": [-72.8176606, -39.8633814],
+              "alongKm": 1538.261
+            },
+            {
+              "id": "osm-node:12801520310",
+              "name": "Purey",
+              "status": "disused",
+              "coordinates": [-72.8695705, -39.8180185],
+              "alongKm": 1545.083
+            },
+            {
+              "id": "osm-node:4728597530",
+              "name": "Antilhue",
+              "status": "active",
+              "coordinates": [-72.95423, -39.80704],
+              "alongKm": 1553.05
+            },
+            {
+              "id": "osm-node:1909588488",
+              "name": "Máfil",
+              "status": "active",
+              "coordinates": [-72.9497429, -39.665253],
+              "alongKm": 1570.761
+            },
+            {
+              "id": "osm-node:1909587993",
+              "name": "Mariquina",
+              "status": "active",
+              "coordinates": [-72.9322727, -39.565951],
+              "alongKm": 1582.713
+            },
+            {
+              "id": "osm-node:12801520311",
+              "name": "Ciruelos",
+              "status": "disused",
+              "coordinates": [-72.8619457, -39.5427895],
+              "alongKm": 1589.332
+            },
+            {
+              "id": "osm-node:2180503365",
+              "name": "Lanco",
+              "status": "active",
+              "coordinates": [-72.7796544, -39.4510196],
+              "alongKm": 1602.74
+            },
+            {
+              "id": "osm-node:12801520312",
+              "name": "La Paz",
+              "status": "disused",
+              "coordinates": [-72.7116499, -39.4132819],
+              "alongKm": 1610.075
+            },
+            {
+              "id": "osm-node:11506086538",
+              "name": "Loncoche",
+              "status": "active",
+              "coordinates": [-72.6368587, -39.3698064],
+              "alongKm": 1618.518
+            },
+            {
+              "id": "osm-node:12801520313",
+              "name": "Afquintúe",
+              "status": "disused",
+              "coordinates": [-72.60379, -39.3050692],
+              "alongKm": 1627.77
+            },
+            {
+              "id": "osm-node:1909759643",
+              "name": "Lastarria",
+              "status": "active",
+              "coordinates": [-72.6770097, -39.2354561],
+              "alongKm": 1638.503
+            },
+            {
+              "id": "osm-node:12801520314",
+              "name": "Quitratúe",
+              "status": "disused",
+              "coordinates": [-72.6621089, -39.1552067],
+              "alongKm": 1647.749
+            },
+            {
+              "id": "osm-node:5964260082",
+              "name": "Gorbea",
+              "status": "active",
+              "coordinates": [-72.6728701, -39.1028477],
+              "alongKm": 1654.284
+            },
+            {
+              "id": "osm-node:12049657228",
+              "name": "Pitrufquén",
+              "status": "active",
+              "coordinates": [-72.6418832, -38.9840773],
+              "alongKm": 1667.957
+            },
+            {
+              "id": "osm-node:10960876274",
+              "name": "Quepe",
+              "status": "active",
+              "coordinates": [-72.6162526, -38.8683537],
+              "alongKm": 1681.142
+            },
+            {
+              "id": "osm-node:10956639396",
+              "name": "Temuco",
+              "status": "active",
+              "coordinates": [-72.5789545, -38.7370684],
+              "alongKm": 1697.337
+            },
+            {
+              "id": "osm-node:12049657226",
+              "name": "Cajón",
+              "status": "active",
+              "coordinates": [-72.5044857, -38.6757694],
+              "alongKm": 1707.048
+            },
+            {
+              "id": "osm-node:9108598797",
+              "name": "Pillanlelbún",
+              "status": "active",
+              "coordinates": [-72.4539439, -38.6361708],
+              "alongKm": 1713.577
+            },
+            {
+              "id": "osm-node:10956639399",
+              "name": "Lautaro",
+              "status": "active",
+              "coordinates": [-72.4321639, -38.525105],
+              "alongKm": 1726.569
+            },
+            {
+              "id": "osm-node:7278743853",
+              "name": "Quillem",
+              "status": "active",
+              "coordinates": [-72.3866642, -38.4652536],
+              "alongKm": 1734.731
+            },
+            {
+              "id": "osm-node:12049640405",
+              "name": "Perquenco",
+              "status": "active",
+              "coordinates": [-72.3751467, -38.4201914],
+              "alongKm": 1740.187
+            },
+            {
+              "id": "osm-node:1641614467",
+              "name": "Púa",
+              "status": "active",
+              "coordinates": [-72.3745323, -38.3360082],
+              "alongKm": 1750.406
+            },
+            {
+              "id": "osm-node:10956639403",
+              "name": "Victoria",
+              "status": "active",
+              "coordinates": [-72.3329322, -38.2372382],
+              "alongKm": 1762.502
+            },
+            {
+              "id": "osm-node:671848125",
+              "name": "Inspector Fernández",
+              "status": "active",
+              "coordinates": [-72.3125638, -38.1960417],
+              "alongKm": 1767.613
+            },
+            {
+              "id": "osm-node:7926478740",
+              "name": "Pailahueque",
+              "status": "disused",
+              "coordinates": [-72.3175102, -38.1309174],
+              "alongKm": 1775.128
+            },
+            {
+              "id": "osm-node:4832723726",
+              "name": "Ercilla",
+              "status": "active",
+              "coordinates": [-72.3769795, -38.0548709],
+              "alongKm": 1785.519
+            },
+            {
+              "id": "osm-node:7926478737",
+              "name": "Pidima",
+              "status": "disused",
+              "coordinates": [-72.426579, -38.0122982],
+              "alongKm": 1792.174
+            },
+            {
+              "id": "osm-node:7926478726",
+              "name": "Collipulli",
+              "status": "active",
+              "coordinates": [-72.4445204, -37.9532451],
+              "alongKm": 1799.38
+            },
+            {
+              "id": "osm-node:12049640404",
+              "name": "Lolenco",
+              "status": "disused",
+              "coordinates": [-72.4558695, -37.8785504],
+              "alongKm": 1807.871
+            },
+            {
+              "id": "osm-node:3855581257",
+              "name": "Mininco",
+              "status": "active",
+              "coordinates": [-72.4747511, -37.7956177],
+              "alongKm": 1817.543
+            },
+            {
+              "id": "osm-node:12049640403",
+              "name": "Las Viñas",
+              "status": "disused",
+              "coordinates": [-72.5135356, -37.748743],
+              "alongKm": 1825.436
+            },
+            {
+              "id": "osm-node:920461262",
+              "name": "Renaico",
+              "status": "active",
+              "coordinates": [-72.5880398, -37.670975],
+              "alongKm": 1837.239
+            },
+            {
+              "id": "osm-node:7926478720",
+              "name": "Rihue",
+              "status": "disused",
+              "coordinates": [-72.5907482, -37.6225263],
+              "alongKm": 1842.641
+            },
+            {
+              "id": "osm-node:11506118926",
+              "name": "Coigüe",
+              "status": "active",
+              "coordinates": [-72.596123, -37.5574812],
+              "alongKm": 1849.915
+            },
+            {
+              "id": "osm-node:1798798511",
+              "name": "Santa Fe",
+              "status": "active",
+              "coordinates": [-72.5840819, -37.4606644],
+              "alongKm": 1861.374
+            },
+            {
+              "id": "osm-node:12049551160",
+              "name": "Millantú",
+              "status": "disused",
+              "coordinates": [-72.6180523, -37.399201],
+              "alongKm": 1868.848
+            },
+            {
+              "id": "osm-node:5186665831",
+              "name": "Diuquín",
+              "status": "active",
+              "coordinates": [-72.6746567, -37.3628352],
+              "alongKm": 1876.467
+            },
+            {
+              "id": "osm-node:3663884060",
+              "name": "Laja",
+              "status": "active",
+              "coordinates": [-72.7166824, -37.2819417],
+              "alongKm": 1887.121
+            },
+            {
+              "id": "osm-node:1713527308",
+              "name": "Turquía",
+              "status": "active",
+              "coordinates": [-72.6521605, -37.2307034],
+              "alongKm": 1897.262
+            },
+            {
+              "id": "osm-node:1033193501",
+              "name": "Yumbel",
+              "status": "active",
+              "coordinates": [-72.539765, -37.1464962],
+              "alongKm": 1911.309
+            },
+            {
+              "id": "osm-node:1713527309",
+              "name": "Monte Águila",
+              "status": "active",
+              "coordinates": [-72.4420569, -37.0855707],
+              "alongKm": 1922.602
+            },
+            {
+              "id": "osm-node:1320075104",
+              "name": "Cabrero",
+              "status": "active",
+              "coordinates": [-72.3999351, -37.0347715],
+              "alongKm": 1929.449
+            },
+            {
+              "id": "osm-node:1736791297",
+              "name": "General Cruz",
+              "status": "active",
+              "coordinates": [-72.3494661, -36.9335128],
+              "alongKm": 1941.799
+            },
+            {
+              "id": "osm-node:12049551157",
+              "name": "Santa Clara",
+              "status": "disused",
+              "coordinates": [-72.3278604, -36.8260847],
+              "alongKm": 1954.134
+            },
+            {
+              "id": "osm-node:2118620286",
+              "name": "Bulnes",
+              "status": "active",
+              "coordinates": [-72.2926926, -36.7453219],
+              "alongKm": 1963.903
+            },
+            {
+              "id": "osm-node:11508239379",
+              "name": "Rucapequén",
+              "status": "active",
+              "coordinates": [-72.2790669, -36.6729695],
+              "alongKm": 1972.349
+            },
+            {
+              "id": "osm-node:285773326",
+              "name": "Nebuco",
+              "status": "active",
+              "coordinates": [-72.2290887, -36.646748],
+              "alongKm": 1977.841
+            },
+            {
+              "id": "osm-node:267570007",
+              "name": "Chillán",
+              "status": "active",
+              "coordinates": [-72.1125006, -36.6038495],
+              "alongKm": 1989.593
+            },
+            {
+              "id": "osm-node:1741897065",
+              "name": "Cocharcas",
+              "status": "active",
+              "coordinates": [-72.0681293, -36.5243545],
+              "alongKm": 1999.592
+            },
+            {
+              "id": "osm-node:4677463829",
+              "name": "Ninquihue",
+              "status": "disused",
+              "coordinates": [-72.0139713, -36.4765382],
+              "alongKm": 2006.783
+            },
+            {
+              "id": "osm-node:310360568",
+              "name": "San Carlos",
+              "status": "active",
+              "coordinates": [-71.966424, -36.4257443],
+              "alongKm": 2013.973
+            },
+            {
+              "id": "osm-node:1746212293",
+              "name": "Buli",
+              "status": "active",
+              "coordinates": [-71.9346593, -36.3581668],
+              "alongKm": 2022.021
+            },
+            {
+              "id": "osm-node:4677463828",
+              "name": "Ñiquén",
+              "status": "active",
+              "coordinates": [-71.9015866, -36.2942015],
+              "alongKm": 2029.726
+            },
+            {
+              "id": "osm-node:4677463831",
+              "name": "Perquilauquén",
+              "status": "active",
+              "coordinates": [-71.8714655, -36.2359983],
+              "alongKm": 2036.739
+            },
+            {
+              "id": "osm-node:4677463824",
+              "name": "Parral",
+              "status": "active",
+              "coordinates": [-71.8335437, -36.138481],
+              "alongKm": 2048.138
+            },
+            {
+              "id": "osm-node:4677463826",
+              "name": "Copihue",
+              "status": "disused",
+              "coordinates": [-71.7995427, -36.0934318],
+              "alongKm": 2054.062
+            },
+            {
+              "id": "osm-node:4677463823",
+              "name": "Retiro",
+              "status": "active",
+              "coordinates": [-71.7674424, -36.0564144],
+              "alongKm": 2059.089
+            },
+            {
+              "id": "osm-node:4677463832",
+              "name": "Longaví",
+              "status": "active",
+              "coordinates": [-71.688967, -35.9657317],
+              "alongKm": 2071.453
+            },
+            {
+              "id": "osm-node:4677463825",
+              "name": "Miraflores",
+              "status": "active",
+              "coordinates": [-71.6454682, -35.915251],
+              "alongKm": 2078.297
+            },
+            {
+              "id": "osm-node:5036055986",
+              "name": "Linares",
+              "status": "active",
+              "coordinates": [-71.5906109, -35.8475599],
+              "alongKm": 2087.363
+            },
+            {
+              "id": "osm-node:4677463830",
+              "name": "Putagán",
+              "status": "active",
+              "coordinates": [-71.6646122, -35.7682013],
+              "alongKm": 2099.261
+            },
+            {
+              "id": "osm-node:4677463833",
+              "name": "Villa Alegre",
+              "status": "active",
+              "coordinates": [-71.6801312, -35.696277],
+              "alongKm": 2107.381
+            },
+            {
+              "id": "osm-node:308140865",
+              "name": "San Javier",
+              "status": "active",
+              "coordinates": [-71.7001517, -35.6025062],
+              "alongKm": 2117.963
+            },
+            {
+              "id": "osm-node:4677463827",
+              "name": "Maule",
+              "status": "active",
+              "coordinates": [-71.6848373, -35.5227622],
+              "alongKm": 2127.178
+            },
+            {
+              "id": "osm-node:308140957",
+              "name": "Talca",
+              "status": "active",
+              "coordinates": [-71.6495039, -35.4297832],
+              "alongKm": 2138.084
+            },
+            {
+              "id": "osm-node:1781094334",
+              "name": "Panguilemo",
+              "status": "active",
+              "coordinates": [-71.5881514, -35.3682181],
+              "alongKm": 2147.105
+            },
+            {
+              "id": "osm-node:13674888708",
+              "name": "San Rafael",
+              "status": "active",
+              "coordinates": [-71.5190572, -35.3066492],
+              "alongKm": 2156.427
+            },
+            {
+              "id": "osm-node:13674888709",
+              "name": "Camarico",
+              "status": "active",
+              "coordinates": [-71.4246494, -35.2214538],
+              "alongKm": 2169.465
+            },
+            {
+              "id": "osm-node:308141105",
+              "name": "Itahue",
+              "status": "disused",
+              "coordinates": [-71.3671118, -35.1439881],
+              "alongKm": 2179.817
+            },
+            {
+              "id": "osm-node:1388181293",
+              "name": "Molina",
+              "status": "active",
+              "coordinates": [-71.3029359, -35.1021775],
+              "alongKm": 2187.443
+            },
+            {
+              "id": "osm-node:13674888710",
+              "name": "Lontué",
+              "status": "active",
+              "coordinates": [-71.2687592, -35.0552201],
+              "alongKm": 2193.52
+            },
+            {
+              "id": "osm-node:302449631",
+              "name": "Curicó",
+              "status": "active",
+              "coordinates": [-71.2464509, -34.9845025],
+              "alongKm": 2201.931
+            },
+            {
+              "id": "osm-node:13674888711",
+              "name": "Sarmiento",
+              "status": "disused",
+              "coordinates": [-71.2001571, -34.935028],
+              "alongKm": 2209.086
+            },
+            {
+              "id": "osm-node:566733943",
+              "name": "Teno",
+              "status": "active",
+              "coordinates": [-71.1588663, -34.8710844],
+              "alongKm": 2217.784
+            },
+            {
+              "id": "osm-node:13674888713",
+              "name": "Chimbarongo",
+              "status": "active",
+              "coordinates": [-71.0411467, -34.7122897],
+              "alongKm": 2238.628
+            },
+            {
+              "id": "osm-node:13674888714",
+              "name": "Tinguiririca",
+              "status": "disused",
+              "coordinates": [-70.993963, -34.6409599],
+              "alongKm": 2247.696
+            },
+            {
+              "id": "osm-node:9810431962",
+              "name": "San Fernando",
+              "status": "active",
+              "coordinates": [-70.9825058, -34.5897616],
+              "alongKm": 2253.543
+            },
+            {
+              "id": "osm-node:13675681700",
+              "name": "Polonia",
+              "status": "disused",
+              "coordinates": [-70.9399215, -34.534485],
+              "alongKm": 2260.905
+            },
+            {
+              "id": "osm-node:13675681699",
+              "name": "Pelequén",
+              "status": "active",
+              "coordinates": [-70.8916168, -34.4619301],
+              "alongKm": 2270.284
+            },
+            {
+              "id": "osm-node:308145490",
+              "name": "Rengo",
+              "status": "active",
+              "coordinates": [-70.8673291, -34.4074816],
+              "alongKm": 2276.894
+            },
+            {
+              "id": "osm-node:3786231057",
+              "name": "Rosario",
+              "status": "active",
+              "coordinates": [-70.8404917, -34.3495747],
+              "alongKm": 2283.797
+            },
+            {
+              "id": "osm-node:308151051",
+              "name": "Requínoa",
+              "status": "active",
+              "coordinates": [-70.8153506, -34.286031],
+              "alongKm": 2291.238
+            },
+            {
+              "id": "osm-node:13675681698",
+              "name": "Los Lirios",
+              "status": "active",
+              "coordinates": [-70.7847381, -34.2274926],
+              "alongKm": 2298.33
+            },
+            {
+              "id": "osm-node:1758969349",
+              "name": "Rancagua",
+              "status": "active",
+              "coordinates": [-70.7530943, -34.1708022],
+              "alongKm": 2305.624
+            },
+            {
+              "id": "osm-node:318415381",
+              "name": "Graneros",
+              "status": "active",
+              "coordinates": [-70.7250751, -34.0656913],
+              "alongKm": 2317.593
+            },
+            {
+              "id": "osm-node:1266495025",
+              "name": "San Francisco",
+              "status": "active",
+              "coordinates": [-70.7132774, -33.9770598],
+              "alongKm": 2327.52
+            },
+            {
+              "id": "osm-node:318418135",
+              "name": "Hospital",
+              "status": "active",
+              "coordinates": [-70.7456636, -33.8680839],
+              "alongKm": 2340.635
+            },
+            {
+              "id": "osm-node:7385889045",
+              "name": "Paine",
+              "status": "active",
+              "coordinates": [-70.7435468, -33.8160729],
+              "alongKm": 2346.432
+            },
+            {
+              "id": "osm-node:5215345941",
+              "name": "Linderos",
+              "status": "active",
+              "coordinates": [-70.7348128, -33.7634923],
+              "alongKm": 2352.336
+            },
+            {
+              "id": "osm-node:5213447514",
+              "name": "Buin Zoo",
+              "status": "active",
+              "coordinates": [-70.7245032, -33.7134496],
+              "alongKm": 2357.981
+            },
+            {
+              "id": "osm-node:4747704104",
+              "name": "Nos",
+              "status": "active",
+              "coordinates": [-70.7047402, -33.6322291],
+              "alongKm": 2367.477
+            },
+            {
+              "id": "osm-node:4756906640",
+              "name": "Freire",
+              "status": "active",
+              "coordinates": [-70.6983559, -33.5867082],
+              "alongKm": 2372.664
+            },
+            {
+              "id": "place:cl-santiago",
+              "name": "Santiago",
+              "status": "city",
+              "coordinates": [-70.64343, -33.45718],
+              "alongKm": 2407.71
+            },
+            {
+              "id": "osm-node:4753977083",
+              "name": "Lo Espejo",
+              "status": "active",
+              "coordinates": [-70.6859167, -33.5145218],
+              "alongKm": 2445.71
+            },
+            {
+              "id": "osm-node:4757181460",
+              "name": "Alameda",
+              "status": "active",
+              "coordinates": [-70.6795694, -33.4523949],
+              "alongKm": 2452.671
+            },
+            {
+              "id": "osm-node:11982461965",
+              "name": "Renca",
+              "status": "disused",
+              "coordinates": [-70.6908608, -33.3994671],
+              "alongKm": 2458.737
+            },
+            {
+              "id": "osm-node:11982461967",
+              "name": "Colina",
+              "status": "active",
+              "coordinates": [-70.7694923, -33.2909673],
+              "alongKm": 2473.025
+            },
+            {
+              "id": "osm-node:11982461968",
+              "name": "Batuco",
+              "status": "active",
+              "coordinates": [-70.8142894, -33.2398003],
+              "alongKm": 2480.076
+            },
+            {
+              "id": "osm-node:11987611705",
+              "name": "Polpaico",
+              "status": "active",
+              "coordinates": [-70.8866127, -33.169982],
+              "alongKm": 2490.942
+            },
+            {
+              "id": "osm-node:9791348225",
+              "name": "Tiltil",
+              "status": "active",
+              "coordinates": [-70.9282318, -33.0863883],
+              "alongKm": 2501.526
+            },
+            {
+              "id": "osm-node:11508745605",
+              "name": "Rungue",
+              "status": "active",
+              "coordinates": [-70.8932643, -33.0083032],
+              "alongKm": 2512.924
+            },
+            {
+              "id": "osm-node:11987611706",
+              "name": "Montenegro",
+              "status": "active",
+              "coordinates": [-70.8371577, -32.9665281],
+              "alongKm": 2520.21
+            },
+            {
+              "id": "osm-node:13692222771",
+              "name": "Enrique Meiggs",
+              "status": "active",
+              "coordinates": [-70.8503361, -32.8656922],
+              "alongKm": 2533.621
+            },
+            {
+              "id": "osm-node:367159710",
+              "name": "Llay Llay",
+              "status": "active",
+              "coordinates": [-70.9525201, -32.843429],
+              "alongKm": 2545.261
+            },
+            {
+              "id": "osm-node:13692222772",
+              "name": "Ocoa",
+              "status": "active",
+              "coordinates": [-71.0842009, -32.8435115],
+              "alongKm": 2557.883
+            },
+            {
+              "id": "osm-node:11987611709",
+              "name": "Pachacama",
+              "status": "disused",
+              "coordinates": [-71.1484115, -32.836927],
+              "alongKm": 2564.242
+            },
+            {
+              "id": "osm-node:4727180401",
+              "name": "La Calera",
+              "status": "active",
+              "coordinates": [-71.1935524, -32.7905487],
+              "alongKm": 2571.619
+            },
+            {
+              "id": "osm-node:8941117822",
+              "name": "Nogales",
+              "status": "disused",
+              "coordinates": [-71.202857, -32.7387743],
+              "alongKm": 2579.141
+            },
+            {
+              "id": "osm-node:11540225087",
+              "name": "El Melón",
+              "status": "active",
+              "coordinates": [-71.2140093, -32.691166],
+              "alongKm": 2585.09
+            },
+            {
+              "id": "osm-node:5996338227",
+              "name": "Palos Quemados",
+              "status": "disused",
+              "coordinates": [-71.2728428, -32.6397203],
+              "alongKm": 2594.913
+            },
+            {
+              "id": "osm-node:13695929007",
+              "name": "Coligües",
+              "status": "disused",
+              "coordinates": [-71.2760787, -32.6019267],
+              "alongKm": 2603.638
+            },
+            {
+              "id": "osm-node:8941117821",
+              "name": "Catapilco",
+              "status": "disused",
+              "coordinates": [-71.2782145, -32.5656433],
+              "alongKm": 2609.498
+            },
+            {
+              "id": "osm-node:8941117820",
+              "name": "Rayado",
+              "status": "disused",
+              "coordinates": [-71.2568, -32.45846],
+              "alongKm": 2622.089
+            },
+            {
+              "id": "osm-node:8941117813",
+              "name": "Quínquimo",
+              "status": "disused",
+              "coordinates": [-71.3056841, -32.4486425],
+              "alongKm": 2627.268
+            },
+            {
+              "id": "osm-node:8941117812",
+              "name": "Longotoma",
+              "status": "disused",
+              "coordinates": [-71.3690065, -32.3870787],
+              "alongKm": 2639.657
+            },
+            {
+              "id": "osm-node:8941117811",
+              "name": "Huaquén",
+              "status": "disused",
+              "coordinates": [-71.4616162, -32.3161559],
+              "alongKm": 2654.261
+            },
+            {
+              "id": "osm-node:8941117810",
+              "name": "Ingeniero Santa María",
+              "status": "disused",
+              "coordinates": [-71.4821887, -32.2339065],
+              "alongKm": 2664.564
+            },
+            {
+              "id": "osm-node:8941117809",
+              "name": "Pichidangui",
+              "status": "disused",
+              "coordinates": [-71.5072207, -32.1234626],
+              "alongKm": 2680.854
+            },
+            {
+              "id": "osm-node:8941117808",
+              "name": "Ingeniero Barriga",
+              "status": "disused",
+              "coordinates": [-71.5036939, -32.0324226],
+              "alongKm": 2691.873
+            },
+            {
+              "id": "osm-node:8941117807",
+              "name": "Los Vilos",
+              "status": "disused",
+              "coordinates": [-71.5068089, -31.9135787],
+              "alongKm": 2707.361
+            },
+            {
+              "id": "osm-node:8941117806",
+              "name": "Las Vacas",
+              "status": "disused",
+              "coordinates": [-71.361844, -31.8400156],
+              "alongKm": 2727.268
+            },
+            {
+              "id": "osm-node:8941117805",
+              "name": "Cavilolén",
+              "status": "disused",
+              "coordinates": [-71.3086782, -31.7601941],
+              "alongKm": 2742.38
+            },
+            {
+              "id": "osm-node:11540105703",
+              "name": "Las Cañas",
+              "status": "disused",
+              "coordinates": [-71.248433, -31.7336179],
+              "alongKm": 2754.791
+            },
+            {
+              "id": "osm-node:8941117804",
+              "name": "Choapa",
+              "status": "disused",
+              "coordinates": [-71.2162393, -31.7186505],
+              "alongKm": 2763.296
+            },
+            {
+              "id": "osm-node:8941117803",
+              "name": "Illapel",
+              "status": "disused",
+              "coordinates": [-71.1637135, -31.6331168],
+              "alongKm": 2781.262
+            },
+            {
+              "id": "osm-node:8941117802",
+              "name": "Aucó",
+              "status": "disused",
+              "coordinates": [-71.0963596, -31.5157916],
+              "alongKm": 2797.162
+            },
+            {
+              "id": "osm-node:8941117801",
+              "name": "Farellón Sánchez",
+              "status": "abandoned",
+              "coordinates": [-71.0237726, -31.4518558],
+              "alongKm": 2809.403
+            },
+            {
+              "id": "osm-node:8941117785",
+              "name": "Director Lagarrigue",
+              "status": "disused",
+              "coordinates": [-71.0249828, -31.3535616],
+              "alongKm": 2825.223
+            },
+            {
+              "id": "osm-node:8941117781",
+              "name": "Llahuín",
+              "status": "disused",
+              "coordinates": [-71.0541781, -31.318259],
+              "alongKm": 2833.546
+            },
+            {
+              "id": "osm-node:8941117780",
+              "name": "Pama",
+              "status": "disused",
+              "coordinates": [-71.0449413, -31.234633],
+              "alongKm": 2844.393
+            },
+            {
+              "id": "osm-node:8941117779",
+              "name": "Combarbalá",
+              "status": "disused",
+              "coordinates": [-71.0130363, -31.1738485],
+              "alongKm": 2854.714
+            },
+            {
+              "id": "osm-node:8941117778",
+              "name": "La Mostaza",
+              "status": "disused",
+              "coordinates": [-71.0430876, -31.1065656],
+              "alongKm": 2863.307
+            },
+            {
+              "id": "osm-node:8941117777",
+              "name": "Cogotí",
+              "status": "disused",
+              "coordinates": [-71.0479492, -31.0259848],
+              "alongKm": 2876.299
+            },
+            {
+              "id": "osm-node:8941117775",
+              "name": "San Lorenzo",
+              "status": "disused",
+              "coordinates": [-71.0094727, -30.8789878],
+              "alongKm": 2898.284
+            },
+            {
+              "id": "osm-node:8941117774",
+              "name": "Huatulame",
+              "status": "disused",
+              "coordinates": [-70.9796866, -30.8381124],
+              "alongKm": 2906.104
+            },
+            {
+              "id": "osm-node:8941117773",
+              "name": "El Palqui",
+              "status": "disused",
+              "coordinates": [-70.9436602, -30.766274],
+              "alongKm": 2915.614
+            },
+            {
+              "id": "osm-node:8941117772",
+              "name": "Sotaquí",
+              "status": "disused",
+              "coordinates": [-71.1189197, -30.6296098],
+              "alongKm": 2946.883
+            },
+            {
+              "id": "osm-node:8941093801",
+              "name": "Puntilla",
+              "status": "disused",
+              "coordinates": [-71.16809, -30.58981],
+              "alongKm": 2953.989
+            },
+            {
+              "id": "osm-node:11530653663",
+              "name": "Cumbre del Olivo",
+              "status": "disused",
+              "coordinates": [-71.1555577, -30.5388275],
+              "alongKm": 2959.989
+            },
+            {
+              "id": "osm-node:8941500808",
+              "name": "Recoleta",
+              "status": "disused",
+              "coordinates": [-71.1478956, -30.5019762],
+              "alongKm": 2965.978
+            },
+            {
+              "id": "osm-node:8941500738",
+              "name": "Higueritas",
+              "status": "disused",
+              "coordinates": [-71.1915234, -30.4123295],
+              "alongKm": 2977.49
+            },
+            {
+              "id": "osm-node:8941500736",
+              "name": "Las Perdices",
+              "status": "disused",
+              "coordinates": [-71.2491803, -30.319491],
+              "alongKm": 2992.929
+            },
+            {
+              "id": "osm-node:8941500735",
+              "name": "Las Cardas",
+              "status": "disused",
+              "coordinates": [-71.2554504, -30.2813359],
+              "alongKm": 3001.626
+            },
+            {
+              "id": "osm-node:8941500734",
+              "name": "Tambillos",
+              "status": "disused",
+              "coordinates": [-71.2358128, -30.1992823],
+              "alongKm": 3011.34
+            },
+            {
+              "id": "osm-node:8941500733",
+              "name": "Andacollo",
+              "status": "disused",
+              "coordinates": [-71.2196056, -30.1388021],
+              "alongKm": 3018.411
+            },
+            {
+              "id": "osm-node:8941500732",
+              "name": "Cerrillos",
+              "status": "disused",
+              "coordinates": [-71.2590232, -30.056231],
+              "alongKm": 3028.369
+            },
+            {
+              "id": "osm-node:8941500731",
+              "name": "Pan de Azúcar",
+              "status": "disused",
+              "coordinates": [-71.2892062, -29.9823012],
+              "alongKm": 3037.381
+            },
+            {
+              "id": "osm-node:8941500729",
+              "name": "Coquimbo",
+              "status": "active",
+              "coordinates": [-71.3345188, -29.9740211],
+              "alongKm": 3044.16
+            },
+            {
+              "id": "osm-node:8941500727",
+              "name": "Peñuelas",
+              "status": "abandoned",
+              "coordinates": [-71.2872289, -29.948074],
+              "alongKm": 3050.546
+            },
+            {
+              "id": "osm-node:13822872185",
+              "name": "La Serena",
+              "status": "active",
+              "coordinates": [-71.2568598, -29.9017805],
+              "alongKm": 3056.534
+            },
+            {
+              "id": "osm-node:8938474505",
+              "name": "Islón",
+              "status": "abandoned",
+              "coordinates": [-71.1859139, -29.899845],
+              "alongKm": 3064.61
+            },
+            {
+              "id": "osm-node:8935468406",
+              "name": "Lambert",
+              "status": "disused",
+              "coordinates": [-71.1206308, -29.8417417],
+              "alongKm": 3074.897
+            },
+            {
+              "id": "osm-node:11527519470",
+              "name": "Corralitos",
+              "status": "disused",
+              "coordinates": [-71.0528389, -29.7682909],
+              "alongKm": 3085.939
+            },
+            {
+              "id": "osm-node:8935468405",
+              "name": "Agua Grande",
+              "status": "disused",
+              "coordinates": [-71.0175502, -29.7329258],
+              "alongKm": 3092.959
+            },
+            {
+              "id": "osm-node:8935468404",
+              "name": "Almirante Latorre",
+              "status": "disused",
+              "coordinates": [-70.9562059, -29.6350273],
+              "alongKm": 3110.892
+            },
+            {
+              "id": "osm-node:8935468403",
+              "name": "Hualcuna",
+              "status": "disused",
+              "coordinates": [-70.9558959, -29.5907637],
+              "alongKm": 3119.804
+            },
+            {
+              "id": "osm-node:13822914809",
+              "name": "Pirita",
+              "status": "disused",
+              "coordinates": [-70.9585608, -29.4822009],
+              "alongKm": 3135.884
+            },
+            {
+              "id": "osm-node:8935468401",
+              "name": "Tres Cruces",
+              "status": "disused",
+              "coordinates": [-70.9358393, -29.3767036],
+              "alongKm": 3150.005
+            },
+            {
+              "id": "osm-node:8935468400",
+              "name": "Punta Colorada",
+              "status": "disused",
+              "coordinates": [-71.0183644, -29.3530046],
+              "alongKm": 3159.633
+            },
+            {
+              "id": "osm-way:1360537858",
+              "name": "Estación Desvío Los Choros",
+              "status": "abandoned",
+              "coordinates": [-71.0305147, -29.2622265],
+              "alongKm": 3170.911
+            },
+            {
+              "id": "osm-node:13822914810",
+              "name": "Chañar",
+              "status": "disused",
+              "coordinates": [-70.9169352, -29.1760384],
+              "alongKm": 3193.654
+            },
+            {
+              "id": "osm-node:8935468397",
+              "name": "Cachiyuyo",
+              "status": "disused",
+              "coordinates": [-70.8982844, -29.0367437],
+              "alongKm": 3211.319
+            },
+            {
+              "id": "osm-node:8935468396",
+              "name": "Domeyko",
+              "status": "disused",
+              "coordinates": [-70.889978, -28.9553811],
+              "alongKm": 3221.473
+            },
+            {
+              "id": "osm-node:8935468395",
+              "name": "Vizcachitas",
+              "status": "disused",
+              "coordinates": [-70.761304, -28.8441191],
+              "alongKm": 3241.95
+            },
+            {
+              "id": "osm-node:13822914812",
+              "name": "Agua Amarga",
+              "status": "disused",
+              "coordinates": [-70.7664729, -28.7998025],
+              "alongKm": 3248.319
+            },
+            {
+              "id": "osm-node:8935468393",
+              "name": "Romero",
+              "status": "disused",
+              "coordinates": [-70.7663934, -28.6666178],
+              "alongKm": 3266.555
+            },
+            {
+              "id": "osm-node:8935468383",
+              "name": "Llanos de Soto",
+              "status": "active",
+              "coordinates": [-70.7952347, -28.5688983],
+              "alongKm": 3281.539
+            },
+            {
+              "id": "osm-node:8935468382",
+              "name": "Chacritas",
+              "status": "disused",
+              "coordinates": [-70.7137299, -28.3929747],
+              "alongKm": 3312.12
+            },
+            {
+              "id": "osm-node:13822876772",
+              "name": "Km. 765",
+              "status": "active",
+              "coordinates": [-70.6983157, -28.2576791],
+              "alongKm": 3327.314
+            },
+            {
+              "id": "osm-node:8935468375",
+              "name": "Algarrobal",
+              "status": "disused",
+              "coordinates": [-70.6410119, -28.1315826],
+              "alongKm": 3343.545
+            },
+            {
+              "id": "osm-node:214186383",
+              "name": "Punta de Díaz",
+              "status": "disused",
+              "coordinates": [-70.6040648, -28.04332],
+              "alongKm": 3354.959
+            },
+            {
+              "id": "osm-node:8935468372",
+              "name": "Castilla",
+              "status": "disused",
+              "coordinates": [-70.5932351, -27.8601813],
+              "alongKm": 3375.481
+            },
+            {
+              "id": "osm-node:13822920725",
+              "name": "Barros Luco",
+              "status": "disused",
+              "coordinates": [-70.5562578, -27.6600688],
+              "alongKm": 3400.314
+            },
+            {
+              "id": "osm-node:11521724603",
+              "name": "Mina Restauradora",
+              "status": "disused",
+              "coordinates": [-70.5163411, -27.6242687],
+              "alongKm": 3405.928
+            },
+            {
+              "id": "osm-node:8935468370",
+              "name": "Travesía",
+              "status": "disused",
+              "coordinates": [-70.4425041, -27.5417893],
+              "alongKm": 3419.386
+            },
+            {
+              "id": "osm-node:8935468368",
+              "name": "Toledo",
+              "status": "disused",
+              "coordinates": [-70.4162372, -27.3100228],
+              "alongKm": 3447.756
+            },
+            {
+              "id": "osm-node:977936426",
+              "name": "Copiapó",
+              "status": "active",
+              "coordinates": [-70.3440456, -27.359137],
+              "alongKm": 3456.774
+            },
+            {
+              "id": "osm-node:8935468366",
+              "name": "Paipote",
+              "status": "disused",
+              "coordinates": [-70.2768796, -27.4155031],
+              "alongKm": 3466.627
+            },
+            {
+              "id": "osm-node:8935468365",
+              "name": "Chulo",
+              "status": "disused",
+              "coordinates": [-70.1664744, -27.3197818],
+              "alongKm": 3482.209
+            },
+            {
+              "id": "osm-node:8935468342",
+              "name": "Juan Godoy",
+              "status": "disused",
+              "coordinates": [-70.1338106, -27.2261095],
+              "alongKm": 3494.506
+            },
+            {
+              "id": "osm-node:8935468341",
+              "name": "Llampos",
+              "status": "disused",
+              "coordinates": [-70.0159991, -27.1713863],
+              "alongKm": 3515.215
+            },
+            {
+              "id": "osm-node:8935468339",
+              "name": "Carrera Pinto",
+              "status": "disused",
+              "coordinates": [-69.9320773, -27.0845376],
+              "alongKm": 3533.771
+            },
+            {
+              "id": "osm-node:8935468335",
+              "name": "Chimberos",
+              "status": "disused",
+              "coordinates": [-69.9396389, -26.8967656],
+              "alongKm": 3556.857
+            },
+            {
+              "id": "osm-node:8935468334",
+              "name": "Inca",
+              "status": "disused",
+              "coordinates": [-69.8872687, -26.8092661],
+              "alongKm": 3570.632
+            },
+            {
+              "id": "osm-node:8935468330",
+              "name": "Inca de Oro",
+              "status": "disused",
+              "coordinates": [-69.9037623, -26.75475],
+              "alongKm": 3577.028
+            },
+            {
+              "id": "osm-node:8935468326",
+              "name": "San Pedro",
+              "status": "disused",
+              "coordinates": [-69.9134066, -26.6978391],
+              "alongKm": 3583.477
+            },
+            {
+              "id": "osm-node:8935468324",
+              "name": "Serrano",
+              "status": "disused",
+              "coordinates": [-69.9562384, -26.6398659],
+              "alongKm": 3591.561
+            },
+            {
+              "id": "osm-node:8964627635",
+              "name": "Km. 1040",
+              "status": "disused",
+              "coordinates": [-70.0162391, -26.5635258],
+              "alongKm": 3602.858
+            },
+            {
+              "id": "osm-node:13712715866",
+              "name": "Chañarcito",
+              "status": "disused",
+              "coordinates": [-70.0519458, -26.498612],
+              "alongKm": 3611.459
+            },
+            {
+              "id": "osm-node:8962098287",
+              "name": "Empalme 2",
+              "status": "disused",
+              "coordinates": [-70.13574, -26.41237],
+              "alongKm": 3624.834
+            },
+            {
+              "id": "osm-node:2330410236",
+              "name": "Diego de Almagro",
+              "status": "disused",
+              "coordinates": [-70.0415068, -26.3909735],
+              "alongKm": 3634.853
+            },
+            {
+              "id": "osm-node:8961933715",
+              "name": "Pedro Montt",
+              "status": "disused",
+              "coordinates": [-69.9808723, -26.2178279],
+              "alongKm": 3659.189
+            },
+            {
+              "id": "osm-node:13712715865",
+              "name": "José Joaquín Pérez",
+              "status": "disused",
+              "coordinates": [-69.9202945, -25.9892594],
+              "alongKm": 3686.751
+            },
+            {
+              "id": "osm-node:8935468321",
+              "name": "Altamira",
+              "status": "disused",
+              "coordinates": [-69.8460682, -25.7992194],
+              "alongKm": 3715.232
+            },
+            {
+              "id": "osm-node:1270771387",
+              "name": "San Juan",
+              "status": "disused",
+              "coordinates": [-69.7135953, -25.5968266],
+              "alongKm": 3741.793
+            },
+            {
+              "id": "osm-node:8935468320",
+              "name": "Severín",
+              "status": "disused",
+              "coordinates": [-69.6915002, -25.4355247],
+              "alongKm": 3760.838
+            },
+            {
+              "id": "osm-node:8926170653",
+              "name": "Catalina",
+              "status": "disused",
+              "coordinates": [-69.7143433, -25.2376918],
+              "alongKm": 3784.37
+            },
+            {
+              "id": "osm-node:8926170652",
+              "name": "Balmaceda",
+              "status": "disused",
+              "coordinates": [-69.7263267, -24.9932294],
+              "alongKm": 3812.187
+            },
+            {
+              "id": "osm-node:1281005566",
+              "name": "Los Vientos",
+              "status": "disused",
+              "coordinates": [-69.7732285, -24.6811504],
+              "alongKm": 3851.967
+            },
+            {
+              "id": "osm-node:3011201790",
+              "name": "Lacalle",
+              "status": "disused",
+              "coordinates": [-69.8207535, -24.4689909],
+              "alongKm": 3876.182
+            },
+            {
+              "id": "osm-node:1281005742",
+              "name": "Aguas Buenas",
+              "status": "disused",
+              "coordinates": [-69.894355, -24.314363],
+              "alongKm": 3896.934
+            },
+            {
+              "id": "osm-node:1280973485",
+              "name": "Aguas Blancas",
+              "status": "disused",
+              "coordinates": [-69.8507972, -24.1783604],
+              "alongKm": 3914.919
+            },
+            {
+              "id": "osm-node:8922048333",
+              "name": "Oriente",
+              "status": "disused",
+              "coordinates": [-69.7690576, -24.0449352],
+              "alongKm": 3932.947
+            },
+            {
+              "id": "osm-node:7411961743",
+              "name": "Palestina",
+              "status": "active",
+              "coordinates": [-69.7354962, -23.8788533],
+              "alongKm": 3952.746
+            },
+            {
+              "id": "osm-node:13702498597",
+              "name": "Llanos",
+              "status": "disused",
+              "coordinates": [-69.8198691, -23.8147767],
+              "alongKm": 3963.908
+            },
+            {
+              "id": "osm-node:13712715835",
+              "name": "Lata",
+              "status": "disused",
+              "coordinates": [-69.994739, -23.7773004],
+              "alongKm": 3982.509
+            },
+            {
+              "id": "osm-node:3011237108",
+              "name": "O'Higgins",
+              "status": "active",
+              "coordinates": [-70.253194, -23.6575279],
+              "alongKm": 4017.183
+            },
+            {
+              "id": "place:cl-antofagasta",
+              "name": "Antofagasta",
+              "status": "city",
+              "coordinates": [-70.40275, -23.6509],
+              "alongKm": 4055.931
+            },
+            {
+              "id": "osm-node:8926170651",
+              "name": "La Negra",
+              "status": "active",
+              "coordinates": [-70.3254946, -23.7697364],
+              "alongKm": 4079.42
+            },
+            {
+              "id": "osm-node:11563776530",
+              "name": "Portezuelo",
+              "status": "active",
+              "coordinates": [-70.2846515, -23.7004845],
+              "alongKm": 4088.542
+            },
+            {
+              "id": "osm-node:3011237110",
+              "name": "Uribe",
+              "status": "disused",
+              "coordinates": [-70.2364255, -23.556152],
+              "alongKm": 4106.703
+            },
+            {
+              "id": "osm-node:1290560415",
+              "name": "Prat",
+              "status": "active",
+              "coordinates": [-70.1712668, -23.4728199],
+              "alongKm": 4118.173
+            },
+            {
+              "id": "osm-node:1517315716",
+              "name": "Latorre",
+              "status": "active",
+              "coordinates": [-70.0636308, -23.450239],
+              "alongKm": 4130.042
+            },
+            {
+              "id": "osm-node:4382610607",
+              "name": "Cuevitas",
+              "status": "active",
+              "coordinates": [-69.9541248, -23.3982417],
+              "alongKm": 4142.855
+            },
+            {
+              "id": "osm-node:8919140828",
+              "name": "Baquedano (FCAB)",
+              "status": "active",
+              "coordinates": [-69.8408019, -23.3337599],
+              "alongKm": 4156.48
+            },
+            {
+              "id": "osm-node:8919140826",
+              "name": "La Rioja",
+              "status": "active",
+              "coordinates": [-69.8773436, -23.1317559],
+              "alongKm": 4184.938
+            },
+            {
+              "id": "osm-node:8919140821",
+              "name": "Deseada",
+              "status": "disused",
+              "coordinates": [-69.8276782, -22.8816453],
+              "alongKm": 4213.529
+            },
+            {
+              "id": "osm-node:8919140820",
+              "name": "Los Dones",
+              "status": "disused",
+              "coordinates": [-69.782167, -22.785225],
+              "alongKm": 4225.274
+            },
+            {
+              "id": "osm-node:8961933706",
+              "name": "Lynch",
+              "status": "active",
+              "coordinates": [-69.73141, -22.7396759],
+              "alongKm": 4232.579
+            },
+            {
+              "id": "osm-node:8919140819",
+              "name": "Pedro de Valdivia",
+              "status": "active",
+              "coordinates": [-69.6291406, -22.613403],
+              "alongKm": 4250.809
+            },
+            {
+              "id": "osm-node:1287199013",
+              "name": "Miraje",
+              "status": "active",
+              "coordinates": [-69.5680556, -22.5040117],
+              "alongKm": 4264.793
+            },
+            {
+              "id": "osm-node:1287199032",
+              "name": "Chacance",
+              "status": "active",
+              "coordinates": [-69.5603169, -22.396795],
+              "alongKm": 4277.128
+            },
+            {
+              "id": "osm-node:8914187969",
+              "name": "Toco",
+              "status": "active",
+              "coordinates": [-69.5954788, -22.0695585],
+              "alongKm": 4314.29
+            },
+            {
+              "id": "osm-node:8914187968",
+              "name": "Teresa",
+              "status": "active",
+              "coordinates": [-69.586798, -21.9739779],
+              "alongKm": 4325.324
+            },
+            {
+              "id": "osm-node:8914187967",
+              "name": "Santa Fe",
+              "status": "active",
+              "coordinates": [-69.5582961, -21.8936337],
+              "alongKm": 4335.172
+            },
+            {
+              "id": "osm-node:8377035429",
+              "name": "Quillagua",
+              "status": "active",
+              "coordinates": [-69.5345168, -21.6631112],
+              "alongKm": 4363.2
+            },
+            {
+              "id": "osm-node:8914187966",
+              "name": "Hilaricos",
+              "status": "active",
+              "coordinates": [-69.5209053, -21.4908875],
+              "alongKm": 4384.547
+            },
+            {
+              "id": "osm-node:8913403538",
+              "name": "Tambillos",
+              "status": "disused",
+              "coordinates": [-69.4978425, -21.3595935],
+              "alongKm": 4399.597
+            },
+            {
+              "id": "osm-node:8952999636",
+              "name": "Soledad",
+              "status": "active",
+              "coordinates": [-69.4929124, -21.2680942],
+              "alongKm": 4409.784
+            },
+            {
+              "id": "osm-node:8913403537",
+              "name": "Ramaditas",
+              "status": "active",
+              "coordinates": [-69.4807727, -21.0446166],
+              "alongKm": 4434.666
+            },
+            {
+              "id": "osm-node:8887350039",
+              "name": "Cerro Gordo",
+              "status": "active",
+              "coordinates": [-69.5381295, -20.8566375],
+              "alongKm": 4456.636
+            },
+            {
+              "id": "osm-node:2990698540",
+              "name": "Empalme Km. 699",
+              "status": "active",
+              "coordinates": [-69.5968743, -20.7013716],
+              "alongKm": 4474.949
+            },
+            {
+              "id": "osm-node:8887349776",
+              "name": "Pintados",
+              "status": "active",
+              "coordinates": [-69.6364554, -20.6224599],
+              "alongKm": 4485.016
+            },
+            {
+              "id": "osm-node:2990660539",
+              "name": "Mosquitos",
+              "status": "disused",
+              "coordinates": [-69.7230153, -20.5546985],
+              "alongKm": 4496.761
+            },
+            {
+              "id": "osm-node:1271443076",
+              "name": "Gallinazos",
+              "status": "active",
+              "coordinates": [-69.7981072, -20.4956596],
+              "alongKm": 4506.971
+            },
+            {
+              "id": "osm-node:8906827759",
+              "name": "San Donato",
+              "status": "abandoned",
+              "coordinates": [-69.7486476, -20.1096096],
+              "alongKm": 4555.92
+            },
+            {
+              "id": "osm-node:8961502048",
+              "name": "Huara (FCS)",
+              "status": "abandoned",
+              "coordinates": [-69.7732398, -19.9944867],
+              "alongKm": 4570.322
+            },
+            {
+              "id": "osm-node:8909466783",
+              "name": "Primitiva",
+              "status": "abandoned",
+              "coordinates": [-69.7944288, -19.9256364],
+              "alongKm": 4579.987
+            },
+            {
+              "id": "osm-node:8909466795",
+              "name": "Negreiros (FCS)",
+              "status": "abandoned",
+              "coordinates": [-69.8476801, -19.8602929],
+              "alongKm": 4590.156
+            },
+            {
+              "id": "osm-node:8913367923",
+              "name": "Aguada",
+              "status": "abandoned",
+              "coordinates": [-69.8899248, -19.7673536],
+              "alongKm": 4601.825
+            },
+            {
+              "id": "osm-node:8909466801",
+              "name": "Santa Catalina",
+              "status": "abandoned",
+              "coordinates": [-69.9125435, -19.7248467],
+              "alongKm": 4607.336
+            },
+            {
+              "id": "osm-node:8909480929",
+              "name": "Dolores",
+              "status": "abandoned",
+              "coordinates": [-69.9456428, -19.6770408],
+              "alongKm": 4613.903
+            },
+            {
+              "id": "osm-node:8909480935",
+              "name": "Jazpampa",
+              "status": "abandoned",
+              "coordinates": [-70.0246437, -19.5695331],
+              "alongKm": 4629.258
+            },
+            {
+              "id": "osm-node:8909480936",
+              "name": "Nivel",
+              "status": "abandoned",
+              "coordinates": [-70.089414, -19.5841631],
+              "alongKm": 4637.411
+            },
+            {
+              "id": "osm-node:8909480937",
+              "name": "San Roberto",
+              "status": "abandoned",
+              "coordinates": [-70.1295499, -19.5847845],
+              "alongKm": 4642.807
+            },
+            {
+              "id": "osm-node:8909480940",
+              "name": "Arenal",
+              "status": "abandoned",
+              "coordinates": [-70.1721328, -19.5878046],
+              "alongKm": 4651.408
+            },
+            {
+              "id": "osm-node:8909480939",
+              "name": "Hospicio",
+              "status": "abandoned",
+              "coordinates": [-70.2006124, -19.5958517],
+              "alongKm": 4657.713
+            },
+            {
+              "id": "halt:cl-main-line:km-4722",
+              "name": "Km 4722",
+              "status": "kilometre-post",
+              "coordinates": [-70.2607389, -19.0269743],
+              "alongKm": 4721.536
+            },
+            {
+              "id": "place:cl-arica",
+              "name": "Arica",
+              "status": "city",
+              "coordinates": [-70.30567, -18.46692],
+              "alongKm": 4785.358
+            }
+          ],
+          "skippedStationIds": [
+            "osm-node:8834168515",
+            "osm-node:12801520306",
+            "osm-node:803918746",
+            "osm-node:11506093195",
+            "osm-node:12049657227",
+            "osm-node:8826162118",
+            "osm-node:11403883709",
+            "osm-node:5778202618",
+            "osm-node:7274706055",
+            "osm-node:3658439732",
+            "osm-node:1713527310",
+            "osm-node:12049551156",
+            "osm-way:1087639110",
+            "osm-node:13674888715",
+            "osm-node:5213447511",
+            "osm-node:4756906623",
+            "osm-node:318475846",
+            "osm-node:318377395",
+            "osm-node:4746169757",
+            "osm-way:24964200",
+            "osm-node:4593880289",
+            "osm-node:4746169733",
+            "osm-node:13695929013",
+            "osm-node:11982461966",
+            "osm-node:11987611707",
+            "osm-node:11987611708",
+            "osm-way:661196684",
+            "osm-node:13692222773",
+            "osm-node:11545476560",
+            "osm-node:4727180416",
+            "osm-node:8941117800",
+            "osm-node:8941500809",
+            "osm-node:8941500737",
+            "osm-node:12817983992",
+            "osm-node:1276698525",
+            "osm-node:1098631958",
+            "osm-node:8959578677",
+            "osm-node:8961933709",
+            "osm-node:8887350049",
+            "osm-node:8906827758",
+            "osm-way:755252222",
+            "osm-node:8961502046",
+            "osm-node:8961851369",
+            "osm-node:8909480931",
+            "osm-node:4723234536"
+          ],
+          "legs": [
+            {
+              "id": "cl-main-line:leg-1",
+              "fromStationId": "place:cl-punta-arenas",
+              "toStationId": "halt:cl-main-line:km-94",
+              "distanceKm": 93.609,
+              "sliceCount": 19
+            },
+            {
+              "id": "cl-main-line:leg-2",
+              "fromStationId": "halt:cl-main-line:km-94",
+              "toStationId": "halt:cl-main-line:km-187",
+              "distanceKm": 93.609,
+              "sliceCount": 19
+            },
+            {
+              "id": "cl-main-line:leg-3",
+              "fromStationId": "halt:cl-main-line:km-187",
+              "toStationId": "halt:cl-main-line:km-281",
+              "distanceKm": 93.609,
+              "sliceCount": 19
+            },
+            {
+              "id": "cl-main-line:leg-4",
+              "fromStationId": "halt:cl-main-line:km-281",
+              "toStationId": "halt:cl-main-line:km-374",
+              "distanceKm": 93.609,
+              "sliceCount": 19
+            },
+            {
+              "id": "cl-main-line:leg-5",
+              "fromStationId": "halt:cl-main-line:km-374",
+              "toStationId": "halt:cl-main-line:km-468",
+              "distanceKm": 93.609,
+              "sliceCount": 19
+            },
+            {
+              "id": "cl-main-line:leg-6",
+              "fromStationId": "halt:cl-main-line:km-468",
+              "toStationId": "halt:cl-main-line:km-562",
+              "distanceKm": 93.609,
+              "sliceCount": 19
+            },
+            {
+              "id": "cl-main-line:leg-7",
+              "fromStationId": "halt:cl-main-line:km-562",
+              "toStationId": "halt:cl-main-line:km-655",
+              "distanceKm": 93.609,
+              "sliceCount": 19
+            },
+            {
+              "id": "cl-main-line:leg-8",
+              "fromStationId": "halt:cl-main-line:km-655",
+              "toStationId": "halt:cl-main-line:km-749",
+              "distanceKm": 93.609,
+              "sliceCount": 19
+            },
+            {
+              "id": "cl-main-line:leg-9",
+              "fromStationId": "halt:cl-main-line:km-749",
+              "toStationId": "halt:cl-main-line:km-842",
+              "distanceKm": 93.609,
+              "sliceCount": 19
+            },
+            {
+              "id": "cl-main-line:leg-10",
+              "fromStationId": "halt:cl-main-line:km-842",
+              "toStationId": "halt:cl-main-line:km-936",
+              "distanceKm": 93.609,
+              "sliceCount": 19
+            },
+            {
+              "id": "cl-main-line:leg-11",
+              "fromStationId": "halt:cl-main-line:km-936",
+              "toStationId": "halt:cl-main-line:km-1030",
+              "distanceKm": 93.609,
+              "sliceCount": 19
+            },
+            {
+              "id": "cl-main-line:leg-12",
+              "fromStationId": "halt:cl-main-line:km-1030",
+              "toStationId": "halt:cl-main-line:km-1123",
+              "distanceKm": 93.609,
+              "sliceCount": 19
+            },
+            {
+              "id": "cl-main-line:leg-13",
+              "fromStationId": "halt:cl-main-line:km-1123",
+              "toStationId": "halt:cl-main-line:km-1217",
+              "distanceKm": 93.609,
+              "sliceCount": 19
+            },
+            {
+              "id": "cl-main-line:leg-14",
+              "fromStationId": "halt:cl-main-line:km-1217",
+              "toStationId": "place:cl-puerto-montt",
+              "distanceKm": 93.609,
+              "sliceCount": 19
+            },
+            {
+              "id": "cl-main-line:leg-15",
+              "fromStationId": "place:cl-puerto-montt",
+              "toStationId": "osm-node:1107682659",
+              "distanceKm": 11.167,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-16",
+              "fromStationId": "osm-node:1107682659",
+              "toStationId": "osm-node:8788040383",
+              "distanceKm": 6.896,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-17",
+              "fromStationId": "osm-node:8788040383",
+              "toStationId": "osm-node:8715496993",
+              "distanceKm": 12.821,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-18",
+              "fromStationId": "osm-node:8715496993",
+              "toStationId": "osm-node:801682415",
+              "distanceKm": 7.732,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-19",
+              "fromStationId": "osm-node:801682415",
+              "toStationId": "osm-node:12801571335",
+              "distanceKm": 10.2,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-20",
+              "fromStationId": "osm-node:12801571335",
+              "toStationId": "osm-node:8713368984",
+              "distanceKm": 7.048,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-21",
+              "fromStationId": "osm-node:8713368984",
+              "toStationId": "osm-node:8819298793",
+              "distanceKm": 14.289,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-22",
+              "fromStationId": "osm-node:8819298793",
+              "toStationId": "osm-node:8843878871",
+              "distanceKm": 11.466,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-23",
+              "fromStationId": "osm-node:8843878871",
+              "toStationId": "osm-node:1492329889",
+              "distanceKm": 14.565,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-24",
+              "fromStationId": "osm-node:1492329889",
+              "toStationId": "osm-node:8861862732",
+              "distanceKm": 9.1,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-25",
+              "fromStationId": "osm-node:8861862732",
+              "toStationId": "osm-node:8880517344",
+              "distanceKm": 8.751,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-26",
+              "fromStationId": "osm-node:8880517344",
+              "toStationId": "osm-node:8902910228",
+              "distanceKm": 10.188,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-27",
+              "fromStationId": "osm-node:8902910228",
+              "toStationId": "osm-node:8937085849",
+              "distanceKm": 11.192,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-28",
+              "fromStationId": "osm-node:8937085849",
+              "toStationId": "osm-node:8952643802",
+              "distanceKm": 7.047,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-29",
+              "fromStationId": "osm-node:8952643802",
+              "toStationId": "osm-node:12801520315",
+              "distanceKm": 11.821,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-30",
+              "fromStationId": "osm-node:12801520315",
+              "toStationId": "osm-node:11506003307",
+              "distanceKm": 12.723,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-31",
+              "fromStationId": "osm-node:11506003307",
+              "toStationId": "osm-node:12801520308",
+              "distanceKm": 8.393,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-32",
+              "fromStationId": "osm-node:12801520308",
+              "toStationId": "osm-node:12801520307",
+              "distanceKm": 7.109,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-33",
+              "fromStationId": "osm-node:12801520307",
+              "toStationId": "osm-node:1500315734",
+              "distanceKm": 8.845,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-34",
+              "fromStationId": "osm-node:1500315734",
+              "toStationId": "osm-node:982910005",
+              "distanceKm": 9.654,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-35",
+              "fromStationId": "osm-node:982910005",
+              "toStationId": "osm-node:960923831",
+              "distanceKm": 10.408,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-36",
+              "fromStationId": "osm-node:960923831",
+              "toStationId": "osm-node:12801520309",
+              "distanceKm": 8.935,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-37",
+              "fromStationId": "osm-node:12801520309",
+              "toStationId": "osm-node:11505941309",
+              "distanceKm": 7.387,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-38",
+              "fromStationId": "osm-node:11505941309",
+              "toStationId": "osm-node:12801520310",
+              "distanceKm": 6.822,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-39",
+              "fromStationId": "osm-node:12801520310",
+              "toStationId": "osm-node:4728597530",
+              "distanceKm": 7.967,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-40",
+              "fromStationId": "osm-node:4728597530",
+              "toStationId": "osm-node:1909588488",
+              "distanceKm": 17.712,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-41",
+              "fromStationId": "osm-node:1909588488",
+              "toStationId": "osm-node:1909587993",
+              "distanceKm": 11.952,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-42",
+              "fromStationId": "osm-node:1909587993",
+              "toStationId": "osm-node:12801520311",
+              "distanceKm": 6.619,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-43",
+              "fromStationId": "osm-node:12801520311",
+              "toStationId": "osm-node:2180503365",
+              "distanceKm": 13.408,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-44",
+              "fromStationId": "osm-node:2180503365",
+              "toStationId": "osm-node:12801520312",
+              "distanceKm": 7.335,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-45",
+              "fromStationId": "osm-node:12801520312",
+              "toStationId": "osm-node:11506086538",
+              "distanceKm": 8.443,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-46",
+              "fromStationId": "osm-node:11506086538",
+              "toStationId": "osm-node:12801520313",
+              "distanceKm": 9.252,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-47",
+              "fromStationId": "osm-node:12801520313",
+              "toStationId": "osm-node:1909759643",
+              "distanceKm": 10.733,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-48",
+              "fromStationId": "osm-node:1909759643",
+              "toStationId": "osm-node:12801520314",
+              "distanceKm": 9.246,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-49",
+              "fromStationId": "osm-node:12801520314",
+              "toStationId": "osm-node:5964260082",
+              "distanceKm": 6.535,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-50",
+              "fromStationId": "osm-node:5964260082",
+              "toStationId": "osm-node:12049657228",
+              "distanceKm": 13.673,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-51",
+              "fromStationId": "osm-node:12049657228",
+              "toStationId": "osm-node:10960876274",
+              "distanceKm": 13.185,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-52",
+              "fromStationId": "osm-node:10960876274",
+              "toStationId": "osm-node:10956639396",
+              "distanceKm": 16.195,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-53",
+              "fromStationId": "osm-node:10956639396",
+              "toStationId": "osm-node:12049657226",
+              "distanceKm": 9.711,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-54",
+              "fromStationId": "osm-node:12049657226",
+              "toStationId": "osm-node:9108598797",
+              "distanceKm": 6.529,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-55",
+              "fromStationId": "osm-node:9108598797",
+              "toStationId": "osm-node:10956639399",
+              "distanceKm": 12.991,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-56",
+              "fromStationId": "osm-node:10956639399",
+              "toStationId": "osm-node:7278743853",
+              "distanceKm": 8.163,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-57",
+              "fromStationId": "osm-node:7278743853",
+              "toStationId": "osm-node:12049640405",
+              "distanceKm": 5.455,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-58",
+              "fromStationId": "osm-node:12049640405",
+              "toStationId": "osm-node:1641614467",
+              "distanceKm": 10.219,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-59",
+              "fromStationId": "osm-node:1641614467",
+              "toStationId": "osm-node:10956639403",
+              "distanceKm": 12.096,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-60",
+              "fromStationId": "osm-node:10956639403",
+              "toStationId": "osm-node:671848125",
+              "distanceKm": 5.111,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-61",
+              "fromStationId": "osm-node:671848125",
+              "toStationId": "osm-node:7926478740",
+              "distanceKm": 7.515,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-62",
+              "fromStationId": "osm-node:7926478740",
+              "toStationId": "osm-node:4832723726",
+              "distanceKm": 10.391,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-63",
+              "fromStationId": "osm-node:4832723726",
+              "toStationId": "osm-node:7926478737",
+              "distanceKm": 6.655,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-64",
+              "fromStationId": "osm-node:7926478737",
+              "toStationId": "osm-node:7926478726",
+              "distanceKm": 7.206,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-65",
+              "fromStationId": "osm-node:7926478726",
+              "toStationId": "osm-node:12049640404",
+              "distanceKm": 8.491,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-66",
+              "fromStationId": "osm-node:12049640404",
+              "toStationId": "osm-node:3855581257",
+              "distanceKm": 9.672,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-67",
+              "fromStationId": "osm-node:3855581257",
+              "toStationId": "osm-node:12049640403",
+              "distanceKm": 7.893,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-68",
+              "fromStationId": "osm-node:12049640403",
+              "toStationId": "osm-node:920461262",
+              "distanceKm": 11.802,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-69",
+              "fromStationId": "osm-node:920461262",
+              "toStationId": "osm-node:7926478720",
+              "distanceKm": 5.402,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-70",
+              "fromStationId": "osm-node:7926478720",
+              "toStationId": "osm-node:11506118926",
+              "distanceKm": 7.275,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-71",
+              "fromStationId": "osm-node:11506118926",
+              "toStationId": "osm-node:1798798511",
+              "distanceKm": 11.459,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-72",
+              "fromStationId": "osm-node:1798798511",
+              "toStationId": "osm-node:12049551160",
+              "distanceKm": 7.474,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-73",
+              "fromStationId": "osm-node:12049551160",
+              "toStationId": "osm-node:5186665831",
+              "distanceKm": 7.619,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-74",
+              "fromStationId": "osm-node:5186665831",
+              "toStationId": "osm-node:3663884060",
+              "distanceKm": 10.654,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-75",
+              "fromStationId": "osm-node:3663884060",
+              "toStationId": "osm-node:1713527308",
+              "distanceKm": 10.142,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-76",
+              "fromStationId": "osm-node:1713527308",
+              "toStationId": "osm-node:1033193501",
+              "distanceKm": 14.046,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-77",
+              "fromStationId": "osm-node:1033193501",
+              "toStationId": "osm-node:1713527309",
+              "distanceKm": 11.293,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-78",
+              "fromStationId": "osm-node:1713527309",
+              "toStationId": "osm-node:1320075104",
+              "distanceKm": 6.847,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-79",
+              "fromStationId": "osm-node:1320075104",
+              "toStationId": "osm-node:1736791297",
+              "distanceKm": 12.351,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-80",
+              "fromStationId": "osm-node:1736791297",
+              "toStationId": "osm-node:12049551157",
+              "distanceKm": 12.334,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-81",
+              "fromStationId": "osm-node:12049551157",
+              "toStationId": "osm-node:2118620286",
+              "distanceKm": 9.769,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-82",
+              "fromStationId": "osm-node:2118620286",
+              "toStationId": "osm-node:11508239379",
+              "distanceKm": 8.447,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-83",
+              "fromStationId": "osm-node:11508239379",
+              "toStationId": "osm-node:285773326",
+              "distanceKm": 5.492,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-84",
+              "fromStationId": "osm-node:285773326",
+              "toStationId": "osm-node:267570007",
+              "distanceKm": 11.752,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-85",
+              "fromStationId": "osm-node:267570007",
+              "toStationId": "osm-node:1741897065",
+              "distanceKm": 9.999,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-86",
+              "fromStationId": "osm-node:1741897065",
+              "toStationId": "osm-node:4677463829",
+              "distanceKm": 7.191,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-87",
+              "fromStationId": "osm-node:4677463829",
+              "toStationId": "osm-node:310360568",
+              "distanceKm": 7.19,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-88",
+              "fromStationId": "osm-node:310360568",
+              "toStationId": "osm-node:1746212293",
+              "distanceKm": 8.048,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-89",
+              "fromStationId": "osm-node:1746212293",
+              "toStationId": "osm-node:4677463828",
+              "distanceKm": 7.705,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-90",
+              "fromStationId": "osm-node:4677463828",
+              "toStationId": "osm-node:4677463831",
+              "distanceKm": 7.013,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-91",
+              "fromStationId": "osm-node:4677463831",
+              "toStationId": "osm-node:4677463824",
+              "distanceKm": 11.399,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-92",
+              "fromStationId": "osm-node:4677463824",
+              "toStationId": "osm-node:4677463826",
+              "distanceKm": 5.924,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-93",
+              "fromStationId": "osm-node:4677463826",
+              "toStationId": "osm-node:4677463823",
+              "distanceKm": 5.026,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-94",
+              "fromStationId": "osm-node:4677463823",
+              "toStationId": "osm-node:4677463832",
+              "distanceKm": 12.364,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-95",
+              "fromStationId": "osm-node:4677463832",
+              "toStationId": "osm-node:4677463825",
+              "distanceKm": 6.844,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-96",
+              "fromStationId": "osm-node:4677463825",
+              "toStationId": "osm-node:5036055986",
+              "distanceKm": 9.067,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-97",
+              "fromStationId": "osm-node:5036055986",
+              "toStationId": "osm-node:4677463830",
+              "distanceKm": 11.898,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-98",
+              "fromStationId": "osm-node:4677463830",
+              "toStationId": "osm-node:4677463833",
+              "distanceKm": 8.119,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-99",
+              "fromStationId": "osm-node:4677463833",
+              "toStationId": "osm-node:308140865",
+              "distanceKm": 10.583,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-100",
+              "fromStationId": "osm-node:308140865",
+              "toStationId": "osm-node:4677463827",
+              "distanceKm": 9.214,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-101",
+              "fromStationId": "osm-node:4677463827",
+              "toStationId": "osm-node:308140957",
+              "distanceKm": 10.906,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-102",
+              "fromStationId": "osm-node:308140957",
+              "toStationId": "osm-node:1781094334",
+              "distanceKm": 9.021,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-103",
+              "fromStationId": "osm-node:1781094334",
+              "toStationId": "osm-node:13674888708",
+              "distanceKm": 9.322,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-104",
+              "fromStationId": "osm-node:13674888708",
+              "toStationId": "osm-node:13674888709",
+              "distanceKm": 13.038,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-105",
+              "fromStationId": "osm-node:13674888709",
+              "toStationId": "osm-node:308141105",
+              "distanceKm": 10.352,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-106",
+              "fromStationId": "osm-node:308141105",
+              "toStationId": "osm-node:1388181293",
+              "distanceKm": 7.626,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-107",
+              "fromStationId": "osm-node:1388181293",
+              "toStationId": "osm-node:13674888710",
+              "distanceKm": 6.077,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-108",
+              "fromStationId": "osm-node:13674888710",
+              "toStationId": "osm-node:302449631",
+              "distanceKm": 8.41,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-109",
+              "fromStationId": "osm-node:302449631",
+              "toStationId": "osm-node:13674888711",
+              "distanceKm": 7.155,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-110",
+              "fromStationId": "osm-node:13674888711",
+              "toStationId": "osm-node:566733943",
+              "distanceKm": 8.699,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-111",
+              "fromStationId": "osm-node:566733943",
+              "toStationId": "osm-node:13674888713",
+              "distanceKm": 20.843,
+              "sliceCount": 5
+            },
+            {
+              "id": "cl-main-line:leg-112",
+              "fromStationId": "osm-node:13674888713",
+              "toStationId": "osm-node:13674888714",
+              "distanceKm": 9.068,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-113",
+              "fromStationId": "osm-node:13674888714",
+              "toStationId": "osm-node:9810431962",
+              "distanceKm": 5.848,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-114",
+              "fromStationId": "osm-node:9810431962",
+              "toStationId": "osm-node:13675681700",
+              "distanceKm": 7.362,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-115",
+              "fromStationId": "osm-node:13675681700",
+              "toStationId": "osm-node:13675681699",
+              "distanceKm": 9.379,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-116",
+              "fromStationId": "osm-node:13675681699",
+              "toStationId": "osm-node:308145490",
+              "distanceKm": 6.61,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-117",
+              "fromStationId": "osm-node:308145490",
+              "toStationId": "osm-node:3786231057",
+              "distanceKm": 6.903,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-118",
+              "fromStationId": "osm-node:3786231057",
+              "toStationId": "osm-node:308151051",
+              "distanceKm": 7.442,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-119",
+              "fromStationId": "osm-node:308151051",
+              "toStationId": "osm-node:13675681698",
+              "distanceKm": 7.091,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-120",
+              "fromStationId": "osm-node:13675681698",
+              "toStationId": "osm-node:1758969349",
+              "distanceKm": 7.294,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-121",
+              "fromStationId": "osm-node:1758969349",
+              "toStationId": "osm-node:318415381",
+              "distanceKm": 11.969,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-122",
+              "fromStationId": "osm-node:318415381",
+              "toStationId": "osm-node:1266495025",
+              "distanceKm": 9.928,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-123",
+              "fromStationId": "osm-node:1266495025",
+              "toStationId": "osm-node:318418135",
+              "distanceKm": 13.114,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-124",
+              "fromStationId": "osm-node:318418135",
+              "toStationId": "osm-node:7385889045",
+              "distanceKm": 5.797,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-125",
+              "fromStationId": "osm-node:7385889045",
+              "toStationId": "osm-node:5215345941",
+              "distanceKm": 5.904,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-126",
+              "fromStationId": "osm-node:5215345941",
+              "toStationId": "osm-node:5213447514",
+              "distanceKm": 5.646,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-127",
+              "fromStationId": "osm-node:5213447514",
+              "toStationId": "osm-node:4747704104",
+              "distanceKm": 9.496,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-128",
+              "fromStationId": "osm-node:4747704104",
+              "toStationId": "osm-node:4756906640",
+              "distanceKm": 5.187,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-129",
+              "fromStationId": "osm-node:4756906640",
+              "toStationId": "place:cl-santiago",
+              "distanceKm": 35.046,
+              "sliceCount": 8
+            },
+            {
+              "id": "cl-main-line:leg-130",
+              "fromStationId": "place:cl-santiago",
+              "toStationId": "osm-node:4753977083",
+              "distanceKm": 38,
+              "sliceCount": 8
+            },
+            {
+              "id": "cl-main-line:leg-131",
+              "fromStationId": "osm-node:4753977083",
+              "toStationId": "osm-node:4757181460",
+              "distanceKm": 6.96,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-132",
+              "fromStationId": "osm-node:4757181460",
+              "toStationId": "osm-node:11982461965",
+              "distanceKm": 6.066,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-133",
+              "fromStationId": "osm-node:11982461965",
+              "toStationId": "osm-node:11982461967",
+              "distanceKm": 14.287,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-134",
+              "fromStationId": "osm-node:11982461967",
+              "toStationId": "osm-node:11982461968",
+              "distanceKm": 7.051,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-135",
+              "fromStationId": "osm-node:11982461968",
+              "toStationId": "osm-node:11987611705",
+              "distanceKm": 10.867,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-136",
+              "fromStationId": "osm-node:11987611705",
+              "toStationId": "osm-node:9791348225",
+              "distanceKm": 10.584,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-137",
+              "fromStationId": "osm-node:9791348225",
+              "toStationId": "osm-node:11508745605",
+              "distanceKm": 11.397,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-138",
+              "fromStationId": "osm-node:11508745605",
+              "toStationId": "osm-node:11987611706",
+              "distanceKm": 7.286,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-139",
+              "fromStationId": "osm-node:11987611706",
+              "toStationId": "osm-node:13692222771",
+              "distanceKm": 13.411,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-140",
+              "fromStationId": "osm-node:13692222771",
+              "toStationId": "osm-node:367159710",
+              "distanceKm": 11.639,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-141",
+              "fromStationId": "osm-node:367159710",
+              "toStationId": "osm-node:13692222772",
+              "distanceKm": 12.623,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-142",
+              "fromStationId": "osm-node:13692222772",
+              "toStationId": "osm-node:11987611709",
+              "distanceKm": 6.359,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-143",
+              "fromStationId": "osm-node:11987611709",
+              "toStationId": "osm-node:4727180401",
+              "distanceKm": 7.377,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-144",
+              "fromStationId": "osm-node:4727180401",
+              "toStationId": "osm-node:8941117822",
+              "distanceKm": 7.522,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-145",
+              "fromStationId": "osm-node:8941117822",
+              "toStationId": "osm-node:11540225087",
+              "distanceKm": 5.949,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-146",
+              "fromStationId": "osm-node:11540225087",
+              "toStationId": "osm-node:5996338227",
+              "distanceKm": 9.822,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-147",
+              "fromStationId": "osm-node:5996338227",
+              "toStationId": "osm-node:13695929007",
+              "distanceKm": 8.726,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-148",
+              "fromStationId": "osm-node:13695929007",
+              "toStationId": "osm-node:8941117821",
+              "distanceKm": 5.859,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-149",
+              "fromStationId": "osm-node:8941117821",
+              "toStationId": "osm-node:8941117820",
+              "distanceKm": 12.591,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-150",
+              "fromStationId": "osm-node:8941117820",
+              "toStationId": "osm-node:8941117813",
+              "distanceKm": 5.179,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-151",
+              "fromStationId": "osm-node:8941117813",
+              "toStationId": "osm-node:8941117812",
+              "distanceKm": 12.389,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-152",
+              "fromStationId": "osm-node:8941117812",
+              "toStationId": "osm-node:8941117811",
+              "distanceKm": 14.604,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-153",
+              "fromStationId": "osm-node:8941117811",
+              "toStationId": "osm-node:8941117810",
+              "distanceKm": 10.303,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-154",
+              "fromStationId": "osm-node:8941117810",
+              "toStationId": "osm-node:8941117809",
+              "distanceKm": 16.29,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-155",
+              "fromStationId": "osm-node:8941117809",
+              "toStationId": "osm-node:8941117808",
+              "distanceKm": 11.018,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-156",
+              "fromStationId": "osm-node:8941117808",
+              "toStationId": "osm-node:8941117807",
+              "distanceKm": 15.489,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-157",
+              "fromStationId": "osm-node:8941117807",
+              "toStationId": "osm-node:8941117806",
+              "distanceKm": 19.907,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-158",
+              "fromStationId": "osm-node:8941117806",
+              "toStationId": "osm-node:8941117805",
+              "distanceKm": 15.111,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-159",
+              "fromStationId": "osm-node:8941117805",
+              "toStationId": "osm-node:11540105703",
+              "distanceKm": 12.411,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-160",
+              "fromStationId": "osm-node:11540105703",
+              "toStationId": "osm-node:8941117804",
+              "distanceKm": 8.505,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-161",
+              "fromStationId": "osm-node:8941117804",
+              "toStationId": "osm-node:8941117803",
+              "distanceKm": 17.967,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-162",
+              "fromStationId": "osm-node:8941117803",
+              "toStationId": "osm-node:8941117802",
+              "distanceKm": 15.9,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-163",
+              "fromStationId": "osm-node:8941117802",
+              "toStationId": "osm-node:8941117801",
+              "distanceKm": 12.241,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-164",
+              "fromStationId": "osm-node:8941117801",
+              "toStationId": "osm-node:8941117785",
+              "distanceKm": 15.819,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-165",
+              "fromStationId": "osm-node:8941117785",
+              "toStationId": "osm-node:8941117781",
+              "distanceKm": 8.324,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-166",
+              "fromStationId": "osm-node:8941117781",
+              "toStationId": "osm-node:8941117780",
+              "distanceKm": 10.846,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-167",
+              "fromStationId": "osm-node:8941117780",
+              "toStationId": "osm-node:8941117779",
+              "distanceKm": 10.322,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-168",
+              "fromStationId": "osm-node:8941117779",
+              "toStationId": "osm-node:8941117778",
+              "distanceKm": 8.593,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-169",
+              "fromStationId": "osm-node:8941117778",
+              "toStationId": "osm-node:8941117777",
+              "distanceKm": 12.992,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-170",
+              "fromStationId": "osm-node:8941117777",
+              "toStationId": "osm-node:8941117775",
+              "distanceKm": 21.985,
+              "sliceCount": 5
+            },
+            {
+              "id": "cl-main-line:leg-171",
+              "fromStationId": "osm-node:8941117775",
+              "toStationId": "osm-node:8941117774",
+              "distanceKm": 7.82,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-172",
+              "fromStationId": "osm-node:8941117774",
+              "toStationId": "osm-node:8941117773",
+              "distanceKm": 9.51,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-173",
+              "fromStationId": "osm-node:8941117773",
+              "toStationId": "osm-node:8941117772",
+              "distanceKm": 31.269,
+              "sliceCount": 7
+            },
+            {
+              "id": "cl-main-line:leg-174",
+              "fromStationId": "osm-node:8941117772",
+              "toStationId": "osm-node:8941093801",
+              "distanceKm": 7.106,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-175",
+              "fromStationId": "osm-node:8941093801",
+              "toStationId": "osm-node:11530653663",
+              "distanceKm": 6,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-176",
+              "fromStationId": "osm-node:11530653663",
+              "toStationId": "osm-node:8941500808",
+              "distanceKm": 5.989,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-177",
+              "fromStationId": "osm-node:8941500808",
+              "toStationId": "osm-node:8941500738",
+              "distanceKm": 11.512,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-178",
+              "fromStationId": "osm-node:8941500738",
+              "toStationId": "osm-node:8941500736",
+              "distanceKm": 15.439,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-179",
+              "fromStationId": "osm-node:8941500736",
+              "toStationId": "osm-node:8941500735",
+              "distanceKm": 8.697,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-180",
+              "fromStationId": "osm-node:8941500735",
+              "toStationId": "osm-node:8941500734",
+              "distanceKm": 9.714,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-181",
+              "fromStationId": "osm-node:8941500734",
+              "toStationId": "osm-node:8941500733",
+              "distanceKm": 7.071,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-182",
+              "fromStationId": "osm-node:8941500733",
+              "toStationId": "osm-node:8941500732",
+              "distanceKm": 9.958,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-183",
+              "fromStationId": "osm-node:8941500732",
+              "toStationId": "osm-node:8941500731",
+              "distanceKm": 9.012,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-184",
+              "fromStationId": "osm-node:8941500731",
+              "toStationId": "osm-node:8941500729",
+              "distanceKm": 6.778,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-185",
+              "fromStationId": "osm-node:8941500729",
+              "toStationId": "osm-node:8941500727",
+              "distanceKm": 6.387,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-186",
+              "fromStationId": "osm-node:8941500727",
+              "toStationId": "osm-node:13822872185",
+              "distanceKm": 5.987,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-187",
+              "fromStationId": "osm-node:13822872185",
+              "toStationId": "osm-node:8938474505",
+              "distanceKm": 8.076,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-188",
+              "fromStationId": "osm-node:8938474505",
+              "toStationId": "osm-node:8935468406",
+              "distanceKm": 10.287,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-189",
+              "fromStationId": "osm-node:8935468406",
+              "toStationId": "osm-node:11527519470",
+              "distanceKm": 11.042,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-190",
+              "fromStationId": "osm-node:11527519470",
+              "toStationId": "osm-node:8935468405",
+              "distanceKm": 7.02,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-191",
+              "fromStationId": "osm-node:8935468405",
+              "toStationId": "osm-node:8935468404",
+              "distanceKm": 17.933,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-192",
+              "fromStationId": "osm-node:8935468404",
+              "toStationId": "osm-node:8935468403",
+              "distanceKm": 8.912,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-193",
+              "fromStationId": "osm-node:8935468403",
+              "toStationId": "osm-node:13822914809",
+              "distanceKm": 16.08,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-194",
+              "fromStationId": "osm-node:13822914809",
+              "toStationId": "osm-node:8935468401",
+              "distanceKm": 14.121,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-195",
+              "fromStationId": "osm-node:8935468401",
+              "toStationId": "osm-node:8935468400",
+              "distanceKm": 9.628,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-196",
+              "fromStationId": "osm-node:8935468400",
+              "toStationId": "osm-way:1360537858",
+              "distanceKm": 11.279,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-197",
+              "fromStationId": "osm-way:1360537858",
+              "toStationId": "osm-node:13822914810",
+              "distanceKm": 22.743,
+              "sliceCount": 5
+            },
+            {
+              "id": "cl-main-line:leg-198",
+              "fromStationId": "osm-node:13822914810",
+              "toStationId": "osm-node:8935468397",
+              "distanceKm": 17.665,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-199",
+              "fromStationId": "osm-node:8935468397",
+              "toStationId": "osm-node:8935468396",
+              "distanceKm": 10.155,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-200",
+              "fromStationId": "osm-node:8935468396",
+              "toStationId": "osm-node:8935468395",
+              "distanceKm": 20.476,
+              "sliceCount": 5
+            },
+            {
+              "id": "cl-main-line:leg-201",
+              "fromStationId": "osm-node:8935468395",
+              "toStationId": "osm-node:13822914812",
+              "distanceKm": 6.369,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-202",
+              "fromStationId": "osm-node:13822914812",
+              "toStationId": "osm-node:8935468393",
+              "distanceKm": 18.236,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-203",
+              "fromStationId": "osm-node:8935468393",
+              "toStationId": "osm-node:8935468383",
+              "distanceKm": 14.984,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-204",
+              "fromStationId": "osm-node:8935468383",
+              "toStationId": "osm-node:8935468382",
+              "distanceKm": 30.581,
+              "sliceCount": 7
+            },
+            {
+              "id": "cl-main-line:leg-205",
+              "fromStationId": "osm-node:8935468382",
+              "toStationId": "osm-node:13822876772",
+              "distanceKm": 15.195,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-206",
+              "fromStationId": "osm-node:13822876772",
+              "toStationId": "osm-node:8935468375",
+              "distanceKm": 16.231,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-207",
+              "fromStationId": "osm-node:8935468375",
+              "toStationId": "osm-node:214186383",
+              "distanceKm": 11.414,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-208",
+              "fromStationId": "osm-node:214186383",
+              "toStationId": "osm-node:8935468372",
+              "distanceKm": 20.522,
+              "sliceCount": 5
+            },
+            {
+              "id": "cl-main-line:leg-209",
+              "fromStationId": "osm-node:8935468372",
+              "toStationId": "osm-node:13822920725",
+              "distanceKm": 24.833,
+              "sliceCount": 5
+            },
+            {
+              "id": "cl-main-line:leg-210",
+              "fromStationId": "osm-node:13822920725",
+              "toStationId": "osm-node:11521724603",
+              "distanceKm": 5.614,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-211",
+              "fromStationId": "osm-node:11521724603",
+              "toStationId": "osm-node:8935468370",
+              "distanceKm": 13.458,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-212",
+              "fromStationId": "osm-node:8935468370",
+              "toStationId": "osm-node:8935468368",
+              "distanceKm": 28.37,
+              "sliceCount": 6
+            },
+            {
+              "id": "cl-main-line:leg-213",
+              "fromStationId": "osm-node:8935468368",
+              "toStationId": "osm-node:977936426",
+              "distanceKm": 9.019,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-214",
+              "fromStationId": "osm-node:977936426",
+              "toStationId": "osm-node:8935468366",
+              "distanceKm": 9.852,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-215",
+              "fromStationId": "osm-node:8935468366",
+              "toStationId": "osm-node:8935468365",
+              "distanceKm": 15.582,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-216",
+              "fromStationId": "osm-node:8935468365",
+              "toStationId": "osm-node:8935468342",
+              "distanceKm": 12.297,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-217",
+              "fromStationId": "osm-node:8935468342",
+              "toStationId": "osm-node:8935468341",
+              "distanceKm": 20.709,
+              "sliceCount": 5
+            },
+            {
+              "id": "cl-main-line:leg-218",
+              "fromStationId": "osm-node:8935468341",
+              "toStationId": "osm-node:8935468339",
+              "distanceKm": 18.556,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-219",
+              "fromStationId": "osm-node:8935468339",
+              "toStationId": "osm-node:8935468335",
+              "distanceKm": 23.086,
+              "sliceCount": 5
+            },
+            {
+              "id": "cl-main-line:leg-220",
+              "fromStationId": "osm-node:8935468335",
+              "toStationId": "osm-node:8935468334",
+              "distanceKm": 13.775,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-221",
+              "fromStationId": "osm-node:8935468334",
+              "toStationId": "osm-node:8935468330",
+              "distanceKm": 6.396,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-222",
+              "fromStationId": "osm-node:8935468330",
+              "toStationId": "osm-node:8935468326",
+              "distanceKm": 6.449,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-223",
+              "fromStationId": "osm-node:8935468326",
+              "toStationId": "osm-node:8935468324",
+              "distanceKm": 8.084,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-224",
+              "fromStationId": "osm-node:8935468324",
+              "toStationId": "osm-node:8964627635",
+              "distanceKm": 11.297,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-225",
+              "fromStationId": "osm-node:8964627635",
+              "toStationId": "osm-node:13712715866",
+              "distanceKm": 8.602,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-226",
+              "fromStationId": "osm-node:13712715866",
+              "toStationId": "osm-node:8962098287",
+              "distanceKm": 13.375,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-227",
+              "fromStationId": "osm-node:8962098287",
+              "toStationId": "osm-node:2330410236",
+              "distanceKm": 10.019,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-228",
+              "fromStationId": "osm-node:2330410236",
+              "toStationId": "osm-node:8961933715",
+              "distanceKm": 24.335,
+              "sliceCount": 5
+            },
+            {
+              "id": "cl-main-line:leg-229",
+              "fromStationId": "osm-node:8961933715",
+              "toStationId": "osm-node:13712715865",
+              "distanceKm": 27.562,
+              "sliceCount": 6
+            },
+            {
+              "id": "cl-main-line:leg-230",
+              "fromStationId": "osm-node:13712715865",
+              "toStationId": "osm-node:8935468321",
+              "distanceKm": 28.481,
+              "sliceCount": 6
+            },
+            {
+              "id": "cl-main-line:leg-231",
+              "fromStationId": "osm-node:8935468321",
+              "toStationId": "osm-node:1270771387",
+              "distanceKm": 26.561,
+              "sliceCount": 6
+            },
+            {
+              "id": "cl-main-line:leg-232",
+              "fromStationId": "osm-node:1270771387",
+              "toStationId": "osm-node:8935468320",
+              "distanceKm": 19.045,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-233",
+              "fromStationId": "osm-node:8935468320",
+              "toStationId": "osm-node:8926170653",
+              "distanceKm": 23.531,
+              "sliceCount": 5
+            },
+            {
+              "id": "cl-main-line:leg-234",
+              "fromStationId": "osm-node:8926170653",
+              "toStationId": "osm-node:8926170652",
+              "distanceKm": 27.817,
+              "sliceCount": 6
+            },
+            {
+              "id": "cl-main-line:leg-235",
+              "fromStationId": "osm-node:8926170652",
+              "toStationId": "osm-node:1281005566",
+              "distanceKm": 39.78,
+              "sliceCount": 8
+            },
+            {
+              "id": "cl-main-line:leg-236",
+              "fromStationId": "osm-node:1281005566",
+              "toStationId": "osm-node:3011201790",
+              "distanceKm": 24.216,
+              "sliceCount": 5
+            },
+            {
+              "id": "cl-main-line:leg-237",
+              "fromStationId": "osm-node:3011201790",
+              "toStationId": "osm-node:1281005742",
+              "distanceKm": 20.752,
+              "sliceCount": 5
+            },
+            {
+              "id": "cl-main-line:leg-238",
+              "fromStationId": "osm-node:1281005742",
+              "toStationId": "osm-node:1280973485",
+              "distanceKm": 17.985,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-239",
+              "fromStationId": "osm-node:1280973485",
+              "toStationId": "osm-node:8922048333",
+              "distanceKm": 18.028,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-240",
+              "fromStationId": "osm-node:8922048333",
+              "toStationId": "osm-node:7411961743",
+              "distanceKm": 19.799,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-241",
+              "fromStationId": "osm-node:7411961743",
+              "toStationId": "osm-node:13702498597",
+              "distanceKm": 11.161,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-242",
+              "fromStationId": "osm-node:13702498597",
+              "toStationId": "osm-node:13712715835",
+              "distanceKm": 18.601,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-243",
+              "fromStationId": "osm-node:13712715835",
+              "toStationId": "osm-node:3011237108",
+              "distanceKm": 34.674,
+              "sliceCount": 7
+            },
+            {
+              "id": "cl-main-line:leg-244",
+              "fromStationId": "osm-node:3011237108",
+              "toStationId": "place:cl-antofagasta",
+              "distanceKm": 38.748,
+              "sliceCount": 8
+            },
+            {
+              "id": "cl-main-line:leg-245",
+              "fromStationId": "place:cl-antofagasta",
+              "toStationId": "osm-node:8926170651",
+              "distanceKm": 23.489,
+              "sliceCount": 5
+            },
+            {
+              "id": "cl-main-line:leg-246",
+              "fromStationId": "osm-node:8926170651",
+              "toStationId": "osm-node:11563776530",
+              "distanceKm": 9.122,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-247",
+              "fromStationId": "osm-node:11563776530",
+              "toStationId": "osm-node:3011237110",
+              "distanceKm": 18.161,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-248",
+              "fromStationId": "osm-node:3011237110",
+              "toStationId": "osm-node:1290560415",
+              "distanceKm": 11.47,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-249",
+              "fromStationId": "osm-node:1290560415",
+              "toStationId": "osm-node:1517315716",
+              "distanceKm": 11.869,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-250",
+              "fromStationId": "osm-node:1517315716",
+              "toStationId": "osm-node:4382610607",
+              "distanceKm": 12.813,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-251",
+              "fromStationId": "osm-node:4382610607",
+              "toStationId": "osm-node:8919140828",
+              "distanceKm": 13.625,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-252",
+              "fromStationId": "osm-node:8919140828",
+              "toStationId": "osm-node:8919140826",
+              "distanceKm": 28.458,
+              "sliceCount": 6
+            },
+            {
+              "id": "cl-main-line:leg-253",
+              "fromStationId": "osm-node:8919140826",
+              "toStationId": "osm-node:8919140821",
+              "distanceKm": 28.591,
+              "sliceCount": 6
+            },
+            {
+              "id": "cl-main-line:leg-254",
+              "fromStationId": "osm-node:8919140821",
+              "toStationId": "osm-node:8919140820",
+              "distanceKm": 11.745,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-255",
+              "fromStationId": "osm-node:8919140820",
+              "toStationId": "osm-node:8961933706",
+              "distanceKm": 7.305,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-256",
+              "fromStationId": "osm-node:8961933706",
+              "toStationId": "osm-node:8919140819",
+              "distanceKm": 18.23,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-257",
+              "fromStationId": "osm-node:8919140819",
+              "toStationId": "osm-node:1287199013",
+              "distanceKm": 13.983,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-258",
+              "fromStationId": "osm-node:1287199013",
+              "toStationId": "osm-node:1287199032",
+              "distanceKm": 12.336,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-259",
+              "fromStationId": "osm-node:1287199032",
+              "toStationId": "osm-node:8914187969",
+              "distanceKm": 37.162,
+              "sliceCount": 8
+            },
+            {
+              "id": "cl-main-line:leg-260",
+              "fromStationId": "osm-node:8914187969",
+              "toStationId": "osm-node:8914187968",
+              "distanceKm": 11.034,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-261",
+              "fromStationId": "osm-node:8914187968",
+              "toStationId": "osm-node:8914187967",
+              "distanceKm": 9.849,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-262",
+              "fromStationId": "osm-node:8914187967",
+              "toStationId": "osm-node:8377035429",
+              "distanceKm": 28.028,
+              "sliceCount": 6
+            },
+            {
+              "id": "cl-main-line:leg-263",
+              "fromStationId": "osm-node:8377035429",
+              "toStationId": "osm-node:8914187966",
+              "distanceKm": 21.347,
+              "sliceCount": 5
+            },
+            {
+              "id": "cl-main-line:leg-264",
+              "fromStationId": "osm-node:8914187966",
+              "toStationId": "osm-node:8913403538",
+              "distanceKm": 15.05,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-265",
+              "fromStationId": "osm-node:8913403538",
+              "toStationId": "osm-node:8952999636",
+              "distanceKm": 10.187,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-266",
+              "fromStationId": "osm-node:8952999636",
+              "toStationId": "osm-node:8913403537",
+              "distanceKm": 24.881,
+              "sliceCount": 5
+            },
+            {
+              "id": "cl-main-line:leg-267",
+              "fromStationId": "osm-node:8913403537",
+              "toStationId": "osm-node:8887350039",
+              "distanceKm": 21.97,
+              "sliceCount": 5
+            },
+            {
+              "id": "cl-main-line:leg-268",
+              "fromStationId": "osm-node:8887350039",
+              "toStationId": "osm-node:2990698540",
+              "distanceKm": 18.313,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-269",
+              "fromStationId": "osm-node:2990698540",
+              "toStationId": "osm-node:8887349776",
+              "distanceKm": 10.067,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-270",
+              "fromStationId": "osm-node:8887349776",
+              "toStationId": "osm-node:2990660539",
+              "distanceKm": 11.746,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-271",
+              "fromStationId": "osm-node:2990660539",
+              "toStationId": "osm-node:1271443076",
+              "distanceKm": 10.21,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-272",
+              "fromStationId": "osm-node:1271443076",
+              "toStationId": "osm-node:8906827759",
+              "distanceKm": 48.948,
+              "sliceCount": 10
+            },
+            {
+              "id": "cl-main-line:leg-273",
+              "fromStationId": "osm-node:8906827759",
+              "toStationId": "osm-node:8961502048",
+              "distanceKm": 14.402,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-274",
+              "fromStationId": "osm-node:8961502048",
+              "toStationId": "osm-node:8909466783",
+              "distanceKm": 9.665,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-275",
+              "fromStationId": "osm-node:8909466783",
+              "toStationId": "osm-node:8909466795",
+              "distanceKm": 10.17,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-276",
+              "fromStationId": "osm-node:8909466795",
+              "toStationId": "osm-node:8913367923",
+              "distanceKm": 11.669,
+              "sliceCount": 3
+            },
+            {
+              "id": "cl-main-line:leg-277",
+              "fromStationId": "osm-node:8913367923",
+              "toStationId": "osm-node:8909466801",
+              "distanceKm": 5.511,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-278",
+              "fromStationId": "osm-node:8909466801",
+              "toStationId": "osm-node:8909480929",
+              "distanceKm": 6.567,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-279",
+              "fromStationId": "osm-node:8909480929",
+              "toStationId": "osm-node:8909480935",
+              "distanceKm": 15.354,
+              "sliceCount": 4
+            },
+            {
+              "id": "cl-main-line:leg-280",
+              "fromStationId": "osm-node:8909480935",
+              "toStationId": "osm-node:8909480936",
+              "distanceKm": 8.153,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-281",
+              "fromStationId": "osm-node:8909480936",
+              "toStationId": "osm-node:8909480937",
+              "distanceKm": 5.396,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-282",
+              "fromStationId": "osm-node:8909480937",
+              "toStationId": "osm-node:8909480940",
+              "distanceKm": 8.601,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-283",
+              "fromStationId": "osm-node:8909480940",
+              "toStationId": "osm-node:8909480939",
+              "distanceKm": 6.305,
+              "sliceCount": 2
+            },
+            {
+              "id": "cl-main-line:leg-284",
+              "fromStationId": "osm-node:8909480939",
+              "toStationId": "halt:cl-main-line:km-4722",
+              "distanceKm": 63.823,
+              "sliceCount": 13
+            },
+            {
+              "id": "cl-main-line:leg-285",
+              "fromStationId": "halt:cl-main-line:km-4722",
+              "toStationId": "place:cl-arica",
+              "distanceKm": 63.823,
+              "sliceCount": 13
+            }
+          ],
+          "gridSlices": [
+            {
+              "id": "cl-main-line:grid:slice-001",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.90114, -53.16472],
+                [-70.9087293, -53.119985]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-002",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.9087293, -53.119985],
+                [-70.9163302, -53.0752512]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-003",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.9163302, -53.0752512],
+                [-70.9239292, -53.0305178]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-004",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.9239292, -53.0305178],
+                [-70.93152, -52.9857843]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-005",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.93152, -52.9857843],
+                [-70.939119, -52.9410519]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-006",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.939119, -52.9410519],
+                [-70.9467194, -52.89632]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-007",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.9467194, -52.89632],
+                [-70.9543083, -52.8515879]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-008",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.9543083, -52.8515879],
+                [-70.9619087, -52.8068569]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-009",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.9619087, -52.8068569],
+                [-70.9695088, -52.7621265]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-010",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.9695088, -52.7621265],
+                [-70.9770976, -52.7173958]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-011",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.9770976, -52.7173958],
+                [-70.9846977, -52.6726663]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-012",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.9846977, -52.6726663],
+                [-70.9922975, -52.6279373]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-013",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.9922975, -52.6279373],
+                [-70.9998861, -52.5832081]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-014",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.9998861, -52.5832081],
+                [-71.0074857, -52.53848]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-015",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.0074857, -52.53848],
+                [-71.0150758, -52.4937519]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-016",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.0150758, -52.4937519],
+                [-71.0226755, -52.4490248]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-017",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.0226755, -52.4490248],
+                [-71.0302749, -52.4042982]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-018",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.0302749, -52.4042982],
+                [-71.0378648, -52.3595714]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-019",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.0378648, -52.3595714],
+                [-71.0454642, -52.3148458]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-020",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.0454642, -52.3148458],
+                [-71.0530633, -52.2701207]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-021",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.0530633, -52.2701207],
+                [-71.060653, -52.2253954]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-022",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.060653, -52.2253954],
+                [-71.0682519, -52.1806712]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-023",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.0682519, -52.1806712],
+                [-71.0758414, -52.1359469]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-024",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.0758414, -52.1359469],
+                [-71.0834402, -52.0912236]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-025",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.0834402, -52.0912236],
+                [-71.0910295, -52.0465003]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-026",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.0910295, -52.0465003],
+                [-71.0986284, -52.001778]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-027",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.0986284, -52.001778],
+                [-71.1062269, -51.9570562]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-028",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.1062269, -51.9570562],
+                [-71.1138161, -51.9123344]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-029",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.1138161, -51.9123344],
+                [-71.121416, -51.8676136]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-030",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.121416, -51.8676136],
+                [-71.129005, -51.8228927]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-031",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.129005, -51.8228927],
+                [-71.1366031, -51.7781729]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-032",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.1366031, -51.7781729],
+                [-71.144192, -51.7334529]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-033",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.144192, -51.7334529],
+                [-71.1517915, -51.6887341]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-034",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.1517915, -51.6887341],
+                [-71.1593803, -51.6440151]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-035",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.1593803, -51.6440151],
+                [-71.166978, -51.5992972]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-036",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.166978, -51.5992972],
+                [-71.1745682, -51.5545793]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-037",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.1745682, -51.5545793],
+                [-71.1821663, -51.5098624]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-038",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.1821663, -51.5098624],
+                [-71.1897653, -51.465146]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-039",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.1897653, -51.465146],
+                [-71.1973538, -51.4204294]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-040",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.1973538, -51.4204294],
+                [-71.2049526, -51.3757141]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-041",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.2049526, -51.3757141],
+                [-71.212541, -51.3309985]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-042",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.212541, -51.3309985],
+                [-71.2201397, -51.286284]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-043",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.2201397, -51.286284],
+                [-71.2277289, -51.2415695]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-044",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.2277289, -51.2415695],
+                [-71.235317, -51.1968553]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-045",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.235317, -51.1968553],
+                [-71.2429154, -51.1521424]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-046",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.2429154, -51.1521424],
+                [-71.2505049, -51.1074293]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-047",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.2505049, -51.1074293],
+                [-71.2581016, -51.0627172]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-048",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.2581016, -51.0627172],
+                [-71.265691, -51.0180052]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-049",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.265691, -51.0180052],
+                [-71.2732891, -50.9732941]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-050",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.2732891, -50.9732941],
+                [-71.2808783, -50.928583]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-051",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.2808783, -50.928583],
+                [-71.2884746, -50.8838729]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-052",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.2884746, -50.8838729],
+                [-71.2960637, -50.8391627]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-053",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.2960637, -50.8391627],
+                [-71.3036614, -50.7944537]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-054",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.3036614, -50.7944537],
+                [-71.3112504, -50.7497445]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-055",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.3112504, -50.7497445],
+                [-71.3188479, -50.7050364]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-056",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.3188479, -50.7050364],
+                [-71.3264361, -50.6603282]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-057",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.3264361, -50.6603282],
+                [-71.3340249, -50.6156205]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-058",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.3340249, -50.6156205],
+                [-71.3416221, -50.5709139]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-059",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.3416221, -50.5709139],
+                [-71.3492107, -50.5262071]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-060",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.3492107, -50.5262071],
+                [-71.3568078, -50.4815015]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-061",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.3568078, -50.4815015],
+                [-71.3643956, -50.4367957]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-062",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.3643956, -50.4367957],
+                [-71.3719841, -50.3920904]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-063",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.3719841, -50.3920904],
+                [-71.3795824, -50.3473864]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-064",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.3795824, -50.3473864],
+                [-71.3871707, -50.3026821]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-065",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.3871707, -50.3026821],
+                [-71.3947673, -50.2579789]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-066",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.3947673, -50.2579789],
+                [-71.4023548, -50.2132755]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-067",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.4023548, -50.2132755],
+                [-71.4099443, -50.1685728]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-068",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.4099443, -50.1685728],
+                [-71.4175407, -50.1238711]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-069",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.4175407, -50.1238711],
+                [-71.4251279, -50.0791692]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-070",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.4251279, -50.0791692],
+                [-71.4327173, -50.034468]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-071",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.4327173, -50.034468],
+                [-71.4403133, -49.9897677]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-072",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.4403133, -49.9897677],
+                [-71.4479011, -49.9450673]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-073",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.4479011, -49.9450673],
+                [-71.4554985, -49.9003681]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-074",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.4554985, -49.9003681],
+                [-71.4630853, -49.8556687]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-075",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.4630853, -49.8556687],
+                [-71.4706743, -49.8109699]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-076",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.4706743, -49.8109699],
+                [-71.47827, -49.7662721]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-077",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.47827, -49.7662721],
+                [-71.485858, -49.7215742]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-078",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.485858, -49.7215742],
+                [-71.4934454, -49.6768768]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-079",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.4934454, -49.6768768],
+                [-71.5010424, -49.6321806]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-080",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.5010424, -49.6321806],
+                [-71.5086301, -49.5874842]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-081",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.5086301, -49.5874842],
+                [-71.5162163, -49.5427882]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-082",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.5162163, -49.5427882],
+                [-71.523805, -49.4980928]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-083",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.523805, -49.4980928],
+                [-71.5314014, -49.4533985]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-084",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.5314014, -49.4533985],
+                [-71.5389874, -49.408704]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-085",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.5389874, -49.408704],
+                [-71.5465758, -49.3640101]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-086",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.5465758, -49.3640101],
+                [-71.5541721, -49.3193173]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-087",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.5541721, -49.3193173],
+                [-71.5617594, -49.2746244]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-088",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.5617594, -49.2746244],
+                [-71.5693475, -49.2299319]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-089",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.5693475, -49.2299319],
+                [-71.576942, -49.1852405]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-090",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.576942, -49.1852405],
+                [-71.584529, -49.140549]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-091",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.584529, -49.140549],
+                [-71.592116, -49.095858]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-092",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.592116, -49.095858],
+                [-71.5997039, -49.0511676]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-093",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.5997039, -49.0511676],
+                [-71.6072995, -49.0064782]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-094",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.6072995, -49.0064782],
+                [-71.6148862, -48.9617887]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-095",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.6148862, -48.9617887],
+                [-71.6224729, -48.9170997]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-096",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.6224729, -48.9170997],
+                [-71.6300604, -48.8724112]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-097",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.6300604, -48.8724112],
+                [-71.6376557, -48.8277238]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-098",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.6376557, -48.8277238],
+                [-71.6452423, -48.7830363]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-099",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.6452423, -48.7830363],
+                [-71.6528301, -48.7383493]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-100",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.6528301, -48.7383493],
+                [-71.6604163, -48.6936628]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-101",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.6604163, -48.6936628],
+                [-71.6680035, -48.6489768]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-102",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.6680035, -48.6489768],
+                [-71.6755983, -48.6042918]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-103",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.6755983, -48.6042918],
+                [-71.6831845, -48.5596068]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-104",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.6831845, -48.5596068],
+                [-71.6907718, -48.5149223]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-105",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.6907718, -48.5149223],
+                [-71.6983587, -48.4702382]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-106",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.6983587, -48.4702382],
+                [-71.7059534, -48.4255553]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-107",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.7059534, -48.4255553],
+                [-71.7135405, -48.3808723]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-108",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.7135405, -48.3808723],
+                [-71.7211262, -48.3361897]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-109",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.7211262, -48.3361897],
+                [-71.7287132, -48.2915076]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-110",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.7287132, -48.2915076],
+                [-71.7362986, -48.246826]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-111",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.7362986, -48.246826],
+                [-71.7438852, -48.2021449]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-112",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.7438852, -48.2021449],
+                [-71.7514806, -48.157465]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-113",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.7514806, -48.157465],
+                [-71.7590659, -48.1127849]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-114",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.7590659, -48.1127849],
+                [-71.7666526, -48.0681053]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-115",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.7666526, -48.0681053],
+                [-71.7742391, -48.0234263]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-116",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.7742391, -48.0234263],
+                [-71.7818241, -47.9787476]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-117",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.7818241, -47.9787476],
+                [-71.7894116, -47.9340696]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-118",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.7894116, -47.9340696],
+                [-71.7970052, -47.8893926]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-119",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.7970052, -47.8893926],
+                [-71.8045915, -47.8447155]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-120",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.8045915, -47.8447155],
+                [-71.8121777, -47.8000389]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-121",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.8121777, -47.8000389],
+                [-71.8197636, -47.7553628]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-122",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.8197636, -47.7553628],
+                [-71.8273482, -47.710687]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-123",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.8273482, -47.710687],
+                [-71.8349342, -47.6660119]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-124",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.8349342, -47.6660119],
+                [-71.84252, -47.6213373]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-125",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.84252, -47.6213373],
+                [-71.8501071, -47.5766633]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-126",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.8501071, -47.5766633],
+                [-71.8577012, -47.5319903]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-127",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.8577012, -47.5319903],
+                [-71.8652854, -47.4873171]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-128",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.8652854, -47.4873171],
+                [-71.8728709, -47.4426444]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-129",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.8728709, -47.4426444],
+                [-71.8804564, -47.3979723]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-130",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.8804564, -47.3979723],
+                [-71.8880417, -47.3533006]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-131",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.8880417, -47.3533006],
+                [-71.895627, -47.3086295]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-132",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.895627, -47.3086295],
+                [-71.9032122, -47.2639588]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-133",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.9032122, -47.2639588],
+                [-71.9107974, -47.2192886]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-134",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.9107974, -47.2192886],
+                [-71.9183826, -47.174619]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-135",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.9183826, -47.174619],
+                [-71.925969, -47.1299499]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-136",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.925969, -47.1299499],
+                [-71.9335539, -47.0852812]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-137",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.9335539, -47.0852812],
+                [-71.9411387, -47.040613]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-138",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.9411387, -47.040613],
+                [-71.9487247, -46.9959454]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-139",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.9487247, -46.9959454],
+                [-71.9563179, -46.9512789]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-140",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.9563179, -46.9512789],
+                [-71.9639026, -46.9066122]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-141",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.9639026, -46.9066122],
+                [-71.9714885, -46.8619461]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-142",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.9714885, -46.8619461],
+                [-71.9790729, -46.8172803]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-143",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.9790729, -46.8172803],
+                [-71.9866574, -46.7726151]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-144",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.9866574, -46.7726151],
+                [-71.9942431, -46.7279505]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-145",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-71.9942431, -46.7279505],
+                [-72.0018272, -46.6832863]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-146",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.0018272, -46.6832863],
+                [-72.0094115, -46.6386225]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-147",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.0094115, -46.6386225],
+                [-72.0169968, -46.5939594]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-148",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.0169968, -46.5939594],
+                [-72.0245809, -46.5492966]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-149",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.0245809, -46.5492966],
+                [-72.0321662, -46.5046345]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-150",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.0321662, -46.5046345],
+                [-72.0397501, -46.4599727]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-151",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.0397501, -46.4599727],
+                [-72.0473351, -46.4153116]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-152",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.0473351, -46.4153116],
+                [-72.0549189, -46.3706508]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-153",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.0549189, -46.3706508],
+                [-72.0625038, -46.3259906]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-154",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.0625038, -46.3259906],
+                [-72.0700874, -46.2813309]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-155",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.0700874, -46.2813309],
+                [-72.0776724, -46.2366717]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-156",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.0776724, -46.2366717],
+                [-72.085257, -46.192013]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-157",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.085257, -46.192013],
+                [-72.0928403, -46.1473547]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-158",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.0928403, -46.1473547],
+                [-72.100425, -46.1026971]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-159",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.100425, -46.1026971],
+                [-72.1080097, -46.0580399]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-160",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.1080097, -46.0580399],
+                [-72.1155939, -46.0133832]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-161",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.1155939, -46.0133832],
+                [-72.1231755, -45.9687267]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-162",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.1231755, -45.9687267],
+                [-72.1307515, -45.9240703]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-163",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.1307515, -45.9240703],
+                [-72.1383357, -45.8794151]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-164",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.1383357, -45.8794151],
+                [-72.1459199, -45.8347604]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-165",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.1459199, -45.8347604],
+                [-72.1535041, -45.7901062]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-166",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.1535041, -45.7901062],
+                [-72.1610881, -45.7454525]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-167",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.1610881, -45.7454525],
+                [-72.168672, -45.7007993]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-168",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.168672, -45.7007993],
+                [-72.1762559, -45.6561465]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-169",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.1762559, -45.6561465],
+                [-72.1838397, -45.6114943]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-170",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.1838397, -45.6114943],
+                [-72.1914234, -45.5668426]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-171",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.1914234, -45.5668426],
+                [-72.199007, -45.5221913]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-172",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.199007, -45.5221913],
+                [-72.2065905, -45.4775406]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-173",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.2065905, -45.4775406],
+                [-72.2141739, -45.4328903]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-174",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.2141739, -45.4328903],
+                [-72.2217557, -45.3882404]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-175",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.2217557, -45.3882404],
+                [-72.2293307, -45.3435905]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-176",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.2293307, -45.3435905],
+                [-72.2369139, -45.2989417]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-177",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.2369139, -45.2989417],
+                [-72.2444973, -45.2542934]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-178",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.2444973, -45.2542934],
+                [-72.2520817, -45.2096458]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-179",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.2520817, -45.2096458],
+                [-72.2596646, -45.1649985]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-180",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.2596646, -45.1649985],
+                [-72.2672475, -45.1203517]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-181",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.2672475, -45.1203517],
+                [-72.2748305, -45.0757054]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-182",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.2748305, -45.0757054],
+                [-72.282413, -45.0310596]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-183",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.282413, -45.0310596],
+                [-72.2899873, -44.9864136]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-184",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.2899873, -44.9864136],
+                [-72.2975701, -44.9417688]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-185",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.2975701, -44.9417688],
+                [-72.305154, -44.8971246]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-186",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.305154, -44.8971246],
+                [-72.3127366, -44.8524808]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-187",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.3127366, -44.8524808],
+                [-72.3203203, -44.8078376]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-188",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.3203203, -44.8078376],
+                [-72.3279011, -44.7631946]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-189",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.3279011, -44.7631946],
+                [-72.3354763, -44.7185517]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-190",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.3354763, -44.7185517],
+                [-72.3430586, -44.6739099]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-191",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.3430586, -44.6739099],
+                [-72.350642, -44.6292686]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-192",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.350642, -44.6292686],
+                [-72.3582241, -44.5846278]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-193",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.3582241, -44.5846278],
+                [-72.3658059, -44.5399874]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-194",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.3658059, -44.5399874],
+                [-72.3733807, -44.495347]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-195",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.3733807, -44.495347],
+                [-72.3809626, -44.4507076]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-196",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.3809626, -44.4507076],
+                [-72.3885458, -44.4060689]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-197",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.3885458, -44.4060689],
+                [-72.3961286, -44.3614306]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-198",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.3961286, -44.3614306],
+                [-72.4037086, -44.3167926]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-199",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.4037086, -44.3167926],
+                [-72.4112833, -44.2721546]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-200",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.4112833, -44.2721546],
+                [-72.4188662, -44.2275179]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-201",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.4188662, -44.2275179],
+                [-72.4264489, -44.1828816]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-202",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.4264489, -44.1828816],
+                [-72.4340313, -44.1382458]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-203",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.4340313, -44.1382458],
+                [-72.4416108, -44.0936103]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-204",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.4416108, -44.0936103],
+                [-72.4491852, -44.0489748]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-205",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.4491852, -44.0489748],
+                [-72.4567676, -44.0043405]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-206",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.4567676, -44.0043405],
+                [-72.4643499, -43.9597067]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-207",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.4643499, -43.9597067],
+                [-72.4719305, -43.9150732]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-208",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.4719305, -43.9150732],
+                [-72.4795045, -43.8704397]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-209",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.4795045, -43.8704397],
+                [-72.4870866, -43.8258074]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-210",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.4870866, -43.8258074],
+                [-72.4946686, -43.7811756]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-211",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.4946686, -43.7811756],
+                [-72.5022489, -43.7365441]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-212",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.5022489, -43.7365441],
+                [-72.5098225, -43.6919126]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-213",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.5098225, -43.6919126],
+                [-72.5174046, -43.6472823]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-214",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.5174046, -43.6472823],
+                [-72.5249859, -43.6026524]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-215",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.5249859, -43.6026524],
+                [-72.5325594, -43.5580223]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-216",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.5325594, -43.5580223],
+                [-72.5401409, -43.5133934]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-217",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.5401409, -43.5133934],
+                [-72.5477223, -43.4687651]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-218",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.5477223, -43.4687651],
+                [-72.5553022, -43.4241371]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-219",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.5553022, -43.4241371],
+                [-72.5628767, -43.3795091]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-220",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.5628767, -43.3795091],
+                [-72.5704579, -43.3348822]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-221",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.5704579, -43.3348822],
+                [-72.5780373, -43.2902557]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-222",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.5780373, -43.2902557],
+                [-72.5856104, -43.2456291]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-223",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.5856104, -43.2456291],
+                [-72.5931927, -43.2010038]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-224",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.5931927, -43.2010038],
+                [-72.6007721, -43.1563788]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-225",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.6007721, -43.1563788],
+                [-72.6083461, -43.1117537]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-226",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.6083461, -43.1117537],
+                [-72.6159271, -43.0671298]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-227",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.6159271, -43.0671298],
+                [-72.6235073, -43.0225064]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-228",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.6235073, -43.0225064],
+                [-72.63108, -42.9778827]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-229",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.63108, -42.9778827],
+                [-72.6386618, -42.9332604]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-230",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.6386618, -42.9332604],
+                [-72.6462407, -42.8886383]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-231",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.6462407, -42.8886383],
+                [-72.6538142, -42.8440162]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-232",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.6538142, -42.8440162],
+                [-72.6613946, -42.7993953]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-233",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.6613946, -42.7993953],
+                [-72.6689744, -42.7547748]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-234",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.6689744, -42.7547748],
+                [-72.6765466, -42.7101541]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-235",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.6765466, -42.7101541],
+                [-72.6841281, -42.6655347]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-236",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.6841281, -42.6655347],
+                [-72.6917079, -42.6209157]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-237",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.6917079, -42.6209157],
+                [-72.6992809, -42.5762966]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-238",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.6992809, -42.5762966],
+                [-72.7068591, -42.5316784]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-239",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.7068591, -42.5316784],
+                [-72.7144323, -42.4870603]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-240",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.7144323, -42.4870603],
+                [-72.7220135, -42.4424434]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-241",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.7220135, -42.4424434],
+                [-72.7295925, -42.3978269]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-242",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.7295925, -42.3978269],
+                [-72.737164, -42.3532101]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-243",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.737164, -42.3532101],
+                [-72.7447432, -42.3085945]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-244",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.7447432, -42.3085945],
+                [-72.7523159, -42.2639789]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-245",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.7523159, -42.2639789],
+                [-72.7598967, -42.2193644]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-246",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.7598967, -42.2193644],
+                [-72.7674756, -42.1747504]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-247",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.7674756, -42.1747504],
+                [-72.7750481, -42.1301362]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-248",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.7750481, -42.1301362],
+                [-72.7826268, -42.085523]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-249",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.7826268, -42.085523],
+                [-72.7901992, -42.0409098]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-250",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.7901992, -42.0409098],
+                [-72.7977778, -41.9962977]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-251",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.7977778, -41.9962977],
+                [-72.8053499, -41.9516855]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-252",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.8053499, -41.9516855],
+                [-72.8129301, -41.9070745]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-253",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.8129301, -41.9070745],
+                [-72.8205084, -41.8624638]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-254",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.8205084, -41.8624638],
+                [-72.8280806, -41.8178531]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-255",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.8280806, -41.8178531],
+                [-72.8356602, -41.7732435]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-256",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.8356602, -41.7732435],
+                [-72.8432319, -41.7286338]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-257",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.8432319, -41.7286338],
+                [-72.8508099, -41.6840251]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-258",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.8508099, -41.6840251],
+                [-72.8583815, -41.6394163]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-259",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.8583815, -41.6394163],
+                [-72.8659596, -41.5948086]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-260",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.8659596, -41.5948086],
+                [-72.8735324, -41.5502009]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-261",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-72.8735324, -41.5502009],
+                [-72.8811086, -41.505594]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-262",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.8811086, -41.505594],
+                [-72.9148489, -41.4785561]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-263",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.9148489, -41.4785561],
+                [-72.8837749, -41.4972174]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-264",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.8837749, -41.4972174],
+                [-72.9020977, -41.465162]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "razed"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-265",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.9020977, -41.465162],
+                [-72.9089533, -41.43075]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "current",
+                "disused",
+                "razed"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-266",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.9089533, -41.43075],
+                [-72.9204397, -41.3869276]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "current",
+                "disused",
+                "razed"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-267",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.9204397, -41.3869276],
+                [-72.9535606, -41.3507479]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-268",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.9535606, -41.3507479],
+                [-72.9893555, -41.322945]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-269",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.9893555, -41.322945],
+                [-72.9824112, -41.2847866]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-270",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.9824112, -41.2847866],
+                [-73.009735, -41.2456411]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-271",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.009735, -41.2456411],
+                [-73.0448089, -41.2187808]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-272",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.0448089, -41.2187808],
+                [-73.0711628, -41.1823172]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-273",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.0711628, -41.1823172],
+                [-73.0632995, -41.137743]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-274",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.0632995, -41.137743],
+                [-73.0746194, -41.0949724]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-275",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.0746194, -41.0949724],
+                [-73.0978842, -41.0535678]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-276",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.0978842, -41.0535678],
+                [-73.12163, -41.0123554]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-277",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.12163, -41.0123554],
+                [-73.150853, -40.9746049]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-278",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.150853, -40.9746049],
+                [-73.1612542, -40.9311844]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-279",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.1612542, -40.9311844],
+                [-73.1662018, -40.8863827]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-280",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.1662018, -40.8863827],
+                [-73.1742024, -40.8421309]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-281",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.1742024, -40.8421309],
+                [-73.2083912, -40.8077454]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-282",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.2083912, -40.8077454],
+                [-73.2165657, -40.7661724]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-283",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.2165657, -40.7661724],
+                [-73.2116995, -40.7259644]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-284",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.2116995, -40.7259644],
+                [-73.2090923, -40.6860749]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-285",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.2090923, -40.6860749],
+                [-73.2001551, -40.6448753]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-286",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.2001551, -40.6448753],
+                [-73.167022, -40.6090057]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-287",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.167022, -40.6090057],
+                [-73.143438, -40.5735384]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-288",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.143438, -40.5735384],
+                [-73.1349538, -40.5380068]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-289",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.1349538, -40.5380068],
+                [-73.1270662, -40.5072049]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-290",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.1270662, -40.5072049],
+                [-73.1307761, -40.4641491]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-291",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.1307761, -40.4641491],
+                [-73.1337717, -40.4230807]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-292",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.1337717, -40.4230807],
+                [-73.1466324, -40.3811042]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-293",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.1466324, -40.3811042],
+                [-73.1587001, -40.360852]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-294",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.1587001, -40.360852],
+                [-73.1155713, -40.3401305]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-295",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.1155713, -40.3401305],
+                [-73.0904743, -40.3160531]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-296",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.0904743, -40.3160531],
+                [-73.0607301, -40.2784332]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-297",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.0607301, -40.2784332],
+                [-73.0225588, -40.2561379]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-298",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-73.0225588, -40.2561379],
+                [-72.9826716, -40.2241539]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-299",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.9826716, -40.2241539],
+                [-72.9482039, -40.1967363]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-300",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.9482039, -40.1967363],
+                [-72.9131451, -40.163336]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-301",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.9131451, -40.163336],
+                [-72.8747127, -40.1297409]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-302",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.8747127, -40.1297409],
+                [-72.8770568, -40.0848447]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-303",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.8770568, -40.0848447],
+                [-72.8817147, -40.0400497]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-304",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.8817147, -40.0400497],
+                [-72.8492645, -40.0030426]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-305",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.8492645, -40.0030426],
+                [-72.8064947, -39.9761167]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-306",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.8064947, -39.9761167],
+                [-72.8131581, -39.9323598]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-307",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.8131581, -39.9323598],
+                [-72.8102076, -39.8902181]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-308",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.8102076, -39.8902181],
+                [-72.830593, -39.8513307]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-309",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.830593, -39.8513307],
+                [-72.8686643, -39.8182745]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-310",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.8686643, -39.8182745],
+                [-72.9258982, -39.8200588]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-311",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.9258982, -39.8200588],
+                [-72.951052, -39.7970036]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-312",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.951052, -39.7970036],
+                [-72.9389767, -39.7570581]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-313",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.9389767, -39.7570581],
+                [-72.94304, -39.7133426]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-314",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.94304, -39.7133426],
+                [-72.9439828, -39.6700588]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-315",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.9439828, -39.6700588],
+                [-72.9530401, -39.628548]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-316",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.9530401, -39.628548],
+                [-72.9509977, -39.5844332]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-317",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.9509977, -39.5844332],
+                [-72.9071189, -39.5590961]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-318",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.9071189, -39.5590961],
+                [-72.8549847, -39.5400938]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-319",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.8549847, -39.5400938],
+                [-72.8126254, -39.511263]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-320",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.8126254, -39.511263],
+                [-72.8019589, -39.4684219]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-321",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.8019589, -39.4684219],
+                [-72.7573424, -39.4407254]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-322",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.7573424, -39.4407254],
+                [-72.7122258, -39.4137899]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-323",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.7122258, -39.4137899],
+                [-72.6676222, -39.3886981]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-324",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.6676222, -39.3886981],
+                [-72.6244719, -39.3606584]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-325",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.6244719, -39.3606584],
+                [-72.590691, -39.3269122]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-326",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.590691, -39.3269122],
+                [-72.6205072, -39.2917478]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-327",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.6205072, -39.2917478],
+                [-72.6625971, -39.2642754]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-328",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.6625971, -39.2642754],
+                [-72.6772049, -39.2222302]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-329",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.6772049, -39.2222302],
+                [-72.6623507, -39.1788133]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-330",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.6623507, -39.1788133],
+                [-72.672994, -39.1378585]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-331",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.672994, -39.1378585],
+                [-72.6731949, -39.0964149]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-332",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.6731949, -39.0964149],
+                [-72.6653259, -39.0524874]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-333",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.6653259, -39.0524874],
+                [-72.6547597, -39.0082769]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-334",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.6547597, -39.0082769],
+                [-72.6315604, -38.9678467]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-335",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.6315604, -38.9678467],
+                [-72.6247005, -38.9231983]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-336",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.6247005, -38.9231983],
+                [-72.6178302, -38.8785513]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-337",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.6178302, -38.8785513],
+                [-72.6221738, -38.8347588]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-338",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.6221738, -38.8347588],
+                [-72.6168963, -38.7906764]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-339",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.6168963, -38.7906764],
+                [-72.5911145, -38.7544005]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-340",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.5911145, -38.7544005],
+                [-72.5578692, -38.7200004]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-341",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.5578692, -38.7200004],
+                [-72.5169575, -38.6900762]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-342",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.5169575, -38.6900762],
+                [-72.4766161, -38.6628847]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-343",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.4766161, -38.6628847],
+                [-72.4465303, -38.6247636]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-344",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.4465303, -38.6247636],
+                [-72.4465348, -38.5812093]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-345",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.4465348, -38.5812093],
+                [-72.4389142, -38.538149]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-346",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.4389142, -38.538149],
+                [-72.4122535, -38.4984699]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-347",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.4122535, -38.4984699],
+                [-72.3848023, -38.4633297]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-348",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.3848023, -38.4633297],
+                [-72.3761764, -38.4216644]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-349",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.3761764, -38.4216644],
+                [-72.3807868, -38.382324]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-350",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.3807868, -38.382324],
+                [-72.3757627, -38.3395304]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-351",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.3757627, -38.3395304],
+                [-72.3544176, -38.2987445]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-352",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.3544176, -38.2987445],
+                [-72.3472198, -38.2544093]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-353",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.3472198, -38.2544093],
+                [-72.3170974, -38.2191715]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-354",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.3170974, -38.2191715],
+                [-72.3094216, -38.174719]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-355",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.3094216, -38.174719],
+                [-72.3168473, -38.1319409]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-356",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.3168473, -38.1319409],
+                [-72.3427968, -38.0918774]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-357",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.3427968, -38.0918774],
+                [-72.3710651, -38.0551835]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-358",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.3710651, -38.0551835],
+                [-72.4123902, -38.0278592]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-359",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.4123902, -38.0278592],
+                [-72.4374926, -37.9895003]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-360",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.4374926, -37.9895003],
+                [-72.4488348, -37.9488393]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-361",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.4488348, -37.9488393],
+                [-72.4539166, -37.9043248]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-362",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.4539166, -37.9043248],
+                [-72.4544023, -37.8597478]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-363",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.4544023, -37.8597478],
+                [-72.465464, -37.817215]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-364",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.465464, -37.817215],
+                [-72.484016, -37.7763023]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-365",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.484016, -37.7763023],
+                [-72.511226, -37.7521909]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-366",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.511226, -37.7521909],
+                [-72.5253021, -37.7110253]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-367",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.5253021, -37.7110253],
+                [-72.5676929, -37.6824959]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-368",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.5676929, -37.6824959],
+                [-72.5911287, -37.6462692]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-369",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.5911287, -37.6462692],
+                [-72.5903491, -37.6013107]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-370",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.5903491, -37.6013107],
+                [-72.5962734, -37.5567279]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-371",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.5962734, -37.5567279],
+                [-72.5826944, -37.5174948]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-372",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.5826944, -37.5174948],
+                [-72.5833128, -37.4728274]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-373",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.5833128, -37.4728274],
+                [-72.5990802, -37.4303095]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-374",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.5990802, -37.4303095],
+                [-72.6241034, -37.3900227]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-375",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.6241034, -37.3900227],
+                [-72.6592101, -37.3650277]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-376",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.6592101, -37.3650277],
+                [-72.7037797, -37.3441884]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-377",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.7037797, -37.3441884],
+                [-72.7095513, -37.3000771]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-378",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.7095513, -37.3000771],
+                [-72.715279, -37.2602387]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-379",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.715279, -37.2602387],
+                [-72.6705042, -37.2437593]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-380",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.6705042, -37.2437593],
+                [-72.6343764, -37.2113118]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-381",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.6343764, -37.2113118],
+                [-72.5933981, -37.1818752]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-382",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.5933981, -37.1818752],
+                [-72.5530008, -37.1517089]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-383",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.5530008, -37.1517089],
+                [-72.5024389, -37.1317728]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-384",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.5024389, -37.1317728],
+                [-72.45953, -37.1043654]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-385",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.45953, -37.1043654],
+                [-72.4259593, -37.0682439]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-386",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.4259593, -37.0682439],
+                [-72.3993012, -37.0298537]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-387",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.3993012, -37.0298537],
+                [-72.3779363, -36.9890475]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-388",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.3779363, -36.9890475],
+                [-72.3536951, -36.9487776]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-389",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.3536951, -36.9487776],
+                [-72.3486848, -36.9052195]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-390",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.3486848, -36.9052195],
+                [-72.3322352, -36.8625107]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-391",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.3322352, -36.8625107],
+                [-72.3289182, -36.8183399]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-392",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.3289182, -36.8183399],
+                [-72.3125229, -36.7766022]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-393",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.3125229, -36.7766022],
+                [-72.2879598, -36.7363283]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-394",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.2879598, -36.7363283],
+                [-72.2854311, -36.6915735]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-395",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.2854311, -36.6915735],
+                [-72.2580448, -36.6573771]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-396",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.2580448, -36.6573771],
+                [-72.2113609, -36.634]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-397",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.2113609, -36.634],
+                [-72.1599776, -36.6168517]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-398",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.1599776, -36.6168517],
+                [-72.1112844, -36.6003237]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-399",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.1112844, -36.6003237],
+                [-72.0981994, -36.5566128]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-400",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.0981994, -36.5566128],
+                [-72.0650569, -36.5216443]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-401",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.0650569, -36.5216443],
+                [-72.0273841, -36.4884033]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-402",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-72.0273841, -36.4884033],
+                [-71.9897621, -36.4551366]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-403",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.9897621, -36.4551366],
+                [-71.9635853, -36.4167959]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-404",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.9635853, -36.4167959],
+                [-71.943344, -36.3749461]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-405",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.943344, -36.3749461],
+                [-71.9218642, -36.3334409]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-406",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.9218642, -36.3334409],
+                [-71.9004112, -36.2919305]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-407",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.9004112, -36.2919305],
+                [-71.878933, -36.2504324]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-408",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.878933, -36.2504324],
+                [-71.8574974, -36.2089239]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-409",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.8574974, -36.2089239],
+                [-71.8419386, -36.1658716]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-410",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.8419386, -36.1658716],
+                [-71.8254852, -36.1233555]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-411",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.8254852, -36.1233555],
+                [-71.7935549, -36.0865259]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-412",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.7935549, -36.0865259],
+                [-71.7616269, -36.0497034]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-413",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.7616269, -36.0497034],
+                [-71.7308732, -36.0123141]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-414",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.7308732, -36.0123141],
+                [-71.6982132, -35.9764396]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-415",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.6982132, -35.9764396],
+                [-71.6663952, -35.9395801]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-416",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.6663952, -35.9395801],
+                [-71.6346612, -35.9026815]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-417",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.6346612, -35.9026815],
+                [-71.6026003, -35.8659987]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-418",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.6026003, -35.8659987],
+                [-71.6000314, -35.8273574]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-419",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.6000314, -35.8273574],
+                [-71.6440095, -35.8001019]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-420",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.6440095, -35.8001019],
+                [-71.6660261, -35.7616595]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-421",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.6660261, -35.7616595],
+                [-71.6755928, -35.717369]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-422",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.6755928, -35.717369],
+                [-71.6851177, -35.6730734]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-423",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.6851177, -35.6730734],
+                [-71.6945727, -35.6287686]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-424",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.6945727, -35.6287686],
+                [-71.7022174, -35.5843499]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "razed"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-425",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.7022174, -35.5843499],
+                [-71.6936623, -35.540983]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "razed"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-426",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.6936623, -35.540983],
+                [-71.6734013, -35.49915]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-427",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.6734013, -35.49915],
+                [-71.6532745, -35.4572789]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-428",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.6532745, -35.4572789],
+                [-71.6413427, -35.4147795]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-429",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.6413427, -35.4147795],
+                [-71.6030148, -35.3827487]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-430",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.6030148, -35.3827487],
+                [-71.5689412, -35.3476151]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-431",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.5689412, -35.3476151],
+                [-71.5297359, -35.3160087]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-432",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.5297359, -35.3160087],
+                [-71.4984172, -35.2792875]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-433",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.4984172, -35.2792875],
+                [-71.4608792, -35.2481029]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-434",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.4608792, -35.2481029],
+                [-71.4193991, -35.2192842]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-435",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.4193991, -35.2192842],
+                [-71.3875881, -35.1828989]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-436",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.3875881, -35.1828989],
+                [-71.3656634, -35.1428453]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-437",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.3656634, -35.1428453],
+                [-71.3200517, -35.1186363]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-438",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.3200517, -35.1186363],
+                [-71.2884996, -35.0824441]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-439",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2884996, -35.0824441],
+                [-71.2604753, -35.0437689]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-440",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2604753, -35.0437689],
+                [-71.2455201, -35.0018171]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-441",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2455201, -35.0018171],
+                [-71.230841, -34.9618141]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-442",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.230841, -34.9618141],
+                [-71.193291, -34.9290333]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-443",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.193291, -34.9290333],
+                [-71.1767271, -34.8913902]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-444",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1767271, -34.8913902],
+                [-71.1446789, -34.8549123]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-445",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1446789, -34.8549123],
+                [-71.1240219, -34.8135164]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-446",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1240219, -34.8135164],
+                [-71.0923188, -34.7774993]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-447",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0923188, -34.7774993],
+                [-71.0625024, -34.7397916]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-448",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0625024, -34.7397916],
+                [-71.0332957, -34.7017758]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-449",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0332957, -34.7017758],
+                [-71.0063117, -34.662666]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-450",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0063117, -34.662666],
+                [-70.9915756, -34.6203298]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-451",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9915756, -34.6203298],
+                [-70.9725286, -34.5802716]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-452",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9725286, -34.5802716],
+                [-70.9452195, -34.5413547]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-453",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9452195, -34.5413547],
+                [-70.9173857, -34.5027269]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-454",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9173857, -34.5027269],
+                [-70.8920129, -34.4644634]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-455",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8920129, -34.4644634],
+                [-70.8787446, -34.4216711]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-456",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8787446, -34.4216711],
+                [-70.8547053, -34.3816389]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-457",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8547053, -34.3816389],
+                [-70.8360326, -34.3393975]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-458",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8360326, -34.3393975],
+                [-70.8198175, -34.2965236]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-459",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8198175, -34.2965236],
+                [-70.7988203, -34.2550836]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-460",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7988203, -34.2550836],
+                [-70.7757536, -34.2144838]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-461",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7757536, -34.2144838],
+                [-70.7540214, -34.1763396]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-462",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7540214, -34.1763396],
+                [-70.7428384, -34.132371]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-463",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7428384, -34.132371],
+                [-70.731108, -34.0884664]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-464",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.731108, -34.0884664],
+                [-70.7207378, -34.0443736]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-465",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7207378, -34.0443736],
+                [-70.7163658, -33.9995569]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-466",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7163658, -33.9995569],
+                [-70.71519, -33.9549376]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-467",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.71519, -33.9549376],
+                [-70.7290804, -33.9132846]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-468",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7290804, -33.9132846],
+                [-70.7460623, -33.8737637]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-469",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7460623, -33.8737637],
+                [-70.7453623, -33.8288589]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-470",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7453623, -33.8288589],
+                [-70.7389913, -33.7842057]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-471",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7389913, -33.7842057],
+                [-70.7299595, -33.7398724]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-472",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7299595, -33.7398724],
+                [-70.7208418, -33.6955506]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-473",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7208418, -33.6955506],
+                [-70.7138065, -33.6531857]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-474",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7138065, -33.6531857],
+                [-70.6968204, -33.6106328]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-475",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.6968204, -33.6106328],
+                [-70.6967531, -33.5658904]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "current",
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-476",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.6967531, -33.5658904],
+                [-70.6612435, -33.5791808]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "construction",
+                "current",
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-477",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.6612435, -33.5791808],
+                [-70.6272931, -33.5997763]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "construction",
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-478",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.6272931, -33.5997763],
+                [-70.6316354, -33.5549888]
+              ],
+              "bridge": false,
+              "tunnel": true,
+              "service": false,
+              "railwayStatuses": [
+                "construction"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-479",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.6316354, -33.5549888],
+                [-70.6378955, -33.5103752]
+              ],
+              "bridge": false,
+              "tunnel": true,
+              "service": false,
+              "railwayStatuses": [
+                "construction"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-480",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.6378955, -33.5103752],
+                [-70.6424083, -33.4655955]
+              ],
+              "bridge": false,
+              "tunnel": true,
+              "service": false,
+              "railwayStatuses": [
+                "construction",
+                "proposed"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-481",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.6424083, -33.4655955],
+                [-70.6482141, -33.4332517]
+              ],
+              "bridge": false,
+              "tunnel": true,
+              "service": false,
+              "railwayStatuses": [
+                "construction",
+                "proposed"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-482",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.6482141, -33.4332517],
+                [-70.647237, -33.4368478]
+              ],
+              "bridge": false,
+              "tunnel": true,
+              "service": false,
+              "railwayStatuses": [
+                "construction",
+                "proposed"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-483",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.647237, -33.4368478],
+                [-70.642816, -33.4618519]
+              ],
+              "bridge": false,
+              "tunnel": true,
+              "service": false,
+              "railwayStatuses": [
+                "construction",
+                "proposed"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-484",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.642816, -33.4618519],
+                [-70.6385977, -33.5066653]
+              ],
+              "bridge": false,
+              "tunnel": true,
+              "service": false,
+              "railwayStatuses": [
+                "construction"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-485",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.6385977, -33.5066653],
+                [-70.6324376, -33.5512906]
+              ],
+              "bridge": false,
+              "tunnel": true,
+              "service": false,
+              "railwayStatuses": [
+                "construction"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-486",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.6324376, -33.5512906],
+                [-70.6275338, -33.5960181]
+              ],
+              "bridge": false,
+              "tunnel": true,
+              "service": false,
+              "railwayStatuses": [
+                "construction",
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-487",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.6275338, -33.5960181],
+                [-70.6577301, -33.5815455]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "construction",
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-488",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.6577301, -33.5815455],
+                [-70.695822, -33.562207]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "current",
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-489",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.695822, -33.562207],
+                [-70.6872469, -33.5208132]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "current",
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-490",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.6872469, -33.5208132],
+                [-70.6806873, -33.4762533]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-491",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.6806873, -33.4762533],
+                [-70.6814756, -33.4316002]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-492",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.6814756, -33.4316002],
+                [-70.6941135, -33.3884409]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-493",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.6941135, -33.3884409],
+                [-70.7184644, -33.3491908]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-494",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7184644, -33.3491908],
+                [-70.7502666, -33.3129152]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-495",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7502666, -33.3129152],
+                [-70.7820473, -33.2766345]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-496",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7820473, -33.2766345],
+                [-70.8138086, -33.24035]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-497",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8138086, -33.24035],
+                [-70.8466251, -33.2059035]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-498",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8466251, -33.2059035],
+                [-70.8802922, -33.176602]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-499",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8802922, -33.176602],
+                [-70.9147448, -33.1429487]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-500",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9147448, -33.1429487],
+                [-70.9293643, -33.1000816]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-501",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9293643, -33.1000816],
+                [-70.9315448, -33.0555763]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-502",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9315448, -33.0555763],
+                [-70.913896, -33.020778]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-503",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.913896, -33.020778],
+                [-70.8756545, -32.9969228]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-504",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8756545, -32.9969228],
+                [-70.8387875, -32.967832]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-505",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8387875, -32.967832],
+                [-70.8131477, -32.930692]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-506",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8131477, -32.930692],
+                [-70.8264705, -32.8908679]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-507",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8264705, -32.8908679],
+                [-70.8567825, -32.8564374]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-508",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8567825, -32.8564374],
+                [-70.9005817, -32.845549]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-509",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9005817, -32.845549],
+                [-70.9497356, -32.8435544]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-510",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9497356, -32.8435544],
+                [-71.0031709, -32.8410228]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-511",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0031709, -32.8410228],
+                [-71.0539036, -32.8385702]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-512",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0539036, -32.8385702],
+                [-71.1064544, -32.8470915]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-513",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1064544, -32.8470915],
+                [-71.1550319, -32.8330855]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-514",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1550319, -32.8330855],
+                [-71.18092, -32.7955406]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-515",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.18092, -32.7955406],
+                [-71.1935246, -32.7747855]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-516",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1935246, -32.7747855],
+                [-71.2074266, -32.7321233]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-517",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2074266, -32.7321233],
+                [-71.2138199, -32.6919626]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-518",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2138199, -32.6919626],
+                [-71.2301604, -32.6539352]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-519",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2301604, -32.6539352],
+                [-71.2734554, -32.6391262]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-520",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2734554, -32.6391262],
+                [-71.2674747, -32.617243]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-521",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2674747, -32.617243],
+                [-71.2740974, -32.5968483]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-522",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2740974, -32.5968483],
+                [-71.2770849, -32.5612297]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-523",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2770849, -32.5612297],
+                [-71.2655231, -32.5174206]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-524",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2655231, -32.5174206],
+                [-71.2573873, -32.4771345]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-525",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2573873, -32.4771345],
+                [-71.2816411, -32.4492308]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-526",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2816411, -32.4492308],
+                [-71.3079592, -32.4353035]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-527",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.3079592, -32.4353035],
+                [-71.3292098, -32.4087218]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-528",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.3292098, -32.4087218],
+                [-71.3707341, -32.3843644]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-529",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.3707341, -32.3843644],
+                [-71.4045327, -32.3705685]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-530",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.4045327, -32.3705685],
+                [-71.4401951, -32.3484296]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-531",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.4401951, -32.3484296],
+                [-71.4644714, -32.310034]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-532",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.4644714, -32.310034],
+                [-71.4629835, -32.2699426]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-533",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.4629835, -32.2699426],
+                [-71.4847583, -32.2306419]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused",
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-534",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.4847583, -32.2306419],
+                [-71.5158749, -32.2100504]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused",
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-535",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.5158749, -32.2100504],
+                [-71.5209494, -32.1692096]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-536",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.5209494, -32.1692096],
+                [-71.504051, -32.1305301]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-537",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.504051, -32.1305301],
+                [-71.5060778, -32.0877237]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-538",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.5060778, -32.0877237],
+                [-71.5075039, -32.0486931]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-539",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.5075039, -32.0486931],
+                [-71.5074655, -32.0056152]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-540",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.5074655, -32.0056152],
+                [-71.487301, -31.9674721]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-541",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.487301, -31.9674721],
+                [-71.5105455, -31.9338634]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-542",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.5105455, -31.9338634],
+                [-71.4916155, -31.8977615]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-543",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.4916155, -31.8977615],
+                [-71.4660583, -31.8697806]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-544",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.4660583, -31.8697806],
+                [-71.4167588, -31.8646636]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-545",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.4167588, -31.8646636],
+                [-71.3777778, -31.8511334]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-546",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.3777778, -31.8511334],
+                [-71.3503001, -31.8186907]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-547",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.3503001, -31.8186907],
+                [-71.3299449, -31.7881076]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-548",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.3299449, -31.7881076],
+                [-71.3212591, -31.7784337]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-549",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.3212591, -31.7784337],
+                [-71.2930995, -31.7579875]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-550",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2930995, -31.7579875],
+                [-71.2672777, -31.7586817]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-551",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2672777, -31.7586817],
+                [-71.2467829, -31.7324108]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-552",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2467829, -31.7324108],
+                [-71.2245409, -31.7332824]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-553",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2245409, -31.7332824],
+                [-71.2283083, -31.7114056]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-554",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2283083, -31.7114056],
+                [-71.2588089, -31.6835533]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-555",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2588089, -31.6835533],
+                [-71.2228885, -31.6571999]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-556",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2228885, -31.6571999],
+                [-71.1749024, -31.6392924]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-557",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1749024, -31.6392924],
+                [-71.1447102, -31.6085493]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-558",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1447102, -31.6085493],
+                [-71.1110187, -31.5765468]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-559",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1110187, -31.5765468],
+                [-71.0990895, -31.5347781]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-560",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0990895, -31.5347781],
+                [-71.095787, -31.491268]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-561",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.095787, -31.491268],
+                [-71.0573662, -31.4628618]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-562",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0573662, -31.4628618],
+                [-71.020156, -31.4481508]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-563",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.020156, -31.4481508],
+                [-71.0103176, -31.411539]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-564",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0103176, -31.411539],
+                [-71.0068878, -31.3817681]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-565",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0068878, -31.3817681],
+                [-71.024788, -31.3555278]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-566",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.024788, -31.3555278],
+                [-71.0308937, -31.3302294]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-567",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0308937, -31.3302294],
+                [-71.0585476, -31.3072635]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-568",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0585476, -31.3072635],
+                [-71.0638743, -31.2681276]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-569",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0638743, -31.2681276],
+                [-71.0421902, -31.2300072]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-570",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0421902, -31.2300072],
+                [-71.0284652, -31.2012901]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-571",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0284652, -31.2012901],
+                [-71.014552, -31.1716295]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-572",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.014552, -31.1716295],
+                [-71.0309725, -31.1324695]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-573",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0309725, -31.1324695],
+                [-71.0436634, -31.0921594]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-574",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0436634, -31.0921594],
+                [-71.0495976, -31.06296]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-575",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0495976, -31.06296],
+                [-71.0413343, -31.0356965]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-576",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0413343, -31.0356965],
+                [-71.0682455, -31.0067489]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-577",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0682455, -31.0067489],
+                [-71.0693115, -30.9689879]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-578",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0693115, -30.9689879],
+                [-71.0476408, -30.9364065]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-579",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0476408, -30.9364065],
+                [-71.0212551, -30.9024751]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-580",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0212551, -30.9024751],
+                [-70.996921, -30.8759864]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-581",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.996921, -30.8759864],
+                [-70.9878539, -30.8448796]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-582",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9878539, -30.8448796],
+                [-70.9720031, -30.806462]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-583",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9720031, -30.806462],
+                [-70.94599, -30.7714183]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-584",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.94599, -30.7714183],
+                [-70.9602899, -30.736077]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-585",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9602899, -30.736077],
+                [-70.9520905, -30.7001783]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-586",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9520905, -30.7001783],
+                [-70.9935165, -30.6979575]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-587",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9935165, -30.6979575],
+                [-71.0337916, -30.6935305]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-588",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0337916, -30.6935305],
+                [-71.0740421, -30.6720397]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-589",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0740421, -30.6720397],
+                [-71.1087015, -30.6432013]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-590",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1087015, -30.6432013],
+                [-71.1341756, -30.605165]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-591",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1341756, -30.605165],
+                [-71.1685216, -30.5808812]
+              ],
+              "bridge": true,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-592",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1685216, -30.5808812],
+                [-71.1555389, -30.5387281]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-593",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1555389, -30.5387281],
+                [-71.1492099, -30.5095443]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-594",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1492099, -30.5095443],
+                [-71.1618418, -30.4689378]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-595",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1618418, -30.4689378],
+                [-71.1823411, -30.4308951]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-596",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1823411, -30.4308951],
+                [-71.2060732, -30.3954286]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-597",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2060732, -30.3954286],
+                [-71.2386414, -30.3650879]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-598",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2386414, -30.3650879],
+                [-71.2347121, -30.3395736]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-599",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2347121, -30.3395736],
+                [-71.2461599, -30.3059389]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-600",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2461599, -30.3059389],
+                [-71.2509336, -30.2823384]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-601",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2509336, -30.2823384],
+                [-71.2545153, -30.2520809]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-602",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2545153, -30.2520809],
+                [-71.2412916, -30.2101586]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-603",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2412916, -30.2101586],
+                [-71.2337074, -30.1666722]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-604",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2337074, -30.1666722],
+                [-71.2244448, -30.1252961]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-605",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2244448, -30.1252961],
+                [-71.2450534, -30.0840156]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-606",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2450534, -30.0840156],
+                [-71.2657807, -30.0427829]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-607",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2657807, -30.0427829],
+                [-71.2829278, -30.0008692]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-608",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2829278, -30.0008692],
+                [-71.3109675, -29.9936898]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-609",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.3109675, -29.9936898],
+                [-71.3332921, -29.9681314]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-610",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.3332921, -29.9681314],
+                [-71.2908757, -29.9518065]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-611",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2908757, -29.9518065],
+                [-71.2614044, -29.9149031]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-612",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2614044, -29.9149031],
+                [-71.2307407, -29.8900713]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-613",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.2307407, -29.8900713],
+                [-71.1834056, -29.8971272]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-614",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1834056, -29.8971272],
+                [-71.1423703, -29.8780061]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-615",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1423703, -29.8780061],
+                [-71.1200212, -29.8409824]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-616",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.1200212, -29.8409824],
+                [-71.0896399, -29.8058805]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-617",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0896399, -29.8058805],
+                [-71.0622281, -29.7700045]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-618",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0622281, -29.7700045],
+                [-71.027646, -29.7513422]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-619",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.027646, -29.7513422],
+                [-71.009468, -29.7165997]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-620",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.009468, -29.7165997],
+                [-71.0015725, -29.6999619]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-621",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0015725, -29.6999619],
+                [-70.990864, -29.6670157]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-622",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.990864, -29.6670157],
+                [-70.96202, -29.640219]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-623",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.96202, -29.640219],
+                [-70.9430756, -29.6220032]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-624",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9430756, -29.6220032],
+                [-70.9563105, -29.5890354]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-625",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9563105, -29.5890354],
+                [-70.9576298, -29.5648534]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-626",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9576298, -29.5648534],
+                [-70.9480143, -29.5283477]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-627",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9480143, -29.5283477],
+                [-70.9580682, -29.4898977]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-628",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9580682, -29.4898977],
+                [-70.9519857, -29.4504312]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-629",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9519857, -29.4504312],
+                [-70.9336447, -29.4117335]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-630",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9336447, -29.4117335],
+                [-70.9357937, -29.3766937]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-631",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9357937, -29.3766937],
+                [-70.9799429, -29.3694767]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-632",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9799429, -29.3694767],
+                [-71.0212104, -29.3508436]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-633",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0212104, -29.3508436],
+                [-71.0332907, -29.3135798]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-634",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0332907, -29.3135798],
+                [-71.0339324, -29.2698554]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-635",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0339324, -29.2698554],
+                [-71.0137351, -29.2292324]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-636",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-71.0137351, -29.2292324],
+                [-70.9929522, -29.2081028]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-637",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9929522, -29.2081028],
+                [-70.9593402, -29.2118544]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-638",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9593402, -29.2118544],
+                [-70.9319437, -29.1958494]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-639",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9319437, -29.1958494],
+                [-70.9192418, -29.1641686]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-640",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9192418, -29.1641686],
+                [-70.9077129, -29.1275153]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-641",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9077129, -29.1275153],
+                [-70.8880339, -29.0898294]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-642",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8880339, -29.0898294],
+                [-70.8915457, -29.0468257]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-643",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8915457, -29.0468257],
+                [-70.9054905, -29.006783]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-644",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.9054905, -29.006783],
+                [-70.8970572, -28.9656674]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-645",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8970572, -28.9656674],
+                [-70.8743129, -28.9359915]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-646",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8743129, -28.9359915],
+                [-70.840956, -28.9027095]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-647",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.840956, -28.9027095],
+                [-70.8158774, -28.8707923]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-648",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8158774, -28.8707923],
+                [-70.7768432, -28.8519819]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-649",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7768432, -28.8519819],
+                [-70.7533382, -28.8194537]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-650",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7533382, -28.8194537],
+                [-70.7676359, -28.7863246]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-651",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7676359, -28.7863246],
+                [-70.7722767, -28.756519]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-652",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7722767, -28.756519],
+                [-70.7615828, -28.7173744]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-653",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7615828, -28.7173744],
+                [-70.7658203, -28.6772468]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-654",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7658203, -28.6772468],
+                [-70.7667806, -28.6365831]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-655",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7667806, -28.6365831],
+                [-70.7829664, -28.5971279]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-656",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7829664, -28.5971279],
+                [-70.8071251, -28.5733577]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-657",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.8071251, -28.5733577],
+                [-70.7682347, -28.5693116]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-658",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7682347, -28.5693116],
+                [-70.7572104, -28.5617941]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-659",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7572104, -28.5617941],
+                [-70.7338274, -28.5384855]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-660",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7338274, -28.5384855],
+                [-70.7206627, -28.4989702]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-661",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7206627, -28.4989702],
+                [-70.7124654, -28.4545918]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-662",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7124654, -28.4545918],
+                [-70.7085065, -28.4114215]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-663",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7085065, -28.4114215],
+                [-70.7125, -28.3673344]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-664",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7125, -28.3673344],
+                [-70.7057434, -28.3230354]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-665",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7057434, -28.3230354],
+                [-70.7002874, -28.2784205]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-666",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.7002874, -28.2784205],
+                [-70.6881167, -28.2355436]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-667",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.6881167, -28.2355436],
+                [-70.6637118, -28.1972765]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-668",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.6637118, -28.1972765],
+                [-70.6611267, -28.1540176]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-669",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.6611267, -28.1540176],
+                [-70.6451127, -28.1217589]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-670",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.6451127, -28.1217589],
+                [-70.6266135, -28.0811588]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-671",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.6266135, -28.0811588],
+                [-70.6038187, -28.0430228]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-672",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.6038187, -28.0430228],
+                [-70.5978179, -27.9987491]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-673",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.5978179, -27.9987491],
+                [-70.5935571, -27.9539408]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-674",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.5935571, -27.9539408],
+                [-70.5907281, -27.9091691]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-675",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.5907281, -27.9091691],
+                [-70.5928669, -27.8644926]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-676",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.5928669, -27.8644926],
+                [-70.5967048, -27.8196548]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-677",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.5967048, -27.8196548],
+                [-70.5981594, -27.7752586]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-678",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.5981594, -27.7752586],
+                [-70.5795583, -27.7443886]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-679",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.5795583, -27.7443886],
+                [-70.5668112, -27.7021224]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-680",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.5668112, -27.7021224],
+                [-70.5586356, -27.6619267]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-681",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.5586356, -27.6619267],
+                [-70.5224938, -27.6304523]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-682",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.5224938, -27.6304523],
+                [-70.4918261, -27.5974066]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-683",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.4918261, -27.5974066],
+                [-70.4523015, -27.5737354]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-684",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.4523015, -27.5737354],
+                [-70.4434039, -27.536349]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-685",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.4434039, -27.536349],
+                [-70.4462652, -27.4917436]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-686",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.4462652, -27.4917436],
+                [-70.4474147, -27.4472106]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-687",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.4474147, -27.4472106],
+                [-70.4373089, -27.4033916]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-688",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.4373089, -27.4033916],
+                [-70.4361805, -27.3632688]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-689",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.4361805, -27.3632688],
+                [-70.4390468, -27.3191935]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-690",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.4390468, -27.3191935],
+                [-70.397919, -27.3216318]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-691",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.397919, -27.3216318],
+                [-70.3573641, -27.3484261]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-692",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.3573641, -27.3484261],
+                [-70.3175179, -27.3703303]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-693",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.3175179, -27.3703303],
+                [-70.2885842, -27.4058095]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-694",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.2885842, -27.4058095],
+                [-70.2568698, -27.3914972]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-695",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.2568698, -27.3914972],
+                [-70.2250625, -27.3574063]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-696",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.2250625, -27.3574063],
+                [-70.1863087, -27.3288945]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-697",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.1863087, -27.3288945],
+                [-70.1661746, -27.2985191]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-698",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.1661746, -27.2985191],
+                [-70.1477052, -27.2601542]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-699",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.1477052, -27.2601542],
+                [-70.1289796, -27.2253003]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-700",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.1289796, -27.2253003],
+                [-70.0894689, -27.2424121]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-701",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0894689, -27.2424121],
+                [-70.0543264, -27.2509065]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-702",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0543264, -27.2509065],
+                [-70.027235, -27.2145074]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-703",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.027235, -27.2145074],
+                [-70.0168567, -27.1731621]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-704",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0168567, -27.1731621],
+                [-70.0192573, -27.1338537]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-705",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0192573, -27.1338537],
+                [-69.9779922, -27.1266286]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-706",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9779922, -27.1266286],
+                [-69.9393438, -27.1164023]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-707",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9393438, -27.1164023],
+                [-69.9292295, -27.0739001]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-708",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9292295, -27.0739001],
+                [-69.9088254, -27.0328405]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-709",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9088254, -27.0328405],
+                [-69.9007132, -26.9905057]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-710",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9007132, -26.9905057],
+                [-69.9269909, -26.9527745]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-711",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9269909, -26.9527745],
+                [-69.9316906, -26.9110399]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-712",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9316906, -26.9110399],
+                [-69.918618, -26.8935777]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-713",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.918618, -26.8935777],
+                [-69.8939838, -26.8576714]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-714",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8939838, -26.8576714],
+                [-69.8855299, -26.8146828]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-715",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8855299, -26.8146828],
+                [-69.900999, -26.7727713]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-716",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.900999, -26.7727713],
+                [-69.9080781, -26.7283808]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-717",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9080781, -26.7283808],
+                [-69.9190788, -26.6851234]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-718",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9190788, -26.6851234],
+                [-69.9423925, -26.6459203]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-719",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9423925, -26.6459203],
+                [-69.9867677, -26.6264743]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-720",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9867677, -26.6264743],
+                [-70.0079431, -26.587685]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-721",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0079431, -26.587685],
+                [-70.024571, -26.5459638]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-722",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.024571, -26.5459638],
+                [-70.0519074, -26.5117363]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-723",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0519074, -26.5117363],
+                [-70.0681895, -26.4711237]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-724",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0681895, -26.4711237],
+                [-70.0940025, -26.4342332]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-725",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0940025, -26.4342332],
+                [-70.1349304, -26.4111383]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-726",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.1349304, -26.4111383],
+                [-70.0895515, -26.3948385]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-727",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0895515, -26.3948385],
+                [-70.0401072, -26.3905633]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-728",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0401072, -26.3905633],
+                [-70.0006633, -26.3672455]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-729",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0006633, -26.3672455],
+                [-69.9947351, -26.3407653]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-730",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9947351, -26.3407653],
+                [-69.9761073, -26.2998504]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-731",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9761073, -26.2998504],
+                [-69.9749614, -26.2549922]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-732",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9749614, -26.2549922],
+                [-69.9824472, -26.2106692]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-733",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9824472, -26.2106692],
+                [-69.9863663, -26.1660332]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-734",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9863663, -26.1660332],
+                [-69.9802906, -26.1217837]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-735",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9802906, -26.1217837],
+                [-69.971438, -26.0775533]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-736",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.971438, -26.0775533],
+                [-69.9515672, -26.0369849]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-737",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9515672, -26.0369849],
+                [-69.9326086, -25.9986441]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-738",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9326086, -25.9986441],
+                [-69.9260355, -25.9796076]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-739",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9260355, -25.9796076],
+                [-69.8997815, -25.9609061]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-740",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8997815, -25.9609061],
+                [-69.8845515, -25.919478]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-741",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8845515, -25.919478],
+                [-69.8630608, -25.8821764]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-742",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8630608, -25.8821764],
+                [-69.8546297, -25.8437703]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-743",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8546297, -25.8437703],
+                [-69.8467053, -25.8012203]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-744",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8467053, -25.8012203],
+                [-69.8141998, -25.7688956]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-745",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8141998, -25.7688956],
+                [-69.7860543, -25.7327654]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-746",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7860543, -25.7327654],
+                [-69.7612366, -25.6937561]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-747",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7612366, -25.6937561],
+                [-69.7407105, -25.6527816]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-748",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7407105, -25.6527816],
+                [-69.7204194, -25.611705]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-749",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7204194, -25.611705],
+                [-69.7243564, -25.5729994]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-750",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7243564, -25.5729994],
+                [-69.7187417, -25.5296833]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-751",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7187417, -25.5296833],
+                [-69.7043407, -25.4866367]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-752",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7043407, -25.4866367],
+                [-69.6929222, -25.4429528]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-753",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.6929222, -25.4429528],
+                [-69.6845457, -25.3986279]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-754",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.6845457, -25.3986279],
+                [-69.6762397, -25.3542926]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-755",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.6762397, -25.3542926],
+                [-69.6742773, -25.3101863]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-756",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.6742773, -25.3101863],
+                [-69.6959208, -25.2724921]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-757",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.6959208, -25.2724921],
+                [-69.7150689, -25.2320605]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-758",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7150689, -25.2320605],
+                [-69.7269035, -25.188841]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-759",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7269035, -25.188841],
+                [-69.7262701, -25.1442985]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-760",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7262701, -25.1442985],
+                [-69.7292027, -25.099563]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-761",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7292027, -25.099563],
+                [-69.7311969, -25.054862]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-762",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7311969, -25.054862],
+                [-69.7365669, -25.0104458]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-763",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7365669, -25.0104458],
+                [-69.7109964, -24.9720901]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-764",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7109964, -24.9720901],
+                [-69.6934813, -24.931459]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-765",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.6934813, -24.931459],
+                [-69.6946503, -24.8916022]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-766",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.6946503, -24.8916022],
+                [-69.7305072, -24.8666493]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-767",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7305072, -24.8666493],
+                [-69.7569055, -24.8319126]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-768",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7569055, -24.8319126],
+                [-69.7651744, -24.7879476]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-769",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7651744, -24.7879476],
+                [-69.7727534, -24.7435837]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-770",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7727534, -24.7435837],
+                [-69.7744003, -24.698805]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-771",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7744003, -24.698805],
+                [-69.7723749, -24.6539666]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-772",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7723749, -24.6539666],
+                [-69.7800045, -24.6096546]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-773",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7800045, -24.6096546],
+                [-69.7927283, -24.5662217]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-774",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7927283, -24.5662217],
+                [-69.8066658, -24.5230799]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-775",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8066658, -24.5230799],
+                [-69.8181403, -24.4793538]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-776",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8181403, -24.4793538],
+                [-69.844188, -24.4424076]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-777",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.844188, -24.4424076],
+                [-69.8720497, -24.405776]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-778",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8720497, -24.405776],
+                [-69.8893144, -24.3637638]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-779",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8893144, -24.3637638],
+                [-69.9030791, -24.3217374]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-780",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9030791, -24.3217374],
+                [-69.8894087, -24.2887447]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-781",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8894087, -24.2887447],
+                [-69.8806108, -24.2451055]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-782",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8806108, -24.2451055],
+                [-69.8521541, -24.2209437]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-783",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8521541, -24.2209437],
+                [-69.850695, -24.1776397]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-784",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.850695, -24.1776397],
+                [-69.8215844, -24.1482751]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-785",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8215844, -24.1482751],
+                [-69.8051518, -24.1058837]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-786",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8051518, -24.1058837],
+                [-69.7760757, -24.0702477]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-787",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7760757, -24.0702477],
+                [-69.7721023, -24.0285022]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-788",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7721023, -24.0285022],
+                [-69.7725544, -23.983751]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-789",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7725544, -23.983751],
+                [-69.7708132, -23.940035]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-790",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7708132, -23.940035],
+                [-69.7468202, -23.900781]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-791",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7468202, -23.900781],
+                [-69.7523287, -23.8657757]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-792",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7523287, -23.8657757],
+                [-69.7902283, -23.8371328]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-793",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7902283, -23.8371328],
+                [-69.8287005, -23.8093839]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-794",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8287005, -23.8093839],
+                [-69.8746264, -23.7933764]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-795",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8746264, -23.7933764],
+                [-69.9227533, -23.7884333]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-796",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9227533, -23.7884333],
+                [-69.9713359, -23.7843215]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-797",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9713359, -23.7843215],
+                [-70.0144383, -23.764593]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-798",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0144383, -23.764593],
+                [-70.0570387, -23.7623814]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-799",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0570387, -23.7623814],
+                [-70.0972232, -23.74181]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-800",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0972232, -23.74181],
+                [-70.1439176, -23.7279957]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-801",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.1439176, -23.7279957],
+                [-70.1904044, -23.717675]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-802",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.1904044, -23.717675],
+                [-70.2265148, -23.7015256]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-803",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.2265148, -23.7015256],
+                [-70.2476986, -23.6614596]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-804",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.2476986, -23.6614596],
+                [-70.2687397, -23.6753593]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-805",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.2687397, -23.6753593],
+                [-70.2941769, -23.7125769]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-806",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.2941769, -23.7125769],
+                [-70.3100911, -23.7545845]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-807",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.3100911, -23.7545845],
+                [-70.3449398, -23.7594863]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-808",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.3449398, -23.7594863],
+                [-70.3673733, -23.7242711]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-809",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.3673733, -23.7242711],
+                [-70.4011558, -23.6961527]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-810",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.4011558, -23.6961527],
+                [-70.3937069, -23.660967]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-811",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.3937069, -23.660967],
+                [-70.3981968, -23.6443759]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-812",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.3981968, -23.6443759],
+                [-70.389114, -23.6453458]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-813",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.389114, -23.6453458],
+                [-70.4076487, -23.6855752]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-814",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.4076487, -23.6855752],
+                [-70.3796726, -23.7150719]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-815",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.3796726, -23.7150719],
+                [-70.3565356, -23.7475481]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-816",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.3565356, -23.7475481],
+                [-70.3203014, -23.7682682]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-817",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.3203014, -23.7682682],
+                [-70.2996171, -23.7282717]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-818",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.2996171, -23.7282717],
+                [-70.2791246, -23.6884064]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-819",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.2791246, -23.6884064],
+                [-70.253093, -23.654647]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-820",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.253093, -23.654647],
+                [-70.2564196, -23.6118683]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-821",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.2564196, -23.6118683],
+                [-70.2440418, -23.5697795]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-822",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.2440418, -23.5697795],
+                [-70.221349, -23.5299242]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-823",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.221349, -23.5299242],
+                [-70.1919894, -23.4941016]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-824",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.1919894, -23.4941016],
+                [-70.1587702, -23.4610548]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-825",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.1587702, -23.4610548],
+                [-70.1111308, -23.4583673]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-826",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.1111308, -23.4583673],
+                [-70.0640397, -23.4502844]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-827",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0640397, -23.4502844],
+                [-70.0185981, -23.4367505]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-828",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0185981, -23.4367505],
+                [-69.9772065, -23.4127008]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-829",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9772065, -23.4127008],
+                [-69.9372869, -23.3866937]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-830",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9372869, -23.3866937],
+                [-69.8955417, -23.3632395]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-831",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8955417, -23.3632395],
+                [-69.8531585, -23.3407043]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-832",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8531585, -23.3407043],
+                [-69.8405351, -23.3084063]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-833",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8405351, -23.3084063],
+                [-69.8759371, -23.288435]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-834",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8759371, -23.288435],
+                [-69.8601575, -23.2557578]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-835",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8601575, -23.2557578],
+                [-69.8734542, -23.2130401]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-836",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8734542, -23.2130401],
+                [-69.8853905, -23.174472]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-837",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8853905, -23.174472],
+                [-69.8771986, -23.131217]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-838",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8771986, -23.131217],
+                [-69.8677424, -23.0873776]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-839",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8677424, -23.0873776],
+                [-69.8549194, -23.0445899]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-840",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8549194, -23.0445899],
+                [-69.8504748, -23.0001393]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-841",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8504748, -23.0001393],
+                [-69.8483431, -22.9553551]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-842",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8483431, -22.9553551],
+                [-69.8403663, -22.9111546]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-843",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8403663, -22.9111546],
+                [-69.8223769, -22.8693542]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-844",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8223769, -22.8693542],
+                [-69.8049208, -22.8273785]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-845",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8049208, -22.8273785],
+                [-69.7837508, -22.7872109]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-846",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7837508, -22.7872109],
+                [-69.7482615, -22.7566951]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-847",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7482615, -22.7566951],
+                [-69.7121068, -22.7271787]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-848",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7121068, -22.7271787],
+                [-69.6753897, -22.7002638]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-849",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.6753897, -22.7002638],
+                [-69.6516278, -22.6610672]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-850",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.6516278, -22.6610672],
+                [-69.6304543, -22.620578]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-851",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.6304543, -22.620578],
+                [-69.6198604, -22.5775299]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-852",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.6198604, -22.5775299],
+                [-69.5963438, -22.5381562]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-853",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5963438, -22.5381562],
+                [-69.566773, -22.5025703]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-854",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.566773, -22.5025703],
+                [-69.5522476, -22.460452]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-855",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5522476, -22.460452],
+                [-69.5578955, -22.4158016]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-856",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5578955, -22.4158016],
+                [-69.5660321, -22.3717127]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-857",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5660321, -22.3717127],
+                [-69.5677175, -22.3280343]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-858",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5677175, -22.3280343],
+                [-69.5709304, -22.2837233]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-859",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5709304, -22.2837233],
+                [-69.571525, -22.238762]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-860",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.571525, -22.238762],
+                [-69.5723173, -22.1938019]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-861",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5723173, -22.1938019],
+                [-69.5743978, -22.1489694]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-862",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5743978, -22.1489694],
+                [-69.5821934, -22.1048524]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-863",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5821934, -22.1048524],
+                [-69.5973471, -22.0634096]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-864",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5973471, -22.0634096],
+                [-69.60081, -22.0200583]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-865",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.60081, -22.0200583],
+                [-69.5876519, -21.9767791]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-866",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5876519, -21.9767791],
+                [-69.5690837, -21.9364972]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-867",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5690837, -21.9364972],
+                [-69.5586974, -21.8951388]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-868",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5586974, -21.8951388],
+                [-69.5430732, -21.8542807]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-869",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5430732, -21.8542807],
+                [-69.5213867, -21.8147047]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-870",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5213867, -21.8147047],
+                [-69.5138187, -21.771379]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-871",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5138187, -21.771379],
+                [-69.5185389, -21.7319862]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-872",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5185389, -21.7319862],
+                [-69.5310016, -21.6897539]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-873",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5310016, -21.6897539],
+                [-69.537137, -21.6473135]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-874",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.537137, -21.6473135],
+                [-69.5578972, -21.6146322]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-875",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5578972, -21.6146322],
+                [-69.5386101, -21.5751519]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-876",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5386101, -21.5751519],
+                [-69.5294176, -21.5310061]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-877",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5294176, -21.5310061],
+                [-69.5200556, -21.4868918]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-878",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5200556, -21.4868918],
+                [-69.5027884, -21.4457323]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-879",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5027884, -21.4457323],
+                [-69.5000546, -21.400886]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-880",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5000546, -21.400886],
+                [-69.4976484, -21.3559758]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-881",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.4976484, -21.3559758],
+                [-69.4952203, -21.3110667]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-882",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.4952203, -21.3110667],
+                [-69.4928084, -21.2661569]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-883",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.4928084, -21.2661569],
+                [-69.4903894, -21.2212474]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-884",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.4903894, -21.2212474],
+                [-69.4879333, -21.1763398]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-885",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.4879333, -21.1763398],
+                [-69.4855006, -21.131431]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-886",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.4855006, -21.131431],
+                [-69.4830435, -21.0865235]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-887",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.4830435, -21.0865235],
+                [-69.4806103, -21.0416148]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-888",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.4806103, -21.0416148],
+                [-69.4842008, -20.9975125]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-889",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.4842008, -20.9975125],
+                [-69.5004507, -20.9551839]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-890",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5004507, -20.9551839],
+                [-69.5166585, -20.9128426]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-891",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5166585, -20.9128426],
+                [-69.5328402, -20.8704941]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-892",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5328402, -20.8704941],
+                [-69.5490033, -20.828141]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-893",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5490033, -20.828141],
+                [-69.5650253, -20.7857425]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-894",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5650253, -20.7857425],
+                [-69.5810383, -20.7433426]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-895",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5810383, -20.7433426],
+                [-69.5970373, -20.7009395]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-896",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.5970373, -20.7009395],
+                [-69.6129559, -20.6585114]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-897",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.6129559, -20.6585114],
+                [-69.6363385, -20.6225483]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-898",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.6363385, -20.6225483],
+                [-69.6732099, -20.5937247]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-899",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.6732099, -20.5937247],
+                [-69.7100488, -20.5648714]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-900",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7100488, -20.5648714],
+                [-69.7468517, -20.5359857]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-901",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7468517, -20.5359857],
+                [-69.7836349, -20.5070856]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-902",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7836349, -20.5070856],
+                [-69.7861779, -20.4729054]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-903",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7861779, -20.4729054],
+                [-69.7586697, -20.4521566]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "current"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-904",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7586697, -20.4521566],
+                [-69.7517593, -20.407876]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-905",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7517593, -20.407876],
+                [-69.7532567, -20.3629319]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-906",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7532567, -20.3629319],
+                [-69.7574268, -20.3187233]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-907",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7574268, -20.3187233],
+                [-69.7853347, -20.2839657]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-908",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7853347, -20.2839657],
+                [-69.7930134, -20.2406876]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-909",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7930134, -20.2406876],
+                [-69.7880353, -20.1985007]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "disused",
+                "razed"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-910",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7880353, -20.1985007],
+                [-69.7705132, -20.1573295]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "disused",
+                "razed"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-911",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7705132, -20.1573295],
+                [-69.7490504, -20.11786]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-912",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7490504, -20.11786],
+                [-69.7366169, -20.0751894]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "disused"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-913",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7366169, -20.0751894],
+                [-69.7484904, -20.0318303]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-914",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7484904, -20.0318303],
+                [-69.7728826, -19.9973632]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-915",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7728826, -19.9973632],
+                [-69.8003384, -19.9617887]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-916",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8003384, -19.9617887],
+                [-69.7943648, -19.925534]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-917",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.7943648, -19.925534],
+                [-69.8079625, -19.8875706]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-918",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8079625, -19.8875706],
+                [-69.8465321, -19.8611929]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-919",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8465321, -19.8611929],
+                [-69.8628621, -19.821285]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-920",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8628621, -19.821285],
+                [-69.8868298, -19.7834708]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-921",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8868298, -19.7834708],
+                [-69.8971456, -19.7398392]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-922",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.8971456, -19.7398392],
+                [-69.9297735, -19.7086196]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-923",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9297735, -19.7086196],
+                [-69.9493569, -19.6678169]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-924",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9493569, -19.6678169],
+                [-69.9749127, -19.6317851]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-925",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-69.9749127, -19.6317851],
+                [-70.0073065, -19.60008]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-926",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0073065, -19.60008],
+                [-70.0266787, -19.5634036]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-927",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0266787, -19.5634036],
+                [-70.0691205, -19.5767045]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-928",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.0691205, -19.5767045],
+                [-70.110974, -19.5940731]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-929",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.110974, -19.5940731],
+                [-70.1438934, -19.5772034]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-930",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.1438934, -19.5772034],
+                [-70.179069, -19.5785761]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-931",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.179069, -19.5785761],
+                [-70.1878418, -19.6116723]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-932",
+              "distanceKm": 5,
+              "gapFill": false,
+              "coordinates": [
+                [-70.1878418, -19.6116723],
+                [-70.1991877, -19.5755088]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "razed"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-933",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.1991877, -19.5755088],
+                [-70.2022694, -19.5324064]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "abandoned",
+                "gap-fill",
+                "razed"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-934",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.2022694, -19.5324064],
+                [-70.2074397, -19.4877052]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill",
+                "razed"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-935",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.2074397, -19.4877052],
+                [-70.2126098, -19.4430042]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-936",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.2126098, -19.4430042],
+                [-70.2177799, -19.3983033]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-937",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.2177799, -19.3983033],
+                [-70.22295, -19.3536026]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-938",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.22295, -19.3536026],
+                [-70.22812, -19.308902]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-939",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.22812, -19.308902],
+                [-70.2332901, -19.2642016]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-940",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.2332901, -19.2642016],
+                [-70.2384601, -19.2195013]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-941",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.2384601, -19.2195013],
+                [-70.2436301, -19.1748011]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-942",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.2436301, -19.1748011],
+                [-70.2488013, -19.1301012]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-943",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.2488013, -19.1301012],
+                [-70.2539713, -19.0854014]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-944",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.2539713, -19.0854014],
+                [-70.259151, -19.0407026]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-945",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.259151, -19.0407026],
+                [-70.2643211, -18.9960031]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-946",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.2643211, -18.9960031],
+                [-70.269491, -18.9513036]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-947",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.269491, -18.9513036],
+                [-70.2746609, -18.9066043]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-948",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.2746609, -18.9066043],
+                [-70.2798308, -18.8619052]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-949",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.2798308, -18.8619052],
+                [-70.2850018, -18.8172063]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-950",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.2850018, -18.8172063],
+                [-70.2901717, -18.7725074]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-951",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.2901717, -18.7725074],
+                [-70.2953416, -18.7278087]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-952",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.2953416, -18.7278087],
+                [-70.3005114, -18.6831101]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-953",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.3005114, -18.6831101],
+                [-70.3056812, -18.6384116]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-954",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.3056812, -18.6384116],
+                [-70.310851, -18.5937133]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-955",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.310851, -18.5937133],
+                [-70.316022, -18.5490152]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-956",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.316022, -18.5490152],
+                [-70.3211917, -18.5043172]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-957",
+              "distanceKm": 5,
+              "gapFill": true,
+              "coordinates": [
+                [-70.3211917, -18.5043172],
+                [-70.3087608, -18.4682555]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "gap-fill"
+              ]
+            },
+            {
+              "id": "cl-main-line:grid:slice-958",
+              "distanceKm": 0.358,
+              "gapFill": false,
+              "coordinates": [
+                [-70.3087608, -18.4682555],
+                [-70.30567, -18.46692]
+              ],
+              "bridge": false,
+              "tunnel": false,
+              "service": false,
+              "railwayStatuses": [
+                "current",
+                "gap-fill"
+              ]
+            }
+          ],
+          "distanceKm": 4785.4,
+          "railKm": 3342,
+          "gapKm": 1443.3,
+          "sliceCount": 1104,
+          "gridSliceCount": 958,
+          "elevation": [
+            {
+              "position": 0,
+              "coordinate": [-70.90114, -53.16472],
+              "stationId": "place:cl-punta-arenas",
+              "meanElevationM": 13.5,
+              "elevationStdDevM": 18.5
+            },
+            {
+              "position": 1,
+              "coordinate": [-70.9087293, -53.119985],
+              "meanElevationM": 49.4,
+              "elevationStdDevM": 42.1
+            },
+            {
+              "position": 2,
+              "coordinate": [-70.9163302, -53.0752512],
+              "meanElevationM": 125.2,
+              "elevationStdDevM": 54.3
+            },
+            {
+              "position": 3,
+              "coordinate": [-70.9239292, -53.0305178],
+              "meanElevationM": 85.9,
+              "elevationStdDevM": 28.1
+            },
+            {
+              "position": 4,
+              "coordinate": [-70.93152, -52.9857843],
+              "meanElevationM": 66.6,
+              "elevationStdDevM": 7.8
+            },
+            {
+              "position": 5,
+              "coordinate": [-70.939119, -52.9410519],
+              "meanElevationM": 39.8,
+              "elevationStdDevM": 11
+            },
+            {
+              "position": 6,
+              "coordinate": [-70.9467194, -52.89632],
+              "meanElevationM": 29.2,
+              "elevationStdDevM": 5.8
+            },
+            {
+              "position": 7,
+              "coordinate": [-70.9543083, -52.8515879],
+              "meanElevationM": 49.1,
+              "elevationStdDevM": 6.7
+            },
+            {
+              "position": 8,
+              "coordinate": [-70.9619087, -52.8068569],
+              "meanElevationM": 18,
+              "elevationStdDevM": 12.6
+            },
+            {
+              "position": 9,
+              "coordinate": [-70.9695088, -52.7621265],
+              "meanElevationM": 2.1,
+              "elevationStdDevM": 5.6
+            },
+            {
+              "position": 10,
+              "coordinate": [-70.9770976, -52.7173958],
+              "meanElevationM": 23.4,
+              "elevationStdDevM": 5.7
+            },
+            {
+              "position": 11,
+              "coordinate": [-70.9846977, -52.6726663],
+              "meanElevationM": 47.2,
+              "elevationStdDevM": 14.6
+            },
+            {
+              "position": 12,
+              "coordinate": [-70.9922975, -52.6279373],
+              "meanElevationM": 99.5,
+              "elevationStdDevM": 20.7
+            },
+            {
+              "position": 13,
+              "coordinate": [-70.9998861, -52.5832081],
+              "meanElevationM": 185.7,
+              "elevationStdDevM": 57.1
+            },
+            {
+              "position": 14,
+              "coordinate": [-71.0074857, -52.53848],
+              "meanElevationM": 286.4,
+              "elevationStdDevM": 29.7
+            },
+            {
+              "position": 15,
+              "coordinate": [-71.0150758, -52.4937519],
+              "meanElevationM": 356,
+              "elevationStdDevM": 18.6
+            },
+            {
+              "position": 16,
+              "coordinate": [-71.0226755, -52.4490248],
+              "meanElevationM": 318.4,
+              "elevationStdDevM": 33.8
+            },
+            {
+              "position": 17,
+              "coordinate": [-71.0302749, -52.4042982],
+              "meanElevationM": 250,
+              "elevationStdDevM": 42.1
+            },
+            {
+              "position": 18,
+              "coordinate": [-71.0378648, -52.3595714],
+              "meanElevationM": 197.4,
+              "elevationStdDevM": 38.7
+            },
+            {
+              "position": 19,
+              "coordinate": [-71.0454642, -52.3148458],
+              "meanElevationM": 177.8,
+              "elevationStdDevM": 30
+            },
+            {
+              "position": 20,
+              "coordinate": [-71.0530633, -52.2701207],
+              "meanElevationM": 197.6,
+              "elevationStdDevM": 20.1
+            },
+            {
+              "position": 21,
+              "coordinate": [-71.060653, -52.2253954],
+              "meanElevationM": 207.3,
+              "elevationStdDevM": 4.5
+            },
+            {
+              "position": 22,
+              "coordinate": [-71.0682519, -52.1806712],
+              "meanElevationM": 217.3,
+              "elevationStdDevM": 17.8
+            },
+            {
+              "position": 23,
+              "coordinate": [-71.0758414, -52.1359469],
+              "meanElevationM": 233.5,
+              "elevationStdDevM": 19.8
+            },
+            {
+              "position": 24,
+              "coordinate": [-71.0834402, -52.0912236],
+              "meanElevationM": 235.9,
+              "elevationStdDevM": 11.3
+            },
+            {
+              "position": 25,
+              "coordinate": [-71.0910295, -52.0465003],
+              "meanElevationM": 227.9,
+              "elevationStdDevM": 10.1
+            },
+            {
+              "position": 26,
+              "coordinate": [-71.0986284, -52.001778],
+              "meanElevationM": 201.2,
+              "elevationStdDevM": 11.8
+            },
+            {
+              "position": 27,
+              "coordinate": [-71.1062269, -51.9570562],
+              "meanElevationM": 170.5,
+              "elevationStdDevM": 8.2
+            },
+            {
+              "position": 28,
+              "coordinate": [-71.1138161, -51.9123344],
+              "meanElevationM": 149.7,
+              "elevationStdDevM": 5.9
+            },
+            {
+              "position": 29,
+              "coordinate": [-71.121416, -51.8676136],
+              "meanElevationM": 120.4,
+              "elevationStdDevM": 19.6
+            },
+            {
+              "position": 30,
+              "coordinate": [-71.129005, -51.8228927],
+              "meanElevationM": 147.3,
+              "elevationStdDevM": 14.8
+            },
+            {
+              "position": 31,
+              "coordinate": [-71.1366031, -51.7781729],
+              "meanElevationM": 197.5,
+              "elevationStdDevM": 48.5
+            },
+            {
+              "position": 32,
+              "coordinate": [-71.144192, -51.7334529],
+              "meanElevationM": 335.1,
+              "elevationStdDevM": 30.6
+            },
+            {
+              "position": 33,
+              "coordinate": [-71.1517915, -51.6887341],
+              "meanElevationM": 335.2,
+              "elevationStdDevM": 12.4
+            },
+            {
+              "position": 34,
+              "coordinate": [-71.1593803, -51.6440151],
+              "meanElevationM": 311.9,
+              "elevationStdDevM": 10.6
+            },
+            {
+              "position": 35,
+              "coordinate": [-71.166978, -51.5992972],
+              "meanElevationM": 291.9,
+              "elevationStdDevM": 15.1
+            },
+            {
+              "position": 36,
+              "coordinate": [-71.1745682, -51.5545793],
+              "meanElevationM": 302,
+              "elevationStdDevM": 10
+            },
+            {
+              "position": 37,
+              "coordinate": [-71.1821663, -51.5098624],
+              "meanElevationM": 305.2,
+              "elevationStdDevM": 9.7
+            },
+            {
+              "position": 38,
+              "coordinate": [-71.1897653, -51.465146],
+              "meanElevationM": 314.3,
+              "elevationStdDevM": 12.9
+            },
+            {
+              "position": 39,
+              "coordinate": [-71.1973538, -51.4204294],
+              "meanElevationM": 313.8,
+              "elevationStdDevM": 9
+            },
+            {
+              "position": 40,
+              "coordinate": [-71.2049526, -51.3757141],
+              "meanElevationM": 330.8,
+              "elevationStdDevM": 6.3
+            },
+            {
+              "position": 41,
+              "coordinate": [-71.212541, -51.3309985],
+              "meanElevationM": 338.5,
+              "elevationStdDevM": 8
+            },
+            {
+              "position": 42,
+              "coordinate": [-71.2201397, -51.286284],
+              "meanElevationM": 344.6,
+              "elevationStdDevM": 6.9
+            },
+            {
+              "position": 43,
+              "coordinate": [-71.2277289, -51.2415695],
+              "meanElevationM": 350.6,
+              "elevationStdDevM": 6.4
+            },
+            {
+              "position": 44,
+              "coordinate": [-71.235317, -51.1968553],
+              "meanElevationM": 351.2,
+              "elevationStdDevM": 6.8
+            },
+            {
+              "position": 45,
+              "coordinate": [-71.2429154, -51.1521424],
+              "meanElevationM": 357.4,
+              "elevationStdDevM": 7.9
+            },
+            {
+              "position": 46,
+              "coordinate": [-71.2505049, -51.1074293],
+              "meanElevationM": 361.3,
+              "elevationStdDevM": 8.6
+            },
+            {
+              "position": 47,
+              "coordinate": [-71.2581016, -51.0627172],
+              "meanElevationM": 342.3,
+              "elevationStdDevM": 19.3
+            },
+            {
+              "position": 48,
+              "coordinate": [-71.265691, -51.0180052],
+              "meanElevationM": 287.1,
+              "elevationStdDevM": 22.4
+            },
+            {
+              "position": 49,
+              "coordinate": [-71.2732891, -50.9732941],
+              "meanElevationM": 285.4,
+              "elevationStdDevM": 54.9
+            },
+            {
+              "position": 50,
+              "coordinate": [-71.2808783, -50.928583],
+              "meanElevationM": 378.6,
+              "elevationStdDevM": 27.3
+            },
+            {
+              "position": 51,
+              "coordinate": [-71.2884746, -50.8838729],
+              "meanElevationM": 400.9,
+              "elevationStdDevM": 8.3
+            },
+            {
+              "position": 52,
+              "coordinate": [-71.2960637, -50.8391627],
+              "meanElevationM": 370.1,
+              "elevationStdDevM": 28.6
+            },
+            {
+              "position": 53,
+              "coordinate": [-71.3036614, -50.7944537],
+              "meanElevationM": 395.9,
+              "elevationStdDevM": 16.7
+            },
+            {
+              "position": 54,
+              "coordinate": [-71.3112504, -50.7497445],
+              "meanElevationM": 429.4,
+              "elevationStdDevM": 12.3
+            },
+            {
+              "position": 55,
+              "coordinate": [-71.3188479, -50.7050364],
+              "meanElevationM": 454.8,
+              "elevationStdDevM": 9.8
+            },
+            {
+              "position": 56,
+              "coordinate": [-71.3264361, -50.6603282],
+              "meanElevationM": 478.1,
+              "elevationStdDevM": 10.3
+            },
+            {
+              "position": 57,
+              "coordinate": [-71.3340249, -50.6156205],
+              "meanElevationM": 498.6,
+              "elevationStdDevM": 19.3
+            },
+            {
+              "position": 58,
+              "coordinate": [-71.3416221, -50.5709139],
+              "meanElevationM": 531.1,
+              "elevationStdDevM": 35.8
+            },
+            {
+              "position": 59,
+              "coordinate": [-71.3492107, -50.5262071],
+              "meanElevationM": 612.7,
+              "elevationStdDevM": 18.3
+            },
+            {
+              "position": 60,
+              "coordinate": [-71.3568078, -50.4815015],
+              "meanElevationM": 624.1,
+              "elevationStdDevM": 19
+            },
+            {
+              "position": 61,
+              "coordinate": [-71.3643956, -50.4367957],
+              "meanElevationM": 644.9,
+              "elevationStdDevM": 16.3
+            },
+            {
+              "position": 62,
+              "coordinate": [-71.3719841, -50.3920904],
+              "meanElevationM": 688.5,
+              "elevationStdDevM": 18.4
+            },
+            {
+              "position": 63,
+              "coordinate": [-71.3795824, -50.3473864],
+              "meanElevationM": 733.1,
+              "elevationStdDevM": 22.7
+            },
+            {
+              "position": 64,
+              "coordinate": [-71.3871707, -50.3026821],
+              "meanElevationM": 707.8,
+              "elevationStdDevM": 133.5
+            },
+            {
+              "position": 65,
+              "coordinate": [-71.3947673, -50.2579789],
+              "meanElevationM": 272.5,
+              "elevationStdDevM": 75.5
+            },
+            {
+              "position": 66,
+              "coordinate": [-71.4023548, -50.2132755],
+              "meanElevationM": 188.5,
+              "elevationStdDevM": 38.8
+            },
+            {
+              "position": 67,
+              "coordinate": [-71.4099443, -50.1685728],
+              "meanElevationM": 318.6,
+              "elevationStdDevM": 70.6
+            },
+            {
+              "position": 68,
+              "coordinate": [-71.4175407, -50.1238711],
+              "meanElevationM": 547.9,
+              "elevationStdDevM": 62
+            },
+            {
+              "position": 69,
+              "coordinate": [-71.4251279, -50.0791692],
+              "meanElevationM": 738.8,
+              "elevationStdDevM": 114.4
+            },
+            {
+              "position": 70,
+              "coordinate": [-71.4327173, -50.034468],
+              "meanElevationM": 998,
+              "elevationStdDevM": 81.7
+            },
+            {
+              "position": 71,
+              "coordinate": [-71.4403133, -49.9897677],
+              "meanElevationM": 844.5,
+              "elevationStdDevM": 33.7
+            },
+            {
+              "position": 72,
+              "coordinate": [-71.4479011, -49.9450673],
+              "meanElevationM": 831.2,
+              "elevationStdDevM": 50.1
+            },
+            {
+              "position": 73,
+              "coordinate": [-71.4554985, -49.9003681],
+              "meanElevationM": 738.2,
+              "elevationStdDevM": 39.8
+            },
+            {
+              "position": 74,
+              "coordinate": [-71.4630853, -49.8556687],
+              "meanElevationM": 712,
+              "elevationStdDevM": 39.6
+            },
+            {
+              "position": 75,
+              "coordinate": [-71.4706743, -49.8109699],
+              "meanElevationM": 685.8,
+              "elevationStdDevM": 35.4
+            },
+            {
+              "position": 76,
+              "coordinate": [-71.47827, -49.7662721],
+              "meanElevationM": 608.3,
+              "elevationStdDevM": 15.2
+            },
+            {
+              "position": 77,
+              "coordinate": [-71.485858, -49.7215742],
+              "meanElevationM": 515.6,
+              "elevationStdDevM": 39.1
+            },
+            {
+              "position": 78,
+              "coordinate": [-71.4934454, -49.6768768],
+              "meanElevationM": 432.2,
+              "elevationStdDevM": 27.9
+            },
+            {
+              "position": 79,
+              "coordinate": [-71.5010424, -49.6321806],
+              "meanElevationM": 335.2,
+              "elevationStdDevM": 55.8
+            },
+            {
+              "position": 80,
+              "coordinate": [-71.5086301, -49.5874842],
+              "meanElevationM": 287.4,
+              "elevationStdDevM": 42.7
+            },
+            {
+              "position": 81,
+              "coordinate": [-71.5162163, -49.5427882],
+              "meanElevationM": 268.7,
+              "elevationStdDevM": 35.2
+            },
+            {
+              "position": 82,
+              "coordinate": [-71.523805, -49.4980928],
+              "meanElevationM": 359.8,
+              "elevationStdDevM": 58.1
+            },
+            {
+              "position": 83,
+              "coordinate": [-71.5314014, -49.4533985],
+              "meanElevationM": 489.3,
+              "elevationStdDevM": 66.7
+            },
+            {
+              "position": 84,
+              "coordinate": [-71.5389874, -49.408704],
+              "meanElevationM": 503.5,
+              "elevationStdDevM": 42.9
+            },
+            {
+              "position": 85,
+              "coordinate": [-71.5465758, -49.3640101],
+              "meanElevationM": 537.8,
+              "elevationStdDevM": 46.7
+            },
+            {
+              "position": 86,
+              "coordinate": [-71.5541721, -49.3193173],
+              "meanElevationM": 654.4,
+              "elevationStdDevM": 81.6
+            },
+            {
+              "position": 87,
+              "coordinate": [-71.5617594, -49.2746244],
+              "meanElevationM": 746,
+              "elevationStdDevM": 18.3
+            },
+            {
+              "position": 88,
+              "coordinate": [-71.5693475, -49.2299319],
+              "meanElevationM": 786.3,
+              "elevationStdDevM": 25.4
+            },
+            {
+              "position": 89,
+              "coordinate": [-71.576942, -49.1852405],
+              "meanElevationM": 875.6,
+              "elevationStdDevM": 41.9
+            },
+            {
+              "position": 90,
+              "coordinate": [-71.584529, -49.140549],
+              "meanElevationM": 1005.3,
+              "elevationStdDevM": 66
+            },
+            {
+              "position": 91,
+              "coordinate": [-71.592116, -49.095858],
+              "meanElevationM": 1032,
+              "elevationStdDevM": 30.2
+            },
+            {
+              "position": 92,
+              "coordinate": [-71.5997039, -49.0511676],
+              "meanElevationM": 1001.2,
+              "elevationStdDevM": 56.2
+            },
+            {
+              "position": 93,
+              "coordinate": [-71.6072995, -49.0064782],
+              "meanElevationM": 945.1,
+              "elevationStdDevM": 97.5
+            },
+            {
+              "position": 94,
+              "coordinate": [-71.6148862, -48.9617887],
+              "meanElevationM": 797.6,
+              "elevationStdDevM": 117.6
+            },
+            {
+              "position": 95,
+              "coordinate": [-71.6224729, -48.9170997],
+              "meanElevationM": 644.2,
+              "elevationStdDevM": 78.8
+            },
+            {
+              "position": 96,
+              "coordinate": [-71.6300604, -48.8724112],
+              "meanElevationM": 683.4,
+              "elevationStdDevM": 61.8
+            },
+            {
+              "position": 97,
+              "coordinate": [-71.6376557, -48.8277238],
+              "meanElevationM": 820.3,
+              "elevationStdDevM": 101.8
+            },
+            {
+              "position": 98,
+              "coordinate": [-71.6452423, -48.7830363],
+              "meanElevationM": 1071.8,
+              "elevationStdDevM": 84.3
+            },
+            {
+              "position": 99,
+              "coordinate": [-71.6528301, -48.7383493],
+              "meanElevationM": 1151.6,
+              "elevationStdDevM": 102.2
+            },
+            {
+              "position": 100,
+              "coordinate": [-71.6604163, -48.6936628],
+              "meanElevationM": 1408.9,
+              "elevationStdDevM": 88.6
+            },
+            {
+              "position": 101,
+              "coordinate": [-71.6680035, -48.6489768],
+              "meanElevationM": 1525,
+              "elevationStdDevM": 44.4
+            },
+            {
+              "position": 102,
+              "coordinate": [-71.6755983, -48.6042918],
+              "meanElevationM": 1521.2,
+              "elevationStdDevM": 75.8
+            },
+            {
+              "position": 103,
+              "coordinate": [-71.6831845, -48.5596068],
+              "meanElevationM": 1519.9,
+              "elevationStdDevM": 65
+            },
+            {
+              "position": 104,
+              "coordinate": [-71.6907718, -48.5149223],
+              "meanElevationM": 1439.5,
+              "elevationStdDevM": 66.6
+            },
+            {
+              "position": 105,
+              "coordinate": [-71.6983587, -48.4702382],
+              "meanElevationM": 1256.2,
+              "elevationStdDevM": 73.2
+            },
+            {
+              "position": 106,
+              "coordinate": [-71.7059534, -48.4255553],
+              "meanElevationM": 1072.2,
+              "elevationStdDevM": 86.2
+            },
+            {
+              "position": 107,
+              "coordinate": [-71.7135405, -48.3808723],
+              "meanElevationM": 780,
+              "elevationStdDevM": 69.2
+            },
+            {
+              "position": 108,
+              "coordinate": [-71.7211262, -48.3361897],
+              "meanElevationM": 695.9,
+              "elevationStdDevM": 16.8
+            },
+            {
+              "position": 109,
+              "coordinate": [-71.7287132, -48.2915076],
+              "meanElevationM": 748.8,
+              "elevationStdDevM": 52.8
+            },
+            {
+              "position": 110,
+              "coordinate": [-71.7362986, -48.246826],
+              "meanElevationM": 881.9,
+              "elevationStdDevM": 60.5
+            },
+            {
+              "position": 111,
+              "coordinate": [-71.7438852, -48.2021449],
+              "meanElevationM": 930.7,
+              "elevationStdDevM": 103
+            },
+            {
+              "position": 112,
+              "coordinate": [-71.7514806, -48.157465],
+              "meanElevationM": 835.6,
+              "elevationStdDevM": 44.6
+            },
+            {
+              "position": 113,
+              "coordinate": [-71.7590659, -48.1127849],
+              "meanElevationM": 827.5,
+              "elevationStdDevM": 28.5
+            },
+            {
+              "position": 114,
+              "coordinate": [-71.7666526, -48.0681053],
+              "meanElevationM": 830.4,
+              "elevationStdDevM": 30.4
+            },
+            {
+              "position": 115,
+              "coordinate": [-71.7742391, -48.0234263],
+              "meanElevationM": 832.2,
+              "elevationStdDevM": 15.2
+            },
+            {
+              "position": 116,
+              "coordinate": [-71.7818241, -47.9787476],
+              "meanElevationM": 1026.3,
+              "elevationStdDevM": 166.1
+            },
+            {
+              "position": 117,
+              "coordinate": [-71.7894116, -47.9340696],
+              "meanElevationM": 1500.7,
+              "elevationStdDevM": 126.6
+            },
+            {
+              "position": 118,
+              "coordinate": [-71.7970052, -47.8893926],
+              "meanElevationM": 1569.5,
+              "elevationStdDevM": 86.8
+            },
+            {
+              "position": 119,
+              "coordinate": [-71.8045915, -47.8447155],
+              "meanElevationM": 1676.5,
+              "elevationStdDevM": 121.2
+            },
+            {
+              "position": 120,
+              "coordinate": [-71.8121777, -47.8000389],
+              "meanElevationM": 2010.1,
+              "elevationStdDevM": 97.7
+            },
+            {
+              "position": 121,
+              "coordinate": [-71.8197636, -47.7553628],
+              "meanElevationM": 1939.9,
+              "elevationStdDevM": 67.9
+            },
+            {
+              "position": 122,
+              "coordinate": [-71.8273482, -47.710687],
+              "meanElevationM": 2026.2,
+              "elevationStdDevM": 114.6
+            },
+            {
+              "position": 123,
+              "coordinate": [-71.8349342, -47.6660119],
+              "meanElevationM": 1675.7,
+              "elevationStdDevM": 212.9
+            },
+            {
+              "position": 124,
+              "coordinate": [-71.84252, -47.6213373],
+              "meanElevationM": 1047.2,
+              "elevationStdDevM": 131.7
+            },
+            {
+              "position": 125,
+              "coordinate": [-71.8501071, -47.5766633],
+              "meanElevationM": 948,
+              "elevationStdDevM": 301.3
+            },
+            {
+              "position": 126,
+              "coordinate": [-71.8577012, -47.5319903],
+              "meanElevationM": 414.9,
+              "elevationStdDevM": 327.7
+            },
+            {
+              "position": 127,
+              "coordinate": [-71.8652854, -47.4873171],
+              "meanElevationM": 178.6,
+              "elevationStdDevM": 56.9
+            },
+            {
+              "position": 128,
+              "coordinate": [-71.8728709, -47.4426444],
+              "meanElevationM": 156.9,
+              "elevationStdDevM": 5.7
+            },
+            {
+              "position": 129,
+              "coordinate": [-71.8804564, -47.3979723],
+              "meanElevationM": 191.9,
+              "elevationStdDevM": 61.2
+            },
+            {
+              "position": 130,
+              "coordinate": [-71.8880417, -47.3533006],
+              "meanElevationM": 297.9,
+              "elevationStdDevM": 113.4
+            },
+            {
+              "position": 131,
+              "coordinate": [-71.895627, -47.3086295],
+              "meanElevationM": 335.9,
+              "elevationStdDevM": 141.8
+            },
+            {
+              "position": 132,
+              "coordinate": [-71.9032122, -47.2639588],
+              "meanElevationM": 517.4,
+              "elevationStdDevM": 133.3
+            },
+            {
+              "position": 133,
+              "coordinate": [-71.9107974, -47.2192886],
+              "meanElevationM": 671.8,
+              "elevationStdDevM": 53.4
+            },
+            {
+              "position": 134,
+              "coordinate": [-71.9183826, -47.174619],
+              "meanElevationM": 604.5,
+              "elevationStdDevM": 49.5
+            },
+            {
+              "position": 135,
+              "coordinate": [-71.925969, -47.1299499],
+              "meanElevationM": 1369.9,
+              "elevationStdDevM": 433.7
+            },
+            {
+              "position": 136,
+              "coordinate": [-71.9335539, -47.0852812],
+              "meanElevationM": 1843.8,
+              "elevationStdDevM": 225.3
+            },
+            {
+              "position": 137,
+              "coordinate": [-71.9411387, -47.040613],
+              "meanElevationM": 1706,
+              "elevationStdDevM": 290.4
+            },
+            {
+              "position": 138,
+              "coordinate": [-71.9487247, -46.9959454],
+              "meanElevationM": 1902.9,
+              "elevationStdDevM": 323.6
+            },
+            {
+              "position": 139,
+              "coordinate": [-71.9563179, -46.9512789],
+              "meanElevationM": 1836.5,
+              "elevationStdDevM": 206.6
+            },
+            {
+              "position": 140,
+              "coordinate": [-71.9639026, -46.9066122],
+              "meanElevationM": 1552.5,
+              "elevationStdDevM": 278.4
+            },
+            {
+              "position": 141,
+              "coordinate": [-71.9714885, -46.8619461],
+              "meanElevationM": 1332,
+              "elevationStdDevM": 272.3
+            },
+            {
+              "position": 142,
+              "coordinate": [-71.9790729, -46.8172803],
+              "meanElevationM": 975.9,
+              "elevationStdDevM": 184.3
+            },
+            {
+              "position": 143,
+              "coordinate": [-71.9866574, -46.7726151],
+              "meanElevationM": 1455.9,
+              "elevationStdDevM": 207.9
+            },
+            {
+              "position": 144,
+              "coordinate": [-71.9942431, -46.7279505],
+              "meanElevationM": 1287.5,
+              "elevationStdDevM": 296.3
+            },
+            {
+              "position": 145,
+              "coordinate": [-72.0018272, -46.6832863],
+              "meanElevationM": 1744,
+              "elevationStdDevM": 161.1
+            },
+            {
+              "position": 146,
+              "coordinate": [-72.0094115, -46.6386225],
+              "meanElevationM": 1825.5,
+              "elevationStdDevM": 131.2
+            },
+            {
+              "position": 147,
+              "coordinate": [-72.0169968, -46.5939594],
+              "meanElevationM": 1227.6,
+              "elevationStdDevM": 280.6
+            },
+            {
+              "position": 148,
+              "coordinate": [-72.0245809, -46.5492966],
+              "meanElevationM": 373.4,
+              "elevationStdDevM": 181.4
+            },
+            {
+              "position": 149,
+              "coordinate": [-72.0321662, -46.5046345],
+              "meanElevationM": 205.5,
+              "elevationStdDevM": 0
+            },
+            {
+              "position": 150,
+              "coordinate": [-72.0397501, -46.4599727],
+              "meanElevationM": 484.6,
+              "elevationStdDevM": 371.8
+            },
+            {
+              "position": 151,
+              "coordinate": [-72.0473351, -46.4153116],
+              "meanElevationM": 1482.3,
+              "elevationStdDevM": 237.2
+            },
+            {
+              "position": 152,
+              "coordinate": [-72.0549189, -46.3706508],
+              "meanElevationM": 1291.1,
+              "elevationStdDevM": 201.4
+            },
+            {
+              "position": 153,
+              "coordinate": [-72.0625038, -46.3259906],
+              "meanElevationM": 1025.5,
+              "elevationStdDevM": 152
+            },
+            {
+              "position": 154,
+              "coordinate": [-72.0700874, -46.2813309],
+              "meanElevationM": 889.3,
+              "elevationStdDevM": 221.6
+            },
+            {
+              "position": 155,
+              "coordinate": [-72.0776724, -46.2366717],
+              "meanElevationM": 606.1,
+              "elevationStdDevM": 107.5
+            },
+            {
+              "position": 156,
+              "coordinate": [-72.085257, -46.192013],
+              "meanElevationM": 497.6,
+              "elevationStdDevM": 157.4
+            },
+            {
+              "position": 157,
+              "coordinate": [-72.0928403, -46.1473547],
+              "meanElevationM": 515.3,
+              "elevationStdDevM": 179.7
+            },
+            {
+              "position": 158,
+              "coordinate": [-72.100425, -46.1026971],
+              "meanElevationM": 770.6,
+              "elevationStdDevM": 296.7
+            },
+            {
+              "position": 159,
+              "coordinate": [-72.1080097, -46.0580399],
+              "meanElevationM": 1598.7,
+              "elevationStdDevM": 197
+            },
+            {
+              "position": 160,
+              "coordinate": [-72.1155939, -46.0133832],
+              "meanElevationM": 1356.4,
+              "elevationStdDevM": 275.9
+            },
+            {
+              "position": 161,
+              "coordinate": [-72.1231755, -45.9687267],
+              "meanElevationM": 1113.3,
+              "elevationStdDevM": 260.9
+            },
+            {
+              "position": 162,
+              "coordinate": [-72.1307515, -45.9240703],
+              "meanElevationM": 781.1,
+              "elevationStdDevM": 380.8
+            },
+            {
+              "position": 163,
+              "coordinate": [-72.1383357, -45.8794151],
+              "meanElevationM": 1248.2,
+              "elevationStdDevM": 251.3
+            },
+            {
+              "position": 164,
+              "coordinate": [-72.1459199, -45.8347604],
+              "meanElevationM": 1162.2,
+              "elevationStdDevM": 279.6
+            },
+            {
+              "position": 165,
+              "coordinate": [-72.1535041, -45.7901062],
+              "meanElevationM": 469.2,
+              "elevationStdDevM": 150.5
+            },
+            {
+              "position": 166,
+              "coordinate": [-72.1610881, -45.7454525],
+              "meanElevationM": 319,
+              "elevationStdDevM": 49.1
+            },
+            {
+              "position": 167,
+              "coordinate": [-72.168672, -45.7007993],
+              "meanElevationM": 309.1,
+              "elevationStdDevM": 32.5
+            },
+            {
+              "position": 168,
+              "coordinate": [-72.1762559, -45.6561465],
+              "meanElevationM": 346.5,
+              "elevationStdDevM": 118.2
+            },
+            {
+              "position": 169,
+              "coordinate": [-72.1838397, -45.6114943],
+              "meanElevationM": 648.3,
+              "elevationStdDevM": 255.1
+            },
+            {
+              "position": 170,
+              "coordinate": [-72.1914234, -45.5668426],
+              "meanElevationM": 840.3,
+              "elevationStdDevM": 249
+            },
+            {
+              "position": 171,
+              "coordinate": [-72.199007, -45.5221913],
+              "meanElevationM": 841.5,
+              "elevationStdDevM": 297.7
+            },
+            {
+              "position": 172,
+              "coordinate": [-72.2065905, -45.4775406],
+              "meanElevationM": 746,
+              "elevationStdDevM": 391.4
+            },
+            {
+              "position": 173,
+              "coordinate": [-72.2141739, -45.4328903],
+              "meanElevationM": 772.6,
+              "elevationStdDevM": 327.2
+            },
+            {
+              "position": 174,
+              "coordinate": [-72.2217557, -45.3882404],
+              "meanElevationM": 1156.7,
+              "elevationStdDevM": 306.3
+            },
+            {
+              "position": 175,
+              "coordinate": [-72.2293307, -45.3435905],
+              "meanElevationM": 1166.1,
+              "elevationStdDevM": 279.4
+            },
+            {
+              "position": 176,
+              "coordinate": [-72.2369139, -45.2989417],
+              "meanElevationM": 901.9,
+              "elevationStdDevM": 371.3
+            },
+            {
+              "position": 177,
+              "coordinate": [-72.2444973, -45.2542934],
+              "meanElevationM": 368.5,
+              "elevationStdDevM": 267.8
+            },
+            {
+              "position": 178,
+              "coordinate": [-72.2520817, -45.2096458],
+              "meanElevationM": 910.8,
+              "elevationStdDevM": 470.9
+            },
+            {
+              "position": 179,
+              "coordinate": [-72.2596646, -45.1649985],
+              "meanElevationM": 1203.8,
+              "elevationStdDevM": 205.6
+            },
+            {
+              "position": 180,
+              "coordinate": [-72.2672475, -45.1203517],
+              "meanElevationM": 742.3,
+              "elevationStdDevM": 291
+            },
+            {
+              "position": 181,
+              "coordinate": [-72.2748305, -45.0757054],
+              "meanElevationM": 907.8,
+              "elevationStdDevM": 291.1
+            },
+            {
+              "position": 182,
+              "coordinate": [-72.282413, -45.0310596],
+              "meanElevationM": 1029,
+              "elevationStdDevM": 237.6
+            },
+            {
+              "position": 183,
+              "coordinate": [-72.2899873, -44.9864136],
+              "meanElevationM": 601.6,
+              "elevationStdDevM": 439.5
+            },
+            {
+              "position": 184,
+              "coordinate": [-72.2975701, -44.9417688],
+              "meanElevationM": 584.3,
+              "elevationStdDevM": 433.4
+            },
+            {
+              "position": 185,
+              "coordinate": [-72.305154, -44.8971246],
+              "meanElevationM": 848.7,
+              "elevationStdDevM": 418.4
+            },
+            {
+              "position": 186,
+              "coordinate": [-72.3127366, -44.8524808],
+              "meanElevationM": 837.2,
+              "elevationStdDevM": 330.8
+            },
+            {
+              "position": 187,
+              "coordinate": [-72.3203203, -44.8078376],
+              "meanElevationM": 910.6,
+              "elevationStdDevM": 222.8
+            },
+            {
+              "position": 188,
+              "coordinate": [-72.3279011, -44.7631946],
+              "meanElevationM": 1134.3,
+              "elevationStdDevM": 264.8
+            },
+            {
+              "position": 189,
+              "coordinate": [-72.3354763, -44.7185517],
+              "meanElevationM": 763.3,
+              "elevationStdDevM": 306
+            },
+            {
+              "position": 190,
+              "coordinate": [-72.3430586, -44.6739099],
+              "meanElevationM": 495.1,
+              "elevationStdDevM": 273.9
+            },
+            {
+              "position": 191,
+              "coordinate": [-72.350642, -44.6292686],
+              "meanElevationM": 656,
+              "elevationStdDevM": 354.9
+            },
+            {
+              "position": 192,
+              "coordinate": [-72.3582241, -44.5846278],
+              "meanElevationM": 997.5,
+              "elevationStdDevM": 297.4
+            },
+            {
+              "position": 193,
+              "coordinate": [-72.3658059, -44.5399874],
+              "meanElevationM": 979.6,
+              "elevationStdDevM": 313.5
+            },
+            {
+              "position": 194,
+              "coordinate": [-72.3733807, -44.495347],
+              "meanElevationM": 1365.1,
+              "elevationStdDevM": 287
+            },
+            {
+              "position": 195,
+              "coordinate": [-72.3809626, -44.4507076],
+              "meanElevationM": 1186,
+              "elevationStdDevM": 380.7
+            },
+            {
+              "position": 196,
+              "coordinate": [-72.3885458, -44.4060689],
+              "meanElevationM": 1613.5,
+              "elevationStdDevM": 271.1
+            },
+            {
+              "position": 197,
+              "coordinate": [-72.3961286, -44.3614306],
+              "meanElevationM": 1119,
+              "elevationStdDevM": 246.1
+            },
+            {
+              "position": 198,
+              "coordinate": [-72.4037086, -44.3167926],
+              "meanElevationM": 1035.4,
+              "elevationStdDevM": 357.3
+            },
+            {
+              "position": 199,
+              "coordinate": [-72.4112833, -44.2721546],
+              "meanElevationM": 1349.6,
+              "elevationStdDevM": 266.9
+            },
+            {
+              "position": 200,
+              "coordinate": [-72.4188662, -44.2275179],
+              "meanElevationM": 1006.3,
+              "elevationStdDevM": 330.6
+            },
+            {
+              "position": 201,
+              "coordinate": [-72.4264489, -44.1828816],
+              "meanElevationM": 1044.5,
+              "elevationStdDevM": 294.3
+            },
+            {
+              "position": 202,
+              "coordinate": [-72.4340313, -44.1382458],
+              "meanElevationM": 635.1,
+              "elevationStdDevM": 340.7
+            },
+            {
+              "position": 203,
+              "coordinate": [-72.4416108, -44.0936103],
+              "meanElevationM": 529.8,
+              "elevationStdDevM": 429.2
+            },
+            {
+              "position": 204,
+              "coordinate": [-72.4491852, -44.0489748],
+              "meanElevationM": 258.3,
+              "elevationStdDevM": 218.5
+            },
+            {
+              "position": 205,
+              "coordinate": [-72.4567676, -44.0043405],
+              "meanElevationM": 119.1,
+              "elevationStdDevM": 95
+            },
+            {
+              "position": 206,
+              "coordinate": [-72.4643499, -43.9597067],
+              "meanElevationM": 115.6,
+              "elevationStdDevM": 87.5
+            },
+            {
+              "position": 207,
+              "coordinate": [-72.4719305, -43.9150732],
+              "meanElevationM": 581.7,
+              "elevationStdDevM": 387.4
+            },
+            {
+              "position": 208,
+              "coordinate": [-72.4795045, -43.8704397],
+              "meanElevationM": 1081.5,
+              "elevationStdDevM": 174.5
+            },
+            {
+              "position": 209,
+              "coordinate": [-72.4870866, -43.8258074],
+              "meanElevationM": 1198.1,
+              "elevationStdDevM": 203.8
+            },
+            {
+              "position": 210,
+              "coordinate": [-72.4946686, -43.7811756],
+              "meanElevationM": 1085.1,
+              "elevationStdDevM": 199.1
+            },
+            {
+              "position": 211,
+              "coordinate": [-72.5022489, -43.7365441],
+              "meanElevationM": 1060.7,
+              "elevationStdDevM": 291.4
+            },
+            {
+              "position": 212,
+              "coordinate": [-72.5098225, -43.6919126],
+              "meanElevationM": 1143.5,
+              "elevationStdDevM": 227.2
+            },
+            {
+              "position": 213,
+              "coordinate": [-72.5174046, -43.6472823],
+              "meanElevationM": 1090.9,
+              "elevationStdDevM": 143.1
+            },
+            {
+              "position": 214,
+              "coordinate": [-72.5249859, -43.6026524],
+              "meanElevationM": 1149,
+              "elevationStdDevM": 194.6
+            },
+            {
+              "position": 215,
+              "coordinate": [-72.5325594, -43.5580223],
+              "meanElevationM": 1025.1,
+              "elevationStdDevM": 344.8
+            },
+            {
+              "position": 216,
+              "coordinate": [-72.5401409, -43.5133934],
+              "meanElevationM": 1124.5,
+              "elevationStdDevM": 327.9
+            },
+            {
+              "position": 217,
+              "coordinate": [-72.5477223, -43.4687651],
+              "meanElevationM": 883.9,
+              "elevationStdDevM": 383.3
+            },
+            {
+              "position": 218,
+              "coordinate": [-72.5553022, -43.4241371],
+              "meanElevationM": 976.9,
+              "elevationStdDevM": 379.5
+            },
+            {
+              "position": 219,
+              "coordinate": [-72.5628767, -43.3795091],
+              "meanElevationM": 692.2,
+              "elevationStdDevM": 396.4
+            },
+            {
+              "position": 220,
+              "coordinate": [-72.5704579, -43.3348822],
+              "meanElevationM": 1003.4,
+              "elevationStdDevM": 430.9
+            },
+            {
+              "position": 221,
+              "coordinate": [-72.5780373, -43.2902557],
+              "meanElevationM": 1083.2,
+              "elevationStdDevM": 392
+            },
+            {
+              "position": 222,
+              "coordinate": [-72.5856104, -43.2456291],
+              "meanElevationM": 817.1,
+              "elevationStdDevM": 335.1
+            },
+            {
+              "position": 223,
+              "coordinate": [-72.5931927, -43.2010038],
+              "meanElevationM": 812.3,
+              "elevationStdDevM": 341.4
+            },
+            {
+              "position": 224,
+              "coordinate": [-72.6007721, -43.1563788],
+              "meanElevationM": 805.9,
+              "elevationStdDevM": 360.1
+            },
+            {
+              "position": 225,
+              "coordinate": [-72.6083461, -43.1117537],
+              "meanElevationM": 760.1,
+              "elevationStdDevM": 322.6
+            },
+            {
+              "position": 226,
+              "coordinate": [-72.6159271, -43.0671298],
+              "meanElevationM": 494.6,
+              "elevationStdDevM": 305.4
+            },
+            {
+              "position": 227,
+              "coordinate": [-72.6235073, -43.0225064],
+              "meanElevationM": 362.1,
+              "elevationStdDevM": 396.1
+            },
+            {
+              "position": 228,
+              "coordinate": [-72.63108, -42.9778827],
+              "meanElevationM": 226.4,
+              "elevationStdDevM": 283.1
+            },
+            {
+              "position": 229,
+              "coordinate": [-72.6386618, -42.9332604],
+              "meanElevationM": 662.4,
+              "elevationStdDevM": 369.4
+            },
+            {
+              "position": 230,
+              "coordinate": [-72.6462407, -42.8886383],
+              "meanElevationM": 631.1,
+              "elevationStdDevM": 297.8
+            },
+            {
+              "position": 231,
+              "coordinate": [-72.6538142, -42.8440162],
+              "meanElevationM": 701.5,
+              "elevationStdDevM": 182.8
+            },
+            {
+              "position": 232,
+              "coordinate": [-72.6613946, -42.7993953],
+              "meanElevationM": 207,
+              "elevationStdDevM": 188.3
+            },
+            {
+              "position": 233,
+              "coordinate": [-72.6689744, -42.7547748],
+              "meanElevationM": 684.6,
+              "elevationStdDevM": 320.9
+            },
+            {
+              "position": 234,
+              "coordinate": [-72.6765466, -42.7101541],
+              "meanElevationM": 613.5,
+              "elevationStdDevM": 338.1
+            },
+            {
+              "position": 235,
+              "coordinate": [-72.6841281, -42.6655347],
+              "meanElevationM": 610.6,
+              "elevationStdDevM": 266.2
+            },
+            {
+              "position": 236,
+              "coordinate": [-72.6917079, -42.6209157],
+              "meanElevationM": 621.7,
+              "elevationStdDevM": 304.6
+            },
+            {
+              "position": 237,
+              "coordinate": [-72.6992809, -42.5762966],
+              "meanElevationM": 633.5,
+              "elevationStdDevM": 193.4
+            },
+            {
+              "position": 238,
+              "coordinate": [-72.7068591, -42.5316784],
+              "meanElevationM": 389.2,
+              "elevationStdDevM": 338.9
+            },
+            {
+              "position": 239,
+              "coordinate": [-72.7144323, -42.4870603],
+              "meanElevationM": 0,
+              "elevationStdDevM": 0
+            },
+            {
+              "position": 240,
+              "coordinate": [-72.7220135, -42.4424434],
+              "meanElevationM": 13.5,
+              "elevationStdDevM": 52
+            },
+            {
+              "position": 241,
+              "coordinate": [-72.7295925, -42.3978269],
+              "meanElevationM": 102.9,
+              "elevationStdDevM": 174.4
+            },
+            {
+              "position": 242,
+              "coordinate": [-72.737164, -42.3532101],
+              "meanElevationM": 453.2,
+              "elevationStdDevM": 232.6
+            },
+            {
+              "position": 243,
+              "coordinate": [-72.7447432, -42.3085945],
+              "meanElevationM": 285.6,
+              "elevationStdDevM": 200.6
+            },
+            {
+              "position": 244,
+              "coordinate": [-72.7523159, -42.2639789],
+              "meanElevationM": 35.5,
+              "elevationStdDevM": 22.7
+            },
+            {
+              "position": 245,
+              "coordinate": [-72.7598967, -42.2193644],
+              "meanElevationM": 1.2,
+              "elevationStdDevM": 4.7
+            },
+            {
+              "position": 246,
+              "coordinate": [-72.7674756, -42.1747504],
+              "meanElevationM": 0,
+              "elevationStdDevM": 0
+            },
+            {
+              "position": 247,
+              "coordinate": [-72.7750481, -42.1301362],
+              "meanElevationM": 0,
+              "elevationStdDevM": 0
+            },
+            {
+              "position": 248,
+              "coordinate": [-72.7826268, -42.085523],
+              "meanElevationM": 0,
+              "elevationStdDevM": 0
+            },
+            {
+              "position": 249,
+              "coordinate": [-72.7901992, -42.0409098],
+              "meanElevationM": 0,
+              "elevationStdDevM": 0
+            },
+            {
+              "position": 250,
+              "coordinate": [-72.7977778, -41.9962977],
+              "meanElevationM": 1.1,
+              "elevationStdDevM": 5.1
+            },
+            {
+              "position": 251,
+              "coordinate": [-72.8053499, -41.9516855],
+              "meanElevationM": 32.1,
+              "elevationStdDevM": 34.6
+            },
+            {
+              "position": 252,
+              "coordinate": [-72.8129301, -41.9070745],
+              "meanElevationM": 54.6,
+              "elevationStdDevM": 36.1
+            },
+            {
+              "position": 253,
+              "coordinate": [-72.8205084, -41.8624638],
+              "meanElevationM": 4.6,
+              "elevationStdDevM": 11.4
+            },
+            {
+              "position": 254,
+              "coordinate": [-72.8280806, -41.8178531],
+              "meanElevationM": 0,
+              "elevationStdDevM": 0
+            },
+            {
+              "position": 255,
+              "coordinate": [-72.8356602, -41.7732435],
+              "meanElevationM": 0,
+              "elevationStdDevM": 0
+            },
+            {
+              "position": 256,
+              "coordinate": [-72.8432319, -41.7286338],
+              "meanElevationM": 0,
+              "elevationStdDevM": 0
+            },
+            {
+              "position": 257,
+              "coordinate": [-72.8508099, -41.6840251],
+              "meanElevationM": 0,
+              "elevationStdDevM": 0
+            },
+            {
+              "position": 258,
+              "coordinate": [-72.8583815, -41.6394163],
+              "meanElevationM": 0,
+              "elevationStdDevM": 0
+            },
+            {
+              "position": 259,
+              "coordinate": [-72.8659596, -41.5948086],
+              "meanElevationM": 0,
+              "elevationStdDevM": 0
+            },
+            {
+              "position": 260,
+              "coordinate": [-72.8735324, -41.5502009],
+              "meanElevationM": 0,
+              "elevationStdDevM": 0
+            },
+            {
+              "position": 261,
+              "coordinate": [-72.8811086, -41.505594],
+              "meanElevationM": 7.7,
+              "elevationStdDevM": 18.3
+            },
+            {
+              "position": 262,
+              "coordinate": [-72.9148489, -41.4785561],
+              "meanElevationM": 47.6,
+              "elevationStdDevM": 49.7
+            },
+            {
+              "position": 263,
+              "coordinate": [-72.8837749, -41.4972174],
+              "meanElevationM": 22.1,
+              "elevationStdDevM": 34.8
+            },
+            {
+              "position": 264,
+              "coordinate": [-72.9020977, -41.465162],
+              "meanElevationM": 96.9,
+              "elevationStdDevM": 47.6
+            },
+            {
+              "position": 265,
+              "coordinate": [-72.9089533, -41.43075],
+              "meanElevationM": 116.6,
+              "elevationStdDevM": 16.7
+            },
+            {
+              "position": 266,
+              "coordinate": [-72.9204397, -41.3869276],
+              "meanElevationM": 113.8,
+              "elevationStdDevM": 8.8
+            },
+            {
+              "position": 267,
+              "coordinate": [-72.9535606, -41.3507479],
+              "meanElevationM": 115.4,
+              "elevationStdDevM": 17.9
+            },
+            {
+              "position": 268,
+              "coordinate": [-72.9893555, -41.322945],
+              "meanElevationM": 101.7,
+              "elevationStdDevM": 32.3
+            },
+            {
+              "position": 269,
+              "coordinate": [-72.9824112, -41.2847866],
+              "meanElevationM": 71.4,
+              "elevationStdDevM": 29.5
+            },
+            {
+              "position": 270,
+              "coordinate": [-73.009735, -41.2456411],
+              "meanElevationM": 77,
+              "elevationStdDevM": 32
+            },
+            {
+              "position": 271,
+              "coordinate": [-73.0448089, -41.2187808],
+              "meanElevationM": 113.3,
+              "elevationStdDevM": 26.5
+            },
+            {
+              "position": 272,
+              "coordinate": [-73.0711628, -41.1823172],
+              "meanElevationM": 134.9,
+              "elevationStdDevM": 10.9
+            },
+            {
+              "position": 273,
+              "coordinate": [-73.0632995, -41.137743],
+              "meanElevationM": 143.3,
+              "elevationStdDevM": 11.5
+            },
+            {
+              "position": 274,
+              "coordinate": [-73.0746194, -41.0949724],
+              "meanElevationM": 138.1,
+              "elevationStdDevM": 6.6
+            },
+            {
+              "position": 275,
+              "coordinate": [-73.0978842, -41.0535678],
+              "meanElevationM": 124,
+              "elevationStdDevM": 5.5
+            },
+            {
+              "position": 276,
+              "coordinate": [-73.12163, -41.0123554],
+              "meanElevationM": 117.3,
+              "elevationStdDevM": 5.5
+            },
+            {
+              "position": 277,
+              "coordinate": [-73.150853, -40.9746049],
+              "meanElevationM": 116.9,
+              "elevationStdDevM": 13.3
+            },
+            {
+              "position": 278,
+              "coordinate": [-73.1612542, -40.9311844],
+              "meanElevationM": 119.1,
+              "elevationStdDevM": 9.7
+            },
+            {
+              "position": 279,
+              "coordinate": [-73.1662018, -40.8863827],
+              "meanElevationM": 96.8,
+              "elevationStdDevM": 7.8
+            },
+            {
+              "position": 280,
+              "coordinate": [-73.1742024, -40.8421309],
+              "meanElevationM": 82.9,
+              "elevationStdDevM": 7.2
+            },
+            {
+              "position": 281,
+              "coordinate": [-73.2083912, -40.8077454],
+              "meanElevationM": 81.7,
+              "elevationStdDevM": 18.9
+            },
+            {
+              "position": 282,
+              "coordinate": [-73.2165657, -40.7661724],
+              "meanElevationM": 68.4,
+              "elevationStdDevM": 17.8
+            },
+            {
+              "position": 283,
+              "coordinate": [-73.2116995, -40.7259644],
+              "meanElevationM": 63.7,
+              "elevationStdDevM": 15.4
+            },
+            {
+              "position": 284,
+              "coordinate": [-73.2090923, -40.6860749],
+              "meanElevationM": 63.7,
+              "elevationStdDevM": 22.1
+            },
+            {
+              "position": 285,
+              "coordinate": [-73.2001551, -40.6448753],
+              "meanElevationM": 54.9,
+              "elevationStdDevM": 23.5
+            },
+            {
+              "position": 286,
+              "coordinate": [-73.167022, -40.6090057],
+              "meanElevationM": 54.5,
+              "elevationStdDevM": 24.1
+            },
+            {
+              "position": 287,
+              "coordinate": [-73.143438, -40.5735384],
+              "meanElevationM": 45.3,
+              "elevationStdDevM": 20.6
+            },
+            {
+              "position": 288,
+              "coordinate": [-73.1349538, -40.5380068],
+              "meanElevationM": 55.1,
+              "elevationStdDevM": 20.7
+            },
+            {
+              "position": 289,
+              "coordinate": [-73.1270662, -40.5072049],
+              "meanElevationM": 77.3,
+              "elevationStdDevM": 14.4
+            },
+            {
+              "position": 290,
+              "coordinate": [-73.1307761, -40.4641491],
+              "meanElevationM": 75.8,
+              "elevationStdDevM": 11.8
+            },
+            {
+              "position": 291,
+              "coordinate": [-73.1337717, -40.4230807],
+              "meanElevationM": 59.3,
+              "elevationStdDevM": 14
+            },
+            {
+              "position": 292,
+              "coordinate": [-73.1466324, -40.3811042],
+              "meanElevationM": 53.3,
+              "elevationStdDevM": 22.2
+            },
+            {
+              "position": 293,
+              "coordinate": [-73.1587001, -40.360852],
+              "meanElevationM": 29.7,
+              "elevationStdDevM": 28
+            },
+            {
+              "position": 294,
+              "coordinate": [-73.1155713, -40.3401305],
+              "meanElevationM": 26.7,
+              "elevationStdDevM": 28.5
+            },
+            {
+              "position": 295,
+              "coordinate": [-73.0904743, -40.3160531],
+              "meanElevationM": 33.2,
+              "elevationStdDevM": 24.7
+            },
+            {
+              "position": 296,
+              "coordinate": [-73.0607301, -40.2784332],
+              "meanElevationM": 52.7,
+              "elevationStdDevM": 17.7
+            },
+            {
+              "position": 297,
+              "coordinate": [-73.0225588, -40.2561379],
+              "meanElevationM": 64,
+              "elevationStdDevM": 15.6
+            },
+            {
+              "position": 298,
+              "coordinate": [-72.9826716, -40.2241539],
+              "meanElevationM": 79.3,
+              "elevationStdDevM": 27.4
+            },
+            {
+              "position": 299,
+              "coordinate": [-72.9482039, -40.1967363],
+              "meanElevationM": 94.1,
+              "elevationStdDevM": 32.2
+            },
+            {
+              "position": 300,
+              "coordinate": [-72.9131451, -40.163336],
+              "meanElevationM": 107.1,
+              "elevationStdDevM": 42.6
+            },
+            {
+              "position": 301,
+              "coordinate": [-72.8747127, -40.1297409],
+              "meanElevationM": 125.7,
+              "elevationStdDevM": 55.9
+            },
+            {
+              "position": 302,
+              "coordinate": [-72.8770568, -40.0848447],
+              "meanElevationM": 120.8,
+              "elevationStdDevM": 56.8
+            },
+            {
+              "position": 303,
+              "coordinate": [-72.8817147, -40.0400497],
+              "meanElevationM": 81,
+              "elevationStdDevM": 17.5
+            },
+            {
+              "position": 304,
+              "coordinate": [-72.8492645, -40.0030426],
+              "meanElevationM": 78.3,
+              "elevationStdDevM": 16.7
+            },
+            {
+              "position": 305,
+              "coordinate": [-72.8064947, -39.9761167],
+              "meanElevationM": 123.2,
+              "elevationStdDevM": 57.8
+            },
+            {
+              "position": 306,
+              "coordinate": [-72.8131581, -39.9323598],
+              "meanElevationM": 141.1,
+              "elevationStdDevM": 81.7
+            },
+            {
+              "position": 307,
+              "coordinate": [-72.8102076, -39.8902181],
+              "meanElevationM": 132.3,
+              "elevationStdDevM": 94.8
+            },
+            {
+              "position": 308,
+              "coordinate": [-72.830593, -39.8513307],
+              "meanElevationM": 112.6,
+              "elevationStdDevM": 110.9
+            },
+            {
+              "position": 309,
+              "coordinate": [-72.8686643, -39.8182745],
+              "meanElevationM": 74.9,
+              "elevationStdDevM": 57
+            },
+            {
+              "position": 310,
+              "coordinate": [-72.9258982, -39.8200588],
+              "meanElevationM": 114.3,
+              "elevationStdDevM": 103.8
+            },
+            {
+              "position": 311,
+              "coordinate": [-72.951052, -39.7970036],
+              "meanElevationM": 40.1,
+              "elevationStdDevM": 29.2
+            },
+            {
+              "position": 312,
+              "coordinate": [-72.9389767, -39.7570581],
+              "meanElevationM": 58.8,
+              "elevationStdDevM": 26.3
+            },
+            {
+              "position": 313,
+              "coordinate": [-72.94304, -39.7133426],
+              "meanElevationM": 41.4,
+              "elevationStdDevM": 19.3
+            },
+            {
+              "position": 314,
+              "coordinate": [-72.9439828, -39.6700588],
+              "meanElevationM": 27.9,
+              "elevationStdDevM": 15.4
+            },
+            {
+              "position": 315,
+              "coordinate": [-72.9530401, -39.628548],
+              "meanElevationM": 31.8,
+              "elevationStdDevM": 8.7
+            },
+            {
+              "position": 316,
+              "coordinate": [-72.9509977, -39.5844332],
+              "meanElevationM": 56.3,
+              "elevationStdDevM": 37.5
+            },
+            {
+              "position": 317,
+              "coordinate": [-72.9071189, -39.5590961],
+              "meanElevationM": 48.3,
+              "elevationStdDevM": 29.5
+            },
+            {
+              "position": 318,
+              "coordinate": [-72.8549847, -39.5400938],
+              "meanElevationM": 55.7,
+              "elevationStdDevM": 29.7
+            },
+            {
+              "position": 319,
+              "coordinate": [-72.8126254, -39.511263],
+              "meanElevationM": 87,
+              "elevationStdDevM": 46.8
+            },
+            {
+              "position": 320,
+              "coordinate": [-72.8019589, -39.4684219],
+              "meanElevationM": 115.6,
+              "elevationStdDevM": 72.1
+            },
+            {
+              "position": 321,
+              "coordinate": [-72.7573424, -39.4407254],
+              "meanElevationM": 103.8,
+              "elevationStdDevM": 44.7
+            },
+            {
+              "position": 322,
+              "coordinate": [-72.7122258, -39.4137899],
+              "meanElevationM": 136.4,
+              "elevationStdDevM": 54.6
+            },
+            {
+              "position": 323,
+              "coordinate": [-72.6676222, -39.3886981],
+              "meanElevationM": 146.7,
+              "elevationStdDevM": 74
+            },
+            {
+              "position": 324,
+              "coordinate": [-72.6244719, -39.3606584],
+              "meanElevationM": 139.5,
+              "elevationStdDevM": 44.4
+            },
+            {
+              "position": 325,
+              "coordinate": [-72.590691, -39.3269122],
+              "meanElevationM": 201.6,
+              "elevationStdDevM": 59.7
+            },
+            {
+              "position": 326,
+              "coordinate": [-72.6205072, -39.2917478],
+              "meanElevationM": 219,
+              "elevationStdDevM": 73.1
+            },
+            {
+              "position": 327,
+              "coordinate": [-72.6625971, -39.2642754],
+              "meanElevationM": 186,
+              "elevationStdDevM": 91.6
+            },
+            {
+              "position": 328,
+              "coordinate": [-72.6772049, -39.2222302],
+              "meanElevationM": 126.3,
+              "elevationStdDevM": 40.3
+            },
+            {
+              "position": 329,
+              "coordinate": [-72.6623507, -39.1788133],
+              "meanElevationM": 150.1,
+              "elevationStdDevM": 71.8
+            },
+            {
+              "position": 330,
+              "coordinate": [-72.672994, -39.1378585],
+              "meanElevationM": 144.7,
+              "elevationStdDevM": 81.4
+            },
+            {
+              "position": 331,
+              "coordinate": [-72.6731949, -39.0964149],
+              "meanElevationM": 104.2,
+              "elevationStdDevM": 29.6
+            },
+            {
+              "position": 332,
+              "coordinate": [-72.6653259, -39.0524874],
+              "meanElevationM": 104.6,
+              "elevationStdDevM": 25.7
+            },
+            {
+              "position": 333,
+              "coordinate": [-72.6547597, -39.0082769],
+              "meanElevationM": 97.6,
+              "elevationStdDevM": 9.1
+            },
+            {
+              "position": 334,
+              "coordinate": [-72.6315604, -38.9678467],
+              "meanElevationM": 97,
+              "elevationStdDevM": 8.8
+            },
+            {
+              "position": 335,
+              "coordinate": [-72.6247005, -38.9231983],
+              "meanElevationM": 99.1,
+              "elevationStdDevM": 4.8
+            },
+            {
+              "position": 336,
+              "coordinate": [-72.6178302, -38.8785513],
+              "meanElevationM": 91.4,
+              "elevationStdDevM": 6.7
+            },
+            {
+              "position": 337,
+              "coordinate": [-72.6221738, -38.8347588],
+              "meanElevationM": 86.5,
+              "elevationStdDevM": 14.8
+            },
+            {
+              "position": 338,
+              "coordinate": [-72.6168963, -38.7906764],
+              "meanElevationM": 96.5,
+              "elevationStdDevM": 9
+            },
+            {
+              "position": 339,
+              "coordinate": [-72.5911145, -38.7544005],
+              "meanElevationM": 122.2,
+              "elevationStdDevM": 46.6
+            },
+            {
+              "position": 340,
+              "coordinate": [-72.5578692, -38.7200004],
+              "meanElevationM": 140.6,
+              "elevationStdDevM": 48.5
+            },
+            {
+              "position": 341,
+              "coordinate": [-72.5169575, -38.6900762],
+              "meanElevationM": 145.2,
+              "elevationStdDevM": 25.4
+            },
+            {
+              "position": 342,
+              "coordinate": [-72.4766161, -38.6628847],
+              "meanElevationM": 155.3,
+              "elevationStdDevM": 12.1
+            },
+            {
+              "position": 343,
+              "coordinate": [-72.4465303, -38.6247636],
+              "meanElevationM": 175.8,
+              "elevationStdDevM": 26.6
+            },
+            {
+              "position": 344,
+              "coordinate": [-72.4465348, -38.5812093],
+              "meanElevationM": 237.2,
+              "elevationStdDevM": 56.7
+            },
+            {
+              "position": 345,
+              "coordinate": [-72.4389142, -38.538149],
+              "meanElevationM": 224.3,
+              "elevationStdDevM": 19.6
+            },
+            {
+              "position": 346,
+              "coordinate": [-72.4122535, -38.4984699],
+              "meanElevationM": 243.7,
+              "elevationStdDevM": 17.8
+            },
+            {
+              "position": 347,
+              "coordinate": [-72.3848023, -38.4633297],
+              "meanElevationM": 271.6,
+              "elevationStdDevM": 13.3
+            },
+            {
+              "position": 348,
+              "coordinate": [-72.3761764, -38.4216644],
+              "meanElevationM": 294.5,
+              "elevationStdDevM": 10.3
+            },
+            {
+              "position": 349,
+              "coordinate": [-72.3807868, -38.382324],
+              "meanElevationM": 301.6,
+              "elevationStdDevM": 12.3
+            },
+            {
+              "position": 350,
+              "coordinate": [-72.3757627, -38.3395304],
+              "meanElevationM": 307.2,
+              "elevationStdDevM": 12.2
+            },
+            {
+              "position": 351,
+              "coordinate": [-72.3544176, -38.2987445],
+              "meanElevationM": 324.6,
+              "elevationStdDevM": 12.5
+            },
+            {
+              "position": 352,
+              "coordinate": [-72.3472198, -38.2544093],
+              "meanElevationM": 340.7,
+              "elevationStdDevM": 13
+            },
+            {
+              "position": 353,
+              "coordinate": [-72.3170974, -38.2191715],
+              "meanElevationM": 349.6,
+              "elevationStdDevM": 15.9
+            },
+            {
+              "position": 354,
+              "coordinate": [-72.3094216, -38.174719],
+              "meanElevationM": 357.9,
+              "elevationStdDevM": 12.5
+            },
+            {
+              "position": 355,
+              "coordinate": [-72.3168473, -38.1319409],
+              "meanElevationM": 373.2,
+              "elevationStdDevM": 20.7
+            },
+            {
+              "position": 356,
+              "coordinate": [-72.3427968, -38.0918774],
+              "meanElevationM": 359.8,
+              "elevationStdDevM": 22.4
+            },
+            {
+              "position": 357,
+              "coordinate": [-72.3710651, -38.0551835],
+              "meanElevationM": 317.7,
+              "elevationStdDevM": 24.2
+            },
+            {
+              "position": 358,
+              "coordinate": [-72.4123902, -38.0278592],
+              "meanElevationM": 291.7,
+              "elevationStdDevM": 28.2
+            },
+            {
+              "position": 359,
+              "coordinate": [-72.4374926, -37.9895003],
+              "meanElevationM": 266.6,
+              "elevationStdDevM": 60.7
+            },
+            {
+              "position": 360,
+              "coordinate": [-72.4488348, -37.9488393],
+              "meanElevationM": 223.2,
+              "elevationStdDevM": 41.4
+            },
+            {
+              "position": 361,
+              "coordinate": [-72.4539166, -37.9043248],
+              "meanElevationM": 230.1,
+              "elevationStdDevM": 10.6
+            },
+            {
+              "position": 362,
+              "coordinate": [-72.4544023, -37.8597478],
+              "meanElevationM": 203.4,
+              "elevationStdDevM": 28.2
+            },
+            {
+              "position": 363,
+              "coordinate": [-72.465464, -37.817215],
+              "meanElevationM": 167.4,
+              "elevationStdDevM": 43.6
+            },
+            {
+              "position": 364,
+              "coordinate": [-72.484016, -37.7763023],
+              "meanElevationM": 139.8,
+              "elevationStdDevM": 35
+            },
+            {
+              "position": 365,
+              "coordinate": [-72.511226, -37.7521909],
+              "meanElevationM": 117.5,
+              "elevationStdDevM": 31.4
+            },
+            {
+              "position": 366,
+              "coordinate": [-72.5253021, -37.7110253],
+              "meanElevationM": 102.9,
+              "elevationStdDevM": 25.7
+            },
+            {
+              "position": 367,
+              "coordinate": [-72.5676929, -37.6824959],
+              "meanElevationM": 72.3,
+              "elevationStdDevM": 5.8
+            },
+            {
+              "position": 368,
+              "coordinate": [-72.5911287, -37.6462692],
+              "meanElevationM": 70.9,
+              "elevationStdDevM": 6.5
+            },
+            {
+              "position": 369,
+              "coordinate": [-72.5903491, -37.6013107],
+              "meanElevationM": 67.3,
+              "elevationStdDevM": 6.4
+            },
+            {
+              "position": 370,
+              "coordinate": [-72.5962734, -37.5567279],
+              "meanElevationM": 68,
+              "elevationStdDevM": 10.6
+            },
+            {
+              "position": 371,
+              "coordinate": [-72.5826944, -37.5174948],
+              "meanElevationM": 71.7,
+              "elevationStdDevM": 13.5
+            },
+            {
+              "position": 372,
+              "coordinate": [-72.5833128, -37.4728274],
+              "meanElevationM": 85.5,
+              "elevationStdDevM": 8.5
+            },
+            {
+              "position": 373,
+              "coordinate": [-72.5990802, -37.4303095],
+              "meanElevationM": 86.1,
+              "elevationStdDevM": 8.7
+            },
+            {
+              "position": 374,
+              "coordinate": [-72.6241034, -37.3900227],
+              "meanElevationM": 83.6,
+              "elevationStdDevM": 15.7
+            },
+            {
+              "position": 375,
+              "coordinate": [-72.6592101, -37.3650277],
+              "meanElevationM": 86.1,
+              "elevationStdDevM": 28.2
+            },
+            {
+              "position": 376,
+              "coordinate": [-72.7037797, -37.3441884],
+              "meanElevationM": 91.9,
+              "elevationStdDevM": 35.8
+            },
+            {
+              "position": 377,
+              "coordinate": [-72.7095513, -37.3000771],
+              "meanElevationM": 77.1,
+              "elevationStdDevM": 27.3
+            },
+            {
+              "position": 378,
+              "coordinate": [-72.715279, -37.2602387],
+              "meanElevationM": 85.3,
+              "elevationStdDevM": 49.9
+            },
+            {
+              "position": 379,
+              "coordinate": [-72.6705042, -37.2437593],
+              "meanElevationM": 86.8,
+              "elevationStdDevM": 32.5
+            },
+            {
+              "position": 380,
+              "coordinate": [-72.6343764, -37.2113118],
+              "meanElevationM": 82,
+              "elevationStdDevM": 22.8
+            },
+            {
+              "position": 381,
+              "coordinate": [-72.5933981, -37.1818752],
+              "meanElevationM": 89.3,
+              "elevationStdDevM": 19.8
+            },
+            {
+              "position": 382,
+              "coordinate": [-72.5530008, -37.1517089],
+              "meanElevationM": 99.5,
+              "elevationStdDevM": 21.3
+            },
+            {
+              "position": 383,
+              "coordinate": [-72.5024389, -37.1317728],
+              "meanElevationM": 105.2,
+              "elevationStdDevM": 6.9
+            },
+            {
+              "position": 384,
+              "coordinate": [-72.45953, -37.1043654],
+              "meanElevationM": 114.1,
+              "elevationStdDevM": 7.7
+            },
+            {
+              "position": 385,
+              "coordinate": [-72.4259593, -37.0682439],
+              "meanElevationM": 121.1,
+              "elevationStdDevM": 5.8
+            },
+            {
+              "position": 386,
+              "coordinate": [-72.3993012, -37.0298537],
+              "meanElevationM": 127.4,
+              "elevationStdDevM": 8.8
+            },
+            {
+              "position": 387,
+              "coordinate": [-72.3779363, -36.9890475],
+              "meanElevationM": 123.1,
+              "elevationStdDevM": 4.7
+            },
+            {
+              "position": 388,
+              "coordinate": [-72.3536951, -36.9487776],
+              "meanElevationM": 114.2,
+              "elevationStdDevM": 10.5
+            },
+            {
+              "position": 389,
+              "coordinate": [-72.3486848, -36.9052195],
+              "meanElevationM": 105.6,
+              "elevationStdDevM": 8.5
+            },
+            {
+              "position": 390,
+              "coordinate": [-72.3322352, -36.8625107],
+              "meanElevationM": 96.2,
+              "elevationStdDevM": 7.9
+            },
+            {
+              "position": 391,
+              "coordinate": [-72.3289182, -36.8183399],
+              "meanElevationM": 88.4,
+              "elevationStdDevM": 10.7
+            },
+            {
+              "position": 392,
+              "coordinate": [-72.3125229, -36.7766022],
+              "meanElevationM": 83.3,
+              "elevationStdDevM": 6.3
+            },
+            {
+              "position": 393,
+              "coordinate": [-72.2879598, -36.7363283],
+              "meanElevationM": 79.2,
+              "elevationStdDevM": 7.8
+            },
+            {
+              "position": 394,
+              "coordinate": [-72.2854311, -36.6915735],
+              "meanElevationM": 69.8,
+              "elevationStdDevM": 8.5
+            },
+            {
+              "position": 395,
+              "coordinate": [-72.2580448, -36.6573771],
+              "meanElevationM": 73.6,
+              "elevationStdDevM": 10.7
+            },
+            {
+              "position": 396,
+              "coordinate": [-72.2113609, -36.634],
+              "meanElevationM": 82.7,
+              "elevationStdDevM": 8.4
+            },
+            {
+              "position": 397,
+              "coordinate": [-72.1599776, -36.6168517],
+              "meanElevationM": 94.6,
+              "elevationStdDevM": 5.1
+            },
+            {
+              "position": 398,
+              "coordinate": [-72.1112844, -36.6003237],
+              "meanElevationM": 116.9,
+              "elevationStdDevM": 8.1
+            },
+            {
+              "position": 399,
+              "coordinate": [-72.0981994, -36.5566128],
+              "meanElevationM": 118.9,
+              "elevationStdDevM": 8.2
+            },
+            {
+              "position": 400,
+              "coordinate": [-72.0650569, -36.5216443],
+              "meanElevationM": 130.2,
+              "elevationStdDevM": 6.9
+            },
+            {
+              "position": 401,
+              "coordinate": [-72.0273841, -36.4884033],
+              "meanElevationM": 146.9,
+              "elevationStdDevM": 5.8
+            },
+            {
+              "position": 402,
+              "coordinate": [-71.9897621, -36.4551366],
+              "meanElevationM": 160.9,
+              "elevationStdDevM": 6.4
+            },
+            {
+              "position": 403,
+              "coordinate": [-71.9635853, -36.4167959],
+              "meanElevationM": 171.5,
+              "elevationStdDevM": 7.1
+            },
+            {
+              "position": 404,
+              "coordinate": [-71.943344, -36.3749461],
+              "meanElevationM": 174.3,
+              "elevationStdDevM": 5.8
+            },
+            {
+              "position": 405,
+              "coordinate": [-71.9218642, -36.3334409],
+              "meanElevationM": 168.8,
+              "elevationStdDevM": 4.7
+            },
+            {
+              "position": 406,
+              "coordinate": [-71.9004112, -36.2919305],
+              "meanElevationM": 162.5,
+              "elevationStdDevM": 3.4
+            },
+            {
+              "position": 407,
+              "coordinate": [-71.878933, -36.2504324],
+              "meanElevationM": 160.5,
+              "elevationStdDevM": 4.3
+            },
+            {
+              "position": 408,
+              "coordinate": [-71.8574974, -36.2089239],
+              "meanElevationM": 165.5,
+              "elevationStdDevM": 5
+            },
+            {
+              "position": 409,
+              "coordinate": [-71.8419386, -36.1658716],
+              "meanElevationM": 168.6,
+              "elevationStdDevM": 4.7
+            },
+            {
+              "position": 410,
+              "coordinate": [-71.8254852, -36.1233555],
+              "meanElevationM": 162.6,
+              "elevationStdDevM": 5
+            },
+            {
+              "position": 411,
+              "coordinate": [-71.7935549, -36.0865259],
+              "meanElevationM": 163.8,
+              "elevationStdDevM": 10.6
+            },
+            {
+              "position": 412,
+              "coordinate": [-71.7616269, -36.0497034],
+              "meanElevationM": 162.8,
+              "elevationStdDevM": 7
+            },
+            {
+              "position": 413,
+              "coordinate": [-71.7308732, -36.0123141],
+              "meanElevationM": 152.4,
+              "elevationStdDevM": 5.5
+            },
+            {
+              "position": 414,
+              "coordinate": [-71.6982132, -35.9764396],
+              "meanElevationM": 143.6,
+              "elevationStdDevM": 5
+            },
+            {
+              "position": 415,
+              "coordinate": [-71.6663952, -35.9395801],
+              "meanElevationM": 142.5,
+              "elevationStdDevM": 5.6
+            },
+            {
+              "position": 416,
+              "coordinate": [-71.6346612, -35.9026815],
+              "meanElevationM": 152.9,
+              "elevationStdDevM": 6.6
+            },
+            {
+              "position": 417,
+              "coordinate": [-71.6026003, -35.8659987],
+              "meanElevationM": 157.9,
+              "elevationStdDevM": 7.3
+            },
+            {
+              "position": 418,
+              "coordinate": [-71.6000314, -35.8273574],
+              "meanElevationM": 146.9,
+              "elevationStdDevM": 6.8
+            },
+            {
+              "position": 419,
+              "coordinate": [-71.6440095, -35.8001019],
+              "meanElevationM": 127.4,
+              "elevationStdDevM": 5
+            },
+            {
+              "position": 420,
+              "coordinate": [-71.6660261, -35.7616595],
+              "meanElevationM": 129.2,
+              "elevationStdDevM": 35.3
+            },
+            {
+              "position": 421,
+              "coordinate": [-71.6755928, -35.717369],
+              "meanElevationM": 119.2,
+              "elevationStdDevM": 6.6
+            },
+            {
+              "position": 422,
+              "coordinate": [-71.6851177, -35.6730734],
+              "meanElevationM": 118.1,
+              "elevationStdDevM": 7.2
+            },
+            {
+              "position": 423,
+              "coordinate": [-71.6945727, -35.6287686],
+              "meanElevationM": 113.7,
+              "elevationStdDevM": 7.9
+            },
+            {
+              "position": 424,
+              "coordinate": [-71.7022174, -35.5843499],
+              "meanElevationM": 102.4,
+              "elevationStdDevM": 10.6
+            },
+            {
+              "position": 425,
+              "coordinate": [-71.6936623, -35.540983],
+              "meanElevationM": 131,
+              "elevationStdDevM": 42.5
+            },
+            {
+              "position": 426,
+              "coordinate": [-71.6734013, -35.49915],
+              "meanElevationM": 113.9,
+              "elevationStdDevM": 8.8
+            },
+            {
+              "position": 427,
+              "coordinate": [-71.6532745, -35.4572789],
+              "meanElevationM": 107.6,
+              "elevationStdDevM": 11.4
+            },
+            {
+              "position": 428,
+              "coordinate": [-71.6413427, -35.4147795],
+              "meanElevationM": 102.1,
+              "elevationStdDevM": 11.8
+            },
+            {
+              "position": 429,
+              "coordinate": [-71.6030148, -35.3827487],
+              "meanElevationM": 106.3,
+              "elevationStdDevM": 9.6
+            },
+            {
+              "position": 430,
+              "coordinate": [-71.5689412, -35.3476151],
+              "meanElevationM": 117.6,
+              "elevationStdDevM": 10.4
+            },
+            {
+              "position": 431,
+              "coordinate": [-71.5297359, -35.3160087],
+              "meanElevationM": 135.8,
+              "elevationStdDevM": 10.2
+            },
+            {
+              "position": 432,
+              "coordinate": [-71.4984172, -35.2792875],
+              "meanElevationM": 151.5,
+              "elevationStdDevM": 7.6
+            },
+            {
+              "position": 433,
+              "coordinate": [-71.4608792, -35.2481029],
+              "meanElevationM": 169.9,
+              "elevationStdDevM": 8.8
+            },
+            {
+              "position": 434,
+              "coordinate": [-71.4193991, -35.2192842],
+              "meanElevationM": 196.8,
+              "elevationStdDevM": 29.8
+            },
+            {
+              "position": 435,
+              "coordinate": [-71.3875881, -35.1828989],
+              "meanElevationM": 215.5,
+              "elevationStdDevM": 26.6
+            },
+            {
+              "position": 436,
+              "coordinate": [-71.3656634, -35.1428453],
+              "meanElevationM": 223.3,
+              "elevationStdDevM": 12.1
+            },
+            {
+              "position": 437,
+              "coordinate": [-71.3200517, -35.1186363],
+              "meanElevationM": 229.5,
+              "elevationStdDevM": 6.6
+            },
+            {
+              "position": 438,
+              "coordinate": [-71.2884996, -35.0824441],
+              "meanElevationM": 225.8,
+              "elevationStdDevM": 11.3
+            },
+            {
+              "position": 439,
+              "coordinate": [-71.2604753, -35.0437689],
+              "meanElevationM": 218.2,
+              "elevationStdDevM": 10.6
+            },
+            {
+              "position": 440,
+              "coordinate": [-71.2455201, -35.0018171],
+              "meanElevationM": 205.3,
+              "elevationStdDevM": 10.4
+            },
+            {
+              "position": 441,
+              "coordinate": [-71.230841, -34.9618141],
+              "meanElevationM": 216,
+              "elevationStdDevM": 11.5
+            },
+            {
+              "position": 442,
+              "coordinate": [-71.193291, -34.9290333],
+              "meanElevationM": 245.9,
+              "elevationStdDevM": 14.1
+            },
+            {
+              "position": 443,
+              "coordinate": [-71.1767271, -34.8913902],
+              "meanElevationM": 277.5,
+              "elevationStdDevM": 14.1
+            },
+            {
+              "position": 444,
+              "coordinate": [-71.1446789, -34.8549123],
+              "meanElevationM": 285.4,
+              "elevationStdDevM": 14.2
+            },
+            {
+              "position": 445,
+              "coordinate": [-71.1240219, -34.8135164],
+              "meanElevationM": 286.8,
+              "elevationStdDevM": 18.4
+            },
+            {
+              "position": 446,
+              "coordinate": [-71.0923188, -34.7774993],
+              "meanElevationM": 271.1,
+              "elevationStdDevM": 23.3
+            },
+            {
+              "position": 447,
+              "coordinate": [-71.0625024, -34.7397916],
+              "meanElevationM": 281.6,
+              "elevationStdDevM": 9
+            },
+            {
+              "position": 448,
+              "coordinate": [-71.0332957, -34.7017758],
+              "meanElevationM": 327.3,
+              "elevationStdDevM": 53.7
+            },
+            {
+              "position": 449,
+              "coordinate": [-71.0063117, -34.662666],
+              "meanElevationM": 365.4,
+              "elevationStdDevM": 42.5
+            },
+            {
+              "position": 450,
+              "coordinate": [-70.9915756, -34.6203298],
+              "meanElevationM": 387.6,
+              "elevationStdDevM": 77.5
+            },
+            {
+              "position": 451,
+              "coordinate": [-70.9725286, -34.5802716],
+              "meanElevationM": 336.9,
+              "elevationStdDevM": 14.1
+            },
+            {
+              "position": 452,
+              "coordinate": [-70.9452195, -34.5413547],
+              "meanElevationM": 315.4,
+              "elevationStdDevM": 17.1
+            },
+            {
+              "position": 453,
+              "coordinate": [-70.9173857, -34.5027269],
+              "meanElevationM": 325,
+              "elevationStdDevM": 46.9
+            },
+            {
+              "position": 454,
+              "coordinate": [-70.8920129, -34.4644634],
+              "meanElevationM": 321.8,
+              "elevationStdDevM": 87.7
+            },
+            {
+              "position": 455,
+              "coordinate": [-70.8787446, -34.4216711],
+              "meanElevationM": 314.1,
+              "elevationStdDevM": 44.8
+            },
+            {
+              "position": 456,
+              "coordinate": [-70.8547053, -34.3816389],
+              "meanElevationM": 322.9,
+              "elevationStdDevM": 13
+            },
+            {
+              "position": 457,
+              "coordinate": [-70.8360326, -34.3393975],
+              "meanElevationM": 353,
+              "elevationStdDevM": 13.6
+            },
+            {
+              "position": 458,
+              "coordinate": [-70.8198175, -34.2965236],
+              "meanElevationM": 401.1,
+              "elevationStdDevM": 15
+            },
+            {
+              "position": 459,
+              "coordinate": [-70.7988203, -34.2550836],
+              "meanElevationM": 454.2,
+              "elevationStdDevM": 27.1
+            },
+            {
+              "position": 460,
+              "coordinate": [-70.7757536, -34.2144838],
+              "meanElevationM": 494.7,
+              "elevationStdDevM": 14.4
+            },
+            {
+              "position": 461,
+              "coordinate": [-70.7540214, -34.1763396],
+              "meanElevationM": 500,
+              "elevationStdDevM": 14.5
+            },
+            {
+              "position": 462,
+              "coordinate": [-70.7428384, -34.132371],
+              "meanElevationM": 469,
+              "elevationStdDevM": 10.9
+            },
+            {
+              "position": 463,
+              "coordinate": [-70.731108, -34.0884664],
+              "meanElevationM": 467.1,
+              "elevationStdDevM": 6.9
+            },
+            {
+              "position": 464,
+              "coordinate": [-70.7207378, -34.0443736],
+              "meanElevationM": 504.1,
+              "elevationStdDevM": 50.7
+            },
+            {
+              "position": 465,
+              "coordinate": [-70.7163658, -33.9995569],
+              "meanElevationM": 504.4,
+              "elevationStdDevM": 58.3
+            },
+            {
+              "position": 466,
+              "coordinate": [-70.71519, -33.9549376],
+              "meanElevationM": 479.6,
+              "elevationStdDevM": 37.7
+            },
+            {
+              "position": 467,
+              "coordinate": [-70.7290804, -33.9132846],
+              "meanElevationM": 518.5,
+              "elevationStdDevM": 167.9
+            },
+            {
+              "position": 468,
+              "coordinate": [-70.7460623, -33.8737637],
+              "meanElevationM": 385.9,
+              "elevationStdDevM": 32.2
+            },
+            {
+              "position": 469,
+              "coordinate": [-70.7453623, -33.8288589],
+              "meanElevationM": 380.8,
+              "elevationStdDevM": 10.3
+            },
+            {
+              "position": 470,
+              "coordinate": [-70.7389913, -33.7842057],
+              "meanElevationM": 424.2,
+              "elevationStdDevM": 15.2
+            },
+            {
+              "position": 471,
+              "coordinate": [-70.7299595, -33.7398724],
+              "meanElevationM": 474.3,
+              "elevationStdDevM": 15.7
+            },
+            {
+              "position": 472,
+              "coordinate": [-70.7208418, -33.6955506],
+              "meanElevationM": 518.2,
+              "elevationStdDevM": 22.3
+            },
+            {
+              "position": 473,
+              "coordinate": [-70.7138065, -33.6531857],
+              "meanElevationM": 547.8,
+              "elevationStdDevM": 15.7
+            },
+            {
+              "position": 474,
+              "coordinate": [-70.6968204, -33.6106328],
+              "meanElevationM": 573.7,
+              "elevationStdDevM": 23.1
+            },
+            {
+              "position": 475,
+              "coordinate": [-70.6967531, -33.5658904],
+              "meanElevationM": 556.7,
+              "elevationStdDevM": 16.3
+            },
+            {
+              "position": 476,
+              "coordinate": [-70.6612435, -33.5791808],
+              "meanElevationM": 596.8,
+              "elevationStdDevM": 15.9
+            },
+            {
+              "position": 477,
+              "coordinate": [-70.6272931, -33.5997763],
+              "meanElevationM": 637.3,
+              "elevationStdDevM": 15.5
+            },
+            {
+              "position": 478,
+              "coordinate": [-70.6316354, -33.5549888],
+              "meanElevationM": 607.9,
+              "elevationStdDevM": 15.4
+            },
+            {
+              "position": 479,
+              "coordinate": [-70.6378955, -33.5103752],
+              "meanElevationM": 566.2,
+              "elevationStdDevM": 14.8
+            },
+            {
+              "position": 480,
+              "coordinate": [-70.6424083, -33.4655955],
+              "meanElevationM": 546.8,
+              "elevationStdDevM": 13.1
+            },
+            {
+              "position": 481,
+              "coordinate": [-70.6482141, -33.4332517],
+              "meanElevationM": 569.1,
+              "elevationStdDevM": 49.5
+            },
+            {
+              "position": 482,
+              "coordinate": [-70.647237, -33.4368478],
+              "meanElevationM": 570.5,
+              "elevationStdDevM": 49
+            },
+            {
+              "position": 483,
+              "coordinate": [-70.642816, -33.4618519],
+              "meanElevationM": 549.3,
+              "elevationStdDevM": 15
+            },
+            {
+              "position": 484,
+              "coordinate": [-70.6385977, -33.5066653],
+              "meanElevationM": 562,
+              "elevationStdDevM": 14.6
+            },
+            {
+              "position": 485,
+              "coordinate": [-70.6324376, -33.5512906],
+              "meanElevationM": 604.7,
+              "elevationStdDevM": 15.5
+            },
+            {
+              "position": 486,
+              "coordinate": [-70.6275338, -33.5960181],
+              "meanElevationM": 635,
+              "elevationStdDevM": 15.6
+            },
+            {
+              "position": 487,
+              "coordinate": [-70.6577301, -33.5815455],
+              "meanElevationM": 601.3,
+              "elevationStdDevM": 15.8
+            },
+            {
+              "position": 488,
+              "coordinate": [-70.695822, -33.562207],
+              "meanElevationM": 555.8,
+              "elevationStdDevM": 16.6
+            },
+            {
+              "position": 489,
+              "coordinate": [-70.6872469, -33.5208132],
+              "meanElevationM": 539.3,
+              "elevationStdDevM": 15.1
+            },
+            {
+              "position": 490,
+              "coordinate": [-70.6806873, -33.4762533],
+              "meanElevationM": 520,
+              "elevationStdDevM": 11.3
+            },
+            {
+              "position": 491,
+              "coordinate": [-70.6814756, -33.4316002],
+              "meanElevationM": 525.9,
+              "elevationStdDevM": 14.8
+            },
+            {
+              "position": 492,
+              "coordinate": [-70.6941135, -33.3884409],
+              "meanElevationM": 523.1,
+              "elevationStdDevM": 53.8
+            },
+            {
+              "position": 493,
+              "coordinate": [-70.7184644, -33.3491908],
+              "meanElevationM": 487.7,
+              "elevationStdDevM": 14.8
+            },
+            {
+              "position": 494,
+              "coordinate": [-70.7502666, -33.3129152],
+              "meanElevationM": 484.4,
+              "elevationStdDevM": 4.8
+            },
+            {
+              "position": 495,
+              "coordinate": [-70.7820473, -33.2766345],
+              "meanElevationM": 487,
+              "elevationStdDevM": 4.9
+            },
+            {
+              "position": 496,
+              "coordinate": [-70.8138086, -33.24035],
+              "meanElevationM": 488.1,
+              "elevationStdDevM": 13.7
+            },
+            {
+              "position": 497,
+              "coordinate": [-70.8466251, -33.2059035],
+              "meanElevationM": 571.6,
+              "elevationStdDevM": 114.8
+            },
+            {
+              "position": 498,
+              "coordinate": [-70.8802922, -33.176602],
+              "meanElevationM": 548.4,
+              "elevationStdDevM": 56.1
+            },
+            {
+              "position": 499,
+              "coordinate": [-70.9147448, -33.1429487],
+              "meanElevationM": 702.3,
+              "elevationStdDevM": 216.7
+            },
+            {
+              "position": 500,
+              "coordinate": [-70.9293643, -33.1000816],
+              "meanElevationM": 630.8,
+              "elevationStdDevM": 59.6
+            },
+            {
+              "position": 501,
+              "coordinate": [-70.9315448, -33.0555763],
+              "meanElevationM": 874,
+              "elevationStdDevM": 235.8
+            },
+            {
+              "position": 502,
+              "coordinate": [-70.913896, -33.020778],
+              "meanElevationM": 814.2,
+              "elevationStdDevM": 128.7
+            },
+            {
+              "position": 503,
+              "coordinate": [-70.8756545, -32.9969228],
+              "meanElevationM": 791.4,
+              "elevationStdDevM": 80.8
+            },
+            {
+              "position": 504,
+              "coordinate": [-70.8387875, -32.967832],
+              "meanElevationM": 842.5,
+              "elevationStdDevM": 99.6
+            },
+            {
+              "position": 505,
+              "coordinate": [-70.8131477, -32.930692],
+              "meanElevationM": 889,
+              "elevationStdDevM": 113.8
+            },
+            {
+              "position": 506,
+              "coordinate": [-70.8264705, -32.8908679],
+              "meanElevationM": 790.3,
+              "elevationStdDevM": 109.9
+            },
+            {
+              "position": 507,
+              "coordinate": [-70.8567825, -32.8564374],
+              "meanElevationM": 742.8,
+              "elevationStdDevM": 150
+            },
+            {
+              "position": 508,
+              "coordinate": [-70.9005817, -32.845549],
+              "meanElevationM": 580.3,
+              "elevationStdDevM": 191.2
+            },
+            {
+              "position": 509,
+              "coordinate": [-70.9497356, -32.8435544],
+              "meanElevationM": 446.8,
+              "elevationStdDevM": 106.7
+            },
+            {
+              "position": 510,
+              "coordinate": [-71.0031709, -32.8410228],
+              "meanElevationM": 438.5,
+              "elevationStdDevM": 144.5
+            },
+            {
+              "position": 511,
+              "coordinate": [-71.0539036, -32.8385702],
+              "meanElevationM": 389.5,
+              "elevationStdDevM": 126.4
+            },
+            {
+              "position": 512,
+              "coordinate": [-71.1064544, -32.8470915],
+              "meanElevationM": 319.3,
+              "elevationStdDevM": 55.2
+            },
+            {
+              "position": 513,
+              "coordinate": [-71.1550319, -32.8330855],
+              "meanElevationM": 328.6,
+              "elevationStdDevM": 105.9
+            },
+            {
+              "position": 514,
+              "coordinate": [-71.18092, -32.7955406],
+              "meanElevationM": 274.4,
+              "elevationStdDevM": 106.3
+            },
+            {
+              "position": 515,
+              "coordinate": [-71.1935246, -32.7747855],
+              "meanElevationM": 228.2,
+              "elevationStdDevM": 53.3
+            },
+            {
+              "position": 516,
+              "coordinate": [-71.2074266, -32.7321233],
+              "meanElevationM": 258.5,
+              "elevationStdDevM": 71.7
+            },
+            {
+              "position": 517,
+              "coordinate": [-71.2138199, -32.6919626],
+              "meanElevationM": 290.1,
+              "elevationStdDevM": 80.4
+            },
+            {
+              "position": 518,
+              "coordinate": [-71.2301604, -32.6539352],
+              "meanElevationM": 398.7,
+              "elevationStdDevM": 147.5
+            },
+            {
+              "position": 519,
+              "coordinate": [-71.2734554, -32.6391262],
+              "meanElevationM": 492.8,
+              "elevationStdDevM": 174.8
+            },
+            {
+              "position": 520,
+              "coordinate": [-71.2674747, -32.617243],
+              "meanElevationM": 412.1,
+              "elevationStdDevM": 207.4
+            },
+            {
+              "position": 521,
+              "coordinate": [-71.2740974, -32.5968483],
+              "meanElevationM": 215.1,
+              "elevationStdDevM": 123.8
+            },
+            {
+              "position": 522,
+              "coordinate": [-71.2770849, -32.5612297],
+              "meanElevationM": 109.6,
+              "elevationStdDevM": 28.7
+            },
+            {
+              "position": 523,
+              "coordinate": [-71.2655231, -32.5174206],
+              "meanElevationM": 120.6,
+              "elevationStdDevM": 51.3
+            },
+            {
+              "position": 524,
+              "coordinate": [-71.2573873, -32.4771345],
+              "meanElevationM": 97.6,
+              "elevationStdDevM": 59
+            },
+            {
+              "position": 525,
+              "coordinate": [-71.2816411, -32.4492308],
+              "meanElevationM": 78,
+              "elevationStdDevM": 80.9
+            },
+            {
+              "position": 526,
+              "coordinate": [-71.3079592, -32.4353035],
+              "meanElevationM": 64.9,
+              "elevationStdDevM": 65
+            },
+            {
+              "position": 527,
+              "coordinate": [-71.3292098, -32.4087218],
+              "meanElevationM": 70,
+              "elevationStdDevM": 37.5
+            },
+            {
+              "position": 528,
+              "coordinate": [-71.3707341, -32.3843644],
+              "meanElevationM": 61.3,
+              "elevationStdDevM": 58.8
+            },
+            {
+              "position": 529,
+              "coordinate": [-71.4045327, -32.3705685],
+              "meanElevationM": 74.8,
+              "elevationStdDevM": 72.4
+            },
+            {
+              "position": 530,
+              "coordinate": [-71.4401951, -32.3484296],
+              "meanElevationM": 40,
+              "elevationStdDevM": 39.2
+            },
+            {
+              "position": 531,
+              "coordinate": [-71.4644714, -32.310034],
+              "meanElevationM": 58.1,
+              "elevationStdDevM": 58.9
+            },
+            {
+              "position": 532,
+              "coordinate": [-71.4629835, -32.2699426],
+              "meanElevationM": 81.6,
+              "elevationStdDevM": 113.9
+            },
+            {
+              "position": 533,
+              "coordinate": [-71.4847583, -32.2306419],
+              "meanElevationM": 69.7,
+              "elevationStdDevM": 53.7
+            },
+            {
+              "position": 534,
+              "coordinate": [-71.5158749, -32.2100504],
+              "meanElevationM": 63.4,
+              "elevationStdDevM": 61.7
+            },
+            {
+              "position": 535,
+              "coordinate": [-71.5209494, -32.1692096],
+              "meanElevationM": 103.2,
+              "elevationStdDevM": 128.5
+            },
+            {
+              "position": 536,
+              "coordinate": [-71.504051, -32.1305301],
+              "meanElevationM": 50.1,
+              "elevationStdDevM": 63.9
+            },
+            {
+              "position": 537,
+              "coordinate": [-71.5060778, -32.0877237],
+              "meanElevationM": 75.4,
+              "elevationStdDevM": 57
+            },
+            {
+              "position": 538,
+              "coordinate": [-71.5075039, -32.0486931],
+              "meanElevationM": 95.5,
+              "elevationStdDevM": 88.7
+            },
+            {
+              "position": 539,
+              "coordinate": [-71.5074655, -32.0056152],
+              "meanElevationM": 63.4,
+              "elevationStdDevM": 67.6
+            },
+            {
+              "position": 540,
+              "coordinate": [-71.487301, -31.9674721],
+              "meanElevationM": 141.1,
+              "elevationStdDevM": 160.3
+            },
+            {
+              "position": 541,
+              "coordinate": [-71.5105455, -31.9338634],
+              "meanElevationM": 34.7,
+              "elevationStdDevM": 38.6
+            },
+            {
+              "position": 542,
+              "coordinate": [-71.4916155, -31.8977615],
+              "meanElevationM": 40.3,
+              "elevationStdDevM": 38.5
+            },
+            {
+              "position": 543,
+              "coordinate": [-71.4660583, -31.8697806],
+              "meanElevationM": 95.1,
+              "elevationStdDevM": 62.1
+            },
+            {
+              "position": 544,
+              "coordinate": [-71.4167588, -31.8646636],
+              "meanElevationM": 189.7,
+              "elevationStdDevM": 99.3
+            },
+            {
+              "position": 545,
+              "coordinate": [-71.3777778, -31.8511334],
+              "meanElevationM": 188.6,
+              "elevationStdDevM": 83.6
+            },
+            {
+              "position": 546,
+              "coordinate": [-71.3503001, -31.8186907],
+              "meanElevationM": 342.3,
+              "elevationStdDevM": 148.6
+            },
+            {
+              "position": 547,
+              "coordinate": [-71.3299449, -31.7881076],
+              "meanElevationM": 490.6,
+              "elevationStdDevM": 152.4
+            },
+            {
+              "position": 548,
+              "coordinate": [-71.3212591, -31.7784337],
+              "meanElevationM": 587.5,
+              "elevationStdDevM": 166.9
+            },
+            {
+              "position": 549,
+              "coordinate": [-71.2930995, -31.7579875],
+              "meanElevationM": 524.7,
+              "elevationStdDevM": 122.7
+            },
+            {
+              "position": 550,
+              "coordinate": [-71.2672777, -31.7586817],
+              "meanElevationM": 508.7,
+              "elevationStdDevM": 126.2
+            },
+            {
+              "position": 551,
+              "coordinate": [-71.2467829, -31.7324108],
+              "meanElevationM": 360.9,
+              "elevationStdDevM": 100.5
+            },
+            {
+              "position": 552,
+              "coordinate": [-71.2245409, -31.7332824],
+              "meanElevationM": 359.8,
+              "elevationStdDevM": 108.2
+            },
+            {
+              "position": 553,
+              "coordinate": [-71.2283083, -31.7114056],
+              "meanElevationM": 339.9,
+              "elevationStdDevM": 114.1
+            },
+            {
+              "position": 554,
+              "coordinate": [-71.2588089, -31.6835533],
+              "meanElevationM": 279.1,
+              "elevationStdDevM": 87.6
+            },
+            {
+              "position": 555,
+              "coordinate": [-71.2228885, -31.6571999],
+              "meanElevationM": 335.7,
+              "elevationStdDevM": 74.6
+            },
+            {
+              "position": 556,
+              "coordinate": [-71.1749024, -31.6392924],
+              "meanElevationM": 413.7,
+              "elevationStdDevM": 112.8
+            },
+            {
+              "position": 557,
+              "coordinate": [-71.1447102, -31.6085493],
+              "meanElevationM": 472.4,
+              "elevationStdDevM": 114.3
+            },
+            {
+              "position": 558,
+              "coordinate": [-71.1110187, -31.5765468],
+              "meanElevationM": 533.2,
+              "elevationStdDevM": 115.4
+            },
+            {
+              "position": 559,
+              "coordinate": [-71.0990895, -31.5347781],
+              "meanElevationM": 678.8,
+              "elevationStdDevM": 153.9
+            },
+            {
+              "position": 560,
+              "coordinate": [-71.095787, -31.491268],
+              "meanElevationM": 727.5,
+              "elevationStdDevM": 138.8
+            },
+            {
+              "position": 561,
+              "coordinate": [-71.0573662, -31.4628618],
+              "meanElevationM": 928,
+              "elevationStdDevM": 189.2
+            },
+            {
+              "position": 562,
+              "coordinate": [-71.020156, -31.4481508],
+              "meanElevationM": 1000.9,
+              "elevationStdDevM": 170.6
+            },
+            {
+              "position": 563,
+              "coordinate": [-71.0103176, -31.411539],
+              "meanElevationM": 1098.3,
+              "elevationStdDevM": 198.5
+            },
+            {
+              "position": 564,
+              "coordinate": [-71.0068878, -31.3817681],
+              "meanElevationM": 1310.1,
+              "elevationStdDevM": 252.3
+            },
+            {
+              "position": 565,
+              "coordinate": [-71.024788, -31.3555278],
+              "meanElevationM": 1586.5,
+              "elevationStdDevM": 163
+            },
+            {
+              "position": 566,
+              "coordinate": [-71.0308937, -31.3302294],
+              "meanElevationM": 1461.4,
+              "elevationStdDevM": 150.6
+            },
+            {
+              "position": 567,
+              "coordinate": [-71.0585476, -31.3072635],
+              "meanElevationM": 1362.7,
+              "elevationStdDevM": 144
+            },
+            {
+              "position": 568,
+              "coordinate": [-71.0638743, -31.2681276],
+              "meanElevationM": 1138.2,
+              "elevationStdDevM": 136
+            },
+            {
+              "position": 569,
+              "coordinate": [-71.0421902, -31.2300072],
+              "meanElevationM": 982.8,
+              "elevationStdDevM": 96.2
+            },
+            {
+              "position": 570,
+              "coordinate": [-71.0284652, -31.2012901],
+              "meanElevationM": 968,
+              "elevationStdDevM": 99.2
+            },
+            {
+              "position": 571,
+              "coordinate": [-71.014552, -31.1716295],
+              "meanElevationM": 916.8,
+              "elevationStdDevM": 57.2
+            },
+            {
+              "position": 572,
+              "coordinate": [-71.0309725, -31.1324695],
+              "meanElevationM": 890.3,
+              "elevationStdDevM": 110.9
+            },
+            {
+              "position": 573,
+              "coordinate": [-71.0436634, -31.0921594],
+              "meanElevationM": 875.6,
+              "elevationStdDevM": 133.8
+            },
+            {
+              "position": 574,
+              "coordinate": [-71.0495976, -31.06296],
+              "meanElevationM": 742.6,
+              "elevationStdDevM": 74.5
+            },
+            {
+              "position": 575,
+              "coordinate": [-71.0413343, -31.0356965],
+              "meanElevationM": 778.6,
+              "elevationStdDevM": 135.4
+            },
+            {
+              "position": 576,
+              "coordinate": [-71.0682455, -31.0067489],
+              "meanElevationM": 702.5,
+              "elevationStdDevM": 72.3
+            },
+            {
+              "position": 577,
+              "coordinate": [-71.0693115, -30.9689879],
+              "meanElevationM": 659.6,
+              "elevationStdDevM": 69.2
+            },
+            {
+              "position": 578,
+              "coordinate": [-71.0476408, -30.9364065],
+              "meanElevationM": 681.4,
+              "elevationStdDevM": 146.4
+            },
+            {
+              "position": 579,
+              "coordinate": [-71.0212551, -30.9024751],
+              "meanElevationM": 607.3,
+              "elevationStdDevM": 96.1
+            },
+            {
+              "position": 580,
+              "coordinate": [-70.996921, -30.8759864],
+              "meanElevationM": 559.4,
+              "elevationStdDevM": 89.6
+            },
+            {
+              "position": 581,
+              "coordinate": [-70.9878539, -30.8448796],
+              "meanElevationM": 580.5,
+              "elevationStdDevM": 118.1
+            },
+            {
+              "position": 582,
+              "coordinate": [-70.9720031, -30.806462],
+              "meanElevationM": 567.5,
+              "elevationStdDevM": 134
+            },
+            {
+              "position": 583,
+              "coordinate": [-70.94599, -30.7714183],
+              "meanElevationM": 447.7,
+              "elevationStdDevM": 58
+            },
+            {
+              "position": 584,
+              "coordinate": [-70.9602899, -30.736077],
+              "meanElevationM": 517.2,
+              "elevationStdDevM": 129.1
+            },
+            {
+              "position": 585,
+              "coordinate": [-70.9520905, -30.7001783],
+              "meanElevationM": 489,
+              "elevationStdDevM": 85.4
+            },
+            {
+              "position": 586,
+              "coordinate": [-70.9935165, -30.6979575],
+              "meanElevationM": 472.6,
+              "elevationStdDevM": 99.4
+            },
+            {
+              "position": 587,
+              "coordinate": [-71.0337916, -30.6935305],
+              "meanElevationM": 471.8,
+              "elevationStdDevM": 114.4
+            },
+            {
+              "position": 588,
+              "coordinate": [-71.0740421, -30.6720397],
+              "meanElevationM": 450.4,
+              "elevationStdDevM": 155.6
+            },
+            {
+              "position": 589,
+              "coordinate": [-71.1087015, -30.6432013],
+              "meanElevationM": 373.9,
+              "elevationStdDevM": 137.3
+            },
+            {
+              "position": 590,
+              "coordinate": [-71.1341756, -30.605165],
+              "meanElevationM": 346.5,
+              "elevationStdDevM": 121.5
+            },
+            {
+              "position": 591,
+              "coordinate": [-71.1685216, -30.5808812],
+              "meanElevationM": 276.1,
+              "elevationStdDevM": 38.2
+            },
+            {
+              "position": 592,
+              "coordinate": [-71.1555389, -30.5387281],
+              "meanElevationM": 339.2,
+              "elevationStdDevM": 62.1
+            },
+            {
+              "position": 593,
+              "coordinate": [-71.1492099, -30.5095443],
+              "meanElevationM": 379,
+              "elevationStdDevM": 61.5
+            },
+            {
+              "position": 594,
+              "coordinate": [-71.1618418, -30.4689378],
+              "meanElevationM": 418.5,
+              "elevationStdDevM": 68.9
+            },
+            {
+              "position": 595,
+              "coordinate": [-71.1823411, -30.4308951],
+              "meanElevationM": 445.2,
+              "elevationStdDevM": 67.2
+            },
+            {
+              "position": 596,
+              "coordinate": [-71.2060732, -30.3954286],
+              "meanElevationM": 513.7,
+              "elevationStdDevM": 78
+            },
+            {
+              "position": 597,
+              "coordinate": [-71.2386414, -30.3650879],
+              "meanElevationM": 562.3,
+              "elevationStdDevM": 69.2
+            },
+            {
+              "position": 598,
+              "coordinate": [-71.2347121, -30.3395736],
+              "meanElevationM": 648.7,
+              "elevationStdDevM": 122.8
+            },
+            {
+              "position": 599,
+              "coordinate": [-71.2461599, -30.3059389],
+              "meanElevationM": 594.4,
+              "elevationStdDevM": 140.4
+            },
+            {
+              "position": 600,
+              "coordinate": [-71.2509336, -30.2823384],
+              "meanElevationM": 436.5,
+              "elevationStdDevM": 116.2
+            },
+            {
+              "position": 601,
+              "coordinate": [-71.2545153, -30.2520809],
+              "meanElevationM": 343.7,
+              "elevationStdDevM": 83.9
+            },
+            {
+              "position": 602,
+              "coordinate": [-71.2412916, -30.2101586],
+              "meanElevationM": 266.6,
+              "elevationStdDevM": 93.1
+            },
+            {
+              "position": 603,
+              "coordinate": [-71.2337074, -30.1666722],
+              "meanElevationM": 238.4,
+              "elevationStdDevM": 125.7
+            },
+            {
+              "position": 604,
+              "coordinate": [-71.2244448, -30.1252961],
+              "meanElevationM": 190.1,
+              "elevationStdDevM": 74.7
+            },
+            {
+              "position": 605,
+              "coordinate": [-71.2450534, -30.0840156],
+              "meanElevationM": 134,
+              "elevationStdDevM": 19.7
+            },
+            {
+              "position": 606,
+              "coordinate": [-71.2657807, -30.0427829],
+              "meanElevationM": 124.7,
+              "elevationStdDevM": 33.8
+            },
+            {
+              "position": 607,
+              "coordinate": [-71.2829278, -30.0008692],
+              "meanElevationM": 136.8,
+              "elevationStdDevM": 76
+            },
+            {
+              "position": 608,
+              "coordinate": [-71.3109675, -29.9936898],
+              "meanElevationM": 120.3,
+              "elevationStdDevM": 92.2
+            },
+            {
+              "position": 609,
+              "coordinate": [-71.3332921, -29.9681314],
+              "meanElevationM": 29.7,
+              "elevationStdDevM": 29
+            },
+            {
+              "position": 610,
+              "coordinate": [-71.2908757, -29.9518065],
+              "meanElevationM": 25.4,
+              "elevationStdDevM": 33.5
+            },
+            {
+              "position": 611,
+              "coordinate": [-71.2614044, -29.9149031],
+              "meanElevationM": 23.8,
+              "elevationStdDevM": 33.6
+            },
+            {
+              "position": 612,
+              "coordinate": [-71.2307407, -29.8900713],
+              "meanElevationM": 65,
+              "elevationStdDevM": 54.4
+            },
+            {
+              "position": 613,
+              "coordinate": [-71.1834056, -29.8971272],
+              "meanElevationM": 130.1,
+              "elevationStdDevM": 75.3
+            },
+            {
+              "position": 614,
+              "coordinate": [-71.1423703, -29.8780061],
+              "meanElevationM": 187.4,
+              "elevationStdDevM": 47.4
+            },
+            {
+              "position": 615,
+              "coordinate": [-71.1200212, -29.8409824],
+              "meanElevationM": 304,
+              "elevationStdDevM": 92.3
+            },
+            {
+              "position": 616,
+              "coordinate": [-71.0896399, -29.8058805],
+              "meanElevationM": 416.7,
+              "elevationStdDevM": 134.9
+            },
+            {
+              "position": 617,
+              "coordinate": [-71.0622281, -29.7700045],
+              "meanElevationM": 487.9,
+              "elevationStdDevM": 144.4
+            },
+            {
+              "position": 618,
+              "coordinate": [-71.027646, -29.7513422],
+              "meanElevationM": 665.5,
+              "elevationStdDevM": 178.3
+            },
+            {
+              "position": 619,
+              "coordinate": [-71.009468, -29.7165997],
+              "meanElevationM": 789,
+              "elevationStdDevM": 169.2
+            },
+            {
+              "position": 620,
+              "coordinate": [-71.0015725, -29.6999619],
+              "meanElevationM": 776.8,
+              "elevationStdDevM": 140.3
+            },
+            {
+              "position": 621,
+              "coordinate": [-70.990864, -29.6670157],
+              "meanElevationM": 875.9,
+              "elevationStdDevM": 126.1
+            },
+            {
+              "position": 622,
+              "coordinate": [-70.96202, -29.640219],
+              "meanElevationM": 1026.2,
+              "elevationStdDevM": 85.9
+            },
+            {
+              "position": 623,
+              "coordinate": [-70.9430756, -29.6220032],
+              "meanElevationM": 1080,
+              "elevationStdDevM": 92.2
+            },
+            {
+              "position": 624,
+              "coordinate": [-70.9563105, -29.5890354],
+              "meanElevationM": 1137.4,
+              "elevationStdDevM": 78.2
+            },
+            {
+              "position": 625,
+              "coordinate": [-70.9576298, -29.5648534],
+              "meanElevationM": 1088,
+              "elevationStdDevM": 95.9
+            },
+            {
+              "position": 626,
+              "coordinate": [-70.9480143, -29.5283477],
+              "meanElevationM": 996.3,
+              "elevationStdDevM": 84.9
+            },
+            {
+              "position": 627,
+              "coordinate": [-70.9580682, -29.4898977],
+              "meanElevationM": 913.2,
+              "elevationStdDevM": 94.3
+            },
+            {
+              "position": 628,
+              "coordinate": [-70.9519857, -29.4504312],
+              "meanElevationM": 878.6,
+              "elevationStdDevM": 132.7
+            },
+            {
+              "position": 629,
+              "coordinate": [-70.9336447, -29.4117335],
+              "meanElevationM": 825.5,
+              "elevationStdDevM": 142.3
+            },
+            {
+              "position": 630,
+              "coordinate": [-70.9357937, -29.3766937],
+              "meanElevationM": 670.7,
+              "elevationStdDevM": 127.9
+            },
+            {
+              "position": 631,
+              "coordinate": [-70.9799429, -29.3694767],
+              "meanElevationM": 611,
+              "elevationStdDevM": 117.6
+            },
+            {
+              "position": 632,
+              "coordinate": [-71.0212104, -29.3508436],
+              "meanElevationM": 459.1,
+              "elevationStdDevM": 80.7
+            },
+            {
+              "position": 633,
+              "coordinate": [-71.0332907, -29.3135798],
+              "meanElevationM": 679.1,
+              "elevationStdDevM": 148.3
+            },
+            {
+              "position": 634,
+              "coordinate": [-71.0339324, -29.2698554],
+              "meanElevationM": 743.3,
+              "elevationStdDevM": 87.2
+            },
+            {
+              "position": 635,
+              "coordinate": [-71.0137351, -29.2292324],
+              "meanElevationM": 892.9,
+              "elevationStdDevM": 103.9
+            },
+            {
+              "position": 636,
+              "coordinate": [-70.9929522, -29.2081028],
+              "meanElevationM": 1025.1,
+              "elevationStdDevM": 165.6
+            },
+            {
+              "position": 637,
+              "coordinate": [-70.9593402, -29.2118544],
+              "meanElevationM": 1099.8,
+              "elevationStdDevM": 152.3
+            },
+            {
+              "position": 638,
+              "coordinate": [-70.9319437, -29.1958494],
+              "meanElevationM": 1112.2,
+              "elevationStdDevM": 111.1
+            },
+            {
+              "position": 639,
+              "coordinate": [-70.9192418, -29.1641686],
+              "meanElevationM": 1163.8,
+              "elevationStdDevM": 101.2
+            },
+            {
+              "position": 640,
+              "coordinate": [-70.9077129, -29.1275153],
+              "meanElevationM": 1126,
+              "elevationStdDevM": 34.7
+            },
+            {
+              "position": 641,
+              "coordinate": [-70.8880339, -29.0898294],
+              "meanElevationM": 1012.9,
+              "elevationStdDevM": 61.8
+            },
+            {
+              "position": 642,
+              "coordinate": [-70.8915457, -29.0468257],
+              "meanElevationM": 895.5,
+              "elevationStdDevM": 49.4
+            },
+            {
+              "position": 643,
+              "coordinate": [-70.9054905, -29.006783],
+              "meanElevationM": 803.8,
+              "elevationStdDevM": 63
+            },
+            {
+              "position": 644,
+              "coordinate": [-70.8970572, -28.9656674],
+              "meanElevationM": 799,
+              "elevationStdDevM": 77.2
+            },
+            {
+              "position": 645,
+              "coordinate": [-70.8743129, -28.9359915],
+              "meanElevationM": 849.3,
+              "elevationStdDevM": 50.9
+            },
+            {
+              "position": 646,
+              "coordinate": [-70.840956, -28.9027095],
+              "meanElevationM": 912.8,
+              "elevationStdDevM": 49.7
+            },
+            {
+              "position": 647,
+              "coordinate": [-70.8158774, -28.8707923],
+              "meanElevationM": 970.4,
+              "elevationStdDevM": 44.3
+            },
+            {
+              "position": 648,
+              "coordinate": [-70.7768432, -28.8519819],
+              "meanElevationM": 1083.7,
+              "elevationStdDevM": 64.3
+            },
+            {
+              "position": 649,
+              "coordinate": [-70.7533382, -28.8194537],
+              "meanElevationM": 1141.4,
+              "elevationStdDevM": 68.6
+            },
+            {
+              "position": 650,
+              "coordinate": [-70.7676359, -28.7863246],
+              "meanElevationM": 1042,
+              "elevationStdDevM": 82.1
+            },
+            {
+              "position": 651,
+              "coordinate": [-70.7722767, -28.756519],
+              "meanElevationM": 964.2,
+              "elevationStdDevM": 71.7
+            },
+            {
+              "position": 652,
+              "coordinate": [-70.7615828, -28.7173744],
+              "meanElevationM": 905.9,
+              "elevationStdDevM": 119.9
+            },
+            {
+              "position": 653,
+              "coordinate": [-70.7658203, -28.6772468],
+              "meanElevationM": 684.1,
+              "elevationStdDevM": 70.6
+            },
+            {
+              "position": 654,
+              "coordinate": [-70.7667806, -28.6365831],
+              "meanElevationM": 581.6,
+              "elevationStdDevM": 43.2
+            },
+            {
+              "position": 655,
+              "coordinate": [-70.7829664, -28.5971279],
+              "meanElevationM": 485.8,
+              "elevationStdDevM": 42.2
+            },
+            {
+              "position": 656,
+              "coordinate": [-70.8071251, -28.5733577],
+              "meanElevationM": 416,
+              "elevationStdDevM": 51.9
+            },
+            {
+              "position": 657,
+              "coordinate": [-70.7682347, -28.5693116],
+              "meanElevationM": 441,
+              "elevationStdDevM": 43.7
+            },
+            {
+              "position": 658,
+              "coordinate": [-70.7572104, -28.5617941],
+              "meanElevationM": 467.1,
+              "elevationStdDevM": 51.1
+            },
+            {
+              "position": 659,
+              "coordinate": [-70.7338274, -28.5384855],
+              "meanElevationM": 550,
+              "elevationStdDevM": 35.2
+            },
+            {
+              "position": 660,
+              "coordinate": [-70.7206627, -28.4989702],
+              "meanElevationM": 602.6,
+              "elevationStdDevM": 42.5
+            },
+            {
+              "position": 661,
+              "coordinate": [-70.7124654, -28.4545918],
+              "meanElevationM": 675,
+              "elevationStdDevM": 37.2
+            },
+            {
+              "position": 662,
+              "coordinate": [-70.7085065, -28.4114215],
+              "meanElevationM": 665.3,
+              "elevationStdDevM": 24.6
+            },
+            {
+              "position": 663,
+              "coordinate": [-70.7125, -28.3673344],
+              "meanElevationM": 590.3,
+              "elevationStdDevM": 30.5
+            },
+            {
+              "position": 664,
+              "coordinate": [-70.7057434, -28.3230354],
+              "meanElevationM": 521.7,
+              "elevationStdDevM": 23.4
+            },
+            {
+              "position": 665,
+              "coordinate": [-70.7002874, -28.2784205],
+              "meanElevationM": 463,
+              "elevationStdDevM": 18.6
+            },
+            {
+              "position": 666,
+              "coordinate": [-70.6881167, -28.2355436],
+              "meanElevationM": 445.5,
+              "elevationStdDevM": 26.4
+            },
+            {
+              "position": 667,
+              "coordinate": [-70.6637118, -28.1972765],
+              "meanElevationM": 469,
+              "elevationStdDevM": 56.3
+            },
+            {
+              "position": 668,
+              "coordinate": [-70.6611267, -28.1540176],
+              "meanElevationM": 439,
+              "elevationStdDevM": 19.6
+            },
+            {
+              "position": 669,
+              "coordinate": [-70.6451127, -28.1217589],
+              "meanElevationM": 436.1,
+              "elevationStdDevM": 24.5
+            },
+            {
+              "position": 670,
+              "coordinate": [-70.6266135, -28.0811588],
+              "meanElevationM": 436.2,
+              "elevationStdDevM": 22.4
+            },
+            {
+              "position": 671,
+              "coordinate": [-70.6038187, -28.0430228],
+              "meanElevationM": 457.2,
+              "elevationStdDevM": 30.2
+            },
+            {
+              "position": 672,
+              "coordinate": [-70.5978179, -27.9987491],
+              "meanElevationM": 437.5,
+              "elevationStdDevM": 20.6
+            },
+            {
+              "position": 673,
+              "coordinate": [-70.5935571, -27.9539408],
+              "meanElevationM": 391.1,
+              "elevationStdDevM": 22.7
+            },
+            {
+              "position": 674,
+              "coordinate": [-70.5907281, -27.9091691],
+              "meanElevationM": 426.6,
+              "elevationStdDevM": 69.5
+            },
+            {
+              "position": 675,
+              "coordinate": [-70.5928669, -27.8644926],
+              "meanElevationM": 339.1,
+              "elevationStdDevM": 25.6
+            },
+            {
+              "position": 676,
+              "coordinate": [-70.5967048, -27.8196548],
+              "meanElevationM": 319.6,
+              "elevationStdDevM": 25.7
+            },
+            {
+              "position": 677,
+              "coordinate": [-70.5981594, -27.7752586],
+              "meanElevationM": 335.3,
+              "elevationStdDevM": 48.4
+            },
+            {
+              "position": 678,
+              "coordinate": [-70.5795583, -27.7443886],
+              "meanElevationM": 401.6,
+              "elevationStdDevM": 58
+            },
+            {
+              "position": 679,
+              "coordinate": [-70.5668112, -27.7021224],
+              "meanElevationM": 465.5,
+              "elevationStdDevM": 111.2
+            },
+            {
+              "position": 680,
+              "coordinate": [-70.5586356, -27.6619267],
+              "meanElevationM": 474.6,
+              "elevationStdDevM": 54.5
+            },
+            {
+              "position": 681,
+              "coordinate": [-70.5224938, -27.6304523],
+              "meanElevationM": 461.7,
+              "elevationStdDevM": 45.6
+            },
+            {
+              "position": 682,
+              "coordinate": [-70.4918261, -27.5974066],
+              "meanElevationM": 470.6,
+              "elevationStdDevM": 43.3
+            },
+            {
+              "position": 683,
+              "coordinate": [-70.4523015, -27.5737354],
+              "meanElevationM": 618.3,
+              "elevationStdDevM": 78.6
+            },
+            {
+              "position": 684,
+              "coordinate": [-70.4434039, -27.536349],
+              "meanElevationM": 746.8,
+              "elevationStdDevM": 66
+            },
+            {
+              "position": 685,
+              "coordinate": [-70.4462652, -27.4917436],
+              "meanElevationM": 657.3,
+              "elevationStdDevM": 38.4
+            },
+            {
+              "position": 686,
+              "coordinate": [-70.4474147, -27.4472106],
+              "meanElevationM": 600.9,
+              "elevationStdDevM": 50.4
+            },
+            {
+              "position": 687,
+              "coordinate": [-70.4373089, -27.4033916],
+              "meanElevationM": 606.2,
+              "elevationStdDevM": 114.4
+            },
+            {
+              "position": 688,
+              "coordinate": [-70.4361805, -27.3632688],
+              "meanElevationM": 513.4,
+              "elevationStdDevM": 120.1
+            },
+            {
+              "position": 689,
+              "coordinate": [-70.4390468, -27.3191935],
+              "meanElevationM": 357,
+              "elevationStdDevM": 91.5
+            },
+            {
+              "position": 690,
+              "coordinate": [-70.397919, -27.3216318],
+              "meanElevationM": 352.4,
+              "elevationStdDevM": 62.4
+            },
+            {
+              "position": 691,
+              "coordinate": [-70.3573641, -27.3484261],
+              "meanElevationM": 425.7,
+              "elevationStdDevM": 94.7
+            },
+            {
+              "position": 692,
+              "coordinate": [-70.3175179, -27.3703303],
+              "meanElevationM": 460.7,
+              "elevationStdDevM": 86.7
+            },
+            {
+              "position": 693,
+              "coordinate": [-70.2885842, -27.4058095],
+              "meanElevationM": 451,
+              "elevationStdDevM": 38.4
+            },
+            {
+              "position": 694,
+              "coordinate": [-70.2568698, -27.3914972],
+              "meanElevationM": 557.7,
+              "elevationStdDevM": 102.9
+            },
+            {
+              "position": 695,
+              "coordinate": [-70.2250625, -27.3574063],
+              "meanElevationM": 611.5,
+              "elevationStdDevM": 54.9
+            },
+            {
+              "position": 696,
+              "coordinate": [-70.1863087, -27.3288945],
+              "meanElevationM": 685.9,
+              "elevationStdDevM": 63.9
+            },
+            {
+              "position": 697,
+              "coordinate": [-70.1661746, -27.2985191],
+              "meanElevationM": 757.2,
+              "elevationStdDevM": 68
+            },
+            {
+              "position": 698,
+              "coordinate": [-70.1477052, -27.2601542],
+              "meanElevationM": 876.8,
+              "elevationStdDevM": 48.9
+            },
+            {
+              "position": 699,
+              "coordinate": [-70.1289796, -27.2253003],
+              "meanElevationM": 968.1,
+              "elevationStdDevM": 69.7
+            },
+            {
+              "position": 700,
+              "coordinate": [-70.0894689, -27.2424121],
+              "meanElevationM": 1055.3,
+              "elevationStdDevM": 75.4
+            },
+            {
+              "position": 701,
+              "coordinate": [-70.0543264, -27.2509065],
+              "meanElevationM": 1176,
+              "elevationStdDevM": 84.8
+            },
+            {
+              "position": 702,
+              "coordinate": [-70.027235, -27.2145074],
+              "meanElevationM": 1323.8,
+              "elevationStdDevM": 83.9
+            },
+            {
+              "position": 703,
+              "coordinate": [-70.0168567, -27.1731621],
+              "meanElevationM": 1472.1,
+              "elevationStdDevM": 105.6
+            },
+            {
+              "position": 704,
+              "coordinate": [-70.0192573, -27.1338537],
+              "meanElevationM": 1592.2,
+              "elevationStdDevM": 104.1
+            },
+            {
+              "position": 705,
+              "coordinate": [-69.9779922, -27.1266286],
+              "meanElevationM": 1685.9,
+              "elevationStdDevM": 100.5
+            },
+            {
+              "position": 706,
+              "coordinate": [-69.9393438, -27.1164023],
+              "meanElevationM": 1695.4,
+              "elevationStdDevM": 72.2
+            },
+            {
+              "position": 707,
+              "coordinate": [-69.9292295, -27.0739001],
+              "meanElevationM": 1696,
+              "elevationStdDevM": 89.1
+            },
+            {
+              "position": 708,
+              "coordinate": [-69.9088254, -27.0328405],
+              "meanElevationM": 1706.2,
+              "elevationStdDevM": 40.1
+            },
+            {
+              "position": 709,
+              "coordinate": [-69.9007132, -26.9905057],
+              "meanElevationM": 1815.7,
+              "elevationStdDevM": 58.5
+            },
+            {
+              "position": 710,
+              "coordinate": [-69.9269909, -26.9527745],
+              "meanElevationM": 1858.4,
+              "elevationStdDevM": 49.6
+            },
+            {
+              "position": 711,
+              "coordinate": [-69.9316906, -26.9110399],
+              "meanElevationM": 1971,
+              "elevationStdDevM": 51.7
+            },
+            {
+              "position": 712,
+              "coordinate": [-69.918618, -26.8935777],
+              "meanElevationM": 1952.5,
+              "elevationStdDevM": 54.1
+            },
+            {
+              "position": 713,
+              "coordinate": [-69.8939838, -26.8576714],
+              "meanElevationM": 1882.6,
+              "elevationStdDevM": 67.3
+            },
+            {
+              "position": 714,
+              "coordinate": [-69.8855299, -26.8146828],
+              "meanElevationM": 1805.5,
+              "elevationStdDevM": 54.1
+            },
+            {
+              "position": 715,
+              "coordinate": [-69.900999, -26.7727713],
+              "meanElevationM": 1668.6,
+              "elevationStdDevM": 63.7
+            },
+            {
+              "position": 716,
+              "coordinate": [-69.9080781, -26.7283808],
+              "meanElevationM": 1514.3,
+              "elevationStdDevM": 53.3
+            },
+            {
+              "position": 717,
+              "coordinate": [-69.9190788, -26.6851234],
+              "meanElevationM": 1401.3,
+              "elevationStdDevM": 61.3
+            },
+            {
+              "position": 718,
+              "coordinate": [-69.9423925, -26.6459203],
+              "meanElevationM": 1267.8,
+              "elevationStdDevM": 43.4
+            },
+            {
+              "position": 719,
+              "coordinate": [-69.9867677, -26.6264743],
+              "meanElevationM": 1212.9,
+              "elevationStdDevM": 38.5
+            },
+            {
+              "position": 720,
+              "coordinate": [-70.0079431, -26.587685],
+              "meanElevationM": 1140.7,
+              "elevationStdDevM": 39.5
+            },
+            {
+              "position": 721,
+              "coordinate": [-70.024571, -26.5459638],
+              "meanElevationM": 1064.9,
+              "elevationStdDevM": 59.3
+            },
+            {
+              "position": 722,
+              "coordinate": [-70.0519074, -26.5117363],
+              "meanElevationM": 1030.8,
+              "elevationStdDevM": 122.6
+            },
+            {
+              "position": 723,
+              "coordinate": [-70.0681895, -26.4711237],
+              "meanElevationM": 950.5,
+              "elevationStdDevM": 120.3
+            },
+            {
+              "position": 724,
+              "coordinate": [-70.0940025, -26.4342332],
+              "meanElevationM": 810.1,
+              "elevationStdDevM": 111.6
+            },
+            {
+              "position": 725,
+              "coordinate": [-70.1349304, -26.4111383],
+              "meanElevationM": 684.5,
+              "elevationStdDevM": 41.1
+            },
+            {
+              "position": 726,
+              "coordinate": [-70.0895515, -26.3948385],
+              "meanElevationM": 765.4,
+              "elevationStdDevM": 52.3
+            },
+            {
+              "position": 727,
+              "coordinate": [-70.0401072, -26.3905633],
+              "meanElevationM": 843.1,
+              "elevationStdDevM": 47.4
+            },
+            {
+              "position": 728,
+              "coordinate": [-70.0006633, -26.3672455],
+              "meanElevationM": 921.6,
+              "elevationStdDevM": 50.4
+            },
+            {
+              "position": 729,
+              "coordinate": [-69.9947351, -26.3407653],
+              "meanElevationM": 993.2,
+              "elevationStdDevM": 60.5
+            },
+            {
+              "position": 730,
+              "coordinate": [-69.9761073, -26.2998504],
+              "meanElevationM": 1059.4,
+              "elevationStdDevM": 20
+            },
+            {
+              "position": 731,
+              "coordinate": [-69.9749614, -26.2549922],
+              "meanElevationM": 1077.4,
+              "elevationStdDevM": 22
+            },
+            {
+              "position": 732,
+              "coordinate": [-69.9824472, -26.2106692],
+              "meanElevationM": 1063.7,
+              "elevationStdDevM": 26.8
+            },
+            {
+              "position": 733,
+              "coordinate": [-69.9863663, -26.1660332],
+              "meanElevationM": 1071.2,
+              "elevationStdDevM": 29.4
+            },
+            {
+              "position": 734,
+              "coordinate": [-69.9802906, -26.1217837],
+              "meanElevationM": 1099.2,
+              "elevationStdDevM": 26
+            },
+            {
+              "position": 735,
+              "coordinate": [-69.971438, -26.0775533],
+              "meanElevationM": 1116.1,
+              "elevationStdDevM": 33.2
+            },
+            {
+              "position": 736,
+              "coordinate": [-69.9515672, -26.0369849],
+              "meanElevationM": 1178.2,
+              "elevationStdDevM": 37.9
+            },
+            {
+              "position": 737,
+              "coordinate": [-69.9326086, -25.9986441],
+              "meanElevationM": 1211.6,
+              "elevationStdDevM": 50
+            },
+            {
+              "position": 738,
+              "coordinate": [-69.9260355, -25.9796076],
+              "meanElevationM": 1226.5,
+              "elevationStdDevM": 48.5
+            },
+            {
+              "position": 739,
+              "coordinate": [-69.8997815, -25.9609061],
+              "meanElevationM": 1323.3,
+              "elevationStdDevM": 86.3
+            },
+            {
+              "position": 740,
+              "coordinate": [-69.8845515, -25.919478],
+              "meanElevationM": 1497.9,
+              "elevationStdDevM": 75.5
+            },
+            {
+              "position": 741,
+              "coordinate": [-69.8630608, -25.8821764],
+              "meanElevationM": 1589.2,
+              "elevationStdDevM": 42.5
+            },
+            {
+              "position": 742,
+              "coordinate": [-69.8546297, -25.8437703],
+              "meanElevationM": 1719.4,
+              "elevationStdDevM": 46.7
+            },
+            {
+              "position": 743,
+              "coordinate": [-69.8467053, -25.8012203],
+              "meanElevationM": 1789.9,
+              "elevationStdDevM": 66.3
+            },
+            {
+              "position": 744,
+              "coordinate": [-69.8141998, -25.7688956],
+              "meanElevationM": 1770.5,
+              "elevationStdDevM": 60.1
+            },
+            {
+              "position": 745,
+              "coordinate": [-69.7860543, -25.7327654],
+              "meanElevationM": 1748.5,
+              "elevationStdDevM": 28.7
+            },
+            {
+              "position": 746,
+              "coordinate": [-69.7612366, -25.6937561],
+              "meanElevationM": 1826,
+              "elevationStdDevM": 32.9
+            },
+            {
+              "position": 747,
+              "coordinate": [-69.7407105, -25.6527816],
+              "meanElevationM": 1925.3,
+              "elevationStdDevM": 34.5
+            },
+            {
+              "position": 748,
+              "coordinate": [-69.7204194, -25.611705],
+              "meanElevationM": 1990.4,
+              "elevationStdDevM": 48.6
+            },
+            {
+              "position": 749,
+              "coordinate": [-69.7243564, -25.5729994],
+              "meanElevationM": 2053.1,
+              "elevationStdDevM": 40
+            },
+            {
+              "position": 750,
+              "coordinate": [-69.7187417, -25.5296833],
+              "meanElevationM": 2007.5,
+              "elevationStdDevM": 25.2
+            },
+            {
+              "position": 751,
+              "coordinate": [-69.7043407, -25.4866367],
+              "meanElevationM": 1984.4,
+              "elevationStdDevM": 31.9
+            },
+            {
+              "position": 752,
+              "coordinate": [-69.6929222, -25.4429528],
+              "meanElevationM": 1990.7,
+              "elevationStdDevM": 31.4
+            },
+            {
+              "position": 753,
+              "coordinate": [-69.6845457, -25.3986279],
+              "meanElevationM": 2030.1,
+              "elevationStdDevM": 33.2
+            },
+            {
+              "position": 754,
+              "coordinate": [-69.6762397, -25.3542926],
+              "meanElevationM": 2054.4,
+              "elevationStdDevM": 27.6
+            },
+            {
+              "position": 755,
+              "coordinate": [-69.6742773, -25.3101863],
+              "meanElevationM": 2128.9,
+              "elevationStdDevM": 37
+            },
+            {
+              "position": 756,
+              "coordinate": [-69.6959208, -25.2724921],
+              "meanElevationM": 2172.7,
+              "elevationStdDevM": 25.6
+            },
+            {
+              "position": 757,
+              "coordinate": [-69.7150689, -25.2320605],
+              "meanElevationM": 2191.8,
+              "elevationStdDevM": 28.6
+            },
+            {
+              "position": 758,
+              "coordinate": [-69.7269035, -25.188841],
+              "meanElevationM": 2223,
+              "elevationStdDevM": 22.1
+            },
+            {
+              "position": 759,
+              "coordinate": [-69.7262701, -25.1442985],
+              "meanElevationM": 2298.3,
+              "elevationStdDevM": 51.5
+            },
+            {
+              "position": 760,
+              "coordinate": [-69.7292027, -25.099563],
+              "meanElevationM": 2375.4,
+              "elevationStdDevM": 43.1
+            },
+            {
+              "position": 761,
+              "coordinate": [-69.7311969, -25.054862],
+              "meanElevationM": 2422.4,
+              "elevationStdDevM": 22.9
+            },
+            {
+              "position": 762,
+              "coordinate": [-69.7365669, -25.0104458],
+              "meanElevationM": 2443.7,
+              "elevationStdDevM": 27
+            },
+            {
+              "position": 763,
+              "coordinate": [-69.7109964, -24.9720901],
+              "meanElevationM": 2418.3,
+              "elevationStdDevM": 33.2
+            },
+            {
+              "position": 764,
+              "coordinate": [-69.6934813, -24.931459],
+              "meanElevationM": 2406.1,
+              "elevationStdDevM": 41.5
+            },
+            {
+              "position": 765,
+              "coordinate": [-69.6946503, -24.8916022],
+              "meanElevationM": 2326,
+              "elevationStdDevM": 43.3
+            },
+            {
+              "position": 766,
+              "coordinate": [-69.7305072, -24.8666493],
+              "meanElevationM": 2225,
+              "elevationStdDevM": 44.9
+            },
+            {
+              "position": 767,
+              "coordinate": [-69.7569055, -24.8319126],
+              "meanElevationM": 2111,
+              "elevationStdDevM": 38.4
+            },
+            {
+              "position": 768,
+              "coordinate": [-69.7651744, -24.7879476],
+              "meanElevationM": 1993.5,
+              "elevationStdDevM": 39.5
+            },
+            {
+              "position": 769,
+              "coordinate": [-69.7727534, -24.7435837],
+              "meanElevationM": 1901.4,
+              "elevationStdDevM": 26.5
+            },
+            {
+              "position": 770,
+              "coordinate": [-69.7744003, -24.698805],
+              "meanElevationM": 1844.5,
+              "elevationStdDevM": 31.3
+            },
+            {
+              "position": 771,
+              "coordinate": [-69.7723749, -24.6539666],
+              "meanElevationM": 1784.7,
+              "elevationStdDevM": 64.5
+            },
+            {
+              "position": 772,
+              "coordinate": [-69.7800045, -24.6096546],
+              "meanElevationM": 1698.4,
+              "elevationStdDevM": 55.1
+            },
+            {
+              "position": 773,
+              "coordinate": [-69.7927283, -24.5662217],
+              "meanElevationM": 1603.6,
+              "elevationStdDevM": 42.1
+            },
+            {
+              "position": 774,
+              "coordinate": [-69.8066658, -24.5230799],
+              "meanElevationM": 1517.7,
+              "elevationStdDevM": 26
+            },
+            {
+              "position": 775,
+              "coordinate": [-69.8181403, -24.4793538],
+              "meanElevationM": 1462.3,
+              "elevationStdDevM": 15.5
+            },
+            {
+              "position": 776,
+              "coordinate": [-69.844188, -24.4424076],
+              "meanElevationM": 1433,
+              "elevationStdDevM": 28.2
+            },
+            {
+              "position": 777,
+              "coordinate": [-69.8720497, -24.405776],
+              "meanElevationM": 1381.2,
+              "elevationStdDevM": 21.2
+            },
+            {
+              "position": 778,
+              "coordinate": [-69.8893144, -24.3637638],
+              "meanElevationM": 1344.1,
+              "elevationStdDevM": 23.9
+            },
+            {
+              "position": 779,
+              "coordinate": [-69.9030791, -24.3217374],
+              "meanElevationM": 1284.9,
+              "elevationStdDevM": 23.2
+            },
+            {
+              "position": 780,
+              "coordinate": [-69.8894087, -24.2887447],
+              "meanElevationM": 1255.8,
+              "elevationStdDevM": 24.6
+            },
+            {
+              "position": 781,
+              "coordinate": [-69.8806108, -24.2451055],
+              "meanElevationM": 1180.4,
+              "elevationStdDevM": 38.9
+            },
+            {
+              "position": 782,
+              "coordinate": [-69.8521541, -24.2209437],
+              "meanElevationM": 1145.6,
+              "elevationStdDevM": 18.1
+            },
+            {
+              "position": 783,
+              "coordinate": [-69.850695, -24.1776397],
+              "meanElevationM": 1071.8,
+              "elevationStdDevM": 26.2
+            },
+            {
+              "position": 784,
+              "coordinate": [-69.8215844, -24.1482751],
+              "meanElevationM": 1016.8,
+              "elevationStdDevM": 14
+            },
+            {
+              "position": 785,
+              "coordinate": [-69.8051518, -24.1058837],
+              "meanElevationM": 1004.4,
+              "elevationStdDevM": 13.3
+            },
+            {
+              "position": 786,
+              "coordinate": [-69.7760757, -24.0702477],
+              "meanElevationM": 1023.8,
+              "elevationStdDevM": 47.4
+            },
+            {
+              "position": 787,
+              "coordinate": [-69.7721023, -24.0285022],
+              "meanElevationM": 999.4,
+              "elevationStdDevM": 13.1
+            },
+            {
+              "position": 788,
+              "coordinate": [-69.7725544, -23.983751],
+              "meanElevationM": 961.2,
+              "elevationStdDevM": 21.3
+            },
+            {
+              "position": 789,
+              "coordinate": [-69.7708132, -23.940035],
+              "meanElevationM": 886.4,
+              "elevationStdDevM": 25.2
+            },
+            {
+              "position": 790,
+              "coordinate": [-69.7468202, -23.900781],
+              "meanElevationM": 848.9,
+              "elevationStdDevM": 16.4
+            },
+            {
+              "position": 791,
+              "coordinate": [-69.7523287, -23.8657757],
+              "meanElevationM": 810.9,
+              "elevationStdDevM": 18.1
+            },
+            {
+              "position": 792,
+              "coordinate": [-69.7902283, -23.8371328],
+              "meanElevationM": 758.2,
+              "elevationStdDevM": 16.3
+            },
+            {
+              "position": 793,
+              "coordinate": [-69.8287005, -23.8093839],
+              "meanElevationM": 721.5,
+              "elevationStdDevM": 14.9
+            },
+            {
+              "position": 794,
+              "coordinate": [-69.8746264, -23.7933764],
+              "meanElevationM": 701.9,
+              "elevationStdDevM": 15.5
+            },
+            {
+              "position": 795,
+              "coordinate": [-69.9227533, -23.7884333],
+              "meanElevationM": 673.5,
+              "elevationStdDevM": 14.8
+            },
+            {
+              "position": 796,
+              "coordinate": [-69.9713359, -23.7843215],
+              "meanElevationM": 663.5,
+              "elevationStdDevM": 22.2
+            },
+            {
+              "position": 797,
+              "coordinate": [-70.0144383, -23.764593],
+              "meanElevationM": 658.7,
+              "elevationStdDevM": 29.9
+            },
+            {
+              "position": 798,
+              "coordinate": [-70.0570387, -23.7623814],
+              "meanElevationM": 680.8,
+              "elevationStdDevM": 81
+            },
+            {
+              "position": 799,
+              "coordinate": [-70.0972232, -23.74181],
+              "meanElevationM": 650.7,
+              "elevationStdDevM": 25.5
+            },
+            {
+              "position": 800,
+              "coordinate": [-70.1439176, -23.7279957],
+              "meanElevationM": 664,
+              "elevationStdDevM": 36.5
+            },
+            {
+              "position": 801,
+              "coordinate": [-70.1904044, -23.717675],
+              "meanElevationM": 649.3,
+              "elevationStdDevM": 42.6
+            },
+            {
+              "position": 802,
+              "coordinate": [-70.2265148, -23.7015256],
+              "meanElevationM": 646.6,
+              "elevationStdDevM": 40.4
+            },
+            {
+              "position": 803,
+              "coordinate": [-70.2476986, -23.6614596],
+              "meanElevationM": 577.9,
+              "elevationStdDevM": 43
+            },
+            {
+              "position": 804,
+              "coordinate": [-70.2687397, -23.6753593],
+              "meanElevationM": 560.1,
+              "elevationStdDevM": 41.3
+            },
+            {
+              "position": 805,
+              "coordinate": [-70.2941769, -23.7125769],
+              "meanElevationM": 591.7,
+              "elevationStdDevM": 58.9
+            },
+            {
+              "position": 806,
+              "coordinate": [-70.3100911, -23.7545845],
+              "meanElevationM": 486.6,
+              "elevationStdDevM": 57.2
+            },
+            {
+              "position": 807,
+              "coordinate": [-70.3449398, -23.7594863],
+              "meanElevationM": 497.4,
+              "elevationStdDevM": 82.2
+            },
+            {
+              "position": 808,
+              "coordinate": [-70.3673733, -23.7242711],
+              "meanElevationM": 506.4,
+              "elevationStdDevM": 175.5
+            },
+            {
+              "position": 809,
+              "coordinate": [-70.4011558, -23.6961527],
+              "meanElevationM": 213.5,
+              "elevationStdDevM": 150.6
+            },
+            {
+              "position": 810,
+              "coordinate": [-70.3937069, -23.660967],
+              "meanElevationM": 156.5,
+              "elevationStdDevM": 173.2
+            },
+            {
+              "position": 811,
+              "coordinate": [-70.3981968, -23.6443759],
+              "meanElevationM": 68.4,
+              "elevationStdDevM": 114.5
+            },
+            {
+              "position": 812,
+              "coordinate": [-70.389114, -23.6453458],
+              "meanElevationM": 136.6,
+              "elevationStdDevM": 153.3
+            },
+            {
+              "position": 813,
+              "coordinate": [-70.4076487, -23.6855752],
+              "meanElevationM": 112.7,
+              "elevationStdDevM": 124.4
+            },
+            {
+              "position": 814,
+              "coordinate": [-70.3796726, -23.7150719],
+              "meanElevationM": 417.7,
+              "elevationStdDevM": 139.3
+            },
+            {
+              "position": 815,
+              "coordinate": [-70.3565356, -23.7475481],
+              "meanElevationM": 526.3,
+              "elevationStdDevM": 129
+            },
+            {
+              "position": 816,
+              "coordinate": [-70.3203014, -23.7682682],
+              "meanElevationM": 459.5,
+              "elevationStdDevM": 38.7
+            },
+            {
+              "position": 817,
+              "coordinate": [-70.2996171, -23.7282717],
+              "meanElevationM": 566,
+              "elevationStdDevM": 73.3
+            },
+            {
+              "position": 818,
+              "coordinate": [-70.2791246, -23.6884064],
+              "meanElevationM": 574,
+              "elevationStdDevM": 30.9
+            },
+            {
+              "position": 819,
+              "coordinate": [-70.253093, -23.654647],
+              "meanElevationM": 559.4,
+              "elevationStdDevM": 34.8
+            },
+            {
+              "position": 820,
+              "coordinate": [-70.2564196, -23.6118683],
+              "meanElevationM": 557,
+              "elevationStdDevM": 24.9
+            },
+            {
+              "position": 821,
+              "coordinate": [-70.2440418, -23.5697795],
+              "meanElevationM": 583.5,
+              "elevationStdDevM": 30.6
+            },
+            {
+              "position": 822,
+              "coordinate": [-70.221349, -23.5299242],
+              "meanElevationM": 623.7,
+              "elevationStdDevM": 21.4
+            },
+            {
+              "position": 823,
+              "coordinate": [-70.1919894, -23.4941016],
+              "meanElevationM": 666.3,
+              "elevationStdDevM": 25.4
+            },
+            {
+              "position": 824,
+              "coordinate": [-70.1587702, -23.4610548],
+              "meanElevationM": 765.9,
+              "elevationStdDevM": 69.7
+            },
+            {
+              "position": 825,
+              "coordinate": [-70.1111308, -23.4583673],
+              "meanElevationM": 844.8,
+              "elevationStdDevM": 105.8
+            },
+            {
+              "position": 826,
+              "coordinate": [-70.0640397, -23.4502844],
+              "meanElevationM": 868.1,
+              "elevationStdDevM": 66
+            },
+            {
+              "position": 827,
+              "coordinate": [-70.0185981, -23.4367505],
+              "meanElevationM": 879.2,
+              "elevationStdDevM": 48.4
+            },
+            {
+              "position": 828,
+              "coordinate": [-69.9772065, -23.4127008],
+              "meanElevationM": 900.1,
+              "elevationStdDevM": 27.8
+            },
+            {
+              "position": 829,
+              "coordinate": [-69.9372869, -23.3866937],
+              "meanElevationM": 942.6,
+              "elevationStdDevM": 25.9
+            },
+            {
+              "position": 830,
+              "coordinate": [-69.8955417, -23.3632395],
+              "meanElevationM": 996.2,
+              "elevationStdDevM": 29.4
+            },
+            {
+              "position": 831,
+              "coordinate": [-69.8531585, -23.3407043],
+              "meanElevationM": 1030.2,
+              "elevationStdDevM": 21.6
+            },
+            {
+              "position": 832,
+              "coordinate": [-69.8405351, -23.3084063],
+              "meanElevationM": 1067.3,
+              "elevationStdDevM": 23.8
+            },
+            {
+              "position": 833,
+              "coordinate": [-69.8759371, -23.288435],
+              "meanElevationM": 1116.1,
+              "elevationStdDevM": 38.5
+            },
+            {
+              "position": 834,
+              "coordinate": [-69.8601575, -23.2557578],
+              "meanElevationM": 1188.8,
+              "elevationStdDevM": 20
+            },
+            {
+              "position": 835,
+              "coordinate": [-69.8734542, -23.2130401],
+              "meanElevationM": 1257.5,
+              "elevationStdDevM": 28.1
+            },
+            {
+              "position": 836,
+              "coordinate": [-69.8853905, -23.174472],
+              "meanElevationM": 1297.4,
+              "elevationStdDevM": 32.4
+            },
+            {
+              "position": 837,
+              "coordinate": [-69.8771986, -23.131217],
+              "meanElevationM": 1309.7,
+              "elevationStdDevM": 39.4
+            },
+            {
+              "position": 838,
+              "coordinate": [-69.8677424, -23.0873776],
+              "meanElevationM": 1339.6,
+              "elevationStdDevM": 34
+            },
+            {
+              "position": 839,
+              "coordinate": [-69.8549194, -23.0445899],
+              "meanElevationM": 1375.4,
+              "elevationStdDevM": 24.6
+            },
+            {
+              "position": 840,
+              "coordinate": [-69.8504748, -23.0001393],
+              "meanElevationM": 1410.3,
+              "elevationStdDevM": 29.1
+            },
+            {
+              "position": 841,
+              "coordinate": [-69.8483431, -22.9553551],
+              "meanElevationM": 1423.1,
+              "elevationStdDevM": 37.3
+            },
+            {
+              "position": 842,
+              "coordinate": [-69.8403663, -22.9111546],
+              "meanElevationM": 1410.6,
+              "elevationStdDevM": 25.1
+            },
+            {
+              "position": 843,
+              "coordinate": [-69.8223769, -22.8693542],
+              "meanElevationM": 1414.6,
+              "elevationStdDevM": 14.9
+            },
+            {
+              "position": 844,
+              "coordinate": [-69.8049208, -22.8273785],
+              "meanElevationM": 1408.5,
+              "elevationStdDevM": 6.3
+            },
+            {
+              "position": 845,
+              "coordinate": [-69.7837508, -22.7872109],
+              "meanElevationM": 1447.7,
+              "elevationStdDevM": 22
+            },
+            {
+              "position": 846,
+              "coordinate": [-69.7482615, -22.7566951],
+              "meanElevationM": 1498.6,
+              "elevationStdDevM": 11.2
+            },
+            {
+              "position": 847,
+              "coordinate": [-69.7121068, -22.7271787],
+              "meanElevationM": 1502.5,
+              "elevationStdDevM": 20.2
+            },
+            {
+              "position": 848,
+              "coordinate": [-69.6753897, -22.7002638],
+              "meanElevationM": 1458.2,
+              "elevationStdDevM": 15.4
+            },
+            {
+              "position": 849,
+              "coordinate": [-69.6516278, -22.6610672],
+              "meanElevationM": 1424.5,
+              "elevationStdDevM": 9.1
+            },
+            {
+              "position": 850,
+              "coordinate": [-69.6304543, -22.620578],
+              "meanElevationM": 1402.8,
+              "elevationStdDevM": 15.1
+            },
+            {
+              "position": 851,
+              "coordinate": [-69.6198604, -22.5775299],
+              "meanElevationM": 1370.7,
+              "elevationStdDevM": 13.6
+            },
+            {
+              "position": 852,
+              "coordinate": [-69.5963438, -22.5381562],
+              "meanElevationM": 1333.6,
+              "elevationStdDevM": 13.9
+            },
+            {
+              "position": 853,
+              "coordinate": [-69.566773, -22.5025703],
+              "meanElevationM": 1293.5,
+              "elevationStdDevM": 13.7
+            },
+            {
+              "position": 854,
+              "coordinate": [-69.5522476, -22.460452],
+              "meanElevationM": 1266.2,
+              "elevationStdDevM": 12.3
+            },
+            {
+              "position": 855,
+              "coordinate": [-69.5578955, -22.4158016],
+              "meanElevationM": 1242.9,
+              "elevationStdDevM": 9.1
+            },
+            {
+              "position": 856,
+              "coordinate": [-69.5660321, -22.3717127],
+              "meanElevationM": 1224.1,
+              "elevationStdDevM": 11.7
+            },
+            {
+              "position": 857,
+              "coordinate": [-69.5677175, -22.3280343],
+              "meanElevationM": 1204.7,
+              "elevationStdDevM": 9.4
+            },
+            {
+              "position": 858,
+              "coordinate": [-69.5709304, -22.2837233],
+              "meanElevationM": 1182.5,
+              "elevationStdDevM": 8.2
+            },
+            {
+              "position": 859,
+              "coordinate": [-69.571525, -22.238762],
+              "meanElevationM": 1164.5,
+              "elevationStdDevM": 6.7
+            },
+            {
+              "position": 860,
+              "coordinate": [-69.5723173, -22.1938019],
+              "meanElevationM": 1147.6,
+              "elevationStdDevM": 5.4
+            },
+            {
+              "position": 861,
+              "coordinate": [-69.5743978, -22.1489694],
+              "meanElevationM": 1129.4,
+              "elevationStdDevM": 9.2
+            },
+            {
+              "position": 862,
+              "coordinate": [-69.5821934, -22.1048524],
+              "meanElevationM": 1110.1,
+              "elevationStdDevM": 12.7
+            },
+            {
+              "position": 863,
+              "coordinate": [-69.5973471, -22.0634096],
+              "meanElevationM": 1091.9,
+              "elevationStdDevM": 12.4
+            },
+            {
+              "position": 864,
+              "coordinate": [-69.60081, -22.0200583],
+              "meanElevationM": 1074.2,
+              "elevationStdDevM": 7.2
+            },
+            {
+              "position": 865,
+              "coordinate": [-69.5876519, -21.9767791],
+              "meanElevationM": 1054.7,
+              "elevationStdDevM": 8.9
+            },
+            {
+              "position": 866,
+              "coordinate": [-69.5690837, -21.9364972],
+              "meanElevationM": 1047.5,
+              "elevationStdDevM": 22.2
+            },
+            {
+              "position": 867,
+              "coordinate": [-69.5586974, -21.8951388],
+              "meanElevationM": 1047,
+              "elevationStdDevM": 20.7
+            },
+            {
+              "position": 868,
+              "coordinate": [-69.5430732, -21.8542807],
+              "meanElevationM": 1030.2,
+              "elevationStdDevM": 14.8
+            },
+            {
+              "position": 869,
+              "coordinate": [-69.5213867, -21.8147047],
+              "meanElevationM": 1021.6,
+              "elevationStdDevM": 33.2
+            },
+            {
+              "position": 870,
+              "coordinate": [-69.5138187, -21.771379],
+              "meanElevationM": 1014.6,
+              "elevationStdDevM": 40.8
+            },
+            {
+              "position": 871,
+              "coordinate": [-69.5185389, -21.7319862],
+              "meanElevationM": 993.6,
+              "elevationStdDevM": 86.5
+            },
+            {
+              "position": 872,
+              "coordinate": [-69.5310016, -21.6897539],
+              "meanElevationM": 913.5,
+              "elevationStdDevM": 63.4
+            },
+            {
+              "position": 873,
+              "coordinate": [-69.537137, -21.6473135],
+              "meanElevationM": 867.1,
+              "elevationStdDevM": 47.1
+            },
+            {
+              "position": 874,
+              "coordinate": [-69.5578972, -21.6146322],
+              "meanElevationM": 858,
+              "elevationStdDevM": 46.6
+            },
+            {
+              "position": 875,
+              "coordinate": [-69.5386101, -21.5751519],
+              "meanElevationM": 912,
+              "elevationStdDevM": 11.3
+            },
+            {
+              "position": 876,
+              "coordinate": [-69.5294176, -21.5310061],
+              "meanElevationM": 905.4,
+              "elevationStdDevM": 8.3
+            },
+            {
+              "position": 877,
+              "coordinate": [-69.5200556, -21.4868918],
+              "meanElevationM": 881.4,
+              "elevationStdDevM": 9.8
+            },
+            {
+              "position": 878,
+              "coordinate": [-69.5027884, -21.4457323],
+              "meanElevationM": 850.8,
+              "elevationStdDevM": 12.7
+            },
+            {
+              "position": 879,
+              "coordinate": [-69.5000546, -21.400886],
+              "meanElevationM": 817.7,
+              "elevationStdDevM": 9.7
+            },
+            {
+              "position": 880,
+              "coordinate": [-69.4976484, -21.3559758],
+              "meanElevationM": 813.9,
+              "elevationStdDevM": 9.1
+            },
+            {
+              "position": 881,
+              "coordinate": [-69.4952203, -21.3110667],
+              "meanElevationM": 815.6,
+              "elevationStdDevM": 7.9
+            },
+            {
+              "position": 882,
+              "coordinate": [-69.4928084, -21.2661569],
+              "meanElevationM": 821.7,
+              "elevationStdDevM": 8.1
+            },
+            {
+              "position": 883,
+              "coordinate": [-69.4903894, -21.2212474],
+              "meanElevationM": 827.3,
+              "elevationStdDevM": 10.4
+            },
+            {
+              "position": 884,
+              "coordinate": [-69.4879333, -21.1763398],
+              "meanElevationM": 835.8,
+              "elevationStdDevM": 11.6
+            },
+            {
+              "position": 885,
+              "coordinate": [-69.4855006, -21.131431],
+              "meanElevationM": 854.6,
+              "elevationStdDevM": 13.1
+            },
+            {
+              "position": 886,
+              "coordinate": [-69.4830435, -21.0865235],
+              "meanElevationM": 872.3,
+              "elevationStdDevM": 12.7
+            },
+            {
+              "position": 887,
+              "coordinate": [-69.4806103, -21.0416148],
+              "meanElevationM": 909.5,
+              "elevationStdDevM": 28.4
+            },
+            {
+              "position": 888,
+              "coordinate": [-69.4842008, -20.9975125],
+              "meanElevationM": 921.9,
+              "elevationStdDevM": 10.1
+            },
+            {
+              "position": 889,
+              "coordinate": [-69.5004507, -20.9551839],
+              "meanElevationM": 937.3,
+              "elevationStdDevM": 8.9
+            },
+            {
+              "position": 890,
+              "coordinate": [-69.5166585, -20.9128426],
+              "meanElevationM": 942.6,
+              "elevationStdDevM": 7.7
+            },
+            {
+              "position": 891,
+              "coordinate": [-69.5328402, -20.8704941],
+              "meanElevationM": 946.4,
+              "elevationStdDevM": 10
+            },
+            {
+              "position": 892,
+              "coordinate": [-69.5490033, -20.828141],
+              "meanElevationM": 968.3,
+              "elevationStdDevM": 18.5
+            },
+            {
+              "position": 893,
+              "coordinate": [-69.5650253, -20.7857425],
+              "meanElevationM": 973,
+              "elevationStdDevM": 6.7
+            },
+            {
+              "position": 894,
+              "coordinate": [-69.5810383, -20.7433426],
+              "meanElevationM": 974.8,
+              "elevationStdDevM": 5
+            },
+            {
+              "position": 895,
+              "coordinate": [-69.5970373, -20.7009395],
+              "meanElevationM": 973.8,
+              "elevationStdDevM": 3.1
+            },
+            {
+              "position": 896,
+              "coordinate": [-69.6129559, -20.6585114],
+              "meanElevationM": 977.4,
+              "elevationStdDevM": 10.2
+            },
+            {
+              "position": 897,
+              "coordinate": [-69.6363385, -20.6225483],
+              "meanElevationM": 1006.3,
+              "elevationStdDevM": 57.2
+            },
+            {
+              "position": 898,
+              "coordinate": [-69.6732099, -20.5937247],
+              "meanElevationM": 977.5,
+              "elevationStdDevM": 20.1
+            },
+            {
+              "position": 899,
+              "coordinate": [-69.7100488, -20.5648714],
+              "meanElevationM": 990.4,
+              "elevationStdDevM": 43.6
+            },
+            {
+              "position": 900,
+              "coordinate": [-69.7468517, -20.5359857],
+              "meanElevationM": 1008.8,
+              "elevationStdDevM": 50.2
+            },
+            {
+              "position": 901,
+              "coordinate": [-69.7836349, -20.5070856],
+              "meanElevationM": 1042,
+              "elevationStdDevM": 70
+            },
+            {
+              "position": 902,
+              "coordinate": [-69.7861779, -20.4729054],
+              "meanElevationM": 1035.7,
+              "elevationStdDevM": 64.4
+            },
+            {
+              "position": 903,
+              "coordinate": [-69.7586697, -20.4521566],
+              "meanElevationM": 1013.6,
+              "elevationStdDevM": 47.1
+            },
+            {
+              "position": 904,
+              "coordinate": [-69.7517593, -20.407876],
+              "meanElevationM": 1027.5,
+              "elevationStdDevM": 63.6
+            },
+            {
+              "position": 905,
+              "coordinate": [-69.7532567, -20.3629319],
+              "meanElevationM": 1045.9,
+              "elevationStdDevM": 62.6
+            },
+            {
+              "position": 906,
+              "coordinate": [-69.7574268, -20.3187233],
+              "meanElevationM": 1035,
+              "elevationStdDevM": 41.2
+            },
+            {
+              "position": 907,
+              "coordinate": [-69.7853347, -20.2839657],
+              "meanElevationM": 1054.2,
+              "elevationStdDevM": 41.5
+            },
+            {
+              "position": 908,
+              "coordinate": [-69.7930134, -20.2406876],
+              "meanElevationM": 1044.5,
+              "elevationStdDevM": 20.7
+            },
+            {
+              "position": 909,
+              "coordinate": [-69.7880353, -20.1985007],
+              "meanElevationM": 1045.3,
+              "elevationStdDevM": 11
+            },
+            {
+              "position": 910,
+              "coordinate": [-69.7705132, -20.1573295],
+              "meanElevationM": 1061.7,
+              "elevationStdDevM": 19.2
+            },
+            {
+              "position": 911,
+              "coordinate": [-69.7490504, -20.11786],
+              "meanElevationM": 1073,
+              "elevationStdDevM": 16.6
+            },
+            {
+              "position": 912,
+              "coordinate": [-69.7366169, -20.0751894],
+              "meanElevationM": 1084.4,
+              "elevationStdDevM": 11.1
+            },
+            {
+              "position": 913,
+              "coordinate": [-69.7484904, -20.0318303],
+              "meanElevationM": 1098.2,
+              "elevationStdDevM": 12.5
+            },
+            {
+              "position": 914,
+              "coordinate": [-69.7728826, -19.9973632],
+              "meanElevationM": 1111.5,
+              "elevationStdDevM": 10.2
+            },
+            {
+              "position": 915,
+              "coordinate": [-69.8003384, -19.9617887],
+              "meanElevationM": 1123.6,
+              "elevationStdDevM": 11.2
+            },
+            {
+              "position": 916,
+              "coordinate": [-69.7943648, -19.925534],
+              "meanElevationM": 1139.3,
+              "elevationStdDevM": 25.5
+            },
+            {
+              "position": 917,
+              "coordinate": [-69.8079625, -19.8875706],
+              "meanElevationM": 1166.6,
+              "elevationStdDevM": 31.9
+            },
+            {
+              "position": 918,
+              "coordinate": [-69.8465321, -19.8611929],
+              "meanElevationM": 1150.5,
+              "elevationStdDevM": 13.8
+            },
+            {
+              "position": 919,
+              "coordinate": [-69.8628621, -19.821285],
+              "meanElevationM": 1168.1,
+              "elevationStdDevM": 39.7
+            },
+            {
+              "position": 920,
+              "coordinate": [-69.8868298, -19.7834708],
+              "meanElevationM": 1144.2,
+              "elevationStdDevM": 15.3
+            },
+            {
+              "position": 921,
+              "coordinate": [-69.8971456, -19.7398392],
+              "meanElevationM": 1136.4,
+              "elevationStdDevM": 5.9
+            },
+            {
+              "position": 922,
+              "coordinate": [-69.9297735, -19.7086196],
+              "meanElevationM": 1146.8,
+              "elevationStdDevM": 28.7
+            },
+            {
+              "position": 923,
+              "coordinate": [-69.9493569, -19.6678169],
+              "meanElevationM": 1137.7,
+              "elevationStdDevM": 32.1
+            },
+            {
+              "position": 924,
+              "coordinate": [-69.9749127, -19.6317851],
+              "meanElevationM": 1155.2,
+              "elevationStdDevM": 49.2
+            },
+            {
+              "position": 925,
+              "coordinate": [-70.0073065, -19.60008],
+              "meanElevationM": 1147.2,
+              "elevationStdDevM": 42.8
+            },
+            {
+              "position": 926,
+              "coordinate": [-70.0266787, -19.5634036],
+              "meanElevationM": 1104.4,
+              "elevationStdDevM": 77.5
+            },
+            {
+              "position": 927,
+              "coordinate": [-70.0691205, -19.5767045],
+              "meanElevationM": 1165.1,
+              "elevationStdDevM": 121.6
+            },
+            {
+              "position": 928,
+              "coordinate": [-70.110974, -19.5940731],
+              "meanElevationM": 1035.7,
+              "elevationStdDevM": 103.9
+            },
+            {
+              "position": 929,
+              "coordinate": [-70.1438934, -19.5772034],
+              "meanElevationM": 932.1,
+              "elevationStdDevM": 109.4
+            },
+            {
+              "position": 930,
+              "coordinate": [-70.179069, -19.5785761],
+              "meanElevationM": 592.1,
+              "elevationStdDevM": 230.1
+            },
+            {
+              "position": 931,
+              "coordinate": [-70.1878418, -19.6116723],
+              "meanElevationM": 447.9,
+              "elevationStdDevM": 265.9
+            },
+            {
+              "position": 932,
+              "coordinate": [-70.1991877, -19.5755088],
+              "meanElevationM": 242,
+              "elevationStdDevM": 233.5
+            },
+            {
+              "position": 933,
+              "coordinate": [-70.2022694, -19.5324064],
+              "meanElevationM": 212.3,
+              "elevationStdDevM": 286.4
+            },
+            {
+              "position": 934,
+              "coordinate": [-70.2074397, -19.4877052],
+              "meanElevationM": 291.8,
+              "elevationStdDevM": 338.2
+            },
+            {
+              "position": 935,
+              "coordinate": [-70.2126098, -19.4430042],
+              "meanElevationM": 350.3,
+              "elevationStdDevM": 352.5
+            },
+            {
+              "position": 936,
+              "coordinate": [-70.2177799, -19.3983033],
+              "meanElevationM": 383.5,
+              "elevationStdDevM": 355.8
+            },
+            {
+              "position": 937,
+              "coordinate": [-70.22295, -19.3536026],
+              "meanElevationM": 616.8,
+              "elevationStdDevM": 337.1
+            },
+            {
+              "position": 938,
+              "coordinate": [-70.22812, -19.308902],
+              "meanElevationM": 935.4,
+              "elevationStdDevM": 149.4
+            },
+            {
+              "position": 939,
+              "coordinate": [-70.2332901, -19.2642016],
+              "meanElevationM": 934.6,
+              "elevationStdDevM": 113.2
+            },
+            {
+              "position": 940,
+              "coordinate": [-70.2384601, -19.2195013],
+              "meanElevationM": 641.6,
+              "elevationStdDevM": 112.1
+            },
+            {
+              "position": 941,
+              "coordinate": [-70.2436301, -19.1748011],
+              "meanElevationM": 332.8,
+              "elevationStdDevM": 255
+            },
+            {
+              "position": 942,
+              "coordinate": [-70.2488013, -19.1301012],
+              "meanElevationM": 734.7,
+              "elevationStdDevM": 235.9
+            },
+            {
+              "position": 943,
+              "coordinate": [-70.2539713, -19.0854014],
+              "meanElevationM": 990.8,
+              "elevationStdDevM": 105.6
+            },
+            {
+              "position": 944,
+              "coordinate": [-70.259151, -19.0407026],
+              "meanElevationM": 1065.4,
+              "elevationStdDevM": 33.4
+            },
+            {
+              "position": 945,
+              "coordinate": [-70.2643211, -18.9960031],
+              "meanElevationM": 1011.3,
+              "elevationStdDevM": 66.7
+            },
+            {
+              "position": 946,
+              "coordinate": [-70.269491, -18.9513036],
+              "meanElevationM": 953.4,
+              "elevationStdDevM": 55.8
+            },
+            {
+              "position": 947,
+              "coordinate": [-70.2746609, -18.9066043],
+              "meanElevationM": 992.5,
+              "elevationStdDevM": 50.1
+            },
+            {
+              "position": 948,
+              "coordinate": [-70.2798308, -18.8619052],
+              "meanElevationM": 892.4,
+              "elevationStdDevM": 64.2
+            },
+            {
+              "position": 949,
+              "coordinate": [-70.2850018, -18.8172063],
+              "meanElevationM": 722.2,
+              "elevationStdDevM": 53.5
+            },
+            {
+              "position": 950,
+              "coordinate": [-70.2901717, -18.7725074],
+              "meanElevationM": 420,
+              "elevationStdDevM": 205.7
+            },
+            {
+              "position": 951,
+              "coordinate": [-70.2953416, -18.7278087],
+              "meanElevationM": 616.6,
+              "elevationStdDevM": 15.1
+            },
+            {
+              "position": 952,
+              "coordinate": [-70.3005114, -18.6831101],
+              "meanElevationM": 704.2,
+              "elevationStdDevM": 60.5
+            },
+            {
+              "position": 953,
+              "coordinate": [-70.3056812, -18.6384116],
+              "meanElevationM": 788.1,
+              "elevationStdDevM": 72.9
+            },
+            {
+              "position": 954,
+              "coordinate": [-70.310851, -18.5937133],
+              "meanElevationM": 595,
+              "elevationStdDevM": 87.7
+            },
+            {
+              "position": 955,
+              "coordinate": [-70.316022, -18.5490152],
+              "meanElevationM": 266.1,
+              "elevationStdDevM": 158.3
+            },
+            {
+              "position": 956,
+              "coordinate": [-70.3211917, -18.5043172],
+              "meanElevationM": 51.2,
+              "elevationStdDevM": 62.4
+            },
+            {
+              "position": 957,
+              "coordinate": [-70.3087608, -18.4682555],
+              "meanElevationM": 21.2,
+              "elevationStdDevM": 29
+            },
+            {
+              "position": 958,
+              "coordinate": [-70.30567, -18.46692],
+              "stationId": "place:cl-arica",
+              "meanElevationM": 21.7,
+              "elevationStdDevM": 25.9
+            }
+          ]
+        }
+      ],
+      "elevationSourceId": "copernicus-dem-glo90",
+      "elevationAggregation": "mean-and-population-standard-deviation-within-geographic-tile",
+      "mountainStdDevM": 120
     }
   ],
   "routedLinks": [
@@ -33155,6 +57437,7 @@ setup.worldGraphData = {
       "sliceCount": 263,
       "navigable": false,
       "reviewRequired": true,
+      "playableCorridorId": "cl-main-line",
       "runs": [
         {
           "gapFill": true,
@@ -33188,6 +57471,7 @@ setup.worldGraphData = {
       "sliceCount": 220,
       "navigable": false,
       "reviewRequired": true,
+      "playableCorridorId": "cl-main-line",
       "runs": [
         {
           "gapFill": false,
@@ -33561,6 +57845,7 @@ setup.worldGraphData = {
       "sliceCount": 331,
       "navigable": false,
       "reviewRequired": true,
+      "playableCorridorId": "cl-main-line",
       "runs": [
         {
           "gapFill": false,
@@ -34402,6 +58687,7 @@ setup.worldGraphData = {
       "sliceCount": 147,
       "navigable": false,
       "reviewRequired": true,
+      "playableCorridorId": "cl-main-line",
       "runs": [
         {
           "gapFill": false,

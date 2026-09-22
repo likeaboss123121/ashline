@@ -71,7 +71,7 @@ test('v0.2.0 saves retain survival state while old branches move onto the source
   v.player.carriedCargo=[{type:'diesel',amount:17,grade:65}];v.gameTimeTimestampMs+=345600000;
   v.player.carry={fatigue:0.25,hunger:-0.1};
   v.currentTrain=[s.railyard.cloneCar(v.defaultTrains.dieselRoad)];v.currentTrain[0].inventory=[];
-  v.journey={legIndex:2,branch:'2:5:6',tileIndex:0,forward:false};v.onFoot={branch:null,tileIndex:5};
+  v.journey={legIndex:2,branch:'2:5:6',tileIndex:0,forward:false};v.onFoot={branch:null,tileIndex:500};
   v.campfires={test:{expiresAt:12345}};
   v.stationTracks[2]=[{length:999999,infinite:true,trains:[],supplies:{diesel:0,coal:0,water:12}},
     {length:100,trains:[]},{length:999999,infinite:true,trains:[]}];
@@ -79,17 +79,18 @@ test('v0.2.0 saves retain survival state while old branches move onto the source
   for(const key of ['player','campfires','gameTimeTimestampMs','stationTracks'])
     assert.equal(JSON.stringify(result[key]),JSON.stringify(v[key]),key);
   assert.equal(JSON.stringify(result.journey),JSON.stringify({legIndex:2,tileIndex:0,forward:false}));
-  assert.equal(JSON.stringify(result.onFoot),JSON.stringify({legIndex:2,tileIndex:2,branch:null}));
+  const lastOfLeg=s.realWorldPilot.getGridRoute().legs[2].tiles.length-1;
+  assert.equal(JSON.stringify(result.onFoot),JSON.stringify({legIndex:2,tileIndex:lastOfLeg,branch:null}));
   assert.equal(result.currentTrain[0].model,'diesel-road');
   assert.equal(result.currentTrain[0].inventory.length,0,'no gifts to newer or already-depleted kits');
 });
 
-test('v0.2.0 saves outside the sourced corridor keep their train and return safely to Padre Hurtado', () => {
+test('v0.2.0 saves outside the sourced corridor keep their train and return safely to the first station', () => {
   const {setup:s,State:{variables:v}}=loadGame();s.startNewRun();
-  v.saveSchemaVersion=1;v.currentStation=27;
+  v.saveSchemaVersion=1;v.currentStation=900;
   v.currentTrain=[s.railyard.cloneCar(v.defaultTrains.dieselShunter)];
-  v.journey={legIndex:27,tileIndex:7,branch:'27:2:1',forward:true};
-  v.onFoot={tileIndex:3,branch:'27:2:1'};
+  v.journey={legIndex:900,tileIndex:7,branch:'900:2:1',forward:true};
+  v.onFoot={tileIndex:3,branch:'900:2:1'};
   const result=s.saveMigrations.upgradeState(state(v,'OnFoot'),1).state.history[0];
   assert.equal(result.title,'TrainInterior');
   assert.equal(result.variables.currentStation,1);

@@ -15,7 +15,9 @@
     "test:browser": "node scripts/build.cjs && node --test tests/browser.test.cjs",
     "verify": "npm run build && npm test && npm run test:browser",
     "world:extract:chile:national": "node scripts/world/extract-osm-pilot.cjs --scope national",
-    "world:route:chile": "node scripts/world/route-planning-links.cjs"
+    "world:route:chile": "node scripts/world/route-planning-links.cjs",
+    "world:elevation:chile:main": "node scripts/world/sample-elevation.cjs --geometry chile-routed-links --fetch --output world/imported/chile-routed-elevation.json",
+    "world:extract:chile:stations": "node scripts/world/extract-osm-stations.cjs"
   },
   "engines": {
     "node": ">=22"

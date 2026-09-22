@@ -99,8 +99,7 @@ setup.worldmap = {
 	// numbers rather than rolled separately, so the world makes sense as you cross it: the dry belt sits where the
 	// dry belt belongs, forests follow the rain, and it gets colder as you climb or leave the temperate latitudes.
 	getClimate: function(seed, x, y) {
-		var sourced = setup.realWorldPilot && setup.realWorldPilot.getGridRoute
-			? setup.realWorldPilot.getGridRoute().tiles.filter(function(tile) { return tile.x === x && tile.y === y; })[0] : null;
+		var sourced = setup.realWorldPilot && setup.realWorldPilot.getTileAt ? setup.realWorldPilot.getTileAt(x, y) : null;
 		if (sourced) {
 			var sourcedLatitude = sourced.geoCoordinate[1], sourcedElevation = sourced.elevation;
 			return { latitude: sourcedLatitude, longitude: sourced.geoCoordinate[0], elevation: sourcedElevation,
@@ -135,8 +134,7 @@ setup.worldmap = {
 		return band[band.length - 1][1];
 	},
 	getBaseTerrain: function(seed, x, y) {
-		var sourced = setup.realWorldPilot && setup.realWorldPilot.getGridRoute
-			? setup.realWorldPilot.getGridRoute().tiles.filter(function(tile) { return tile.x === x && tile.y === y; })[0] : null;
+		var sourced = setup.realWorldPilot && setup.realWorldPilot.getTileAt ? setup.realWorldPilot.getTileAt(x, y) : null;
 		if (sourced) return sourced.terrain;
 		// Water is where the land is not, and is decided before any climate question.
 		if (this.smoothNoise(seed, 'water', x, y, 7) > 0.74) {
@@ -160,8 +158,7 @@ setup.worldmap = {
 	// Whether there is water to pump from: the tile itself is water (the line is bridging it), or one of the eight
 	// tiles around it is.
 	isBesideWater: function(seed, x, y) {
-		var route = setup.realWorldPilot && setup.realWorldPilot.getGridRoute ? setup.realWorldPilot.getGridRoute() : null;
-		var sourced = route && route.tiles.filter(function(tile) { return tile.x === x && tile.y === y; })[0];
+		var sourced = setup.realWorldPilot && setup.realWorldPilot.getTileAt ? setup.realWorldPilot.getTileAt(x, y) : null;
 		if (sourced) return sourced.terrain === 'bridge';
 		for (var dx = -1; dx <= 1; dx++) {
 			for (var dy = -1; dy <= 1; dy++) {
@@ -943,8 +940,11 @@ setup.worldmap = {
 	// map shows where the route goes next. The playable grid is a walk of 5 km steps rather than a projection, so the
 	// routes are placed on a geographic 5 km grid whose origin is the corridor's first tile; over the corridor's few
 	// dozen kilometres the two agree to within a cell. Returns the occupied cells only, keyed by grid position.
-	getDebugContextCells: function(origin) {
-		var routes = (setup.worldGraphData && setup.worldGraphData.routedLinks) || [];
+	getDebugContextCells: function(origin, corridorId) {
+		// Links the active corridor already plays are on the map as real tiles; drawing them again would double them.
+		var routes = ((setup.worldGraphData && setup.worldGraphData.routedLinks) || []).filter(function(route) {
+			return !corridorId || route.playableCorridorId !== corridorId;
+		});
 		var lon0 = origin[0], lat0 = origin[1];
 		var kmPerLon = 111.32 * Math.cos(lat0 * Math.PI / 180), kmPerLat = 110.57, tile = this.TILE_KM;
 		var toCell = function(point) {
@@ -981,7 +981,7 @@ setup.worldmap = {
 		var leg = { index: route.corridor.id, tiles: route.tiles, byKey: {}, branches: [], rect: route.rect,
 			realWorld: true, corridor: route.corridor };
 		route.tiles.forEach(function(tile) { leg.byKey[setup.worldmap.key(tile.x, tile.y)] = tile; });
-		var context = this.getDebugContextCells(route.tiles[0].geoCoordinate);
+		var context = this.getDebugContextCells(route.tiles[0].geoCoordinate, route.corridor.id);
 		var rect = { x0: leg.rect.x0, y0: leg.rect.y0, x1: leg.rect.x1, y1: leg.rect.y1 };
 		Object.keys(context.cells).forEach(function(key) {
 			var contextCell = context.cells[key];
@@ -1079,7 +1079,8 @@ setup.worldmap = {
 					cellRect.setAttribute('aria-label', 'Teleport to track tile ' + x + ', ' + y);
 				}
 				var title = document.createElementNS(ns, 'title');
-				title.textContent = tile ? ((tile.station ? tile.station + ' | ' : '') + 'grid ' + x + ',' + y + ' '
+				title.textContent = tile ? ((tile.station ? tile.station + ' | ' : '') + (tile.gapFill ? 'gap fill | ' : '')
+					+ 'grid ' + x + ',' + y + ' '
 					+ tile.terrain + ' ' + tile.shape + ' ' + tile.grade.toFixed(1) + '% | '
 					+ tile.geoCoordinate[1].toFixed(4) + '\u00b0, ' + tile.geoCoordinate[0].toFixed(4) + '\u00b0 | mean '
 					+ tile.elevation.toFixed(1) + ' m, relief \u03c3 ' + tile.elevationStdDevM.toFixed(1) + ' m')
@@ -1115,6 +1116,19 @@ setup.worldmap = {
 				markerTitle.textContent = tile.station;
 				marker.appendChild(markerTitle);
 				svg.appendChild(marker);
+				// Cities are named on the map; the halts between them are only markers, or the labels would overlap.
+				if (String(tile.stationId).indexOf('place:') === 0) {
+					var stationLabel = document.createElementNS(ns, 'text');
+					stationLabel.setAttribute('x', cx + cell);
+					stationLabel.setAttribute('y', cy + cell / 3);
+					stationLabel.setAttribute('fill', '#e5c58a');
+					stationLabel.setAttribute('font-size', String(cell * 1.4));
+					stationLabel.setAttribute('font-family', 'sans-serif');
+					stationLabel.setAttribute('pointer-events', 'none');
+					stationLabel.setAttribute('class', 'debug-station-label');
+					stationLabel.textContent = tile.station;
+					svg.appendChild(stationLabel);
+				}
 			}
 		});
 		// Where the train is standing, and which way it is going, so the map can be read against the journey.

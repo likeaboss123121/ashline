@@ -244,7 +244,8 @@ test('travel refuses a lead the station or the one it would arrive at does not h
   State.variables.enteredTrainIndex = 0;
   assert.match(setup.railyard.getDepartureBlockReason(1, 1, false), /no Southbound Track/);
   assert.equal(setup.railyard.getDepartureBlockReason(1, 1, true), '');
-  assert.match(setup.railyard.getDepartureBlockReason(2, 1, true), /Talagante has no Southbound Track/);
+  assert.equal(setup.railyard.getDepartureBlockReason(2, 1, true),
+    setup.worldmap.getStationName(3) + ' has no Southbound Track to arrive on.');
   assert.equal(setup.railyard.getDepartureBlockReason(2, 1, false), '');
   State.variables.currentStation = 2;
   State.variables.currentTrain = [{ length: 18 }];
@@ -275,14 +276,18 @@ test('lead tracks take their names from the route heading, not from entry and ex
   const { setup } = loadGame();
   const first = setup.railyard.generateStationTracks(1, 'compass');
   assert.equal(setup.railyard.getTrackLabel(first, 0), 'South Stub');
-  assert.equal(setup.railyard.getTrackLabel(first, first.length - 1), 'South-westbound Track');
+  assert.equal(setup.railyard.getTrackLabel(first, first.length - 1), 'Northbound Track');
   // Arriving at a station means its other lead points back down the leg just travelled.
   const second = setup.railyard.generateStationTracks(2, 'compass');
   assert.equal(setup.railyard.getLeadDirection(second, 'entry'),
     setup.railyard.oppositeDirection(setup.railyard.getLegHeading(1, 'compass')));
   assert.equal(setup.railyard.getLeadDirection(second, 'exit'), setup.railyard.getLegHeading(2, 'compass'));
   const headings = [1, 2, 3, 4].map(stationId => setup.railyard.getLegHeading(stationId, 'ignored'));
-  assert.deepEqual(headings, ['southwest', 'southwest', 'west', 'west']);
+  assert.deepEqual(headings, ['north', 'north', 'north', 'north']);
+  // Further up the line the real track turns, and the leads turn with it.
+  const stationCount = setup.realWorldPilot.getGridRoute().corridor.stations.length;
+  const all = new Set(Array.from({ length: stationCount - 1 }, (_, index) => setup.railyard.getLegHeading(index + 1, 'ignored')));
+  assert.ok(all.size >= 5, [...all].join(', '));
   assert.equal(setup.railyard.getDirectionName('northeast'), 'North-eastbound');
   assert.equal(setup.railyard.getDirectionName('southwest'), 'South-westbound');
   // A station where the route turns is named for its own two headings.
@@ -311,11 +316,12 @@ test('debug teleport moves an onboard consist but moves a walker without their p
   const { setup, State } = loadGame();
   const v = State.variables;
   Object.assign(v, { randomSeed: 'debug-teleport', debugMode: true, travellingForward: true });
-  const tiles = setup.realWorldPilot.getGridRoute().tiles;
+  const route = setup.realWorldPilot.getGridRoute();
+  const at = (legIndex, tileIndex) => route.tiles[route.legs[legIndex].startPosition + tileIndex];
   const train = [{ type: 'dieselShunter', length: 12 }, { type: 'boxcar', length: 12 }];
   v.currentTrain = train;
   v.onFoot = null;
-  let result = setup.worldmap.debugTeleportToTile(0, tiles[2].x, tiles[2].y);
+  let result = setup.worldmap.debugTeleportToTile(0, at(2, 1).x, at(2, 1).y);
   assert.equal(result.mode, 'consist');
   assert.equal(v.currentTrain, train, 'the whole active consist remains together');
   assert.deepEqual({ legIndex: v.journey.legIndex, tileIndex: v.journey.tileIndex, branch: v.journey.branch || null },
@@ -325,7 +331,7 @@ test('debug teleport moves an onboard consist but moves a walker without their p
   // Once outside, journey is the parked consist and onFoot is the player. Clicking another tile moves only onFoot.
   v.onFoot = { legIndex: 2, tileIndex: 1, branch: null };
   const parked = JSON.stringify(v.journey);
-  result = setup.worldmap.debugTeleportToTile(0, tiles[6].x, tiles[6].y);
+  result = setup.worldmap.debugTeleportToTile(0, at(4, 2).x, at(4, 2).y);
   assert.equal(result.mode, 'player');
   assert.equal(JSON.stringify(v.journey), parked);
   assert.deepEqual([v.onFoot.legIndex, v.onFoot.tileIndex], [4, 2]);
@@ -334,37 +340,38 @@ test('debug teleport moves an onboard consist but moves a walker without their p
   // A player without a train still gets valid walking context, but is never offered a phantom train to board.
   v.currentTrain = null;
   v.onFoot = null;
-  result = setup.worldmap.debugTeleportToTile(0, tiles[7].x, tiles[7].y);
+  result = setup.worldmap.debugTeleportToTile(0, at(4, 3).x, at(4, 3).y);
   assert.equal(result.passage, 'OnFoot');
   assert.deepEqual([v.onFoot.legIndex, v.onFoot.tileIndex], [4, 3]);
   assert.equal(setup.onfoot.getTrainPosition(), null);
   assert.equal(setup.onfoot.isBesideTrain(), false);
   v.debugMode = false;
-  assert.equal(setup.worldmap.debugTeleportToTile(0, tiles[4].x, tiles[4].y), null);
+  assert.equal(setup.worldmap.debugTeleportToTile(0, at(4, 1).x, at(4, 1).y), null);
   assert.equal(v.onFoot.tileIndex, 3);
 });
 
 test('debug teleport treats a station cell as the station rather than a line endpoint', () => {
   const { setup, State } = loadGame();
   setup.startNewRun();
-  const v = State.variables, tiles = setup.realWorldPilot.getGridRoute().tiles;
+  const v = State.variables, route = setup.realWorldPilot.getGridRoute();
+  const stationTile = stationId => route.tiles[route.stationPositions[stationId - 1]];
   Object.assign(v, { randomSeed: 'station-teleport', debugMode: true, travellingForward: true,
     currentStation: 1, currentTrain: [{ type: 'dieselShunter', length: 12 }], onFoot: null });
-  let result = setup.worldmap.debugTeleportToTile(0, tiles[3].x, tiles[3].y);
+  let result = setup.worldmap.debugTeleportToTile(0, stationTile(3).x, stationTile(3).y);
   assert.equal(result.stationId, 3);assert.equal(result.passage, 'DrivingMode');
   assert.equal(v.currentStation, 3);assert.equal(v.journey, null);
-  assert.equal(v.drivingTrackIndex, 0,'a forward teleport arrives on Talagante\'s entry lead');
+  assert.equal(v.drivingTrackIndex, 0,'a forward teleport arrives on the station\'s entry lead');
 
   v.journey={legIndex:2,tileIndex:1,forward:true};v.onFoot={legIndex:2,tileIndex:1,branch:null};
   const parked=JSON.stringify(v.journey);
-  result=setup.worldmap.debugTeleportToTile(0,tiles[4].x,tiles[4].y);
+  result=setup.worldmap.debugTeleportToTile(0,stationTile(4).x,stationTile(4).y);
   assert.equal(result.stationId,4);assert.equal(result.passage,'Railyard');
   assert.equal(v.currentStation,4);assert.equal(JSON.stringify(v.journey),parked,'the remote train stays parked');
-  assert.deepEqual([v.onFoot.legIndex,v.onFoot.tileIndex],[3,1]);
+  assert.deepEqual([v.onFoot.legIndex,v.onFoot.tileIndex],[3,route.legs[3].tiles.length-1]);
   assert.equal(v.onFoot.inRailyard,true);
 
   v.currentTrain=null;v.onFoot=null;v.journey=null;
-  result=setup.worldmap.debugTeleportToTile(0,tiles[8].x,tiles[8].y);
+  result=setup.worldmap.debugTeleportToTile(0,stationTile(5).x,stationTile(5).y);
   assert.equal(result.stationId,5);assert.equal(result.passage,'Railyard');
   assert.equal(v.currentStation,5);assert.equal(v.journey,null);assert.equal(v.onFoot,null);
 });
@@ -372,7 +379,8 @@ test('debug teleport treats a station cell as the station rather than a line end
 test('a walker can enter a sourced station yard without moving or losing the parked train', () => {
   const { setup, State } = loadGame();setup.startNewRun();
   const v=State.variables,train=[setup.railyard.cloneCar(v.defaultTrains.dieselShunter)];
-  v.currentStation=2;v.currentTrain=train;v.journey={legIndex:2,tileIndex:1,forward:true};
+  const lastBeforeStation=setup.realWorldPilot.getGridRoute().legs[2].tiles.length-2;
+  v.currentStation=2;v.currentTrain=train;v.journey={legIndex:2,tileIndex:lastBeforeStation,forward:true};
   assert.equal(setup.onfoot.climbDown(),true);
   assert.equal(setup.onfoot.walk(1),true);
   assert.equal(setup.onfoot.getStationId(),3);
@@ -792,7 +800,8 @@ test('water for a steam engine can come from a station tank or from beside the l
   // Out on the line, water is there to pump only where the map puts water next to the track.
   const seed = setup.worldmap.getSeed();
   const found = { wet: null, dry: null };
-  for (let legIndex = 1; legIndex <= 4 && !(found.wet && found.dry); legIndex++) {
+  const legCount = setup.realWorldPilot.getGridRoute().corridor.stations.length - 1;
+  for (let legIndex = 1; legIndex <= legCount && !(found.wet && found.dry); legIndex++) {
     setup.worldmap.getMainLine(seed, legIndex).forEach((tile, tileIndex) => {
       const kind = setup.worldmap.isBesideWater(seed, tile.x, tile.y) ? 'wet' : 'dry';
       if (!found[kind]) found[kind] = { legIndex, tileIndex, forward: true };
@@ -989,8 +998,8 @@ test('the sun follows the clock, the season and the latitude, and grades the pic
   const { setup, State } = loadGame();
   const light = setup.daylight;
   State.variables.currentStation = 1;
-  assert.ok(light.getLatitude() > -34 && light.getLatitude() < -33,
-    `daylight should use Padre Hurtado's sourced latitude, got ${light.getLatitude()}`);
+  assert.ok(light.getLatitude() > -53.2 && light.getLatitude() < -53.1,
+    `daylight should use Punta Arenas's sourced latitude, got ${light.getLatitude()}`);
   const at = (month, day, hour) => Date.UTC(2000, month, day, hour);
   // Punta Arenas: a high summer sun, a low winter one, and the sun well down at midnight.
   assert.ok(Math.abs(light.getSunElevation(at(11, 21, 12), -53.2) - 60) < 2);
@@ -1226,14 +1235,17 @@ test('sourced tiles report their real coordinates and sampled elevation', () => 
   const { setup } = loadGame();
   const world = setup.worldmap;
   const home = world.getClimate('climate', 0, 0);
-  assert.ok(Math.abs(home.latitude - (-33.5678013)) < 0.00001);
-  assert.ok(Math.abs(home.longitude - (-70.8156797)) < 0.00001);
-  assert.equal(home.elevation, 436.2);
-  assert.equal(world.getBaseTerrain('climate', 0, 0), 'bridge');
-  const melipilla = setup.realWorldPilot.getStationTile(5);
-  const west = world.getClimate('climate', melipilla.x, melipilla.y);
-  assert.equal(west.elevation, 184.2);
-  assert.ok(west.longitude < home.longitude);
+  assert.ok(Math.abs(home.latitude - (-53.16472)) < 0.00001);
+  assert.ok(Math.abs(home.longitude - (-70.90114)) < 0.00001);
+  assert.equal(home.elevation, 13.5);
+  assert.equal(world.getBaseTerrain('climate', 0, 0), 'plains');
+  const stationCount = setup.realWorldPilot.getGridRoute().corridor.stations.length;
+  const arica = setup.realWorldPilot.getStationTile(stationCount);
+  assert.equal(arica.station, 'Arica');
+  const north = world.getClimate('climate', arica.x, arica.y);
+  assert.equal(north.elevation, 21.7);
+  assert.ok(Math.abs(north.latitude - (-18.46692)) < 0.00001);
+  assert.ok(north.temperature > home.temperature + 10, 'the far north is warmer');
 });
 
 test('each locomotive is worth choosing: range, speed and pull sit in sensible bands', () => {
@@ -1360,10 +1372,15 @@ test('the date can be written four ways, and the clock behind it never changes',
 
 test('all playable stations come from the authored sourced corridor', () => {
   const { setup } = loadGame();
-  assert.deepEqual([1, 2, 3, 4, 5].map(id => setup.worldmap.getStationName(id)),
-    ['Padre Hurtado', 'Malloco', 'Talagante', 'El Monte', 'Melipilla']);
-  assert.equal(setup.realWorldPilot.getStation(6), null);
-  for (let legIndex = 1; legIndex <= 4; legIndex++) {
+  const route = setup.realWorldPilot.getGridRoute(), stationCount = route.corridor.stations.length;
+  assert.equal(route.corridor.id, 'cl-main-line');
+  assert.deepEqual([1, 2, 3].map(id => setup.worldmap.getStationName(id)), ['Punta Arenas', 'Km 94', 'Km 187']);
+  assert.equal(setup.worldmap.getStationName(stationCount), 'Arica');
+  for (const city of ['Puerto Montt', 'Temuco', 'Chillán', 'Talca', 'Santiago', 'La Serena', 'Copiapó', 'Antofagasta']) {
+    assert.ok(route.corridor.stations.some(station => station.name === city), city + ' is a stop on the line');
+  }
+  assert.equal(setup.realWorldPilot.getStation(stationCount + 1), null);
+  for (let legIndex = 1; legIndex < stationCount; legIndex++) {
     const leg = setup.worldmap.getLeg('ignored', legIndex);
     assert.equal(leg.fromStation.name, setup.worldmap.getStationName(legIndex));
     assert.equal(leg.toStation.name, setup.worldmap.getStationName(legIndex + 1));

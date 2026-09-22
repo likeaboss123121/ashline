@@ -174,7 +174,8 @@ setup.worldGraph = (function () {
 				if (run.gapFill) line.setAttribute('stroke-dasharray', '4 3');
 				var title = document.createElementNS(namespace, 'title');
 				title.textContent = route.from + ' to ' + route.to + ': ' + route.routedKm + ' km routed, ' + route.railKm +
-					' km on mapped rail, ' + route.gapKm + ' km of proposed gap fill in ' + route.gapCount + ' — for review, not playable';
+					' km on mapped rail, ' + route.gapKm + ' km of gap fill in ' + route.gapCount +
+					(route.playableCorridorId ? ' — played as ' + route.playableCorridorId : ' — for review, not playable');
 				line.appendChild(title);
 				svg.appendChild(line);
 			});
@@ -207,9 +208,12 @@ setup.worldGraph = (function () {
 			var routedSummary = document.createElement('p');
 			var railKm = data.routedLinks.reduce(function (sum, route) { return sum + route.railKm; }, 0);
 			var gapKm = data.routedLinks.reduce(function (sum, route) { return sum + route.gapKm; }, 0);
+			var played = data.routedLinks.filter(function (route) { return !!route.playableCorridorId; }).length;
 			routedSummary.textContent = data.routedLinks.length + ' planning links routed over mapped rail: ' +
 				Math.round(railKm).toLocaleString('en-US') + ' km on real track (solid) and ' +
-				Math.round(gapKm).toLocaleString('en-US') + ' km of proposed gap fill (dashed). None of it is playable until reviewed.';
+				Math.round(gapKm).toLocaleString('en-US') + ' km of gap fill (dashed). ' +
+				(played === data.routedLinks.length ? 'All of them are playable.'
+					: played ? played + ' of them are playable; the rest are unreviewed.' : 'None of it is playable until reviewed.');
 			parent.appendChild(routedSummary);
 		}
 		appendRailGeometryPreview(parent);

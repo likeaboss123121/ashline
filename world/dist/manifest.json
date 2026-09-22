@@ -2262,6 +2262,30 @@
       "elevationSourceId": "copernicus-dem-glo90",
       "elevationAggregation": "mean-and-population-standard-deviation-within-geographic-tile",
       "mountainStdDevM": 120
+    },
+    {
+      "formatVersion": 1,
+      "geometryId": "chile-routed-links",
+      "routed": true,
+      "buildId": "c2ec6ae9c54680f2",
+      "file": "topology/chile-routed-links.json",
+      "corridors": [
+        {
+          "id": "cl-main-line",
+          "label": "Chilean main line",
+          "stationCount": 286,
+          "distanceKm": 4785.4,
+          "gridSliceCount": 958,
+          "routedLinkIds": [
+            "route:cl-punta-arenas>cl-puerto-montt",
+            "route:cl-puerto-montt>cl-santiago",
+            "route:cl-santiago>cl-antofagasta",
+            "route:cl-antofagasta>cl-arica"
+          ],
+          "railKm": 3342,
+          "gapKm": 1443.3
+        }
+      ]
     }
   ],
   "routedLinks": [
@@ -2282,7 +2306,8 @@
       "sliceCount": 263,
       "stationCount": 0,
       "navigable": false,
-      "reviewRequired": true
+      "reviewRequired": true,
+      "playableCorridorId": "cl-main-line"
     },
     {
       "id": "route:cl-puerto-montt>cl-santiago",
@@ -2301,7 +2326,8 @@
       "sliceCount": 220,
       "stationCount": 11,
       "navigable": false,
-      "reviewRequired": true
+      "reviewRequired": true,
+      "playableCorridorId": "cl-main-line"
     },
     {
       "id": "route:cl-santiago>cl-antofagasta",
@@ -2320,7 +2346,8 @@
       "sliceCount": 331,
       "stationCount": 2,
       "navigable": false,
-      "reviewRequired": true
+      "reviewRequired": true,
+      "playableCorridorId": "cl-main-line"
     },
     {
       "id": "route:cl-antofagasta>cl-arica",
@@ -2339,7 +2366,8 @@
       "sliceCount": 147,
       "stationCount": 0,
       "navigable": false,
-      "reviewRequired": true
+      "reviewRequired": true,
+      "playableCorridorId": "cl-main-line"
     }
   ]
 }

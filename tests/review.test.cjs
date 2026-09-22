@@ -415,8 +415,8 @@ test('station lead headings follow the sourced rail grid', () => {
     assert.equal(tracks[0].direction, yard.oppositeDirection(yard.getLegHeading(station - 1)));
     assert.ok(g.setup.yardGeneration.validate(tracks));
   }
-  assert.equal(yard.getLegHeading(1), 'southwest');
-  assert.equal(world.getStationName(5), 'Melipilla');
+  assert.equal(yard.getLegHeading(1), 'north');
+  assert.equal(world.getStationName(5), 'Km 374');
 });
 
 test('passenger templates exist at their catalogue lengths in both projections', () => {

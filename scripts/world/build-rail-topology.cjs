@@ -263,7 +263,9 @@ function buildTopology(geometry, authored) {
     geometryId: geometry.id,
     tileKm: TILE_KM,
     buildId: crypto.createHash('sha256').update(JSON.stringify({ topologyVersion: 3,
-      geometry: geometry.sourceInputSha256, authored })).digest('hex').slice(0, 16),
+      geometry: geometry.sourceInputSha256,
+      // Only this geometry's corridors: adding a corridor elsewhere must not make this topology's elevation stale.
+      authored: { corridors: authored.corridors.filter(corridor => corridor.geometryId === geometry.id) } })).digest('hex').slice(0, 16),
     stats: {
       railwayCoordinateNodes: graph.nodes.size,
       railwaySegments: graph.segments.length,

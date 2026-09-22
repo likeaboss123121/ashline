@@ -2,7 +2,7 @@
    geometry, elevation and provenance stay in setup, while saves contain only a station and journey position. */
 setup.realWorldPilot = (function () {
 	'use strict';
-	var DEFAULT_CORRIDOR_ID = 'cl-padre-hurtado-melipilla';
+	var DEFAULT_CORRIDOR_ID = 'cl-main-line';
 	var gridCache = {};
 
 	function allCorridors() {
@@ -43,8 +43,8 @@ setup.realWorldPilot = (function () {
 		var result = slices.map(function(slice) {
 			return {
 				id: slice.id, distanceKm: setup.worldmap.TILE_KM, actualDistanceKm: slice.distanceKm,
-				coordinates: slice.coordinates.slice(), sourceWayIds: slice.sourceWayIds.slice(),
-				bridge: slice.bridge, tunnel: slice.tunnel, service: slice.service,
+				coordinates: slice.coordinates.slice(), sourceWayIds: (slice.sourceWayIds || []).slice(),
+				bridge: slice.bridge, tunnel: slice.tunnel, service: slice.service, gapFill: slice.gapFill === true,
 				railwayStatuses: slice.railwayStatuses.slice()
 			};
 		});
@@ -116,6 +116,7 @@ setup.realWorldPilot = (function () {
 				grade: grade, out: outgoing === null ? -1 : outgoing,
 				distanceKm: index < slices.length ? setup.worldmap.TILE_KM : 0,
 				railwayStatuses: adjacentSlice.railwayStatuses.slice(), sourceSliceId: adjacentSlice.id,
+				gapFill: adjacentSlice.gapFill === true,
 				station: station ? station.name : 0, stationId: station ? station.id : null,
 				stationIndex: station ? corridor.stations.indexOf(station) + 1 : 0,
 				geoCoordinate: elevation.coordinate, globalPosition: index
@@ -139,9 +140,20 @@ setup.realWorldPilot = (function () {
 			};
 			legTiles.forEach(function(tile) { legs[stationIndex + 1].byKey[setup.worldmap.key(tile.x, tile.y)] = tile; });
 		}
-		gridCache[corridorId] = { corridor: corridor, slices: slices, tiles: tiles, legs: legs,
+		// The walk can cross itself where the real line doubles back; the first tile to claim a square keeps it.
+		var byKey = {};
+		tiles.forEach(function(tile) {
+			var tileKey = setup.worldmap.key(tile.x, tile.y);
+			if (!byKey[tileKey]) byKey[tileKey] = tile;
+		});
+		gridCache[corridorId] = { corridor: corridor, slices: slices, tiles: tiles, legs: legs, byKey: byKey,
 			stationPositions: positions, rect: setup.worldmap.rectFor(tiles) };
 		return gridCache[corridorId];
+	}
+
+	function getTileAt(x, y) {
+		var route = getGridRoute();
+		return route ? route.byKey[setup.worldmap.key(Number(x), Number(y))] || null : null;
 	}
 
 	function getLeg(legIndex) {
@@ -239,7 +251,7 @@ setup.realWorldPilot = (function () {
 	}
 
 	return {
-		DEFAULT_CORRIDOR_ID: DEFAULT_CORRIDOR_ID, getCorridor: getCorridor, getGridRoute: getGridRoute,
+		DEFAULT_CORRIDOR_ID: DEFAULT_CORRIDOR_ID, getCorridor: getCorridor, getGridRoute: getGridRoute, getTileAt: getTileAt,
 		getLeg: getLeg, getStation: getStation, getStationTile: getStationTile, getLegHeading: getLegHeading,
 		getJourneyRoute: getJourneyRoute, start: start, finish: finish, resumeLegacy: resumeLegacy,
 		endpointForView: endpointForView, terrainFor: terrainFor, debugTarget: debugTarget,

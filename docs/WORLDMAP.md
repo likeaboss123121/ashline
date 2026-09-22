@@ -20,10 +20,11 @@ tags. Lifecycle status does not restrict gameplay routing: the setting restores 
 The authored Padre Hurtado–Malloco–Talagante–El Monte–Melipilla gameplay corridor routes over that connected graph
 and retains eleven station-bounded provenance slices. Gameplay reslices the complete 41.96 km corridor
 into eight fixed 5 km gameplay moves. The short final GIS remainder stays in provenance and is folded into the
-last cell rather than becoming a 1.96 km player action. That derived corridor alone is navigable.
+last cell rather than becoming a 1.96 km player action. It is still compiled, but is no longer the default world:
+the Chilean main line below replaced it.
 
 Static graph data always lives in `setup`; saves keep only numeric station and journey positions.
-New games spawn at Padre Hurtado in the sourced grid and run through
+New games spawn at Punta Arenas on the Chilean main line and run through
 `OnTheLine`, its normal driving view, walking, save, time and fuel systems. The active `currentTrain` remains the
 same consist. Run
 `npm run world:build` to regenerate outputs and `npm run world:check` to verify them.
@@ -62,6 +63,44 @@ overview, where mapped rail is solid and gap fills are dashed.
 Current result: Puerto Montt–Santiago runs entirely on mapped rail; Santiago–Antofagasta almost entirely; Antofagasta–Arica
 needs a 121 km join where no railway ever linked Iquique and Arica; and Punta Arenas–Puerto Montt is a 1,306 km
 proposal, because Patagonia has never had a connecting railway.
+
+Routing also records how many kilometres of each slice run on bridges and in tunnels, so a playable corridor can
+tell a river crossing from a culvert.
+
+## The Chilean main line
+
+Likea approved all four Chile links, gap fills included, for play on 2026-09-22. The playable world is now the
+`cl-main-line` corridor in `world/authored/playable-corridors.json`, which lists the routed links it plays. Listing
+a link there is the review decision; the proposal file itself never changes to `navigable: true`.
+`scripts/world/build-routed-corridor.cjs` builds it at compile time:
+
+- **One line.** The four links are joined end to end (the compiler refuses links that do not meet) into a single
+  4,785 km line from Punta Arenas to Arica: about 3,342 km on mapped rail and 1,443 km of gap fill.
+- **Stops.** Each city the links join is a station. So is every named OSM station, working or closed, that stands
+  within 1 km of mapped track on the line. These come from `world/imported/chile-stations.json`
+  (`npm run world:extract:chile:stations -- --input chile-260920.osm.pbf`, 671 stations), because the railway
+  extract only keeps nodes on the track and misses most stations. Metro and bus stations are left out.
+  Stops closer than 5 km are thinned: a city wins, then a working station (larger EFE category first), then a
+  working halt, then a closed station.
+- **Kilometre posts.** Where the line runs more than 100 km with nowhere to stop, halts named `Km N` (distance
+  from Punta Arenas) are spaced evenly along it. Only the Patagonian gap fill and one stretch near Arica need them.
+  The limit exists because every yard keeps a reserve engine with fuel to reach the next stop, which a tank cannot
+  promise over 1,300 km.
+- **Tiles.** The whole line is re-cut into 958 slices of 5 km, each carrying its OSM ways, the routed slices it came
+  from, rail and gap kilometres, and a `gapFill` flag (more gap than rail) that the debug map shows on hover.
+  A tile is a bridge when it has at least 200 m of bridge and a tunnel when at least half of it is underground.
+- **Elevation.** `npm run world:elevation:chile:main` fetches the Copernicus GLO-90 tiles the line crosses (about 50,
+  cached outside the repository) and samples every position, as for the pilot. The compiler rejects stale samples
+  by build ID; the ID covers only what decides where slices fall, so changing stops or bridge rules does not need a
+  resample.
+
+The result: 286 stops, a median of 10.8 km apart and never more than 94 km; the costliest leg is about 200 minutes
+of diesel. The browser bundle carries only each slice's ends and flags; full slices and legs are in
+`world/dist/topology/chile-routed-links.json`.
+
+Known quirks: the grid is a walk of 5 km moves, not a projection, so it crosses itself in 11 places (the first tile
+to claim a square keeps it for terrain lookups and teleporting); and the route runs into Santiago's Alameda
+terminus and back out, as the mapped track does.
 
 ## Static world data is never saved
 
@@ -128,7 +167,8 @@ weight limits come from.
 ## The debug map
 
 `appendDebugMap(parent, stationId)` draws the complete playable corridor: terrain as coloured cells, track as
-lines through them, all real stations as markers, and source data on hover. Every track cell is a mouse
+lines through them, all stations as markers with the cities named, and source data on hover. Routed links the
+corridor does not play are drawn around it on a geographic grid as context; links it plays are not drawn twice. Every track cell is a mouse
 and keyboard teleport target; an exact-tile selector provides the same operation when a route is too narrow or
 dense to click comfortably. Narrow maps are visually enlarged without changing their tile coordinates.
 Teleporting while aboard moves `journey`, so the complete active consist moves;
@@ -141,7 +181,9 @@ there to inspect compiled data rather than to be a player-facing map.
 
 ## Not done yet
 
-- Only the Padre Hurtado–Melipilla corridor is currently playable.
+- Only the Chilean main line is playable; Argentine, Peruvian and further links are not yet routed.
+- Stations are not yet differentiated by size or status in gameplay: a closed halt generates the same kind of yard as
+  a city.
 - The larger South America graph remains non-navigable planning data pending reviewed rail geometry.
 - Climate, rivers, obstacles, track condition and weather are not yet sourced into gameplay.
 

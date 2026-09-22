@@ -1,6 +1,20 @@
 {
   "corridors": [
     {
+      "id": "cl-main-line",
+      "label": "Chilean main line",
+      "routedLinkSetId": "chile-routed-links",
+      "stationSetId": "chile-stations",
+      "debugOnly": false,
+      "approval": "Likea approved the routed links and their gap fills for gameplay on 2026-09-22.",
+      "routedLinkIds": [
+        "route:cl-punta-arenas>cl-puerto-montt",
+        "route:cl-puerto-montt>cl-santiago",
+        "route:cl-santiago>cl-antofagasta",
+        "route:cl-antofagasta>cl-arica"
+      ]
+    },
+    {
       "id": "cl-padre-hurtado-melipilla",
       "label": "Padre Hurtado–Melipilla rail grid",
       "geometryId": "chile-central-pilot",

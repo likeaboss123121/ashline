@@ -404,7 +404,7 @@ function sliceRoute(graph, steps, linkId) {
   let current = null;
   function open(coordinate) {
     current = { coordinates: [coordinate], distanceKm: 0, railKm: 0, gapKm: 0, sourceWayIds: new Set(),
-      statuses: new Set(), bridge: false, tunnel: false, kinds: new Set() };
+      statuses: new Set(), bridge: false, tunnel: false, bridgeKm: 0, tunnelKm: 0, kinds: new Set() };
   }
   function close() {
     if (!current || !(current.distanceKm > 0)) return;
@@ -417,6 +417,8 @@ function sliceRoute(graph, steps, linkId) {
       gapFill: current.gapKm > 0,
       bridge: current.bridge,
       tunnel: current.tunnel,
+      bridgeKm: round(current.bridgeKm, 3),
+      tunnelKm: round(current.tunnelKm, 3),
       sourceWayIds: Array.from(current.sourceWayIds).sort(),
       railwayStatuses: Array.from(current.statuses).sort(),
       coordinates: simplify(current.coordinates, SIMPLIFY_DEGREES).map(point => [round(point[0], 5), round(point[1], 5)]),
@@ -432,8 +434,12 @@ function sliceRoute(graph, steps, linkId) {
     if (segment.way) {
       current.sourceWayIds.add(segment.way.id);
       current.statuses.add(segment.way.railwayStatus);
-      current.bridge = current.bridge || (!!segment.way.tags.bridge && segment.way.tags.bridge !== 'no');
-      current.tunnel = current.tunnel || (!!segment.way.tags.tunnel && segment.way.tags.tunnel !== 'no');
+      const bridge = !!segment.way.tags.bridge && segment.way.tags.bridge !== 'no';
+      const tunnel = !!segment.way.tags.tunnel && segment.way.tags.tunnel !== 'no';
+      current.bridge = current.bridge || bridge;
+      current.tunnel = current.tunnel || tunnel;
+      if (bridge) current.bridgeKm += km;
+      if (tunnel) current.tunnelKm += km;
     }
   }
   open(graph.nodes.get(steps[0].from).coordinate);

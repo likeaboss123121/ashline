@@ -2,44 +2,12 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { buildTopology } = require('./build-rail-topology.cjs');
 const { simplify } = require('./route-planning-links.cjs');
+const { parseCsv } = require('./csv.cjs');
+const { buildRoutedTopology } = require('./build-routed-corridor.cjs');
 
 const root = path.resolve(__dirname, '../..');
 const checkOnly = process.argv.includes('--check');
 const tileKm = 5;
-
-function parseCsv(text) {
-  const lines = text.replace(/^\uFEFF/, '').trim().split(/\r?\n/);
-  const parseLine = line => {
-    const values = [];
-    let value = '';
-    let quoted = false;
-    for (let i = 0; i < line.length; i++) {
-      const character = line[i];
-      if (character === '"') {
-        if (quoted && line[i + 1] === '"') {
-          value += '"';
-          i++;
-        } else {
-          quoted = !quoted;
-        }
-      } else if (character === ',' && !quoted) {
-        values.push(value);
-        value = '';
-      } else {
-        value += character;
-      }
-    }
-    if (quoted) throw new Error('Unclosed CSV quote: ' + line);
-    values.push(value);
-    return values;
-  };
-  const headings = parseLine(lines.shift());
-  return lines.filter(Boolean).map((line, index) => {
-    const values = parseLine(line);
-    if (values.length !== headings.length) throw new Error('Bad CSV column count on row ' + (index + 2));
-    return Object.fromEntries(headings.map((heading, column) => [heading, values[column]]));
-  });
-}
 
 function read(relativePath) {
   return fs.readFileSync(path.join(root, relativePath), 'utf8');
@@ -198,6 +166,23 @@ function compile() {
     return geometry;
   });
   const railTopology = railGeometry.map(geometry => buildTopology(geometry, authoredPlayableCorridors));
+  const stationSets = Object.fromEntries((importManifest.stations || []).map(entry => {
+    const stationSet = JSON.parse(read(entry.file));
+    assert(stationSet.id === entry.id && stationSet.formatVersion === 1, 'Station import ID mismatch: ' + entry.file);
+    const source = sourceManifest.sources.find(candidate => candidate.id === stationSet.sourceId);
+    assert(source && source.status === 'ingested', 'Station set has no ingested source: ' + entry.id);
+    assert(stationSet.stations.length === stationSet.stats.stationCount, 'Station count mismatch: ' + entry.id);
+    return [entry.id, stationSet];
+  }));
+  // Corridors made of routed planning links: listing a link in an authored corridor is what approves it for play.
+  (importManifest.routedLinks || []).forEach(entry => {
+    if (!authoredPlayableCorridors.corridors.some(corridor => corridor.routedLinkSetId === entry.id)) return;
+    railTopology.push(buildRoutedTopology(JSON.parse(read(entry.file)), authoredPlayableCorridors, nodes, stationSets));
+  });
+  authoredPlayableCorridors.corridors.forEach(corridor => {
+    assert(railTopology.some(topology => topology.corridors.some(built => built.id === corridor.id)),
+      'Authored playable corridor was not built: ' + corridor.id);
+  });
   const elevationByGeometry = Object.fromEntries((importManifest.elevation || []).map(entry => {
     const elevation = JSON.parse(read(entry.file));
     assert(elevation.geometryId === entry.geometryId, 'Elevation import geometry mismatch: ' + entry.file);
@@ -224,6 +209,11 @@ function compile() {
   });
   const linksById = Object.fromEntries(links.map(link => [link.id, link]));
   routedLinks.forEach(route => {
+    // The proposal record never changes; the corridor that plays over it is noted beside it.
+    const playable = railTopology.flatMap(topology => topology.corridors)
+      .filter(corridor => (corridor.routedLinkIds || []).includes(route.id));
+    assert(playable.length <= 1, 'Routed link is played by two corridors: ' + route.id);
+    if (playable.length) route.playableCorridorId = playable[0].id;
     route.planningLinkIds.forEach(id => {
       assert(linksById[id], 'Routed link covers unknown planning link: ' + id);
       assert(!linksById[id].routedBy, 'Planning link routed twice: ' + id);
@@ -379,9 +369,12 @@ function validateBundle(bundle) {
         leg.slices.forEach((slice, sliceIndex) => {
           assert(!sliceIds.has(slice.id), 'Duplicate topology slice: ' + slice.id);
           sliceIds.add(slice.id);
-          assert(slice.navigable === true && slice.reviewStatus === 'authored-gameplay-route', 'Unsafe topology slice: ' + slice.id);
+          assert(slice.navigable === true && slice.reviewStatus === (topology.routed ? 'approved-routed-link'
+            : 'authored-gameplay-route'), 'Unsafe topology slice: ' + slice.id);
           assert(slice.distanceKm > 0 && slice.distanceKm <= bundle.tileKm + 0.001, 'Invalid topology slice length: ' + slice.id);
-          assert(slice.coordinates.length >= 2 && slice.sourceWayIds.length > 0, 'Topology slice lacks provenance: ' + slice.id);
+          // A proposed gap fill has no OSM way under it, only the routed slices it was cut from.
+          assert(slice.coordinates.length >= 2 && (slice.sourceWayIds.length > 0 ||
+            (topology.routed && slice.gapFill && slice.routedSliceIds.length > 0)), 'Topology slice lacks provenance: ' + slice.id);
           assert(Array.isArray(slice.railwayStatuses) && slice.railwayStatuses.length > 0,
             'Topology slice lacks lifecycle provenance: ' + slice.id);
           if (sliceIndex) {
@@ -461,16 +454,40 @@ function outputsFor(bundle) {
       coordinates: way.coordinates
     }))
   })) };
+  // A routed corridor runs to thousands of kilometres. The runtime only reads each grid slice's ends and flags, so the
+  // browser gets those; the full slices and per-station legs stay in world/dist/topology.
+  browserBundle.railTopology = bundle.railTopology.map(topology => !topology.routed ? topology : {
+    ...topology,
+    corridors: topology.corridors.map(corridor => ({
+      ...corridor,
+      legs: corridor.legs.map(leg => ({ id: leg.id, fromStationId: leg.fromStationId, toStationId: leg.toStationId,
+        distanceKm: leg.distanceKm, sliceCount: leg.slices.length })),
+      gridSlices: corridor.gridSlices.map(slice => ({ id: slice.id, distanceKm: slice.distanceKm, gapFill: slice.gapFill,
+        coordinates: [slice.coordinates[0], slice.coordinates.at(-1)], bridge: slice.bridge, tunnel: slice.tunnel,
+        service: slice.service, railwayStatuses: slice.railwayStatuses })),
+      elevation: corridor.elevation.map(sample => ({ position: sample.position, coordinate: sample.coordinate,
+        ...(sample.stationId ? { stationId: sample.stationId } : {}), meanElevationM: sample.meanElevationM,
+        elevationStdDevM: sample.elevationStdDevM }))
+    }))
+  });
+  manifest.railTopology = bundle.railTopology.map(topology => !topology.routed ? topology : ({ formatVersion: topology.formatVersion,
+    geometryId: topology.geometryId, routed: true, buildId: topology.buildId,
+    file: 'topology/' + topology.geometryId + '.json',
+    corridors: topology.corridors.map(corridor => ({ id: corridor.id, label: corridor.label,
+      stationCount: corridor.stations.length, distanceKm: corridor.distanceKm, gridSliceCount: corridor.gridSliceCount,
+      routedLinkIds: corridor.routedLinkIds, railKm: corridor.railKm, gapKm: corridor.gapKm })) }));
   manifest.routedLinks = bundle.routedLinks.map(route => ({
     id: route.id, proposalSetId: route.proposalSetId, from: route.from, to: route.to,
     planningLinkIds: route.planningLinkIds, status: route.status, chordKm: route.chordKm, routedKm: route.routedKm,
     railKm: route.railKm, gapKm: route.gapKm, gapCount: route.gaps.length, sliceCount: route.sliceCount,
-    stationCount: route.stations.length, navigable: route.navigable, reviewRequired: route.reviewRequired
+    stationCount: route.stations.length, navigable: route.navigable, reviewRequired: route.reviewRequired,
+    ...(route.playableCorridorId ? { playableCorridorId: route.playableCorridorId } : {})
   }));
   browserBundle.routedLinks = bundle.routedLinks.map(route => ({
     id: route.id, from: route.from, to: route.to, status: route.status, chordKm: route.chordKm,
     routedKm: route.routedKm, railKm: route.railKm, gapKm: route.gapKm, gapCount: route.gaps.length,
     sliceCount: route.sliceCount, navigable: route.navigable, reviewRequired: route.reviewRequired,
+    ...(route.playableCorridorId ? { playableCorridorId: route.playableCorridorId } : {}),
     runs: runsOf(route.slices)
   }));
   const outputs = new Map([

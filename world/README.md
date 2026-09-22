@@ -9,17 +9,20 @@ chunk can be validated and inspected without loading the whole dataset. The worl
 **planning links**, not playable railway geometry. They join authored city
 waypoints by geodesic chords so the format, stable identifiers, regional partitioning, debug view and size can be
 tested before OpenStreetMap rail geometry and raster sampling are introduced. Every planning link is marked
-`navigable: false` and `reviewRequired: true`. The explicitly authored central-Chile corridor is the current
-playable world; the planning chords remain debug data and never become track merely by being imported.
+`navigable: false` and `reviewRequired: true`. The explicitly authored Chilean main line, Punta Arenas to Arica,
+is the current playable world; the planning chords remain debug data and never become track merely by being imported.
 
 ## Inputs
 
 - `authored/places.csv` contains the small GeoNames-derived city catalogue used by the South America spike.
 - `authored/corridors.csv` defines three ordered Punta Arenas–Panama planning corridors.
-- `authored/playable-corridors.json` names the OSM station sequence approved for gameplay.
+- `authored/playable-corridors.json` names the corridors approved for gameplay: the central pilot by its OSM station
+  sequence, and the main line by the routed links it plays.
 - `imports.json` lists normalized geometry sets included by the compiler.
 - `imported/chile-central-rail.json` is the first real-geometry pilot, derived from the dated Chile OSM extract.
 - `imported/chile-central-elevation.json` contains mean elevation and elevation standard deviation for each pilot grid tile.
+- `imported/chile-stations.json` lists 671 named Chilean railway stations, working and closed, used as stops.
+- `imported/chile-routed-elevation.json` holds the same elevation aggregates for every main-line grid tile.
 - `sources.json` records data versions, licences, attribution and whether each source is actually ingested yet.
 - `schema/world-graph.schema.json` documents the compiled bundle contract.
 
@@ -61,6 +64,14 @@ npm run world:build
 proposals and their review report. Routed proposals are never navigable: they are candidates for a reviewed
 corridor, not track the player can use.
 
+The main line plays approved routed links. Its stations and elevation come from:
+
+```sh
+npm run world:extract:chile:stations -- --input /path/to/chile-260920.osm.pbf
+npm run world:elevation:chile:main   # fetches the Copernicus tiles it needs into the system temp directory
+npm run world:build
+```
+
 The extractor deliberately filters railway ways before the bounding-box pass. Reversing those operations made
 the complete-way extractor exceed this server's memory on the 59-million-node country file.
 
@@ -74,10 +85,10 @@ the complete-way extractor exceed this server's memory on the 59-million-node co
 6. Partition the graph into fixed geographic regions and compile the web/offline artifacts.
 
 The repository currently implements the input contract, deterministic compilation, regional partitioning,
-runtime loading/querying, the planning-corridor debug view, and a routed Padre Hurtado–Melipilla corridor. Gameplay
-uses eight fixed 5 km moves across five real stations inside the ordinary `OnTheLine` passage, driving view,
+runtime loading/querying, the planning-corridor debug view, and the Chilean main line built from approved routed
+links. Gameplay uses 958 fixed 5 km moves across 286 stops inside the ordinary `OnTheLine` passage, driving view,
 walking, save, time and fuel systems. Copernicus GLO-90 samples provide each tile's mean elevation for grade and
 within-tile elevation standard deviation for ruggedness: high flat land stays plains, while locally varied land
-becomes mountain. It does not yet include climate sampling, destination yards, or reviewed gap fills, and it does not claim that the
+becomes mountain. It does not yet include climate sampling or destination yards, and it does not claim that the
 worldwide waypoint chords are rail. The final short GIS remainder is retained as provenance but merged into the
 last gameplay cell, so the player is never offered an odd partial-distance move.
