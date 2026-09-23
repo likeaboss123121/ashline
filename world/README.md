@@ -22,7 +22,8 @@ is the current playable world; the planning chords remain debug data and never b
 - `imported/chile-central-rail.json` is the first real-geometry pilot, derived from the dated Chile OSM extract.
 - `imported/chile-central-elevation.json` contains mean elevation and elevation standard deviation for each pilot grid tile.
 - `imported/chile-stations.json` lists 671 named Chilean railway stations, working and closed, used as stops.
-- `imported/chile-routed-elevation.json` holds the same elevation aggregates for every main-line grid tile.
+- `imported/chile-routed-elevation.json` holds the same elevation aggregates for every main-line grid square.
+- `imported/south-america-places.json` lists 52,661 named cities, towns and villages, for gap fills to run through.
 - `sources.json` records data versions, licences, attribution and whether each source is actually ingested yet.
 - `schema/world-graph.schema.json` documents the compiled bundle contract.
 
@@ -68,7 +69,10 @@ The main line plays approved routed links. Its stations and elevation come from:
 
 ```sh
 npm run world:extract:chile:stations -- --input /path/to/chile-260920.osm.pbf
-npm run world:elevation:chile:main   # fetches the Copernicus tiles it needs into the system temp directory
+npm run world:extract:south-america:places -- --input /path/to/south-america-260921.osm.pbf
+export ASHLINE_DEM_CACHE=/somewhere/durable/copernicus   # elevation tiles; defaults to the system temp directory
+npm run world:route:chile            # lays long gap fills over the terrain, through towns
+npm run world:elevation:chile:main   # samples each grid square the main line crosses
 npm run world:build
 ```
 
@@ -86,7 +90,7 @@ the complete-way extractor exceed this server's memory on the 59-million-node co
 
 The repository currently implements the input contract, deterministic compilation, regional partitioning,
 runtime loading/querying, the planning-corridor debug view, and the Chilean main line built from approved routed
-links. Gameplay uses 958 fixed 5 km moves across 286 stops inside the ordinary `OnTheLine` passage, driving view,
+links. Gameplay uses 851 moves between squares of a shared geographic grid, across 282 stops, inside the ordinary `OnTheLine` passage, driving view,
 walking, save, time and fuel systems. Copernicus GLO-90 samples provide each tile's mean elevation for grade and
 within-tile elevation standard deviation for ruggedness: high flat land stays plains, while locally varied land
 becomes mountain. It does not yet include climate sampling or destination yards, and it does not claim that the

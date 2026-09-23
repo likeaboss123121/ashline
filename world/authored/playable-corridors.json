@@ -5,6 +5,7 @@
       "label": "Chilean main line",
       "routedLinkSetId": "chile-routed-links",
       "stationSetId": "chile-stations",
+      "settlementSetId": "south-america-places",
       "debugOnly": false,
       "approval": "Likea approved the routed links and their gap fills for gameplay on 2026-09-22.",
       "routedLinkIds": [

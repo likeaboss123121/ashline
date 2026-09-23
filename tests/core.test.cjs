@@ -283,7 +283,7 @@ test('lead tracks take their names from the route heading, not from entry and ex
     setup.railyard.oppositeDirection(setup.railyard.getLegHeading(1, 'compass')));
   assert.equal(setup.railyard.getLeadDirection(second, 'exit'), setup.railyard.getLegHeading(2, 'compass'));
   const headings = [1, 2, 3, 4].map(stationId => setup.railyard.getLegHeading(stationId, 'ignored'));
-  assert.deepEqual(headings, ['north', 'north', 'north', 'north']);
+  assert.deepEqual(headings, ['north', 'north', 'north', 'northwest']);
   // Further up the line the real track turns, and the leads turn with it.
   const stationCount = setup.realWorldPilot.getGridRoute().corridor.stations.length;
   const all = new Set(Array.from({ length: stationCount - 1 }, (_, index) => setup.railyard.getLegHeading(index + 1, 'ignored')));
@@ -393,7 +393,7 @@ test('a walker can enter a sourced station yard without moving or losing the par
   assert.ok(setup.onfoot.getWalk(-1));
 });
 
-test('the sourced rail grid joins end to end in fixed five-kilometre moves', () => {
+test('the sourced rail grid joins end to end, one geographic square per move', () => {
   const { setup } = loadGame();
   for (let legIndex = 1; legIndex <= 4; legIndex++) {
       const leg = setup.worldmap.getLeg('ignored', legIndex);
@@ -413,7 +413,8 @@ test('the sourced rail grid joins end to end in fixed five-kilometre moves', () 
           `leg ${legIndex} tile ${i} steps off the line`);
         assert.ok(mainLine[i + 1].ends.includes(setup.worldmap.opposite(tile.out)),
           `leg ${legIndex} tile ${i + 1} does not join the one before it`);
-        assert.equal(tile.distanceKm, 5);
+        // A move covers the track between two squares: about 5 km straight, 7 diagonally, more where it winds.
+        assert.ok(tile.distanceKm > 0 && tile.distanceKm < 40, `leg ${legIndex} tile ${i} moves ${tile.distanceKm} km`);
       }
   }
 });
@@ -439,7 +440,9 @@ test('grades and weight decide how long a leg takes and what can pull it', () =>
   // The same steps are travelled either way round, so the grades simply change sign.
   assert.equal(out.steepestClimb, Math.max(0, ...grades));
   assert.equal(back.steepestClimb, Math.max(0, ...grades.map(grade => -grade)));
-  assert.equal(out.kilometres, (out.tiles - 1) * 5);
+  const legTiles = setup.worldmap.getLeg('grades', 1).tiles;
+  assert.equal(out.kilometres, Math.round(legTiles.slice(0, -1).reduce((sum, tile, index) =>
+    sum + setup.worldmap.getStepKm(legTiles, index), 0)));
   assert.ok(setup.worldmap.getLegTravel('grades', 1, heavy, false).minutes >= out.minutes);
 });
 
@@ -453,8 +456,11 @@ test('a consist too heavy for the grades ahead is told so instead of travelling'
     car.cargo = [{ type: 'coal', amount: 3000 }];
     return car;
   }));
-  // Find a leg this consist genuinely cannot pull, so the test is about the rule and not about the seed.
-  const stationId = 2;
+  // Find a leg this consist genuinely cannot pull, so the test is about the rule and not about where the line runs.
+  const stationCount = setup.realWorldPilot.getGridRoute().corridor.stations.length;
+  const stationId = Array.from({ length: stationCount - 1 }, (_, index) => index + 2).find(id =>
+    setup.worldmap.getLegTravel('climb', id - 1, heavy, true).steepestClimb > setup.worldmap.getClimbLimitPercent(heavy));
+  assert.ok(stationId, 'some leg climbs more than a hundred loaded boxcars can be pulled up');
   const lead = () => ({ length: 999999, infinite: true, trains: [] });
   State.variables.stationTracks = { [stationId]: [lead(), { length: 400, trains: [] }, lead()] };
   State.variables.currentStation = stationId;
@@ -1237,14 +1243,15 @@ test('sourced tiles report their real coordinates and sampled elevation', () => 
   const home = world.getClimate('climate', 0, 0);
   assert.ok(Math.abs(home.latitude - (-53.16472)) < 0.00001);
   assert.ok(Math.abs(home.longitude - (-70.90114)) < 0.00001);
-  assert.equal(home.elevation, 13.5);
+  assert.equal(home.elevation, 13.8);
   assert.equal(world.getBaseTerrain('climate', 0, 0), 'plains');
   const stationCount = setup.realWorldPilot.getGridRoute().corridor.stations.length;
   const arica = setup.realWorldPilot.getStationTile(stationCount);
   assert.equal(arica.station, 'Arica');
   const north = world.getClimate('climate', arica.x, arica.y);
-  assert.equal(north.elevation, 21.7);
-  assert.ok(Math.abs(north.latitude - (-18.46692)) < 0.00001);
+  assert.equal(north.elevation, 8.1);
+  // The tile is the grid square Arica stands in, so it reports the square's middle: within a few kilometres.
+  assert.ok(Math.abs(north.latitude - (-18.46692)) < 0.05, String(north.latitude));
   assert.ok(north.temperature > home.temperature + 10, 'the far north is warmer');
 });
 
@@ -1374,9 +1381,11 @@ test('all playable stations come from the authored sourced corridor', () => {
   const { setup } = loadGame();
   const route = setup.realWorldPilot.getGridRoute(), stationCount = route.corridor.stations.length;
   assert.equal(route.corridor.id, 'cl-main-line');
-  assert.deepEqual([1, 2, 3].map(id => setup.worldmap.getStationName(id)), ['Punta Arenas', 'Km 94', 'Km 187']);
+  assert.deepEqual([1, 2, 3].map(id => setup.worldmap.getStationName(id)), ['Punta Arenas', 'Río Seco', 'Km 91']);
   assert.equal(setup.worldmap.getStationName(stationCount), 'Arica');
-  for (const city of ['Puerto Montt', 'Temuco', 'Chillán', 'Talca', 'Santiago', 'La Serena', 'Copiapó', 'Antofagasta']) {
+  // Puerto Montt lies at the end of a spur the line from Patagonia joins well north of it, so it is bypassed.
+  assert.deepEqual([...route.corridor.bypassedCities].map(city => city.name), ['Puerto Montt']);
+  for (const city of ['San Carlos de Bariloche', 'Osorno', 'Temuco', 'Chillán', 'Talca', 'Santiago', 'La Serena', 'Copiapó', 'Antofagasta']) {
     assert.ok(route.corridor.stations.some(station => station.name === city), city + ' is a stop on the line');
   }
   assert.equal(setup.realWorldPilot.getStation(stationCount + 1), null);

@@ -5,10 +5,10 @@ every gap is new track that does not exist in OpenStreetMap. Rail figures includ
 
 | Link | Chord | Routed | On rail | Gap fills | Stations on route |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| cl-punta-arenas → cl-puerto-montt | 1309.1 km | 1311.5 km | 4.6 km | 1306.8 km in 1 | 0 |
+| cl-punta-arenas → cl-puerto-montt | 1309.1 km | 2075.3 km | 4.6 km | 2070.7 km in 1 | 0 |
 | cl-puerto-montt → cl-santiago | 913.6 km | 1098.2 km | 1090.2 km | 8 km in 2 | 11 |
 | cl-santiago → cl-antofagasta | 1090.7 km | 1654.2 km | 1646 km | 8.2 km in 3 | 2 |
-| cl-antofagasta → cl-arica | 575.6 km | 730.3 km | 609.1 km | 121.2 km in 1 | 0 |
+| cl-antofagasta → cl-arica | 575.6 km | 774.9 km | 609.1 km | 165.8 km in 1 | 0 |
 
 Network repairs: 1492 digitizing breaks under 50 m snapped; 729 candidate short gaps under 30 km offered to routing (rail costs 4× less than a gap per km).
 
@@ -17,7 +17,7 @@ Network repairs: 1492 digitizing breaks under 50 m snapped; 729 candidate short 
 - Starts at nearest track, 0.579 km from the city.
 - Ends at nearest track, 2.024 km from the city.
 - Gap fills proposed for review:
-  - long-gap, 1305.807 km, from -70.90114, -53.16472 to -72.88254, -41.49715
+  - long-gap, 2070.565 km, from -70.90114, -53.16472 to -72.88254, -41.49715
 
 ## cl-puerto-montt → cl-santiago
 
@@ -41,5 +41,5 @@ Network repairs: 1492 digitizing breaks under 50 m snapped; 729 candidate short 
 - Starts at nearest track, 0.533 km from the city.
 - Ends at nearest track, 1.096 km from the city.
 - Gap fills proposed for review:
-  - long-gap, 121.218 km, from -70.199, -19.5606 to -70.32436, -18.47693
+  - long-gap, 165.831 km, from -70.199, -19.5606 to -70.32436, -18.47693
 

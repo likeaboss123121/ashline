@@ -560,15 +560,17 @@ setup.worldmap = {
 		}
 		return cache.mainLines[legIndex];
 	},
-	// What one 5 km step costs: five minutes on the flat, more up a grade, a little less down, and more again
-	// for a heavy consist. Fuel follows, because the time system burns it by the minute while travelling.
-	getTileMinutes: function(grade, train) {
+	// What one step costs: five minutes per 5 km on the flat, more up a grade, a little less down, and more again
+	// for a heavy consist. Fuel follows, because the time system burns it by the minute while travelling. A step on the
+	// geographic grid covers however much track lies between two squares, so km scales it; without it a step is 5 km.
+	getTileMinutes: function(grade, train, km) {
 		var tractive = this.getTrainTractiveKN(train);
 		var tonnesPerKN = tractive > 0 ? (this.getTrainWeightKg(train) / 1000) / tractive : 0;
 		var weightFactor = 1 + Math.max(0, tonnesPerKN - 1.2) * 0.12;
 		var gradeFactor = grade >= 0 ? 1 + grade * 0.22 : Math.max(0.75, 1 + grade * 0.05);
 		var speedFactor = this.REFERENCE_SPEED_KMH / this.getTopSpeedKmh(train);
-		return Math.max(1, Math.round(this.BASE_MINUTES_PER_TILE * speedFactor * gradeFactor * weightFactor));
+		var distanceFactor = (Number(km) > 0 ? Number(km) : this.TILE_KM) / this.TILE_KM;
+		return Math.max(1, Math.round(this.BASE_MINUTES_PER_TILE * speedFactor * gradeFactor * weightFactor * distanceFactor));
 	},
 	// The consist runs at the top speed of the locomotive being driven. Another locomotive hauled in neutral is only
 	// weight, and does not hold the train back.
@@ -622,6 +624,12 @@ setup.worldmap = {
 		});
 	},
 	// Where the consist stands, for the driving view and the status line.
+	// The track between a tile and the next one along: a fixed 5 km on the old grid, whatever lies between two squares
+	// on the geographic one.
+	getStepKm: function(tiles, index) {
+		var tile = tiles[index];
+		return tile && Number(tile.distanceKm) > 0 ? Number(tile.distanceKm) : this.TILE_KM;
+	},
 	getJourneyView: function(position) {
 		var journey = position || this.getJourney();
 		if (!journey) {
@@ -632,13 +640,19 @@ setup.worldmap = {
 		if (path.leg.realWorld) {
 			var realIndex = Math.max(0, Math.min(journey.tileIndex, tiles.length - 1));
 			var travelled = journey.forward !== false ? realIndex : tiles.length - 1 - realIndex;
+			var behind = 0, total = 0;
+			for (var stepIndex = 0; stepIndex < tiles.length - 1; stepIndex++) {
+				var stepKm = this.getStepKm(tiles, stepIndex);
+				total += stepKm;
+				if (journey.forward !== false ? stepIndex < realIndex : stepIndex >= realIndex) behind += stepKm;
+			}
 			return {
 				realWorld: true, corridorId: path.leg.corridorId, legIndex: journey.legIndex,
 				tileIndex: realIndex, tileCount: tiles.length, forward: journey.forward !== false,
 				tile: tiles[realIndex], terrain: tiles[realIndex].terrain, shape: tiles[realIndex].shape,
 				grade: journey.forward !== false ? tiles[realIndex].grade : -tiles[Math.max(0, realIndex - 1)].grade,
-				kilometresDone: travelled * this.TILE_KM,
-				kilometresLeft: (tiles.length - 1 - travelled) * this.TILE_KM,
+				kilometresDone: Math.round(behind),
+				kilometresLeft: Math.round(total - behind),
 				fromStation: journey.forward !== false ? path.leg.fromStation.name : path.leg.toStation.name,
 				toStation: journey.forward !== false ? path.leg.toStation.name : path.leg.fromStation.name
 			};
@@ -674,7 +688,8 @@ setup.worldmap = {
 		var train = State.variables.currentTrain;
 		var limit = this.getClimbLimitPercent(train);
 		var step = {
-			grade: grade, terrain: terrain, heading: '', minutes: this.getTileMinutes(grade, train),
+			grade: grade, terrain: terrain, heading: '',
+			minutes: this.getTileMinutes(grade, train, extra && extra.distanceKm),
 			blocked: (this.getTrainTractiveKN(train) > 0 && grade > limit)
 				? 'The grade ahead is ' + grade.toFixed(1) + '%, and your consist can pull ' + limit.toFixed(1) + '%.'
 				: '',
@@ -703,7 +718,8 @@ setup.worldmap = {
 			if (realTo < 0 || realTo >= tiles.length) return null;
 			var forwardStep = realTo > from;
 			var realStep = this.describeStep(forwardStep ? tiles[from].grade : -tiles[realTo].grade, tiles[realTo].terrain, {
-				fromIndex: from, toIndex: realTo, realWorld: true, distanceKm: this.TILE_KM,
+				fromIndex: from, toIndex: realTo, realWorld: true,
+				distanceKm: this.getStepKm(tiles, Math.min(from, realTo)),
 				heading: this.describeDirection(forwardStep ? tiles[from].out : this.opposite(tiles[realTo].out)),
 				destinationName: tiles[realTo].station || '',
 				arrivesAt: realTo === 0 ? journey.legIndex : (realTo === tiles.length - 1 ? journey.legIndex + 1 : 0)
@@ -813,15 +829,18 @@ setup.worldmap = {
 			: leg.tiles.filter(function(tile) { return !tile.branch && tile.out !== -1; });
 		var minutes = 0;
 		var steepestClimb = 0;
+		var kilometres = 0;
 		for (var i = 0; i < steps.length; i++) {
 			var grade = reverse ? -steps[i].grade : steps[i].grade;
+			var stepKm = leg.realWorld ? this.getStepKm(leg.tiles, i) : this.TILE_KM;
 			steepestClimb = Math.max(steepestClimb, grade);
-			minutes += this.getTileMinutes(grade, train);
+			minutes += this.getTileMinutes(grade, train, stepKm);
+			kilometres += stepKm;
 		}
 		return {
 			minutes: Math.max(1, minutes),
 			tiles: steps.length + 1,
-			kilometres: steps.length * this.TILE_KM,
+			kilometres: Math.round(kilometres),
 			steepestClimb: steepestClimb,
 			climbLimit: this.getClimbLimitPercent(train)
 		};
@@ -940,7 +959,21 @@ setup.worldmap = {
 	// map shows where the route goes next. The playable grid is a walk of 5 km steps rather than a projection, so the
 	// routes are placed on a geographic 5 km grid whose origin is the corridor's first tile; over the corridor's few
 	// dozen kilometres the two agree to within a cell. Returns the occupied cells only, keyed by grid position.
-	getDebugContextCells: function(origin, corridorId) {
+	// The grid square a longitude and latitude falls in, on the shared geographic grid the compiler lays routed
+	// corridors on (scripts/world/projection.cjs holds the same formulas and explains the choice).
+	projectGrid: function(point, grid) {
+		var radians = Math.PI / 180, R = 6371.0088;
+		var project = function(p) {
+			var lambda = p[0] * radians, phi = p[1] * radians;
+			var lambda0 = grid.centre[0] * radians, phi0 = grid.centre[1] * radians;
+			var k = Math.sqrt(2 / (1 + Math.sin(phi0) * Math.sin(phi) + Math.cos(phi0) * Math.cos(phi) * Math.cos(lambda - lambda0)));
+			return [R * k * Math.cos(phi) * Math.sin(lambda - lambda0),
+				R * k * (Math.cos(phi0) * Math.sin(phi) - Math.sin(phi0) * Math.cos(phi) * Math.cos(lambda - lambda0))];
+		};
+		var here = project(point), origin = project(grid.origin);
+		return { x: Math.round((here[0] - origin[0]) / grid.cellKm), y: Math.round((here[1] - origin[1]) / grid.cellKm) };
+	},
+	getDebugContextCells: function(origin, corridorId, grid) {
 		// Links the active corridor already plays are on the map as real tiles; drawing them again would double them.
 		var routes = ((setup.worldGraphData && setup.worldGraphData.routedLinks) || []).filter(function(route) {
 			return !corridorId || route.playableCorridorId !== corridorId;
@@ -950,10 +983,12 @@ setup.worldmap = {
 		var lon0 = origin[0], lat0 = origin[1];
 		var kmPerLat = 110.57, tile = this.TILE_KM;
 		var kmPerLon = function(latitude) { return 111.32 * Math.cos(latitude * Math.PI / 180); };
-		var toCell = function(point) {
+		var self = this;
+		// On the shared grid the context lands on exactly the squares the playable line would use.
+		var toCell = grid ? function(point) { return self.projectGrid(point, grid); } : function(point) {
 			return { x: Math.round((point[0] - lon0) * kmPerLon(point[1]) / tile), y: Math.round((point[1] - lat0) * kmPerLat / tile) };
 		};
-		var cells = {}, self = this;
+		var cells = {};
 		routes.forEach(function(route) {
 			route.runs.forEach(function(run) {
 				// Walk each run in steps of about a kilometre and mark every cell it passes through.
@@ -984,7 +1019,7 @@ setup.worldmap = {
 		var leg = { index: route.corridor.id, tiles: route.tiles, byKey: {}, branches: [], rect: route.rect,
 			realWorld: true, corridor: route.corridor };
 		route.tiles.forEach(function(tile) { leg.byKey[setup.worldmap.key(tile.x, tile.y)] = tile; });
-		var context = this.getDebugContextCells(route.tiles[0].geoCoordinate, route.corridor.id);
+		var context = this.getDebugContextCells(route.tiles[0].geoCoordinate, route.corridor.id, route.corridor.grid);
 		var rect = { x0: leg.rect.x0, y0: leg.rect.y0, x1: leg.rect.x1, y1: leg.rect.y1 };
 		Object.keys(context.cells).forEach(function(key) {
 			var contextCell = context.cells[key];
@@ -1329,7 +1364,9 @@ setup.worldmap = {
 			var mainLine = leg.tiles;
 			var grades = mainLine.map(function(tile) { return tile.grade; });
 			heading.textContent = leg.corridor.label + ': ' + mainLine.length + ' grid positions, '
-				+ ((mainLine.length - 1) * this.TILE_KM) + ' playable km, grades '
+				+ Math.round(mainLine.slice(0, -1).reduce(function(sum, tile, index) {
+					return sum + setup.worldmap.getStepKm(mainLine, index);
+				}, 0)) + ' playable km, grades '
 				+ Math.min.apply(null, grades).toFixed(1) + '% to ' + Math.max.apply(null, grades).toFixed(1) + '%, '
 				+ leg.corridor.stations.length + ' sourced stations. Yard contents still use seed ' + this.getSeed() + '.';
 			parent.appendChild(heading);

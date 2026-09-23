@@ -32,7 +32,7 @@
       "license": "ODbL 1.0",
       "attribution": "© OpenStreetMap contributors; extract provided by Geofabrik",
       "status": "ingested",
-      "use": "Every mapped railway alignment and named station in South America, for routing the continental planning links",
+      "use": "Every mapped railway alignment, named station and named city, town and village in South America: routing the continental planning links, and the settlements proposed track is drawn through",
       "transformation": "Osmium tag filter, GeoJSON sequence export, deterministic streaming normalization"
     },
     {

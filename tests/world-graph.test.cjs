@@ -183,7 +183,9 @@ test('the sourced grid is the default playable world without copying static data
     { meanElevationM: 200, elevationStdDevM: 180 }, 120), 'mountain', 'ruggedness is independent of altitude');
   game.State.variables.journey = { legIndex: 2, tileIndex: 0, forward: true };
   const step = game.setup.worldmap.getJourneyStep(1);
-  assert.equal(step.distanceKm, 5);
+  const firstMove = game.setup.realWorldPilot.getGridRoute().legs[2].tiles[0].distanceKm;
+  assert.ok(firstMove > 0);
+  assert.equal(step.distanceKm, firstMove, 'a move covers the track between its two squares');
   assert.equal(game.setup.railyard.moveAlongLine(1), true);
   assert.equal(game.State.variables.journey.tileIndex, 1);
   assert.equal(game.State.variables.currentTrain, train);
@@ -322,15 +324,30 @@ test('the main line joins the routed links into one line that can be driven from
   const stations = route.corridor.stations;
   assert.equal(stations[0].name, 'Punta Arenas');
   assert.equal(stations.at(-1).name, 'Arica');
-  assert.ok(route.tiles.length > 900, route.tiles.length + ' tiles');
-  // Stops are real stations wherever the line runs on mapped track; only stretches with nowhere to stop, like the
-  // Patagonian gap fill, get kilometre-post halts.
+  assert.ok(route.tiles.length > 800, route.tiles.length + ' tiles');
+  // Stops are real stations wherever the line runs on mapped track, and the towns a proposed line runs through
+  // where it does not; only what is left of a long stretch with nowhere to stop gets kilometre-post halts.
   const statuses = new Set(stations.map(station => station.status));
-  ['city', 'active', 'disused', 'kilometre-post'].forEach(status => assert.ok(statuses.has(status), status));
+  ['city', 'active', 'disused', 'settlement', 'kilometre-post'].forEach(status => assert.ok(statuses.has(status), status));
+  ['Puerto Santa Cruz', 'Río Mayo', 'San Carlos de Bariloche'].forEach(name =>
+    assert.ok(stations.some(station => station.name === name && station.status === 'settlement'), name));
+  // The tiles are squares of one geographic grid: each touches the next, none repeats, and every stop stands within
+  // a few squares of where it really is.
+  const squares = new Set(route.tiles.map(tile => tile.x + ',' + tile.y));
+  assert.equal(squares.size, route.tiles.length);
+  route.tiles.slice(1).forEach((tile, index) => assert.equal(
+    Math.max(Math.abs(tile.x - route.tiles[index].x), Math.abs(tile.y - route.tiles[index].y)), 1));
+  const km = (a, b) => Math.hypot((a[0] - b[0]) * 111.32 * Math.cos(a[1] * Math.PI / 180), (a[1] - b[1]) * 110.57);
+  stations.forEach((station, index) => {
+    const tile = route.tiles[route.stationPositions[index]];
+    assert.ok(km(station.coordinates, tile.geoCoordinate) < 25, station.name + ' stands ' + km(station.coordinates, tile.geoCoordinate) + ' km off');
+  });
   stations.filter(station => station.status === 'kilometre-post').forEach(station => assert.match(station.name, /^Km \d+$/));
+  // What the player travels between stops: the moves between their squares, without the spurs a through train skips.
   for (let index = 1; index < stations.length; index++) {
-    const gap = stations[index].alongKm - stations[index - 1].alongKm;
-    assert.ok(gap >= 5 && gap <= 100, stations[index - 1].name + ' to ' + stations[index].name + ': ' + gap + ' km');
+    const from = route.stationPositions[index - 1], to = route.stationPositions[index];
+    const km = route.tiles.slice(from, to).reduce((sum, tile) => sum + tile.distanceKm, 0);
+    assert.ok(km >= 3 && km <= 110, stations[index - 1].name + ' to ' + stations[index].name + ': ' + km + ' km');
   }
   // Gap fills are marked on their tiles, and there are far fewer bridges and tunnels than tiles.
   assert.ok(route.tiles.filter(tile => tile.gapFill).length > 250);

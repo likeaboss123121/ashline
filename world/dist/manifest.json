@@ -34,7 +34,7 @@
       "license": "ODbL 1.0",
       "attribution": "© OpenStreetMap contributors; extract provided by Geofabrik",
       "status": "ingested",
-      "use": "Every mapped railway alignment and named station in South America, for routing the continental planning links",
+      "use": "Every mapped railway alignment, named station and named city, town and village in South America: routing the continental planning links, and the settlements proposed track is drawn through",
       "transformation": "Osmium tag filter, GeoJSON sequence export, deterministic streaming normalization"
     },
     {
@@ -2279,23 +2279,25 @@
       "formatVersion": 1,
       "geometryId": "chile-routed-links",
       "routed": true,
-      "buildId": "c2ec6ae9c54680f2",
+      "buildId": "803bde8177d74150",
       "file": "topology/chile-routed-links.json",
       "corridors": [
         {
           "id": "cl-main-line",
           "label": "Chilean main line",
-          "stationCount": 286,
-          "distanceKm": 4785.4,
-          "gridSliceCount": 958,
+          "stationCount": 282,
+          "distanceKm": 5594.6,
+          "gridCellCount": 852,
           "routedLinkIds": [
             "route:cl-punta-arenas>cl-puerto-montt",
             "route:cl-puerto-montt>cl-santiago",
             "route:cl-santiago>cl-antofagasta",
             "route:cl-antofagasta>cl-arica"
           ],
-          "railKm": 3342,
-          "gapKm": 1443.3
+          "railKm": 3158.9,
+          "gapKm": 2435.7,
+          "playableKm": 5347.5,
+          "skippedDetourKm": 247.1
         }
       ]
     }
@@ -2311,11 +2313,11 @@
       ],
       "status": "rail-with-gap-proposals",
       "chordKm": 1309.1,
-      "routedKm": 1311.5,
+      "routedKm": 2075.3,
       "railKm": 4.6,
-      "gapKm": 1306.8,
+      "gapKm": 2070.7,
       "gapCount": 1,
-      "sliceCount": 263,
+      "sliceCount": 416,
       "stationCount": 0,
       "navigable": false,
       "reviewRequired": true,
@@ -2371,11 +2373,11 @@
       ],
       "status": "rail-with-gap-proposals",
       "chordKm": 575.6,
-      "routedKm": 730.3,
+      "routedKm": 774.9,
       "railKm": 609.1,
-      "gapKm": 121.2,
+      "gapKm": 165.8,
       "gapCount": 1,
-      "sliceCount": 147,
+      "sliceCount": 155,
       "stationCount": 0,
       "navigable": false,
       "reviewRequired": true,

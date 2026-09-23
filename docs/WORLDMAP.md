@@ -69,38 +69,82 @@ tell a river crossing from a culvert.
 
 ## The Chilean main line
 
-Likea approved all four Chile links, gap fills included, for play on 2026-09-22. The playable world is now the
+Likea approved all four Chile links, gap fills included, for play on 2026-09-22. The playable world is the
 `cl-main-line` corridor in `world/authored/playable-corridors.json`, which lists the routed links it plays. Listing
 a link there is the review decision; the proposal file itself never changes to `navigable: true`.
 `scripts/world/build-routed-corridor.cjs` builds it at compile time:
 
 - **One line.** The four links are joined end to end (the compiler refuses links that do not meet) into a single
-  4,785 km line from Punta Arenas to Arica: about 3,342 km on mapped rail and 1,443 km of gap fill.
-- **Stops.** Each city the links join is a station. So is every named OSM station, working or closed, that stands
-  within 1 km of mapped track on the line. These come from `world/imported/chile-stations.json`
-  (`npm run world:extract:chile:stations -- --input chile-260920.osm.pbf`, 671 stations), because the railway
-  extract only keeps nodes on the track and misses most stations. Metro and bus stations are left out.
-  Stops closer than 5 km are thinned: a city wins, then a working station (larger EFE category first), then a
-  working halt, then a closed station.
-- **Kilometre posts.** Where the line runs more than 100 km with nowhere to stop, halts named `Km N` (distance
-  from Punta Arenas) are spaced evenly along it. Only the Patagonian gap fill and one stretch near Arica need them.
-  The limit exists because every yard keeps a reserve engine with fuel to reach the next stop, which a tank cannot
-  promise over 1,300 km.
-- **Tiles.** The whole line is re-cut into 958 slices of 5 km, each carrying its OSM ways, the routed slices it came
-  from, rail and gap kilometres, and a `gapFill` flag (more gap than rail) that the debug map shows on hover.
-  A tile is a bridge when it has at least 200 m of bridge and a tunnel when at least half of it is underground.
-- **Elevation.** `npm run world:elevation:chile:main` fetches the Copernicus GLO-90 tiles the line crosses (about 50,
-  cached outside the repository) and samples every position, as for the pilot. The compiler rejects stale samples
-  by build ID; the ID covers only what decides where slices fall, so changing stops or bridge rules does not need a
-  resample.
+  line from Punta Arenas to Arica: about 5,595 km as routed, of which 3,342 km is mapped rail.
+- **Stops.** Each city the links join is a station. So is every named OSM station, working or closed, within 1 km
+  of mapped track on the line (`world/imported/chile-stations.json`, 671 stations; metro and bus stations are left
+  out), and every city, town or village within 3 km of a stretch of gap fill
+  (`world/imported/south-america-places.json`, 52,661 settlements). Stops closer than 5 km are thinned: a city
+  wins, then a working station (larger EFE category first), a settlement, a working halt, then a closed station.
+- **Kilometre posts.** Where the line still runs more than 100 km with nowhere to stop, halts named `Km N` (distance
+  from Punta Arenas along the routed line) are spaced evenly along it. Every yard keeps a reserve engine with fuel
+  to reach the next stop, which a tank cannot promise over much longer stretches.
+- **Tiles.** See "The geographic grid" below: 852 squares of the shared grid, each carrying its OSM ways, the
+  routed slices it came from, rail and gap kilometres, and a `gapFill` flag the debug map shows on hover. A square
+  is a bridge when it has at least 200 m of bridge and a tunnel when at least half of it is underground.
+- **Spurs.** Where the line runs out to a terminus and back the same way, the out-and-back is left out of the
+  moves: 247 km in all, at Puerto Montt, Santiago and Antofagasta. A stop that would then stand more than 20 km
+  from where it really is, is dropped; a city dropped this way is recorded in `bypassedCities`. That is Puerto
+  Montt: the line from Patagonia comes over the Andes and reaches the railway near Osorno, 60 km north of it.
+- **Elevation.** `npm run world:elevation:chile:main` fetches the Copernicus GLO-90 tiles the line crosses and
+  samples each square. The compiler rejects stale samples by build ID; the ID covers only what decides where the
+  squares fall, so changing stops or bridge rules does not need a resample.
 
-The result: 286 stops, a median of 10.8 km apart and never more than 94 km; the costliest leg is about 200 minutes
-of diesel. The browser bundle carries only each slice's ends and flags; full slices and legs are in
-`world/dist/topology/chile-routed-links.json`.
+The result: 282 stops, 5,348 km of moves, and no stretch between stops longer than about 100 km; the costliest leg
+is about 160 minutes of diesel. The browser bundle carries only each square's position, move length and flags;
+full slices and legs are in `world/dist/topology/chile-routed-links.json`.
 
-Known quirks: the grid is a walk of 5 km moves, not a projection, so it crosses itself in 11 places (the first tile
-to claim a square keeps it for terrain lookups and teleporting); and the route runs into Santiago's Alameda
-terminus and back out, as the mapped track does.
+## The geographic grid
+
+Routed corridors are laid on one shared grid of 5 km squares (`scripts/world/projection.cjs`): a Lambert
+azimuthal equal-area projection centred on South America (60°W, 20°S), shifted so Punta Arenas is square (0, 0).
+Every square covers the same area of ground, shapes bend by no more than about a tenth across the continent, and
+because every corridor uses the same grid, separately built lines meet where the real railways meet.
+
+A corridor's tiles are the squares its line passes through, in order. The line is followed in steps of an eighth
+of a square; a loop back into a square already crossed is folded into that square when it is short (a switchback
+or spiral, up to 15 km) and cut when it is long (a spur, above); a square that only clips the corner between two
+diagonal neighbours is folded into them, so diagonal track runs straight rather than in stair steps. Each square
+touches the next, none repeats, and no drift builds up along the line: a tile's grid position is where it really is.
+
+A move costs the track it covers: half the track in each of the two squares. That is 5 km on a straight run,
+about 7 km diagonally, and more where the line winds; driving time, fuel and walking time scale with it
+(`setup.worldmap.getStepKm`). Grade is the difference between the two squares' mean elevations over that distance.
+
+This replaced the earlier layout, in which every 5 km slice of track was one step in one of eight directions. That
+kept moves at exactly 5 km but drifted from real geography wherever the line wound: by Arica the line stood about
+500 km north of the city. The Padre Hurtado–Melipilla pilot still uses that layout.
+
+## Gap fills over the terrain
+
+A gap fill longer than 10 km is not a straight line. `scripts/world/terrain-path.cjs` plans it the way a railway
+would be planned: first which settlements it serves, then how it gets between them.
+
+1. The area around the gap is resampled from Copernicus GLO-90 into cells of about 2 km, keeping each cell's mean
+   elevation and roughness (the spread of heights within it). Open sea, and lakes (which the elevation model draws
+   perfectly flat), are water.
+2. Every city, town and village in the area is a candidate stop. A hop between two is estimated from the ground
+   under the straight line between them; a hop into a settlement is 25% (city), 15% (town) or 8% (village) cheaper;
+   no hop may exceed 250 km. The cheapest chain from one end of the gap to the other is chosen. The discount is a
+   share, not a fixed bonus, so a string of villages is never cheaper than the ground between them.
+3. Between consecutive stops, the cheapest path over the cells is the line: a kilometre costs 1, a 2% grade doubles
+   that and steeper grades cost with the square of the grade, rough ground and ground above 2,500 m cost more, and
+   water costs thirty times as much.
+
+Resampled areas are cached beside the elevation tiles, so rerouting takes seconds. Set `ASHLINE_DEM_CACHE` to keep
+the tile cache somewhere durable; the default is the system temporary directory.
+
+The Patagonian gap is now 2,071 km through 23 settlements instead of 1,306 km in a straight line over the ice
+fields: up the Atlantic side through Puerto Santa Cruz, Puerto San Julián and Pico Truncado, inland by Las Heras,
+Río Mayo and Gobernador Costa to Bariloche, over the Andes by Villa La Angostura, and down to the Chilean railway
+near Osorno. The Iquique–Arica gap runs 166 km instead of 121. The Chile routing only knows Chilean track, so near
+Bariloche the new line runs beside Argentina's existing railway rather than on it; routing the main line over the
+continental network would fix that. The continental proposals do not yet follow the terrain.
 
 ## Static world data is never saved
 
@@ -113,7 +157,7 @@ independent of map size and lets a world-data migration translate old position i
 Tiles use whole-number display coordinates, `x` east and `y` north. A **leg** is the sourced run between two real
 stations. `getLeg(seed, legIndex)`, `getStationTile(seed, stationId)` and railyard headings all delegate to the
 compiled corridor, so the debug grid, travel controls and yard leads describe the same topology. Leg lengths are
-determined by station placement: the current corridor has one-, two-, one- and four-move legs.
+determined by station placement.
 
 ## Tiles
 

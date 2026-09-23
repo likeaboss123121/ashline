@@ -79,11 +79,60 @@ setup.realWorldPilot = (function () {
 		return positions;
 	}
 
+	// The direction of the step from one grid square to its neighbour.
+	function directionBetween(from, to) {
+		var dx = to.x - from.x, dy = to.y - from.y;
+		for (var index = 0; index < setup.worldmap.DIRECTIONS.length; index++) {
+			if (setup.worldmap.DIRECTIONS[index].dx === dx && setup.worldmap.DIRECTIONS[index].dy === dy) return index;
+		}
+		throw new Error('Grid squares ' + from.x + ',' + from.y + ' and ' + to.x + ',' + to.y + ' do not touch.');
+	}
+
+	// A corridor laid on the shared geographic grid: its squares are the tiles, where they really are, and each move
+	// costs the track it covers rather than a fixed 5 km.
+	function buildCellRoute(record) {
+		var corridor = record.corridor, cells = corridor.gridCells, elevations = corridor.elevation || [];
+		if (elevations.length !== cells.length) return null;
+		var tiles = cells.map(function(cell, index) {
+			var incoming = index ? setup.worldmap.opposite(directionBetween(cells[index - 1], cell)) : null;
+			var outgoing = index < cells.length - 1 ? directionBetween(cell, cells[index + 1]) : null;
+			var ends = [];
+			if (incoming !== null) ends.push(incoming);
+			if (outgoing !== null && ends.indexOf(outgoing) === -1) ends.push(outgoing);
+			ends.sort(function(a, b) { return a - b; });
+			var elevation = elevations[index], grade = 0;
+			if (outgoing !== null) {
+				grade = (elevations[index + 1].meanElevationM - elevation.meanElevationM) / (cell.stepKm * 1000) * 100;
+				grade = Math.max(-setup.worldmap.GRADE_LIMIT, Math.min(setup.worldmap.GRADE_LIMIT,
+					Math.round(grade / setup.worldmap.GRADE_STEP) * setup.worldmap.GRADE_STEP));
+			}
+			return {
+				x: cell.x, y: cell.y, ends: ends, shape: setup.worldmap.getShape(ends),
+				terrain: terrainFor(cell, elevation, record.topology.mountainStdDevM),
+				elevation: elevation.meanElevationM, elevationStdDevM: elevation.elevationStdDevM,
+				grade: grade, out: outgoing === null ? -1 : outgoing, distanceKm: cell.stepKm,
+				railwayStatuses: cell.railwayStatuses.slice(), sourceSliceId: cell.id, gapFill: cell.gapFill === true,
+				station: 0, stationId: null, stationIndex: 0, geoCoordinate: cell.centre, globalPosition: index
+			};
+		});
+		corridor.stationPositions.forEach(function(position, index) {
+			tiles[position].station = corridor.stations[index].name;
+			tiles[position].stationId = corridor.stations[index].id;
+			tiles[position].stationIndex = index + 1;
+		});
+		return { tiles: tiles, positions: corridor.stationPositions.slice(), slices: cells };
+	}
+
 	function getGridRoute(corridorId) {
 		corridorId = corridorId || DEFAULT_CORRIDOR_ID;
 		if (gridCache[corridorId]) return gridCache[corridorId];
 		var record = getRecord(corridorId);
 		if (!record) return null;
+		if (record.corridor.gridCells) {
+			var built = buildCellRoute(record);
+			if (!built) return null;
+			return (gridCache[corridorId] = finishRoute(record.corridor, built.tiles, built.positions, built.slices));
+		}
 		var corridor = record.corridor, rawSlices = corridor.gridSlices || [], rawElevations = corridor.elevation || [];
 		if (rawElevations.length !== rawSlices.length + 1) return null;
 		var slices = mergeFinalRemainder(rawSlices);
@@ -126,6 +175,11 @@ setup.realWorldPilot = (function () {
 				y += setup.worldmap.DIRECTIONS[outgoing].dy;
 			}
 		}
+		return (gridCache[corridorId] = finishRoute(corridor, tiles, positions, slices));
+	}
+
+	// Legs between stations, and the lookup from a square to its tile, for either kind of corridor.
+	function finishRoute(corridor, tiles, positions, slices) {
 		var legs = {};
 		for (var stationIndex = 0; stationIndex < corridor.stations.length - 1; stationIndex++) {
 			var startPosition = positions[stationIndex], endPosition = positions[stationIndex + 1];
@@ -146,9 +200,8 @@ setup.realWorldPilot = (function () {
 			var tileKey = setup.worldmap.key(tile.x, tile.y);
 			if (!byKey[tileKey]) byKey[tileKey] = tile;
 		});
-		gridCache[corridorId] = { corridor: corridor, slices: slices, tiles: tiles, legs: legs, byKey: byKey,
+		return { corridor: corridor, slices: slices, tiles: tiles, legs: legs, byKey: byKey,
 			stationPositions: positions, rect: setup.worldmap.rectFor(tiles) };
-		return gridCache[corridorId];
 	}
 
 	function getTileAt(x, y) {
@@ -246,7 +299,7 @@ setup.realWorldPilot = (function () {
 		var note = document.createElement('p');
 		note.className = 'small-description';
 		note.textContent = route.corridor.label + ' is the active gameplay world: ' + route.tiles.length
-			+ ' grid positions, ' + route.slices.length + ' fixed 5 km moves and ' + route.corridor.stations.length + ' stations.';
+			+ ' grid positions, ' + (route.tiles.length - 1) + ' moves and ' + route.corridor.stations.length + ' stations.';
 		parent.appendChild(note);
 	}
 

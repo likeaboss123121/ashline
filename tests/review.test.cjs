@@ -82,18 +82,20 @@ test('empty engines can collect finite station fuel and recover from the line wi
   assert.equal(s.recovery.stock(2).diesel,before-400);
   assert.equal(s.railyard.isTrainDriveCapable(v.currentTrain),true);
   v.currentTrain[0].inventory=s.items.createStartingKit();
-  v.currentTrain[0].cargo=[];v.journey={legIndex:1,tileIndex:2,forward:true};
+  // Stranded well out on a long leg, several tiles from either station.
+  const legIndex=Object.values(s.realWorldPilot.getGridRoute().legs).find(leg=>leg.tiles.length>=10).index,stranded=5;
+  v.currentTrain[0].cargo=[];v.journey={legIndex,tileIndex:stranded,forward:true};
   assert.equal(s.onfoot.climbDown(),true);
   assert.equal(s.recovery.supplyRoutes('diesel').length,0,'no station collection is offered from a distant tile');
   assert.equal(s.items.takeFromCar(v.currentTrain[0],'jerrycan'),true);
   v.onFoot.tileIndex=0;
   const route=s.recovery.supplyRoutes('diesel')[0],clock=s.time.getCurrentTimestampMs();
-  assert.equal(route.station,1);
+  assert.equal(route.station,legIndex);
   assert.equal(s.recovery.collect(route.station,'diesel',false),true);
   assert.ok(s.time.getCurrentTimestampMs()>clock);
   assert.ok(s.items.getPlayerCarriedKg()<=50);
   assert.ok(s.items.getPlayerCargo().find(stack=>stack.type==='diesel').amount<=20);
-  v.onFoot.tileIndex=2;
+  v.onFoot.tileIndex=stranded;
   assert.equal(s.items.giveToCar(v.currentTrain[0],'jerrycan'),false,'a filled jerrycan cannot be stowed without its diesel');
   assert.equal(s.recovery.load('diesel'),true);
   assert.equal(s.items.giveToCar(v.currentTrain[0],'jerrycan'),true);
@@ -416,7 +418,7 @@ test('station lead headings follow the sourced rail grid', () => {
     assert.ok(g.setup.yardGeneration.validate(tracks));
   }
   assert.equal(yard.getLegHeading(1), 'north');
-  assert.equal(world.getStationName(5), 'Km 374');
+  assert.equal(world.getStationName(5), 'Esperanza');
 });
 
 test('passenger templates exist at their catalogue lengths in both projections', () => {

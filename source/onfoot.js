@@ -7,7 +7,7 @@
 // Standing beside the train, the player has the run of it: its tools, its stores, its bunker. A tile away they have
 // only what they carry, which is why there is a pack at all.
 setup.onfoot = {
-	MINUTES_PER_TILE: 60,
+	MINUTES_PER_TILE: 60, // for 5 km of track; a longer step between squares takes proportionally longer
 	FATIGUE_PER_MINUTE: 0.5,
 	CHOP_MINUTES: 30,
 	CHOP_KG: 60, // what one session of felling and dragging yields, which is about what a person can carry
@@ -106,8 +106,10 @@ setup.onfoot = {
 			// Reuse rail connectivity, but never apply train power/grade restrictions to walking.
 			step = world.getJourneyStep(direction, position);
 		}
+		var distanceKm = step && step.distanceKm ? step.distanceKm : setup.worldmap.TILE_KM;
 		return step ? { toIndex: step.toIndex, branch: step.toMain != null ? null : (step.toBranch || position.branch),
-			terrain: step.terrain, heading: step.heading, minutes: this.MINUTES_PER_TILE } : null;
+			terrain: step.terrain, heading: step.heading, distanceKm: distanceKm,
+			minutes: Math.max(1, Math.round(this.MINUTES_PER_TILE * distanceKm / setup.worldmap.TILE_KM)) } : null;
 	},
 	getBranchWalks: function() {
 		var position = this.getPosition(), self = this;
@@ -196,7 +198,7 @@ Macro.add('onFootControls', {
 			if (!walk) {
 				return;
 			}
-			output += '<<timedlink "Walk ' + setup.units.kilometres(setup.worldmap.TILE_KM) + ' ' + walk.heading + '" '
+			output += '<<timedlink "Walk ' + setup.units.kilometres(walk.distanceKm) + ' ' + walk.heading + '" '
 				+ walk.minutes + ' "walk" "fatigue:+3">><<run setup.onfoot.walk(' + direction + ')>>'
 				+ '<<goto "OnFoot">><</timedlink>><br>';
 		});

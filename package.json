@@ -21,7 +21,8 @@
     "world:extract:south-america": "node scripts/world/extract-osm-pilot.cjs --scope south-america",
     "world:extract:south-america:stations": "node scripts/world/extract-osm-stations.cjs --scope south-america",
     "world:route:south-america": "node --max-old-space-size=4096 scripts/world/route-planning-links.cjs --scope south-america",
-    "world:elevation:south-america": "node scripts/world/sample-elevation.cjs --geometry south-america-routed-links --fetch --output world/imported/south-america-routed-elevation.json"
+    "world:elevation:south-america": "node scripts/world/sample-elevation.cjs --geometry south-america-routed-links --fetch --output world/imported/south-america-routed-elevation.json",
+    "world:extract:south-america:places": "node scripts/world/extract-osm-places.cjs --scope south-america"
   },
   "engines": {
     "node": ">=22"

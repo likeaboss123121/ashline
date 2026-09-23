@@ -174,10 +174,18 @@ function compile() {
     assert(stationSet.stations.length === stationSet.stats.stationCount, 'Station count mismatch: ' + entry.id);
     return [entry.id, stationSet];
   }));
+  const settlementSets = Object.fromEntries((importManifest.settlements || []).map(entry => {
+    const settlementSet = JSON.parse(read(entry.file));
+    assert(settlementSet.id === entry.id && settlementSet.formatVersion === 1, 'Settlement import ID mismatch: ' + entry.file);
+    const source = sourceManifest.sources.find(candidate => candidate.id === settlementSet.sourceId);
+    assert(source && source.status === 'ingested', 'Settlement set has no ingested source: ' + entry.id);
+    assert(settlementSet.places.length === settlementSet.stats.placeCount, 'Settlement count mismatch: ' + entry.id);
+    return [entry.id, settlementSet];
+  }));
   // Corridors made of routed planning links: listing a link in an authored corridor is what approves it for play.
   (importManifest.routedLinks || []).forEach(entry => {
     if (!authoredPlayableCorridors.corridors.some(corridor => corridor.routedLinkSetId === entry.id)) return;
-    railTopology.push(buildRoutedTopology(JSON.parse(read(entry.file)), authoredPlayableCorridors, nodes, stationSets));
+    railTopology.push(buildRoutedTopology(JSON.parse(read(entry.file)), authoredPlayableCorridors, nodes, stationSets, settlementSets));
   });
   authoredPlayableCorridors.corridors.forEach(corridor => {
     assert(railTopology.some(topology => topology.corridors.some(built => built.id === corridor.id)),
@@ -282,7 +290,8 @@ function validateElevation(elevation, topology, sources) {
   const corridors = Object.fromEntries(elevation.corridors.map(corridor => [corridor.corridorId, corridor]));
   topology.corridors.forEach(corridor => {
     const samples = corridors[corridor.id] && corridors[corridor.id].positions;
-    assert(Array.isArray(samples) && samples.length === corridor.gridSliceCount + 1,
+    // A routed corridor samples each grid square it crosses; the pilot samples each end of each 5 km slice.
+    assert(Array.isArray(samples) && samples.length === (corridor.gridCells ? corridor.gridCells.length : corridor.gridSliceCount + 1),
       'Elevation position count mismatch: ' + corridor.id);
     samples.forEach((sample, index) => {
       assert(sample.position === index && Array.isArray(sample.coordinate) && sample.coordinate.length === 2,
@@ -394,13 +403,35 @@ function validateBundle(bundle) {
         corridorDistance += leg.distanceKm;
       });
       assert(sliceIds.size === corridor.sliceCount, 'Topology slice count mismatch: ' + corridor.id);
-      assert(Array.isArray(corridor.gridSlices) && corridor.gridSlices.length === corridor.gridSliceCount,
-        'Topology grid slice count mismatch: ' + corridor.id);
-      corridor.gridSlices.forEach(slice => {
-        assert(slice.distanceKm > 0 && slice.distanceKm <= bundle.tileKm + 0.001 &&
-          Array.isArray(slice.railwayStatuses) && slice.railwayStatuses.length > 0,
-        'Invalid gameplay grid slice: ' + slice.id);
-      });
+      if (corridor.gridCells) {
+        // Squares of the shared geographic grid: each touches the next, none repeats, every move but the last has
+        // track to cover, and the moves add up to the line.
+        const cells = corridor.gridCells, seen = new Set();
+        assert(cells.length === corridor.gridCellCount && cells.length >= 2, 'Topology grid cell count mismatch: ' + corridor.id);
+        cells.forEach((cell, index) => {
+          const key = cell.x + ',' + cell.y;
+          assert(!seen.has(key), 'Grid square visited twice: ' + cell.id);
+          seen.add(key);
+          if (index) assert(Math.max(Math.abs(cell.x - cells[index - 1].x), Math.abs(cell.y - cells[index - 1].y)) === 1,
+            'Grid squares do not touch: ' + cell.id);
+          assert(index === cells.length - 1 ? cell.stepKm === 0 : cell.stepKm > 0, 'Invalid grid move: ' + cell.id);
+          assert(Array.isArray(cell.railwayStatuses) && cell.railwayStatuses.length > 0, 'Grid square lacks provenance: ' + cell.id);
+        });
+        const skippedKm = (corridor.skippedDetours || []).reduce((sum, detour) => sum + detour.km, 0);
+        assert(Math.abs(cells.reduce((sum, cell) => sum + cell.stepKm, 0) + skippedKm - corridor.distanceKm) < 1,
+          'Grid moves and skipped detours do not add up to the line: ' + corridor.id);
+        const positions = corridor.stationPositions;
+        assert(positions.length === corridor.stations.length && positions[0] === 0 && positions.at(-1) === cells.length - 1
+          && positions.every((position, index) => !index || position > positions[index - 1]), 'Invalid station squares: ' + corridor.id);
+      } else {
+        assert(Array.isArray(corridor.gridSlices) && corridor.gridSlices.length === corridor.gridSliceCount,
+          'Topology grid slice count mismatch: ' + corridor.id);
+        corridor.gridSlices.forEach(slice => {
+          assert(slice.distanceKm > 0 && slice.distanceKm <= bundle.tileKm + 0.001 &&
+            Array.isArray(slice.railwayStatuses) && slice.railwayStatuses.length > 0,
+          'Invalid gameplay grid slice: ' + slice.id);
+        });
+      }
       assert(Math.abs(Math.round(corridorDistance * 10) / 10 - corridor.distanceKm) < 0.01,
         'Topology corridor distance mismatch: ' + corridor.id);
     });
@@ -468,9 +499,9 @@ function outputsFor(bundle) {
       ...corridor,
       legs: corridor.legs.map(leg => ({ id: leg.id, fromStationId: leg.fromStationId, toStationId: leg.toStationId,
         distanceKm: leg.distanceKm, sliceCount: leg.slices.length })),
-      gridSlices: corridor.gridSlices.map(slice => ({ id: slice.id, distanceKm: slice.distanceKm, gapFill: slice.gapFill,
-        coordinates: [slice.coordinates[0], slice.coordinates.at(-1)], bridge: slice.bridge, tunnel: slice.tunnel,
-        service: slice.service, railwayStatuses: slice.railwayStatuses })),
+      gridCells: corridor.gridCells.map(cell => ({ id: cell.id, x: cell.x, y: cell.y, centre: cell.centre,
+        stepKm: cell.stepKm, gapFill: cell.gapFill, bridge: cell.bridge, tunnel: cell.tunnel,
+        railwayStatuses: cell.railwayStatuses })),
       elevation: corridor.elevation.map(sample => ({ position: sample.position, coordinate: sample.coordinate,
         ...(sample.stationId ? { stationId: sample.stationId } : {}), meanElevationM: sample.meanElevationM,
         elevationStdDevM: sample.elevationStdDevM }))
@@ -480,8 +511,10 @@ function outputsFor(bundle) {
     geometryId: topology.geometryId, routed: true, buildId: topology.buildId,
     file: 'topology/' + topology.geometryId + '.json',
     corridors: topology.corridors.map(corridor => ({ id: corridor.id, label: corridor.label,
-      stationCount: corridor.stations.length, distanceKm: corridor.distanceKm, gridSliceCount: corridor.gridSliceCount,
-      routedLinkIds: corridor.routedLinkIds, railKm: corridor.railKm, gapKm: corridor.gapKm })) }));
+      stationCount: corridor.stations.length, distanceKm: corridor.distanceKm, gridCellCount: corridor.gridCellCount,
+      routedLinkIds: corridor.routedLinkIds, railKm: corridor.railKm, gapKm: corridor.gapKm,
+      ...(corridor.gridCells ? { gridCellCount: corridor.gridCellCount, playableKm: corridor.playableKm,
+        skippedDetourKm: Math.round(corridor.skippedDetours.reduce((sum, detour) => sum + detour.km, 0) * 10) / 10 } : {}) })) }));
   manifest.routedLinks = bundle.routedLinks.map(route => ({
     id: route.id, proposalSetId: route.proposalSetId, from: route.from, to: route.to,
     planningLinkIds: route.planningLinkIds, status: route.status, chordKm: route.chordKm, routedKm: route.routedKm,

@@ -6,10 +6,10 @@ const { spawnSync } = require('node:child_process');
 const { buildTopology } = require('./build-rail-topology.cjs');
 const { buildRoutedTopology } = require('./build-routed-corridor.cjs');
 const { parseCsv } = require('./csv.cjs');
+const { defaultCache, tilesFor, fetchTiles } = require('./dem.cjs');
 
 const root = path.resolve(__dirname, '../..');
 const TILE_KM = 5;
-const COPERNICUS_URL = 'https://copernicus-dem-90m.s3.amazonaws.com/';
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -32,16 +32,22 @@ function sha256File(file) {
 }
 
 function positionCoordinates(corridor) {
+  // A routed corridor is sampled over each grid square it crosses, centred on the square.
+  if (corridor.gridCells) {
+    const stationAt = Object.fromEntries(corridor.stationPositions.map((position, index) => [position, corridor.stations[index].id]));
+    return corridor.gridCells.map((cell, index) => ({ coordinate: cell.centre, sliceId: cell.id,
+      ...(stationAt[index] ? { stationId: stationAt[index] } : {}), squareKm: corridor.grid.cellKm }));
+  }
   const positions = [{ coordinate: corridor.stations[0].coordinates, stationId: corridor.stations[0].id }];
   corridor.gridSlices.forEach(slice => positions.push({ coordinate: slice.coordinates.at(-1), sliceId: slice.id }));
   positions.at(-1).stationId = corridor.stations.at(-1).id;
   return positions;
 }
 
-function sampleSquare(vrt, coordinate) {
+function sampleSquare(vrt, coordinate, squareKm = TILE_KM) {
   const latitude = coordinate[1];
-  const halfLatitude = (TILE_KM / 2) / 111.32;
-  const halfLongitude = (TILE_KM / 2) / (111.32 * Math.cos(latitude * Math.PI / 180));
+  const halfLatitude = (squareKm / 2) / 111.32;
+  const halfLongitude = (squareKm / 2) / (111.32 * Math.cos(latitude * Math.PI / 180));
   const xyz = run('gdal_translate', ['-q', '-of', 'XYZ', '-projwin',
     String(coordinate[0] - halfLongitude), String(latitude + halfLatitude),
     String(coordinate[0] + halfLongitude), String(latitude - halfLatitude), vrt, '/vsistdout/']);
@@ -79,47 +85,9 @@ function topologyFor(geometryId) {
     .map(row => ({ id: row.place_id, name: row.name }));
   const stationSets = Object.fromEntries((imports.stations || []).map(entry =>
     [entry.id, JSON.parse(fs.readFileSync(path.join(root, entry.file), 'utf8'))]));
-  return buildRoutedTopology(routed, authored, places, stationSets);
-}
-
-// Copernicus names each 1-degree tile by its south-west corner.
-function copernicusTileName(longitude, latitude) {
-  const south = Math.floor(latitude), west = Math.floor(longitude);
-  return 'Copernicus_DSM_COG_30_' + (south < 0 ? 'S' : 'N') + String(Math.abs(south)).padStart(2, '0') + '_00_' +
-    (west < 0 ? 'W' : 'E') + String(Math.abs(west)).padStart(3, '0') + '_00_DEM';
-}
-
-function tilesFor(coordinates) {
-  const names = new Set();
-  coordinates.forEach(coordinate => {
-    const halfLatitude = (TILE_KM / 2) / 111.32;
-    const halfLongitude = (TILE_KM / 2) / (111.32 * Math.cos(coordinate[1] * Math.PI / 180));
-    [-1, 1].forEach(dx => [-1, 1].forEach(dy => {
-      names.add(copernicusTileName(coordinate[0] + dx * halfLongitude, coordinate[1] + dy * halfLatitude));
-    }));
-  });
-  return Array.from(names).sort();
-}
-
-// Downloads the DEM tiles a route needs into a cache directory. Tiles that are all sea do not exist upstream and are
-// skipped; a square that finds no land at all is recorded as sea level.
-function fetchTiles(names, cache) {
-  fs.mkdirSync(cache, { recursive: true });
-  const files = [];
-  names.forEach((name, index) => {
-    const file = path.join(cache, name + '.tif');
-    const missing = file + '.missing';
-    if (!fs.existsSync(file) && !fs.existsSync(missing)) {
-      if (process.env.ASHLINE_WORLD_QUIET !== '1') console.error('Fetching ' + name + ' (' + (index + 1) + '/' + names.length + ')');
-      const result = spawnSync('curl', ['-sS', '-f', '-o', file + '.part', COPERNICUS_URL + name + '/' + name + '.tif'],
-        { encoding: 'utf8' });
-      if (result.status === 0) fs.renameSync(file + '.part', file);
-      else if (/\b(403|404)\b/.test(result.stderr)) { fs.rmSync(file + '.part', { force: true }); fs.writeFileSync(missing, ''); }
-      else throw new Error('Could not fetch ' + name + ': ' + result.stderr);
-    }
-    if (fs.existsSync(file)) files.push(file);
-  });
-  return files;
+  const settlementSets = Object.fromEntries((imports.settlements || []).map(entry =>
+    [entry.id, JSON.parse(fs.readFileSync(path.join(root, entry.file), 'utf8'))]));
+  return buildRoutedTopology(routed, authored, places, stationSets, settlementSets);
 }
 
 function main() {
@@ -132,7 +100,7 @@ function main() {
   const positionsByCorridor = topology.corridors.map(corridor => ({ corridor, positions: positionCoordinates(corridor) }));
   let demPaths;
   if (fetch) {
-    const cache = path.resolve(argument('cache') || path.join(os.tmpdir(), 'ashline-copernicus'));
+    const cache = argument('cache') ? path.resolve(argument('cache')) : defaultCache();
     demPaths = fetchTiles(tilesFor(positionsByCorridor.flatMap(entry => entry.positions.map(position => position.coordinate))), cache);
   } else {
     demPaths = String(argument('dem')).split(',').filter(Boolean).map(file => path.resolve(root, file));
@@ -155,7 +123,7 @@ function main() {
           coordinate: position.coordinate,
           ...(position.stationId ? { stationId: position.stationId } : {}),
           ...(position.sliceId ? { incomingSliceId: position.sliceId } : {}),
-          ...sampleSquare(vrt, position.coordinate)
+          ...sampleSquare(vrt, position.coordinate, position.squareKm)
         };
       })
     }));
