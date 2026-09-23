@@ -415,3 +415,16 @@
 	flex-wrap: wrap;
 	margin-bottom: 4px;
 }
+
+/* The pan arrows, in a diamond. */
+.debug-map-pan {
+	display: grid;
+	grid-template-columns: repeat(3, auto);
+	grid-template-areas: ". up ." "left . right" ". down .";
+	gap: 2px;
+}
+
+.debug-map-pan .debug-map-pan-up { grid-area: up; }
+.debug-map-pan .debug-map-pan-left { grid-area: left; }
+.debug-map-pan .debug-map-pan-right { grid-area: right; }
+.debug-map-pan .debug-map-pan-down { grid-area: down; }

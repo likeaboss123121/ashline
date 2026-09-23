@@ -1162,14 +1162,15 @@ setup.worldmap = {
 			frame.scrollTop += after.top + unitY * scale - clientY;
 			show();
 		};
-		var addButton = function(label, title, onClick) {
+		var addButton = function(label, title, onClick, parent) {
 			var button = document.createElement('button');
 			button.type = 'button';
 			button.textContent = label;
 			button.title = title;
 			button.setAttribute('aria-label', title);
 			button.addEventListener('click', onClick);
-			bar.appendChild(button);
+			(parent || bar).appendChild(button);
+			return button;
 		};
 		addButton('\u2212', 'Zoom out', function() { mode = 'scale'; zoomTo(currentScale() / 1.5); });
 		addButton('+', 'Zoom in', function() { mode = 'scale'; zoomTo(currentScale() * 1.5); });
@@ -1186,13 +1187,17 @@ setup.worldmap = {
 			show();
 		});
 		// Panning by button: a network map is heavy to drag or scroll, so these jump three quarters of the view at once.
-		[['\u2190', 'Pan left', -1, 0], ['\u2191', 'Pan up', 0, -1], ['\u2193', 'Pan down', 0, 1], ['\u2192', 'Pan right', 1, 0]]
+		// They sit in a diamond, each arrow on the side it moves towards.
+		var pad = document.createElement('div');
+		pad.className = 'debug-map-pan';
+		[['\u2191', 'Pan up', 0, -1], ['\u2190', 'Pan left', -1, 0], ['\u2192', 'Pan right', 1, 0], ['\u2193', 'Pan down', 0, 1]]
 			.forEach(function(pan) {
 				addButton(pan[0], pan[1], function() {
 					frame.scrollLeft += pan[2] * Math.round(frame.clientWidth * 0.75);
 					frame.scrollTop += pan[3] * Math.round(frame.clientHeight * 0.75);
-				});
+				}, pad).className = 'debug-map-pan-' + pan[1].slice(4);
 			});
+		bar.appendChild(pad);
 		bar.appendChild(readout);
 		show();
 		// The opening view: close enough to click a tile, centred on the player. A map small enough to fit the panel
