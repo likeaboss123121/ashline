@@ -19,8 +19,8 @@
       "snapshotTimestamp": "2026-09-20T20:22:06Z",
       "license": "ODbL 1.0",
       "attribution": "© OpenStreetMap contributors; extract provided by Geofabrik",
-      "status": "ingested",
-      "use": "Current, proposed, construction, disused, abandoned, dismantled, razed and other mapped railway alignments in the central Chile pilot",
+      "status": "superseded",
+      "use": "Formerly the central Chile pilot and the Chilean main line; replaced by the South America extract",
       "transformation": "Osmium tag filter, complete-way bounding-box extract, GeoJSON export, deterministic normalization"
     },
     {

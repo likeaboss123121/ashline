@@ -7,10 +7,8 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '../..');
-const SCOPES = {
-  'south-america': { output: 'world/imported/south-america-places.json', id: 'south-america-places',
-    label: 'South America settlements', sourceId: 'openstreetmap-geofabrik-south-america-2026-09-21' }
-};
+const SCOPE = { output: 'world/imported/south-america-places.json', id: 'south-america-places',
+  label: 'South America settlements', sourceId: 'openstreetmap-geofabrik-south-america-2026-09-21' };
 const KINDS = ['city', 'town', 'village'];
 
 function assert(condition, message) {
@@ -39,8 +37,7 @@ function sha256File(file) {
 }
 
 function main() {
-  const scope = SCOPES[argument('scope') || 'south-america'];
-  assert(scope, 'Unknown scope: ' + argument('scope'));
+  const scope = SCOPE;
   const input = argument('input') && path.resolve(root, argument('input'));
   assert(input && fs.existsSync(input), 'Usage: npm run world:extract:south-america:places -- --input /path/to/extract.osm.pbf');
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'ashline-osm-places-'));

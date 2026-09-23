@@ -25,8 +25,7 @@ setup.worldGraph = (function () {
 		assert(data.tileKm === 5, 'unexpected gameplay slice length');
 		assert(Array.isArray(data.regions) && data.chunks, 'missing region catalogue');
 		assert(Array.isArray(data.corridors), 'missing corridor catalogue');
-		assert(Array.isArray(data.railGeometry), 'missing sourced rail geometry catalogue');
-		assert(Array.isArray(data.railTopology), 'missing compiled rail topology catalogue');
+		assert(data.network && data.network.squares, 'missing playable network');
 		return true;
 	}
 
@@ -102,10 +101,10 @@ setup.worldGraph = (function () {
 			nodeCount: nodeCount,
 			linkCount: linkCount,
 			corridorCount: data.corridors.length,
-			railGeometrySetCount: data.railGeometry.length,
-			railWayCount: data.railGeometry.reduce(function (sum, geometry) { return sum + geometry.stats.wayCount; }, 0),
-			railCoordinateCount: data.railGeometry.reduce(function (sum, geometry) { return sum + geometry.stats.coordinateCount; }, 0),
-			playableRailCorridorCount: data.railTopology.reduce(function (sum, topology) { return sum + topology.corridors.length; }, 0)
+			networkSquareCount: data.network.squares.x.length,
+			networkStopCount: data.network.stops.name.length,
+			networkRailKm: data.network.stats.railKm,
+			networkNewLineKm: data.network.stats.bridgeKm
 		};
 	}
 
@@ -175,7 +174,7 @@ setup.worldGraph = (function () {
 				var title = document.createElementNS(namespace, 'title');
 				title.textContent = route.from + ' to ' + route.to + ': ' + route.routedKm + ' km routed, ' + route.railKm +
 					' km on mapped rail, ' + route.gapKm + ' km of gap fill in ' + route.gapCount +
-					(route.playableCorridorId ? ' — played as ' + route.playableCorridorId : ' — for review, not playable');
+					' — a planning route, not the playable network';
 				line.appendChild(title);
 				svg.appendChild(line);
 			});
@@ -208,90 +207,12 @@ setup.worldGraph = (function () {
 			var routedSummary = document.createElement('p');
 			var railKm = data.routedLinks.reduce(function (sum, route) { return sum + route.railKm; }, 0);
 			var gapKm = data.routedLinks.reduce(function (sum, route) { return sum + route.gapKm; }, 0);
-			var played = data.routedLinks.filter(function (route) { return !!route.playableCorridorId; }).length;
 			routedSummary.textContent = data.routedLinks.length + ' planning links routed over mapped rail: ' +
 				Math.round(railKm).toLocaleString('en-US') + ' km on real track (solid) and ' +
-				Math.round(gapKm).toLocaleString('en-US') + ' km of gap fill (dashed). ' +
-				(played === data.routedLinks.length ? 'All of them are playable.'
-					: played ? played + ' of them are playable; the rest are unreviewed.' : 'None of it is playable until reviewed.');
+				Math.round(gapKm).toLocaleString('en-US') + ' km of gap fill (dashed). The playable world is the network ' +
+				'in the World rail grid section; these routes are the planning corridors for comparison.';
 			parent.appendChild(routedSummary);
 		}
-		appendRailGeometryPreview(parent);
-	}
-
-	function appendRailGeometryPreview(parent) {
-		if (!data.railGeometry.length) return;
-		var namespace = 'http://www.w3.org/2000/svg';
-		data.railGeometry.forEach(function (geometry) {
-			var heading = document.createElement('h4');
-			heading.textContent = geometry.label;
-			parent.appendChild(heading);
-			var summary = document.createElement('p');
-			summary.textContent = geometry.stats.wayCount.toLocaleString() + ' sourced OSM ways, '
-				+ geometry.stats.coordinateCount.toLocaleString() + ' coordinates and '
-				+ Math.round(geometry.stats.lengthKm).toLocaleString() + ' km of mapped track. All lifecycle statuses are routable by game policy; only authored routes are playable.';
-			parent.appendChild(summary);
-			var width = 520, height = 600, padding = 16;
-			var bounds = geometry.bounds;
-			var middleLatitude = (bounds[1] + bounds[3]) / 2;
-			var longitudeScale = Math.cos(middleLatitude * Math.PI / 180);
-			var spanX = Math.max(0.000001, (bounds[2] - bounds[0]) * longitudeScale);
-			var spanY = Math.max(0.000001, bounds[3] - bounds[1]);
-			var availableWidth = width - padding * 2;
-			var availableHeight = height - padding * 2;
-			var scale = Math.min(availableWidth / spanX, availableHeight / spanY);
-			var drawnWidth = spanX * scale;
-			var drawnHeight = spanY * scale;
-			var offsetX = (width - drawnWidth) / 2;
-			var offsetY = (height - drawnHeight) / 2;
-			var project = function (coordinate) {
-				return [offsetX + (coordinate[0] - bounds[0]) * longitudeScale * scale,
-					offsetY + (bounds[3] - coordinate[1]) * scale];
-			};
-			var svg = document.createElementNS(namespace, 'svg');
-			svg.setAttribute('class', 'rail-geometry-preview');
-			svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
-			svg.setAttribute('role', 'img');
-			svg.setAttribute('aria-label', geometry.label + ', sourced railway geometry preview');
-			svg.style.width = 'min(100%, 420px)';
-			svg.style.height = 'auto';
-			svg.style.background = '#151719';
-			svg.style.border = '1px solid #555';
-			var colors = { current: '#d8d2c4', construction: '#d9b45d', proposed: '#8ca9c4', planned: '#8ca9c4',
-				disused: '#9a825b', abandoned: '#745f4a', dismantled: '#705747', historic: '#705747',
-				razed: '#684d4d', demolished: '#684d4d', removed: '#684d4d' };
-			// Thousands of individual SVG nodes made opening Debug needlessly expensive. Batch ways with the same
-			// visual meaning into one path; the normalized source still retains each OSM way and its tags.
-			var pathGroups = {};
-			geometry.ways.forEach(function (way) {
-				var groupKey = way.railwayStatus + (way.service ? ':service' : ':route');
-				if (!pathGroups[groupKey]) pathGroups[groupKey] = { status: way.railwayStatus, service: !!way.service, ways: 0, commands: [] };
-				var group = pathGroups[groupKey];
-				group.ways++;
-				group.commands.push(way.coordinates.map(function (coordinate, index) {
-					var point = project(coordinate);
-					return (index ? 'L' : 'M') + point[0].toFixed(2) + ' ' + point[1].toFixed(2);
-				}).join(' '));
-			});
-			Object.keys(pathGroups).sort().forEach(function (groupKey) {
-				var group = pathGroups[groupKey];
-				var path = document.createElementNS(namespace, 'path');
-				path.setAttribute('d', group.commands.join(' '));
-				path.setAttribute('fill', 'none');
-				path.setAttribute('stroke', colors[group.status] || '#888');
-				path.setAttribute('stroke-width', group.service ? '0.45' : '0.8');
-				path.setAttribute('opacity', group.service ? '0.45' : '0.9');
-				path.setAttribute('data-way-count', group.ways);
-				var title = document.createElementNS(namespace, 'title');
-				title.textContent = group.ways + ' ' + group.status + (group.service ? ' service' : ' route') + ' ways';
-				path.appendChild(title);
-				svg.appendChild(path);
-			});
-			parent.appendChild(svg);
-			var legend = document.createElement('p');
-			legend.textContent = 'Current · proposed · construction · disused · abandoned · dismantled · razed. Status is historical provenance, not a gameplay restriction. Service, yard, siding and spur tracks are drawn faintly.';
-			parent.appendChild(legend);
-		});
 	}
 
 	validateHeader();

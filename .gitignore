@@ -28,6 +28,3 @@ development materials/
 # Raw geographic inputs are far too large to ship; normalized attributed outputs live under world/ instead.
 world/raw/
 *.osm.pbf
-# The national rail geometry is a large derived input for the routing stage, regenerated from the dated extract with
-# npm run world:extract:chile:national. Its compact routed output under world/proposals/ is what gets committed.
-world/imported/chile-rail.json

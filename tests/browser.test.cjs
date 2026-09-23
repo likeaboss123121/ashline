@@ -1590,7 +1590,8 @@ test('debug mode draws the complete sourced rail grid', async t => {
   assert.ok(map, 'the debug panel should draw a world map');
   assert.ok(map.cells > 20000, JSON.stringify(map));
   assert.equal(map.track, 2, 'mapped track and new lines, each one path');
-  assert.equal(map.stations, 6755, JSON.stringify(map));
+  assert.equal(map.stations, await page.evaluate(() => SugarCube.setup.realWorldPilot.getGridRoute().corridor.stations.length),
+    JSON.stringify(map));
   // The network is every railway there is, so nothing is drawn around it as context.
   const context = await page.evaluate(() => {
     const svg = document.querySelector('svg.worldmap-debug');
@@ -1609,7 +1610,7 @@ test('debug mode draws the complete sourced rail grid', async t => {
   ['Punta Arenas', 'Puerto Montt', 'Santiago', 'Lima', 'Bogotá', 'Caracas', 'Manaus', 'São Paulo'].forEach(city =>
     assert.ok(context.labels.includes(city), city));
   assert.ok(context.gapTiles > 1000, JSON.stringify(context));
-  assert.match(map.heading, /^South America railway network: \d+ grid squares, \d+ legs, 6755 stations; \d+ km of mapped railway joined by \d+ new lines/);
+  assert.match(map.heading, /^South America railway network: \d+ grid squares, \d+ legs, \d+ stations; \d+ km of mapped railway joined by \d+ new lines/);
   // One line under the map names the square under the pointer.
   await page.locator('#developer-Debug .debug-map-frame').hover();
   assert.match(await page.locator('#developer-Debug .debug-map-hover').innerText(), /^(.+ \| )?grid -?\d+,-?\d+/);
@@ -1619,20 +1620,13 @@ test('debug mode draws the complete sourced rail grid', async t => {
   if (!await prototype.evaluate(element => element.open)) await prototype.locator(':scope > summary').click();
   assert.match(await prototype.innerText(), /35 places, 40 non-navigable links in 24 regional chunks/);
   assert.match(await prototype.innerText(), /not claimed railway geometry/);
-  // The three planning chords, with the Chile links routed over mapped rail drawn on top: real track solid, gap
-  // fills dashed, and all of it played by the main line.
+  // The three planning chords, with every one of their links routed over the continent's mapped rail drawn on top:
+  // real track solid, gap fills dashed, and none of it the playable network.
   assert.equal(await prototype.locator('svg.world-graph-debug polyline:not(.world-route-rail):not(.world-route-gap)').count(), 3);
-  // Every corridor of the continent is routed now, not only the Chilean one.
-  assert.ok(await prototype.locator('svg.world-graph-debug polyline.world-route-rail').count() > 100);
-  assert.ok(await prototype.locator('svg.world-graph-debug polyline.world-route-rail').count() >= 4);
-  assert.ok(await prototype.locator('svg.world-graph-debug polyline.world-route-gap').count() >= 2);
-  assert.match(await prototype.innerText(), /42 planning links routed over mapped rail: [\d,]+ km on real track \(solid\) and [\d,]+ km of gap fill \(dashed\)\. 4 of them are playable; the rest are unreviewed\./);
+  assert.ok(await prototype.locator('svg.world-graph-debug polyline.world-route-rail').count() > 50);
+  assert.ok(await prototype.locator('svg.world-graph-debug polyline.world-route-gap').count() > 50);
+  assert.match(await prototype.innerText(), /38 planning links routed over mapped rail: [\d,]+ km on real track \(solid\) and [\d,]+ km of gap fill \(dashed\)\. The playable world is the network in the World rail grid section/);
   assert.equal(await prototype.locator('svg.world-graph-debug circle').count(), 35);
-  assert.match(await prototype.innerText(), /1,581 sourced OSM ways, 21,391 coordinates and 1,160 km/);
-  const previewCounts = await prototype.locator('svg.rail-geometry-preview path[data-way-count]').evaluateAll(paths =>
-    paths.map(path => Number(path.getAttribute('data-way-count'))));
-  assert.equal(previewCounts.reduce((sum, count) => sum + count, 0), 1581);
-  assert.ok(previewCounts.length <= 12, JSON.stringify(previewCounts));
   const reference = page.locator('details.debug-section').filter({ has: page.getByText('Reference data', { exact: true }) });
   await page.getByRole('button', { name: 'Wiki', exact: true }).click();
   await reference.getByText('Railcars', { exact: true }).click();

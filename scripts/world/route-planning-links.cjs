@@ -1,8 +1,8 @@
-// Pipeline stage 4: replace planning chords with real rail, and propose the smallest gap fills where there is none.
+// The planning corridors routed over real rail, for comparison with the playable network in the debug overview.
 //
 // Each planning link joins two authored cities by a straight geodesic chord. This stage anchors both cities to the
-// national railway network, repairs digitizing breaks where two OSM ways stop a few metres apart, and routes the link
-// over the repaired network. Wherever the network does not connect, it offers the cheapest way across:
+// continent's railway network, repairs digitizing breaks where two OSM ways stop a few metres apart, and routes the
+// link over the repaired network. Wherever the network does not connect, it offers the cheapest way across:
 //
 //   snap       an OSM break shorter than SNAP_M, joined without comment: it is the same track drawn twice.
 //   gap        a join between the loose ends of two separate networks within GAP_KM. Rail pays GAP_PENALTY times its
@@ -10,15 +10,13 @@
 //   long-gap   the shortest possible join between the two cities' networks when nothing else connects them, such as
 //              the length of Patagonia, which has never had a railway.
 //
-// Nothing produced here is playable. Every gap is a proposal for review, and the whole route stays navigable: false
-// until an authored reviewed corridor adopts it. The output is small and committed; the national geometry it reads
-// is large and is regenerated from the dated extract (see world/README.md).
+// Nothing produced here is playable: the playable world is the network built by build-network.cjs. Every route stays
+// navigable: false.
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
-const { buildCoordinateGraph, TILE_KM } = require('./build-rail-topology.cjs');
+const { buildCoordinateGraph, TILE_KM } = require('./rail-graph.cjs');
 const { formatJson } = require('./import-osm-geojson.cjs');
-const terrain = require('./terrain-path.cjs');
 
 const root = path.resolve(__dirname, '../..');
 const SNAP_M = 50;
@@ -350,32 +348,7 @@ const REFINE_KM = 25;
 const DETOUR_FACTORS = [1.4, 2, 3];
 // Beyond this multiple of the straight line, a route is reported as a detour rather than a plausible corridor.
 const DETOUR_REPORT = 2.5;
-// Gap fills at least this long are laid over the terrain, through towns (scripts/world/terrain-path.cjs); shorter
-// ones are the short joins between two ends of track that nearly meet, and stay straight.
-const TERRAIN_GAP_KM = 10;
 
-// Replaces each long straight gap step with a chain of steps along its terrain path, through points added to the
-// graph for the purpose. Returns the new steps and, for each gap in the old ones, what its line became.
-function layGapsOverTerrain(graph, steps, linkId, towns, cache) {
-  const laid = [], outcomes = [];
-  steps.forEach(step => {
-    const kind = step.segment.kind;
-    if (kind !== 'gap' && kind !== 'long-gap') { laid.push(step); return; }
-    const from = graph.nodes.get(step.from).coordinate, to = graph.nodes.get(step.to).coordinate;
-    const path = step.segment.distanceKm >= TERRAIN_GAP_KM ? terrain.terrainPath(from, to, towns, cache) : null;
-    if (!path) { laid.push(step); outcomes.push(null); return; }
-    let previous = step.from;
-    path.coordinates.slice(1).forEach((coordinate, index, rest) => {
-      const key = index === rest.length - 1 ? step.to : 'via:' + linkId + ':' + outcomes.length + ':' + index;
-      if (!graph.nodes.has(key)) graph.nodes.set(key, { key, coordinate, segments: [] });
-      laid.push({ from: previous, to: key, segment: { kind, distanceKm: haversineKm(graph.nodes.get(previous).coordinate, coordinate),
-        from: previous, to: key, terrainRouted: true } });
-      previous = key;
-    });
-    outcomes.push(path);
-  });
-  return { steps: laid, outcomes };
-}
 function closestPair(graph, setA, setB) {
   const sample = keys => {
     const sorted = Array.from(keys).sort();
@@ -547,8 +520,7 @@ function stationsAlong(graph, steps, stationGrid) {
 
 // countryCodes limits routing to links whose two cities both lie in those countries; null routes every link the
 // geometry might cover, which is what a continental network is for.
-// terrainOptions, when given, lays long gap fills over the terrain: { towns: [[lon, lat], ...], cache: DEM cache dir }.
-function routeLinks(geometry, places, corridorRows, countryCodes, terrainOptions) {
+function routeLinks(geometry, places, corridorRows, countryCodes) {
   const graph = buildCoordinateGraph(geometry);
   graph.segments.forEach(segment => { segment.kind = 'rail'; });
   const grid = new Grid();
@@ -589,26 +561,15 @@ function routeLinks(geometry, places, corridorRows, countryCodes, terrainOptions
   const links = Array.from(pairs.entries()).map(([pairId, pair]) => {
     const fromAnchor = anchorFor(pair.from);
     const toAnchor = anchorFor(pair.to);
-    const routed = routeLink(graph, fromAnchor, toAnchor);
-    const longGaps = routed.longGaps;
+    const { steps, longGaps } = routeLink(graph, fromAnchor, toAnchor);
     const id = 'route:' + pairId;
-    const gapSteps = routed.steps.filter(step => step.segment.kind === 'gap' || step.segment.kind === 'long-gap');
-    if (terrainOptions && gapSteps.some(step => step.segment.distanceKm >= TERRAIN_GAP_KM)) log('laying gaps of ' + id + ' over terrain');
-    const laid = terrainOptions ? layGapsOverTerrain(graph, routed.steps, id, terrainOptions.towns, terrainOptions.cache)
-      : { steps: routed.steps, outcomes: gapSteps.map(() => null) };
-    const steps = laid.steps;
     const slices = sliceRoute(graph, steps, id);
-    const gaps = gapSteps.map((step, index) => {
-      const outcome = laid.outcomes[index];
-      return {
-        kind: step.segment.kind,
-        distanceKm: round(outcome ? outcome.km : step.segment.distanceKm, 3),
-        ...(outcome ? { straightKm: round(outcome.straightKm, 3), terrainRouted: true, waterKm: round(outcome.waterKm, 1),
-          via: outcome.via } : {}),
-        from: graph.nodes.get(step.from).coordinate.map(value => round(value, 5)),
-        to: graph.nodes.get(step.to).coordinate.map(value => round(value, 5))
-      };
-    });
+    const gaps = steps.filter(step => step.segment.kind === 'gap' || step.segment.kind === 'long-gap').map(step => ({
+      kind: step.segment.kind,
+      distanceKm: round(step.segment.distanceKm, 3),
+      from: graph.nodes.get(step.from).coordinate.map(value => round(value, 5)),
+      to: graph.nodes.get(step.to).coordinate.map(value => round(value, 5))
+    }));
     const railKm = slices.reduce((sum, slice) => sum + slice.railKm, 0);
     const gapKm = slices.reduce((sum, slice) => sum + slice.gapKm, 0);
     return {
@@ -680,34 +641,18 @@ function reportMarkdown(result) {
   return lines.join('\n');
 }
 
-// Which network is routed, and which links over it.
-const SCOPES = {
-  chile: {
-    geometry: 'world/imported/chile-rail.json',
-    output: 'world/proposals/chile-routed-links.json',
-    id: 'chile-routed-links',
-    label: 'Chile planning links routed over OpenStreetMap rail',
-    countries: ['CL'],
-    // Long gap fills follow the terrain and pass through towns; the towns come from the continental extract.
-    terrain: { places: 'world/imported/south-america-places.json' },
-    command: 'npm run world:route:chile',
-    extract: 'npm run world:extract:chile:national -- --input /path/to/chile-260920.osm.pbf'
-  },
-  'south-america': {
-    geometry: 'world/imported/south-america-rail.json',
-    output: 'world/proposals/south-america-routed-links.json',
-    id: 'south-america-routed-links',
-    label: 'South America planning links routed over OpenStreetMap rail',
-    countries: null,
-    command: 'npm run world:route:south-america',
-    extract: 'npm run world:extract:south-america -- --input /path/to/south-america-260921.osm.pbf'
-  }
+// The network routed over, and where the proposals go.
+const SCOPE = {
+  geometry: 'world/imported/south-america-rail.json',
+  output: 'world/proposals/south-america-routed-links.json',
+  id: 'south-america-routed-links',
+  label: 'South America planning links routed over OpenStreetMap rail',
+  command: 'npm run world:route:south-america',
+  extract: 'npm run world:extract:south-america -- --input /path/to/south-america-260921.osm.pbf'
 };
 
 function main() {
-  const scopeName = process.argv.includes('--scope') ? process.argv[process.argv.indexOf('--scope') + 1] : 'chile';
-  const scope = SCOPES[scopeName];
-  assert(scope, 'Unknown scope: ' + scopeName + ' (use ' + Object.keys(SCOPES).join(' or ') + ')');
+  const scope = SCOPE;
   const geometryPath = path.join(root, scope.geometry);
   assert(fs.existsSync(geometryPath), 'Missing ' + scope.geometry + '. Run: ' + scope.extract);
   const bytes = fs.readFileSync(geometryPath);
@@ -717,16 +662,7 @@ function main() {
     latitude: Number(row.latitude), longitude: Number(row.longitude)
   }));
   const corridorRows = parseCsv(fs.readFileSync(path.join(root, 'world/authored/corridors.csv'), 'utf8'));
-  let terrainOptions = null, townsSource = null;
-  if (scope.terrain) {
-    const placesPath = path.join(root, scope.terrain.places);
-    assert(fs.existsSync(placesPath), 'Missing ' + scope.terrain.places +
-      '. Run: npm run world:extract:south-america:places -- --input /path/to/south-america-260921.osm.pbf');
-    const settlements = JSON.parse(fs.readFileSync(placesPath, 'utf8'));
-    townsSource = { id: settlements.id, sourceId: settlements.sourceId, placeCount: settlements.places.length };
-    terrainOptions = { towns: settlements.places };
-  }
-  const routed = routeLinks(geometry, places, corridorRows, scope.countries, terrainOptions);
+  const routed = routeLinks(geometry, places, corridorRows, null);
   const result = {
     formatVersion: 1,
     id: scope.id,
@@ -737,9 +673,7 @@ function main() {
     geometrySha256: crypto.createHash('sha256').update(bytes).digest('hex'),
     tileKm: TILE_KM,
     parameters: { snapM: SNAP_M, gapKm: GAP_KM, gapPenalty: GAP_PENALTY, anchorKm: ANCHOR_KM,
-      stationAnchorKm: STATION_ANCHOR_KM, stationSnapKm: STATION_SNAP_KM, simplifyDegrees: SIMPLIFY_DEGREES,
-      ...(terrainOptions ? { terrainGapKm: TERRAIN_GAP_KM, terrain: { ...terrain.PARAMETERS, towns: townsSource,
-        elevationSourceId: 'copernicus-dem-glo90' } } : {}) },
+      stationAnchorKm: STATION_ANCHOR_KM, stationSnapKm: STATION_SNAP_KM, simplifyDegrees: SIMPLIFY_DEGREES },
     navigable: false,
     reviewRequired: true,
     stats: { snaps: routed.snaps, shortGaps: routed.shortGaps, linkCount: routed.links.length },
@@ -766,4 +700,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { routeLinks, sliceRoute, simplify, SNAP_M, GAP_KM, GAP_PENALTY };
+module.exports = { routeLinks, simplify, GAP_KM };

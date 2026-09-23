@@ -72,8 +72,7 @@
       "reviewRequired": true,
       "geometrySource": "authored-waypoint-chord",
       "routedBy": [
-        "route:cl-punta-arenas>cl-puerto-montt",
-        "south-america-routed-links/route:cl-punta-arenas>cl-puerto-montt"
+        "route:cl-punta-arenas>cl-puerto-montt"
       ]
     }
   ]

@@ -1,44 +1,8 @@
 {
-  "railGeometry": [
-    {
-      "id": "chile-central-pilot",
-      "file": "world/imported/chile-central-rail.json"
-    }
-  ],
-  "elevation": [
-    {
-      "geometryId": "chile-central-pilot",
-      "file": "world/imported/chile-central-elevation.json"
-    },
-    {
-      "geometryId": "chile-routed-links",
-      "file": "world/imported/chile-routed-elevation.json"
-    }
-  ],
   "routedLinks": [
-    {
-      "id": "chile-routed-links",
-      "file": "world/proposals/chile-routed-links.json"
-    },
     {
       "id": "south-america-routed-links",
       "file": "world/proposals/south-america-routed-links.json"
-    }
-  ],
-  "stations": [
-    {
-      "id": "chile-stations",
-      "file": "world/imported/chile-stations.json"
-    },
-    {
-      "id": "south-america-stations",
-      "file": "world/imported/south-america-stations.json"
-    }
-  ],
-  "settlements": [
-    {
-      "id": "south-america-places",
-      "file": "world/imported/south-america-places.json"
     }
   ],
   "network": [

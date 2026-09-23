@@ -1,6 +1,6 @@
 // Named railway stations from an OpenStreetMap snapshot, for placing stops along routed corridors.
 //
-// The railway geometry extract only keeps nodes that sit on railway ways, which misses most of Chile's stations: large
+// The railway geometry extract only keeps nodes that sit on railway ways, which misses most stations: large
 // ones are mapped as areas, many stand beside the track, and the long-closed stations of the north are tagged
 // disused:railway or abandoned:railway. This pulls all of them, active or not, and keeps a name, a point and a status.
 // Metro and bus stations are left out: a train cannot stop at either.
@@ -11,12 +11,8 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '../..');
-const SCOPES = {
-  chile: { output: 'world/imported/chile-stations.json', id: 'chile-stations', label: 'Chile railway stations',
-    sourceId: 'openstreetmap-geofabrik-2026-09-20' },
-  'south-america': { output: 'world/imported/south-america-stations.json', id: 'south-america-stations',
-    label: 'South America railway stations', sourceId: 'openstreetmap-geofabrik-south-america-2026-09-21' }
-};
+const SCOPE = { output: 'world/imported/south-america-stations.json', id: 'south-america-stations',
+  label: 'South America railway stations', sourceId: 'openstreetmap-geofabrik-south-america-2026-09-21' };
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -73,10 +69,9 @@ function osmId(id) {
 }
 
 function main() {
-  const scope = SCOPES[argument('scope') || 'chile'];
-  assert(scope, 'Unknown scope: ' + argument('scope') + ' (use ' + Object.keys(SCOPES).join(' or ') + ')');
+  const scope = SCOPE;
   const input = argument('input') && path.resolve(root, argument('input'));
-  assert(input && fs.existsSync(input), 'Usage: npm run world:extract:chile:stations -- --input /path/to/extract.osm.pbf');
+  assert(input && fs.existsSync(input), 'Usage: npm run world:extract:south-america:stations -- --input /path/to/extract.osm.pbf');
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'ashline-osm-stations-'));
   const filtered = path.join(temporary, 'stations.osm.pbf');
   const geojson = path.join(temporary, 'stations.geojsonseq');

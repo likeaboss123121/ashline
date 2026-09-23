@@ -232,4 +232,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { formatJson, normalizeGeoJson, createNormalizer, writeNormalizedJson, railwayStatus, classifyRailway };
+module.exports = { formatJson, normalizeGeoJson, createNormalizer, writeNormalizedJson };

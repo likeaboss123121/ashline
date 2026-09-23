@@ -48,4 +48,4 @@ function centreOf(cell, grid = GRID) {
   return [Math.round(centre[0] * 1e7) / 1e7, Math.round(centre[1] * 1e7) / 1e7];
 }
 
-module.exports = { GRID, EARTH_RADIUS_KM, project, unproject, cellOf, centreOf };
+module.exports = { GRID, EARTH_RADIUS_KM, project, cellOf, centreOf };

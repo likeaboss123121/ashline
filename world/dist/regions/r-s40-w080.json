@@ -72,8 +72,7 @@
       "reviewRequired": true,
       "geometrySource": "authored-waypoint-chord",
       "routedBy": [
-        "route:cl-puerto-montt>cl-santiago",
-        "south-america-routed-links/route:cl-puerto-montt>cl-santiago"
+        "route:cl-puerto-montt>cl-santiago"
       ]
     }
   ]

@@ -1,0 +1,4 @@
+{
+  "about": "Lines to lay by hand when building the network (scripts/world/build-network.cjs). Each join runs from one point to another, both given as [longitude, latitude] within 10 km of existing track; the builder snaps each end to the nearest network square and lays the line over the terrain through towns, as it does for every new line. Use this for a connection the automatic joins miss. Example: { \"from\": [-72.94, -41.47], \"to\": [-72.69, -41.32], \"note\": \"Puerto Montt to Puerto Varas\" }",
+  "joins": []
+}

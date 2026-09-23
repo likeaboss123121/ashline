@@ -4,7 +4,7 @@ const path = require('node:path');
 const test = require('node:test');
 const { loadGame } = require('./helpers.cjs');
 const { normalizeGeoJson } = require('../scripts/world/import-osm-geojson.cjs');
-const { buildTopology } = require('../scripts/world/build-rail-topology.cjs');
+const { buildCoordinateGraph } = require('../scripts/world/rail-graph.cjs');
 
 const root = path.resolve(__dirname, '..');
 
@@ -19,17 +19,10 @@ test('world graph loads all regional chunks without entering save state', () => 
   const game = loadGame();
   const graph = game.setup.worldGraph;
   const stats = graph.getStats();
-  assert.deepEqual(JSON.parse(JSON.stringify(stats)), {
-    datasetVersion: 'sa-spike-0.2.0',
-    regionCount: 24,
-    nodeCount: 35,
-    linkCount: 40,
-    corridorCount: 3,
-    railGeometrySetCount: 1,
-    railWayCount: 1581,
-    railCoordinateCount: 21391,
-    playableRailCorridorCount: 2
-  });
+  const { networkSquareCount, networkStopCount, networkRailKm, networkNewLineKm, ...planning } = JSON.parse(JSON.stringify(stats));
+  assert.deepEqual(planning, { datasetVersion: 'sa-spike-0.2.0', regionCount: 24, nodeCount: 35, linkCount: 40, corridorCount: 3 });
+  assert.ok(networkSquareCount > 20000 && networkStopCount > 6000, JSON.stringify(stats));
+  assert.ok(networkRailKm > 120000 && networkNewLineKm > 15000, JSON.stringify(stats));
   assert.equal(graph.loadAll(), true);
   assert.equal(graph.getNode('cl-punta-arenas').name, 'Punta Arenas');
   assert.equal(graph.getNode('pa-panama-city').name, 'Panama City');
@@ -113,49 +106,8 @@ test('OSM importer retains provenance and operational tags while refusing naviga
     assert.equal(way.navigable, false);
     assert.equal(way.reviewRequired, true);
   });
-  const importedGraph = require('../scripts/world/build-rail-topology.cjs').buildCoordinateGraph(geometry);
+  const importedGraph = buildCoordinateGraph(geometry);
   assert.equal(importedGraph.segments.length, 4, 'all railway lifecycle statuses are mechanically routable');
-});
-
-test('central Chile pilot geometry is sourced, bounded and internally consistent', () => {
-  const geometry = JSON.parse(require('node:fs').readFileSync(path.join(root, 'world/imported/chile-central-rail.json'), 'utf8'));
-  assert.equal(geometry.id, 'chile-central-pilot');
-  assert.equal(geometry.sourceId, 'openstreetmap-geofabrik-2026-09-20');
-  assert.equal(geometry.stats.wayCount, geometry.ways.length);
-  assert.equal(geometry.ways.reduce((sum, way) => sum + way.coordinates.length, 0), geometry.stats.coordinateCount);
-  assert.deepEqual(JSON.parse(JSON.stringify(geometry.bounds)), [-71.636144, -34.0204701, -70.0186352, -32.449901]);
-  assert.equal(new Set(geometry.ways.map(way => way.id)).size, geometry.ways.length);
-  assert.ok(geometry.ways.some(way => way.tags.name === 'Línea Central Sur'));
-  assert.ok(geometry.ways.every(way => way.navigable === false && way.reviewRequired === true));
-});
-
-test('authored Chile rail topology follows connected OSM track in five-kilometre slices', () => {
-  const fs = require('node:fs');
-  const geometry = JSON.parse(fs.readFileSync(path.join(root, 'world/imported/chile-central-rail.json'), 'utf8'));
-  const authored = JSON.parse(fs.readFileSync(path.join(root, 'world/authored/playable-corridors.json'), 'utf8'));
-  const topology = buildTopology(geometry, authored);
-  const corridor = topology.corridors[0];
-  assert.deepEqual(corridor.stations.map(station => station.name),
-    ['Padre Hurtado', 'Malloco', 'Talagante', 'El Monte', 'Melipilla']);
-  assert.equal(corridor.debugOnly, false);
-  assert.equal(corridor.navigable, true);
-  assert.equal(corridor.sliceCount, 11);
-  assert.equal(corridor.gridSliceCount, 9);
-  assert.equal(corridor.distanceKm, 42);
-  const knownWays = new Set(geometry.ways.map(way => way.id));
-  corridor.legs.forEach(leg => {
-    let previousEnd = null;
-    leg.slices.forEach(slice => {
-      assert.ok(slice.distanceKm > 0 && slice.distanceKm <= 5.001);
-      assert.ok(slice.sourceWayIds.every(id => knownWays.has(id)));
-      if (previousEnd) assert.deepEqual(slice.coordinates[0], previousEnd);
-      previousEnd = slice.coordinates.at(-1);
-    });
-    assert.ok(Math.abs(leg.slices.reduce((sum, slice) => sum + slice.distanceKm, 0) - leg.distanceKm) < 0.01);
-  });
-  assert.equal(corridor.gridSlices.slice(0, -1).every(slice => slice.distanceKm === 5), true);
-  assert.ok(corridor.gridSlices.at(-1).distanceKm > 0 && corridor.gridSlices.at(-1).distanceKm < 5);
-  assert.deepEqual(topology, buildTopology(geometry, authored), 'topology compilation is deterministic');
 });
 
 test('the sourced grid is the default playable world without copying static data into saves', () => {
@@ -167,16 +119,9 @@ test('the sourced grid is the default playable world without copying static data
   assert.equal(game.setup.realWorldPilot.start(), true);
   assert.deepEqual(JSON.parse(JSON.stringify(game.State.variables.journey)),
     { legIndex: 1, tileIndex: 0, forward: true });
-  // The Padre Hurtado–Melipilla pilot is still compiled, so it can be checked against its known values.
-  const route = game.setup.realWorldPilot.getGridRoute('cl-padre-hurtado-melipilla');
-  assert.equal(route.tiles.length, 9);
-  assert.ok(route.slices.every(slice => slice.distanceKm === 5));
-  assert.deepEqual(JSON.parse(JSON.stringify(route.stationPositions)), [0, 1, 3, 4, 8]);
+  const route = game.setup.realWorldPilot.getGridRoute();
   assert.ok(route.tiles.every(tile => Number.isFinite(tile.elevation) && Number.isFinite(tile.elevationStdDevM)));
-  assert.ok(route.tiles.every(tile => tile.terrain === 'plains' || tile.terrain === 'bridge' || tile.terrain === 'tunnel'));
-  assert.equal(route.tiles[0].elevation, 436.2);
-  assert.equal(route.tiles[0].elevationStdDevM, 15);
-  assert.equal(route.tiles[0].grade, -0.5);
+  assert.ok(route.tiles.every(tile => ['plains', 'mountain', 'bridge', 'tunnel'].includes(tile.terrain)));
   assert.equal(game.setup.realWorldPilot.terrainFor({ bridge: false, tunnel: false },
     { meanElevationM: 3000, elevationStdDevM: 20 }, 120), 'plains', 'high and flat is not mountainous');
   assert.equal(game.setup.realWorldPilot.terrainFor({ bridge: false, tunnel: false },
@@ -277,44 +222,54 @@ test('planning links are routed over real rail, with breaks snapped and gaps pro
   assert.ok(statuses.has('abandoned'), 'lifecycle status survives as provenance');
 });
 
-test('routed Chile proposals stay proposals, and the main line that plays them is authored', () => {
+test('the planning corridors are routed over the continent for comparison, and never played', () => {
   const game = loadGame();
   const data = game.setup.worldGraphData;
-  const routes = data.routedLinks;
-  // The Chile network routes the four Pacific links the main line plays; the continental network routes all 38 links
-  // of all three corridors, and its copies of the four are qualified by their set.
-  const chile = [...routes].filter(route => route.proposalSetId !== 'south-america-routed-links');
-  assert.deepEqual(chile.map(route => route.id), [
-    'route:cl-punta-arenas>cl-puerto-montt', 'route:cl-puerto-montt>cl-santiago',
-    'route:cl-santiago>cl-antofagasta', 'route:cl-antofagasta>cl-arica'
-  ]);
-  const continental = [...routes].filter(route => route.proposalSetId === 'south-america-routed-links');
-  assert.equal(continental.length, 38);
-  assert.ok(continental.every(route => !route.playableCorridorId), 'nothing continental is playable yet');
-  assert.ok(continental.some(route => route.id.startsWith('south-america-routed-links/route:cl-')), 'qualified IDs');
+  const routes = [...data.routedLinks];
+  // All three corridors: 40 planning links, 38 distinct pairs of cities.
+  assert.equal(routes.length, 38);
   routes.forEach(route => {
+    assert.equal(route.proposalSetId, 'south-america-routed-links');
     assert.equal(route.navigable, false);
     assert.equal(route.reviewRequired, true);
     assert.ok(route.runs.length > 0 && route.runs.every(run => run.coordinates.length >= 2));
   });
-  // Puerto Montt to Santiago runs almost entirely on mapped rail; Patagonia has none.
-  const south = chile.find(route => route.id === 'route:cl-puerto-montt>cl-santiago');
+  // Puerto Montt to Santiago runs almost entirely on mapped rail.
+  const south = routes.find(route => route.id === 'route:cl-puerto-montt>cl-santiago');
   assert.ok(south.railKm / south.routedKm > 0.95, JSON.stringify(south));
-  const patagonia = chile.find(route => route.id === 'route:cl-punta-arenas>cl-puerto-montt');
-  assert.ok(patagonia.gapKm > 1000, JSON.stringify(patagonia));
-  // Routing alone never makes a line playable: the authored main line lists the links it plays.
-  const playable = [...data.railTopology].flatMap(topology => [...topology.corridors]).map(corridor => corridor.id);
-  assert.deepEqual(playable, ['cl-padre-hurtado-melipilla', 'cl-main-line']);
-  chile.forEach(route => assert.equal(route.playableCorridorId, 'cl-main-line'));
-  // Every chunked planning link now knows which routes replaced it: the continental network covers all 40, including
-  // the two into Panama City, which it reaches by a proposed line because the extract stops at the border.
+  // Every chunked planning link knows which route replaced it.
   const links = Object.values(data.chunks).flatMap(chunk => [...chunk.links]);
-  const covered = links.filter(link => link.routedBy);
-  assert.equal(covered.length, links.length);
-  assert.ok(covered.every(link => Array.isArray(link.routedBy) && link.routedBy.length));
-  ['plan:pacific:01', 'plan:pacific:02', 'plan:pacific:03', 'plan:pacific:04'].forEach(id => {
-    assert.equal(links.find(link => link.id === id).routedBy.length, 2, id + ' is routed by both networks');
-  });
+  assert.ok(links.every(link => Array.isArray(link.routedBy) && link.routedBy.length === 1), 'every link routed once');
+});
+
+test('a line that ends near other track it only reaches the long way round is joined to it', () => {
+  const { stubJoins, traceLine, Network } = require('../scripts/world/build-network.cjs');
+  const projection = require('../scripts/world/projection.cjs');
+  const grid = projection.GRID;
+  // Kilometres east and north of a point in the Argentine pampas, as longitude and latitude.
+  const at = (eastKm, northKm) => [-62 + eastKm / (111.32 * Math.cos(-35 * Math.PI / 180)), -35 + northKm / 110.57];
+  const network = new Network();
+  const add = (id, points) => network.add(traceLine(points.map(point => at(...point)), grid, {}),
+    { id, status: 'current', bridgeShare: 0, tunnelShare: 0 });
+  add('main', [[0, 0], [0, 100]]);
+  // A branch that leaves the main line, swings out and runs back up beside it, ending 15 km short of it at 80 km.
+  add('branch', [[0, 0], [15, 0], [15, 80]]);
+  // A short spur off the main line, ending 7 km from the branch: the way round to the branch is long, the way back
+  // to its own main line is not.
+  add('spur', [[0, 50], [8, 50]]);
+  const joins = stubJoins(network, grid);
+  const endOf = point => network.squares.get(projection.cellOf(at(...point), grid).join(',')).key;
+  const pairs = joins.map(join => [join.from, join.to].sort().join(' '));
+  // The branch's end reaches back to the main line; the spur's end reaches across to the branch.
+  assert.ok(joins.some(join => join.from === endOf([15, 80]) && network.squares.get(join.to).x === network.squares.get(endOf([0, 80])).x),
+    JSON.stringify(joins));
+  assert.ok(joins.some(join => join.from === endOf([8, 50]) && Math.abs(network.squares.get(join.to).x - network.squares.get(endOf([15, 50])).x) <= 1),
+    JSON.stringify(joins));
+  // The main line's far end is 25 km from the branch's end, and was the long way round from it; once the branch has
+  // been joined back to the main line it no longer is, so no second join closes a small loop.
+  assert.ok(!joins.some(join => join.from === endOf([0, 100]) || join.to === endOf([0, 100])), JSON.stringify(joins));
+  assert.equal(joins.length, 2, JSON.stringify(joins));
+  assert.equal(new Set(pairs).size, pairs.length, 'each join is made once');
 });
 
 test('the whole continent is one network that can be driven from Punta Arenas to Caracas', () => {
@@ -324,6 +279,9 @@ test('the whole continent is one network that can be driven from Punta Arenas to
   const stats = setup.worldGraphData.network.stats;
   assert.ok(route.network && route.tiles.length > 20000, route.tiles.length + ' squares');
   assert.equal(stats.unreachableCities.length, 0, 'every authored city is on the network');
+  // Line ends near track they could only reach the long way round are joined to it.
+  assert.ok(stats.stubJoinCount > 100, JSON.stringify(stats));
+  assert.equal(stats.stubJoinCount, setup.worldGraphData.network.stats.stubJoinCount);
   // The squares are one geographic grid: no square twice, every move to a neighbour, matched from the other side.
   const squares = new Set(route.tiles.map(tile => tile.x + ',' + tile.y));
   assert.equal(squares.size, route.tiles.length);

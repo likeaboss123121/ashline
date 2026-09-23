@@ -8,22 +8,15 @@
     "watch": "node scripts/build.cjs --watch",
     "world:build": "node scripts/world/compile-world.cjs",
     "world:check": "node scripts/world/compile-world.cjs --check",
-    "world:extract:chile": "node scripts/world/extract-osm-pilot.cjs",
-    "world:elevation:chile": "node scripts/world/sample-elevation.cjs",
     "world:benchmark": "node scripts/world/benchmark-world.cjs",
     "test": "node --test tests/core.test.cjs tests/review.test.cjs tests/migrations.test.cjs tests/world-graph.test.cjs",
     "test:browser": "node scripts/build.cjs && node --test tests/browser.test.cjs",
     "verify": "npm run build && npm test && npm run test:browser",
-    "world:extract:chile:national": "node scripts/world/extract-osm-pilot.cjs --scope national",
-    "world:route:chile": "node scripts/world/route-planning-links.cjs",
-    "world:elevation:chile:main": "node scripts/world/sample-elevation.cjs --geometry chile-routed-links --fetch --output world/imported/chile-routed-elevation.json",
-    "world:extract:chile:stations": "node scripts/world/extract-osm-stations.cjs",
-    "world:extract:south-america": "node scripts/world/extract-osm-pilot.cjs --scope south-america",
-    "world:extract:south-america:stations": "node scripts/world/extract-osm-stations.cjs --scope south-america",
-    "world:route:south-america": "node --max-old-space-size=4096 scripts/world/route-planning-links.cjs --scope south-america",
-    "world:elevation:south-america": "node scripts/world/sample-elevation.cjs --geometry south-america-routed-links --fetch --output world/imported/south-america-routed-elevation.json",
-    "world:extract:south-america:places": "node scripts/world/extract-osm-places.cjs --scope south-america",
-    "world:network:south-america": "node --max-old-space-size=4096 scripts/world/build-network.cjs --scope south-america"
+    "world:extract:south-america": "node scripts/world/extract-osm-rail.cjs",
+    "world:extract:south-america:stations": "node scripts/world/extract-osm-stations.cjs",
+    "world:route:south-america": "node --max-old-space-size=4096 scripts/world/route-planning-links.cjs",
+    "world:extract:south-america:places": "node scripts/world/extract-osm-places.cjs",
+    "world:network:south-america": "node --max-old-space-size=4096 scripts/world/build-network.cjs"
   },
   "engines": {
     "node": ">=22"

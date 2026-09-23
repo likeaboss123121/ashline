@@ -1238,10 +1238,6 @@ setup.railyard = {
 	getLegHeading: function(stationId, baseSeed) {
 		var exitHeading = this.getLineHeading(stationId, 'exit');
 		if (exitHeading) return exitHeading;
-		if (setup.realWorldPilot && setup.realWorldPilot.getLegHeading && !setup.realWorldPilot.hasNetwork()) {
-			var sourcedHeading = setup.realWorldPilot.getLegHeading(stationId);
-			if (sourcedHeading) return sourcedHeading;
-		}
 		// Keep the opening journey north through Patagonia. Later legs can use every compass point.
 		if (stationId < 10) {
 			return 'north';
@@ -2242,19 +2238,17 @@ setup.railyard = {
 		// Each lead is named for where it points: the first line leaving that side of the station. A side no line
 		// leaves from has no lead, and is named as the way back from the other side.
 		var entryHeading = this.getLineHeading(stationId, 'entry'), exitHeading = this.getLineHeading(stationId, 'exit');
-		tracks[0].direction = entryHeading || (setup.realWorldPilot.hasNetwork() && exitHeading ? this.oppositeDirection(exitHeading)
+		tracks[0].direction = entryHeading || (exitHeading ? this.oppositeDirection(exitHeading)
 			: this.oppositeDirection(this.getLegHeading(stationId - 1, baseSeed)));
 		tracks[tracks.length - 1].direction = exitHeading || this.oppositeDirection(tracks[0].direction);
-		if (setup.realWorldPilot.hasNetwork()) {
-			if (!entryHeading) tracks[0].hasLead = false;
-			if (!exitHeading) tracks[tracks.length - 1].hasLead = false;
-			// A yard with one lead has every track run to it: a siding that only reached the missing lead could never
-			// be used.
-			tracks.slice(1, -1).forEach(function(track) {
-				if (!entryHeading) delete track.connectsToExit;
-				if (!exitHeading) delete track.connectsToEntry;
-			});
-		}
+		if (!entryHeading) tracks[0].hasLead = false;
+		if (!exitHeading) tracks[tracks.length - 1].hasLead = false;
+		// A yard with one lead has every track run to it: a siding that only reached the missing lead could never be
+		// used.
+		tracks.slice(1, -1).forEach(function(track) {
+			if (!entryHeading) delete track.connectsToExit;
+			if (!exitHeading) delete track.connectsToEntry;
+		});
 		setup.yardGeneration.reserve(tracks, stationId, baseSeed);
 		this.addDerelict(tracks, shapeRng);
 		setup.yardGeneration.validate(tracks);

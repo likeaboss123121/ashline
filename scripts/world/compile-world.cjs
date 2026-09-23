@@ -1,9 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { buildTopology } = require('./build-rail-topology.cjs');
 const { simplify } = require('./route-planning-links.cjs');
 const { parseCsv } = require('./csv.cjs');
-const { buildRoutedTopology } = require('./build-routed-corridor.cjs');
 
 const root = path.resolve(__dirname, '../..');
 const checkOnly = process.argv.includes('--check');
@@ -44,7 +42,6 @@ function stableJson(value) {
 function compile() {
   const sourceManifest = JSON.parse(read('world/sources.json'));
   const importManifest = JSON.parse(read('world/imports.json'));
-  const authoredPlayableCorridors = JSON.parse(read('world/authored/playable-corridors.json'));
   const placeRows = parseCsv(read('world/authored/places.csv'));
   const corridorRows = parseCsv(read('world/authored/corridors.csv'));
   const placeIds = new Set();
@@ -159,58 +156,11 @@ function compile() {
 	portalCount: value.portals.length,
     linkCount: value.links.length
   }));
-  const railGeometry = importManifest.railGeometry.map(entry => {
-    const geometry = JSON.parse(read(entry.file));
-    assert(geometry.id === entry.id, 'Rail geometry import ID mismatch: ' + entry.file);
-    validateRailGeometry(geometry, sourceManifest.sources);
-    return geometry;
-  });
-  const railTopology = railGeometry.map(geometry => buildTopology(geometry, authoredPlayableCorridors));
-  const stationSets = Object.fromEntries((importManifest.stations || []).map(entry => {
-    const stationSet = JSON.parse(read(entry.file));
-    assert(stationSet.id === entry.id && stationSet.formatVersion === 1, 'Station import ID mismatch: ' + entry.file);
-    const source = sourceManifest.sources.find(candidate => candidate.id === stationSet.sourceId);
-    assert(source && source.status === 'ingested', 'Station set has no ingested source: ' + entry.id);
-    assert(stationSet.stations.length === stationSet.stats.stationCount, 'Station count mismatch: ' + entry.id);
-    return [entry.id, stationSet];
-  }));
-  const settlementSets = Object.fromEntries((importManifest.settlements || []).map(entry => {
-    const settlementSet = JSON.parse(read(entry.file));
-    assert(settlementSet.id === entry.id && settlementSet.formatVersion === 1, 'Settlement import ID mismatch: ' + entry.file);
-    const source = sourceManifest.sources.find(candidate => candidate.id === settlementSet.sourceId);
-    assert(source && source.status === 'ingested', 'Settlement set has no ingested source: ' + entry.id);
-    assert(settlementSet.places.length === settlementSet.stats.placeCount, 'Settlement count mismatch: ' + entry.id);
-    return [entry.id, settlementSet];
-  }));
-  // Corridors made of routed planning links: listing a link in an authored corridor is what approves it for play.
-  (importManifest.routedLinks || []).forEach(entry => {
-    if (!authoredPlayableCorridors.corridors.some(corridor => corridor.routedLinkSetId === entry.id)) return;
-    railTopology.push(buildRoutedTopology(JSON.parse(read(entry.file)), authoredPlayableCorridors, nodes, stationSets, settlementSets));
-  });
-  authoredPlayableCorridors.corridors.forEach(corridor => {
-    assert(railTopology.some(topology => topology.corridors.some(built => built.id === corridor.id)),
-      'Authored playable corridor was not built: ' + corridor.id);
-  });
-  const elevationByGeometry = Object.fromEntries((importManifest.elevation || []).map(entry => {
-    const elevation = JSON.parse(read(entry.file));
-    assert(elevation.geometryId === entry.geometryId, 'Elevation import geometry mismatch: ' + entry.file);
-    return [entry.geometryId, elevation];
-  }));
-  railTopology.forEach(topology => {
-    const elevation = elevationByGeometry[topology.geometryId];
-    assert(elevation, 'Missing elevation import for topology: ' + topology.geometryId);
-    validateElevation(elevation, topology, sourceManifest.sources);
-    const byCorridor = Object.fromEntries(elevation.corridors.map(corridor => [corridor.corridorId, corridor]));
-    topology.corridors.forEach(corridor => { corridor.elevation = byCorridor[corridor.id].positions; });
-    topology.elevationSourceId = elevation.sourceId;
-    topology.elevationAggregation = elevation.aggregation;
-    topology.mountainStdDevM = elevation.mountainStdDevM;
-  });
   // Planning links routed over real rail by scripts/world/route-planning-links.cjs. They are proposals: the compiler
   // refuses any that claim to be navigable, and a planning link only learns which route covers it, never loses its
   // own planning status.
   // Two sets can route the same pair of cities over different networks. The first set keeps the plain ID and the
-  // rest are qualified by their set, so both stay inspectable and an authored corridor still names one exactly.
+  // rest are qualified by their set, so both stay inspectable.
   const routedIds = new Set();
   const routedLinks = (importManifest.routedLinks || []).flatMap(entry => {
     const routed = JSON.parse(read(entry.file));
@@ -223,19 +173,14 @@ function compile() {
   });
   const linksById = Object.fromEntries(links.map(link => [link.id, link]));
   routedLinks.forEach(route => {
-    // The proposal record never changes; the corridor that plays over it is noted beside it.
-    const playable = railTopology.flatMap(topology => topology.corridors)
-      .filter(corridor => (corridor.routedLinkIds || []).includes(route.id));
-    assert(playable.length <= 1, 'Routed link is played by two corridors: ' + route.id);
-    if (playable.length) route.playableCorridorId = playable[0].id;
     route.planningLinkIds.forEach(id => {
       assert(linksById[id], 'Routed link covers unknown planning link: ' + id);
-      // A link can be routed by more than one set: the Chile network and the continental one both cover Chile.
+      // A link can be routed by more than one set.
       linksById[id].routedBy = (linksById[id].routedBy || []).concat(route.id);
     });
   });
   // The playable network: every mapped railway traced onto the shared grid and joined into one, built by
-  // scripts/world/build-network.cjs. At most one; it replaces the corridors as the world once the runtime reads it.
+  // scripts/world/build-network.cjs. Exactly one: it is the world.
   const networks = (importManifest.network || []).map(entry => {
     const network = JSON.parse(read(entry.file));
     assert(network.id === entry.id && network.formatVersion === 1, 'Network import ID mismatch: ' + entry.file);
@@ -246,7 +191,7 @@ function compile() {
     validateNetwork(network);
     return network;
   });
-  assert(networks.length <= 1, 'Only one playable network is supported');
+  assert(networks.length === 1, 'Exactly one playable network is supported');
   const bundle = {
     formatVersion: 1,
     datasetVersion: sourceManifest.datasetVersion,
@@ -254,42 +199,12 @@ function compile() {
     sources: sourceManifest.sources,
     regions,
     corridors,
-    railGeometry,
-    railTopology,
     routedLinks,
-    network: networks[0] || null,
+    network: networks[0],
     chunks: sortedChunks
   };
   validateBundle(bundle);
   return bundle;
-}
-
-function validateRailGeometry(geometry, sources) {
-  assert(geometry.formatVersion === 1, 'Unsupported rail geometry format: ' + geometry.id);
-  assert(geometry.geometrySource === 'openstreetmap-way', 'Unexpected rail geometry source: ' + geometry.id);
-  assert(geometry.navigable === false && geometry.reviewRequired === true, 'Unsafe rail geometry flags: ' + geometry.id);
-  const source = sources.find(candidate => candidate.id === geometry.sourceId);
-  assert(source && source.status === 'ingested', 'Rail geometry has no ingested source: ' + geometry.id);
-  assert(Array.isArray(geometry.bounds) && geometry.bounds.length === 4, 'Invalid bounds: ' + geometry.id);
-  const ids = new Set();
-  let coordinateCount = 0;
-  let lengthKm = 0;
-  geometry.ways.forEach(way => {
-    assert(!ids.has(way.id), 'Duplicate rail way: ' + way.id);
-    ids.add(way.id);
-    assert(way.navigable === false && way.reviewRequired === true, 'Unsafe rail way flags: ' + way.id);
-    assert(Array.isArray(way.coordinates) && way.coordinates.length >= 2, 'Rail way has no geometry: ' + way.id);
-    way.coordinates.forEach(coordinate => {
-      assert(Array.isArray(coordinate) && coordinate.length === 2 && Number.isFinite(coordinate[0]) && Number.isFinite(coordinate[1]),
-        'Invalid rail coordinate: ' + way.id);
-    });
-    coordinateCount += way.coordinates.length;
-    lengthKm += way.lengthKm;
-  });
-  assert(ids.size === geometry.stats.wayCount, 'Rail way count mismatch: ' + geometry.id);
-  assert(Array.isArray(geometry.points) && geometry.points.length === geometry.stats.pointCount, 'Rail point count mismatch: ' + geometry.id);
-  assert(coordinateCount === geometry.stats.coordinateCount, 'Rail coordinate count mismatch: ' + geometry.id);
-  assert(Math.abs(Math.round(lengthKm * 10) / 10 - geometry.stats.lengthKm) < 0.11, 'Rail length mismatch: ' + geometry.id);
 }
 
 // The eight directions, in the order setup.worldmap.DIRECTIONS uses: a square's track ends are a bit each.
@@ -350,31 +265,6 @@ function compactNetwork(network) {
   });
   return { id: network.id, label: network.label, grid: network.grid, start: byKey.get(network.startSquare),
     stats: network.stats, squares, stops };
-}
-
-function validateElevation(elevation, topology, sources) {
-  assert(elevation.formatVersion === 1 && elevation.tileKm === tileKm, 'Invalid elevation header: ' + elevation.geometryId);
-  assert(elevation.topologyBuildId === topology.buildId, 'Elevation is stale for topology: ' + elevation.geometryId);
-  const source = sources.find(candidate => candidate.id === elevation.sourceId);
-  assert(source && source.status === 'ingested', 'Elevation has no ingested source: ' + elevation.geometryId);
-  assert(elevation.aggregation === 'mean-and-population-standard-deviation-within-geographic-tile',
-    'Unexpected elevation aggregation: ' + elevation.geometryId);
-  assert(Number.isFinite(elevation.mountainStdDevM) && elevation.mountainStdDevM > 0,
-    'Invalid mountain ruggedness threshold: ' + elevation.geometryId);
-  const corridors = Object.fromEntries(elevation.corridors.map(corridor => [corridor.corridorId, corridor]));
-  topology.corridors.forEach(corridor => {
-    const samples = corridors[corridor.id] && corridors[corridor.id].positions;
-    // A routed corridor samples each grid square it crosses; the pilot samples each end of each 5 km slice.
-    assert(Array.isArray(samples) && samples.length === (corridor.gridCells ? corridor.gridCells.length : corridor.gridSliceCount + 1),
-      'Elevation position count mismatch: ' + corridor.id);
-    samples.forEach((sample, index) => {
-      assert(sample.position === index && Array.isArray(sample.coordinate) && sample.coordinate.length === 2,
-        'Invalid elevation position: ' + corridor.id + ':' + index);
-      assert(Number.isFinite(sample.meanElevationM) && Number.isFinite(sample.elevationStdDevM) &&
-        sample.elevationStdDevM >= 0 && Number.isInteger(sample.sampleCount) && sample.sampleCount > 0,
-      'Invalid elevation statistics: ' + corridor.id + ':' + index);
-    });
-  });
 }
 
 function validateBundle(bundle) {
@@ -440,76 +330,6 @@ function validateBundle(bundle) {
     });
     assert(Math.abs(Math.round(routed * 10) / 10 - route.routedKm) < 0.2, 'Routed link distance mismatch: ' + route.id);
   });
-  const topologyGeometryIds = new Set();
-  bundle.railTopology.forEach(topology => {
-    assert(!topologyGeometryIds.has(topology.geometryId), 'Duplicate rail topology: ' + topology.geometryId);
-    topologyGeometryIds.add(topology.geometryId);
-    assert(topology.formatVersion === 1 && topology.tileKm === bundle.tileKm, 'Invalid topology header: ' + topology.geometryId);
-    topology.corridors.forEach(corridor => {
-      assert(corridor.debugOnly === false && corridor.navigable === true,
-		'Authored gameplay corridor is not navigable: ' + corridor.id);
-      assert(corridor.stations.length === corridor.legs.length + 1, 'Wrong station/leg count: ' + corridor.id);
-      const sliceIds = new Set();
-      let corridorDistance = 0;
-      corridor.legs.forEach((leg, legIndex) => {
-        assert(leg.fromStationId === corridor.stations[legIndex].id &&
-          leg.toStationId === corridor.stations[legIndex + 1].id, 'Disconnected topology leg: ' + leg.id);
-        let legDistance = 0;
-        leg.slices.forEach((slice, sliceIndex) => {
-          assert(!sliceIds.has(slice.id), 'Duplicate topology slice: ' + slice.id);
-          sliceIds.add(slice.id);
-          assert(slice.navigable === true && slice.reviewStatus === (topology.routed ? 'approved-routed-link'
-            : 'authored-gameplay-route'), 'Unsafe topology slice: ' + slice.id);
-          assert(slice.distanceKm > 0 && slice.distanceKm <= bundle.tileKm + 0.001, 'Invalid topology slice length: ' + slice.id);
-          // A proposed gap fill has no OSM way under it, only the routed slices it was cut from.
-          assert(slice.coordinates.length >= 2 && (slice.sourceWayIds.length > 0 ||
-            (topology.routed && slice.gapFill && slice.routedSliceIds.length > 0)), 'Topology slice lacks provenance: ' + slice.id);
-          assert(Array.isArray(slice.railwayStatuses) && slice.railwayStatuses.length > 0,
-            'Topology slice lacks lifecycle provenance: ' + slice.id);
-          if (sliceIndex) {
-            const previous = leg.slices[sliceIndex - 1];
-            assert(JSON.stringify(previous.coordinates.at(-1)) === JSON.stringify(slice.coordinates[0]),
-              'Disconnected topology slices: ' + slice.id);
-          }
-          legDistance += slice.distanceKm;
-        });
-        assert(Math.abs(legDistance - leg.distanceKm) < 0.01, 'Topology leg distance mismatch: ' + leg.id);
-        corridorDistance += leg.distanceKm;
-      });
-      assert(sliceIds.size === corridor.sliceCount, 'Topology slice count mismatch: ' + corridor.id);
-      if (corridor.gridCells) {
-        // Squares of the shared geographic grid: each touches the next, none repeats, every move but the last has
-        // track to cover, and the moves add up to the line.
-        const cells = corridor.gridCells, seen = new Set();
-        assert(cells.length === corridor.gridCellCount && cells.length >= 2, 'Topology grid cell count mismatch: ' + corridor.id);
-        cells.forEach((cell, index) => {
-          const key = cell.x + ',' + cell.y;
-          assert(!seen.has(key), 'Grid square visited twice: ' + cell.id);
-          seen.add(key);
-          if (index) assert(Math.max(Math.abs(cell.x - cells[index - 1].x), Math.abs(cell.y - cells[index - 1].y)) === 1,
-            'Grid squares do not touch: ' + cell.id);
-          assert(index === cells.length - 1 ? cell.stepKm === 0 : cell.stepKm > 0, 'Invalid grid move: ' + cell.id);
-          assert(Array.isArray(cell.railwayStatuses) && cell.railwayStatuses.length > 0, 'Grid square lacks provenance: ' + cell.id);
-        });
-        const skippedKm = (corridor.skippedDetours || []).reduce((sum, detour) => sum + detour.km, 0);
-        assert(Math.abs(cells.reduce((sum, cell) => sum + cell.stepKm, 0) + skippedKm - corridor.distanceKm) < 1,
-          'Grid moves and skipped detours do not add up to the line: ' + corridor.id);
-        const positions = corridor.stationPositions;
-        assert(positions.length === corridor.stations.length && positions[0] === 0 && positions.at(-1) === cells.length - 1
-          && positions.every((position, index) => !index || position > positions[index - 1]), 'Invalid station squares: ' + corridor.id);
-      } else {
-        assert(Array.isArray(corridor.gridSlices) && corridor.gridSlices.length === corridor.gridSliceCount,
-          'Topology grid slice count mismatch: ' + corridor.id);
-        corridor.gridSlices.forEach(slice => {
-          assert(slice.distanceKm > 0 && slice.distanceKm <= bundle.tileKm + 0.001 &&
-            Array.isArray(slice.railwayStatuses) && slice.railwayStatuses.length > 0,
-          'Invalid gameplay grid slice: ' + slice.id);
-        });
-      }
-      assert(Math.abs(Math.round(corridorDistance * 10) / 10 - corridor.distanceKm) < 0.01,
-        'Topology corridor distance mismatch: ' + corridor.id);
-    });
-  });
 }
 
 // Consecutive slices of the same kind merged into one polyline, simplified to about 200 m: the browser only draws these
@@ -533,94 +353,31 @@ function runsOf(slices) {
 function outputsFor(bundle) {
   const manifest = { ...bundle };
   delete manifest.chunks;
-  manifest.railGeometry = bundle.railGeometry.map(geometry => ({
-    formatVersion: geometry.formatVersion,
-    id: geometry.id,
-    label: geometry.label,
-    sourceId: geometry.sourceId,
-    sourceSnapshotSha256: geometry.sourceSnapshotSha256,
-    sourceInputSha256: geometry.sourceInputSha256,
-    bounds: geometry.bounds,
-    geometrySource: geometry.geometrySource,
-    navigable: geometry.navigable,
-    reviewRequired: geometry.reviewRequired,
-    stats: geometry.stats,
-    file: 'geometry/' + geometry.id + '.json'
-  }));
-  const browserBundle = { ...bundle, network: undefined, railGeometry: bundle.railGeometry.map(geometry => ({
-    formatVersion: geometry.formatVersion,
-    id: geometry.id,
-    label: geometry.label,
-    sourceId: geometry.sourceId,
-    bounds: geometry.bounds,
-    geometrySource: geometry.geometrySource,
-    navigable: geometry.navigable,
-    reviewRequired: geometry.reviewRequired,
-    stats: geometry.stats,
-    // The full attributed records remain in the standalone geometry chunk. The browser preview only needs shape,
-    // status and whether a line is local service track.
-    ways: geometry.ways.map(way => ({
-      railwayStatus: way.railwayStatus,
-      service: !!way.tags.service,
-      coordinates: way.coordinates
-    }))
-  })) };
-  // A routed corridor runs to thousands of kilometres. The runtime only reads each grid slice's ends and flags, so the
-  // browser gets those; the full slices and per-station legs stay in world/dist/topology.
-  browserBundle.railTopology = bundle.railTopology.map(topology => !topology.routed ? topology : {
-    ...topology,
-    corridors: topology.corridors.map(corridor => ({
-      ...corridor,
-      legs: corridor.legs.map(leg => ({ id: leg.id, fromStationId: leg.fromStationId, toStationId: leg.toStationId,
-        distanceKm: leg.distanceKm, sliceCount: leg.slices.length })),
-      gridCells: corridor.gridCells.map(cell => ({ id: cell.id, x: cell.x, y: cell.y, centre: cell.centre,
-        stepKm: cell.stepKm, gapFill: cell.gapFill, bridge: cell.bridge, tunnel: cell.tunnel,
-        railwayStatuses: cell.railwayStatuses })),
-      elevation: corridor.elevation.map(sample => ({ position: sample.position, coordinate: sample.coordinate,
-        ...(sample.stationId ? { stationId: sample.stationId } : {}), meanElevationM: sample.meanElevationM,
-        elevationStdDevM: sample.elevationStdDevM }))
-    }))
-  });
-  manifest.railTopology = bundle.railTopology.map(topology => !topology.routed ? topology : ({ formatVersion: topology.formatVersion,
-    geometryId: topology.geometryId, routed: true, buildId: topology.buildId,
-    file: 'topology/' + topology.geometryId + '.json',
-    corridors: topology.corridors.map(corridor => ({ id: corridor.id, label: corridor.label,
-      stationCount: corridor.stations.length, distanceKm: corridor.distanceKm, gridCellCount: corridor.gridCellCount,
-      routedLinkIds: corridor.routedLinkIds, railKm: corridor.railKm, gapKm: corridor.gapKm,
-      ...(corridor.gridCells ? { gridCellCount: corridor.gridCellCount, playableKm: corridor.playableKm,
-        skippedDetourKm: Math.round(corridor.skippedDetours.reduce((sum, detour) => sum + detour.km, 0) * 10) / 10 } : {}) })) }));
-  manifest.network = bundle.network ? { id: bundle.network.id, label: bundle.network.label, grid: bundle.network.grid,
+  const browserBundle = { ...bundle, network: undefined };
+  manifest.network = { id: bundle.network.id, label: bundle.network.label, grid: bundle.network.grid,
     sources: bundle.network.sources, parameters: bundle.network.parameters, stats: bundle.network.stats,
-    file: (JSON.parse(read('world/imports.json')).network || [])[0].file } : null;
+    file: JSON.parse(read('world/imports.json')).network[0].file };
   manifest.routedLinks = bundle.routedLinks.map(route => ({
     id: route.id, proposalSetId: route.proposalSetId, from: route.from, to: route.to,
     planningLinkIds: route.planningLinkIds, status: route.status, chordKm: route.chordKm, routedKm: route.routedKm,
     railKm: route.railKm, gapKm: route.gapKm, gapCount: route.gaps.length, sliceCount: route.sliceCount,
-    stationCount: route.stations.length, navigable: route.navigable, reviewRequired: route.reviewRequired,
-    ...(route.playableCorridorId ? { playableCorridorId: route.playableCorridorId } : {})
+    stationCount: route.stations.length, navigable: route.navigable, reviewRequired: route.reviewRequired
   }));
   browserBundle.routedLinks = bundle.routedLinks.map(route => ({
     id: route.id, proposalSetId: route.proposalSetId, from: route.from, to: route.to, status: route.status,
     ...(route.detour ? { detour: true } : {}), chordKm: route.chordKm,
     routedKm: route.routedKm, railKm: route.railKm, gapKm: route.gapKm, gapCount: route.gaps.length,
     sliceCount: route.sliceCount, navigable: route.navigable, reviewRequired: route.reviewRequired,
-    ...(route.playableCorridorId ? { playableCorridorId: route.playableCorridorId } : {}),
     runs: runsOf(route.slices)
   }));
   const outputs = new Map([
     ['world/dist/manifest.json', stableJson(manifest)],
     ['source/world-data.js', '// Generated by scripts/world/compile-world.cjs. Do not edit.\nsetup.worldGraphData = ' + stableJson(browserBundle).trimEnd() + ';\n'
-      + (bundle.network ? '// The playable network, compact: see compactNetwork in the compiler.\nsetup.worldGraphData.network = '
-        + JSON.stringify(compactNetwork(bundle.network)) + ';\n' : '')]
+      + '// The playable network, compact: see compactNetwork in the compiler.\nsetup.worldGraphData.network = '
+      + JSON.stringify(compactNetwork(bundle.network)) + ';\n']
   ]);
   Object.entries(bundle.chunks).forEach(([id, chunk]) => {
     outputs.set('world/dist/regions/' + id + '.json', stableJson(chunk));
-  });
-  bundle.railGeometry.forEach(geometry => {
-    outputs.set('world/dist/geometry/' + geometry.id + '.json', stableJson(geometry));
-  });
-  bundle.railTopology.forEach(topology => {
-    outputs.set('world/dist/topology/' + topology.geometryId + '.json', stableJson(topology));
   });
   return outputs;
 }
@@ -655,9 +412,9 @@ try {
   const action = checkOnly ? 'Verified' : 'Compiled';
   console.log(action + ' world ' + bundle.datasetVersion + ': ' + nodeCount + ' nodes, ' + linkCount +
     ' planning links, ' + bundle.regions.length + ' regions, ' + Math.round(distanceKm).toLocaleString('en-US') +
-    ' km; ' + bundle.railGeometry.reduce((sum, geometry) => sum + geometry.stats.wayCount, 0).toLocaleString('en-US') +
-    ' sourced rail ways, ' + bundle.railTopology.reduce((sum, topology) => sum + topology.corridors.length, 0) +
-    ' playable sourced corridor(s), ' + bundle.routedLinks.length + ' routed planning link proposal(s)');
+    ' km; ' + bundle.routedLinks.length + ' routed planning link proposal(s); network of ' +
+    bundle.network.stats.squareCount.toLocaleString('en-US') + ' squares and ' + bundle.network.stats.stopCount.toLocaleString('en-US') +
+    ' stops');
 } catch (error) {
   console.error(error.stack || error.message);
   process.exitCode = 1;

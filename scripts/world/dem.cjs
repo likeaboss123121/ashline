@@ -21,19 +21,6 @@ function copernicusTileName(longitude, latitude) {
     (west < 0 ? 'W' : 'E') + String(Math.abs(west)).padStart(3, '0') + '_00_DEM';
 }
 
-// The tiles under squares of squareKm centred on each coordinate.
-function tilesFor(coordinates, squareKm = 5) {
-  const names = new Set();
-  coordinates.forEach(coordinate => {
-    const halfLatitude = (squareKm / 2) / 111.32;
-    const halfLongitude = (squareKm / 2) / (111.32 * Math.cos(coordinate[1] * Math.PI / 180));
-    [-1, 1].forEach(dx => [-1, 1].forEach(dy => {
-      names.add(copernicusTileName(coordinate[0] + dx * halfLongitude, coordinate[1] + dy * halfLatitude));
-    }));
-  });
-  return Array.from(names).sort();
-}
-
 // The tiles under a box [west, south, east, north].
 function tilesForBox(box) {
   const names = [];
@@ -74,4 +61,4 @@ function fetchTiles(names, cache = defaultCache()) {
   return names.map(name => path.join(cache, name + '.tif')).filter(file => fs.existsSync(file));
 }
 
-module.exports = { COPERNICUS_URL, defaultCache, copernicusTileName, tilesFor, tilesForBox, fetchTiles };
+module.exports = { defaultCache, copernicusTileName, tilesForBox, fetchTiles };

@@ -962,26 +962,8 @@ setup.worldmap = {
 	},
 	// --- debug map ----------------------------------------------------------------------------------------
 	// A deliberately plain top-down map for debug mode: terrain as coloured cells and track as lines through
-	// them. It is a look at what the generator produced, not a player-facing map.
-	// Planning links routed over real rail (see docs/WORLDMAP.md) are drawn around the playable corridor so the debug
-	// map shows where the route goes next. The playable grid is a walk of 5 km steps rather than a projection, so the
-	// routes are placed on a geographic 5 km grid whose origin is the corridor's first tile; over the corridor's few
-	// dozen kilometres the two agree to within a cell. Returns the occupied cells only, keyed by grid position.
-	// The grid square a longitude and latitude falls in, on the shared geographic grid the compiler lays routed
-	// corridors on (scripts/world/projection.cjs holds the same formulas and explains the choice).
-	projectGrid: function(point, grid) {
-		var radians = Math.PI / 180, R = 6371.0088;
-		var project = function(p) {
-			var lambda = p[0] * radians, phi = p[1] * radians;
-			var lambda0 = grid.centre[0] * radians, phi0 = grid.centre[1] * radians;
-			var k = Math.sqrt(2 / (1 + Math.sin(phi0) * Math.sin(phi) + Math.cos(phi0) * Math.cos(phi) * Math.cos(lambda - lambda0)));
-			return [R * k * Math.cos(phi) * Math.sin(lambda - lambda0),
-				R * k * (Math.cos(phi0) * Math.sin(phi) - Math.sin(phi0) * Math.cos(phi) * Math.cos(lambda - lambda0))];
-		};
-		var here = project(point), origin = project(grid.origin);
-		return { x: Math.round((here[0] - origin[0]) / grid.cellKm), y: Math.round((here[1] - origin[1]) / grid.cellKm) };
-	},
-	// The middle of a grid square as [longitude, latitude]: projectGrid run backwards.
+	// them. It is a look at what the network builder produced, not a player-facing map.
+	// The middle of a grid square as [longitude, latitude], from the grid's projection (scripts/world/projection.cjs).
 	unprojectGrid: function(x, y, grid) {
 		var radians = Math.PI / 180, R = 6371.0088;
 		var lambda0 = grid.centre[0] * radians, phi0 = grid.centre[1] * radians;
@@ -999,62 +981,15 @@ setup.worldmap = {
 		var lambda = lambda0 + Math.atan2(px * Math.sin(c), rho * Math.cos(phi0) * Math.cos(c) - py * Math.sin(phi0) * Math.sin(c));
 		return [Math.round(lambda / radians * 1e5) / 1e5, Math.round(phi / radians * 1e5) / 1e5];
 	},
-	getDebugContextCells: function(origin, corridorId, grid) {
-		// Links the active corridor already plays are on the map as real tiles; drawing them again would double them.
-		var routes = ((setup.worldGraphData && setup.worldGraphData.routedLinks) || []).filter(function(route) {
-			return !corridorId || route.playableCorridorId !== corridorId;
-		});
-		// A sinusoidal projection: a degree of longitude is measured at its own latitude, so kilometres are true east-west
-		// everywhere. Measuring it at Punta Arenas alone drew the tropics about 40% too narrow.
-		var lon0 = origin[0], lat0 = origin[1];
-		var kmPerLat = 110.57, tile = this.TILE_KM;
-		var kmPerLon = function(latitude) { return 111.32 * Math.cos(latitude * Math.PI / 180); };
-		var self = this;
-		// On the shared grid the context lands on exactly the squares the playable line would use.
-		var toCell = grid ? function(point) { return self.projectGrid(point, grid); } : function(point) {
-			return { x: Math.round((point[0] - lon0) * kmPerLon(point[1]) / tile), y: Math.round((point[1] - lat0) * kmPerLat / tile) };
-		};
-		var cells = {};
-		routes.forEach(function(route) {
-			route.runs.forEach(function(run) {
-				// Walk each run in steps of about a kilometre and mark every cell it passes through.
-				for (var index = 1; index < run.coordinates.length; index++) {
-					var a = run.coordinates[index - 1], b = run.coordinates[index];
-					var km = Math.hypot((b[0] - a[0]) * kmPerLon((a[1] + b[1]) / 2), (b[1] - a[1]) * kmPerLat);
-					var steps = Math.max(1, Math.ceil(km));
-					for (var step = 0; step <= steps; step++) {
-						var cell = toCell([a[0] + (b[0] - a[0]) * step / steps, a[1] + (b[1] - a[1]) * step / steps]);
-						var key = self.key(cell.x, cell.y);
-						var existing = cells[key];
-						if (!existing) {
-							cells[key] = { x: cell.x, y: cell.y, gapFill: run.gapFill, routeIds: [route.id] };
-						} else {
-							existing.gapFill = existing.gapFill && run.gapFill; // mapped rail wins a shared cell
-							if (existing.routeIds.indexOf(route.id) === -1) existing.routeIds.push(route.id);
-						}
-					}
-				}
-			});
-		});
-		return { cells: cells, routes: routes, toCell: toCell };
-	},
+	// The network as a drawing: a plain square per grid square, in its terrain's colour and a teleport target; the
+	// track as one path of mapped railway and one of new lines, a fixed width on screen so it shows however far out the
+	// map is zoomed; a marker per station with the authored cities named; and the train and the walker. A continent
+	// is tens of thousands of squares, so there is no tooltip or keyboard stop per square: the readout under the map
+	// names the square under the pointer, and the station list is the keyboard way to teleport.
 	buildDebugMap: function(stationId, cellSize) {
-		var seed = this.getSeed();
-		var route = setup.realWorldPilot.getGridRoute();
-		var legIndex = Math.max(1, Math.min(Math.floor(Number(stationId)) || 1, route.corridor.stations.length - 1));
-		var leg = { index: route.corridor.id, tiles: route.tiles, byKey: {}, branches: [], rect: route.rect,
-			realWorld: true, corridor: route.corridor };
-		route.tiles.forEach(function(tile) { leg.byKey[setup.worldmap.key(tile.x, tile.y)] = tile; });
-		// The network is every railway there is, so there is nothing around it to draw as context.
-		var context = route.network ? { cells: {}, routes: [], toCell: function() { return { x: 0, y: 0 }; } }
-			: this.getDebugContextCells(route.tiles[0].geoCoordinate, route.corridor.id, route.corridor.grid);
-		var rect = { x0: leg.rect.x0, y0: leg.rect.y0, x1: leg.rect.x1, y1: leg.rect.y1 };
-		Object.keys(context.cells).forEach(function(key) {
-			var contextCell = context.cells[key];
-			rect.x0 = Math.min(rect.x0, contextCell.x - 2); rect.x1 = Math.max(rect.x1, contextCell.x + 2);
-			rect.y0 = Math.min(rect.y0, contextCell.y - 2); rect.y1 = Math.max(rect.y1, contextCell.y + 2);
-		});
-		var cell = cellSize || (Object.keys(context.cells).length ? 7 : 9);
+		var route = setup.realWorldPilot.getGridRoute(), rect = route.rect;
+		var leg = { tiles: route.tiles, byKey: route.byKey, corridor: route.corridor, rect: rect };
+		var cell = cellSize || 9;
 		var width = (rect.x1 - rect.x0 + 1) * cell;
 		var height = (rect.y1 - rect.y0 + 1) * cell;
 		var ns = 'http://www.w3.org/2000/svg';
@@ -1063,15 +998,12 @@ setup.worldmap = {
 		svg.setAttribute('width', width);
 		svg.setAttribute('height', height);
 		svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
-		// A mostly north-south leg may only be a handful of native 9 px cells wide. Enlarge the rendered map while
-		// retaining its viewBox so mouse and touch targets are usable without altering generated geometry.
 		svg.style.width = 'min(100%, ' + Math.max(280, width) + 'px)';
 		svg.style.height = 'auto';
 		// Screen y grows downwards while map y grows north, so rows are drawn from the top of the rectangle down.
 		var left = function(x) { return (x - rect.x0) * cell; };
 		var top = function(y) { return (rect.y1 - y) * cell; };
-		// One background for the empty ground: drawing every empty cell of a map this size would be tens of thousands
-		// of elements for nothing.
+		// One background for the empty ground, rather than a square for every empty cell.
 		var ground = document.createElementNS(ns, 'rect');
 		ground.setAttribute('x', 0);
 		ground.setAttribute('y', 0);
@@ -1080,180 +1012,65 @@ setup.worldmap = {
 		ground.setAttribute('fill', '#1b1d1f');
 		ground.setAttribute('class', 'debug-map-ground');
 		svg.appendChild(ground);
-		// The routed lines around the corridor: context only, never teleport targets.
 		var self = this;
-		Object.keys(context.cells).sort().forEach(function(key) {
-			if (leg.byKey[key]) return;
-			var contextCell = context.cells[key];
-			var contextRect = document.createElementNS(ns, 'rect');
-			contextRect.setAttribute('x', left(contextCell.x));
-			contextRect.setAttribute('y', top(contextCell.y));
-			contextRect.setAttribute('width', cell);
-			contextRect.setAttribute('height', cell);
-			contextRect.setAttribute('fill', contextCell.gapFill ? '#5a2b28' : '#3d4a47');
-			// An outline that stays a pixel wide however far out the map is zoomed, so the lines never vanish.
-			contextRect.setAttribute('stroke', contextCell.gapFill ? '#5a2b28' : '#3d4a47');
-			contextRect.setAttribute('stroke-width', '1');
-			contextRect.setAttribute('vector-effect', 'non-scaling-stroke');
-			contextRect.setAttribute('class', 'debug-context-tile' + (contextCell.gapFill ? ' debug-context-gap' : ''));
-			var contextTitle = document.createElementNS(ns, 'title');
-			contextTitle.textContent = (contextCell.gapFill ? 'Proposed gap fill' : 'Mapped rail') + ', not playable | '
-				+ contextCell.routeIds.map(function(id) { return id.replace('route:', ''); }).join(', ')
-				+ ' | grid ' + contextCell.x + ',' + contextCell.y;
-			contextRect.appendChild(contextTitle);
-			svg.appendChild(contextRect);
+		route.tiles.forEach(function(tile) {
+			var square = document.createElementNS(ns, 'rect');
+			square.setAttribute('x', left(tile.x));
+			square.setAttribute('y', top(tile.y));
+			square.setAttribute('width', cell);
+			square.setAttribute('height', cell);
+			square.setAttribute('fill', self.TERRAIN_COLOURS[tile.terrain] || '#000');
+			square.setAttribute('stroke', '#1b1d1f');
+			square.setAttribute('stroke-width', '0.5');
+			square.setAttribute('class', 'debug-teleport-tile' + (tile.gapFill ? ' debug-gap-tile' : ''));
+			square.setAttribute('data-debug-teleport', '0:' + tile.x + ':' + tile.y);
+			if (tile.stationIndex) square.setAttribute('data-station-index', String(tile.stationIndex));
+			svg.appendChild(square);
 		});
-		// The cities the routed lines join, named where they sit.
-		var placeNames = {};
-		(setup.worldGraphData && setup.worldGraphData.chunks ? Object.keys(setup.worldGraphData.chunks) : []).forEach(function(id) {
-			setup.worldGraphData.chunks[id].nodes.forEach(function(node) { placeNames[node.id] = node; });
+		var railPath = [], newPath = [];
+		route.tiles.forEach(function(tile) {
+			var cx = left(tile.x) + cell / 2, cy = top(tile.y) + cell / 2;
+			tile.ends.forEach(function(end) {
+				var direction = self.DIRECTIONS[end];
+				(tile.gapFill ? newPath : railPath).push('M' + cx + ' ' + cy + 'L' + (cx + direction.dx * cell / 2) + ' ' + (cy - direction.dy * cell / 2));
+			});
 		});
-		var labelled = {};
-		context.routes.forEach(function(routed) {
-			[routed.from, routed.to].forEach(function(placeId) {
-				var place = placeNames[placeId];
-				if (!place || labelled[placeId]) return;
-				labelled[placeId] = true;
-				var at = context.toCell([place.longitude, place.latitude]);
+		[[railPath, '#d8d2c4', 'debug-map-track'], [newPath, '#d9624f', 'debug-map-track debug-map-new-track']].forEach(function(entry) {
+			if (!entry[0].length) return;
+			var path = document.createElementNS(ns, 'path');
+			path.setAttribute('d', entry[0].join(''));
+			path.setAttribute('fill', 'none');
+			path.setAttribute('stroke', entry[1]);
+			path.setAttribute('stroke-width', '1.5');
+			path.setAttribute('vector-effect', 'non-scaling-stroke');
+			path.setAttribute('pointer-events', 'none');
+			path.setAttribute('class', entry[2]);
+			svg.appendChild(path);
+		});
+		route.tiles.forEach(function(tile) {
+			if (!tile.station) return;
+			var cx = left(tile.x) + cell / 2, cy = top(tile.y) + cell / 2;
+			var marker = document.createElementNS(ns, 'circle');
+			marker.setAttribute('cx', cx);
+			marker.setAttribute('cy', cy);
+			marker.setAttribute('r', cell / 3);
+			marker.setAttribute('fill', '#e5c58a');
+			marker.setAttribute('pointer-events', 'none');
+			svg.appendChild(marker);
+			// Cities are named on the map; the other stations are only markers, or the labels would overlap.
+			if (tile.stationStatus === 'city') {
 				var label = document.createElementNS(ns, 'text');
-				label.setAttribute('x', left(at.x) + cell * 1.6);
-				label.setAttribute('y', top(at.y) + cell);
-				label.setAttribute('fill', '#c7c5b9');
-				label.setAttribute('font-size', String(cell * 1.6));
+				label.setAttribute('x', cx + cell);
+				label.setAttribute('y', cy + cell / 3);
+				label.setAttribute('fill', '#e5c58a');
+				label.setAttribute('font-size', String(cell * 1.4));
 				label.setAttribute('font-family', 'sans-serif');
 				label.setAttribute('pointer-events', 'none');
-				label.setAttribute('class', 'debug-context-label');
-				label.textContent = place.name;
+				label.setAttribute('class', 'debug-station-label');
+				label.textContent = tile.station;
 				svg.appendChild(label);
-			});
-		});
-		// A network is tens of thousands of squares, so its squares are drawn plainly: no tooltip or keyboard stop
-		// each (the readout under the map names the square the pointer is on, and the station list is the keyboard
-		// way to teleport), and its track is one path rather than a line per square end.
-		var plain = !!route.network;
-		var cellsToDraw = [];
-		if (plain) {
-			leg.tiles.forEach(function(tile) { cellsToDraw.push(tile); });
-		} else {
-			for (var gridY = rect.y0; gridY <= rect.y1; gridY++) {
-				for (var gridX = rect.x0; gridX <= rect.x1; gridX++) {
-					if (leg.byKey[this.key(gridX, gridY)]) cellsToDraw.push(leg.byKey[this.key(gridX, gridY)]);
-				}
-			}
-		}
-		for (var drawIndex = 0; drawIndex < cellsToDraw.length; drawIndex++) {
-			{
-				var tile = cellsToDraw[drawIndex], x = tile.x, y = tile.y;
-				var terrain = tile ? tile.terrain : 'plains';
-				var cellRect = document.createElementNS(ns, 'rect');
-				cellRect.setAttribute('x', left(x));
-				cellRect.setAttribute('y', top(y));
-				cellRect.setAttribute('width', cell);
-				cellRect.setAttribute('height', cell);
-				cellRect.setAttribute('fill', this.TERRAIN_COLOURS[terrain] || '#000');
-				cellRect.setAttribute('stroke', '#1b1d1f');
-				cellRect.setAttribute('stroke-width', '0.5');
-				if (tile) {
-					cellRect.setAttribute('class', 'debug-teleport-tile' + (tile.gapFill ? ' debug-gap-tile' : ''));
-					cellRect.setAttribute('data-debug-teleport', '0:' + x + ':' + y);
-					if (tile.stationIndex) cellRect.setAttribute('data-station-index', String(tile.stationIndex));
-					if (!plain) {
-						cellRect.setAttribute('tabindex', '0');
-						cellRect.setAttribute('role', 'button');
-						cellRect.setAttribute('aria-label', 'Teleport to track tile ' + x + ', ' + y);
-					}
-				}
-				if (plain) { svg.appendChild(cellRect); continue; }
-				var title = document.createElementNS(ns, 'title');
-				title.textContent = tile ? ((tile.station ? tile.station + ' | ' : '') + (tile.gapFill ? 'gap fill | ' : '')
-					+ 'grid ' + x + ',' + y + ' '
-					+ tile.terrain + ' ' + tile.shape + ' ' + tile.grade.toFixed(1) + '% | '
-					+ tile.geoCoordinate[1].toFixed(4) + '\u00b0, ' + tile.geoCoordinate[0].toFixed(4) + '\u00b0 | mean '
-					+ tile.elevation.toFixed(1) + ' m, relief \u03c3 ' + tile.elevationStdDevM.toFixed(1) + ' m')
-					: '';
-				cellRect.appendChild(title);
-				svg.appendChild(cellRect);
-			}
-		}
-		// Track: a line from the middle of a tile out to each end it points at.
-		if (plain) {
-			var railPath = [], gapPath = [];
-			leg.tiles.forEach(function(tile) {
-				var cx = left(tile.x) + cell / 2, cy = top(tile.y) + cell / 2;
-				tile.ends.forEach(function(end) {
-					var direction = setup.worldmap.DIRECTIONS[end];
-					(tile.gapFill ? gapPath : railPath).push('M' + cx + ' ' + cy + 'L' + (cx + direction.dx * cell / 2) + ' ' + (cy - direction.dy * cell / 2));
-				});
-			});
-			[[railPath, '#d8d2c4', 'debug-map-track'], [gapPath, '#d9624f', 'debug-map-track debug-map-new-track']].forEach(function(entry) {
-				if (!entry[0].length) return;
-				var path = document.createElementNS(ns, 'path');
-				path.setAttribute('d', entry[0].join(''));
-				path.setAttribute('fill', 'none');
-				path.setAttribute('stroke', entry[1]);
-				path.setAttribute('stroke-width', '1.5');
-				path.setAttribute('vector-effect', 'non-scaling-stroke');
-				path.setAttribute('pointer-events', 'none');
-				path.setAttribute('class', entry[2]);
-				svg.appendChild(path);
-			});
-		}
-		leg.tiles.forEach(function(tile) {
-			var cx = left(tile.x) + cell / 2;
-			var cy = top(tile.y) + cell / 2;
-			(plain ? [] : tile.ends).forEach(function(end) {
-				var direction = setup.worldmap.DIRECTIONS[end];
-				var line = document.createElementNS(ns, 'line');
-				line.setAttribute('x1', cx);
-				line.setAttribute('y1', cy);
-				line.setAttribute('x2', cx + direction.dx * cell / 2);
-				line.setAttribute('y2', cy - direction.dy * cell / 2);
-				line.setAttribute('stroke', tile.branch ? '#8a7a55' : tile.gapFill ? '#d9624f' : '#d8d2c4');
-				line.setAttribute('stroke-width', tile.branch ? '1' : '1.5');
-				// A fixed width on screen, so a whole continent of track stays visible when zoomed right out.
-				if (route.network) line.setAttribute('vector-effect', 'non-scaling-stroke');
-				line.setAttribute('pointer-events', 'none');
-				svg.appendChild(line);
-			});
-			if (tile.station) {
-				var marker = document.createElementNS(ns, 'circle');
-				marker.setAttribute('cx', cx);
-				marker.setAttribute('cy', cy);
-				marker.setAttribute('r', cell / 3);
-				marker.setAttribute('fill', '#e5c58a');
-				marker.setAttribute('pointer-events', 'none');
-				svg.appendChild(marker);
-				// Cities are named on the map; the halts between them are only markers, or the labels would overlap.
-				if (String(tile.stationId).indexOf('place:') === 0 || tile.stationStatus === 'city') {
-					var stationLabel = document.createElementNS(ns, 'text');
-					stationLabel.setAttribute('x', cx + cell);
-					stationLabel.setAttribute('y', cy + cell / 3);
-					stationLabel.setAttribute('fill', '#e5c58a');
-					stationLabel.setAttribute('font-size', String(cell * 1.4));
-					stationLabel.setAttribute('font-family', 'sans-serif');
-					stationLabel.setAttribute('pointer-events', 'none');
-					stationLabel.setAttribute('class', 'debug-station-label');
-					stationLabel.textContent = tile.station;
-					svg.appendChild(stationLabel);
-				}
 			}
 		});
-		// The playable line again as one stroke of fixed screen width over everything else, so it can still be picked
-		// out when the whole continent is in view and each tile is smaller than a pixel.
-		var outline = route.network ? null : document.createElementNS(ns, 'polyline');
-		if (outline) outline.setAttribute('points', leg.tiles.map(function(tile) {
-			return (left(tile.x) + cell / 2) + ',' + (top(tile.y) + cell / 2);
-		}).join(' '));
-		if (outline) {
-			outline.setAttribute('fill', 'none');
-			outline.setAttribute('stroke', '#e5c58a');
-			outline.setAttribute('stroke-width', '2');
-			outline.setAttribute('stroke-opacity', '0.8');
-			outline.setAttribute('vector-effect', 'non-scaling-stroke');
-			outline.setAttribute('pointer-events', 'none');
-			outline.setAttribute('class', 'debug-map-line');
-			svg.appendChild(outline);
-		}
 		// Where the train is standing, and which way it is going, so the map can be read against the journey.
 		var here = this.getJourneyView();
 		var hasTrain = Array.isArray(State.variables.currentTrain) && State.variables.currentTrain.length > 0;
@@ -1298,7 +1115,7 @@ setup.worldmap = {
 		var focusTile = hasTrain && here && here.realWorld ? here.tile
 			: setup.onfoot && setup.onfoot.isOnFoot() ? setup.onfoot.getTile()
 				: setup.realWorldPilot.getStationTile(Number(State.variables.currentStation) || 1);
-		return { svg: svg, leg: leg, rect: rect, context: context, cell: cell,
+		return { svg: svg, leg: leg, rect: rect, cell: cell,
 			corridorCentre: { x: left((leg.rect.x0 + leg.rect.x1) / 2), y: top((leg.rect.y0 + leg.rect.y1) / 2) },
 			focus: focusTile ? { x: left(focusTile.x) + cell / 2, y: top(focusTile.y) + cell / 2 } : null };
 	},
@@ -1427,15 +1244,15 @@ setup.worldmap = {
 		});
 		return bar;
 	},
-	// The map of a whole network takes a couple of seconds to draw, and the debug panel is rebuilt on every passage
-	// whether or not anyone is looking at it. So a network map is only drawn once the panel is open and it has room
-	// on the page; a corridor's small map is drawn straight away, as before.
+	// The map of a whole network takes a moment to draw, and the debug panel is rebuilt on every passage whether or not
+	// anyone is looking at it. So the map is only drawn once the panel is open and it has room on the page.
 	appendDebugMap: function(parent, stationId) {
 		if (!parent || typeof document === 'undefined') {
 			return;
 		}
-		var route = setup.realWorldPilot.getGridRoute(), self = this;
-		if (!route || !route.network || typeof ResizeObserver !== 'function') {
+		var self = this;
+		if (!setup.realWorldPilot.getGridRoute()) return;
+		if (typeof ResizeObserver !== 'function') {
 			this.buildDebugMapPanel(parent, stationId);
 			return;
 		}
@@ -1467,18 +1284,11 @@ setup.worldmap = {
 			heading.className = 'debug-map-heading';
 			var leg = built.leg, route = setup.realWorldPilot.getGridRoute();
 			var mainLine = leg.tiles;
-			var grades = mainLine.map(function(tile) { return tile.grade; });
-			var networkStats = route && route.network ? setup.worldGraphData.network.stats : null;
-			heading.textContent = networkStats ? leg.corridor.label + ': ' + mainLine.length + ' grid squares, '
+			var networkStats = setup.worldGraphData.network.stats;
+			heading.textContent = leg.corridor.label + ': ' + mainLine.length + ' grid squares, '
 				+ Object.keys(route.legs).length + ' legs, ' + leg.corridor.stations.length + ' stations; '
 				+ networkStats.railKm + ' km of mapped railway joined by ' + networkStats.bridgeCount + ' new lines ('
-				+ networkStats.bridgeKm + ' km). Yard contents still use seed ' + this.getSeed() + '.'
-				: leg.corridor.label + ': ' + mainLine.length + ' grid positions, '
-				+ Math.round(mainLine.slice(0, -1).reduce(function(sum, tile, index) {
-					return sum + setup.worldmap.getStepKm(mainLine, index);
-				}, 0)) + ' playable km, grades '
-				+ Math.min.apply(null, grades).toFixed(1) + '% to ' + Math.max.apply(null, grades).toFixed(1) + '%, '
-				+ leg.corridor.stations.length + ' sourced stations. Yard contents still use seed ' + this.getSeed() + '.';
+				+ networkStats.bridgeKm + ' km). Yard contents still use seed ' + this.getSeed() + '.';
 			parent.appendChild(heading);
 			var instructions = document.createElement('p');
 			instructions.textContent = 'Debug teleport: select a track tile on the map or choose one below. If you are aboard, your entire consist moves with you; on foot, only you move.';
@@ -1513,7 +1323,7 @@ setup.worldmap = {
 			var zoomBar = this.createDebugMapZoom(built.svg, frame, built);
 			parent.appendChild(zoomBar);
 			parent.appendChild(frame);
-			if (route && route.network) {
+			{
 				// One line under the map names the square under the pointer, in place of a tooltip on every square.
 				var readout = document.createElement('p');
 				readout.className = 'small-description debug-map-hover';
@@ -1531,18 +1341,6 @@ setup.worldmap = {
 						: 'grid ' + x + ',' + y + ': no track';
 				});
 			}
-			var railCells = 0, gapCells = 0;
-			Object.keys(built.context.cells).forEach(function(key) {
-				if (built.leg.byKey[key]) return;
-				if (built.context.cells[key].gapFill) gapCells++; else railCells++;
-			});
-			if (railCells || gapCells) {
-				var contextLine = document.createElement('p');
-				contextLine.className = 'debug-map-context';
-				contextLine.textContent = 'Around it: ' + built.context.routes.length + ' routed planning links drawn on a geographic 5 km grid, '
-					+ railCells + ' cells of mapped rail (grey) and ' + gapCells + ' of proposed gap fill (red). Not playable and not teleport targets.';
-				parent.appendChild(contextLine);
-			}
 			// The debug tools are built inside a hidden panel and a folded section, so the map has no size until the
 			// player opens both. Set the opening view the first time it actually appears.
 			if (typeof ResizeObserver === 'function') {
@@ -1556,11 +1354,9 @@ setup.worldmap = {
 			label.textContent = 'Exact track tile: ';
 			var select = document.createElement('select');
 			select.setAttribute('aria-label', 'Exact track tile');
-			// Every tile of a corridor; on the network, every station, since listing tens of thousands of squares
-			// would make the list useless.
-			var listed = leg.corridor && leg.corridor.id === setup.realWorldPilot.NETWORK_ID
-				? mainLine.filter(function(tile) { return tile.stationIndex; }).sort(function(a, b) { return a.stationIndex - b.stationIndex; })
-				: mainLine;
+			// Every station: listing tens of thousands of squares would make the list useless.
+			var listed = mainLine.filter(function(tile) { return tile.stationIndex; })
+				.sort(function(a, b) { return a.stationIndex - b.stationIndex; });
 			listed.forEach(function(tile, index) {
 				var option = document.createElement('option');
 				option.value = '0,' + tile.x + ',' + tile.y;
