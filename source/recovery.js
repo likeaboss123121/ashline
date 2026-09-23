@@ -21,7 +21,9 @@ setup.recovery = {
 		var main = world.getMainLine(world.getSeed(), j.legIndex);
 		var branch = foot.branch && leg.branches.find(function(b) { return b.id === foot.branch; });
 		var index = foot.tileIndex, distances;
-		if (!branch) distances = [{ station: j.legIndex, distance: index }, { station: j.legIndex + 1, distance: main.length - 1 - index }];
+		// A leg knows the stations at its two ends; on the corridor they are the leg's own number and the next.
+		var fromStation = leg.fromStationIndex || j.legIndex, toStation = leg.toStationIndex || j.legIndex + 1;
+		if (!branch) distances = [{ station: fromStation, distance: index }, { station: toStation, distance: main.length - 1 - index }];
 		else {
 			var back = index + 1;
 			distances = [{ station: j.legIndex, distance: back + branch.fromIndex },

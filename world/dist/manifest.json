@@ -3107,5 +3107,82 @@
       "navigable": false,
       "reviewRequired": true
     }
-  ]
+  ],
+  "network": {
+    "id": "south-america-network",
+    "label": "South America railway network",
+    "grid": {
+      "projection": "lambert-azimuthal-equal-area",
+      "centre": [-60, -20],
+      "origin": [-70.90114, -53.16472],
+      "cellKm": 5
+    },
+    "sources": {
+      "geometry": {
+        "id": "south-america-rail",
+        "sourceId": "openstreetmap-geofabrik-south-america-2026-09-21",
+        "sha256": "63ac0a060e2f1bc03821d3e561b14b1cb66128518d32dac2a76899ce1ad3276a"
+      },
+      "stations": {
+        "id": "south-america-stations",
+        "sourceId": "openstreetmap-geofabrik-south-america-2026-09-21"
+      },
+      "settlements": {
+        "id": "south-america-places",
+        "sourceId": "openstreetmap-geofabrik-south-america-2026-09-21"
+      },
+      "elevation": {
+        "sourceId": "copernicus-dem-glo90",
+        "aggregation": "mean-and-population-standard-deviation-within-grid-square",
+        "tileCount": 741
+      }
+    },
+    "parameters": {
+      "traceStepsPerCell": 8,
+      "shortBridgeKm": 30,
+      "straightBridgeKm": 10,
+      "longBridgeMaxKm": 1500,
+      "minPieceKm": 15,
+      "cityReachKm": 10,
+      "bridgeMinKm": 0.2,
+      "tunnelMinShare": 0.5,
+      "maxSectionKm": 100,
+      "minStubKm": 10,
+      "terrain": {
+        "cellDegrees": 0.02,
+        "paddingShare": 0.3,
+        "minPaddingKm": 40,
+        "gradeSoft": 2,
+        "roughnessM": 150,
+        "snowLineM": 2500,
+        "waterCost": 30,
+        "lakeFlatnessM": 0.3,
+        "townKm": 3,
+        "townFactor": 0.85,
+        "stopDiscount": {
+          "city": 0.25,
+          "town": 0.15,
+          "village": 0.08
+        },
+        "maxHopKm": 250,
+        "simplifyDegrees": 0.004
+      }
+    },
+    "stats": {
+      "squareCount": 21043,
+      "moveCount": 21474,
+      "stopCount": 6755,
+      "haltCount": 137,
+      "bridgeCount": 1252,
+      "bridgeKm": 19534,
+      "railKm": 128169,
+      "leftOutPieces": 29,
+      "leftOutKm": 129,
+      "unreachableCities": [],
+      "prunedStubSquares": 965,
+      "junctionSquares": 1539,
+      "endSquares": 1031
+    },
+    "file": "world/network/south-america-network.json"
+  }
 }

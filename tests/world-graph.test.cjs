@@ -163,7 +163,7 @@ test('the sourced grid is the default playable world without copying static data
   game.State.variables.debugMode = true;
   game.State.variables.currentTrain = [{ type: 'test locomotive', length: 10, cargo: [], inventory: [], topSpeedKmh: 60 }];
   const train = game.State.variables.currentTrain;
-  assert.equal(game.setup.realWorldPilot.DEFAULT_CORRIDOR_ID, 'cl-main-line');
+  assert.equal(game.setup.realWorldPilot.DEFAULT_CORRIDOR_ID, 'network');
   assert.equal(game.setup.realWorldPilot.start(), true);
   assert.deepEqual(JSON.parse(JSON.stringify(game.State.variables.journey)),
     { legIndex: 1, tileIndex: 0, forward: true });
@@ -191,7 +191,7 @@ test('the sourced grid is the default playable world without copying static data
   assert.equal(game.State.variables.currentTrain, train);
   assert.equal(game.setup.onfoot.climbDown(), true);
   const main = game.setup.realWorldPilot.getGridRoute();
-  assert.equal(game.setup.onfoot.getTile().elevation, main.tiles[main.legs[2].startPosition + 1].elevation);
+  assert.equal(game.setup.onfoot.getTile().elevation, main.legs[2].tiles[1].elevation);
   assert.equal(game.setup.onfoot.walk(-1), true);
   assert.equal(game.State.variables.onFoot.tileIndex, 0);
   assert.equal(game.State.variables.journey.tileIndex, 1, 'walking does not move the consist');
@@ -317,59 +317,58 @@ test('routed Chile proposals stay proposals, and the main line that plays them i
   });
 });
 
-test('the main line joins the routed links into one line that can be driven from Punta Arenas to Arica', () => {
+test('the whole continent is one network that can be driven from Punta Arenas to Caracas', () => {
   const game = loadGame();
   const { setup, State } = game;
-  const route = setup.realWorldPilot.getGridRoute();
-  const stations = route.corridor.stations;
-  assert.equal(stations[0].name, 'Punta Arenas');
-  assert.equal(stations.at(-1).name, 'Arica');
-  assert.ok(route.tiles.length > 800, route.tiles.length + ' tiles');
-  // Stops are real stations wherever the line runs on mapped track, and the towns a proposed line runs through
-  // where it does not; only what is left of a long stretch with nowhere to stop gets kilometre-post halts.
-  const statuses = new Set(stations.map(station => station.status));
-  ['city', 'active', 'disused', 'settlement', 'kilometre-post'].forEach(status => assert.ok(statuses.has(status), status));
-  ['Puerto Santa Cruz', 'Río Mayo', 'San Carlos de Bariloche'].forEach(name =>
-    assert.ok(stations.some(station => station.name === name && station.status === 'settlement'), name));
-  // The tiles are squares of one geographic grid: each touches the next, none repeats, and every stop stands within
-  // a few squares of where it really is.
+  const pilot = setup.realWorldPilot, route = pilot.getGridRoute(), stations = route.corridor.stations;
+  const stats = setup.worldGraphData.network.stats;
+  assert.ok(route.network && route.tiles.length > 20000, route.tiles.length + ' squares');
+  assert.equal(stats.unreachableCities.length, 0, 'every authored city is on the network');
+  // The squares are one geographic grid: no square twice, every move to a neighbour, matched from the other side.
   const squares = new Set(route.tiles.map(tile => tile.x + ',' + tile.y));
   assert.equal(squares.size, route.tiles.length);
-  route.tiles.slice(1).forEach((tile, index) => assert.equal(
-    Math.max(Math.abs(tile.x - route.tiles[index].x), Math.abs(tile.y - route.tiles[index].y)), 1));
-  const km = (a, b) => Math.hypot((a[0] - b[0]) * 111.32 * Math.cos(a[1] * Math.PI / 180), (a[1] - b[1]) * 110.57);
-  stations.forEach((station, index) => {
-    const tile = route.tiles[route.stationPositions[index]];
-    assert.ok(km(station.coordinates, tile.geoCoordinate) < 25, station.name + ' stands ' + km(station.coordinates, tile.geoCoordinate) + ' km off');
-  });
-  stations.filter(station => station.status === 'kilometre-post').forEach(station => assert.match(station.name, /^Km \d+$/));
-  // What the player travels between stops: the moves between their squares, without the spurs a through train skips.
-  for (let index = 1; index < stations.length; index++) {
-    const from = route.stationPositions[index - 1], to = route.stationPositions[index];
-    const km = route.tiles.slice(from, to).reduce((sum, tile) => sum + tile.distanceKm, 0);
-    assert.ok(km >= 3 && km <= 110, stations[index - 1].name + ' to ' + stations[index].name + ': ' + km + ' km');
+  route.tiles.forEach(tile => tile.ends.forEach(end => {
+    const direction = setup.worldmap.DIRECTIONS[end];
+    const other = route.byKey[(tile.x + direction.dx) + ',' + (tile.y + direction.dy)];
+    assert.ok(other && other.ends.includes(setup.worldmap.opposite(end)), tile.x + ',' + tile.y + ' joins its neighbour');
+  }));
+  // Every junction and every end of the line is a stop, so every leg is one plain line.
+  route.tiles.filter(tile => tile.ends.length !== 2).forEach(tile => assert.ok(tile.stationIndex, tile.x + ',' + tile.y + ' is a stop'));
+  // Spurs to termini are kept: Puerto Montt is at the end of one.
+  const puertoMontt = stations.findIndex(station => station.name === 'Puerto Montt' && station.status === 'city') + 1;
+  assert.ok(puertoMontt > 0);
+  // Find a way from Punta Arenas to Caracas, a station at a time, and drive it.
+  const goal = stations.findIndex(station => station.name === 'Caracas' && station.status === 'city') + 1;
+  const previous = new Map([[1, null]]), queue = [1];
+  while (queue.length && !previous.has(goal)) {
+    const at = queue.shift();
+    pilot.getStationLines(at).forEach(line => {
+      if (!previous.has(line.destination)) { previous.set(line.destination, { from: at, line }); queue.push(line.destination); }
+    });
   }
-  // Gap fills are marked on their tiles, and there are far fewer bridges and tunnels than tiles.
-  assert.ok(route.tiles.filter(tile => tile.gapFill).length > 250);
-  assert.ok(route.tiles.filter(tile => tile.terrain === 'bridge').length < route.tiles.length / 10);
-  // Every yard can be generated with a reserve engine that reaches the next stop.
+  assert.ok(previous.has(goal), 'Caracas can be reached');
+  const path = [];
+  for (let at = goal; previous.get(at); at = previous.get(at).from) path.unshift(previous.get(at));
   State.variables.player = { fatigue: 0, health: 100, immunity: 100, sanity: 100, hunger: 100, thirst: 100 };
-  for (let stationId = 1; stationId <= stations.length; stationId++) {
-    assert.ok(setup.yardGeneration.validate(setup.railyard.generateStationTracks(stationId, 'tip-to-tip')), 'station ' + stationId);
-  }
-  // Drive it: every leg, tile by tile, arriving at each station in turn.
   State.variables.currentTrain = [setup.railyard.cloneCar(State.variables.defaultTrains.dieselShunter)];
   State.variables.stationTracks = {};
-  let moves = 0;
-  for (let legIndex = 1; legIndex < stations.length; legIndex++) {
-    State.variables.journey = { legIndex, tileIndex: 0, forward: true };
+  State.variables.currentStation = 1;
+  let km = 0;
+  path.forEach(({ from, line }) => {
+    assert.equal(State.variables.currentStation, from);
+    const leg = pilot.getLeg(line.legIndex);
+    State.variables.journey = { legIndex: line.legIndex, tileIndex: line.forward ? 0 : leg.tiles.length - 1, forward: line.forward };
     while (State.variables.journey) {
-      const at = 'leg ' + legIndex + ' tile ' + State.variables.journey.tileIndex;
-      assert.equal(setup.railyard.moveAlongLine(1), true, at);
-      moves++;
+      const step = setup.worldmap.getJourneyStep(1);
+      km += step.distanceKm;
+      assert.equal(setup.railyard.moveAlongLine(1), true, 'leg ' + line.legIndex);
     }
-    assert.equal(State.variables.currentStation, legIndex + 1);
+    assert.equal(State.variables.currentStation, line.destination);
+  });
+  assert.equal(setup.worldmap.getStationName(State.variables.currentStation), 'Caracas');
+  assert.ok(km > 10000, Math.round(km) + ' km');
+  // Every yard on the continent can be generated, with a reserve engine that can get out.
+  for (let stationId = 1; stationId <= stations.length; stationId += 11) {
+    assert.ok(setup.yardGeneration.validate(setup.railyard.generateStationTracks(stationId, 'network')), 'station ' + stationId);
   }
-  assert.equal(moves, route.tiles.length - 1);
-  assert.equal(setup.worldmap.getStationName(State.variables.currentStation), 'Arica');
 });

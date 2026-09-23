@@ -283,7 +283,7 @@ test('lead tracks take their names from the route heading, not from entry and ex
     setup.railyard.oppositeDirection(setup.railyard.getLegHeading(1, 'compass')));
   assert.equal(setup.railyard.getLeadDirection(second, 'exit'), setup.railyard.getLegHeading(2, 'compass'));
   const headings = [1, 2, 3, 4].map(stationId => setup.railyard.getLegHeading(stationId, 'ignored'));
-  assert.deepEqual(headings, ['north', 'north', 'north', 'northwest']);
+  assert.deepEqual(headings, ['north', 'north', 'north', 'east']);
   // Further up the line the real track turns, and the leads turn with it.
   const stationCount = setup.realWorldPilot.getGridRoute().corridor.stations.length;
   const all = new Set(Array.from({ length: stationCount - 1 }, (_, index) => setup.railyard.getLegHeading(index + 1, 'ignored')));
@@ -317,7 +317,7 @@ test('debug teleport moves an onboard consist but moves a walker without their p
   const v = State.variables;
   Object.assign(v, { randomSeed: 'debug-teleport', debugMode: true, travellingForward: true });
   const route = setup.realWorldPilot.getGridRoute();
-  const at = (legIndex, tileIndex) => route.tiles[route.legs[legIndex].startPosition + tileIndex];
+  const at = (legIndex, tileIndex) => route.legs[legIndex].tiles[tileIndex];
   const train = [{ type: 'dieselShunter', length: 12 }, { type: 'boxcar', length: 12 }];
   v.currentTrain = train;
   v.onFoot = null;
@@ -1243,13 +1243,13 @@ test('sourced tiles report their real coordinates and sampled elevation', () => 
   const home = world.getClimate('climate', 0, 0);
   assert.ok(Math.abs(home.latitude - (-53.16472)) < 0.00001);
   assert.ok(Math.abs(home.longitude - (-70.90114)) < 0.00001);
-  assert.equal(home.elevation, 13.8);
+  assert.equal(home.elevation, 11);
   assert.equal(world.getBaseTerrain('climate', 0, 0), 'plains');
-  const stationCount = setup.realWorldPilot.getGridRoute().corridor.stations.length;
-  const arica = setup.realWorldPilot.getStationTile(stationCount);
+  const stations = setup.realWorldPilot.getGridRoute().corridor.stations;
+  const arica = setup.realWorldPilot.getStationTile(stations.findIndex(station => station.name === 'Arica' && station.status === 'city') + 1);
   assert.equal(arica.station, 'Arica');
   const north = world.getClimate('climate', arica.x, arica.y);
-  assert.equal(north.elevation, 8.1);
+  assert.equal(north.elevation, 8);
   // The tile is the grid square Arica stands in, so it reports the square's middle: within a few kilometres.
   assert.ok(Math.abs(north.latitude - (-18.46692)) < 0.05, String(north.latitude));
   assert.ok(north.temperature > home.temperature + 10, 'the far north is warmer');
@@ -1377,24 +1377,32 @@ test('the date can be written four ways, and the clock behind it never changes',
   assert.equal(setup.time.getCurrentTimestampMs(), Date.UTC(2000, 6, 4, 15, 7));
 });
 
-test('all playable stations come from the authored sourced corridor', () => {
+test('all playable stations come from the sourced network', () => {
   const { setup } = loadGame();
   const route = setup.realWorldPilot.getGridRoute(), stationCount = route.corridor.stations.length;
-  assert.equal(route.corridor.id, 'cl-main-line');
-  assert.deepEqual([1, 2, 3].map(id => setup.worldmap.getStationName(id)), ['Punta Arenas', 'Río Seco', 'Km 91']);
-  assert.equal(setup.worldmap.getStationName(stationCount), 'Arica');
-  // Puerto Montt lies at the end of a spur the line from Patagonia joins well north of it, so it is bypassed.
-  assert.deepEqual([...route.corridor.bypassedCities].map(city => city.name), ['Puerto Montt']);
-  for (const city of ['San Carlos de Bariloche', 'Osorno', 'Temuco', 'Chillán', 'Talca', 'Santiago', 'La Serena', 'Copiapó', 'Antofagasta']) {
-    assert.ok(route.corridor.stations.some(station => station.name === city), city + ' is a stop on the line');
+  assert.equal(route.corridor.id, 'network');
+  // Stations are numbered outward from Punta Arenas, so the first few run up the line from it.
+  assert.deepEqual([1, 2, 3, 4].map(id => setup.worldmap.getStationName(id)), ['Punta Arenas', 'Río Seco', 'Km 74 from El Turbio', 'El Turbio']);
+  // Every authored city is a stop, spurs to termini included.
+  const cities = route.corridor.stations.filter(station => station.status === 'city').map(station => station.name);
+  assert.equal(cities.length, 35);
+  for (const city of ['Puerto Montt', 'Santiago', 'Arica', 'Lima', 'Quito', 'Bogotá', 'Caracas', 'Manaus', 'São Paulo', 'Buenos Aires']) {
+    assert.ok(cities.includes(city), city + ' is a stop');
   }
   assert.equal(setup.realWorldPilot.getStation(stationCount + 1), null);
-  for (let legIndex = 1; legIndex < stationCount; legIndex++) {
-    const leg = setup.worldmap.getLeg('ignored', legIndex);
-    assert.equal(leg.fromStation.name, setup.worldmap.getStationName(legIndex));
-    assert.equal(leg.toStation.name, setup.worldmap.getStationName(legIndex + 1));
+  // Every leg runs from one station to another, and every line a station lists is a leg that starts or ends there.
+  Object.values(route.legs).forEach(leg => {
     assert.equal(leg.tiles[0].station, leg.fromStation.name);
     assert.equal(leg.tiles.at(-1).station, leg.toStation.name);
+    assert.ok(leg.tiles.slice(1, -1).every(tile => !tile.station), 'no station inside leg ' + leg.index);
+  });
+  for (let stationId = 1; stationId <= stationCount; stationId += 97) {
+    setup.realWorldPilot.getStationLines(stationId).forEach(line => {
+      const leg = route.legs[line.legIndex];
+      assert.equal(line.forward ? leg.fromStationIndex : leg.toStationIndex, stationId);
+      assert.equal(line.forward ? leg.toStationIndex : leg.fromStationIndex, line.destination);
+      assert.ok(line.side === 'entry' || line.side === 'exit');
+    });
   }
 });
 

@@ -15,7 +15,13 @@ setup.yardGeneration = {
 		var yard = setup.railyard, world = setup.worldmap;
 		this.breakStock(tracks, stationId, seed);
 		setup.recovery.ensureStock(tracks);
-		var stockTrack = tracks.slice(1, -1).find(function(track) { return !track.reservedClearance && yard.getTrackFreeLength(track) >= 9; });
+		// The engine must stand where it can get out: on a yard track that reaches a lead the station actually has. A
+		// station at the end of a line has only one.
+		var leads = yard.getLeads(tracks);
+		var stockTrack = tracks.slice(1, -1).find(function(track) {
+			var ends = yard.getTrackConnections(track, leads);
+			return !track.reservedClearance && yard.getTrackFreeLength(track) >= 9 && (ends.entry || ends.exit);
+		});
 		if (!stockTrack) throw new Error('Generated yard has no room for its reserved locomotive.');
 		var engine = yard.createLocomotiveCar('dieselShunter');
 		// Price the escape consist with a full tank and a loaded freight car, not an empty locomotive.
@@ -29,13 +35,15 @@ setup.yardGeneration = {
 			var branch = world.getBranchForStation(seed, stationId);
 			minutes = branch.tiles.reduce(function(total, tile) { return total + world.getTileMinutes(-tile.grade, train); }, 0);
 		} else {
-			minutes = world.getLegTravel(seed, stationId, train, false).minutes;
+			// The way out: the station's first exit line, or its only line when every line leaves the other side.
+			var line = world.getLine(stationId, true) || world.getLine(stationId, false);
+			minutes = line ? world.getLegTravel(seed, line.legIndex, train, !line.forward).minutes : 0;
 		}
 		// Include yard work before departure and five percent beyond the route cost.
 		var required = Math.ceil(minutes * 1.05) + 20;
 		if (required > 1500) throw new Error('Generated escape route exceeds reserve tank capacity.');
 		engine.cargo[0].amount = required;
-		var leads = yard.getLeads(tracks), connections = yard.getTrackConnections(stockTrack, leads);
+		var connections = yard.getTrackConnections(stockTrack, leads);
 		stockTrack.trains.splice(connections.entry ? 0 : stockTrack.trains.length, 0, [engine]);
 	},
 	validate: function(tracks) {

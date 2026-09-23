@@ -40,5 +40,11 @@
       "id": "south-america-places",
       "file": "world/imported/south-america-places.json"
     }
+  ],
+  "network": [
+    {
+      "id": "south-america-network",
+      "file": "world/network/south-america-network.json"
+    }
   ]
 }

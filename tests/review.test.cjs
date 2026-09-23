@@ -162,10 +162,12 @@ test('generated broken stock cannot provide supplies, storage, or power and neve
 
 test('sourced grid cells draw their true incoming connection',()=>{
   const {setup:s}=game([lead(),road(),lead()]);
-  const tiles=s.realWorldPilot.getGridRoute().tiles;
-  for(let i=1;i<tiles.length;i++) {
-    assert.ok(tiles[i].ends.includes(s.worldmap.directionBetween(tiles[i],tiles[i-1])),`(${tiles[i].x},${tiles[i].y}) connects back`);
-  }
+  Object.values(s.realWorldPilot.getGridRoute().legs).forEach(leg=>{
+    const tiles=leg.tiles;
+    for(let i=1;i<tiles.length;i++) {
+      assert.ok(tiles[i].ends.includes(s.worldmap.directionBetween(tiles[i],tiles[i-1])),`(${tiles[i].x},${tiles[i].y}) connects back`);
+    }
+  });
 });
 
 test('the deferred journal neither initializes nor records travel',()=>{
@@ -414,11 +416,13 @@ test('station lead headings follow the sourced rail grid', () => {
   const g = loadGame(), world = g.setup.worldmap, yard = g.setup.railyard;
   for (let station = 2; station <= 5; station++) {
     const tracks = yard.generateStationTracks(station, 'ignored');
-    assert.equal(tracks[0].direction, yard.oppositeDirection(yard.getLegHeading(station - 1)));
+    // Each lead is named for the first line leaving that side of the station.
+    assert.equal(tracks[0].direction, yard.getLineHeading(station, 'entry'));
+    assert.equal(tracks.at(-1).direction, yard.getLineHeading(station, 'exit'));
     assert.ok(g.setup.yardGeneration.validate(tracks));
   }
   assert.equal(yard.getLegHeading(1), 'north');
-  assert.equal(world.getStationName(5), 'Esperanza');
+  assert.equal(world.getStationName(5), 'Gobernador Moyano');
 });
 
 test('passenger templates exist at their catalogue lengths in both projections', () => {

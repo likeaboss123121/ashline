@@ -65,7 +65,20 @@ npm run world:build
 proposals and their review report. Routed proposals are never navigable: they are candidates for a reviewed
 corridor, not track the player can use.
 
-The main line plays approved routed links. Its stations and elevation come from:
+The playable world is the continental network (`network/south-america-network.json`), built from the same
+extract plus its stations and settlements:
+
+```sh
+npm run world:extract:south-america -- --input /path/to/south-america-260921.osm.pbf
+npm run world:extract:south-america:stations -- --input /path/to/south-america-260921.osm.pbf
+npm run world:extract:south-america:places -- --input /path/to/south-america-260921.osm.pbf
+export ASHLINE_DEM_CACHE=/somewhere/durable/copernicus
+npm run world:network:south-america   # an hour the first time, for the elevation tiles and terrain; minutes after
+npm run world:build
+```
+
+The Chilean main line, which played approved routed links before the network, is still compiled. Its stations and
+elevation come from:
 
 ```sh
 npm run world:extract:chile:stations -- --input /path/to/chile-260920.osm.pbf

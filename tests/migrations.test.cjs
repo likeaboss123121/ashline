@@ -87,10 +87,10 @@ test('v0.2.0 saves retain survival state while old branches move onto the source
 
 test('v0.2.0 saves outside the sourced corridor keep their train and return safely to the first station', () => {
   const {setup:s,State:{variables:v}}=loadGame();s.startNewRun();
-  v.saveSchemaVersion=1;v.currentStation=900;
+  v.saveSchemaVersion=1;v.currentStation=99999;
   v.currentTrain=[s.railyard.cloneCar(v.defaultTrains.dieselShunter)];
-  v.journey={legIndex:900,tileIndex:7,branch:'900:2:1',forward:true};
-  v.onFoot={tileIndex:3,branch:'900:2:1'};
+  v.journey={legIndex:99999,tileIndex:7,branch:'99999:2:1',forward:true};
+  v.onFoot={tileIndex:3,branch:'99999:2:1'};
   const result=s.saveMigrations.upgradeState(state(v,'OnFoot'),1).state.history[0];
   assert.equal(result.title,'TrainInterior');
   assert.equal(result.variables.currentStation,1);

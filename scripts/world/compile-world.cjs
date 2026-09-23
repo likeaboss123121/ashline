@@ -234,6 +234,19 @@ function compile() {
       linksById[id].routedBy = (linksById[id].routedBy || []).concat(route.id);
     });
   });
+  // The playable network: every mapped railway traced onto the shared grid and joined into one, built by
+  // scripts/world/build-network.cjs. At most one; it replaces the corridors as the world once the runtime reads it.
+  const networks = (importManifest.network || []).map(entry => {
+    const network = JSON.parse(read(entry.file));
+    assert(network.id === entry.id && network.formatVersion === 1, 'Network import ID mismatch: ' + entry.file);
+    [network.sources.geometry, network.sources.stations, network.sources.settlements].forEach(part => {
+      const source = sourceManifest.sources.find(candidate => candidate.id === part.sourceId);
+      assert(source && source.status === 'ingested', 'Network part has no ingested source: ' + part.id);
+    });
+    validateNetwork(network);
+    return network;
+  });
+  assert(networks.length <= 1, 'Only one playable network is supported');
   const bundle = {
     formatVersion: 1,
     datasetVersion: sourceManifest.datasetVersion,
@@ -244,6 +257,7 @@ function compile() {
     railGeometry,
     railTopology,
     routedLinks,
+    network: networks[0] || null,
     chunks: sortedChunks
   };
   validateBundle(bundle);
@@ -276,6 +290,66 @@ function validateRailGeometry(geometry, sources) {
   assert(Array.isArray(geometry.points) && geometry.points.length === geometry.stats.pointCount, 'Rail point count mismatch: ' + geometry.id);
   assert(coordinateCount === geometry.stats.coordinateCount, 'Rail coordinate count mismatch: ' + geometry.id);
   assert(Math.abs(Math.round(lengthKm * 10) / 10 - geometry.stats.lengthKm) < 0.11, 'Rail length mismatch: ' + geometry.id);
+}
+
+// The eight directions, in the order setup.worldmap.DIRECTIONS uses: a square's track ends are a bit each.
+const DIRECTIONS = [[0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0], [-1, 1]];
+
+function validateNetwork(network) {
+  const byKey = new Map(network.squares.map((square, index) => [square.x + ',' + square.y, index]));
+  assert(byKey.size === network.squares.length, 'Network squares repeat: ' + network.id);
+  network.squares.forEach(square => {
+    assert(square.ends.length > 0 || network.squares.length === 1, 'Network square has no track: ' + square.x + ',' + square.y);
+    square.ends.forEach(end => {
+      assert(DIRECTIONS.some(([dx, dy]) => dx === end.dx && dy === end.dy), 'Network move is not to a neighbour: ' + square.x + ',' + square.y);
+      const other = network.squares[byKey.get((square.x + end.dx) + ',' + (square.y + end.dy))];
+      assert(other && other.ends.some(back => back.dx === -end.dx && back.dy === -end.dy && back.km === end.km),
+        'Network move is not matched from the other side: ' + square.x + ',' + square.y);
+      assert(end.km > 0, 'Network move covers no track: ' + square.x + ',' + square.y);
+    });
+    assert(Number.isFinite(square.elevationM) && Number.isFinite(square.elevationStdDevM), 'Network square lacks elevation: ' + square.x + ',' + square.y);
+  });
+  // One piece, from the square the game starts on.
+  const seen = new Set([network.startSquare]), stack = [network.startSquare];
+  assert(byKey.has(network.startSquare), 'Network start square is missing: ' + network.id);
+  while (stack.length) {
+    const key = stack.pop(), square = network.squares[byKey.get(key)];
+    square.ends.forEach(end => {
+      const next = (square.x + end.dx) + ',' + (square.y + end.dy);
+      if (!seen.has(next)) { seen.add(next); stack.push(next); }
+    });
+  }
+  assert(seen.size === network.squares.length, 'Network is not one piece: ' + network.id);
+  const stopSquares = new Set();
+  network.stops.forEach(stop => {
+    assert(byKey.has(stop.square), 'Network stop is off the network: ' + stop.id);
+    assert(!stopSquares.has(stop.square), 'Two network stops share a square: ' + stop.square);
+    stopSquares.add(stop.square);
+  });
+}
+
+// The network as the browser gets it: parallel arrays, the ends of each square as a bit mask over DIRECTIONS and
+// the length of each move in the same order. Compact, because it runs to tens of thousands of squares.
+function compactNetwork(network) {
+  const byKey = new Map(network.squares.map((square, index) => [square.x + ',' + square.y, index]));
+  const squares = { x: [], y: [], ends: [], km: [], elevation: [], relief: [], flags: [] };
+  network.squares.forEach(square => {
+    let mask = 0;
+    const km = [];
+    DIRECTIONS.forEach(([dx, dy], bit) => {
+      const end = square.ends.find(candidate => candidate.dx === dx && candidate.dy === dy);
+      if (end) { mask |= 1 << bit; km.push(Math.round(end.km * 10) / 10); }
+    });
+    squares.x.push(square.x); squares.y.push(square.y); squares.ends.push(mask); squares.km.push(km);
+    squares.elevation.push(Math.round(square.elevationM)); squares.relief.push(Math.round(square.elevationStdDevM));
+    squares.flags.push((square.gapFill ? 1 : 0) | (square.bridge ? 2 : 0) | (square.tunnel ? 4 : 0));
+  });
+  const stops = { name: [], square: [], status: [] };
+  network.stops.forEach(stop => {
+    stops.name.push(stop.name); stops.square.push(byKey.get(stop.square)); stops.status.push(stop.status);
+  });
+  return { id: network.id, label: network.label, grid: network.grid, start: byKey.get(network.startSquare),
+    stats: network.stats, squares, stops };
 }
 
 function validateElevation(elevation, topology, sources) {
@@ -473,7 +547,7 @@ function outputsFor(bundle) {
     stats: geometry.stats,
     file: 'geometry/' + geometry.id + '.json'
   }));
-  const browserBundle = { ...bundle, railGeometry: bundle.railGeometry.map(geometry => ({
+  const browserBundle = { ...bundle, network: undefined, railGeometry: bundle.railGeometry.map(geometry => ({
     formatVersion: geometry.formatVersion,
     id: geometry.id,
     label: geometry.label,
@@ -515,6 +589,9 @@ function outputsFor(bundle) {
       routedLinkIds: corridor.routedLinkIds, railKm: corridor.railKm, gapKm: corridor.gapKm,
       ...(corridor.gridCells ? { gridCellCount: corridor.gridCellCount, playableKm: corridor.playableKm,
         skippedDetourKm: Math.round(corridor.skippedDetours.reduce((sum, detour) => sum + detour.km, 0) * 10) / 10 } : {}) })) }));
+  manifest.network = bundle.network ? { id: bundle.network.id, label: bundle.network.label, grid: bundle.network.grid,
+    sources: bundle.network.sources, parameters: bundle.network.parameters, stats: bundle.network.stats,
+    file: (JSON.parse(read('world/imports.json')).network || [])[0].file } : null;
   manifest.routedLinks = bundle.routedLinks.map(route => ({
     id: route.id, proposalSetId: route.proposalSetId, from: route.from, to: route.to,
     planningLinkIds: route.planningLinkIds, status: route.status, chordKm: route.chordKm, routedKm: route.routedKm,
@@ -532,7 +609,9 @@ function outputsFor(bundle) {
   }));
   const outputs = new Map([
     ['world/dist/manifest.json', stableJson(manifest)],
-    ['source/world-data.js', '// Generated by scripts/world/compile-world.cjs. Do not edit.\nsetup.worldGraphData = ' + stableJson(browserBundle).trimEnd() + ';\n']
+    ['source/world-data.js', '// Generated by scripts/world/compile-world.cjs. Do not edit.\nsetup.worldGraphData = ' + stableJson(browserBundle).trimEnd() + ';\n'
+      + (bundle.network ? '// The playable network, compact: see compactNetwork in the compiler.\nsetup.worldGraphData.network = '
+        + JSON.stringify(compactNetwork(bundle.network)) + ';\n' : '')]
   ]);
   Object.entries(bundle.chunks).forEach(([id, chunk]) => {
     outputs.set('world/dist/regions/' + id + '.json', stableJson(chunk));

@@ -46,24 +46,32 @@ function tilesForBox(box) {
 }
 
 // Downloads the tiles into the cache and returns the paths of those that exist. Tiles that are all sea do not exist
-// upstream; they are remembered as missing so they are not asked for again.
+// upstream; they are remembered as missing so they are not asked for again. Eight downloads run at once, in batches,
+// since a continent needs several hundred tiles.
 function fetchTiles(names, cache = defaultCache()) {
   fs.mkdirSync(cache, { recursive: true });
-  const files = [];
-  names.forEach((name, index) => {
-    const file = path.join(cache, name + '.tif');
-    const missing = file + '.missing';
-    if (!fs.existsSync(file) && !fs.existsSync(missing)) {
-      if (process.env.ASHLINE_WORLD_QUIET !== '1') console.error('Fetching ' + name + ' (' + (index + 1) + '/' + names.length + ')');
-      const result = spawnSync('curl', ['-sS', '-f', '-o', file + '.part', COPERNICUS_URL + name + '/' + name + '.tif'],
-        { encoding: 'utf8' });
-      if (result.status === 0) fs.renameSync(file + '.part', file);
-      else if (/\b(403|404)\b/.test(result.stderr)) { fs.rmSync(file + '.part', { force: true }); fs.writeFileSync(missing, ''); }
-      else throw new Error('Could not fetch ' + name + ': ' + result.stderr);
+  const wanted = names.filter(name => !fs.existsSync(path.join(cache, name + '.tif')) &&
+    !fs.existsSync(path.join(cache, name + '.tif.missing')));
+  for (let start = 0; start < wanted.length; start += 40) {
+    const batch = wanted.slice(start, start + 40);
+    if (process.env.ASHLINE_WORLD_QUIET !== '1') {
+      console.error('Fetching elevation tiles ' + (start + 1) + '-' + (start + batch.length) + ' of ' + wanted.length);
     }
-    if (fs.existsSync(file)) files.push(file);
-  });
-  return files;
+    const args = ['-sS', '-Z', '--parallel-max', '8', '--retry', '3', '-w', '%{http_code} %{filename_effective}\\n'];
+    batch.forEach(name => args.push('-o', path.join(cache, name + '.tif.part'), COPERNICUS_URL + name + '/' + name + '.tif'));
+    const result = spawnSync('curl', args, { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+    const codes = new Map(result.stdout.trim().split('\n').filter(Boolean).map(line => {
+      const [code, file] = line.split(' ');
+      return [file, code];
+    }));
+    batch.forEach(name => {
+      const part = path.join(cache, name + '.tif.part'), code = codes.get(part);
+      if (code === '200') fs.renameSync(part, path.join(cache, name + '.tif'));
+      else if (code === '403' || code === '404') { fs.rmSync(part, { force: true }); fs.writeFileSync(path.join(cache, name + '.tif.missing'), ''); }
+      else { fs.rmSync(part, { force: true }); throw new Error('Could not fetch ' + name + ' (HTTP ' + code + '): ' + result.stderr); }
+    });
+  }
+  return names.map(name => path.join(cache, name + '.tif')).filter(file => fs.existsSync(file));
 }
 
 module.exports = { COPERNICUS_URL, defaultCache, copernicusTileName, tilesFor, tilesForBox, fetchTiles };

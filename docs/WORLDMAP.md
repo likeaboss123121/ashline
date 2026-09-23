@@ -67,6 +67,48 @@ proposal, because Patagonia has never had a connecting railway.
 Routing also records how many kilometres of each slice run on bridges and in tunnels, so a playable corridor can
 tell a river crossing from a culvert.
 
+## The continental network
+
+The playable world is every mapped railway in South America, joined into one network on the shared grid. It is
+built by `scripts/world/build-network.cjs` (`npm run world:network:south-america`) into
+`world/network/south-america-network.json`, and replaced the Chilean main line as the world on 2026-09-23 at
+Likea's request to keep spur lines and integrate the whole continent. The main line and the Padre Hurtado–Melipilla
+pilot are still compiled but no longer played.
+
+1. **Trace.** All 70,910 OSM railway ways in the 2026-09-21 South America extract, every lifecycle status, are
+   traced across the grid squares they pass through. Two squares are joined where a line runs from one into the
+   other, so junctions and branches are simply squares where lines meet, and a spur to a terminus is a line that
+   ends. A move costs the track it covers, with a floor of most of the distance between the squares' middles.
+2. **Join.** Separate pieces within 30 km of each other are joined by the shortest new line between them. The
+   groups left are joined into one network by the shortest set of new lines (Borůvka's method), counting only
+   groups with at least 15 km of track or an authored city; a city with no railway at all joins as a piece of its
+   own. Lines over 10 km are laid over the terrain through towns, as in "Gap fills over the terrain" below.
+3. **Keep one network.** Whatever is still apart from the network Punta Arenas stands on is left out (29 scraps,
+   129 km). Unnamed dead ends shorter than 10 km (yard tracks, sidings, tracing stubs) are pruned.
+4. **Stops.** One per square: an authored city, else a working station (larger EFE category first), a settlement on
+   a new line, a working halt, a closed station. Every junction and every end of the line is a stop, named for its
+   station or the nearest settlement, so the track between two stops is always one plain line: a leg. A section
+   with no stop for more than 100 km gets halts, named for the nearest settlement within 15 km or for their distance
+   from the section's first stop.
+5. **Elevation.** Copernicus GLO-90 is resampled onto the grid projection itself in one pass (mean and root mean
+   square per square, from which the relief follows), over the 741 tiles under the network.
+
+The result: 21,043 squares, 6,755 stops and 7,186 legs; 128,169 km of mapped railway and 1,252 new lines totalling
+19,534 km, the longest across the Darién to Panama City, through Patagonia, and through the Guianas and Amazonia. All
+35 authored cities are stops, Puerto Montt at the end of its spur among them.
+
+**In play.** `setup.realWorldPilot` builds the network's tiles, stations and legs when first asked (about 0.4 s in a
+browser). Stations are numbered outward from Punta Arenas, a line at a time, so station 2 is the first stop up the
+line and leg 2 runs on from it. Each station lists its lines (`getStationLines`): a leg, the station at its far end,
+the heading, and which side of the yard it leaves from. The two lines that point most nearly opposite ways leave
+from opposite ends of the yard and every other line from the end it runs closer to, so a station on a plain line
+has one line each end however sharply it bends, and a junction offers a choice of lines from one end. A side with no
+line has no lead, and a yard with one lead has every track run to it. Departing names each line by its heading and
+destination; arriving uses the side the leg meets the station on.
+
+The debug map draws the network only when its panel is open, as plain squares and one path of track, with a line
+under the map naming the square under the pointer; the teleport list holds stations rather than squares.
+
 ## The Chilean main line
 
 Likea approved all four Chile links, gap fills included, for play on 2026-09-22. The playable world is the
@@ -225,10 +267,13 @@ there to inspect compiled data rather than to be a player-facing map.
 
 ## Not done yet
 
-- Only the Chilean main line is playable; Argentine, Peruvian and further links are not yet routed.
-- Stations are not yet differentiated by size or status in gameplay: a closed halt generates the same kind of yard as
-  a city.
-- The larger South America graph remains non-navigable planning data pending reviewed rail geometry.
+- A yard has two throats, so a three-way junction puts two lines on one side: a train coming off one of them and
+  leaving by the other backs through the yard.
+- Stations are not yet differentiated by size or status in gameplay: a closed halt, a junction and a city generate the
+  same kind of yard.
+- Halt and junction names are generated (`Km 74 from El Turbio`, or the nearest settlement) and are for Likea to
+  review.
+- Panama and Central America are outside the extract: Panama City is reached by a new line across the Darién.
 - Climate, rivers, obstacles, track condition and weather are not yet sourced into gameplay.
 
 ## Legacy generator

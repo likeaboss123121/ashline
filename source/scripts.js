@@ -1234,8 +1234,11 @@ setup.railyard = {
 		['north', 29], ['northeast', 16], ['northwest', 16], ['east', 12], ['west', 12],
 		['southeast', 5], ['south', 5], ['southwest', 5]
 	],
+	// The heading a station's exit side leads off in: its first line that side.
 	getLegHeading: function(stationId, baseSeed) {
-		if (setup.realWorldPilot && setup.realWorldPilot.getLegHeading) {
+		var exitHeading = this.getLineHeading(stationId, 'exit');
+		if (exitHeading) return exitHeading;
+		if (setup.realWorldPilot && setup.realWorldPilot.getLegHeading && !setup.realWorldPilot.hasNetwork()) {
 			var sourcedHeading = setup.realWorldPilot.getLegHeading(stationId);
 			if (sourcedHeading) return sourcedHeading;
 		}
@@ -1526,7 +1529,14 @@ setup.railyard = {
 		return towardExit ? gap === boundaryTrack.trains.length : gap === 0;
 	},
 	// Both travel directions use the same obstruction and route checks as shunting.
-	getDepartureBlockReason: function(stationId, playerTrackIndex, towardExit) {
+	// The heading of a station's first line on one side, or null where no line leaves that way.
+	getLineHeading: function(stationId, side) {
+		if (!setup.realWorldPilot || !setup.realWorldPilot.getStationLines) return null;
+		var line = setup.realWorldPilot.getStationLines(stationId).filter(function(candidate) { return candidate.side === side; })[0];
+		return line ? setup.worldmap.describeDirection(line.direction) : null;
+	},
+	// legIndex picks one of several lines leaving the same side of a junction; without it, the first line that side.
+	getDepartureBlockReason: function(stationId, playerTrackIndex, towardExit, legIndex) {
 		var tracks = State.variables.stationTracks[stationId];
 		if (!tracks || tracks.length < 3) {
 			return 'No valid station track layout.';
@@ -1534,19 +1544,21 @@ setup.railyard = {
 		if (!(towardExit ? this.getLeads(tracks).exit : this.getLeads(tracks).entry)) {
 			return 'This station has no ' + this.getTrackLabel(tracks, towardExit ? this.getExitTrackIndex(tracks) : this.getEntryTrackIndex()) + '.';
 		}
-		var destination = Number(stationId) + (towardExit ? 1 : -1);
-		if (!setup.realWorldPilot.getStation(destination)) {
+		var line = setup.worldmap.getLine(stationId, towardExit, legIndex);
+		if (!line) {
 			return 'There is no railway beyond ' + setup.worldmap.getStationName(stationId) + ' in that direction.';
 		}
-		// A station not generated yet always has the lead the player arrives on (only station 1 lacks one).
+		var destination = line.destination;
+		// A station not generated yet always has the lead the player arrives on.
+		var arriveOnEntry = setup.realWorldPilot.getArrivalSide(line.legIndex, destination) === 'entry';
 		var destinationTracks = State.variables.stationTracks[destination];
-		if (destinationTracks && !(towardExit ? this.getLeads(destinationTracks).entry : this.getLeads(destinationTracks).exit)) {
+		if (destinationTracks && !(arriveOnEntry ? this.getLeads(destinationTracks).entry : this.getLeads(destinationTracks).exit)) {
 			return setup.worldmap.getStationName(destination) + ' has no '
-				+ this.getTrackLabel(destinationTracks, towardExit ? this.getEntryTrackIndex() : this.getExitTrackIndex(destinationTracks))
+				+ this.getTrackLabel(destinationTracks, arriveOnEntry ? this.getEntryTrackIndex() : this.getExitTrackIndex(destinationTracks))
 				+ ' to arrive on.';
 		}
 		// The world between the stations has the last word: a heavy consist cannot pull the steepest grade there.
-		var climbReason = setup.worldmap.getClimbBlockReason(stationId, towardExit, State.variables.currentTrain);
+		var climbReason = setup.worldmap.getClimbBlockReason(stationId, towardExit, State.variables.currentTrain, line.legIndex);
 		if (climbReason) {
 			return climbReason;
 		}
@@ -1576,13 +1588,13 @@ setup.railyard = {
 	getAdvanceBlockReason: function(stationId, playerTrackIndex) {
 		return this.getDepartureBlockReason(stationId, playerTrackIndex, true);
 	},
-	travelToStation: function(towardExit) {
+	travelToStation: function(towardExit, legIndex) {
 		var variables = State.variables;
-		var destination = variables.currentStation + (towardExit ? 1 : -1);
-		if (!setup.realWorldPilot.getStation(destination) || this.getDepartureBlockReason(variables.currentStation, variables.drivingTrackIndex, towardExit)) {
+		var line = setup.worldmap.getLine(variables.currentStation, towardExit, legIndex);
+		if (!line || this.getDepartureBlockReason(variables.currentStation, variables.drivingTrackIndex, towardExit, line.legIndex)) {
 			return false;
 		}
-		return this.arriveAtStation(destination, towardExit);
+		return this.arriveAtStation(line.destination, setup.realWorldPilot.getArrivalSide(line.legIndex, line.destination) === 'entry');
 	},
 	// Rolling into a station: the consist comes off the line and stands on the lead it arrived by. Shared by the
 	// tile-by-tile journey and by the whole-leg jump the tests and debug tools use.
@@ -1608,25 +1620,23 @@ setup.railyard = {
 		variables.journey = null;
 		return true;
 	},
-	// Leaving a yard puts the consist on the first tile of the leg, and from there it moves a tile at a time.
-	departOntoLine: function(towardExit) {
+	// Leaving a yard puts the consist on the first tile of the leg, and from there it moves a tile at a time. A
+	// junction has several lines on a side; legIndex says which one.
+	departOntoLine: function(towardExit, legIndex) {
 		var variables = State.variables;
 		if (setup.worldmap.isBranchStation(variables.currentStation)) {
 			return this.departFromBranchTerminus();
 		}
 		var stationId = Number(variables.currentStation);
-		if (this.getDepartureBlockReason(stationId, variables.drivingTrackIndex, towardExit)) {
+		var line = setup.worldmap.getLine(stationId, towardExit, legIndex);
+		if (!line || this.getDepartureBlockReason(stationId, variables.drivingTrackIndex, towardExit, line.legIndex)) {
 			return false;
 		}
 		setup.tutorial.finish();
-		var legIndex = setup.worldmap.getLegIndexFor(stationId, towardExit);
-		if (legIndex < 1) {
-			return false;
-		}
-		var tiles = setup.worldmap.getMainLine(setup.worldmap.getSeed(), legIndex);
+		var tiles = setup.worldmap.getMainLine(setup.worldmap.getSeed(), line.legIndex);
 		if (!tiles || tiles.length < 2) return false;
 		variables.travellingForward = !!towardExit;
-		variables.journey = { legIndex: legIndex, tileIndex: towardExit ? 0 : tiles.length - 1, forward: !!towardExit };
+		variables.journey = { legIndex: line.legIndex, tileIndex: line.forward ? 0 : tiles.length - 1, forward: line.forward };
 		return true;
 	},
 	// Leaving a branch terminus: back onto the branch at its far end, facing the junction it came from.
@@ -1674,7 +1684,8 @@ setup.railyard = {
 		if (step.arrivesAt) {
 			// Arriving forward means coming in on the next station's entry lead, and backing in means its exit lead.
 			// A branch terminus has only the one lead, so a train always arrives on it.
-			var onEntryLead = setup.worldmap.isBranchStation(step.arrivesAt) || step.arrivesAt > journey.legIndex;
+			var onEntryLead = setup.worldmap.isBranchStation(step.arrivesAt)
+				|| setup.realWorldPilot.getArrivalSide(journey.legIndex, step.arrivesAt) === 'entry';
 			this.arriveAtStation(step.arrivesAt, onEntryLead);
 		}
 		return true;
@@ -2228,9 +2239,22 @@ setup.railyard = {
 			.concat([{ length: 999999, infinite: true, trains: [] }]);
 		tracks[0].leadTrack = entryRow;
 		tracks[tracks.length - 1].leadTrack = exitRow;
-		// Each lead is named for where it points: ahead along the next leg, and back down the one just travelled.
-		tracks[0].direction = this.oppositeDirection(this.getLegHeading(stationId - 1, baseSeed));
-		tracks[tracks.length - 1].direction = this.getLegHeading(stationId, baseSeed);
+		// Each lead is named for where it points: the first line leaving that side of the station. A side no line
+		// leaves from has no lead, and is named as the way back from the other side.
+		var entryHeading = this.getLineHeading(stationId, 'entry'), exitHeading = this.getLineHeading(stationId, 'exit');
+		tracks[0].direction = entryHeading || (setup.realWorldPilot.hasNetwork() && exitHeading ? this.oppositeDirection(exitHeading)
+			: this.oppositeDirection(this.getLegHeading(stationId - 1, baseSeed)));
+		tracks[tracks.length - 1].direction = exitHeading || this.oppositeDirection(tracks[0].direction);
+		if (setup.realWorldPilot.hasNetwork()) {
+			if (!entryHeading) tracks[0].hasLead = false;
+			if (!exitHeading) tracks[tracks.length - 1].hasLead = false;
+			// A yard with one lead has every track run to it: a siding that only reached the missing lead could never
+			// be used.
+			tracks.slice(1, -1).forEach(function(track) {
+				if (!entryHeading) delete track.connectsToExit;
+				if (!exitHeading) delete track.connectsToEntry;
+			});
+		}
 		setup.yardGeneration.reserve(tracks, stationId, baseSeed);
 		this.addDerelict(tracks, shapeRng);
 		setup.yardGeneration.validate(tracks);
@@ -2490,9 +2514,10 @@ Macro.add('lineControls', {
 		// the way out for a consist that cannot move at all, which is why it is offered before anything else.
 		var escapeLink = '';
 		if (!setup.worldmap.getJourneyStep(-1)) {
-			var backStation = view.forward ? view.legIndex : view.legIndex + 1;
+			var backStation = view.fromStationIndex || (view.forward ? view.legIndex : view.legIndex + 1);
+			var backOnEntry = setup.realWorldPilot.getArrivalSide(view.legIndex, backStation) === 'entry';
 			escapeLink = '<<link "Back into ' + setup.worldmap.getStationName(backStation) + '">>'
-				+ '<<run setup.railyard.arriveAtStation(' + backStation + ', ' + (!view.forward) + ')>>'
+				+ '<<run setup.railyard.arriveAtStation(' + backStation + ', ' + backOnEntry + ')>>'
 				+ '<<goto "DrivingMode">><</link>><br>';
 		}
 		if (!setup.railyard.isTrainDriveCapable(State.variables.currentTrain)) {
@@ -2607,28 +2632,35 @@ Macro.add('drivingTravelButtons', {
 			new Wikifier(this.output, output);
 			return;
 		}
+		// One departure per line leaving the station. A plain station has one line each side; a junction can have
+		// several from one side, each named for the heading it leaves in.
+		var lines = setup.realWorldPilot.getStationLines(stationId);
 		[false, true].forEach(function(towardExit) {
-			if (!towardExit && stationId <= 1) return;
-			// Travelling reads as the heading the lead track is named for, not as next and previous.
-			var heading = setup.railyard.getDirectionName(setup.railyard.getLeadDirection(tracks, towardExit ? 'exit' : 'entry'));
-			var destination = stationId + (towardExit ? 1 : -1);
-			if (!setup.realWorldPilot.getStation(destination)) return;
-			var label = 'Depart ' + heading + ' toward ' + setup.worldmap.getStationName(destination);
-			// The leg is a run of 5 km world tiles: climbing one costs more time, and so more fuel, than rolling
-			// along a flat one, and a heavy consist is slower over all of them.
-			var minutes = setup.worldmap.getTravelMinutes(stationId, towardExit, State.variables.currentTrain);
-			var summary = setup.worldmap.getTravelSummary(stationId, towardExit, State.variables.currentTrain);
-			var reason = setup.railyard.getDepartureBlockReason(stationId, trackIndex, towardExit);
-			if (reason) {
-				output += '<span class="yard-reason" data-yard-reason="depart:' + (towardExit ? 'exit' : 'entry') + '">'
-					+ '<em>' + label + ' unavailable: ' + reason + '</em></span>';
-			} else {
-				// Departing costs nothing by itself: the time and the fuel are spent tile by tile out on the line.
-				output += '<span data-yard-action="depart:' + (towardExit ? 'exit' : 'entry') + '">'
-					+ '<<link "Depart ' + heading + ' toward ' + setup.worldmap.getStationName(destination) + '">>'
-					+ '<<if setup.tutorial.requestExit(' + towardExit + ')>><<run setup.railyard.departOntoLine(' + towardExit + ')>><<goto "OnTheLine">><</if>><</link>></span><br>';
-				output += '<span class="small-description">' + summary + ' About ' + setup.time.formatDuration(minutes) + ' at this weight.</span><br>';
-			}
+			var sideLines = lines.filter(function(line) { return line.side === (towardExit ? 'exit' : 'entry'); });
+			sideLines.forEach(function(line) {
+				// Travelling reads as the heading the line leaves in, not as next and previous.
+				var heading = sideLines.length > 1
+					? setup.railyard.getDirectionName(setup.worldmap.describeDirection(line.direction))
+					: setup.railyard.getDirectionName(setup.railyard.getLeadDirection(tracks, towardExit ? 'exit' : 'entry'));
+				var destination = line.destination;
+				var label = 'Depart ' + heading + ' toward ' + setup.worldmap.getStationName(destination);
+				// A leg is a run of grid squares: climbing costs more time, and so more fuel, than rolling along the flat,
+				// and a heavy consist is slower over all of it.
+				var minutes = setup.worldmap.getTravelMinutes(stationId, towardExit, State.variables.currentTrain, line.legIndex);
+				var summary = setup.worldmap.getTravelSummary(stationId, towardExit, State.variables.currentTrain, line.legIndex);
+				var reason = setup.railyard.getDepartureBlockReason(stationId, trackIndex, towardExit, line.legIndex);
+				if (reason) {
+					output += '<span class="yard-reason" data-yard-reason="depart:' + (towardExit ? 'exit' : 'entry') + '">'
+						+ '<em>' + label + ' unavailable: ' + reason + '</em></span>';
+				} else {
+					// Departing costs nothing by itself: the time and the fuel are spent tile by tile out on the line.
+					output += '<span data-yard-action="depart:' + (towardExit ? 'exit' : 'entry') + '">'
+						+ '<<link "' + label + '">>'
+						+ '<<if setup.tutorial.requestExit(' + towardExit + ')>><<run setup.railyard.departOntoLine(' + towardExit + ', '
+						+ line.legIndex + ')>><<goto "OnTheLine">><</if>><</link>></span><br>';
+					output += '<span class="small-description">' + summary + ' About ' + setup.time.formatDuration(minutes) + ' at this weight.</span><br>';
+				}
+			});
 		});
 		new Wikifier(this.output, output);
 	}
