@@ -945,10 +945,13 @@ setup.worldmap = {
 		var routes = ((setup.worldGraphData && setup.worldGraphData.routedLinks) || []).filter(function(route) {
 			return !corridorId || route.playableCorridorId !== corridorId;
 		});
+		// A sinusoidal projection: a degree of longitude is measured at its own latitude, so kilometres are true east-west
+		// everywhere. Measuring it at Punta Arenas alone drew the tropics about 40% too narrow.
 		var lon0 = origin[0], lat0 = origin[1];
-		var kmPerLon = 111.32 * Math.cos(lat0 * Math.PI / 180), kmPerLat = 110.57, tile = this.TILE_KM;
+		var kmPerLat = 110.57, tile = this.TILE_KM;
+		var kmPerLon = function(latitude) { return 111.32 * Math.cos(latitude * Math.PI / 180); };
 		var toCell = function(point) {
-			return { x: Math.round((point[0] - lon0) * kmPerLon / tile), y: Math.round((point[1] - lat0) * kmPerLat / tile) };
+			return { x: Math.round((point[0] - lon0) * kmPerLon(point[1]) / tile), y: Math.round((point[1] - lat0) * kmPerLat / tile) };
 		};
 		var cells = {}, self = this;
 		routes.forEach(function(route) {
@@ -956,7 +959,7 @@ setup.worldmap = {
 				// Walk each run in steps of about a kilometre and mark every cell it passes through.
 				for (var index = 1; index < run.coordinates.length; index++) {
 					var a = run.coordinates[index - 1], b = run.coordinates[index];
-					var km = Math.hypot((b[0] - a[0]) * kmPerLon, (b[1] - a[1]) * kmPerLat);
+					var km = Math.hypot((b[0] - a[0]) * kmPerLon((a[1] + b[1]) / 2), (b[1] - a[1]) * kmPerLat);
 					var steps = Math.max(1, Math.ceil(km));
 					for (var step = 0; step <= steps; step++) {
 						var cell = toCell([a[0] + (b[0] - a[0]) * step / steps, a[1] + (b[1] - a[1]) * step / steps]);
@@ -1025,6 +1028,10 @@ setup.worldmap = {
 			contextRect.setAttribute('width', cell);
 			contextRect.setAttribute('height', cell);
 			contextRect.setAttribute('fill', contextCell.gapFill ? '#5a2b28' : '#3d4a47');
+			// An outline that stays a pixel wide however far out the map is zoomed, so the lines never vanish.
+			contextRect.setAttribute('stroke', contextCell.gapFill ? '#5a2b28' : '#3d4a47');
+			contextRect.setAttribute('stroke-width', '1');
+			contextRect.setAttribute('vector-effect', 'non-scaling-stroke');
 			contextRect.setAttribute('class', 'debug-context-tile' + (contextCell.gapFill ? ' debug-context-gap' : ''));
 			var contextTitle = document.createElementNS(ns, 'title');
 			contextTitle.textContent = (contextCell.gapFill ? 'Proposed gap fill' : 'Mapped rail') + ', not playable | '
@@ -1131,6 +1138,20 @@ setup.worldmap = {
 				}
 			}
 		});
+		// The playable line again as one stroke of fixed screen width over everything else, so it can still be picked
+		// out when the whole continent is in view and each tile is smaller than a pixel.
+		var outline = document.createElementNS(ns, 'polyline');
+		outline.setAttribute('points', leg.tiles.map(function(tile) {
+			return (left(tile.x) + cell / 2) + ',' + (top(tile.y) + cell / 2);
+		}).join(' '));
+		outline.setAttribute('fill', 'none');
+		outline.setAttribute('stroke', '#e5c58a');
+		outline.setAttribute('stroke-width', '2');
+		outline.setAttribute('stroke-opacity', '0.8');
+		outline.setAttribute('vector-effect', 'non-scaling-stroke');
+		outline.setAttribute('pointer-events', 'none');
+		outline.setAttribute('class', 'debug-map-line');
+		svg.appendChild(outline);
 		// Where the train is standing, and which way it is going, so the map can be read against the journey.
 		var here = this.getJourneyView();
 		var hasTrain = Array.isArray(State.variables.currentTrain) && State.variables.currentTrain.length > 0;
@@ -1171,10 +1192,131 @@ setup.worldmap = {
 			footMarker.appendChild(footTitle);
 			svg.appendChild(footMarker);
 		}
+		// Where the map should open: the train, else the player on foot, else the station they are in.
+		var focusTile = hasTrain && here && here.realWorld ? here.tile
+			: setup.onfoot && setup.onfoot.isOnFoot() ? setup.onfoot.getTile()
+				: setup.realWorldPilot.getStationTile(Number(State.variables.currentStation) || 1);
 		return { svg: svg, leg: leg, rect: rect, context: context, cell: cell,
-			corridorCentre: { x: left((leg.rect.x0 + leg.rect.x1) / 2), y: top((leg.rect.y0 + leg.rect.y1) / 2) } };
+			corridorCentre: { x: left((leg.rect.x0 + leg.rect.x1) / 2), y: top((leg.rect.y0 + leg.rect.y1) / 2) },
+			focus: focusTile ? { x: left(focusTile.x) + cell / 2, y: top(focusTile.y) + cell / 2 } : null };
 	},
 	// Adds the map plus a line of numbers to a debug panel.
+	// Zoom for the debug map. It opens fitted to the width of the panel, as before; "Whole map" shrinks it until the
+	// entire drawing is in view, and the buttons, Ctrl+wheel or a trackpad pinch zoom from there. Zooming only
+	// resizes the drawing that is already on the page and keeps the point under the pointer (or the middle of the
+	// view) where it was. A mouse can also drag the map around; a drag never counts as a click on a tile.
+	DEBUG_MAP_MAX_SCALE: 4,
+	DEBUG_MAP_START_CELL_PX: 6, // on screen, when the map first opens: big enough to click a tile
+	createDebugMapZoom: function(svg, frame, built) {
+		var self = this;
+		var width = Number(svg.getAttribute('width')), height = Number(svg.getAttribute('height'));
+		var mode = 'width'; // 'width', 'whole' or 'scale'
+		var bar = document.createElement('div');
+		bar.className = 'railyard-view-zoom debug-map-zoom';
+		var readout = document.createElement('span');
+		var currentScale = function() {
+			return svg.getBoundingClientRect().width / Math.max(1, width);
+		};
+		var wholeScale = function() {
+			var available = Math.max(120, Math.round(window.innerHeight * 0.7) - 2);
+			return Math.min(Math.max(1, frame.clientWidth) / width, available / height);
+		};
+		var show = function() {
+			readout.textContent = mode === 'width' ? 'Fit width' : mode === 'whole' ? 'Whole map'
+				: Math.round(currentScale() * 100) + '%';
+		};
+		// Resizes the drawing and scrolls so the map point at (clientX, clientY) stays under it.
+		var zoomTo = function(scale, clientX, clientY) {
+			if (!frame.clientWidth) return;
+			var frameBox = frame.getBoundingClientRect(), before = svg.getBoundingClientRect(), old = currentScale();
+			if (typeof clientX !== 'number') {
+				clientX = frameBox.left + frame.clientWidth / 2;
+				clientY = frameBox.top + frame.clientHeight / 2;
+			}
+			var unitX = (clientX - before.left) / old, unitY = (clientY - before.top) / old;
+			scale = Math.max(Math.min(wholeScale(), 1), Math.min(self.DEBUG_MAP_MAX_SCALE, scale));
+			svg.style.maxWidth = 'none';
+			svg.style.width = Math.round(width * scale) + 'px';
+			svg.style.height = Math.round(height * scale) + 'px';
+			var after = svg.getBoundingClientRect();
+			frame.scrollLeft += after.left + unitX * scale - clientX;
+			frame.scrollTop += after.top + unitY * scale - clientY;
+			show();
+		};
+		var addButton = function(label, title, onClick) {
+			var button = document.createElement('button');
+			button.type = 'button';
+			button.textContent = label;
+			button.title = title;
+			button.setAttribute('aria-label', title);
+			button.addEventListener('click', onClick);
+			bar.appendChild(button);
+		};
+		addButton('\u2212', 'Zoom out', function() { mode = 'scale'; zoomTo(currentScale() / 1.5); });
+		addButton('+', 'Zoom in', function() { mode = 'scale'; zoomTo(currentScale() * 1.5); });
+		addButton('Whole map', 'Shrink the map until all of it is in view', function() {
+			mode = 'whole';
+			zoomTo(wholeScale());
+			frame.scrollLeft = 0;
+			frame.scrollTop = 0;
+			show();
+		});
+		addButton('Fit width', 'Fit the map to the width of the panel', function() {
+			mode = 'width';
+			zoomTo(frame.clientWidth / width);
+			show();
+		});
+		bar.appendChild(readout);
+		show();
+		// The opening view: close enough to click a tile, centred on the player. A map small enough to fit the panel
+		// at that size simply fits its width, as it always did.
+		bar.openView = function() {
+			if (!frame.clientWidth) return false;
+			var fitWidth = frame.clientWidth / width, scale = self.DEBUG_MAP_START_CELL_PX / built.cell;
+			mode = scale <= fitWidth ? 'width' : 'scale';
+			zoomTo(Math.max(scale, fitWidth));
+			var target = built.focus || built.corridorCentre, applied = currentScale();
+			frame.scrollLeft = Math.max(0, target.x * applied - frame.clientWidth / 2);
+			frame.scrollTop = Math.max(0, target.y * applied - frame.clientHeight / 2);
+			show();
+			return true;
+		};
+		// Ctrl+wheel, and the pinch a trackpad reports as one, zoom around the pointer; a plain wheel still scrolls.
+		frame.addEventListener('wheel', function(event) {
+			if (!event.ctrlKey) return;
+			event.preventDefault();
+			mode = 'scale';
+			// About a fifth per wheel notch; a pinch sends many small steps and comes out smooth.
+			zoomTo(currentScale() * Math.exp(-event.deltaY * 0.002), event.clientX, event.clientY);
+		}, { passive: false });
+		// Dragging with a mouse pans. Touch already scrolls the frame by itself.
+		// The move and release listeners live only as long as the drag, since the panel is rebuilt on every passage.
+		frame.addEventListener('pointerdown', function(event) {
+			if (event.pointerType !== 'mouse' || event.button !== 0) return;
+			var drag = { x: event.clientX, y: event.clientY, left: frame.scrollLeft, top: frame.scrollTop, moved: false };
+			var move = function(moveEvent) {
+				var dx = moveEvent.clientX - drag.x, dy = moveEvent.clientY - drag.y;
+				if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 5) return;
+				drag.moved = true;
+				frame.classList.add('debug-map-dragging');
+				frame.scrollLeft = drag.left - dx;
+				frame.scrollTop = drag.top - dy;
+			};
+			var release = function() {
+				window.removeEventListener('pointermove', move);
+				window.removeEventListener('pointerup', release);
+				frame.classList.remove('debug-map-dragging');
+				if (!drag.moved) return;
+				// The click that ends a drag must not teleport the player to whatever tile the pointer let go over.
+				var swallow = function(clickEvent) { clickEvent.stopPropagation(); clickEvent.preventDefault(); };
+				frame.addEventListener('click', swallow, { capture: true, once: true });
+				setTimeout(function() { frame.removeEventListener('click', swallow, { capture: true }); }, 0);
+			};
+			window.addEventListener('pointermove', move);
+			window.addEventListener('pointerup', release);
+		});
+		return bar;
+	},
 	appendDebugMap: function(parent, stationId) {
 		if (!parent || typeof document === 'undefined') {
 			return;
@@ -1221,6 +1363,8 @@ setup.worldmap = {
 			var frame = document.createElement('div');
 			frame.className = 'debug-map-frame';
 			frame.appendChild(built.svg);
+			var zoomBar = this.createDebugMapZoom(built.svg, frame, built);
+			parent.appendChild(zoomBar);
 			parent.appendChild(frame);
 			var railCells = 0, gapCells = 0;
 			Object.keys(built.context.cells).forEach(function(key) {
@@ -1235,16 +1379,9 @@ setup.worldmap = {
 				parent.appendChild(contextLine);
 			}
 			// The debug tools are built inside a hidden panel and a folded section, so the map has no size until the
-			// player opens both. Centre it on the playable corridor the first time it actually appears.
-			var centre = function() {
-				if (!frame.clientHeight) return false;
-				var scale = built.svg.getBoundingClientRect().width / Math.max(1, Number(built.svg.getAttribute('width')));
-				frame.scrollTop = Math.max(0, built.corridorCentre.y * scale - frame.clientHeight / 2);
-				frame.scrollLeft = Math.max(0, built.corridorCentre.x * scale - frame.clientWidth / 2);
-				return true;
-			};
+			// player opens both. Set the opening view the first time it actually appears.
 			if (typeof ResizeObserver === 'function') {
-				var watcher = new ResizeObserver(function() { if (centre()) watcher.disconnect(); });
+				var watcher = new ResizeObserver(function() { if (zoomBar.openView()) watcher.disconnect(); });
 				watcher.observe(frame);
 			}
 			parent.appendChild(instructions);

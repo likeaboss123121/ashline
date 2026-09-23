@@ -384,8 +384,10 @@ test('red developer sidebar menus work on mobile with keyboard and close control
   await debug.focus();await page.keyboard.press('Enter');
   assert.equal(await page.locator('#developer-Debug').isVisible(),true);
   const box=await page.locator('#developer-Debug').boundingBox();assert.ok(box.x>=0 && box.x+box.width<=391);assert.ok(box.width>=389,JSON.stringify(box));
-  const debugMapBox=await page.locator('#developer-Debug svg.worldmap-debug').boundingBox();
+  // The map opens zoomed in and scrolls inside its frame; the frame is what has to fit the phone.
+  const debugMapBox=await page.locator('#developer-Debug .debug-map-frame').boundingBox();
   assert.ok(debugMapBox.width>=260&&debugMapBox.width<=340,JSON.stringify(debugMapBox));
+  assert.equal(await page.locator('#developer-Debug .debug-map-zoom button').count(),4);
   assert.ok(await page.locator('#developer-Debug select[aria-label="Exact track tile"] option').count()>1);
   const closeDebug=page.getByRole('button',{name:'Close Debug',exact:true});
   assert.equal(await closeDebug.evaluate(el=>getComputedStyle(el).textTransform),'uppercase');
@@ -1668,6 +1670,43 @@ test('debug map teleport carries an onboard consist into a station on the select
   assert.equal(moved.journey, null);
   assert.equal(moved.onFoot, null);
   assert.match(await page.locator('.debug-teleport-notice').innerText(), /Teleported the complete consist to Km 187 station/);
+});
+
+test('the debug map zooms out to the whole continent and in again, and a drag pans without teleporting', async t => {
+  const page = await openGame(t, { viewport: { width: 1300, height: 950 } });
+  await begin(page);
+  await board(page);
+  await page.evaluate(() => { SugarCube.State.variables.debugMode = true; SugarCube.Engine.play('TrainInterior'); });
+  await passage(page, 'TrainInterior');
+  await page.getByRole('button', { name: 'Debug', exact: true }).click();
+  const mapSection = page.locator('details.debug-section').filter({ has: page.getByText('World rail grid', { exact: true }) });
+  if (!await mapSection.evaluate(element => element.open)) await mapSection.locator(':scope > summary').click();
+  const bar = mapSection.locator('.debug-map-zoom');
+  const svg = mapSection.locator('svg.worldmap-debug');
+  const frame = mapSection.locator('.debug-map-frame');
+  // It opens close enough to click a tile: about 6 px each.
+  const opening = await svg.evaluate(element => element.getBoundingClientRect().width / Number(element.getAttribute('width')) * 7);
+  assert.ok(opening > 5 && opening < 7, String(opening));
+  await bar.getByRole('button', { name: 'Shrink the map until all of it is in view' }).click();
+  const whole = await svg.boundingBox(), box = await frame.boundingBox();
+  assert.ok(whole.width <= box.width + 1 && whole.height <= box.height + 1, JSON.stringify({ whole, box }));
+  assert.equal(await bar.locator('span').innerText(), 'Whole map');
+  await bar.getByRole('button', { name: 'Zoom in' }).click();
+  assert.ok((await svg.boundingBox()).width > whole.width * 1.4);
+  assert.match(await bar.locator('span').innerText(), /^\d+%$/);
+  // A drag that starts and ends on track tiles scrolls the map and teleports nobody.
+  for (let step = 0; step < 4; step++) await bar.getByRole('button', { name: 'Zoom in' }).click();
+  const tile = svg.locator('.debug-teleport-tile').nth(300);
+  await tile.scrollIntoViewIfNeeded();
+  const start = await tile.boundingBox();
+  const before = await page.evaluate(() => JSON.stringify([SugarCube.State.passage, SugarCube.State.variables.currentStation, SugarCube.State.variables.journey]));
+  const scrolled = await frame.evaluate(element => [element.scrollLeft, element.scrollTop].join());
+  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(start.x + 80, start.y + 90, { steps: 6 });
+  await page.mouse.up();
+  assert.notEqual(await frame.evaluate(element => [element.scrollLeft, element.scrollTop].join()), scrolled);
+  assert.equal(await page.evaluate(() => JSON.stringify([SugarCube.State.passage, SugarCube.State.variables.currentStation, SugarCube.State.variables.journey])), before);
 });
 
 test('driving the line goes one 5 km tile at a time, and draws the consist on it', async t => {

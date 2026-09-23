@@ -399,4 +399,17 @@
 	max-height: 70vh;
 	overflow: auto;
 	border: 1px solid #3a2a2e;
+	cursor: grab;
+}
+
+.debug-map-frame.debug-map-dragging {
+	cursor: grabbing;
+	user-select: none;
+}
+
+/* The yard's zoom bar, sitting above the map rather than floating over it. */
+.debug-map-zoom.railyard-view-zoom {
+	position: static;
+	width: fit-content;
+	margin-bottom: 4px;
 }
