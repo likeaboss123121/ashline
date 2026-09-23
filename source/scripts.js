@@ -392,13 +392,13 @@ setup.showCreditsDialog = function() {
 	// Insert this static HTML directly.  Passing labels such as "World data:" through
 	// the Wikifier makes its URL parser mistake "data:" for the start of a link and
 	// display the remainder of the HTML tags as text.
-	Dialog.body().insertAdjacentHTML('beforeend', '<p><strong>Created by:</strong> likea</p><p><a href="http://likeaserver.myddns.me/" target="_blank" rel="noopener noreferrer">Official Website</a></p><p><a href="https://github.com/likeaboss123121" target="_blank" rel="noopener noreferrer">GitHub</a></p>'
+	Dialog.body().insertAdjacentHTML('beforeend', '<p><strong>Created by:</strong> likea</p><p><a href="https://likea.moe/" target="_blank" rel="noopener noreferrer">Official Website</a></p><p><a href="https://github.com/likeaboss123121" target="_blank" rel="noopener noreferrer">GitHub</a></p>'
 		+ '<p><strong>World data:</strong> City names, coordinates and population from <a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer">GeoNames</a>, licensed under CC BY 4.0. Railway geometry © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>, provided by <a href="https://download.geofabrik.de/" target="_blank" rel="noopener noreferrer">Geofabrik</a> under ODbL 1.0.</p>'
 		+ '<p><strong>Elevation data:</strong> Produced using Copernicus WorldDEM-90 © DLR e.V. 2010–2014 and © Airbus Defence and Space GmbH 2014–2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.</p>'
 		+ '<p><strong>AI Generated Content Disclosure:</strong></p>'
 		+ '<p>AI was used to make code and .svg art for this game. Diffusion (what people commonly refer to as AI Image Generation) was not used for this game. '
 		+ 'Read more about how AI was used and my opinions about AI in video games at '
-		+ '<a href="https://likeaserver.myddns.me/ashlinegame/about/#ai-generation-disclosure" target="_blank" rel="noopener noreferrer">'
+		+ '<a href="https://likea.moe/ashlinegame/about/#ai-generation-disclosure" target="_blank" rel="noopener noreferrer">'
 		+ 'Ashline\'s Page on my Website</a>.</p>');
 	Dialog.open();
 };

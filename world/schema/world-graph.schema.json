@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://likeaserver.myddns.me/ashlinegame/schema/world-graph-1.json",
+  "$id": "https://likea.moe/ashlinegame/schema/world-graph-1.json",
   "title": "Ashline compiled world graph bundle",
   "type": "object",
   "required": ["formatVersion", "datasetVersion", "tileKm", "sources", "regions", "corridors", "railGeometry", "railTopology", "chunks"],

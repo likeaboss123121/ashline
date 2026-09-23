@@ -1760,7 +1760,7 @@ test('the credits dialog discloses how AI was used', async t => {
   await page.locator('#menu-story').getByText('Credits', { exact: true }).click();
   const dialog = page.locator('#ui-dialog');
   // The dialog fades in, so wait for the link to lay out before reading any text out of it.
-  const link = dialog.locator('a[href="https://likeaserver.myddns.me/ashlinegame/about/#ai-generation-disclosure"]');
+  const link = dialog.locator('a[href="https://likea.moe/ashlinegame/about/#ai-generation-disclosure"]');
   await link.waitFor({ state: 'visible' });
   const shown = await dialog.innerText();
   assert.match(shown, /AI Generated Content Disclosure:/);

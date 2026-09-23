@@ -4,11 +4,11 @@ Ashline is a text-based survival game about circumnavigating the globe by train 
 
 Ashline is free and open source, and it runs entirely in your browser. It is built with [Twine](https://twinery.org/) and the [SugarCube 2](https://www.motoslave.net/sugarcube/2/) story format.
 
-**[Visit the Ashline website](https://likeaserver.myddns.me/ashlinegame/about/)**
+**[Visit the Ashline website](https://likea.moe/ashlinegame/about/)**
 
 ## Play
 
-- **In your browser:** play the current build on the [Ashline website](https://likeaserver.myddns.me/ashlinegame).
+- **In your browser:** play the current build on the [Ashline website](https://likea.moe/ashlinegame).
 - **Offline:** download a playable HTML file from the [Releases page](https://github.com/likeaboss123121/ashline/releases), then open it in any modern browser.
 
 Saves are stored in your browser. To keep a backup, use **Save to Disk** in the Saves menu.
