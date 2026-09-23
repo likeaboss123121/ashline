@@ -1368,6 +1368,14 @@ setup.worldmap = {
 			zoomTo(frame.clientWidth / width);
 			show();
 		});
+		// Panning by button: a network map is heavy to drag or scroll, so these jump three quarters of the view at once.
+		[['\u2190', 'Pan left', -1, 0], ['\u2191', 'Pan up', 0, -1], ['\u2193', 'Pan down', 0, 1], ['\u2192', 'Pan right', 1, 0]]
+			.forEach(function(pan) {
+				addButton(pan[0], pan[1], function() {
+					frame.scrollLeft += pan[2] * Math.round(frame.clientWidth * 0.75);
+					frame.scrollTop += pan[3] * Math.round(frame.clientHeight * 0.75);
+				});
+			});
 		bar.appendChild(readout);
 		show();
 		// The opening view: close enough to click a tile, centred on the player. A map small enough to fit the panel

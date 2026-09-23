@@ -387,7 +387,7 @@ test('red developer sidebar menus work on mobile with keyboard and close control
   // The map opens zoomed in and scrolls inside its frame; the frame is what has to fit the phone.
   const debugMapBox=await page.locator('#developer-Debug .debug-map-frame').boundingBox();
   assert.ok(debugMapBox.width>=260&&debugMapBox.width<=340,JSON.stringify(debugMapBox));
-  assert.equal(await page.locator('#developer-Debug .debug-map-zoom button').count(),4);
+  assert.equal(await page.locator('#developer-Debug .debug-map-zoom button').count(),8);
   assert.ok(await page.locator('#developer-Debug select[aria-label="Exact track tile"] option').count()>1);
   const closeDebug=page.getByRole('button',{name:'Close Debug',exact:true});
   assert.equal(await closeDebug.evaluate(el=>getComputedStyle(el).textTransform),'uppercase');
@@ -1709,6 +1709,21 @@ test('the debug map zooms out to the whole continent and in again, and a drag pa
   assert.match(await bar.locator('span').innerText(), /^\d+%$/);
   // A drag that starts and ends on track tiles scrolls the map and teleports nobody.
   for (let step = 0; step < 4; step++) await bar.getByRole('button', { name: 'Zoom in' }).click();
+  // Zoomed in, the pan buttons move the view by most of its size, in the direction named.
+  const scrollOf = () => frame.evaluate(element => ({ left: element.scrollLeft, top: element.scrollTop }));
+  let panBefore = await scrollOf();
+  await bar.getByRole('button', { name: 'Pan right' }).click();
+  let panAfter = await scrollOf();
+  assert.ok(panAfter.left > panBefore.left && panAfter.top === panBefore.top, JSON.stringify({ panBefore, panAfter }));
+  panBefore = panAfter;
+  await bar.getByRole('button', { name: 'Pan down' }).click();
+  panAfter = await scrollOf();
+  assert.ok(panAfter.top > panBefore.top && panAfter.left === panBefore.left, JSON.stringify({ panBefore, panAfter }));
+  panBefore = panAfter;
+  await bar.getByRole('button', { name: 'Pan left' }).click();
+  await bar.getByRole('button', { name: 'Pan up' }).click();
+  panAfter = await scrollOf();
+  assert.ok(panAfter.left < panBefore.left && panAfter.top < panBefore.top, JSON.stringify({ panBefore, panAfter }));
   const tile = svg.locator('.debug-teleport-tile').nth(300);
   await tile.scrollIntoViewIfNeeded();
   const start = await tile.boundingBox();
