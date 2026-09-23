@@ -175,7 +175,10 @@ test('actual v0.1.0 exports migrate every passage and preserve stock, cargo and 
     assert.equal(migrated.player.health,100);assert.equal(migrated.player.hunger,100);assert.equal(migrated.player.thirst,100);
     assert.equal(migrated.trains.length,0);assert.equal(migrated.currentCar,undefined);
     assert.ok(await page.evaluate(()=>SugarCube.State.history.every(m=>m.variables.saveSchemaVersion===SugarCube.setup.saveMigrations.CURRENT)));
-    assert.equal(await page.evaluate(()=>SugarCube.setup.saves.save(1)),true);
+    // Old saves from the title or introduction still load, but nothing can be saved there.
+    const inGame=await page.evaluate(()=>SugarCube.setup.isInGame());
+    assert.equal(await page.evaluate(()=>SugarCube.setup.saves.save(1)),inGame,name);
+    if(!inGame) continue;
     assert.equal(await page.evaluate(()=>SugarCube.setup.saves.load(1)),true);
     await passage(page,title);
   }
@@ -942,6 +945,48 @@ test('the first station teaches shunting: off the stub, onto the flatcar, and aw
   assert.equal(await hint(), null);
 });
 
+test('before the game starts, saves can be loaded but not made, and the debug tools stay away', async t => {
+  const page = await openGame(t);
+  // Make a save to load later: begin, save into slot 1, and return to the title.
+  await begin(page);
+  await page.locator('#menu-item-saves a').click();
+  await page.locator('.saves-slot[data-slot="0"] .saves-button').first().click();
+  await page.locator('.saves-slot[data-slot="0"] .saves-button', { hasText: 'Overwrite' }).waitFor();
+  await page.evaluate(() => { SugarCube.Dialog.close(); SugarCube.Engine.play('Start'); });
+  await passage(page, 'Start');
+  for (const title of ['Start', 'Introduction']) {
+    if (title === 'Introduction') {
+      await page.evaluate(() => SugarCube.Engine.play('Introduction'));
+      await passage(page, 'Introduction');
+    }
+    // The console command turns the flag on, but no debug tools appear here.
+    const answer = await page.evaluate(() => window.debug && SugarCube.State.variables.debugMode);
+    assert.equal(answer, true);
+    assert.equal(await page.locator('#menu-story .developer-menu-item').count(), 0, title);
+    assert.equal(await page.locator('#developer-tabs').count(), 0, title);
+    assert.equal(await page.evaluate(() => SugarCube.setup.worldmap.debugTeleportToTile(0, 0, 0)), null, title);
+    // The saves menu offers loading and deleting, not saving.
+    await page.locator('#menu-item-saves a').click();
+    await page.locator('.saves-menu').waitFor({ state: 'visible' });
+    assert.equal(await page.locator('.saves-menu .saves-button', { hasText: /^(Save|Overwrite|Save to disk)$/ }).count(), 0, title);
+    assert.match(await page.locator('.saves-unavailable').innerText(), /Saving is available once the game has started/);
+    assert.equal(await page.locator('.saves-slot[data-slot="0"] .saves-button', { hasText: 'Load' }).count(), 1, title);
+    assert.equal(await page.evaluate(() => SugarCube.setup.saves.save(1)), false, title);
+    assert.equal(await page.evaluate(() => SugarCube.setup.saves.getSlot(1)), null, 'nothing was saved into slot 2');
+    await page.evaluate(() => SugarCube.Dialog.close());
+  }
+  // Loading from the introduction lands in the saved game, where saving and the debug tools are back.
+  await page.locator('#menu-item-saves a').click();
+  await page.locator('.saves-slot[data-slot="0"] .saves-button', { hasText: 'Load' }).click();
+  await page.locator('#ui-dialog-body').getByRole('button', { name: 'Confirm', exact: true }).first().click();
+  await page.waitForFunction(() => SugarCube.State.passage === 'Railyard');
+  assert.equal(await page.evaluate(() => SugarCube.setup.saves.canSave()), true);
+  // The save was made with debug off, and loading it restores that; the console command now brings the tools up.
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.debugMode), false);
+  assert.equal(await page.evaluate(() => SugarCube.setup.enableDebugMode()), 'Ashline debug mode enabled.');
+  assert.ok(await page.locator('#menu-story .developer-menu-item').count() > 0);
+});
+
 test('the saves menu shows what each slot holds, and asks for a backup when one is overdue', async t => {
   const page = await openGame(t);
   await begin(page);
@@ -1275,7 +1320,11 @@ test('legacy intro saves load as an introduction without resetting gameplay stat
         }
       }
     });
+    // Saving is closed on the introduction now, so lift the gate just long enough to write the old-style save.
+    const allowed = SugarCube.Config.saves.isAllowed;
+    SugarCube.Config.saves.isAllowed = null;
     SugarCube.Save.slots.save(0);
+    SugarCube.Config.saves.isAllowed = allowed;
     SugarCube.Save.slots.load(0);
   });
   await passage(page, 'Introduction');

@@ -912,7 +912,7 @@ setup.worldmap = {
 	// leaves its journey position untouched. With no active train, journey supplies the walking route context only.
 	debugTeleportToTile: function(legIndex, x, y) {
 		var variables = State.variables;
-		if (!variables.debugMode) return null;
+		if (!variables.debugMode || !setup.isInGame()) return null;
 		var target = this.getDebugTeleportTarget(Number(legIndex), Number(x), Number(y));
 		if (!target) return null;
 		var activeTrain = Array.isArray(variables.currentTrain) && variables.currentTrain.length > 0;

@@ -60,7 +60,12 @@ setup.saves = {
 			turns: State.turns
 		};
 	},
+	// Whether the game in progress can be saved: not before it has started (see setup.isInGame).
+	canSave: function() {
+		return setup.isInGame();
+	},
 	save: function(index, automatic) {
+		if (!this.canSave()) return this.fail('Saving is available once the game has started.');
 		try {
 			var detail = this.describeCurrent(), slots = this.slotApi();
 			detail.automatic = !!automatic;
@@ -106,7 +111,7 @@ setup.saves = {
 	},
 	exportFile: function() {
 		try {
-			if (Config.saves.isAllowed && !Config.saves.isAllowed()) return this.fail('Saving is unavailable here.');
+			if (!this.canSave()) return this.fail('Saving is available once the game has started.');
 			Save.export('ashline-' + new Date().toISOString().slice(0, 10), this.describeCurrent());
 			this.markExported(); this.error = false; this.message = 'Backup download requested. Keep the downloaded file.';
 			this.refresh(); return true;
@@ -259,9 +264,16 @@ setup.saves = {
 			? 'No backup has been saved to disk from this browser.'
 			: 'Last backup to disk: ' + (days < 1 ? 'today' : Math.floor(days) + ' day' + (Math.floor(days) === 1 ? '' : 's') + ' ago') + '.';
 		backup.appendChild(summary);
-		backup.appendChild(this.button('Save to disk', 'Write a backup file you can keep', function() {
-			self.exportFile();
-		}, 'saves-primary'));
+		if (this.canSave()) {
+			backup.appendChild(this.button('Save to disk', 'Write a backup file you can keep', function() {
+				self.exportFile();
+			}, 'saves-primary'));
+		} else {
+			var waiting = document.createElement('p');
+			waiting.className = 'small-description saves-unavailable';
+			waiting.textContent = 'Saving is available once the game has started. You can load a save now.';
+			backup.appendChild(waiting);
+		}
 		var fileLabel = document.createElement('label');
 		fileLabel.className = 'saves-button saves-file';
 		fileLabel.textContent = 'Load from disk';
@@ -315,7 +327,7 @@ setup.saves = {
 		row.appendChild(detail);
 		var actions = document.createElement('div');
 		actions.className = 'saves-actions';
-		if (index !== 'auto') actions.appendChild(this.button(save ? 'Overwrite' : 'Save', 'Save the game into this slot', function() {
+		if (index !== 'auto' && this.canSave()) actions.appendChild(this.button(save ? 'Overwrite' : 'Save', 'Save the game into this slot', function() {
 			if (save) self.confirm('Overwrite Slot ' + (index + 1) + '? The existing save will be replaced.', function() { self.save(index); });
 			else { self.save(index); self.refresh(); }
 		}, 'saves-primary'));
@@ -358,7 +370,8 @@ Macro.add('saveReminder', {
 			warning.appendChild(setup.saves.button('Saves', 'Open saves and export a backup', function() { setup.saves.showDialog(); }));
 			this.output.appendChild(warning);
 		}
-		if (!setup.saves.shouldRemind()) {
+		// A backup reminder waits for the game: before it starts there is nothing to back up.
+		if (!setup.isInGame() || !setup.saves.shouldRemind()) {
 			return;
 		}
 		var notice = document.createElement('div');

@@ -64,7 +64,8 @@ setup.sideTabs = {
 		var opened = old ? Array.from(old.querySelectorAll('details[open] > summary')).map(function(s) { return (s.querySelector('[data-disclosure-label]') || s).textContent; }) : [];
 		if (old) old.remove();
 		document.querySelectorAll('#menu-story .developer-menu-item').forEach(function(item) { item.remove(); });
-		if (!State.variables.debugMode || State.passage === 'Start') { this.active = null; return; }
+		// The debug tools belong to a game in progress, never to the title, the introduction or save recovery.
+		if (!State.variables.debugMode || !setup.isInGame()) { this.active = null; return; }
 		var menu = document.getElementById('menu-story'); if (!menu) return;
 		var root = document.createElement('aside'); root.id = 'developer-tabs';
 		var self = this;
@@ -103,7 +104,8 @@ setup.enableDebugMode = function() {
 	if (typeof State === 'undefined' || !State.variables) return 'Ashline is not ready yet.';
 	State.variables.debugMode = true;
 	setup.sideTabs.refresh();
-	return 'Ashline debug mode enabled.';
+	return setup.isInGame() ? 'Ashline debug mode enabled.'
+		: 'Ashline debug mode enabled. The debug tools appear once the game has started.';
 };
 if (typeof window !== 'undefined') {
 	var ashlineDebugCommand = function() { return setup.enableDebugMode(); };

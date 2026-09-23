@@ -220,7 +220,8 @@ setup.saveMigrations.steps[0] = function(moment) { setup.saveMigrations.upgradeU
 setup.saveMigrations.steps[1] = function(moment) { setup.saveMigrations.upgradeSourcedWorld(moment); };
 if (typeof Config !== 'undefined') {
 	Config.saves.version = setup.saveMigrations.CURRENT;
-	Config.saves.isAllowed = function() { return State.passage !== 'SaveRecovery'; };
+	// Saving waits for the game to start; loading is allowed everywhere.
+	Config.saves.isAllowed = function() { return setup.isInGame(); };
 }
 Save.onLoad.add(function(save) {
 	var result = setup.saveMigrations.upgradeState(save.state, save.version);

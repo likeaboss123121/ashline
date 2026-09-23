@@ -9,7 +9,7 @@ function loadGame() {
   const code = embedded ? embedded[1] : fs.readFileSync(path.join(root, 'source/scripts.js'), 'utf8');
   const macros = {};
   const context = vm.createContext({
-    setup: {}, State: { variables: {}, passage: 'Start' },
+    setup: {}, State: { variables: {}, passage: 'Railyard' },
     Macro: { add: (name, definition) => { macros[name] = definition; } },
     document: { querySelector() { return null; } }, jQuery: () => ({ one() {}, on() {} }),
     Save: { onLoad: { add() {} } }, console,
