@@ -238,16 +238,20 @@ test('diesel and steam can complete multi-station runs on generated depot suppli
       assert.equal(s.railyard.departOntoLine(true),true,model+' depart '+station);
       let guard=0;
       while(v.journey && guard++<100) {
-        const step=s.worldmap.getJourneyStep(1);assert.ok(step&&!step.blocked);
+        let step=s.worldmap.getJourneyStep(1);
+        // At a junction out on the line the driver picks a way on, as a player would.
+        const choice=!step&&s.worldmap.getBranchChoices().find(candidate=>!s.worldmap.getBranchStep(candidate.id).blocked);
+        if(choice) step=s.worldmap.getBranchStep(choice.id);
+        assert.ok(step&&!step.blocked);
         if(!s.time.advanceMinutesWithSystems(step.minutes,'travel')) {
           assert.ok(steam,'diesel reserve covers the route');
           assert.ok(engine.fireboxEnabled,'steam has fuel and water');
           s.time.advanceMinutesWithSystems(30,'generic');continue;
         }
-        assert.equal(s.railyard.moveAlongLine(1),true);
+        assert.equal(choice?s.railyard.takeBranch(choice.id):s.railyard.moveAlongLine(1),true);
       }
       assert.ok(guard<100,model+' finishes '+station);
-      assert.equal(v.currentStation,station+1);
+      assert.ok(v.journey===null&&v.currentStation!==station,model+' arrives somewhere from '+station);
     }
   }
 });
@@ -422,7 +426,7 @@ test('station lead headings follow the sourced rail grid', () => {
     assert.ok(g.setup.yardGeneration.validate(tracks));
   }
   assert.equal(yard.getLegHeading(1), 'north');
-  assert.equal(world.getStationName(5), 'Gobernador Moyano');
+  assert.equal(world.getStationName(4), 'Gobernador Moyano');
 });
 
 test('passenger templates exist at their catalogue lengths in both projections', () => {

@@ -56,8 +56,12 @@ setup.onfoot = {
 	isBesideTrain: function() {
 		var foot = this.get();
 		var train = this.getTrainPosition();
-		return !!foot && !!train && (foot.legIndex || train.legIndex) === train.legIndex
-			&& foot.tileIndex === train.tileIndex && (foot.branch || null) === train.branch;
+		if (!foot || !train) return false;
+		if ((foot.legIndex || train.legIndex) === train.legIndex && foot.tileIndex === train.tileIndex
+			&& (foot.branch || null) === train.branch) return true;
+		// At a junction the same square ends several legs, so compare where each actually stands.
+		var world = setup.worldmap, here = world.getJourneyView(this.getPosition()), there = world.getJourneyView();
+		return !!here && !!there && !!here.realWorld && here.tile.x === there.tile.x && here.tile.y === there.tile.y;
 	},
 	// Query the walker's route without temporarily moving the parked train.
 	getPosition: function() {
@@ -90,8 +94,12 @@ setup.onfoot = {
 	getWalk: function(direction, branchId) {
 		var position = this.getPosition(), world = setup.worldmap;
 		if (!position || this.isInRailyard()) return null;
-		var step;
-		if (branchId != null) {
+		var step, legIndex = position.legIndex;
+		if (branchId != null && world.getJourneyPath(position).leg.realWorld) {
+			// A line leaving the junction the walker stands at.
+			step = world.getBranchStep(branchId, position);
+			if (step) legIndex = Number(String(branchId).replace('leg:', ''));
+		} else if (branchId != null) {
 			if (position.branch) return null;
 			var branch = (world.getJourneyPath(position).leg.branches || []).filter(function(candidate) {
 				return candidate.id === branchId && candidate.tiles.length
@@ -107,6 +115,9 @@ setup.onfoot = {
 			step = world.getJourneyStep(direction, position);
 		}
 		var distanceKm = step && step.distanceKm ? step.distanceKm : setup.worldmap.TILE_KM;
+		if (step && step.realWorld) return { legIndex: legIndex, toIndex: step.toIndex, branch: null, terrain: step.terrain,
+			heading: step.heading, distanceKm: distanceKm,
+			minutes: Math.max(1, Math.round(this.MINUTES_PER_TILE * distanceKm / setup.worldmap.TILE_KM)) };
 		return step ? { toIndex: step.toIndex, branch: step.toMain != null ? null : (step.toBranch || position.branch),
 			terrain: step.terrain, heading: step.heading, distanceKm: distanceKm,
 			minutes: Math.max(1, Math.round(this.MINUTES_PER_TILE * distanceKm / setup.worldmap.TILE_KM)) } : null;
@@ -114,6 +125,13 @@ setup.onfoot = {
 	getBranchWalks: function() {
 		var position = this.getPosition(), self = this;
 		if (!position || position.branch) return [];
+		if (setup.worldmap.getJourneyPath(position).leg.realWorld) {
+			return setup.worldmap.getBranchChoices(position).map(function(choice) {
+				var walk = self.getWalk(1, choice.id);
+				if (walk) walk.choice = choice.id;
+				return walk;
+			}).filter(function(walk) { return !!walk; });
+		}
 		return (setup.worldmap.getJourneyPath(position).leg.branches || []).map(function(branch) {
 			return self.getWalk(1, branch.id);
 		}).filter(function(walk) { return !!walk; });
@@ -123,7 +141,7 @@ setup.onfoot = {
 		if (!walk) {
 			return false;
 		}
-		State.variables.onFoot = { legIndex: this.getPosition().legIndex, tileIndex: walk.toIndex, branch: walk.branch };
+		State.variables.onFoot = { legIndex: walk.legIndex || this.getPosition().legIndex, tileIndex: walk.toIndex, branch: walk.branch };
 		return true;
 	},
 	// A tool counts as to hand if the player is carrying it, or if the train is right there to fetch it from.
@@ -203,9 +221,9 @@ Macro.add('onFootControls', {
 				+ '<<goto "OnFoot">><</timedlink>><br>';
 		});
 		onfoot.getBranchWalks().forEach(function(walk) {
-			output += '<<timedlink "Walk ' + setup.units.kilometres(setup.worldmap.TILE_KM) + ' ' + walk.heading
-				+ ' onto the branch" ' + walk.minutes + ' "walk" "fatigue:+3">><<run setup.onfoot.walk(1, '
-				+ JSON.stringify(walk.branch) + ')>><<goto "OnFoot">><</timedlink>><br>';
+			output += '<<timedlink "Walk ' + setup.units.kilometres(walk.distanceKm || setup.worldmap.TILE_KM) + ' ' + walk.heading
+				+ (walk.choice ? '' : ' onto the branch') + '" ' + walk.minutes + ' "walk" "fatigue:+3">><<run setup.onfoot.walk(1, '
+				+ JSON.stringify(walk.choice || walk.branch) + ')>><<goto "OnFoot">><</timedlink>><br>';
 		});
 		var chopReason = onfoot.canChop();
 		if (!chopReason) {

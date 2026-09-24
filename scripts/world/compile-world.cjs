@@ -239,7 +239,16 @@ function validateNetwork(network) {
   network.stops.forEach(stop => {
     assert(byKey.has(stop.square), 'Network stop is off the network: ' + stop.id);
     assert(!stopSquares.has(stop.square), 'Two network stops share a square: ' + stop.square);
+    // A railyard has two ends, one line at each: junctions are out on the line.
+    assert(network.squares[byKey.get(stop.square)].ends.length <= 2, 'A network stop has more than two lines: ' + stop.id);
     stopSquares.add(stop.square);
+  });
+  // No two railyards in squares that touch.
+  stopSquares.forEach(key => {
+    const [x, y] = key.split(',').map(Number);
+    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+      assert(!(dx || dy) || !stopSquares.has((x + dx) + ',' + (y + dy)), 'Two network stops stand in touching squares: ' + key);
+    }
   });
 }
 
@@ -264,8 +273,13 @@ function compactNetwork(network) {
     stops.name.push(stop.name); stops.square.push(byKey.get(stop.square)); stops.status.push(stop.status);
     stops.region.push(stop.region);
   });
+  // The junctions and buffers out on the line, named for the nearest place.
+  const points = { square: [], kind: [], name: [] };
+  (network.points || []).forEach(point => {
+    points.square.push(byKey.get(point.square)); points.kind.push(point.kind); points.name.push(point.name);
+  });
   return { id: network.id, label: network.label, grid: network.grid, start: byKey.get(network.startSquare),
-    stats: network.stats, squares, stops };
+    stats: network.stats, squares, stops, points };
 }
 
 function validateBundle(bundle) {

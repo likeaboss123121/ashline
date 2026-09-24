@@ -1606,7 +1606,7 @@ setup.railyard = {
 	travelToStation: function(towardExit, legIndex) {
 		var variables = State.variables;
 		var line = setup.worldmap.getLine(variables.currentStation, towardExit, legIndex);
-		if (!line || this.getDepartureBlockReason(variables.currentStation, variables.drivingTrackIndex, towardExit, line.legIndex)) {
+		if (!line || !line.destination || this.getDepartureBlockReason(variables.currentStation, variables.drivingTrackIndex, towardExit, line.legIndex)) {
 			return false;
 		}
 		return this.arriveAtStation(line.destination, setup.realWorldPilot.getArrivalSide(line.legIndex, line.destination) === 'entry');
@@ -1679,6 +1679,12 @@ setup.railyard = {
 			return false;
 		}
 		var journey = setup.worldmap.getJourney();
+		// At a junction on the network: onto the chosen line, facing away from the junction, and one step along it.
+		if (step.realWorld) {
+			var legIndex = Number(String(branchId).replace('leg:', ''));
+			State.variables.journey = { legIndex: legIndex, tileIndex: step.fromIndex, forward: step.toIndex > step.fromIndex };
+			return this.moveAlongLine(1);
+		}
 		journey.branch = branchId;
 		journey.tileIndex = 0;
 		State.variables.journey = journey;
@@ -2527,7 +2533,7 @@ Macro.add('lineControls', {
 		// On a station's own tile the yard is right there, so backing in ends the journey at no cost. It is also
 		// the way out for a consist that cannot move at all, which is why it is offered before anything else.
 		var escapeLink = '';
-		if (!setup.worldmap.getJourneyStep(-1)) {
+		if (!setup.worldmap.getJourneyStep(-1) && (!view.realWorld || view.fromStationIndex)) {
 			var backStation = view.fromStationIndex || (view.forward ? view.legIndex : view.legIndex + 1);
 			var backOnEntry = setup.realWorldPilot.getArrivalSide(view.legIndex, backStation) === 'entry';
 			escapeLink = '<<link "Back into ' + setup.worldmap.getStationName(backStation) + '">>'
@@ -2566,20 +2572,31 @@ Macro.add('lineControls', {
 		});
 		// At a junction the player knows only which way the rails immediately run. Whether a track reconnects or
 		// ends is deliberately not exposed: there is no map to consult out here.
-		setup.worldmap.getBranchChoices().forEach(function(choice) {
+		var choices = setup.worldmap.getBranchChoices();
+		if (view.realWorld && choices.length) {
+			output += '<p class="small-description">The line divides here.</p>';
+		}
+		choices.forEach(function(choice) {
 			var step = setup.worldmap.getBranchStep(choice.id);
 			if (!step) {
 				return;
 			}
-			var label = 'Drive ' + setup.units.kilometres(setup.worldmap.TILE_KM) + ' ' + choice.direction;
+			var label = 'Drive ' + setup.units.kilometres(step.distanceKm || setup.worldmap.TILE_KM) + ' ' + choice.direction;
 			if (step.blocked) {
+				output += '<span class="small-description"><em>' + label + ': ' + step.blocked + '</em></span><br>';
 				return;
 			}
 			output += '<<timedlink "' + label + '" ' + step.minutes + ' "travel">>'
-				+ '<<run setup.railyard.takeBranch("' + choice.id + '")>><<goto "OnTheLine">><</timedlink>><br>';
+				+ '<<run setup.railyard.takeBranch("' + choice.id + '")>>'
+				+ '<<set _linePassage = State.variables.journey ? "OnTheLine" : "DrivingMode">>'
+				+ '<<goto _linePassage>><</timedlink>><br>';
 			output += '<span class="small-description">A track leads ' + choice.direction + ' into '
-				+ choice.terrain + '.</span><br>';
+				+ choice.terrain + (step.arrivesAt ? ', arriving at ' + setup.worldmap.getStationName(step.arrivesAt) : '')
+				+ '.</span><br>';
 		});
+		if (view.realWorld && !setup.worldmap.getJourneyStep(1) && !choices.length && !view.toStationIndex) {
+			output += '<p class="small-description">The line ends here at a buffer stop.</p>';
+		}
 		output += escapeLink;
 		output += '<<link "Enter the train">><<goto "TrainInterior">><</link>><br>';
 		new Wikifier(this.output, output);
@@ -2657,7 +2674,7 @@ Macro.add('drivingTravelButtons', {
 					? setup.railyard.getDirectionName(setup.worldmap.describeDirection(line.direction))
 					: setup.railyard.getDirectionName(setup.railyard.getLeadDirection(tracks, towardExit ? 'exit' : 'entry'));
 				var destination = line.destination;
-				var label = 'Depart ' + heading + ' toward ' + setup.worldmap.getStationName(destination);
+				var label = 'Depart ' + heading + ' toward ' + (destination ? setup.worldmap.getStationName(destination) : line.destinationName);
 				// A leg is a run of grid squares: climbing costs more time, and so more fuel, than rolling along the flat,
 				// and a heavy consist is slower over all of it.
 				var minutes = setup.worldmap.getTravelMinutes(stationId, towardExit, State.variables.currentTrain, line.legIndex);

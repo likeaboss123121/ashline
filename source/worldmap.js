@@ -442,6 +442,12 @@ setup.worldmap = {
 		return branches.filter(function(branch) { return branch.stationId === stationId; })[0] || null;
 	},
 	// What the player calls a station.
+	// The names at the two ends of a leg: stations, or on the network a junction or the end of a line.
+	getLegEndNames: function(legIndex) {
+		var leg = this.getLeg(this.getSeed(), legIndex);
+		if (leg && leg.realWorld) return [leg.fromStation.name, leg.toStation.name];
+		return [this.getStationName(legIndex), this.getStationName(legIndex + 1)];
+	},
 	getStationName: function(stationId) {
 		if (setup.realWorldPilot && setup.realWorldPilot.getStation) {
 			var station = setup.realWorldPilot.getStation(stationId);
@@ -604,13 +610,21 @@ setup.worldmap = {
 		return { tiles: this.getMainLine(this.getSeed(), journey.legIndex), branch: null, leg: leg };
 	},
 	// The branches leaving the tile the train is standing on, for the player to choose between.
-	getBranchChoices: function() {
-		var journey = this.getJourney();
-		var path = this.getJourneyPath();
+	getBranchChoices: function(position) {
+		var journey = position || this.getJourney();
+		var path = this.getJourneyPath(journey);
 		if (!journey || !path || path.branch) {
 			return [];
 		}
 		var self = this;
+		// On the network the choices are at a junction: every other line that meets it, named for the way it leaves.
+		if (path.leg.realWorld) {
+			return setup.realWorldPilot.getJunctionChoices(journey.legIndex, journey.tileIndex).map(function(line) {
+				var step = self.getLineChoiceStep(line);
+				return { id: 'leg:' + line.legIndex, legIndex: line.legIndex, direction: self.describeDirection(line.direction),
+					tiles: step.tileCount, terrain: step.terrain, rejoins: false, grade: step.grade };
+			});
+		}
 		return (path.leg.branches || []).filter(function(branch) {
 			return branch.fromIndex === journey.tileIndex && branch.tiles.length;
 		}).map(function(branch) {
@@ -763,12 +777,31 @@ setup.worldmap = {
 			arrivesAt: to === 0 ? journey.legIndex : (to === tiles.length - 1 ? journey.legIndex + 1 : 0)
 		});
 	},
+	// The first step along a line leaving a junction: where it goes and what it costs. line is one of
+	// realWorldPilot.getJunctionChoices.
+	getLineChoiceStep: function(line) {
+		var tiles = setup.realWorldPilot.getLeg(line.legIndex).tiles, last = tiles.length - 1;
+		var from = line.forward ? 0 : last, to = line.forward ? 1 : last - 1;
+		var leg = setup.realWorldPilot.getLeg(line.legIndex);
+		return this.describeStep(line.forward ? tiles[from].grade : -tiles[to].grade, tiles[to].terrain, {
+			fromIndex: from, toIndex: to, realWorld: true, toBranch: 'leg:' + line.legIndex, tileCount: tiles.length,
+			distanceKm: this.getStepKm(tiles, Math.min(from, to)), heading: this.describeDirection(line.direction),
+			destinationName: tiles[to].station || '',
+			arrivesAt: to === 0 ? leg.fromStationIndex : (to === last ? leg.toStationIndex : 0)
+		});
+	},
 	// What turning off onto a branch would cost.
-	getBranchStep: function(branchId) {
-		var journey = this.getJourney();
-		var path = this.getJourneyPath();
+	getBranchStep: function(branchId, position) {
+		var journey = position || this.getJourney();
+		var path = this.getJourneyPath(journey);
 		if (!journey || !path || path.branch) {
 			return null;
+		}
+		if (path.leg.realWorld) {
+			var line = setup.realWorldPilot.getJunctionChoices(journey.legIndex, journey.tileIndex).filter(function(candidate) {
+				return 'leg:' + candidate.legIndex === branchId;
+			})[0];
+			return line ? this.getLineChoiceStep(line) : null;
 		}
 		var branch = (path.leg.branches || []).filter(function(candidate) { return candidate.id === branchId; })[0];
 		if (!branch || branch.fromIndex !== journey.tileIndex || !branch.tiles.length) {
@@ -948,7 +981,13 @@ setup.worldmap = {
 		}
 		var forward = currentJourney && currentJourney.legIndex === target.legIndex
 			? currentJourney.forward !== false : variables.travellingForward !== false;
-		variables.currentStation = forward ? target.legIndex : target.legIndex + 1;
+		var targetLeg = this.getLeg(this.getSeed(), target.legIndex);
+		// The station the train last left: the one behind it on this leg, or on the network, where a leg can run between
+		// two junctions, whichever end has a station, else the one it was at.
+		variables.currentStation = targetLeg && targetLeg.realWorld
+			? (forward ? targetLeg.fromStationIndex || targetLeg.toStationIndex : targetLeg.toStationIndex || targetLeg.fromStationIndex)
+				|| variables.currentStation
+			: forward ? target.legIndex : target.legIndex + 1;
 		variables.journey = {
 			legIndex: target.legIndex, tileIndex: target.tileIndex, forward: forward
 		};
@@ -1348,8 +1387,7 @@ setup.worldmap = {
 				if (!result) return;
 				setup.debugTeleportNotice = 'Teleported ' + (result.mode === 'consist' ? 'the complete consist' : 'you')
 					+ (result.stationId ? ' to ' + setup.worldmap.getStationName(result.stationId) + ' station.'
-						: ' to ' + setup.worldmap.getStationName(result.target.legIndex) + '–'
-							+ setup.worldmap.getStationName(result.target.legIndex + 1) + ', tile '
+						: ' to ' + self.getLegEndNames(result.target.legIndex).join('–') + ', tile '
 							+ (result.target.tileIndex + 1) + ' at ' + result.target.tile.x + ', ' + result.target.tile.y + '.');
 				setup.debugReturnToPanel = true;
 				Engine.play(result.passage);

@@ -25,9 +25,9 @@ setup.realWorldPilot = (function () {
 
 	//
 	// Every mapped railway of the continent on the shared grid (scripts/world/build-network.cjs). Its squares are the
-	// tiles. Every junction and every end of the line is a stop, so the track between two stops is always one plain
-	// line: a leg. A station can have any number of lines; each leaves from one side of the
-	// yard, the side facing its way, so the yard keeps its two leads and a junction offers a choice of lines from one.
+	// tiles. A station has at most two lines, one out of each end of its yard. Where three or more lines meet there is a
+	// junction out on the line, and the driver picks a way there (getJunctionChoices); where a line ends without a
+	// station there is a buffer. The track between two of these nodes is one plain line: a leg.
 	function buildNetworkRoute() {
 		var data = setup.worldGraphData.network, squares = data.squares, count = squares.x.length;
 		var directions = setup.worldmap.DIRECTIONS, byKey = {}, tiles = new Array(count), kmByEnd = new Array(count);
@@ -54,28 +54,34 @@ setup.realWorldPilot = (function () {
 		};
 		var stopAtSquare = {};
 		data.stops.square.forEach(function(square, stop) { stopAtSquare[square] = stop; });
-		// The next stop along the line leaving a stop square by one of its ends.
-		var nextStop = function(square, bit) {
+		var pointAtSquare = {};
+		if (data.points) data.points.square.forEach(function(square, point) { pointAtSquare[square] = point; });
+		// The nodes of the network: stations, and out on the line the junctions where a driver picks a way and the
+		// buffers where a line ends without a yard. The track between two nodes is one plain line: a leg.
+		var isNode = function(square) { return stopAtSquare[square] !== undefined || tiles[square].ends.length !== 2; };
+		// The next node along the line leaving a node square by one of its ends.
+		var nextNode = function(square, bit) {
 			for (;;) {
 				var next = neighbour(square, bit);
-				if (stopAtSquare[next] !== undefined) return next;
+				if (isNode(next)) return next;
 				var back = setup.worldmap.opposite(bit);
 				bit = tiles[next].ends.filter(function(end) { return end !== back; })[0];
 				square = next;
 			}
 		};
 		// Stations are numbered outward from where the game starts, a line at a time in compass order, so station 2
-		// is the first stop up the line from station 1 and the numbers run along the lines the way a player meets them.
+		// is the first station up the line from station 1 and the numbers run along the lines the way a player meets
+		// them. Junctions and buffers on the way are passed through, not numbered.
 		var order = [data.start], queued = {};
 		queued[data.start] = true;
 		for (var head = 0; head < order.length; head++) {
 			tiles[order[head]].ends.forEach(function(bit) {
-				var reached = nextStop(order[head], bit);
+				var reached = nextNode(order[head], bit);
 				if (!queued[reached]) { queued[reached] = true; order.push(reached); }
 			});
 		}
 		data.stops.square.forEach(function(square) { if (!queued[square]) { queued[square] = true; order.push(square); } });
-		var stations = order.map(function(square) {
+		var stations = order.filter(function(square) { return stopAtSquare[square] !== undefined; }).map(function(square) {
 			var stop = stopAtSquare[square];
 			return { id: 'stop:' + data.stops.square[stop], name: data.stops.name[stop], status: data.stops.status[stop],
 				region: data.stops.region ? data.stops.region[stop] : 'rural', square: data.stops.square[stop], lines: [] };
@@ -89,25 +95,46 @@ setup.realWorldPilot = (function () {
 			tiles[station.square].stationStatus = station.status;
 			tiles[station.square].stationRegion = station.region;
 		});
-		// Legs: from every station, out along each of its ends to the next station, each stretch once.
+		// What stands at a node, for a leg's ends: a station, or a junction or buffer with the name of the nearest place.
+		var nodes = {};
+		var nodeAt = function(square) {
+			if (nodes[square]) return nodes[square];
+			if (stationAt[square]) {
+				nodes[square] = { kind: 'station', square: square, stationIndex: stationAt[square], station: stations[stationAt[square] - 1],
+					name: stations[stationAt[square] - 1].name, lines: [] };
+			} else {
+				var point = pointAtSquare[square], buffer = tiles[square].ends.length === 1;
+				var place = point !== undefined ? data.points.name[point] : '';
+				nodes[square] = { kind: buffer ? 'buffer' : 'junction', square: square, stationIndex: 0, lines: [],
+					name: buffer ? 'the end of the line' + (place ? ' near ' + place : '') : 'the junction' + (place ? ' near ' + place : '') };
+				tiles[square].junction = !buffer;
+				tiles[square].buffer = buffer;
+				tiles[square].pointName = nodes[square].name;
+			}
+			return nodes[square];
+		};
+		// Legs: from every node, out along each of its ends to the next node, each stretch once.
 		var legs = {}, walked = {}, legCount = 0, place = new Array(count);
 		var corridor = { id: NETWORK_ID, label: data.label, navigable: true, stations: stations };
-		stations.forEach(function(station, stationOffset) {
-			tiles[station.square].ends.forEach(function(firstBit) {
-				if (walked[station.square + ':' + firstBit]) return;
-				var path = [station.square], bits = [], current = station.square, bit = firstBit;
+		order.concat(Object.keys(byKey).map(function(key) { return byKey[key]; }).filter(function(square) {
+			return isNode(square) && !queued[square];
+		})).forEach(function(start) {
+			var from = nodeAt(start);
+			tiles[start].ends.forEach(function(firstBit) {
+				if (walked[start + ':' + firstBit]) return;
+				var path = [start], bits = [], current = start, bit = firstBit;
 				for (;;) {
 					var next = neighbour(current, bit);
 					walked[current + ':' + bit] = true;
 					walked[next + ':' + setup.worldmap.opposite(bit)] = true;
 					bits.push(bit);
 					path.push(next);
-					if (stationAt[next]) break;
+					if (isNode(next)) break;
 					var back = setup.worldmap.opposite(bit), onward = tiles[next].ends.filter(function(end) { return end !== back; });
 					current = next;
 					bit = onward[0];
 				}
-				var legIndex = ++legCount, fromIndex = stationOffset + 1, toIndex = stationAt[path[path.length - 1]];
+				var legIndex = ++legCount, to = nodeAt(path[path.length - 1]);
 				var legTiles = path.map(function(square, position) {
 					var tile = Object.assign({}, tiles[square]);
 					if (position < bits.length) {
@@ -124,21 +151,26 @@ setup.realWorldPilot = (function () {
 				});
 				var leg = {
 					index: legIndex, tiles: legTiles, byKey: {}, branches: [], realWorld: true, corridor: corridor, corridorId: NETWORK_ID,
-					fromStation: stations[fromIndex - 1], toStation: stations[toIndex - 1], fromStationIndex: fromIndex, toStationIndex: toIndex,
+					fromStation: from.station || { name: from.name }, toStation: to.station || { name: to.name },
+					fromStationIndex: from.stationIndex, toStationIndex: to.stationIndex, fromNode: from, toNode: to,
 					start: { x: legTiles[0].x, y: legTiles[0].y }, end: { x: legTiles[legTiles.length - 1].x, y: legTiles[legTiles.length - 1].y },
 					rect: setup.worldmap.rectFor(legTiles)
 				};
 				legTiles.forEach(function(tile) { leg.byKey[setup.worldmap.key(tile.x, tile.y)] = tile; });
 				legs[legIndex] = leg;
-				stations[fromIndex - 1].lines.push({ legIndex: legIndex, forward: true, destination: toIndex, direction: bits[0] });
-				stations[toIndex - 1].lines.push({ legIndex: legIndex, forward: false, destination: fromIndex,
-					direction: setup.worldmap.opposite(bits[bits.length - 1]) });
+				var outbound = { legIndex: legIndex, forward: true, destination: to.stationIndex, destinationName: to.name, direction: bits[0] };
+				var inbound = { legIndex: legIndex, forward: false, destination: from.stationIndex, destinationName: from.name,
+					direction: setup.worldmap.opposite(bits[bits.length - 1]) };
+				from.lines.push(outbound);
+				to.lines.push(inbound);
+				if (from.station) from.station.lines.push(outbound);
+				if (to.station) to.station.lines.push(inbound);
 			});
 		});
 		stations.forEach(assignSides);
 		var tileByKey = {};
 		Object.keys(byKey).forEach(function(key) { tileByKey[key] = tiles[byKey[key]]; });
-		return { corridor: corridor, slices: [], tiles: tiles, legs: legs, byKey: tileByKey, network: true, place: place,
+		return { corridor: corridor, slices: [], tiles: tiles, legs: legs, byKey: tileByKey, network: true, place: place, nodes: nodes,
 			stationPositions: stations.map(function(station) { return station.square; }), rect: setup.worldmap.rectFor(tiles) };
 	}
 
@@ -236,6 +268,50 @@ setup.realWorldPilot = (function () {
 
 	function endpointForView() { return null; }
 
+	// The node at a journey position: at either end of its leg, the station, junction or buffer standing there.
+	function getNodeAt(legIndex, tileIndex) {
+		var leg = getLeg(legIndex);
+		if (!leg) return null;
+		if (Number(tileIndex) <= 0) return leg.fromNode;
+		if (Number(tileIndex) >= leg.tiles.length - 1) return leg.toNode;
+		return null;
+	}
+
+	// The ways on from a junction a journey position stands at, other than the leg it is on: { legIndex, forward,
+	// destination, destinationName, direction } each, forward saying which way the leg runs away from the junction.
+	function getJunctionChoices(legIndex, tileIndex) {
+		var node = getNodeAt(legIndex, tileIndex);
+		if (!node || node.kind !== 'junction') return [];
+		return node.lines.filter(function(line) { return line.legIndex !== Number(legIndex); });
+	}
+
+	// The stations nearest a journey position by track, through any junctions on the way, nearest first, as
+	// { station, distance } with the distance in tiles.
+	function getStationsNear(legIndex, tileIndex) {
+		var leg = getLeg(legIndex);
+		if (!leg) return [];
+		var best = {}, queue = [], found = [];
+		var reach = function(node, distance) {
+			if (best[node.square] !== undefined && best[node.square] <= distance) return;
+			best[node.square] = distance;
+			queue.push([distance, node]);
+		};
+		var index = Math.max(0, Math.min(Number(tileIndex) || 0, leg.tiles.length - 1));
+		reach(leg.fromNode, index);
+		reach(leg.toNode, leg.tiles.length - 1 - index);
+		while (queue.length && found.length < 4) {
+			queue.sort(function(a, b) { return a[0] - b[0]; });
+			var item = queue.shift(), distance = item[0], node = item[1];
+			if (distance > best[node.square]) continue;
+			if (node.kind === 'station') { found.push({ station: node.stationIndex, distance: distance }); continue; }
+			node.lines.forEach(function(line) {
+				var next = getLeg(line.legIndex);
+				reach(line.forward ? next.toNode : next.fromNode, distance + next.tiles.length - 1);
+			});
+		}
+		return found;
+	}
+
 	function debugTarget(x, y) {
 		var route = getGridRoute();
 		if (!route) return null;
@@ -248,7 +324,11 @@ setup.realWorldPilot = (function () {
 			return { legIndex: line.legIndex, tileIndex: line.forward ? 0 : leg.tiles.length - 1, branch: null, tile: tile };
 		}
 		var place = route.place[tile.globalPosition];
-		return place ? { legIndex: place.legIndex, tileIndex: place.tileIndex, branch: null, tile: tile } : null;
+		if (place) return { legIndex: place.legIndex, tileIndex: place.tileIndex, branch: null, tile: tile };
+		// A junction or a buffer: the end of a leg that meets it.
+		var node = route.nodes[tile.globalPosition], line = node && node.lines[0];
+		if (!line) return null;
+		return { legIndex: line.legIndex, tileIndex: line.forward ? 0 : getLeg(line.legIndex).tiles.length - 1, branch: null, tile: tile };
 	}
 
 	function appendDebugControls(parent) {
@@ -265,7 +345,8 @@ setup.realWorldPilot = (function () {
 		NETWORK_ID: NETWORK_ID, DEFAULT_CORRIDOR_ID: NETWORK_ID, hasNetwork: hasNetwork,
 		getCorridor: getCorridor, getGridRoute: getGridRoute, getTileAt: getTileAt,
 		getLeg: getLeg, getStation: getStation, getStationTile: getStationTile,
-		getStationLines: getStationLines, getArrivalSide: getArrivalSide,
+		getStationLines: getStationLines, getArrivalSide: getArrivalSide, getNodeAt: getNodeAt,
+		getJunctionChoices: getJunctionChoices, getStationsNear: getStationsNear,
 		getJourneyRoute: getJourneyRoute, start: start, finish: finish,
 		endpointForView: endpointForView, terrainFor: terrainFor, debugTarget: debugTarget,
 		appendDebugControls: appendDebugControls

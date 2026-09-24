@@ -1137,6 +1137,21 @@
       "spurMaxKm": 40,
       "spurSpacingKm": 100,
       "genericNameCount": 20,
+      "spliceMinKm": 8,
+      "spliceDetourFactor": 1.5,
+      "spliceDetourKm": 10,
+      "shortcutPopulation": 100000,
+      "shortcutKm": 400,
+      "shortcutDetourFactor": 4,
+      "shortcutDetourMinKm": 500,
+      "cityTrackKm": 10,
+      "parallelFactor": 1.4,
+      "parallelExtraKm": 15,
+      "densityRadiusKm": 50,
+      "sparsePopulation": 150000,
+      "densePopulation": 1000000,
+      "ruralSpacingKm": 15,
+      "denseSpacingKm": 25,
       "urbanPopulation": 500000,
       "urbanRadiusKm": 20,
       "industrialRailKm": 60,
@@ -1149,7 +1164,7 @@
       "yardRules": {
         "rural": {
           "minPopulation": 0,
-          "spacingKm": 0
+          "spacingKm": null
         },
         "industrial": {
           "minPopulation": 0,
@@ -1182,36 +1197,43 @@
       }
     },
     "stats": {
-      "squareCount": 22600,
-      "moveCount": 23254,
-      "stopCount": 6528,
-      "haltCount": 148,
-      "bridgeCount": 1706,
-      "bridgeKm": 32533,
-      "stubJoinCount": 304,
+      "squareCount": 20845,
+      "moveCount": 21081,
+      "stopCount": 3496,
+      "haltCount": 156,
+      "bridgeCount": 1708,
+      "bridgeKm": 32177,
+      "stubJoinCount": 303,
       "authoredJoinCount": 3,
       "endJoinCount": 11,
-      "spurCount": 136,
+      "spurCount": 131,
+      "shortcutCount": 8,
+      "parallelStretchesRemoved": 401,
+      "parallelKmRemoved": 12539,
+      "onExistingTrackKm": 2485,
+      "stationsMovedOffJunctions": 465,
+      "junctionPoints": 1105,
+      "bufferPoints": 119,
       "urbanAreas": 123,
-      "urbanSquaresRemoved": 380,
-      "urbanMovesRemoved": 497,
+      "urbanSquaresRemoved": 368,
+      "urbanMovesRemoved": 478,
       "stopRegions": {
-        "urban": 160,
-        "industrial": 296,
-        "rural": 6072
+        "urban": 63,
+        "industrial": 82,
+        "rural": 3351
       },
       "stationsWithoutYard": {
-        "urban": 386,
-        "industrial": 92,
-        "rural": 0
+        "urban": 368,
+        "industrial": 156,
+        "rural": 1460
       },
-      "railKm": 126278,
+      "railKm": 114413,
       "leftOutPieces": 29,
       "leftOutKm": 129,
       "unreachableCities": [],
-      "prunedStubSquares": 635,
-      "junctionSquares": 1689,
-      "endSquares": 666
+      "prunedStubSquares": 682,
+      "junctionSquares": 1105,
+      "endSquares": 699
     },
     "file": "world/network/south-america-network.json"
   }

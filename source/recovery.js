@@ -17,7 +17,9 @@ setup.recovery = {
 		var v = State.variables, world = setup.worldmap, j = world.getJourney();
 		if (!j) return [{ station: v.currentStation, distance: 0 }];
 		if (!v.onFoot) return [];
-		var foot = setup.onfoot.get(), leg = world.getLeg(world.getSeed(), j.legIndex);
+		var foot = setup.onfoot.get(), leg = world.getLeg(world.getSeed(), foot.legIndex || j.legIndex);
+		// On the network, by track through any junctions to the nearest stations.
+		if (leg && leg.realWorld) return setup.realWorldPilot.getStationsNear(leg.index, foot.tileIndex);
 		var main = world.getMainLine(world.getSeed(), j.legIndex);
 		var branch = foot.branch && leg.branches.find(function(b) { return b.id === foot.branch; });
 		var index = foot.tileIndex, distances;

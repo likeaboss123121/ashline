@@ -367,7 +367,8 @@ test('debug teleport treats a station cell as the station rather than a line end
   result=setup.worldmap.debugTeleportToTile(0,stationTile(4).x,stationTile(4).y);
   assert.equal(result.stationId,4);assert.equal(result.passage,'Railyard');
   assert.equal(v.currentStation,4);assert.equal(JSON.stringify(v.journey),parked,'the remote train stays parked');
-  assert.deepEqual([v.onFoot.legIndex,v.onFoot.tileIndex],[3,route.legs[3].tiles.length-1]);
+  const footLeg=route.legs[v.onFoot.legIndex].tiles[v.onFoot.tileIndex];
+  assert.deepEqual([footLeg.x,footLeg.y],[stationTile(4).x,stationTile(4).y],'the walker stands on the station square');
   assert.equal(v.onFoot.inRailyard,true);
 
   v.currentTrain=null;v.onFoot=null;v.journey=null;
@@ -526,7 +527,7 @@ test('backing up on the line returns to the tile before, and the grades reverse 
   assert.equal(back.toIndex, 1);
   assert.equal(State.variables.journey.tileIndex, 2);
   // The step back is the step just taken, downhill where that one climbed.
-  const tiles = setup.worldmap.getMainLine('journey', 4);
+  const tiles = setup.worldmap.getMainLine('journey', State.variables.journey.legIndex);
   assert.equal(back.grade, -tiles[1].grade);
   assert.equal(ahead.grade, tiles[2].grade);
   assert.equal(setup.railyard.moveAlongLine(-1), true);
@@ -1382,7 +1383,7 @@ test('all playable stations come from the sourced network', () => {
   const route = setup.realWorldPilot.getGridRoute(), stationCount = route.corridor.stations.length;
   assert.equal(route.corridor.id, 'network');
   // Stations are numbered outward from Punta Arenas, so the first few run up the line from it.
-  assert.deepEqual([1, 2, 3, 4].map(id => setup.worldmap.getStationName(id)), ['Punta Arenas', 'Río Seco', 'Km 74 from El Turbio', 'El Turbio']);
+  assert.deepEqual([1, 2].map(id => setup.worldmap.getStationName(id)), ['Punta Arenas', 'Río Seco']);
   // Every authored city is a stop, spurs to termini included.
   const cities = route.corridor.stations.filter(station => station.status === 'city').map(station => station.name);
   assert.equal(cities.length, 35);
@@ -1390,11 +1391,14 @@ test('all playable stations come from the sourced network', () => {
     assert.ok(cities.includes(city), city + ' is a stop');
   }
   assert.equal(setup.realWorldPilot.getStation(stationCount + 1), null);
-  // Every leg runs from one station to another, and every line a station lists is a leg that starts or ends there.
+  // Every leg runs between two nodes (a station, a junction out on the line, or a buffer), and every line a station
+  // lists is a leg that starts or ends there.
   Object.values(route.legs).forEach(leg => {
-    assert.equal(leg.tiles[0].station, leg.fromStation.name);
-    assert.equal(leg.tiles.at(-1).station, leg.toStation.name);
-    assert.ok(leg.tiles.slice(1, -1).every(tile => !tile.station), 'no station inside leg ' + leg.index);
+    [[leg.tiles[0], leg.fromNode], [leg.tiles.at(-1), leg.toNode]].forEach(([tile, node]) => {
+      if (node.kind === 'station') assert.equal(tile.station, node.name);
+      else assert.equal(tile.ends.length === 1 ? 'buffer' : 'junction', node.kind);
+    });
+    assert.ok(leg.tiles.slice(1, -1).every(tile => !tile.station && tile.ends.length === 2), 'nothing inside leg ' + leg.index);
   });
   for (let stationId = 1; stationId <= stationCount; stationId += 97) {
     setup.realWorldPilot.getStationLines(stationId).forEach(line => {
@@ -1543,4 +1547,41 @@ test('railyards are sized by their region: small in the country, large in the ci
   urban.forEach(entry => assert.equal(setup.railyard.getYardSize(entry.id).tracks[0], 4));
   const average = list => list.reduce((sum, entry) => sum + yardTracks(entry.id), 0) / list.length;
   assert.ok(average(urban) > average(rural), average(urban) + ' urban tracks against ' + average(rural) + ' rural');
+});
+
+test('a train out on the line stops at a junction and the driver picks the way on; no yard has more than two lines', () => {
+  const { setup, State } = loadGame();
+  const v = State.variables;
+  Object.assign(v, { randomSeed: 'junctions', debugMode: false, travellingForward: true, onFoot: null });
+  v.currentTrain = [{ type: 'dieselShunter', length: 12, cargo: [{ type: 'diesel', amount: 400 }] }];
+  const route = setup.realWorldPilot.getGridRoute();
+  route.corridor.stations.forEach(station => assert.ok(station.lines.length <= 2, station.name + ' has ' + station.lines.length + ' lines'));
+  // A leg that runs from a station into a junction.
+  const leg = Object.values(route.legs).find(candidate => candidate.fromNode.kind === 'station' && candidate.toNode.kind === 'junction');
+  assert.ok(leg, 'some leg leads from a station to a junction');
+  v.currentStation = leg.fromStationIndex;
+  v.journey = { legIndex: leg.index, tileIndex: leg.tiles.length - 1, forward: true };
+  assert.equal(setup.worldmap.getJourneyStep(1), null, 'the line goes no further without a choice');
+  const choices = setup.worldmap.getBranchChoices();
+  assert.ok(choices.length >= 2, JSON.stringify(choices));
+  assert.ok(choices.every(choice => choice.legIndex !== leg.index));
+  const choice = choices.find(candidate => !setup.worldmap.getBranchStep(candidate.id).blocked) || choices[0];
+  setup.worldmap.getBranchStep(choice.id).blocked = '';
+  const taken = setup.railyard.takeBranch(choice.id);
+  assert.ok(taken || v.journey === null);
+  if (v.journey) {
+    assert.equal(v.journey.legIndex, choice.legIndex);
+    const onto = route.legs[choice.legIndex];
+    assert.ok(v.journey.tileIndex === 1 || v.journey.tileIndex === onto.tiles.length - 2, JSON.stringify(v.journey));
+  }
+  // The nearest stations are found through the junction.
+  const near = setup.realWorldPilot.getStationsNear(leg.index, leg.tiles.length - 1);
+  assert.ok(near.length && near[0].station > 0, JSON.stringify(near));
+  // A leg ending at a buffer goes no further.
+  const buffered = Object.values(route.legs).find(candidate => candidate.toNode.kind === 'buffer');
+  if (buffered) {
+    v.journey = { legIndex: buffered.index, tileIndex: buffered.tiles.length - 1, forward: true };
+    assert.equal(setup.worldmap.getJourneyStep(1), null);
+    assert.equal(setup.worldmap.getBranchChoices().length, 0);
+  }
 });

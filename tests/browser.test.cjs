@@ -1811,6 +1811,38 @@ test('the debug map zooms out to the whole continent and in again, and a drag pa
   assert.equal(await page.evaluate(() => JSON.stringify([SugarCube.State.passage, SugarCube.State.variables.currentStation, SugarCube.State.variables.journey])), before);
 });
 
+test('at a junction out on the line the driver picks the way on', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  await board(page);
+  // Put the consist at the end of a leg that runs into a junction, then drive on from there.
+  const setupJunction = await page.evaluate(() => {
+    const route = SugarCube.setup.realWorldPilot.getGridRoute();
+    const leg = Object.values(route.legs).find(candidate => candidate.fromNode.kind === 'station' && candidate.toNode.kind === 'junction'
+      && SugarCube.setup.realWorldPilot.getJunctionChoices(candidate.index, candidate.tiles.length - 1).length >= 2);
+    const v = SugarCube.State.variables;
+    v.currentStation = leg.fromStationIndex;
+    v.journey = { legIndex: leg.index, tileIndex: leg.tiles.length - 1, forward: true };
+    v.currentTrain[0].cargo = [{ type: 'diesel', amount: 400 }];
+    SugarCube.Engine.play('OnTheLine');
+    return { legIndex: leg.index };
+  });
+  await passage(page, 'OnTheLine');
+  await page.locator('#passages').getByText('The line divides here.').waitFor();
+  const choices = await page.evaluate(() => SugarCube.setup.worldmap.getBranchChoices().filter(choice =>
+    !SugarCube.setup.worldmap.getBranchStep(choice.id).blocked).map(choice => choice.legIndex));
+  assert.ok(choices.length >= 1, JSON.stringify(choices));
+  // Nothing drives straight on past the junction; each way on is its own link, named for its heading.
+  assert.equal(await page.evaluate(() => SugarCube.setup.worldmap.getJourneyStep(1)), null);
+  const links = page.locator('#passages a').filter({ hasText: /^Drive [\d.,]+ (km|mi) / });
+  assert.ok(await links.count() >= choices.length);
+  await links.first().click();
+  await page.waitForFunction(legIndex => !SugarCube.State.variables.journey || SugarCube.State.variables.journey.legIndex !== legIndex,
+    setupJunction.legIndex);
+  const after = await page.evaluate(() => SugarCube.State.variables.journey && SugarCube.State.variables.journey.legIndex);
+  assert.ok(after === null || choices.includes(after), String(after));
+});
+
 test('driving the line goes one tile at a time, and draws the consist on it', async t => {
   const page = await openGame(t);
   await begin(page);
@@ -1895,39 +1927,36 @@ test('the sourced corridor exposes real adjacent stations without fictional side
     SugarCube.setup.worldmap.getLeg(SugarCube.setup.worldmap.getSeed(), index).branches.length)), [0, 0, 0, 0]);
 });
 
-test('a junction offers every line leaving it, and departs on the one chosen', async t => {
+test('a yard has one line out of each end, and a line into a junction says so', async t => {
   const page = await openGame(t);
   await begin(page);
   await board(page);
-  // The first station, counting out from Punta Arenas, with more than one line leaving its exit side.
-  const junction = await page.evaluate(() => {
+  // No station anywhere has two lines leaving the same end.
+  assert.equal(await page.evaluate(() => SugarCube.setup.realWorldPilot.getGridRoute().corridor.stations
+    .filter(station => station.lines.filter(line => line.side === 'exit').length > 1
+      || station.lines.filter(line => line.side === 'entry').length > 1).length), 0);
+  // The first station, counting out from Punta Arenas, whose exit line runs to a junction out on the line.
+  const station = await page.evaluate(() => {
     const pilot = SugarCube.setup.realWorldPilot, count = pilot.getGridRoute().corridor.stations.length;
     for (let id = 1; id <= count; id++) {
-      const lines = pilot.getStationLines(id).filter(line => line.side === 'exit');
-      if (lines.length >= 2) {
-        const v = SugarCube.State.variables;
-        v.currentStation = id;
-        // Standing on the exit lead, every line leaving that side is open.
-        v.stationTracks[id] = SugarCube.setup.railyard.generateStationTracks(id, v.randomSeed);
-        v.drivingTrackIndex = v.stationTracks[id].length - 1;
-        v.enteredTrainIndex = 0;
-        SugarCube.Engine.play('DrivingMode');
-        return { id, lines: lines.map(line => ({ legIndex: line.legIndex, destination: SugarCube.setup.worldmap.getStationName(line.destination),
-          heading: SugarCube.setup.railyard.getDirectionName(SugarCube.setup.worldmap.describeDirection(line.direction)) })) };
-      }
+      const line = pilot.getStationLines(id).find(candidate => candidate.side === 'exit' && !candidate.destination);
+      if (!line || !/^the junction/.test(line.destinationName)) continue;
+      const v = SugarCube.State.variables;
+      v.currentStation = id;
+      v.stationTracks[id] = SugarCube.setup.railyard.generateStationTracks(id, v.randomSeed);
+      v.drivingTrackIndex = v.stationTracks[id].length - 1;
+      v.enteredTrainIndex = 0;
+      SugarCube.Engine.play('DrivingMode');
+      return { id, legIndex: line.legIndex, name: line.destinationName };
     }
     return null;
   });
-  assert.ok(junction, 'the network has junctions');
+  assert.ok(station, 'some station leads to a junction');
   await passage(page, 'DrivingMode');
-  const text = await page.locator('#passages').innerText();
-  junction.lines.forEach(line => assert.match(text, new RegExp('Depart ' + line.heading + ' toward ' +
-    line.destination.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), JSON.stringify(line)));
-  // Take the second line: the journey is on that leg, not the first.
-  const chosen = junction.lines[1];
-  await page.locator('#passages').getByText('Depart ' + chosen.heading + ' toward ' + chosen.destination, { exact: true }).first().click();
+  const depart = page.locator('#passages').getByText(new RegExp('^Depart \\S+ toward ' + station.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$')).first();
+  await depart.click();
   await passage(page, 'OnTheLine');
-  assert.equal(await page.evaluate(() => SugarCube.State.variables.journey.legIndex), chosen.legIndex);
+  assert.equal(await page.evaluate(() => SugarCube.State.variables.journey.legIndex), station.legIndex);
 });
 
 test('the credits dialog discloses how AI was used', async t => {

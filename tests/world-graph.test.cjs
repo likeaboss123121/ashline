@@ -21,8 +21,8 @@ test('world graph loads all regional chunks without entering save state', () => 
   const stats = graph.getStats();
   const { networkSquareCount, networkStopCount, networkRailKm, networkNewLineKm, ...planning } = JSON.parse(JSON.stringify(stats));
   assert.deepEqual(planning, { datasetVersion: 'sa-spike-0.2.0', regionCount: 24, nodeCount: 35, linkCount: 40, corridorCount: 3 });
-  assert.ok(networkSquareCount > 20000 && networkStopCount > 6000, JSON.stringify(stats));
-  assert.ok(networkRailKm > 120000 && networkNewLineKm > 15000, JSON.stringify(stats));
+  assert.ok(networkSquareCount > 20000 && networkStopCount > 3000, JSON.stringify(stats));
+  assert.ok(networkRailKm > 100000 && networkNewLineKm > 15000, JSON.stringify(stats));
   assert.equal(graph.loadAll(), true);
   assert.equal(graph.getNode('cl-punta-arenas').name, 'Punta Arenas');
   assert.equal(graph.getNode('pa-panama-city').name, 'Panama City');
@@ -415,39 +415,53 @@ test('the whole continent is one network that can be driven from Punta Arenas to
     const other = route.byKey[(tile.x + direction.dx) + ',' + (tile.y + direction.dy)];
     assert.ok(other && other.ends.includes(setup.worldmap.opposite(end)), tile.x + ',' + tile.y + ' joins its neighbour');
   }));
-  // Every junction and every end of the line is a stop, so every leg is one plain line.
-  route.tiles.filter(tile => tile.ends.length !== 2).forEach(tile => assert.ok(tile.stationIndex, tile.x + ',' + tile.y + ' is a stop'));
+  // Every junction and every end of the line is a node (a station, a junction out on the line, or a buffer), so every
+  // leg is one plain line; and no station has more than two lines.
+  route.tiles.filter(tile => tile.ends.length !== 2).forEach(tile =>
+    assert.ok(tile.stationIndex || tile.junction || tile.buffer, tile.x + ',' + tile.y + ' is a node'));
+  route.tiles.filter(tile => tile.stationIndex).forEach(tile => assert.ok(tile.ends.length <= 2, tile.station));
   // Spurs to termini are kept: Puerto Montt is at the end of one.
   const puertoMontt = stations.findIndex(station => station.name === 'Puerto Montt' && station.status === 'city') + 1;
   assert.ok(puertoMontt > 0);
-  // Find a way from Punta Arenas to Caracas, a station at a time, and drive it.
+  // Find a way from Punta Arenas to Caracas, a node at a time, and drive it, picking the way at each junction.
   const goal = stations.findIndex(station => station.name === 'Caracas' && station.status === 'city') + 1;
-  const previous = new Map([[1, null]]), queue = [1];
-  while (queue.length && !previous.has(goal)) {
-    const at = queue.shift();
-    pilot.getStationLines(at).forEach(line => {
-      if (!previous.has(line.destination)) { previous.set(line.destination, { from: at, line }); queue.push(line.destination); }
+  const startNode = route.nodes[route.stationPositions[0]], goalSquare = route.stationPositions[goal - 1];
+  const previous = new Map([[startNode.square, null]]), queue = [startNode];
+  while (queue.length && !previous.has(goalSquare)) {
+    const node = queue.shift();
+    node.lines.forEach(line => {
+      const leg = pilot.getLeg(line.legIndex), next = line.forward ? leg.toNode : leg.fromNode;
+      if (!previous.has(next.square)) { previous.set(next.square, { from: node, line }); queue.push(next); }
     });
   }
-  assert.ok(previous.has(goal), 'Caracas can be reached');
+  assert.ok(previous.has(goalSquare), 'Caracas can be reached');
   const path = [];
-  for (let at = goal; previous.get(at); at = previous.get(at).from) path.unshift(previous.get(at));
+  for (let at = goalSquare; previous.get(at); at = previous.get(at).from.square) path.unshift(previous.get(at));
   State.variables.player = { fatigue: 0, health: 100, immunity: 100, sanity: 100, hunger: 100, thirst: 100 };
   State.variables.currentTrain = [setup.railyard.cloneCar(State.variables.defaultTrains.dieselShunter)];
   State.variables.stationTracks = {};
   State.variables.currentStation = 1;
-  let km = 0;
+  let km = 0, junctions = 0;
   path.forEach(({ from, line }) => {
-    assert.equal(State.variables.currentStation, from);
     const leg = pilot.getLeg(line.legIndex);
-    State.variables.journey = { legIndex: line.legIndex, tileIndex: line.forward ? 0 : leg.tiles.length - 1, forward: line.forward };
-    while (State.variables.journey) {
-      const step = setup.worldmap.getJourneyStep(1);
+    if (from.kind === 'station') {
+      assert.equal(State.variables.currentStation, from.stationIndex);
+      State.variables.journey = { legIndex: line.legIndex, tileIndex: line.forward ? 0 : leg.tiles.length - 1, forward: line.forward };
+    } else {
+      // Standing at the junction, the chosen line is one of the ways on.
+      const choice = setup.worldmap.getBranchChoices().find(candidate => candidate.legIndex === line.legIndex);
+      assert.ok(choice, 'leg ' + line.legIndex + ' leaves the junction');
+      km += setup.worldmap.getBranchStep(choice.id).distanceKm;
+      assert.equal(setup.railyard.takeBranch(choice.id), true);
+      junctions++;
+    }
+    for (let step = setup.worldmap.getJourneyStep(1); State.variables.journey && step; step = setup.worldmap.getJourneyStep(1)) {
       km += step.distanceKm;
       assert.equal(setup.railyard.moveAlongLine(1), true, 'leg ' + line.legIndex);
     }
-    assert.equal(State.variables.currentStation, line.destination);
+    if (line.destination) assert.equal(State.variables.currentStation, line.destination);
   });
+  assert.ok(junctions > 10, junctions + ' junctions on the way');
   assert.equal(setup.worldmap.getStationName(State.variables.currentStation), 'Caracas');
   assert.ok(km > 10000, Math.round(km) + ' km');
   // Every yard on the continent can be generated, with a reserve engine that can get out.
