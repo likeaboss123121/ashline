@@ -157,6 +157,7 @@ setup.realWorldPilot = (function () {
 					rect: setup.worldmap.rectFor(legTiles)
 				};
 				legTiles.forEach(function(tile) { leg.byKey[setup.worldmap.key(tile.x, tile.y)] = tile; });
+				leg.km = legTiles.reduce(function(sum, tile) { return sum + tile.distanceKm; }, 0);
 				legs[legIndex] = leg;
 				var outbound = { legIndex: legIndex, forward: true, destination: to.stationIndex, destinationName: to.name, direction: bits[0] };
 				var inbound = { legIndex: legIndex, forward: false, destination: from.stationIndex, destinationName: from.name,
@@ -312,6 +313,56 @@ setup.realWorldPilot = (function () {
 		return found;
 	}
 
+	// How far by track the nodes around one are, in km, up to limitKm: { square: km }, the start left out. first, when
+	// given, is the one line to leave by (one of the node's lines), and the search never comes back through the start:
+	// what lies that way, as a signpost would put it.
+	function getNodeDistances(startSquare, limitKm, first) {
+		var route = getGridRoute(), start = route && route.nodes[startSquare];
+		if (!start) return {};
+		var best = {}, queue = [];
+		// A binary heap on km: a signpost looks a long way down the line.
+		var push = function(item) {
+			var index = queue.push(item) - 1;
+			while (index > 0) {
+				var parent = (index - 1) >> 1;
+				if (queue[parent][0] <= item[0]) break;
+				queue[index] = queue[parent]; queue[parent] = item; index = parent;
+			}
+		};
+		var pop = function() {
+			var top = queue[0], last = queue.pop();
+			if (queue.length) {
+				queue[0] = last;
+				for (var index = 0;;) {
+					var child = index * 2 + 1;
+					if (child >= queue.length) break;
+					if (child + 1 < queue.length && queue[child + 1][0] < queue[child][0]) child++;
+					if (queue[child][0] >= last[0]) break;
+					queue[index] = queue[child]; queue[child] = last; index = child;
+				}
+			}
+			return top;
+		};
+		var reach = function(node, km) {
+			if (node.square === start.square || km > limitKm || (best[node.square] !== undefined && best[node.square] <= km)) return;
+			best[node.square] = km;
+			push([km, node]);
+		};
+		(first ? [first] : start.lines).forEach(function(line) {
+			var leg = getLeg(line.legIndex);
+			reach(line.forward ? leg.toNode : leg.fromNode, leg.km);
+		});
+		while (queue.length) {
+			var item = pop(), km = item[0], node = item[1];
+			if (km > best[node.square]) continue;
+			node.lines.forEach(function(line) {
+				var leg = getLeg(line.legIndex);
+				reach(line.forward ? leg.toNode : leg.fromNode, km + leg.km);
+			});
+		}
+		return best;
+	}
+
 	function debugTarget(x, y) {
 		var route = getGridRoute();
 		if (!route) return null;
@@ -346,7 +397,7 @@ setup.realWorldPilot = (function () {
 		getCorridor: getCorridor, getGridRoute: getGridRoute, getTileAt: getTileAt,
 		getLeg: getLeg, getStation: getStation, getStationTile: getStationTile,
 		getStationLines: getStationLines, getArrivalSide: getArrivalSide, getNodeAt: getNodeAt,
-		getJunctionChoices: getJunctionChoices, getStationsNear: getStationsNear,
+		getJunctionChoices: getJunctionChoices, getStationsNear: getStationsNear, getNodeDistances: getNodeDistances,
 		getJourneyRoute: getJourneyRoute, start: start, finish: finish,
 		endpointForView: endpointForView, terrainFor: terrainFor, debugTarget: debugTarget,
 		appendDebugControls: appendDebugControls

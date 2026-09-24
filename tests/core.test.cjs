@@ -1585,3 +1585,36 @@ test('a train out on the line stops at a junction and the driver picks the way o
     assert.equal(setup.worldmap.getBranchChoices().length, 0);
   }
 });
+
+test('the end of a line has a station map, and a junction a signpost with the towns each way', () => {
+  const { setup } = loadGame();
+  const pilot = setup.realWorldPilot, route = pilot.getGridRoute(), stations = route.corridor.stations;
+  // Stations at the end of a line have the map; a station on a through line does not.
+  const terminus = stations.findIndex(station => station.lines.length === 1) + 1;
+  const through = stations.findIndex(station => station.lines.length === 2) + 1;
+  assert.ok(terminus > 0 && through > 0);
+  assert.equal(setup.wayfinding.hasStationMap(terminus), true);
+  assert.equal(setup.wayfinding.hasStationMap(through), false);
+  const nearby = setup.wayfinding.getNearbyStations(terminus);
+  assert.ok(nearby.every((station, index) => station.km <= setup.wayfinding.MAP_RADIUS_KM && station.stationId !== terminus
+    && (!index || station.km >= nearby[index - 1].km)), JSON.stringify(nearby));
+  // A signpost: one line per way out of the junction, each with the nearest towns that way, nearest first, no halts.
+  const leg = Object.values(route.legs).find(candidate => candidate.toNode.kind === 'junction');
+  const sign = setup.wayfinding.getSign({ legIndex: leg.index, tileIndex: leg.tiles.length - 1 });
+  assert.equal(sign.length, leg.toNode.lines.length);
+  sign.forEach(way => {
+    assert.ok(way.direction, JSON.stringify(way));
+    assert.ok(way.destinations.length <= setup.wayfinding.SIGN_TOWNS + 1);
+    way.destinations.slice(0, setup.wayfinding.SIGN_TOWNS).forEach((place, index, list) => assert.ok(!index || place.km >= list[index - 1].km));
+  });
+  // The way back to where the leg came from lists that station first, at the leg's length.
+  if (leg.fromNode.kind === 'station' && leg.fromNode.station.status !== 'halt') {
+    const back = sign.find(way => way.legIndex === leg.index);
+    assert.equal(back.destinations[0].name, leg.fromNode.name);
+    assert.ok(Math.abs(back.destinations[0].km - leg.km) < 0.01);
+  }
+  assert.match(setup.wayfinding.signMarkup({ legIndex: leg.index, tileIndex: leg.tiles.length - 1 }), /junction-sign/);
+  // Away from a junction there is no sign.
+  const middle = Object.values(route.legs).find(candidate => candidate.tiles.length > 2);
+  assert.equal(setup.wayfinding.getSign({ legIndex: middle.index, tileIndex: 1 }).length, 0);
+});

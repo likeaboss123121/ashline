@@ -220,6 +220,7 @@ Macro.add('onFootControls', {
 				+ walk.minutes + ' "walk" "fatigue:+3">><<run setup.onfoot.walk(' + direction + ')>>'
 				+ '<<goto "OnFoot">><</timedlink>><br>';
 		});
+		output += setup.wayfinding.signMarkup(onfoot.getPosition());
 		onfoot.getBranchWalks().forEach(function(walk) {
 			output += '<<timedlink "Walk ' + setup.units.kilometres(walk.distanceKm || setup.worldmap.TILE_KM) + ' ' + walk.heading
 				+ (walk.choice ? '' : ' onto the branch') + '" ' + walk.minutes + ' "walk" "fatigue:+3">><<run setup.onfoot.walk(1, '

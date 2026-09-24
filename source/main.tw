@@ -75,6 +75,7 @@ You step into the railyard. Several trains are parked here, each with its own mi
 <</if>>
 <<tutorialHint>>
 <<railyardButtons>>
+<<if setup.wayfinding.hasStationMap($currentStation)>><<uiSection "station-map" "Station map">><<stationMap>><</uiSection>><</if>>
 <<if $onFoot && $onFoot.inRailyard>>
 <<conditionControls>>
 <<uiSection "inventory" "Inventory and equipment">><<playerPack>><</uiSection>>

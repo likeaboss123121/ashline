@@ -132,6 +132,13 @@ driver picks one of the other lines (`getJunctionChoices`, offered through `getB
 step along it. A walker picks the same way. At a buffer the line simply ends. `getStationsNear` finds the nearest
 stations by track through junctions, for supplies and recovery.
 
+**Finding the way** (`source/wayfinding.js`, `setup.wayfinding`). A station at the end of a line, with one line out
+of its yard, has a building with a map of the railways within 150 km and the nearest stations by track: a reason to
+go down a branch. Its art is still to come; for now the railyard has a "Station map" section with a plain drawing.
+At a junction out on the line a signpost gives, for each way out, the next two stations that way (halts left out)
+and the first city beyond them, with the distance to each by track, driving or on foot. Both are worked out from the
+compiled network when shown; nothing is saved.
+
 The debug map draws the network only when its panel is open, as plain squares and one path of track, with a line
 under the map naming the square under the pointer; the teleport list holds stations rather than squares. Zoom and
 pan buttons sit above it, the pan arrows in a diamond.

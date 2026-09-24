@@ -1811,6 +1811,34 @@ test('the debug map zooms out to the whole continent and in again, and a drag pa
   assert.equal(await page.evaluate(() => JSON.stringify([SugarCube.State.passage, SugarCube.State.variables.currentStation, SugarCube.State.variables.journey])), before);
 });
 
+test('a station at the end of a line has a map of the railways around it', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  const terminus = await page.evaluate(() => {
+    const stations = SugarCube.setup.realWorldPilot.getGridRoute().corridor.stations;
+    const id = stations.findIndex((station, index) => index > 0 && station.lines.length === 1) + 1;
+    SugarCube.State.variables.currentStation = id;
+    SugarCube.Engine.play('Railyard');
+    return { id, name: stations[id - 1].name };
+  });
+  await passage(page, 'Railyard');
+  const section = page.locator('details').filter({ has: page.getByText('Station map', { exact: true }) });
+  if (!await section.evaluate(element => element.open)) await section.locator(':scope > summary').click();
+  await section.locator('svg.station-map').waitFor();
+  assert.match(await section.locator('svg.station-map .station-map-label').allTextContents().then(labels => labels.join('|')),
+    new RegExp(terminus.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ' \\(you are here\\)'));
+  const listed = await section.locator('.station-map-list li').allInnerTexts();
+  assert.ok(listed.every(line => /: [\d.,]+ (km|mi)$/.test(line)), JSON.stringify(listed));
+  // A station on a through line has none.
+  await page.evaluate(() => {
+    const stations = SugarCube.setup.realWorldPilot.getGridRoute().corridor.stations;
+    SugarCube.State.variables.currentStation = stations.findIndex(station => station.lines.length === 2) + 1;
+    SugarCube.Engine.play('Railyard');
+  });
+  await passage(page, 'Railyard');
+  assert.equal(await page.getByText('Station map', { exact: true }).count(), 0);
+});
+
 test('at a junction out on the line the driver picks the way on', async t => {
   const page = await openGame(t);
   await begin(page);
@@ -1829,6 +1857,10 @@ test('at a junction out on the line the driver picks the way on', async t => {
   });
   await passage(page, 'OnTheLine');
   await page.locator('#passages').getByText('The line divides here.').waitFor();
+  // A signpost gives each way on and the towns down it.
+  const signLines = await page.locator('#passages .junction-sign p').allInnerTexts();
+  assert.ok(signLines.length >= 3 && signLines.every(line => /^(North|South|East|West)/.test(line)), JSON.stringify(signLines));
+  assert.ok(signLines.some(line => /\d+(\.\d)? (km|mi)/.test(line)), JSON.stringify(signLines));
   const choices = await page.evaluate(() => SugarCube.setup.worldmap.getBranchChoices().filter(choice =>
     !SugarCube.setup.worldmap.getBranchStep(choice.id).blocked).map(choice => choice.legIndex));
   assert.ok(choices.length >= 1, JSON.stringify(choices));

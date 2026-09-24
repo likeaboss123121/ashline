@@ -428,3 +428,26 @@
 .debug-map-pan .debug-map-pan-left { grid-area: left; }
 .debug-map-pan .debug-map-pan-right { grid-area: right; }
 .debug-map-pan .debug-map-pan-down { grid-area: down; }
+
+/* The station map building at the end of a line: plain until it has its own art. */
+.station-map-holder svg.station-map {
+	display: block;
+	width: min(100%, 480px);
+	height: auto;
+	border: 1px solid #3a2a2e;
+}
+.station-map .station-map-ground { fill: #1b1d1f; }
+.station-map .station-map-track { fill: none; stroke: #d8d2c4; stroke-width: 1.5; }
+.station-map .station-map-junction { fill: #d8d2c4; }
+.station-map .station-map-station { fill: #e5c58a; }
+.station-map .station-map-here { fill: #e0625c; }
+.station-map .station-map-label { fill: #e5c58a; font-size: 9px; font-family: sans-serif; }
+.station-map-list { margin-top: 0.5em; }
+
+/* A signpost at a junction out on the line: each way on and the places down it. */
+.junction-sign {
+	border-left: 3px solid #e5c58a;
+	padding-left: 0.6em;
+	margin: 0.5em 0;
+}
+.junction-sign p { margin: 0.2em 0; }

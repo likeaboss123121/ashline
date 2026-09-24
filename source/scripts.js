@@ -2575,6 +2575,7 @@ Macro.add('lineControls', {
 		var choices = setup.worldmap.getBranchChoices();
 		if (view.realWorld && choices.length) {
 			output += '<p class="small-description">The line divides here.</p>';
+			output += setup.wayfinding.signMarkup(setup.worldmap.getJourney());
 		}
 		choices.forEach(function(choice) {
 			var step = setup.worldmap.getBranchStep(choice.id);
