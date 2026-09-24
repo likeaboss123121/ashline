@@ -295,7 +295,7 @@ function terrainPath(from, to, settlements = [], cache) {
   return { coordinates, km, straightKm, waterKm: crossed, via, expanded };
 }
 
-module.exports = { terrainPath, PARAMETERS, haversineKm };
+module.exports = { terrainPath, PARAMETERS, haversineKm, Heap };
 
 // Try one: node scripts/world/terrain-path.cjs lon,lat lon,lat
 if (require.main === module) {

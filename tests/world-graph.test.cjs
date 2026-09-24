@@ -272,6 +272,48 @@ test('a line that ends near other track it only reaches the long way round is jo
   assert.equal(new Set(pairs).size, pairs.length, 'each join is made once');
 });
 
+test('two line ends that face each other across a gap are joined when the way round is many times as far', () => {
+  const { endJoins, traceLine, Network } = require('../scripts/world/build-network.cjs');
+  const projection = require('../scripts/world/projection.cjs');
+  const grid = projection.GRID;
+  const at = (eastKm, northKm) => [-62 + eastKm / (111.32 * Math.cos(-35 * Math.PI / 180)), -35 + northKm / 110.57];
+  const network = new Network();
+  const add = (id, points) => network.add(traceLine(points.map(point => at(...point)), grid, {}),
+    { id, status: 'current', bridgeShare: 0, tunnelShare: 0 });
+  // A long loop whose two ends stop 100 km apart: the way round is over 1,000 km.
+  add('loop', [[0, 0], [0, 500], [100, 500], [100, 0]]);
+  // A short hook whose ends are 100 km apart but only 300 km round: not worth a new line.
+  add('hook', [[300, 0], [300, 100], [400, 100], [400, 0]]);
+  const planned = [];
+  const joins = endJoins(network, grid, join => { planned.push(join); return join; });
+  const cellAt = point => projection.cellOf(at(...point), grid).join(',');
+  assert.equal(joins.length, 1, JSON.stringify(joins));
+  assert.deepEqual([joins[0].from, joins[0].to].sort(), [cellAt([0, 0]), cellAt([100, 0])].sort());
+  // A join the plan turns down (over water, say) is not made.
+  assert.equal(endJoins(network, grid, () => null).length, 0);
+});
+
+test('a bare rural line sends spurs out to the places off it, spaced apart, skipping generic names', () => {
+  const { spurs, traceLine, Network } = require('../scripts/world/build-network.cjs');
+  const projection = require('../scripts/world/projection.cjs');
+  const grid = projection.GRID;
+  const at = (eastKm, northKm) => [-62 + eastKm / (111.32 * Math.cos(-35 * Math.PI / 180)), -35 + northKm / 110.57];
+  const network = new Network();
+  network.add(traceLine([at(0, 0), at(0, 600)], grid, {}), { id: 'main', status: 'current', bridgeShare: 0, tunnelShare: 0 });
+  const place = (id, name, kind, east, north) => ({ id, name, kind, coordinates: at(east, north) });
+  const places = [
+    place('a', 'Estancia La Rosa', 'isolated_dwelling', 20, 300),
+    place('b', 'Villa Chica', 'village', 25, 330), // bigger, so it wins the stretch; La Rosa is then too close along it
+    place('c', 'Puesto Norte', 'hamlet', 15, 480),
+    place('d', 'Too Close', 'hamlet', 5, 150), // within reach of the track already
+    place('e', 'Too Far', 'village', 60, 200)
+  ].concat(Array.from({ length: 25 }, (_, index) => place('g' + index, 'Estancia', 'isolated_dwelling', 30, 100 + index)));
+  const laid = spurs(network, grid, places, () => 'rural', join => join);
+  assert.deepEqual(laid.map(spur => spur.place.name).sort(), ['Puesto Norte', 'Villa Chica']);
+  // Nothing in a town or a works district.
+  assert.equal(spurs(network, grid, places, () => 'urban', join => join).length, 0);
+});
+
 test('an authored route names its stops by place, by coordinates, or by place near a point', () => {
   const { placeIndex, resolveRoute } = require('../scripts/world/build-network.cjs');
   const index = placeIndex([{ name: 'Punta Arenas', longitude: -70.9, latitude: -53.16 }], [
@@ -292,6 +334,38 @@ test('an authored route names its stops by place, by coordinates, or by place ne
   assert.throws(() => resolveRoute({ route: ['Punta Arenas', 'Atlantis'] }, index), /no place called "Atlantis"/);
   // The older two-point form still reads.
   assert.equal(resolveRoute({ from: [-70, -50], to: [-71, -51] }, index).length, 2);
+});
+
+test('the generator rules make the connections Likea asked for, and thin the yards in cities', () => {
+  const network = require('../world/network/south-america-network.json');
+  const adjacent = new Map(network.squares.map(square => [square.x + ',' + square.y,
+    square.ends.map(end => [(square.x + end.dx) + ',' + (square.y + end.dy), end.km])]));
+  const byTrack = (from, to) => {
+    const distance = new Map([[from, 0]]), queue = [[0, from]];
+    while (queue.length) {
+      queue.sort((a, b) => a[0] - b[0]);
+      const [km, key] = queue.shift();
+      if (key === to) return km;
+      if (km > distance.get(key) || km > 3500) continue;
+      adjacent.get(key).forEach(([next, step]) => {
+        if (km + step < (distance.get(next) ?? Infinity)) { distance.set(next, km + step); queue.push([km + step, next]); }
+      });
+    }
+    return Infinity;
+  };
+  // Facing line ends joined: into Chile from Neuquén, Jazpampa to Arica, and Peru into Ecuador.
+  assert.ok(byTrack('-49,317', '-28,311') < 300, 'Lonquimay to Los Catutos');
+  assert.ok(byTrack('-59,738', '-66,762') < 300, 'Jazpampa to Arica');
+  assert.ok(byTrack('-268,978', '-272,1095') < 1200, 'Trujillo to El Cisne');
+  // The authored Amazon route, Manaus to Neiva.
+  const stop = name => network.stops.find(candidate => candidate.name === name && candidate.status === 'city');
+  assert.ok(byTrack(stop('Manaus').square, network.stops.find(candidate => candidate.name === 'Neiva').square) < 3000, 'Manaus to Neiva');
+  assert.ok(network.stats.endJoinCount > 10 && network.stats.spurCount > 50, JSON.stringify(network.stats));
+  // Every stop has a region, and in the cities a plain station on a through line rarely gets a yard.
+  assert.ok(network.stops.every(candidate => ['rural', 'industrial', 'urban'].includes(candidate.region)));
+  const urbanThrough = network.stops.filter(candidate => candidate.region === 'urban' && candidate.status !== 'city'
+    && adjacent.get(candidate.square).length === 2);
+  assert.ok(urbanThrough.length < 50, urbanThrough.length + ' urban through stations');
 });
 
 test('the whole continent is one network that can be driven from Punta Arenas to Caracas', () => {

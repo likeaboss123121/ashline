@@ -8,6 +8,11 @@
     {
       "note": "Porto Velho down the Madeira to Manaus",
       "route": ["Porto Velho", "Humaitá", "Manicoré", "Novo Aripuanã", "Borba", "Nova Olinda do Norte", "Autazes", "Manaus"]
+    },
+    {
+      "note": "Manaus up the Amazon to Leticia, then across by Puerto Leguízamo and Florencia to Neiva: a direct way through the middle of the continent",
+      "route": ["Manaus", "Manacapuru", "Coari", "Tefé", "Fonte Boa", { "name": "Tabatinga", "near": [-69.9, -4.2] }, "Leticia",
+        "Puerto Leguízamo", "Florencia", "Neiva"]
     }
   ]
 }

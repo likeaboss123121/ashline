@@ -1385,7 +1385,7 @@ setup.worldmap = {
 					var x = built.rect.x0 + Math.floor((event.clientX - box.left) / scale / built.cell);
 					var y = built.rect.y1 - Math.floor((event.clientY - box.top) / scale / built.cell);
 					var tile = route.byKey[setup.worldmap.key(x, y)];
-					readout.textContent = tile ? ((tile.station ? tile.station + ' | ' : '') + (tile.gapFill ? 'new line | ' : '')
+					readout.textContent = tile ? ((tile.station ? tile.station + ' (' + (tile.stationRegion || 'rural') + ') | ' : '') + (tile.gapFill ? 'new line | ' : '')
 						+ 'grid ' + x + ',' + y + ' ' + tile.terrain + ' ' + tile.shape + ' | '
 						+ tile.geoCoordinate[1].toFixed(3) + '\u00b0, ' + tile.geoCoordinate[0].toFixed(3) + '\u00b0 | mean '
 						+ Math.round(tile.elevation) + ' m, relief \u03c3 ' + Math.round(tile.elevationStdDevM) + ' m')

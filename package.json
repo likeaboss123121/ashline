@@ -16,6 +16,7 @@
     "world:extract:south-america:stations": "node scripts/world/extract-osm-stations.cjs",
     "world:route:south-america": "node --max-old-space-size=4096 scripts/world/route-planning-links.cjs",
     "world:extract:south-america:places": "node scripts/world/extract-osm-places.cjs",
+    "world:extract:south-america:outposts": "node scripts/world/extract-osm-places.cjs --outposts",
     "world:network:south-america": "node --max-old-space-size=4096 scripts/world/build-network.cjs"
   },
   "engines": {

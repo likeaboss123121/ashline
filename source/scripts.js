@@ -1334,6 +1334,19 @@ setup.railyard = {
 	SIDING_CHANCE: 0.35,          // sidings are common, and a siding is a dead end by definition
 	MAX_GENERATED_TRACK_METRES: 300,
 	MIN_GENERATED_TRACK_METRES: 160,
+	// A yard's size by the region its station is in (scripts/world/build-network.cjs): small in the country, large
+	// in the cities, where there are far fewer of them. Within the art's limits of MIN to MAX tracks and metres.
+	YARD_SIZE_BY_REGION: {
+		rural: { tracks: [2, 3], metres: [160, 240] },
+		industrial: { tracks: [3, 5], metres: [220, 300] },
+		urban: { tracks: [4, 5], metres: [260, 300] }
+	},
+	getYardSize: function(stationId) {
+		var tile = setup.realWorldPilot && setup.realWorldPilot.getStationTile ? setup.realWorldPilot.getStationTile(stationId) : null;
+		var size = tile && this.YARD_SIZE_BY_REGION[tile.stationRegion];
+		return size || { tracks: [this.MIN_GENERATED_YARD_TRACKS, this.MAX_GENERATED_YARD_TRACKS],
+			metres: [this.MIN_GENERATED_TRACK_METRES, this.MAX_GENERATED_TRACK_METRES] };
+	},
 	// How long each yard track is, worked out from the shape of the yard rather than picked at random. A track
 	// runs from its switch on the entry ladder to its switch on the exit ladder: the tracks between the two leads
 	// get the full length, and every row beyond them is one junction shorter, because its switches sit one
@@ -2199,12 +2212,13 @@ setup.railyard = {
 		// long its longest track is. Every other length follows from that geometry, so no track is drawn at a
 		// length its switches could not give it.
 		var shapeRng = this.mulberry32(this.seedFromString(baseSeed + stationId + ':shape'));
-		var yardCount = this.randomInt(shapeRng, this.MIN_GENERATED_YARD_TRACKS, this.MAX_GENERATED_YARD_TRACKS);
+		var yardSize = this.getYardSize(stationId);
+		var yardCount = this.randomInt(shapeRng, yardSize.tracks[0], yardSize.tracks[1]);
 		var entryRow = this.randomInt(shapeRng, 1, yardCount);
 		var exitRow = this.randomInt(shapeRng, 1, yardCount);
 		// With at most five tracks the geometry never needs more than the cap, so the yard stays inside it.
 		var lengths = this.getYardTrackLengths(yardCount, entryRow, exitRow,
-			this.randomInt(shapeRng, this.MIN_GENERATED_TRACK_METRES, this.MAX_GENERATED_TRACK_METRES));
+			this.randomInt(shapeRng, yardSize.metres[0], yardSize.metres[1]));
 		// Sidings: a stub off one ladder, closed at the other end, which is how most small yards are actually
 		// arranged. They never sit on a lead's own line, because that line has to carry the ladder through.
 		var closures = [];

@@ -176,9 +176,15 @@
               "id",
               "name",
               "status",
+              "region",
               "square",
               "coordinates"
-            ]
+            ],
+            "properties": {
+              "region": {
+                "enum": ["rural", "industrial", "urban"]
+              }
+            }
           }
         },
         "bridges": {

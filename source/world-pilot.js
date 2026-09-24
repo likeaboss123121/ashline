@@ -78,7 +78,7 @@ setup.realWorldPilot = (function () {
 		var stations = order.map(function(square) {
 			var stop = stopAtSquare[square];
 			return { id: 'stop:' + data.stops.square[stop], name: data.stops.name[stop], status: data.stops.status[stop],
-				square: data.stops.square[stop], lines: [] };
+				region: data.stops.region ? data.stops.region[stop] : 'rural', square: data.stops.square[stop], lines: [] };
 		});
 		var stationAt = {};
 		stations.forEach(function(station, index) {
@@ -87,6 +87,7 @@ setup.realWorldPilot = (function () {
 			tiles[station.square].stationId = station.id;
 			tiles[station.square].stationIndex = index + 1;
 			tiles[station.square].stationStatus = station.status;
+			tiles[station.square].stationRegion = station.region;
 		});
 		// Legs: from every station, out along each of its ends to the next station, each stretch once.
 		var legs = {}, walked = {}, legCount = 0, place = new Array(count);

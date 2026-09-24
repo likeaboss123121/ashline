@@ -259,9 +259,10 @@ function compactNetwork(network) {
     squares.elevation.push(Math.round(square.elevationM)); squares.relief.push(Math.round(square.elevationStdDevM));
     squares.flags.push((square.gapFill ? 1 : 0) | (square.bridge ? 2 : 0) | (square.tunnel ? 4 : 0));
   });
-  const stops = { name: [], square: [], status: [] };
+  const stops = { name: [], square: [], status: [], region: [] };
   network.stops.forEach(stop => {
     stops.name.push(stop.name); stops.square.push(byKey.get(stop.square)); stops.status.push(stop.status);
+    stops.region.push(stop.region);
   });
   return { id: network.id, label: network.label, grid: network.grid, start: byKey.get(network.startSquare),
     stats: network.stats, squares, stops };

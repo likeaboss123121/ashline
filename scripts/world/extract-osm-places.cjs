@@ -1,5 +1,8 @@
 // Named settlements from an OpenStreetMap snapshot: the towns a proposed line is drawn towards where no railway
 // was ever mapped. Cities, towns and villages only; hamlets and farms are too small to route a railway through.
+//
+// With --outposts it extracts the hamlets, farms and isolated dwellings instead: the estancias, mine camps and small
+// ports a spur can run out to, where a long rural line would otherwise have nothing off it (see build-network.cjs).
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -7,9 +10,14 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '../..');
-const SCOPE = { output: 'world/imported/south-america-places.json', id: 'south-america-places',
-  label: 'South America settlements', sourceId: 'openstreetmap-geofabrik-south-america-2026-09-21' };
-const KINDS = ['city', 'town', 'village'];
+const SCOPES = {
+  places: { output: 'world/imported/south-america-places.json', id: 'south-america-places',
+    label: 'South America settlements', sourceId: 'openstreetmap-geofabrik-south-america-2026-09-21',
+    kinds: ['city', 'town', 'village'] },
+  outposts: { output: 'world/imported/south-america-outposts.json', id: 'south-america-outposts',
+    label: 'South America hamlets, farms and isolated dwellings', sourceId: 'openstreetmap-geofabrik-south-america-2026-09-21',
+    kinds: ['hamlet', 'isolated_dwelling', 'farm'] }
+};
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -37,9 +45,11 @@ function sha256File(file) {
 }
 
 function main() {
-  const scope = SCOPE;
+  const scope = process.argv.includes('--outposts') ? SCOPES.outposts : SCOPES.places;
+  const KINDS = scope.kinds;
   const input = argument('input') && path.resolve(root, argument('input'));
-  assert(input && fs.existsSync(input), 'Usage: npm run world:extract:south-america:places -- --input /path/to/extract.osm.pbf');
+  assert(input && fs.existsSync(input), 'Usage: npm run world:extract:south-america:places -- --input /path/to/extract.osm.pbf'
+    + ' [--outposts]');
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'ashline-osm-places-'));
   const filtered = path.join(temporary, 'places.osm.pbf');
   const geojson = path.join(temporary, 'places.geojsonseq');

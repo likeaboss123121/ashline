@@ -1529,3 +1529,18 @@ test('the player can climb down, walk the line, fell trees by hand, and carry wh
   assert.equal(setup.onfoot.climbAboard(), true);
   assert.equal(State.variables.onFoot, null);
 });
+
+test('railyards are sized by their region: small in the country, large in the cities', () => {
+  const { setup, State } = loadGame();
+  State.variables.randomSeed = 'yard-regions';
+  const stations = setup.realWorldPilot.getGridRoute().corridor.stations;
+  const sample = region => stations.map((station, index) => ({ station, id: index + 1 }))
+    .filter(entry => entry.station.region === region && entry.id > 1 && !setup.worldmap.isBranchStation(entry.id)).slice(0, 12);
+  const yardTracks = id => setup.railyard.generateStationTracks(id, 'yard-regions').filter(track => !track.infinite && !track.direction).length;
+  const rural = sample('rural'), urban = sample('urban');
+  assert.ok(rural.length > 5 && urban.length > 5);
+  rural.forEach(entry => assert.equal(setup.railyard.getYardSize(entry.id).tracks[1], 3));
+  urban.forEach(entry => assert.equal(setup.railyard.getYardSize(entry.id).tracks[0], 4));
+  const average = list => list.reduce((sum, entry) => sum + yardTracks(entry.id), 0) / list.length;
+  assert.ok(average(urban) > average(rural), average(urban) + ' urban tracks against ' + average(rural) + ' rural');
+});
