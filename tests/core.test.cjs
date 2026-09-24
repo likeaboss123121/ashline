@@ -1106,7 +1106,8 @@ test('sleep clears the bar, the small hours cost sanity, and collapsing is not a
   live(setup, 8 * 60, 'sleep');
   assert.equal(setup.stats.getValue('fatigue'), 0, 'eight hours of good sleep clears a full bar');
 
-  // Being awake in the small hours frays the mind; sleeping through them mends it three times as fast.
+  // Being awake in the small hours frays the mind, SANITY_NIGHT_MULTIPLIER times the base rate; sleeping through
+  // them mends it.
   State.variables.gameTimeTimestampMs = Date.UTC(2000, 6, 25, 0, 30);
   setup.stats.setValue('sanity', 50);
   State.variables.player.carry = {};
@@ -1117,7 +1118,9 @@ test('sleep clears the bar, the small hours cost sanity, and collapsing is not a
   setup.stats.setValue('sanity', 50);
   State.variables.player.carry = {};
   live(setup, 4 * 60, 'sleep');
-  assert.ok(setup.stats.getValue('sanity') > 50 + (50 - awake), 'sleeping through the night mends it faster');
+  assert.ok(setup.stats.getValue('sanity') > 50, 'sleeping through the night mends it');
+  const baseLoss = setup.condition.SANITY_NIGHT_LOSS_PER_MINUTE * 4 * 60;
+  assert.ok(Math.abs((50 - awake) - baseLoss * setup.condition.SANITY_NIGHT_MULTIPLIER) < 2, `four hours awake cost ${50 - awake}`);
 
   // Collapsing takes hours and gives back only a quarter of the bar, and costs sanity.
   setup.stats.setValue('fatigue', 100);
@@ -1627,8 +1630,69 @@ test('the maps a player has looked at are remembered, once each, for the Map tab
   termini.forEach(id => setup.wayfinding.rememberMap(id));
   setup.wayfinding.rememberMap(termini[0]);
   assert.deepEqual(Array.from(setup.wayfinding.getSeenMaps()), Array.from(termini));
-  assert.deepEqual(Array.from(State.variables.seenMaps), Array.from(termini), 'a list of station numbers, nothing more, in the save');
+  assert.deepEqual(Array.from(State.variables.seenMaps), Array.from(termini).map(id => stations[id - 1].id),
+    'the stations\' stable ids, nothing more, in the save');
   State.variables.currentStation = termini[0];
   const here = setup.wayfinding.getHereTile();
   assert.equal(here.stationIndex, termini[0]);
+});
+
+test('stations have buildings by their kind, and keep small stores: a Station HQ has food and clean water', () => {
+  const { setup, State } = loadGame();
+  setup.startNewRun();
+  const v = State.variables, buildings = setup.stationBuildings;
+  v.player = { fatigue: 0, health: 100, immunity: 80, sanity: 100, hunger: 50, thirst: 30 };
+  // The first station teaches the game with its HQ and a diesel tank; every station keeps the same buildings.
+  assert.deepEqual(Array.from(buildings.get(1)), ['hq', 'dieselTank']);
+  const stations = setup.realWorldPilot.getGridRoute().corridor.stations;
+  const counts = { hq: 0, waterTower: 0, coalTower: 0, dieselTank: 0 }, sample = Math.min(600, stations.length);
+  for (let id = 2; id <= sample; id++) {
+    const kinds = buildings.get(id);
+    assert.deepEqual(Array.from(kinds), Array.from(buildings.get(id)), 'the same every time');
+    kinds.forEach(kind => counts[kind]++);
+  }
+  Object.keys(counts).forEach(kind => assert.ok(counts[kind] > sample * 0.03 && counts[kind] < sample * 0.8, JSON.stringify(counts)));
+  // A yard with no buildings keeps only its emergency reserve, with poor water; a water tower's is poor too, but not
+  // as poor, and the HQ's is clean.
+  const bare = stations.findIndex((station, index) => index > 0 && !buildings.get(index + 1).length) + 1;
+  const tower = stations.findIndex((station, index) => index > 0 && buildings.get(index + 1).includes('waterTower')) + 1;
+  assert.equal(setup.recovery.stock(bare).diesel, buildings.EMERGENCY.diesel);
+  assert.equal(setup.recovery.stock(bare).rations, 0);
+  assert.equal(setup.recovery.waterGrade(bare), buildings.GRADES.emergencyWater);
+  assert.equal(setup.recovery.waterGrade(tower), buildings.GRADES.towerWater);
+  assert.ok(setup.recovery.stock(tower).water >= buildings.STORES.waterTower.water[0]);
+  assert.ok(buildings.GRADES.towerWater < buildings.GRADES.drinkingWater);
+  // At the first station's HQ: a ration, a drink, and clean water to carry, each taken from its store.
+  v.currentStation = 1; v.journey = null; v.onFoot = null;
+  const store = setup.recovery.stock(1), rations = store.rations, water = store.drinkingWater;
+  const kitRations = () => setup.items.getPlayerKit().filter(slot => slot.item === 'rations').reduce((n, slot) => n + slot.count, 0);
+  const before = kitRations();
+  assert.equal(setup.recovery.takeRation(), true);
+  assert.equal(store.rations, rations - 1);
+  assert.equal(kitRations(), before + 1);
+  assert.equal(setup.recovery.drinkAtHq(), true);
+  assert.ok(setup.stats.getValue('thirst') > 30);
+  assert.equal(setup.recovery.fillDrinkingWater(), true);
+  const carried = setup.items.getPlayerCargo().find(stack => stack.type === 'water');
+  assert.equal(carried.grade, buildings.GRADES.drinkingWater);
+  assert.ok(store.drinkingWater < water - 2);
+  // No HQ, nothing to take.
+  v.currentStation = bare;
+  assert.equal(setup.recovery.takeRation(), false);
+  assert.equal(setup.recovery.drinkAtHq(), false);
+});
+
+test('a signpost names each place on one way only, the shortest, and a junction by a station is "outside" it', () => {
+  const { setup } = loadGame();
+  const route = setup.realWorldPilot.getGridRoute();
+  let checked = 0;
+  Object.values(route.legs).filter(leg => leg.toNode.kind === 'junction').slice(0, 60).forEach(leg => {
+    const sign = setup.wayfinding.getSign({ legIndex: leg.index, tileIndex: leg.tiles.length - 1 });
+    const names = sign.flatMap(way => way.destinations.map(place => place.name));
+    assert.equal(new Set(names).size, names.length, JSON.stringify(sign));
+    checked++;
+  });
+  assert.ok(checked > 10);
+  assert.equal(setup.worldmap.describePoint('the junction near Buenos Aires', 'Buenos Aires'), 'the junction outside Buenos Aires');
+  assert.equal(setup.worldmap.describePoint('the junction near Luján', 'Buenos Aires'), 'the junction near Luján');
 });

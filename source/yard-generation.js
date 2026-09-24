@@ -14,7 +14,7 @@ setup.yardGeneration = {
 	reserve: function(tracks, stationId, seed) {
 		var yard = setup.railyard, world = setup.worldmap;
 		this.breakStock(tracks, stationId, seed);
-		setup.recovery.ensureStock(tracks);
+		setup.recovery.ensureStock(tracks, stationId);
 		// The engine must stand where it can get out: on a yard track that reaches a lead the station actually has. A
 		// station at the end of a line has only one.
 		var leads = yard.getLeads(tracks);
@@ -35,9 +35,18 @@ setup.yardGeneration = {
 			var branch = world.getBranchForStation(seed, stationId);
 			minutes = branch.tiles.reduce(function(total, tile) { return total + world.getTileMinutes(-tile.grade, train); }, 0);
 		} else {
-			// The way out: the station's first exit line, or its only line when every line leaves the other side.
+			// The way out: the station's first exit line, or its only line when every line leaves the other side. The
+			// line may run to a junction rather than a station, so the tank is sized for the way to the nearest other
+			// station by track, at the pace of that first line.
 			var line = world.getLine(stationId, true) || world.getLine(stationId, false);
 			minutes = line ? world.getLegTravel(seed, line.legIndex, train, !line.forward).minutes : 0;
+			var pilot = setup.realWorldPilot, here = line && pilot.getStationTile ? pilot.getStationTile(stationId) : null;
+			if (here && pilot.getNodeDistances) {
+				var leg = pilot.getLeg(line.legIndex), route = pilot.getGridRoute(), distances = pilot.getNodeDistances(here.globalPosition, 2000);
+				var nearest = Object.keys(distances).filter(function(square) { return route.nodes[square].kind === 'station'; })
+					.reduce(function(best, square) { return Math.min(best, distances[square]); }, Infinity);
+				if (nearest < Infinity && leg.km > 0) minutes = Math.max(minutes, minutes / leg.km * nearest);
+			}
 		}
 		// Include yard work before departure and five percent beyond the route cost.
 		var required = Math.ceil(minutes * 1.05) + 20;

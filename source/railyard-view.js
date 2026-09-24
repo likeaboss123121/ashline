@@ -471,9 +471,24 @@ setup.railyardView = {
 				+ ' free of ' + setup.units.metres(exitTrack.length) : exitName,
 				u: exitStart + exitLead, v: exitV, dx: 3, dy: 2, anchor: 'start', player: isOn(onwardIndex) });
 		}
+		// The station's buildings (setup.stationBuildings) stand in a row behind the farthest track, in from the
+		// entry end, with ground under them.
+		result.buildings = [];
+		var buildingU = J;
+		setup.stationBuildings.get(State.variables.currentStation).forEach(function(kind) {
+			var name = setup.stationBuildings.KINDS[kind].template, width = self.BUILDING_WIDTH_METRES[kind];
+			result.buildings.push({ name: name, u: buildingU, v: -self.BUILDING_OFFSET_UNITS,
+				title: setup.stationBuildings.KINDS[kind].name + '.' });
+			result.groundSpans.push({ u0: buildingU - 2, u1: buildingU + width + 2, v: -self.BUILDING_OFFSET_UNITS - 12 });
+			buildingU += width + self.BUILDING_GAP_METRES;
+		});
 		result.flipped = flipped;
 		return result;
 	},
+	// How far behind the farthest track the buildings stand, and how much room each takes along it.
+	BUILDING_OFFSET_UNITS: 26,
+	BUILDING_WIDTH_METRES: { hq: 17, waterTower: 11, coalTower: 12, dieselTank: 17 },
+	BUILDING_GAP_METRES: 5,
 	// The view opens at the drawing's own size where that fits, and fitted where it does not, which is most yards on
 	// a phone: opening scrolled into a corner of a yard four times the width of the screen tells the player nothing.
 	// Fit squeezes a whole yard in. The level lives on setup rather than in the save: it is how the player is
@@ -821,9 +836,13 @@ setup.railyardView = {
 			images.push(item);
 			return item;
 		};
-		// Paint back to front: all flat track pieces first, then cars from the farthest track to the nearest.
+		// Paint back to front: all flat track pieces first, then the buildings behind the yard, then cars from the
+		// farthest track to the nearest.
 		layout.flat.sort(byDepth).forEach(function(piece) {
 			place(piece.name, piece.u, piece.v, '', true);
+		});
+		(layout.buildings || []).forEach(function(building) {
+			place(building.name, building.u, building.v, building.title);
 		});
 		var trainSpans = {};
 		layout.cars.sort(byDepth).forEach(function(entry) {

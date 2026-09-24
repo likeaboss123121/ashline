@@ -28,7 +28,7 @@ function loadGame() {
   vm.runInContext(fs.readFileSync(path.join(root, 'source/condition.js'), 'utf8'), context, { filename: 'condition.js' });
   vm.runInContext(fs.readFileSync(path.join(root, 'source/tutorial.js'), 'utf8'), context, { filename: 'tutorial.js' });
   vm.runInContext(fs.readFileSync(path.join(root, 'source/units.js'), 'utf8'), context, { filename: 'units.js' });
-  ['yard-actions', 'yard-generation', 'bug-report', 'food', 'campfire', 'recovery', 'journal', 'save-legacy', 'save-migrations', 'saves', 'wayfinding'].forEach(name => {
+  ['yard-actions', 'yard-generation', 'bug-report', 'food', 'campfire', 'recovery', 'journal', 'save-legacy', 'save-migrations', 'saves', 'wayfinding', 'station-buildings'].forEach(name => {
     vm.runInContext(fs.readFileSync(path.join(root, 'source/' + name + '.js'), 'utf8'), context, { filename: name + '.js' });
   });
   vm.runInContext(fs.readFileSync(path.join(root, 'source/onfoot.js'), 'utf8'), context, { filename: 'onfoot.js' });

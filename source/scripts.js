@@ -2567,8 +2567,8 @@ Macro.add('lineControls', {
 				+ '<<set _linePassage = State.variables.journey ? "OnTheLine" : "DrivingMode">>'
 				+ '<<goto _linePassage>><</timedlink>><br>';
 			output += '<span class="small-description">Into ' + step.terrain + ', ' + slope
-				+ (step.destinationName ? ', reaching ' + step.destinationName : '')
-				+ (step.arrivesAt ? ', arriving at ' + setup.worldmap.getStationName(step.arrivesAt) : '') + '.</span><br>';
+				+ (step.arrivesAt ? ', arriving at ' + setup.worldmap.getStationName(step.arrivesAt)
+					: step.destinationName ? ', reaching ' + step.destinationName : '') + '.</span><br>';
 		});
 		// At a junction the player knows only which way the rails immediately run. Whether a track reconnects or
 		// ends is deliberately not exposed: there is no map to consult out here.
@@ -2675,7 +2675,8 @@ Macro.add('drivingTravelButtons', {
 					? setup.railyard.getDirectionName(setup.worldmap.describeDirection(line.direction))
 					: setup.railyard.getDirectionName(setup.railyard.getLeadDirection(tracks, towardExit ? 'exit' : 'entry'));
 				var destination = line.destination;
-				var label = 'Depart ' + heading + ' toward ' + (destination ? setup.worldmap.getStationName(destination) : line.destinationName);
+				var label = 'Depart ' + heading + ' toward ' + (destination ? setup.worldmap.getStationName(destination)
+					: setup.worldmap.describePoint(line.destinationName, setup.worldmap.getStationName(stationId)));
 				// A leg is a run of grid squares: climbing costs more time, and so more fuel, than rolling along the flat,
 				// and a heavy consist is slower over all of it.
 				var minutes = setup.worldmap.getTravelMinutes(stationId, towardExit, State.variables.currentTrain, line.legIndex);
@@ -2954,9 +2955,15 @@ Macro.add('debugTools', {
 			['Basic yield', setup.food.BASIC_YIELD + ' rations'], ['Intact kitchen yield', setup.food.KITCHEN_YIELD + ' rations'],
 			['Ration', '+' + setup.condition.RATION_HUNGER + ' Hunger']
 		]);
-		addReferenceTable('Station depots', ['Resource', 'Initial volume'], Object.keys(setup.recovery.INITIAL_STOCK).map(function(type) {
-			return [type, setup.recovery.INITIAL_STOCK[type] + ' L'];
-		}));
+		addReferenceTable('Station stores', ['Where', 'What it holds'], [['Every yard (emergency)', Object.keys(setup.stationBuildings.EMERGENCY).map(function(type) {
+			return setup.stationBuildings.EMERGENCY[type] + ' L ' + type;
+		}).join(', ')]].concat(setup.stationBuildings.ORDER.map(function(kind) {
+			var store = setup.stationBuildings.STORES[kind];
+			return [setup.stationBuildings.KINDS[kind].name, Object.keys(store).map(function(type) {
+				return store[type][0] + '–' + store[type][1] + ' ' + type;
+			}).join(', ')];
+		})).concat([['Water grade', 'station HQ ' + setup.stationBuildings.GRADES.drinkingWater + '%, water tower '
+			+ setup.stationBuildings.GRADES.towerWater + '%, emergency ' + setup.stationBuildings.GRADES.emergencyWater + '%']]));
 		addReferenceTable('Broken stock', ['Stock', 'Probability'], [
 			['Passenger', setup.yardGeneration.BROKEN_PASSENGER_CHANCE * 100 + '%'],
 			['Other generated stock', setup.yardGeneration.BROKEN_FREIGHT_CHANCE * 100 + '%'], ['Reserved escape engine', '0%']

@@ -442,6 +442,11 @@ setup.worldmap = {
 		return branches.filter(function(branch) { return branch.stationId === stationId; })[0] || null;
 	},
 	// What the player calls a station.
+	// A junction or buffer as seen from a station: one named for the very place the player stands in is "outside" it.
+	describePoint: function(name, stationName) {
+		return stationName && name.slice(-(' near ' + stationName).length) === ' near ' + stationName
+			? name.slice(0, -(' near ' + stationName).length) + ' outside ' + stationName : name;
+	},
 	// The names at the two ends of a leg: stations, or on the network a junction or the end of a line.
 	getLegEndNames: function(legIndex) {
 		var leg = this.getLeg(this.getSeed(), legIndex);

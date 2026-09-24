@@ -108,8 +108,8 @@ setup.tutorial = {
 			}
 			return {
 				id: 'shunt',
-				text: 'Good work! Next, we want to attach the flatcar to the rear of the consist. Decouple the front consist, '
-					+ 'and navigate to the other track. Then, you can back into the track where the flatcar is to couple to the rear.'
+				text: 'Good work! Next, we want to attach the flatcar to the rear of the consist. Navigate '
+					+ 'to the other track. Then, you can back into the track where the flatcar is to couple to the rear.'
 			};
 		}
 		return {

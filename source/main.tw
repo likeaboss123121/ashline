@@ -75,7 +75,7 @@ You have entered the railyard on foot. Your train remains parked out on the line
 You step into the railyard. Several trains are parked here, each with its own mix of cars and cargo.
 <</if>>
 <<tutorialHint>>
-<<if setup.wayfinding.hasStationMap($currentStation)>><<uiSection "station-map" "Station map" true>><<stationMap>><</uiSection>><</if>>
+<<if setup.wayfinding.hasStationMap($currentStation)>><<uiSection "station-map" "Station map" `!setup.tutorial.isActive()`>><<stationMap>><</uiSection>><</if>>
 <<railyardButtons>>
 <<if $onFoot && $onFoot.inRailyard>>
 <<conditionControls>>

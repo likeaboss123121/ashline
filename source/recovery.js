@@ -1,16 +1,28 @@
-// Station supplies are finite, saved on a track object (never an array property).
-// They can be carried by hand even when an engine cannot move; diesel needs the player's 20 L jerrycan.
+// Station supplies are finite and small, saved on a track object (never an array property): a yard's emergency
+// reserve and whatever its buildings keep (setup.stationBuildings). They can be carried by hand even when an engine
+// cannot move; diesel needs the player's 20 L jerrycan.
 setup.recovery = {
-	INITIAL_STOCK: { diesel: 2000, coal: 5000, water: 12000 },
+	TYPES: ['diesel', 'coal', 'water'],
 	GRADE: 89,
-	ensureStock: function(tracks) {
-		if (!tracks[0].supplies) tracks[0].supplies = Object.assign({}, this.INITIAL_STOCK);
+	HQ_WATER_FILL: 10,
+	ensureStock: function(tracks, stationId) {
+		if (!tracks[0].supplies) {
+			var yard = setup.railyard, seed = (State.variables && State.variables.randomSeed) || 'ashline';
+			tracks[0].supplies = stationId
+				? setup.stationBuildings.initialStock(stationId, yard.mulberry32(yard.seedFromString(seed + ':stores:' + stationId)))
+				: Object.assign({}, setup.stationBuildings.EMERGENCY);
+		}
 		return tracks[0].supplies;
 	},
 	stock: function(station) {
 		var v = State.variables;
 		if (!v.stationTracks[station]) v.stationTracks[station] = setup.railyard.generateStationTracks(station, v.randomSeed);
-		return this.ensureStock(v.stationTracks[station]);
+		return this.ensureStock(v.stationTracks[station], station);
+	},
+	// How clean a station's water is: a water tower's, or the yard's emergency butt.
+	waterGrade: function(station) {
+		var stock = this.stock(station);
+		return stock.waterGrade == null ? setup.stationBuildings.GRADES.emergencyWater : stock.waterGrade;
 	},
 	// Distances follow rail connections, including either exit of a rejoining branch.
 	stations: function() {
@@ -66,7 +78,7 @@ setup.recovery = {
 		return true;
 	},
 	plan: function(station, type, intoEngine) {
-		if (!Object.prototype.hasOwnProperty.call(this.INITIAL_STOCK, type)) return null;
+		if (this.TYPES.indexOf(type) === -1) return null;
 		var route = this.supplyRoutes(type).find(function(s) { return String(s.station) === String(station); });
 		if (!route || route.distance) return null;
 		var v = State.variables, engine = v.currentTrain && v.currentTrain[v.currentCarIndex];
@@ -89,9 +101,52 @@ setup.recovery = {
 		if (!p || (!p.intoEngine && p.type === 'diesel' && !this.takeJerrycan())) return false;
 		// Revalidate before spending time; time advances without demanding propulsion.
 		if (!setup.time.advanceMinutesWithSystems(p.minutes, 'walk')) return false;
+		var grade = type === 'water' ? this.waterGrade(p.station) : this.GRADE;
 		this.stock(p.station)[type] -= p.litres;
-		if (p.intoEngine) setup.fuel.addCargo(p.engine, type, p.litres, this.GRADE);
-		else setup.items.addPlayerCargo(type, p.litres, this.GRADE);
+		if (p.intoEngine) setup.fuel.addCargo(p.engine, type, p.litres, grade);
+		else setup.items.addPlayerCargo(type, p.litres, grade);
+		return true;
+	},
+	// The station HQ: a ration from its store, clean water to carry, or a drink there and then. Only standing at the
+	// station, with its HQ.
+	atHq: function() {
+		var v = State.variables;
+		if (v.journey && !(v.onFoot && v.onFoot.inRailyard)) return null;
+		var station = v.currentStation;
+		return setup.stationBuildings.has(station, 'hq') ? station : null;
+	},
+	canTakeRation: function() {
+		var station = this.atHq();
+		return !!station && this.stock(station).rations > 0 && setup.items.playerHasRoom('rations');
+	},
+	takeRation: function() {
+		if (!this.canTakeRation()) return false;
+		this.stock(this.atHq()).rations--;
+		setup.food.add(setup.items.getPlayerKit(), 'rations', 1, setup.condition.RATION_QUALITY);
+		return true;
+	},
+	hqWaterFill: function() {
+		var station = this.atHq();
+		if (!station) return 0;
+		var room = (setup.items.PLAYER_CARRY_KG - setup.items.getPlayerCarriedKg()) / setup.railyard.getCargoDensityKgPerLiter('water');
+		return Math.floor(Math.min(this.HQ_WATER_FILL, room, this.stock(station).drinkingWater || 0));
+	},
+	fillDrinkingWater: function() {
+		var litres = this.hqWaterFill();
+		if (!(litres > 0)) return false;
+		this.stock(this.atHq()).drinkingWater -= litres;
+		setup.items.addPlayerCargo('water', litres, setup.stationBuildings.GRADES.drinkingWater);
+		return true;
+	},
+	canDrinkAtHq: function() {
+		var station = this.atHq();
+		return !!station && (this.stock(station).drinkingWater || 0) >= setup.condition.DRINK_LITRES;
+	},
+	drinkAtHq: function() {
+		if (!this.canDrinkAtHq()) return false;
+		this.stock(this.atHq()).drinkingWater -= setup.condition.DRINK_LITRES;
+		setup.stats.adjust('thirst', setup.condition.DRINK_THIRST);
+		setup.condition.applyConsumableQuality(setup.stationBuildings.GRADES.drinkingWater);
 		return true;
 	},
 	load: function(type) {
@@ -135,16 +190,44 @@ Macro.add('recoveryControls', {
 			a.addEventListener('click', function(e) { e.preventDefault(); if (action()) Engine.play(State.passage); });
 			p.appendChild(a); if (effects) new Wikifier(p, setup.effects.describeHtml(effects)); box.appendChild(p);
 		}
+		// What stands at the station, so the player knows what it can give.
+		var here = !setup.worldmap.getJourney() || (v.onFoot && v.onFoot.inRailyard) ? v.currentStation : null;
+		if (here) {
+			var buildings = setup.stationBuildings.describe(here), note = document.createElement('p');
+			note.className = 'small-description station-buildings';
+			note.textContent = buildings.length ? 'Here: ' + buildings.join(', ') + '.' : 'No station buildings here, only a small emergency store.';
+			box.appendChild(note);
+		}
 		['diesel', 'coal', 'water'].forEach(function(type) {
 			recovery.supplyRoutes(type).forEach(function(route) {
 				var into = !route.distance && !v.onFoot && !!v.currentTrain;
 				var p = recovery.plan(route.station, type, into);
+				// An engine that takes no water (a diesel) still lets the player carry some away.
+				if (!p && into && type === 'water') { into = false; p = recovery.plan(route.station, type, false); }
 				if (!p) return;
 				link('Collect from ' + setup.worldmap.getStationName(route.station) + ': ' + setup.units.litres(p.litres) + ' ' + type
+					+ (type === 'water' ? ' (grade ' + recovery.waterGrade(route.station) + '%)' : '')
 					+ ' (' + setup.time.formatDuration(p.minutes) + ')', function() { return recovery.collect(route.station, type, into); },
 					'fatigue:+' + setup.effects.levelForRate(setup.onfoot.FATIGUE_PER_MINUTE));
 			});
 		});
+		// The station HQ's food and clean water.
+		if (recovery.atHq()) {
+			var hqStock = recovery.stock(recovery.atHq());
+			var spend = function(minutes, action) {
+				return function() { return setup.time.advanceMinutesWithSystems(minutes, 'manual') && action(); };
+			};
+			if (recovery.canTakeRation()) link('Take a ration from the station HQ (' + hqStock.rations + ' left) (0:01)', spend(1, function() { return recovery.takeRation(); }));
+			if (recovery.canDrinkAtHq()) link('Drink at the station HQ (0:02)', spend(2, function() { return recovery.drinkAtHq(); }), 'thirst:+2');
+			if (recovery.hqWaterFill() > 0) link('Fill up with ' + setup.units.litres(recovery.hqWaterFill()) + ' of drinking water (grade '
+				+ setup.stationBuildings.GRADES.drinkingWater + '%) (0:02)', spend(2, function() { return recovery.fillDrinkingWater(); }));
+			if (!hqStock.rations && !(hqStock.drinkingWater >= setup.condition.DRINK_LITRES)) {
+				var empty = document.createElement('p');
+				empty.className = 'small-description';
+				empty.textContent = 'The station HQ has nothing left.';
+				box.appendChild(empty);
+			}
+		}
 		if (!v.onFoot || setup.onfoot.isBesideTrain()) {
 			var engine = setup.railyard.getControllingLocomotive(v.currentTrain);
 			setup.items.getPlayerCargo().forEach(function(stack) {

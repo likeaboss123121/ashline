@@ -37,15 +37,21 @@ setup.wayfinding = {
 		return this.drawAreas([here], here, 'Map of the railways around ' + setup.worldmap.getStationName(stationId));
 	},
 
-	// The stations whose maps the player has looked at, in the order they were first seen. Saved: it is what the
-	// player knows, not world data.
+	// The stations whose maps the player has looked at, in the order they were first seen, as station numbers. Saved
+	// by the stations' stable ids (a station's number changes when the network is rebuilt; its id does not): it is
+	// what the player knows, not world data.
 	getSeenMaps: function() {
-		var seen = State.variables.seenMaps;
-		return Array.isArray(seen) ? seen.filter(function(stationId) { return setup.realWorldPilot.getStation(stationId); }) : [];
+		var seen = State.variables.seenMaps, stations = setup.realWorldPilot.getGridRoute().corridor.stations;
+		if (!Array.isArray(seen)) return [];
+		var numberOf = {};
+		stations.forEach(function(station, index) { numberOf[station.id] = index + 1; });
+		return seen.map(function(id) { return numberOf[id]; }).filter(Boolean);
 	},
 	rememberMap: function(stationId) {
+		var station = setup.realWorldPilot.getStation(stationId);
+		if (!station) return;
 		var seen = Array.isArray(State.variables.seenMaps) ? State.variables.seenMaps : [];
-		if (seen.indexOf(Number(stationId)) < 0) seen.push(Number(stationId));
+		if (seen.indexOf(station.id) < 0) seen.push(station.id);
 		State.variables.seenMaps = seen;
 	},
 
@@ -133,17 +139,28 @@ setup.wayfinding = {
 		var node = pilot.getNodeAt(position.legIndex, position.tileIndex);
 		if (!node || node.kind !== 'junction') return [];
 		var route = pilot.getGridRoute();
-		return node.lines.map(function(line) {
-			var distances = pilot.getNodeDistances(node.square, self.SIGN_LIMIT_KM, line);
+		// Every way's distances first, so each place is signed only on the way that is shortest to it: a road sign
+		// does not point to the same city down every road.
+		var ways = node.lines.map(function(line) {
+			return { line: line, distances: pilot.getNodeDistances(node.square, self.SIGN_LIMIT_KM, line) };
+		});
+		var best = {};
+		ways.forEach(function(way, index) {
+			Object.keys(way.distances).forEach(function(square) {
+				if (best[square] === undefined || way.distances[square] < ways[best[square]].distances[square]) best[square] = index;
+			});
+		});
+		return ways.map(function(way, index) {
+			var distances = way.distances;
 			var stations = Object.keys(distances).map(function(square) {
 				var reached = route.nodes[square];
-				return reached && reached.kind === 'station' && reached.station.status !== 'halt'
+				return reached && reached.kind === 'station' && reached.station.status !== 'halt' && best[square] === index
 					? { name: reached.name, km: distances[square], city: reached.station.status === 'city' } : null;
 			}).filter(Boolean).sort(function(a, b) { return a.km - b.km || a.name.localeCompare(b.name); });
 			var shown = stations.slice(0, self.SIGN_TOWNS);
 			var city = stations.filter(function(station) { return station.city && shown.indexOf(station) < 0; })[0];
 			if (city) shown.push(city);
-			return { direction: setup.worldmap.describeDirection(line.direction), legIndex: line.legIndex, destinations: shown };
+			return { direction: setup.worldmap.describeDirection(way.line.direction), legIndex: way.line.legIndex, destinations: shown };
 		});
 	},
 
@@ -155,7 +172,7 @@ setup.wayfinding = {
 			var heading = way.direction.charAt(0).toUpperCase() + way.direction.slice(1);
 			var places = way.destinations.length ? way.destinations.map(function(place) {
 				return place.name + ' ' + setup.units.kilometres(Math.round(place.km));
-			}).join(' &middot; ') : 'no station';
+			}).join(' &middot; ') : 'no station this way';
 			return '<p><strong>' + heading + '</strong>: ' + places + '</p>';
 		}).join('') + '</div>';
 	}

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="52" height="42" viewBox="0 0 52 42" shape-rendering="crispEdges" data-template="railyard-building-station-hq" data-anchor-x="1" data-anchor-y="26">
+<title>Ashline rail yard template: Station HQ</title>
+<g id="walls">
+<polygon points="3,13 17,6 49,22 49,34 35,41 3,25" fill="#735d42"/>
+<polygon points="3,25 35,41 35,29 3,13" fill="#9a7f5c"/>
+<polygon points="49,34 35,41 35,29 49,22" fill="#735d42"/>
+<polygon points="17,6 49,22 35,29 3,13" fill="#b89f7a"/>
+</g>
+<g id="openings">
+<polygon points="17,32 21,34 21,27 17,25" fill="#3b2a20"/>
+<polygon points="6,24 8,25 8,23 6,22" fill="#dec38a"/>
+<polygon points="6,19 8,20 8,18 6,17" fill="#dec38a"/>
+<polygon points="11,26 13,27 13,25 11,24" fill="#dec38a"/>
+<polygon points="11,21 13,22 13,20 11,19" fill="#dec38a"/>
+<polygon points="26,34 28,35 28,33 26,32" fill="#dec38a"/>
+<polygon points="26,29 28,30 28,28 26,27" fill="#dec38a"/>
+<polygon points="30,36 32,37 32,35 30,34" fill="#dec38a"/>
+<polygon points="30,31 32,32 32,30 30,29" fill="#dec38a"/>
+<polygon points="45,33 42,35 42,32 45,30" fill="#dec38a"/>
+</g>
+<g id="roof">
+<polygon points="2,14 10,2 43,18 51,22 35,30" fill="#42231d"/>
+<polygon points="1,13 35,30 43,18 9,1" fill="#6e3b30"/>
+<polygon points="49,22 35,29 42,18" fill="#735d42"/>
+</g>
+<g id="chimney">
+<polygon points="14,3 17,1 20,3 20,9 17,10 14,9" fill="#5a5952"/>
+<polygon points="14,9 17,10 17,4 14,3" fill="#78766c"/>
+<polygon points="20,9 17,10 17,4 20,3" fill="#5a5952"/>
+<polygon points="17,1 20,3 17,4 14,3" fill="#9c998d"/>
+</g>
+<g id="sign">
+<polygon points="14,21 15,20 23,24 23,27 22,28 14,24" fill="#8c7f64"/>
+<polygon points="14,24 22,28 22,25 14,21" fill="#d9c9a0"/>
+<polygon points="23,27 22,28 22,25 23,24" fill="#8c7f64"/>
+<polygon points="15,20 23,24 22,25 14,21" fill="#d9c9a0"/>
+</g>
+</svg>

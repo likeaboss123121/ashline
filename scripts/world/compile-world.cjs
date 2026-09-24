@@ -268,9 +268,11 @@ function compactNetwork(network) {
     squares.elevation.push(Math.round(square.elevationM)); squares.relief.push(Math.round(square.elevationStdDevM));
     squares.flags.push((square.gapFill ? 1 : 0) | (square.bridge ? 2 : 0) | (square.tunnel ? 4 : 0));
   });
-  const stops = { name: [], square: [], status: [], region: [] };
+  // Each stop's id is the builder's own (an OSM node, an authored place, or a halt's grid square): it outlasts a
+  // rebuild of the network, where the stops' order and numbering do not, so saves refer to stops by it.
+  const stops = { id: [], name: [], square: [], status: [], region: [] };
   network.stops.forEach(stop => {
-    stops.name.push(stop.name); stops.square.push(byKey.get(stop.square)); stops.status.push(stop.status);
+    stops.id.push(stop.id); stops.name.push(stop.name); stops.square.push(byKey.get(stop.square)); stops.status.push(stop.status);
     stops.region.push(stop.region);
   });
   // The junctions and buffers out on the line, named for the nearest place.

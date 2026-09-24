@@ -598,6 +598,58 @@ setup.railyardTemplates = {
 			"anchorX": 9,
 			"anchorY": 5,
 			"lengthMetres": 10
+		},
+		{
+			"file": "railyard-building-water-tower.svg",
+			"passage": "railyard-building-water-tower",
+			"title": "Water tower",
+			"width": 33,
+			"height": 42,
+			"anchorX": -1,
+			"anchorY": 35,
+			"top": [
+				19,
+				1
+			]
+		},
+		{
+			"file": "railyard-building-coal-tower.svg",
+			"passage": "railyard-building-coal-tower",
+			"title": "Coal tower",
+			"width": 48,
+			"height": 67,
+			"anchorX": 1,
+			"anchorY": 58,
+			"top": [
+				26,
+				7
+			]
+		},
+		{
+			"file": "railyard-building-diesel-tank.svg",
+			"passage": "railyard-building-diesel-tank",
+			"title": "Diesel tank",
+			"width": 50,
+			"height": 44,
+			"anchorX": -1,
+			"anchorY": 26,
+			"top": [
+				25,
+				6
+			]
+		},
+		{
+			"file": "railyard-building-station-hq.svg",
+			"passage": "railyard-building-station-hq",
+			"title": "Station HQ",
+			"width": 52,
+			"height": 42,
+			"anchorX": 1,
+			"anchorY": 26,
+			"top": [
+				26,
+				8
+			]
 		}
 	]
 };

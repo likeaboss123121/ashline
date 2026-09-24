@@ -1811,11 +1811,37 @@ test('the debug map zooms out to the whole continent and in again, and a drag pa
   assert.equal(await page.evaluate(() => JSON.stringify([SugarCube.State.passage, SugarCube.State.variables.currentStation, SugarCube.State.variables.journey])), before);
 });
 
+test('station buildings stand behind the yard, and the HQ and a water store serve a diesel crew', async t => {
+  const page = await openGame(t);
+  await begin(page);
+  // Punta Arenas has its Station HQ and a diesel tank, drawn behind the yard.
+  const drawn = await page.evaluate(() => [...document.querySelectorAll('svg.railyard-view use[data-template^="railyard-building-"]')]
+    .map(use => use.getAttribute('data-template')).sort());
+  assert.deepEqual(drawn, ['railyard-building-diesel-tank', 'railyard-building-station-hq']);
+  await board(page);
+  const supplies = page.locator('details').filter({ has: page.getByText('Station supplies', { exact: true }) });
+  if (!await supplies.evaluate(element => element.open)) await supplies.locator(':scope > summary').click();
+  const text = await supplies.innerText();
+  assert.match(text, /Here: Station HQ, Diesel tank\./);
+  // A diesel takes no water, but the crew can still carry some away, at the yard's poor grade.
+  assert.match(text, /Collect from Punta Arenas: [\d.,]+ (L|gal) water \(grade 40%\)/);
+  const rations = () => page.evaluate(() => SugarCube.setup.items.getPlayerKit().filter(slot => slot.item === 'rations')
+    .reduce((n, slot) => n + slot.count, 0));
+  const before = await rations();
+  await supplies.getByText(/^Take a ration from the station HQ/).click();
+  await page.waitForFunction(count => SugarCube.setup.items.getPlayerKit().filter(slot => slot.item === 'rations')
+    .reduce((n, slot) => n + slot.count, 0) > count, before);
+  const again = page.locator('details').filter({ has: page.getByText('Station supplies', { exact: true }) });
+  if (!await again.evaluate(element => element.open)) await again.locator(':scope > summary').click();
+  await again.getByText(/^Fill up with [\d.,]+ (L|gal) of drinking water \(grade 95%\)/).click();
+  await page.waitForFunction(() => SugarCube.setup.items.getPlayerCargo().some(stack => stack.type === 'water' && stack.grade === 95));
+});
+
 test('a station at the end of a line has a map of the railways around it', async t => {
   const page = await openGame(t);
   await begin(page);
   // Punta Arenas is the end of a line, so its map is the first one seen; with none seen, the Map tab says so.
-  assert.deepEqual(await page.evaluate(() => SugarCube.State.variables.seenMaps), [1]);
+  assert.deepEqual(await page.evaluate(() => SugarCube.setup.wayfinding.getSeenMaps()), [1]);
   await page.evaluate(() => { SugarCube.State.variables.seenMaps = []; });
   await page.locator('#menu-story').getByText('Map', { exact: true }).click();
   await page.locator('#ui-dialog').getByText(/You have not seen any maps yet/).waitFor();

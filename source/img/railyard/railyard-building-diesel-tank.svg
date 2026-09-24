@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="44" viewBox="0 0 50 44" shape-rendering="crispEdges" data-template="railyard-building-diesel-tank" data-anchor-x="-1" data-anchor-y="26">
+<title>Ashline rail yard template: Diesel tank</title>
+<g id="bund">
+<polygon points="1,24 25,12 49,24 49,25 25,37 1,25" fill="#5a5952"/>
+<polygon points="1,25 25,37 25,36 1,24" fill="#78766c"/>
+<polygon points="49,25 25,37 25,36 49,24" fill="#5a5952"/>
+<polygon points="25,12 49,24 25,36 1,24" fill="#9c998d"/>
+</g>
+<g id="tank">
+<polygon points="11,9 12,6 15,3 20,1 27,1 33,2 37,4 39,7 39,23 38,26 35,29 30,31 23,31 17,30 13,28 11,25" fill="#5a5952"/>
+<polygon points="35,29 30,31 30,15 35,13" fill="#959389"/>
+<polygon points="30,31 23,31 23,15 30,15" fill="#9c9a90"/>
+<polygon points="23,31 17,30 17,14 23,15" fill="#a19f94"/>
+<polygon points="17,30 13,28 13,12 17,14" fill="#a3a196"/>
+<polygon points="13,28 11,25 11,9 13,12" fill="#a19f94"/>
+<polygon points="39,23 38,26 38,10 39,7" fill="#86847a"/>
+<polygon points="38,26 35,29 35,13 38,10" fill="#8d8b81"/>
+<polygon points="35,13 30,15 23,15 17,14 13,12 11,9 12,6 15,3 20,1 27,1 33,2 37,4 39,7 38,10" fill="#c9c7bb"/>
+<polygon points="35,19 30,21 30,19 35,17" fill="#8c3b2e"/>
+<polygon points="30,21 23,21 23,19 30,19" fill="#8c3b2e"/>
+<polygon points="23,21 17,20 17,18 23,19" fill="#8c3b2e"/>
+<polygon points="17,20 13,18 13,16 17,18" fill="#8c3b2e"/>
+<polygon points="13,18 11,15 11,13 13,16" fill="#8c3b2e"/>
+<polygon points="39,13 39,16 39,14 39,11" fill="#8c3b2e"/>
+<polygon points="39,16 35,19 35,17 39,14" fill="#8c3b2e"/>
+<polygon points="15,8 16,5 22,2 26,2 30,3 33,4 35,6 35,7 34,10 32,12 28,13 24,13 20,12 17,11 15,9" fill="#5a5952"/>
+<polygon points="32,12 28,13 28,12 32,11" fill="#959389"/>
+<polygon points="28,13 24,13 24,12 28,12" fill="#9c9a90"/>
+<polygon points="24,13 20,12 20,11 24,12" fill="#a19f94"/>
+<polygon points="20,12 17,11 17,10 20,11" fill="#a3a196"/>
+<polygon points="17,11 15,9 15,8 17,10" fill="#a19f94"/>
+<polygon points="35,7 34,10 34,9 35,6" fill="#86847a"/>
+<polygon points="34,10 32,12 32,11 34,9" fill="#8d8b81"/>
+<polygon points="32,11 28,12 24,12 20,11 17,10 15,8 16,5 18,4 22,2 26,2 30,3 33,4 35,6 34,9" fill="#c9c7bb"/>
+</g>
+<g id="pump">
+<polygon points="27,32 33,29 39,32 39,38 33,41 27,38" fill="#343d34"/>
+<polygon points="27,38 33,41 33,35 27,32" fill="#4a5649"/>
+<polygon points="39,38 33,41 33,35 39,32" fill="#343d34"/>
+<polygon points="33,29 39,32 33,35 27,32" fill="#6d7a6c"/>
+<polygon points="22,33 24,32 34,37 34,39 32,40 22,35" fill="#232524"/>
+<polygon points="22,35 32,40 32,38 22,33" fill="#2f3230"/>
+<polygon points="34,39 32,40 32,38 34,37" fill="#232524"/>
+<polygon points="24,32 34,37 32,38 22,33" fill="#4d4f4b"/>
+<polygon points="27,34 30,33 32,34 32,42 29,43 27,42" fill="#343d34"/>
+<polygon points="27,42 29,43 29,35 27,34" fill="#4a5649"/>
+<polygon points="32,42 29,43 29,35 32,34" fill="#343d34"/>
+<polygon points="30,33 32,34 29,35 27,34" fill="#6d7a6c"/>
+</g>
+</svg>

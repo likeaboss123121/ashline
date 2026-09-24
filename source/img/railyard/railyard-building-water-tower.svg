@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="33" height="42" viewBox="0 0 33 42" shape-rendering="crispEdges" data-template="railyard-building-water-tower" data-anchor-x="-1" data-anchor-y="35">
+<title>Ashline rail yard template: Water tower</title>
+<g id="legs">
+<polygon points="17,14 19,13 21,14 21,30 19,31 17,30" fill="#232524"/>
+<polygon points="17,30 19,31 19,15 17,14" fill="#2f3230"/>
+<polygon points="21,30 19,31 19,15 21,14" fill="#232524"/>
+<polygon points="19,13 21,14 19,15 17,14" fill="#4d4f4b"/>
+<polygon points="27,19 29,18 31,19 31,35 29,36 27,35" fill="#232524"/>
+<polygon points="27,35 29,36 29,20 27,19" fill="#2f3230"/>
+<polygon points="31,35 29,36 29,20 31,19" fill="#232524"/>
+<polygon points="29,18 31,19 29,20 27,19" fill="#4d4f4b"/>
+<polygon points="7,19 9,18 11,19 11,35 9,36 7,35" fill="#232524"/>
+<polygon points="7,35 9,36 9,20 7,19" fill="#2f3230"/>
+<polygon points="11,35 9,36 9,20 11,19" fill="#232524"/>
+<polygon points="9,18 11,19 9,20 7,19" fill="#4d4f4b"/>
+<polygon points="17,24 19,23 21,24 21,40 19,41 17,40" fill="#232524"/>
+<polygon points="17,40 19,41 19,25 17,24" fill="#2f3230"/>
+<polygon points="21,40 19,41 19,25 21,24" fill="#232524"/>
+<polygon points="19,23 21,24 19,25 17,24" fill="#4d4f4b"/>
+<polygon points="19,21 20,21 30,26 30,27 29,27 19,22" fill="#232524"/>
+<polygon points="19,22 29,27 29,26 19,21" fill="#2f3230"/>
+<polygon points="30,27 29,27 29,26 30,26" fill="#232524"/>
+<polygon points="20,21 30,26 29,26 19,21" fill="#4d4f4b"/>
+<polygon points="9,26 10,26 20,31 20,32 19,32 9,27" fill="#232524"/>
+<polygon points="9,27 19,32 19,31 9,26" fill="#2f3230"/>
+<polygon points="20,32 19,32 19,31 20,31" fill="#232524"/>
+<polygon points="10,26 20,31 19,31 9,26" fill="#4d4f4b"/>
+</g>
+<g id="tank">
+<polygon points="8,5 11,3 15,2 20,1 25,2 29,4 30,6 30,21 27,23 23,24 18,25 13,24 9,22 8,20" fill="#2c241b"/>
+<polygon points="27,23 23,24 23,12 27,11" fill="#504130"/>
+<polygon points="23,24 18,25 18,13 23,12" fill="#554633"/>
+<polygon points="18,25 13,24 13,12 18,13" fill="#594935"/>
+<polygon points="13,24 9,22 9,10 13,12" fill="#5a4a36"/>
+<polygon points="9,22 8,20 8,8 9,10" fill="#594935"/>
+<polygon points="30,18 30,21 30,9 30,6" fill="#453829"/>
+<polygon points="30,21 27,23 27,11 30,9" fill="#4a3d2c"/>
+<polygon points="27,11 23,12 18,13 13,12 9,10 8,8 8,5 11,3 15,2 20,1 25,2 29,4 30,6 30,9" fill="#7d6a4f"/>
+<polygon points="27,21 23,23 23,22 27,20" fill="#2a2d2c"/>
+<polygon points="23,23 18,23 18,22 23,22" fill="#2a2d2c"/>
+<polygon points="18,23 13,22 13,21 18,22" fill="#2a2d2c"/>
+<polygon points="13,22 9,20 9,19 13,21" fill="#2a2d2c"/>
+<polygon points="9,20 7,18 7,17 9,19" fill="#2a2d2c"/>
+<polygon points="31,16 30,19 30,18 31,15" fill="#2a2d2c"/>
+<polygon points="30,19 27,21 27,20 30,18" fill="#2a2d2c"/>
+<polygon points="27,16 23,18 23,17 27,15" fill="#2a2d2c"/>
+<polygon points="23,18 18,18 18,17 23,17" fill="#2a2d2c"/>
+<polygon points="18,18 13,17 13,16 18,17" fill="#2a2d2c"/>
+<polygon points="13,17 9,15 9,14 13,16" fill="#2a2d2c"/>
+<polygon points="9,15 7,13 7,12 9,14" fill="#2a2d2c"/>
+<polygon points="31,11 30,14 30,13 31,10" fill="#2a2d2c"/>
+<polygon points="30,14 27,16 27,15 30,13" fill="#2a2d2c"/>
+</g>
+<g id="roof">
+<polygon points="6,8 7,5 10,3 15,1 20,1 26,2 30,4 32,6 31,9 28,12 23,13 18,13 12,12 8,10" fill="#42231d"/>
+<polygon points="28,12 23,13 19,1" fill="#6c3a2f"/>
+<polygon points="23,13 18,13 19,1" fill="#6d3b30"/>
+<polygon points="18,13 12,12 19,1" fill="#6d3a30"/>
+<polygon points="12,12 8,10 19,1" fill="#6b392f"/>
+<polygon points="8,10 6,8 19,1" fill="#67372d"/>
+<polygon points="6,8 7,5 19,1" fill="#63352b"/>
+<polygon points="32,6 31,9 19,1" fill="#65362c"/>
+<polygon points="31,9 28,12 19,1" fill="#69382e"/>
+</g>
+<g id="spout">
+<polygon points="2,21 11,16 13,17 13,19 4,24 2,23" fill="#232524"/>
+<polygon points="2,23 4,24 4,22 2,21" fill="#2f3230"/>
+<polygon points="13,19 4,24 4,22 13,17" fill="#232524"/>
+<polygon points="11,16 13,17 4,22 2,21" fill="#4d4f4b"/>
+<polygon points="1,22 3,21 5,22 5,29 3,30 1,29" fill="#232524"/>
+<polygon points="1,29 3,30 3,23 1,22" fill="#2f3230"/>
+<polygon points="5,29 3,30 3,23 5,22" fill="#232524"/>
+<polygon points="3,21 5,22 3,23 1,22" fill="#4d4f4b"/>
+</g>
+</svg>

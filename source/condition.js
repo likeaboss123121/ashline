@@ -15,7 +15,8 @@ setup.condition = {
 	HUNGER_PER_MINUTE: 100 / (24 * 60), // a day from full to empty
 	THIRST_PER_MINUTE: 100 / (14 * 60), // thirst comes on faster than hunger
 	SANITY_MEND_PER_MINUTE: 100 / (400 * 60), // a slow drift back up, a few points a day
-	SANITY_NIGHT_LOSS_PER_MINUTE: 100 / (60 * 60), // a night spent awake between midnight and five costs about five
+	SANITY_NIGHT_LOSS_PER_MINUTE: 100 / (60 * 60), // before SANITY_NIGHT_MULTIPLIER: about five points a night awake
+	SANITY_NIGHT_MULTIPLIER: 4, // raised until sanity has its own update: a night awake alone costs about twenty
 	SANITY_ASLEEP_MULTIPLIER: 3,
 	NIGHT_FROM_HOUR: 0,
 	NIGHT_TO_HOUR: 5,
@@ -112,7 +113,7 @@ setup.condition = {
 		if (this.isNight()) {
 			this.apply('sanity', asleep
 				? this.SANITY_NIGHT_LOSS_PER_MINUTE * this.SANITY_ASLEEP_MULTIPLIER
-				: -this.SANITY_NIGHT_LOSS_PER_MINUTE);
+				: -this.SANITY_NIGHT_LOSS_PER_MINUTE * this.SANITY_NIGHT_MULTIPLIER);
 		} else {
 			this.apply('sanity', this.SANITY_MEND_PER_MINUTE * (asleep ? this.SANITY_ASLEEP_MULTIPLIER : 1));
 		}

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="67" viewBox="0 0 48 67" shape-rendering="crispEdges" data-template="railyard-building-coal-tower" data-anchor-x="1" data-anchor-y="58">
+<title>Ashline rail yard template: Coal tower</title>
+<g id="legs">
+<polygon points="23,33 27,31 31,33 31,47 27,49 23,47" fill="#5a5952"/>
+<polygon points="23,47 27,49 27,35 23,33" fill="#78766c"/>
+<polygon points="31,47 27,49 27,35 31,33" fill="#5a5952"/>
+<polygon points="27,31 31,33 27,35 23,33" fill="#9c998d"/>
+<polygon points="39,41 43,39 47,41 47,55 43,57 39,55" fill="#5a5952"/>
+<polygon points="39,55 43,57 43,43 39,41" fill="#78766c"/>
+<polygon points="47,55 43,57 43,43 47,41" fill="#5a5952"/>
+<polygon points="43,39 47,41 43,43 39,41" fill="#9c998d"/>
+<polygon points="5,42 9,40 13,42 13,56 9,58 5,56" fill="#5a5952"/>
+<polygon points="5,56 9,58 9,44 5,42" fill="#78766c"/>
+<polygon points="13,56 9,58 9,44 13,42" fill="#5a5952"/>
+<polygon points="9,40 13,42 9,44 5,42" fill="#9c998d"/>
+<polygon points="21,50 25,48 29,50 29,64 25,66 21,64" fill="#5a5952"/>
+<polygon points="21,64 25,66 25,52 21,50" fill="#78766c"/>
+<polygon points="29,64 25,66 25,52 29,50" fill="#5a5952"/>
+<polygon points="25,48 29,50 25,52 21,50" fill="#9c998d"/>
+</g>
+<g id="bin">
+<polygon points="5,16 27,5 47,15 47,41 25,52 5,42" fill="#5a5952"/>
+<polygon points="5,42 25,52 25,26 5,16" fill="#78766c"/>
+<polygon points="47,41 25,52 25,26 47,15" fill="#5a5952"/>
+<polygon points="27,5 47,15 25,26 5,16" fill="#9c998d"/>
+<polygon points="27,7 43,15 25,24 9,16" fill="#2c2b28"/>
+</g>
+<g id="house">
+<polygon points="15,7 25,2 37,8 37,16 27,21 15,15" fill="#5a5952"/>
+<polygon points="15,15 27,21 27,13 15,7" fill="#78766c"/>
+<polygon points="37,16 27,21 27,13 37,8" fill="#5a5952"/>
+<polygon points="25,2 37,8 27,13 15,7" fill="#9c998d"/>
+<polygon points="15,6 25,1 37,7 37,8 27,13 15,7" fill="#42231d"/>
+<polygon points="15,7 27,13 27,12 15,6" fill="#42231d"/>
+<polygon points="37,8 27,13 27,12 37,7" fill="#42231d"/>
+<polygon points="25,1 37,7 27,12 15,6" fill="#42231d"/>
+</g>
+<g id="chute">
+<polygon points="3,46 13,41 17,43 17,46 7,51 3,49" fill="#2f2922"/>
+<polygon points="3,49 7,51 7,48 3,46" fill="#433a31"/>
+<polygon points="17,46 7,51 7,48 17,43" fill="#2f2922"/>
+<polygon points="13,41 17,43 7,48 3,46" fill="#5f5448"/>
+<polygon points="3,49 7,51 5,55 1,53" fill="#2f2922"/>
+</g>
+</svg>

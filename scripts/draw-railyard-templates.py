@@ -65,6 +65,16 @@ P = {
     'brass': '#c9a15f', 'wheel_rim': '#1b1f20', 'wheel_hub': '#8c3b2e',
     'buffer_top': '#b5503d', 'buffer_side': '#7d3528', 'buffer_end': '#5a261e',
     'sleeper_top': '#6b5b44', 'sleeper_side': '#4a3e2f', 'sleeper_end': '#382f24',
+    # Station buildings.
+    'timber_top': '#7d6a4f', 'timber_side': '#5a4a36', 'timber_end': '#403426', 'timber_dark': '#2c241b',
+    'hoop': '#2a2d2c', 'leg_top': '#4d4f4b', 'leg_side': '#2f3230', 'leg_end': '#232524',
+    'concrete_top': '#9c998d', 'concrete_side': '#78766c', 'concrete_end': '#5a5952', 'concrete_dark': '#3e3d38',
+    'chute_top': '#5f5448', 'chute_side': '#433a31', 'chute_end': '#2f2922',
+    'oil_top': '#c9c7bb', 'oil_side': '#a3a196', 'oil_end': '#7f7d74', 'oil_dark': '#5a5952', 'oil_band': '#8c3b2e',
+    'pump_top': '#6d7a6c', 'pump_side': '#4a5649', 'pump_end': '#343d34',
+    'wall_top': '#b89f7a', 'wall_side': '#9a7f5c', 'wall_end': '#735d42',
+    'roof_top': '#6e3b30', 'roof_side': '#5a3027', 'roof_end': '#42231d',
+    'door': '#3b2a20', 'sign': '#d9c9a0', 'sign_side': '#8c7f64',
 }
 
 
@@ -154,6 +164,37 @@ class Sprite:
                 fill = lerp_hex(side, dark, -angle / (math.pi / 4))
             self.world_poly([(u0, va, za), (u1, va, za), (u1, vb, zb), (u0, vb, zb)], fill)
         self.world_poly([(u1, vv, zz) for vv, zz in section], end)
+
+    def cylinder_z(self, uc, vc, z0, z1, radius, top, side, end, dark, sides=14, band=False):
+        """Faceted upright cylinder (tanks, towers). The faces toward +u and +v are the visible ones. A band (a hoop,
+        a painted stripe) is only its visible faces, with no underlay or top to cover what it wraps."""
+        ring = [(uc + radius * math.cos(2 * math.pi * i / sides), vc + radius * math.sin(2 * math.pi * i / sides))
+                for i in range(sides)]
+        if not band:
+            self.silhouette([(uu, vv, zz) for uu, vv in ring for zz in (z0, z1)], dark)
+        for i in range(sides):
+            (ua, va), (ub, vb) = ring[i], ring[(i + 1) % sides]
+            angle = math.atan2((va + vb) / 2 - vc, (ua + ub) / 2 - uc)
+            if math.cos(angle) + math.sin(angle) <= 0.05:
+                continue
+            fill = lerp_hex(end, side, (math.sin(angle) + 1) / 2)
+            self.world_poly([(ua, va, z0), (ub, vb, z0), (ub, vb, z1), (ua, va, z1)], fill)
+        if not band:
+            self.world_poly([(uu, vv, z1) for uu, vv in ring], top)
+
+    def cone(self, uc, vc, z, radius, height, top, side, dark, sides=14):
+        """A conical roof on an upright cylinder of the same radius."""
+        ring = [(uc + radius * math.cos(2 * math.pi * i / sides), vc + radius * math.sin(2 * math.pi * i / sides))
+                for i in range(sides)]
+        apex = (uc, vc, z + height)
+        self.silhouette([(uu, vv, z) for uu, vv in ring] + [apex], dark)
+        for i in range(sides):
+            (ua, va), (ub, vb) = ring[i], ring[(i + 1) % sides]
+            angle = math.atan2((va + vb) / 2 - vc, (ua + ub) / 2 - uc)
+            if math.cos(angle) + math.sin(angle) <= -0.4:
+                continue
+            fill = lerp_hex(side, top, (math.cos(angle) + math.sin(angle) + 1.5) / 3)
+            self.world_poly([(ua, va, z), (ub, vb, z), apex], fill)
 
     def disc_side(self, uc, v, zc, radius, rim, hub, sides=10):
         """A wheel face on the +v side of the train."""
@@ -323,6 +364,91 @@ def tanker(length_m=14):
     s.part('dome')
     s.box(L / 2 - 2, -2, 14, 4, 4, 2, P['tank_top'], P['tank_side'], P['tank_end'])
     finish_car(s, L, 16)
+    return s
+
+
+# Station buildings -------------------------------------------------------------
+# Each stands beside the yard, behind the farthest track. Its origin is the corner nearest the tracks at its low-u
+# end, on the ground: the building spans u from 0 along the track and v back from 0, away from it.
+
+def water_tower():
+    s = Sprite('railyard-building-water-tower', 'Water tower')
+    uc, vc, r = 10, -10, 8
+    s.part('legs')
+    for du, dv in ((-5, -5), (5, -5), (-5, 5), (5, 5)):
+        s.box(uc + du - 1, vc + dv - 1, 0, 2, 2, 16, P['leg_top'], P['leg_side'], P['leg_end'])
+    for dv in (-5, 5):  # cross bracing between the legs
+        s.box(uc - 5, vc + dv - 0.5, 8, 10, 1, 1, P['leg_top'], P['leg_side'], P['leg_end'])
+    s.part('tank')
+    s.cylinder_z(uc, vc, 16, 28, r, P['timber_top'], P['timber_side'], P['timber_end'], P['timber_dark'])
+    for z in (18, 23):
+        s.cylinder_z(uc, vc, z, z + 1, r + 0.4, P['hoop'], P['hoop'], P['hoop'], P['hoop'], band=True)
+    s.part('roof')
+    s.cone(uc, vc, 28, r + 1, 6, P['roof_top'], P['roof_side'], P['roof_end'])
+    s.part('spout')
+    s.box(uc - 1, vc + r - 1, 20, 2, 9, 2, P['leg_top'], P['leg_side'], P['leg_end'])
+    s.box(uc - 1, vc + r + 7, 14, 2, 2, 7, P['leg_top'], P['leg_side'], P['leg_end'])
+    s.mark('top', uc, vc, 34)
+    return s
+
+
+def coal_tower():
+    s = Sprite('railyard-building-coal-tower', 'Coal tower')
+    s.part('legs')
+    for u0, v0 in ((0, -26), (16, -26), (0, -8), (16, -8)):
+        s.box(u0, v0, 0, 4, 4, 14, P['concrete_top'], P['concrete_side'], P['concrete_end'])
+    s.part('bin')
+    s.box(0, -26, 14, 20, 22, 26, P['concrete_top'], P['concrete_side'], P['concrete_end'])
+    s.world_poly([(2, -24, 40), (18, -24, 40), (18, -6, 40), (2, -6, 40)], P['coal_top'])  # coal heaped in the bin
+    s.part('house')
+    s.box(4, -20, 40, 12, 10, 8, P['concrete_top'], P['concrete_side'], P['concrete_end'])
+    s.box(4, -20, 48, 12, 10, 1, P['roof_end'], P['roof_end'], P['roof_end'])
+    s.part('chute')
+    s.box(8, -4, 16, 4, 10, 3, P['chute_top'], P['chute_side'], P['chute_end'])
+    s.world_poly([(8, 6, 16), (12, 6, 16), (12, 8, 13), (8, 8, 13)], P['chute_end'])
+    s.mark('top', 10, -15, 49)
+    return s
+
+
+def diesel_tank():
+    s = Sprite('railyard-building-diesel-tank', 'Diesel tank')
+    uc, vc, r = 12, -14, 10
+    s.part('bund')
+    s.box(uc - 12, vc - 12, 0, 24, 24, 1, P['concrete_top'], P['concrete_side'], P['concrete_end'])
+    s.part('tank')
+    s.cylinder_z(uc, vc, 1, 17, r, P['oil_top'], P['oil_side'], P['oil_end'], P['oil_dark'])
+    s.cylinder_z(uc, vc, 11, 13, r + 0.3, P['oil_band'], P['oil_band'], P['oil_band'], P['oil_band'], band=True)
+    s.cylinder_z(uc, vc, 17, 18, r - 3, P['oil_top'], P['oil_side'], P['oil_end'], P['oil_dark'])
+    s.part('pump')
+    s.box(26, -8, 0, 6, 6, 6, P['pump_top'], P['pump_side'], P['pump_end'])
+    s.box(22, -3, 2, 10, 2, 2, P['leg_top'], P['leg_side'], P['leg_end'])  # the pipe to the fuelling point
+    s.box(30, -1, 0, 2, 3, 8, P['pump_top'], P['pump_side'], P['pump_end'])
+    s.mark('top', uc, vc, 19)
+    return s
+
+
+def station_hq():
+    s = Sprite('railyard-building-station-hq', 'Station HQ')
+    L, back, front, wall = 32, -16, -2, 12
+    ridge_v, ridge_z = (back + front) / 2, wall + 8
+    s.part('walls')
+    s.box(0, back, 0, L, front - back, wall, P['wall_top'], P['wall_side'], P['wall_end'])
+    s.part('openings')
+    s.world_poly([(14, front, 0), (18, front, 0), (18, front, 7), (14, front, 7)], P['door'])
+    for u0 in (3, 8, 23, 27):
+        for z0 in (3, 8):
+            s.world_poly([(u0, front, z0), (u0 + 2, front, z0), (u0 + 2, front, z0 + 2), (u0, front, z0 + 2)], P['window'])
+    s.world_poly([(L, -12, 3), (L, -9, 3), (L, -9, 6), (L, -12, 6)], P['window'])
+    s.part('roof')
+    s.silhouette([(0, back - 1, wall), (L + 1, back - 1, wall), (0, front + 1, wall), (L + 1, front + 1, wall),
+                  (0, ridge_v, ridge_z), (L + 1, ridge_v, ridge_z)], P['roof_end'])
+    s.world_poly([(-1, front + 1, wall), (L + 1, front + 1, wall), (L + 1, ridge_v, ridge_z), (-1, ridge_v, ridge_z)], P['roof_top'])
+    s.world_poly([(L, back, wall), (L, front, wall), (L, ridge_v, ridge_z)], P['wall_end'])
+    s.part('chimney')
+    s.box(6, ridge_v - 1, ridge_z - 3, 3, 3, 6, P['concrete_top'], P['concrete_side'], P['concrete_end'])
+    s.part('sign')
+    s.box(12, front, 8, 8, 1, 3, P['sign'], P['sign'], P['sign_side'])
+    s.mark('top', L / 2, ridge_v, ridge_z + 2)
     return s
 
 
@@ -778,6 +904,7 @@ def build_all():
         y_switch(False, up=True), y_switch(True, up=True), yy_switch(False, up=True), yy_switch(True, up=True),
         diagonal_track(up=True), y_split_both(), y_merge_both(),
         buffer_stop_start(), track_fade(True), track_fade(False),
+        water_tower(), coal_tower(), diesel_tank(), station_hq(),
     ]
 
 
