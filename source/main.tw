@@ -35,6 +35,7 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 <<if ["Start", "SaveRecovery"].indexOf(passage()) === -1>>
 <<link "Inventory">><<run setup.items.showInventoryDialog()>><</link>><br>
 <<link "Condition">><<run setup.showConditionDialog()>><</link>><br>
+<<link "Map">><<run setup.showMapDialog()>><</link>><br>
 <<link "Help">><<run setup.pages.open("Help")>><</link>><br>
 <</if>>
 <<link "Options">><<run setup.showOptionsDialog()>><</link>><br>

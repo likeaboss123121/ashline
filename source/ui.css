@@ -451,3 +451,16 @@
 	margin: 0.5em 0;
 }
 .junction-sign p { margin: 0.2em 0; }
+
+/* The Map tab: every station map seen, drawn together at the station maps' scale, scrolling when large. */
+.combined-map-frame {
+	max-height: 70vh;
+	max-width: 100%;
+	overflow: auto;
+	border: 1px solid #3a2a2e;
+}
+.combined-map-frame svg.station-map {
+	display: block;
+	max-width: none;
+	border: 0;
+}

@@ -1618,3 +1618,17 @@ test('the end of a line has a station map, and a junction a signpost with the to
   const middle = Object.values(route.legs).find(candidate => candidate.tiles.length > 2);
   assert.equal(setup.wayfinding.getSign({ legIndex: middle.index, tileIndex: 1 }).length, 0);
 });
+
+test('the maps a player has looked at are remembered, once each, for the Map tab', () => {
+  const { setup, State } = loadGame();
+  const stations = setup.realWorldPilot.getGridRoute().corridor.stations;
+  const termini = stations.map((station, index) => index + 1).filter(id => setup.wayfinding.hasStationMap(id)).slice(0, 2);
+  assert.equal(setup.wayfinding.getSeenMaps().length, 0);
+  termini.forEach(id => setup.wayfinding.rememberMap(id));
+  setup.wayfinding.rememberMap(termini[0]);
+  assert.deepEqual(Array.from(setup.wayfinding.getSeenMaps()), Array.from(termini));
+  assert.deepEqual(Array.from(State.variables.seenMaps), Array.from(termini), 'a list of station numbers, nothing more, in the save');
+  State.variables.currentStation = termini[0];
+  const here = setup.wayfinding.getHereTile();
+  assert.equal(here.stationIndex, termini[0]);
+});

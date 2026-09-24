@@ -137,7 +137,9 @@ of its yard, has a building with a map of the railways within 150 km and the nea
 go down a branch. Its art is still to come; for now the railyard has a "Station map" section with a plain drawing.
 At a junction out on the line a signpost gives, for each way out, the next two stations that way (halts left out)
 and the first city beyond them, with the distance to each by track, driving or on foot. Both are worked out from the
-compiled network when shown; nothing is saved.
+compiled network when shown. The **Map** tab in the sidebar draws every station map the player has looked at as
+one map, with where they are now; the list of stations whose maps have been seen (`$seenMaps`, station numbers
+only) is the one thing saved. Punta Arenas is the end of a line, so its map is the first one seen.
 
 The debug map draws the network only when its panel is open, as plain squares and one path of track, with a line
 under the map naming the square under the pointer; the teleport list holds stations rather than squares. Zoom and

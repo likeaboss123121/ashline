@@ -33,16 +33,56 @@ setup.wayfinding = {
 
 	// The map itself, as an SVG element: the squares within MAP_RADIUS_KM of the station, north up.
 	buildStationMap: function(stationId) {
-		var pilot = setup.realWorldPilot, route = pilot.getGridRoute(), here = pilot.getStationTile(stationId);
+		var here = setup.realWorldPilot.getStationTile(stationId);
+		return this.drawAreas([here], here, 'Map of the railways around ' + setup.worldmap.getStationName(stationId));
+	},
+
+	// The stations whose maps the player has looked at, in the order they were first seen. Saved: it is what the
+	// player knows, not world data.
+	getSeenMaps: function() {
+		var seen = State.variables.seenMaps;
+		return Array.isArray(seen) ? seen.filter(function(stationId) { return setup.realWorldPilot.getStation(stationId); }) : [];
+	},
+	rememberMap: function(stationId) {
+		var seen = Array.isArray(State.variables.seenMaps) ? State.variables.seenMaps : [];
+		if (seen.indexOf(Number(stationId)) < 0) seen.push(Number(stationId));
+		State.variables.seenMaps = seen;
+	},
+
+	// Where the player is on the grid: the train or the walker out on the line, else the station they are at.
+	getHereTile: function() {
+		var view = setup.onfoot && setup.onfoot.isOnFoot && setup.onfoot.isOnFoot() && setup.onfoot.getTile
+			? { tile: setup.onfoot.getTile() } : setup.worldmap.getJourneyView();
+		if (view && view.tile) return view.tile;
+		return setup.realWorldPilot.getStationTile(Number(State.variables.currentStation) || 1);
+	},
+
+	// Every map the player has seen, drawn together, with where they are now.
+	buildCombinedMap: function() {
+		var centres = this.getSeenMaps().map(function(stationId) { return setup.realWorldPilot.getStationTile(stationId); });
+		return centres.length ? this.drawAreas(centres, this.getHereTile(), 'Map of the railways you have seen') : null;
+	},
+
+	// The squares within MAP_RADIUS_KM of any of centres, north up, the stations named and here marked (when it falls
+	// on the drawing).
+	drawAreas: function(centres, here, label) {
+		var route = setup.realWorldPilot.getGridRoute();
 		var grid = setup.worldGraphData.network.grid, reach = Math.round(this.MAP_RADIUS_KM / grid.cellKm);
-		var cell = this.MAP_CELL_PX, size = (reach * 2 + 1) * cell, ns = 'http://www.w3.org/2000/svg';
-		var left = function(x) { return (x - here.x + reach) * cell + cell / 2; };
-		var top = function(y) { return (here.y + reach - y) * cell + cell / 2; };
+		var x0 = Math.min.apply(null, centres.map(function(tile) { return tile.x; })) - reach;
+		var x1 = Math.max.apply(null, centres.map(function(tile) { return tile.x; })) + reach;
+		var y0 = Math.min.apply(null, centres.map(function(tile) { return tile.y; })) - reach;
+		var y1 = Math.max.apply(null, centres.map(function(tile) { return tile.y; })) + reach;
+		var cell = this.MAP_CELL_PX, width = (x1 - x0 + 1) * cell, height = (y1 - y0 + 1) * cell, size = width;
+		var ns = 'http://www.w3.org/2000/svg';
+		var left = function(x) { return (x - x0) * cell + cell / 2; };
+		var top = function(y) { return (y1 - y) * cell + cell / 2; };
 		var svg = document.createElementNS(ns, 'svg');
 		svg.setAttribute('class', 'station-map');
-		svg.setAttribute('viewBox', '0 0 ' + size + ' ' + size);
+		svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+		svg.setAttribute('width', width);
+		svg.setAttribute('height', height);
 		svg.setAttribute('role', 'img');
-		svg.setAttribute('aria-label', 'Map of the railways around ' + setup.worldmap.getStationName(stationId));
+		svg.setAttribute('aria-label', label);
 		var add = function(name, attributes, text) {
 			var element = document.createElementNS(ns, name);
 			Object.keys(attributes).forEach(function(key) { element.setAttribute(key, attributes[key]); });
@@ -50,9 +90,9 @@ setup.wayfinding = {
 			svg.appendChild(element);
 			return element;
 		};
-		add('rect', { x: 0, y: 0, width: size, height: size, class: 'station-map-ground' });
+		add('rect', { x: 0, y: 0, width: width, height: height, class: 'station-map-ground' });
 		var near = route.tiles.filter(function(tile) {
-			return Math.abs(tile.x - here.x) <= reach && Math.abs(tile.y - here.y) <= reach;
+			return centres.some(function(centre) { return Math.abs(tile.x - centre.x) <= reach && Math.abs(tile.y - centre.y) <= reach; });
 		});
 		var track = [];
 		near.forEach(function(tile) {
@@ -68,7 +108,7 @@ setup.wayfinding = {
 		});
 		near.forEach(function(tile) {
 			if (!tile.stationIndex) return;
-			var isHere = tile.stationIndex === Number(stationId);
+			var isHere = !!here && tile.x === here.x && tile.y === here.y;
 			add('circle', { cx: left(tile.x), cy: top(tile.y), r: isHere ? cell / 2 : cell / 3,
 				class: isHere ? 'station-map-here' : 'station-map-station' });
 			// A name in the right half of the map reads leftwards from its marker, so it stays on the map.
@@ -77,6 +117,11 @@ setup.wayfinding = {
 				'text-anchor': leftward ? 'end' : 'start', class: 'station-map-label' },
 				isHere ? tile.station + ' (you are here)' : tile.station);
 		});
+		// Out on the line, where the train or the walker is.
+		if (here && !here.stationIndex && here.x >= x0 && here.x <= x1 && here.y >= y0 && here.y <= y1) {
+			add('circle', { cx: left(here.x), cy: top(here.y), r: cell / 2, class: 'station-map-here' });
+			add('text', { x: left(here.x) + cell * 0.7, y: top(here.y) + cell / 3, class: 'station-map-label' }, 'You are here');
+		}
 		return svg;
 	},
 
@@ -121,6 +166,7 @@ Macro.add('stationMap', {
 	handler: function() {
 		var stationId = Number(State.variables.currentStation);
 		if (!setup.wayfinding.hasStationMap(stationId) || typeof document === 'undefined') return;
+		setup.wayfinding.rememberMap(stationId);
 		var holder = document.createElement('div');
 		holder.className = 'station-map-holder';
 		holder.appendChild(setup.wayfinding.buildStationMap(stationId));
@@ -135,3 +181,37 @@ Macro.add('stationMap', {
 		this.output.appendChild(holder);
 	}
 });
+
+// The Map tab: every station map the player has looked at, drawn together.
+setup.showMapDialog = function() {
+	if (typeof Dialog === 'undefined') return;
+	Dialog.setup('Map');
+	var body = document.createElement('div');
+	body.className = 'combined-map';
+	var map = setup.wayfinding.buildCombinedMap();
+	if (map) {
+		var frame = document.createElement('div');
+		frame.className = 'combined-map-frame';
+		frame.appendChild(map);
+		body.appendChild(frame);
+		var from = document.createElement('p');
+		from.className = 'small-description';
+		from.textContent = 'Maps from ' + setup.wayfinding.getSeenMaps().map(function(stationId) {
+			return setup.worldmap.getStationName(stationId);
+		}).join(', ') + '.';
+		body.appendChild(from);
+	} else {
+		var none = document.createElement('p');
+		none.textContent = 'You have not seen any maps yet. Stations at the end of a line have one.';
+		body.appendChild(none);
+	}
+	Dialog.append(body);
+	Dialog.open();
+	// Open on where the player is.
+	var here = body.querySelector('.station-map-here');
+	if (here && frame) {
+		var box = here.getBoundingClientRect(), frameBox = frame.getBoundingClientRect();
+		frame.scrollLeft += box.left - frameBox.left - frame.clientWidth / 2;
+		frame.scrollTop += box.top - frameBox.top - frame.clientHeight / 2;
+	}
+};

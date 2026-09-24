@@ -1814,6 +1814,12 @@ test('the debug map zooms out to the whole continent and in again, and a drag pa
 test('a station at the end of a line has a map of the railways around it', async t => {
   const page = await openGame(t);
   await begin(page);
+  // Punta Arenas is the end of a line, so its map is the first one seen; with none seen, the Map tab says so.
+  assert.deepEqual(await page.evaluate(() => SugarCube.State.variables.seenMaps), [1]);
+  await page.evaluate(() => { SugarCube.State.variables.seenMaps = []; });
+  await page.locator('#menu-story').getByText('Map', { exact: true }).click();
+  await page.locator('#ui-dialog').getByText(/You have not seen any maps yet/).waitFor();
+  await page.evaluate(() => SugarCube.Dialog.close());
   const terminus = await page.evaluate(() => {
     const stations = SugarCube.setup.realWorldPilot.getGridRoute().corridor.stations;
     const id = stations.findIndex((station, index) => index > 0 && station.lines.length === 1) + 1;
@@ -1829,6 +1835,13 @@ test('a station at the end of a line has a map of the railways around it', async
     new RegExp(terminus.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ' \\(you are here\\)'));
   const listed = await section.locator('.station-map-list li').allInnerTexts();
   assert.ok(listed.every(line => /: [\d.,]+ (km|mi)$/.test(line)), JSON.stringify(listed));
+  // Having looked at it, the Map tab draws it, with where the player is.
+  await page.locator('#menu-story').getByText('Map', { exact: true }).click();
+  const dialog = page.locator('#ui-dialog');
+  await dialog.locator('svg.station-map').waitFor();
+  assert.ok((await dialog.locator('.station-map-label').allTextContents()).some(label => label === terminus.name + ' (you are here)'));
+  assert.match(await dialog.innerText(), new RegExp('Maps from ' + terminus.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  await page.evaluate(() => SugarCube.Dialog.close());
   // A station on a through line has none.
   await page.evaluate(() => {
     const stations = SugarCube.setup.realWorldPilot.getGridRoute().corridor.stations;
