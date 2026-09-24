@@ -74,8 +74,8 @@ You have entered the railyard on foot. Your train remains parked out on the line
 You step into the railyard. Several trains are parked here, each with its own mix of cars and cargo.
 <</if>>
 <<tutorialHint>>
+<<if setup.wayfinding.hasStationMap($currentStation)>><<uiSection "station-map" "Station map" true>><<stationMap>><</uiSection>><</if>>
 <<railyardButtons>>
-<<if setup.wayfinding.hasStationMap($currentStation)>><<uiSection "station-map" "Station map">><<stationMap>><</uiSection>><</if>>
 <<if $onFoot && $onFoot.inRailyard>>
 <<conditionControls>>
 <<uiSection "inventory" "Inventory and equipment">><<playerPack>><</uiSection>>
@@ -140,6 +140,7 @@ You step into the railyard. Several trains are parked here, each with its own mi
 <<initDrivingModeState>>
 <</silently>><<railyardView>><<saveReminder>><<buildIntegrityNotice>>
 <p>You are driving your consist at <<print setup.worldmap.getStationName($currentStation)>>.</p>
+<<if setup.wayfinding.hasStationMap($currentStation)>><p class="small-description">This station has a map. Step down from the train to look at it.</p><</if>>
 <p><<link "Stop driving">><<goto "TrainInterior">><</link>></p>
 <<tutorialHint>>
 <<drivingStatus>>
