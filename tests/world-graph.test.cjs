@@ -314,6 +314,35 @@ test('a bare rural line sends spurs out to the places off it, spaced apart, skip
   assert.equal(spurs(network, grid, places, () => 'urban', join => join).length, 0);
 });
 
+test('a city\'s maze of track is reduced to a hub and the lines into it', () => {
+  const { simplifyUrban, traceLine, Network } = require('../scripts/world/build-network.cjs');
+  const projection = require('../scripts/world/projection.cjs');
+  const grid = projection.GRID;
+  const at = (eastKm, northKm) => [-62 + eastKm / (111.32 * Math.cos(-35 * Math.PI / 180)), -35 + northKm / 110.57];
+  const network = new Network();
+  const add = (id, points) => network.add(traceLine(points.map(point => at(...point)), grid, {}),
+    { id, status: 'current', bridgeShare: 0, tunnelShare: 0 });
+  // A lattice of suburban lines 40 km across, every 10 km, with four main lines running out of it into the country.
+  for (let line = 0; line <= 40; line += 10) { add('ew' + line, [[0, line], [40, line]]); add('ns' + line, [[line, 0], [line, 40]]); }
+  add('north', [[20, 40], [20, 200]]); add('south', [[20, 0], [20, -200]]);
+  add('east', [[40, 20], [200, 20]]); add('west', [[0, 20], [-200, 20]]);
+  const inCity = point => { const [x, y] = [point[0], point[1]]; const sw = at(-3, -3), ne = at(43, 43); return x >= sw[0] && x <= ne[0] && y >= sw[1] && y <= ne[1]; };
+  const regionOf = point => inCity(point) ? 'urban' : 'rural';
+  regionOf.peopleAt = point => inCity(point) ? 1e6 : 0;
+  const hub = projection.cellOf(at(20, 20), grid).join(',');
+  const junctions = () => Array.from(network.neighbours().entries()).filter(([key, next]) => next.length > 2 && inCity(projection.centreOf(key.split(',').map(Number), grid))).length;
+  const before = junctions();
+  const result = simplifyUrban(network, grid, regionOf, new Set([hub]));
+  assert.equal(result.areas, 1);
+  assert.ok(result.squares > 20, JSON.stringify(result));
+  assert.ok(junctions() < before / 4, before + ' junctions before, ' + junctions() + ' after');
+  // Every main line still reaches every other, through the hub.
+  const pieces = network.pieces();
+  assert.equal(pieces.length, 1);
+  const far = [[20, 200], [20, -200], [200, 20], [-200, 20]].map(point => projection.cellOf(at(...point), grid).join(','));
+  far.forEach(key => assert.ok(network.squares.has(key), key));
+});
+
 test('an authored route names its stops by place, by coordinates, or by place near a point', () => {
   const { placeIndex, resolveRoute } = require('../scripts/world/build-network.cjs');
   const index = placeIndex([{ name: 'Punta Arenas', longitude: -70.9, latitude: -53.16 }], [

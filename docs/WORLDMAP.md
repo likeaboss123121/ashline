@@ -72,13 +72,19 @@ American network were turned into these rules (September 2026); a route is only 
    empty line gives a player nowhere to explore; real ones had branches like these. A name shared by more than 20
    places ("Estancia", "Puesto") is skipped, and so is a spur over open water. This is what puts extra spurs along
    the tutorial stretch from Punta Arenas to General Nicolás H. Palacios.
-7. **Prune and stop.** Unnamed dead ends shorter than 10 km (yard tracks, sidings, tracing stubs) are pruned. Stops
+7. **Cities.** A big city's railways, mapped in full, are a maze: on 5 km squares its suburban lines cross every few
+   squares, every crossing is a junction, and every junction is a stop and a railyard. Each connected area of urban
+   track (see Regions, below) is reduced to a hub, the authored city there or else its most crowded square, and the
+   shortest way to it from every point where a line enters the area; the rest of the track inside is taken up.
+   Every line into a city still reaches every other through the hub. Likea chose this over junctions without yards
+   (September 2026) to keep the cities simple.
+8. **Prune and stop.** Unnamed dead ends shorter than 10 km (yard tracks, sidings, tracing stubs) are pruned. Stops
    are one per square: an authored city, else a working station (larger EFE category first), a settlement on a new
    line, a working halt, a closed station. Every junction and every end of the line is a stop, named for its station
    or the nearest settlement, so the track between two stops is always one plain line: a leg. A section with no stop
    for more than 100 km gets halts, named for the nearest settlement within 15 km or for their distance from the
    section's first stop.
-8. **Regions and railyards.** Every stop is given a region. **Urban** is where 500,000 people live within 20 km;
+9. **Regions and railyards.** Every stop is given a region. **Urban** is where 500,000 people live within 20 km;
    **industrial** is where, without those people, 60 km of mapped track lies within 10 km (mines, ports, works);
    **rural** is the rest. Every stop is a railyard in the game, and in a city OSM maps a station every kilometre or
    two, which made Buenos Aires over 70 km of yards end to end. So, besides junctions, line ends and the authored
@@ -87,16 +93,18 @@ American network were turned into these rules (September 2026); a route is only 
    The game sizes yards by region (`setup.railyard.YARD_SIZE_BY_REGION`): two or three short tracks in the country,
    three to five in industrial areas, four or five long ones in the cities. The art tops out at five tracks, so a
    city yard is as large as a yard can currently be drawn.
-9. **Elevation.** Copernicus GLO-90 is resampled onto the grid projection itself in one pass (mean and root mean
+10. **Elevation.** Copernicus GLO-90 is resampled onto the grid projection itself in one pass (mean and root mean
    square per square, from which the relief follows), over the 742 tiles under the network.
 
 Every new line longer than 10 km, from any of the joins, is laid over the terrain through towns (below).
 
-The result: 22,850 squares and 6,764 stops (6,074 rural, 297 industrial, 393 urban; 423 stations in cities and works
-districts left without a yard); 129,025 km of mapped railway and 1,706 new lines totalling 32,533 km: 1,207 short
-joins (7,367 km), 45 long ones (12,178 km, the longest across the Darién to Panama City, through Patagonia, and
-through the Guianas and Amazonia), 304 stub joins (3,606 km), 11 facing-end joins (2,518 km), 136 spurs (3,030 km)
-and 3 authored routes (3,833 km). All 35 authored cities are stops, Puerto Montt at the end of its spur among them.
+The result: 22,600 squares and 6,528 stops (6,072 rural, 296 industrial, 160 urban; 478 stations in cities and works
+districts left without a yard, and 380 squares of city track taken up across 123 urban areas); 126,278 km of mapped
+railway and 1,706 new lines totalling 32,533 km: 1,207 short joins (7,367 km), 45 long ones (12,178 km, the longest
+across the Darién to Panama City, through Patagonia, and through the Guianas and Amazonia), 304 stub joins
+(3,606 km), 11 facing-end joins (2,518 km), 136 spurs (3,030 km) and 3 authored routes (3,833 km). All 35 authored
+cities are stops, Puerto Montt at the end of its spur among them. Within 60 km of Buenos Aires there are 29 stops,
+down from 136 before regions and hubs.
 A full rebuild takes about eight minutes once the elevation tiles are cached.
 
 **In play.** `setup.realWorldPilot` builds the network's tiles, stations and legs when first asked (about 0.4 s in a
@@ -227,9 +235,7 @@ there to inspect compiled data rather than to be a player-facing map.
 
 - A yard has two throats, so a three-way junction puts two lines on one side: a train coming off one of them and
   leaving by the other backs through the yard.
-- Every junction is a stop, and so a railyard, so that the track between stops is one plain line. In a city the lines
-  cross every few squares, so Buenos Aires still has about 70 junction yards within 60 km even with its stations
-  thinned. A junction without a yard needs a way to choose a line while driving; that is for Likea to decide.
+- The balance between time on the line and time in yards is not settled; Likea expects to revisit it after 0.3.0.
 - Yards differ by region in size only: a closed halt and a working station in the same region generate the same kind
   of yard.
 - Halt and junction names are generated (`Km 74 from El Turbio`, or the nearest settlement) and are for Likea to

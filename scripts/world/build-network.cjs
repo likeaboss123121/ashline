@@ -31,7 +31,8 @@
 //   7. Spurs: a rural line with no branch for a long way sends a short spur out to the nearest place off it, an
 //      estancia, a mine camp or a village, so there is somewhere to explore off the main line.
 //
-// Every stop then gets a region, from the people and the mapped track around it:
+// Each city's maze of suburban track is then reduced to a hub and the lines into it (simplifyUrban), and every stop
+// gets a region, from the people and the mapped track around it:
 //
 //   - urban: a big population close by. Mapped stations are a kilometre or two apart here, and a railyard at each
 //     would be one long yard, so only the larger places get one, well apart (YARD_RULES).
@@ -501,14 +502,79 @@ function regionClassifier(network, settlements, grid) {
   const squares = Array.from(network.squares.values()).filter(square => square.railKm > 0)
     .map(square => ({ railKm: square.railKm, centre: projection.centreOf([square.x, square.y], grid) }));
   const trackNear = bucketsOf(squares, square => square.centre);
-  return point => {
-    const people = peopleNear(point).reduce((sum, place) => sum + (haversineKm(point, place.coordinates) <= URBAN_RADIUS_KM
-      ? place.population || DEFAULT_POPULATION[place.kind] || 0 : 0), 0);
-    if (people >= URBAN_POPULATION) return 'urban';
+  const peopleAt = point => peopleNear(point).reduce((sum, place) => sum + (haversineKm(point, place.coordinates) <= URBAN_RADIUS_KM
+    ? place.population || DEFAULT_POPULATION[place.kind] || 0 : 0), 0);
+  const regionOf = point => {
+    if (peopleAt(point) >= URBAN_POPULATION) return 'urban';
     const track = trackNear(point).reduce((sum, square) => sum + (haversineKm(point, square.centre) <= INDUSTRIAL_RADIUS_KM
       ? square.railKm : 0), 0);
     return track >= INDUSTRIAL_RAIL_KM ? 'industrial' : 'rural';
   };
+  regionOf.peopleAt = peopleAt;
+  return regionOf;
+}
+
+// A city's railways reduced to a hub and the lines into it. Mapped in full, a big city's suburban network is a maze:
+// on 5 km squares its lines cross every few squares, and every crossing is a junction, so a stop and a railyard. So
+// each connected area of urban track keeps only the shortest way from every point where a line enters it to its hub
+// (an authored city there, else the most crowded square), and the rest of its track inside the area is taken up.
+// Every line into the city still reaches every other, through the hub. hubs is a set of square keys that must stay.
+// Returns what was taken up.
+function simplifyUrban(network, grid, regionOf, hubs) {
+  const adjacent = network.neighbours(), urban = new Set();
+  network.squares.forEach((square, key) => { if (regionOf(projection.centreOf([square.x, square.y], grid)) === 'urban') urban.add(key); });
+  const edgeKm = (a, b) => network.edges.get(a < b ? a + '|' + b : b + '|' + a).km;
+  const seen = new Set(), keepEdges = new Set(), dropSquares = new Set();
+  let areas = 0;
+  Array.from(urban).sort().forEach(start => {
+    if (seen.has(start)) return;
+    // One connected area of urban track.
+    const area = [], stack = [start];
+    seen.add(start);
+    while (stack.length) {
+      const key = stack.pop();
+      area.push(key);
+      adjacent.get(key).forEach(next => { if (urban.has(next) && !seen.has(next)) { seen.add(next); stack.push(next); } });
+    }
+    const inArea = new Set(area);
+    const entries = area.filter(key => adjacent.get(key).some(next => !inArea.has(next)));
+    const cities = area.filter(key => hubs.has(key));
+    const people = key => { const square = network.squares.get(key); return regionOf.peopleAt(projection.centreOf([square.x, square.y], grid)); };
+    const hub = (cities.length ? cities : area).slice().sort((a, b) => people(b) - people(a) || a.localeCompare(b))[0];
+    // The shortest ways out from the hub, inside the area.
+    const distance = new Map([[hub, 0]]), previous = new Map(), settled = new Set(), queue = new Heap();
+    queue.push(0, hub);
+    while (queue.size) {
+      const key = queue.pop();
+      if (settled.has(key)) continue;
+      settled.add(key);
+      adjacent.get(key).forEach(next => {
+        if (!inArea.has(next)) return;
+        const km = distance.get(key) + edgeKm(key, next);
+        if (km < (distance.get(next) ?? Infinity)) { distance.set(next, km); previous.set(next, key); queue.push(km, next); }
+      });
+    }
+    const keep = new Set([hub]);
+    entries.concat(cities).forEach(target => {
+      for (let key = target; previous.has(key); key = previous.get(key)) {
+        const back = previous.get(key);
+        keep.add(key);
+        keepEdges.add(key < back ? key + '|' + back : back + '|' + key);
+      }
+    });
+    area.forEach(key => { if (!keep.has(key)) dropSquares.add(key); });
+    areas++;
+  });
+  let droppedEdges = 0;
+  Array.from(network.edges.values()).forEach(edge => {
+    const inside = urban.has(edge.a) && urban.has(edge.b);
+    if (dropSquares.has(edge.a) || dropSquares.has(edge.b) || (inside && !keepEdges.has(edge.key))) {
+      network.edges.delete(edge.key);
+      droppedEdges++;
+    }
+  });
+  dropSquares.forEach(key => network.squares.delete(key));
+  return { areas, squares: dropSquares.size, moves: droppedEdges };
 }
 
 // Spurs out to places off a rural line: see SPUR_SPACING_KM. places are settlements and outposts; regionOf is from
@@ -808,6 +874,9 @@ function buildNetwork(options) {
   });
   spurLines.forEach(spur => { addLine(network, spur.line); laidLines.push({ ...spur.line, note: spur.place.name }); });
   log(spurLines.length + ' spurs out to places off rural lines (' + Math.round(spurLines.reduce((sum, spur) => sum + spur.line.km, 0)) + ' km)');
+  const simplified = simplifyUrban(network, grid, regionOf, new Set(cityStops.map(stop => stop.square)));
+  log('cities reduced to a hub and the lines into it: ' + simplified.areas + ' urban areas, ' + simplified.squares +
+    ' squares and ' + simplified.moves + ' moves of track taken up');
 
   // 5. Stops: one per square, the highest ranked.
   const candidates = cityStops.filter(stop => kept.has(stop.square)).map(stop => ({ ...stop }));
@@ -1028,6 +1097,7 @@ function buildNetwork(options) {
       stubJoinCount: laidLines.filter(line => line.kind === 'stub').length,
       authoredJoinCount: laidLines.filter(line => line.kind === 'authored').length,
       endJoinCount: facing.length, spurCount: spurLines.length,
+      urbanAreas: simplified.areas, urbanSquaresRemoved: simplified.squares, urbanMovesRemoved: simplified.moves,
       stopRegions: regionCounts, stationsWithoutYard: thinned,
       railKm: Math.round(squares.reduce((sum, square) => sum + square.railKm, 0)),
       leftOutPieces: dropped.length, leftOutKm: Math.round(droppedKm), unreachableCities: lostCities, prunedStubSquares: pruned,
@@ -1120,4 +1190,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { buildNetwork, stubJoins, endJoins, spurs, regionClassifier, traceLine, Network, placeIndex, resolveRoute };
+module.exports = { buildNetwork, stubJoins, endJoins, spurs, regionClassifier, simplifyUrban, traceLine, Network, placeIndex, resolveRoute };
