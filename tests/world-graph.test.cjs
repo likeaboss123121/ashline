@@ -272,6 +272,28 @@ test('a line that ends near other track it only reaches the long way round is jo
   assert.equal(new Set(pairs).size, pairs.length, 'each join is made once');
 });
 
+test('an authored route names its stops by place, by coordinates, or by place near a point', () => {
+  const { placeIndex, resolveRoute } = require('../scripts/world/build-network.cjs');
+  const index = placeIndex([{ name: 'Punta Arenas', longitude: -70.9, latitude: -53.16 }], [
+    { name: 'Humaitá', kind: 'town', population: 57000, coordinates: [-63.02, -7.51] },
+    { name: 'Humaitá', kind: 'village', coordinates: [-42.71, -5.17] },
+    { name: 'San José', kind: 'town', coordinates: [-60, -30] },
+    { name: 'San José', kind: 'town', coordinates: [-70, -10] }
+  ]);
+  const stops = resolveRoute({ route: ['punta arenas', 'Humaita', [-61, -6], { name: 'San José', near: [-69, -11] }] }, index);
+  assert.deepEqual(stops, [
+    { name: 'Punta Arenas', coordinates: [-70.9, -53.16] },
+    { name: 'Humaitá', coordinates: [-63.02, -7.51] },
+    { name: null, coordinates: [-61, -6] },
+    { name: 'San José', coordinates: [-70, -10] }
+  ]);
+  // Two towns of one name far apart: the route has to say which.
+  assert.throws(() => resolveRoute({ route: ['Punta Arenas', 'San José'] }, index), /could be any of .*"near"/);
+  assert.throws(() => resolveRoute({ route: ['Punta Arenas', 'Atlantis'] }, index), /no place called "Atlantis"/);
+  // The older two-point form still reads.
+  assert.equal(resolveRoute({ from: [-70, -50], to: [-71, -51] }, index).length, 2);
+});
+
 test('the whole continent is one network that can be driven from Punta Arenas to Caracas', () => {
   const game = loadGame();
   const { setup, State } = game;

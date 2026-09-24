@@ -41,8 +41,14 @@ and integrate the whole continent, replacing a single Chilean main line.
    groups left are joined into one network by the shortest set of new lines (Borůvka's method), counting only
    groups with at least 15 km of track or an authored city; a city with no railway at all joins as a piece of its
    own. Whatever is still apart from the network Punta Arenas stands on is left out (29 scraps, 129 km).
-3. **Authored joins.** `world/authored/network-joins.json` lists lines to lay by hand, each from one point to another
-   within 10 km of the network. It is the way to add a connection the rules miss; it is empty for now.
+3. **Authored routes.** `world/authored/network-joins.json` lists lines to lay by hand. Each is a list of stops, the
+   first and last within 10 km of the network, and new track is laid over the terrain from each stop to the next.
+   A stop is a place name (case and accents do not matter), `[longitude, latitude]`, or
+   `{ "name": ..., "near": [longitude, latitude] }` when several places share a name; a bare name takes the largest
+   place of that name, and the build stops and lists them when two of the same size are far apart. Listing the towns
+   along a river or a highway steers a line along it. Two routes are laid: Bariloche over the Cardenal Samoré pass to
+   the Chilean main line at Osorno, and Porto Velho down the Madeira through Humaitá, Manicoré, Novo Aripuanã, Borba,
+   Nova Olinda do Norte and Autazes to Manaus.
 4. **Stub joins.** A line that ends within 25 km of other track it can only reach the long way round (at least four
    times as far along the track, and more than 60 km) is joined to it. That catches mapping breaks, lifted junctions
    and branches stopping just short of a main line or a new line, and never loops a branch back onto the line it has
@@ -75,7 +81,7 @@ destination; arriving uses the side the leg meets the station on.
 
 The debug map draws the network only when its panel is open, as plain squares and one path of track, with a line
 under the map naming the square under the pointer; the teleport list holds stations rather than squares. Zoom and
-pan buttons sit above it.
+pan buttons sit above it, the pan arrows in a diamond.
 
 ## The geographic grid
 
@@ -175,9 +181,11 @@ weight limits come from.
 
 ## The debug map
 
-`appendDebugMap(parent, stationId)` draws the whole network once its panel is open: terrain as coloured cells, mapped
+`appendDebugMap(parent, stationId)` draws the network once its panel is open: terrain as coloured cells, mapped
 track and new lines as two paths, every station as a marker with the cities named, and a readout of the square under
-the pointer. Every track cell is a teleport target by mouse; the station list is the keyboard way to teleport.
+the pointer. 300 km of empty ground surrounds the network so no line sits at the edge. Only what is in view, and a
+screen's worth around it, is drawn, and it is redrawn as the map scrolls and zooms; zoomed out below 3 px a square,
+the cells and station markers are left out and the two track paths are the map. Every track cell is a teleport target by mouse; the station list is the keyboard way to teleport.
 Teleporting while aboard moves `journey`, so the complete active consist moves;
 teleporting on foot changes only `onFoot`, leaving the train's journey position alone. A trainless teleport creates
 only the route context walking needs and never invents a boardable train. Station cells enter the actual railyard:

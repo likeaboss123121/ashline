@@ -1107,7 +1107,7 @@
       "elevation": {
         "sourceId": "copernicus-dem-glo90",
         "aggregation": "mean-and-population-standard-deviation-within-grid-square",
-        "tileCount": 742
+        "tileCount": 751
       }
     },
     "parameters": {
@@ -1146,21 +1146,21 @@
       }
     },
     "stats": {
-      "squareCount": 21439,
-      "moveCount": 22191,
-      "stopCount": 6749,
-      "haltCount": 140,
-      "bridgeCount": 1557,
-      "bridgeKm": 23176,
-      "stubJoinCount": 305,
-      "authoredJoinCount": 0,
+      "squareCount": 21616,
+      "moveCount": 22372,
+      "stopCount": 6767,
+      "haltCount": 149,
+      "bridgeCount": 1558,
+      "bridgeKm": 24355,
+      "stubJoinCount": 304,
+      "authoredJoinCount": 2,
       "railKm": 129012,
       "leftOutPieces": 29,
       "leftOutKm": 129,
       "unreachableCities": [],
       "prunedStubSquares": 769,
-      "junctionSquares": 1723,
-      "endSquares": 608
+      "junctionSquares": 1729,
+      "endSquares": 606
     },
     "file": "world/network/south-america-network.json"
   }

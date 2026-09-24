@@ -22,8 +22,9 @@
 // Then two kinds of join are added to the one network:
 //
 //   4. Stub joins: a line that ends close to other track it can only reach the long way round is joined to it.
-//   5. Authored joins: world/authored/network-joins.json lists lines to lay by hand, from one point near the network
-//      to another. Use it for a connection the rules above miss.
+//   5. Authored routes: world/authored/network-joins.json lists lines to lay by hand, as a list of stops from one
+//      place near the network to another, by town name or by coordinates. Use it for a connection the rules above
+//      miss, or to send a new line along the way a person would build it.
 //
 // Usage: npm run world:network:south-america
 // Needs the geometry, station and settlement imports, and the elevation tile cache (ASHLINE_DEM_CACHE).
@@ -58,8 +59,10 @@ const MIN_STUB_KM = 10;
 const STUB_JOIN_KM = 25;
 const STUB_DETOUR_FACTOR = 4;
 const STUB_DETOUR_MIN_KM = 60;
-// An authored join's ends must lie within this of the network.
+// An authored route's ends must lie within this of the network.
 const AUTHORED_SNAP_KM = 10;
+// Two places of the same name and size further apart than this are different places, and the route must say which.
+const SAME_PLACE_KM = 20;
 const NODATA = -32768;
 const BUILDER_VERSION = 1;
 const SCOPE = {
@@ -297,16 +300,21 @@ function longJoins(network, groups, grid) {
 // --- laying new lines --------------------------------------------------------------------------------------------
 
 // Lays a new line between two network squares and adds it to the network: straight when short, over the terrain and
-// through the towns on the way when not. Returns the record of what was laid.
+// through the towns on the way when not. join.through, when given, is a list of named points ({ name, coordinates })
+// the line must pass through in order, each hop between them laid the same way. Returns the record of what was laid.
 function layLine(network, join, context) {
   const { grid, settlements, cache } = context;
   const a = network.squares.get(join.from), b = network.squares.get(join.to);
   const from = projection.centreOf([a.x, a.y], grid), to = projection.centreOf([b.x, b.y], grid);
   const straightKm = haversineKm(from, to);
-  let coordinates = [from, to], via = [], waterKm = 0;
-  if (straightKm > STRAIGHT_BRIDGE_KM) {
-    const laid = terrain.terrainPath(from, to, settlements, cache);
-    if (laid) { coordinates = laid.coordinates; via = laid.via; waterKm = laid.waterKm; }
+  const points = [{ coordinates: from }].concat(join.through || [], [{ coordinates: to }]);
+  let coordinates = [from], via = [], waterKm = 0;
+  for (let hop = 1; hop < points.length; hop++) {
+    const start = coordinates.at(-1), end = points[hop].coordinates;
+    const laid = haversineKm(start, end) > STRAIGHT_BRIDGE_KM && terrain.terrainPath(start, end, settlements, cache);
+    if (laid) { coordinates = coordinates.concat(laid.coordinates.slice(1)); via = via.concat(laid.via); waterKm += laid.waterKm; }
+    else coordinates.push(end);
+    if (hop < points.length - 1 && points[hop].name) via.push(points[hop].name);
   }
   let km = 0;
   for (let point = 1; point < coordinates.length; point++) km += haversineKm(coordinates[point - 1], coordinates[point]);
@@ -459,6 +467,57 @@ function squareFor(network, point, grid) {
   return best;
 }
 
+// --- authored routes ----------------------------------------------------------------------------------------------
+
+// Places a route can name: the authored cities and every settlement. Names match without regard to case or accents,
+// so "Humaita" finds Humaitá.
+const PLACE_RANK = { city: 3, town: 2, village: 1 };
+const plainName = name => String(name).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+function placeIndex(cities, settlements) {
+  const index = new Map();
+  const add = (name, record) => {
+    const key = plainName(name);
+    if (!index.has(key)) index.set(key, []);
+    index.get(key).push(record);
+  };
+  cities.forEach(city => add(city.name, { name: city.name, kind: 'city', population: Infinity, coordinates: [city.longitude, city.latitude] }));
+  settlements.forEach(place => add(place.name, { name: place.name, kind: place.kind, population: place.population || 0, coordinates: place.coordinates }));
+  return index;
+}
+
+// One stop of a route, as { name, coordinates }. A stop is a place name, [longitude, latitude], or
+// { "name": ..., "near": [longitude, latitude] } to pick one of several places sharing a name. A bare name picks the
+// largest place of that name; if two of the same size are far apart, the route has to say which.
+function resolveStop(stop, index, label) {
+  if (Array.isArray(stop)) {
+    assert(stop.length === 2 && stop.every(Number.isFinite), label + ': ' + JSON.stringify(stop) + ' is not [longitude, latitude]');
+    return { name: null, coordinates: stop };
+  }
+  const name = typeof stop === 'string' ? stop : stop && stop.name;
+  assert(name, label + ': ' + JSON.stringify(stop) + ' is not a place name, [longitude, latitude] or { name, near }');
+  const found = index.get(plainName(name)) || [];
+  assert(found.length, label + ': no place called "' + name + '"');
+  if (stop.near) {
+    const nearest = found.slice().sort((p, q) => haversineKm(p.coordinates, stop.near) - haversineKm(q.coordinates, stop.near))[0];
+    return { name: nearest.name, coordinates: nearest.coordinates };
+  }
+  const ranked = found.slice().sort((p, q) => PLACE_RANK[q.kind] - PLACE_RANK[p.kind] || q.population - p.population);
+  const [best, next] = ranked;
+  assert(!next || PLACE_RANK[next.kind] < PLACE_RANK[best.kind] || next.population < best.population
+    || haversineKm(best.coordinates, next.coordinates) <= SAME_PLACE_KM,
+    label + ': "' + name + '" could be any of ' + ranked.filter(place => place.kind === best.kind)
+      .map(place => '[' + place.coordinates.join(', ') + ']').join(', ') + '; write { "name": "' + name + '", "near": [longitude, latitude] }');
+  return { name: best.name, coordinates: best.coordinates };
+}
+
+// An authored route as its stops. { "route": [...] } lists them; the older { "from": ..., "to": ... } is a route of two.
+function resolveRoute(join, index) {
+  const stops = join.route || [join.from, join.to];
+  const label = 'Authored route' + (join.note ? ' "' + join.note + '"' : '');
+  assert(Array.isArray(stops) && stops.length >= 2, label + ' needs at least two stops');
+  return stops.map(stop => resolveStop(stop, index, label));
+}
+
 // --- the stage ----------------------------------------------------------------------------------------------------
 
 function buildNetwork(options) {
@@ -537,10 +596,13 @@ function buildNetwork(options) {
   const lostCities = cityStops.filter(stop => !kept.has(stop.square)).map(stop => stop.name);
   log('kept ' + network.squares.size + ' squares; left out ' + dropped.length + ' isolated pieces (' + Math.round(droppedKm) + ' km)');
 
-  // 4. Authored joins, then stub joins: the rules can miss what a person sees, and a line ends differently once a
-  // join has been laid to it.
+  // 4. Authored routes, then stub joins: the rules can miss what a person sees, and a line ends differently once a
+  // route has been laid to it.
+  const places = placeIndex(cities, settlements);
   (options.authoredJoins || []).forEach(join => {
-    const ends = [join.from, join.to].map(point => {
+    const stops = resolveRoute(join, places);
+    const ends = [stops[0], stops.at(-1)].map(stop => {
+      const point = stop.coordinates;
       const cell = projection.cellOf(point, grid);
       let best = null;
       const reach = Math.ceil(AUTHORED_SNAP_KM / grid.cellKm);
@@ -550,11 +612,13 @@ function buildNetwork(options) {
         const km = haversineKm(point, projection.centreOf([square.x, square.y], grid));
         if (km <= AUTHORED_SNAP_KM && (!best || km < best.km)) best = { key: square.key, km };
       }
-      assert(best, 'Authored join end ' + point.join(',') + ' is not within ' + AUTHORED_SNAP_KM + ' km of the network' +
-        (join.note ? ' (' + join.note + ')' : ''));
+      assert(best, 'Authored route end ' + (stop.name || point.join(',')) + ' is not within ' + AUTHORED_SNAP_KM +
+        ' km of the network' + (join.note ? ' (' + join.note + ')' : ''));
       return best.key;
     });
-    laidLines.push(layLine(network, { from: ends[0], to: ends[1], kind: 'authored', note: join.note }, context));
+    log('laying authored route ' + (join.note || stops.map(stop => stop.name).join(' - ')));
+    laidLines.push(layLine(network, { from: ends[0], to: ends[1], through: stops.slice(1, -1), kind: 'authored',
+      note: join.note }, context));
   });
   const stubs = stubJoins(network, grid);
   log(stubs.length + ' line ends joined to track they only reached the long way round');
@@ -821,4 +885,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { buildNetwork, stubJoins, traceLine, Network };
+module.exports = { buildNetwork, stubJoins, traceLine, Network, placeIndex, resolveRoute };

@@ -14,7 +14,8 @@ marked `navigable: false` and are never played.
 
 - `sources.json` records data versions, licences, attribution and whether each source is ingested.
 - `authored/places.csv` holds the 35 GeoNames cities; `authored/corridors.csv` the three planning corridors.
-- `authored/network-joins.json` lists lines to lay into the network by hand, for connections the rules miss.
+- `authored/network-joins.json` lists routes to lay into the network by hand, as stops named by town or coordinates,
+  for connections the rules miss. Its `about` field explains the format.
 - `imported/south-america-rail.json`: every railway way in the 2026-09-21 Geofabrik South America extract, with its
   OSM ID, lifecycle status and useful tags.
 - `imported/south-america-stations.json`: named railway stations and halts, working and closed.

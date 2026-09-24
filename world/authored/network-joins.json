@@ -1,4 +1,13 @@
 {
-  "about": "Lines to lay by hand when building the network (scripts/world/build-network.cjs). Each join runs from one point to another, both given as [longitude, latitude] within 10 km of existing track; the builder snaps each end to the nearest network square and lays the line over the terrain through towns, as it does for every new line. Use this for a connection the automatic joins miss. Example: { \"from\": [-72.94, -41.47], \"to\": [-72.69, -41.32], \"note\": \"Puerto Montt to Puerto Varas\" }",
-  "joins": []
+  "about": "Lines to lay by hand when building the network (scripts/world/build-network.cjs). Each entry is a route: a list of stops, the first and last within 10 km of existing track. The builder lays new track from each stop to the next over the terrain, through the towns on the way, as it does for every new line; list more stops to steer it, for example the towns along a river. A stop is a place name (a city, town or village; case and accents do not matter), [longitude, latitude], or { \"name\": \"...\", \"near\": [longitude, latitude] } where several places share a name. A bare name picks the largest place of that name, and the build stops and lists the candidates when two of the same size are far apart. Then run npm run world:network:south-america, npm run world:route:south-america and npm run world:build.",
+  "joins": [
+    {
+      "note": "Bariloche over the Cardenal Samoré pass to the Chilean main line at Osorno, for Puerto Montt",
+      "route": ["San Carlos de Bariloche", "Villa La Angostura", "Osorno"]
+    },
+    {
+      "note": "Porto Velho down the Madeira to Manaus",
+      "route": ["Porto Velho", "Humaitá", "Manicoré", "Novo Aripuanã", "Borba", "Nova Olinda do Norte", "Autazes", "Manaus"]
+    }
+  ]
 }
