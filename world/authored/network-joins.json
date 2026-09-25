@@ -1,5 +1,5 @@
 {
-  "about": "Lines to lay by hand when building the network (scripts/world/build-network.cjs). Each entry is a route: a list of stops, the first and last within 10 km of existing track. The builder lays new track from each stop to the next over the terrain, through the towns on the way, as it does for every new line; list more stops to steer it, for example the towns along a river. A stop is a place name (a city, town or village; case and accents do not matter), [longitude, latitude], or { \"name\": \"...\", \"near\": [longitude, latitude] } where several places share a name. A bare name picks the largest place of that name, and the build stops and lists the candidates when two of the same size are far apart. Then run npm run world:network:south-america, npm run world:route:south-america and npm run world:build.",
+  "about": "Lines to lay by hand when building the network (scripts/world/build-network.cjs). Each entry is a route: a list of stops, the first and last within 10 km of existing track. The builder lays new track from each stop to the next over the terrain, through the towns on the way, as it does for every new line; list more stops to steer it, for example the towns along a river. With \"newEnd\": true the last stop may be where there is no track, and the route ends there in a new terminus; with \"scope\" it is laid only in that scope's build (south-america or americas). A stop is a place name (a city, town or village; case and accents do not matter), [longitude, latitude], or { \"name\": \"...\", \"near\": [longitude, latitude] } where several places share a name. A bare name picks the largest place of that name, and the build stops and lists the candidates when two of the same size are far apart. Then run npm run world:network:south-america, npm run world:route:south-america and npm run world:build.",
   "joins": [
     {
       "note": "Bariloche over the Cardenal Samoré pass to the Chilean main line at Osorno, for Puerto Montt",
@@ -13,6 +13,14 @@
       "note": "Manaus up the Amazon to Leticia, then across by Puerto Leguízamo and Florencia to Neiva: a direct way through the middle of the continent",
       "route": ["Manaus", "Manacapuru", "Coari", "Tefé", "Fonte Boa", { "name": "Tabatinga", "near": [-69.9, -4.2] }, "Leticia",
         "Puerto Leguízamo", "Florencia", "Neiva"]
+    },
+    {
+      "note": "Fairbanks down the Tanana and Yukon to Norton Sound, then round the coast by Nome to Wales, at the Bering Strait: where the crossing to Asia will start",
+      "scope": "americas",
+      "newEnd": true,
+      "route": ["Fairbanks", "Nenana", "Tanana", { "name": "Ruby", "near": [-155.5, 64.7] }, { "name": "Galena", "near": [-156.9, 64.7] },
+        "Kaltag", "Unalakleet", "Shaktoolik", "Koyuk", "Elim", "White Mountain", "Nome", "Teller", "Brevig Mission",
+        { "name": "Wales", "near": [-168.1, 65.6] }]
     }
   ]
 }

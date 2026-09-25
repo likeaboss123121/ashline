@@ -10,12 +10,13 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '../..');
+const AREA = require('./scopes.cjs').scopeFromArguments();
+const Area = AREA.label.charAt(0).toUpperCase() + AREA.label.slice(1);
 const SCOPES = {
-  places: { output: 'world/imported/south-america-places.json', id: 'south-america-places',
-    label: 'South America settlements', sourceId: 'openstreetmap-geofabrik-south-america-2026-09-21',
-    kinds: ['city', 'town', 'village'] },
-  outposts: { output: 'world/imported/south-america-outposts.json', id: 'south-america-outposts',
-    label: 'South America hamlets, farms and isolated dwellings', sourceId: 'openstreetmap-geofabrik-south-america-2026-09-21',
+  places: { output: 'world/imported/' + AREA.prefix + '-places.json', id: AREA.prefix + '-places',
+    label: Area + ' settlements', sourceId: AREA.sourceId, kinds: ['city', 'town', 'village'] },
+  outposts: { output: 'world/imported/' + AREA.prefix + '-outposts.json', id: AREA.prefix + '-outposts',
+    label: Area + ' hamlets, farms and isolated dwellings', sourceId: AREA.sourceId,
     kinds: ['hamlet', 'isolated_dwelling', 'farm'] }
 };
 

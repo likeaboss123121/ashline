@@ -76,6 +76,7 @@ test('three authored Punta Arenas to Panama corridors are independently queryabl
   assert.deepEqual([...new Set(JSON.parse(JSON.stringify(graph.getAttributions())))], [
     'City names, coordinates and population: GeoNames (https://www.geonames.org/)',
     '© OpenStreetMap contributors; extract provided by Geofabrik',
+    '© OpenStreetMap contributors; extracts provided by Geofabrik',
     'Produced using Copernicus WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved'
   ]);
 });
@@ -468,4 +469,71 @@ test('the whole continent is one network that can be driven from Punta Arenas to
   for (let stationId = 1; stationId <= stations.length; stationId += 11) {
     assert.ok(setup.yardGeneration.validate(setup.railyard.generateStationTracks(stationId, 'network')), 'station ' + stationId);
   }
+});
+
+test('the hard region covers Alaska and the Yukon, and nothing to the south', () => {
+  const { hardRegionTest } = require('../scripts/world/build-network.cjs');
+  const isHard = hardRegionTest(require('../world/authored/regions.json').regions);
+  for (const [name, point] of [['Fairbanks', [-147.7, 64.8]], ['Wales', [-168.1, 65.6]], ['Whitehorse', [-135.05, 60.72]],
+    ['Skagway', [-135.3, 59.46]], ['Anchorage', [-149.9, 61.2]]]) assert.ok(isHard(point), name);
+  for (const [name, point] of [['Dease Lake', [-130.0, 58.44]], ['Prince George', [-122.75, 53.92]], ['Prince Rupert', [-130.3, 54.3]], ['Fort Nelson', [-122.7, 58.8]],
+    ['Seattle', [-122.3, 47.6]], ['Punta Arenas', [-70.9, -53.2]]]) assert.ok(!isHard(point), name);
+});
+
+test('of two lines between the same junctions nearly as direct as each other, the lesser is taken up', () => {
+  const { pruneParallel, traceLine, Network } = require('../scripts/world/build-network.cjs');
+  const projection = require('../scripts/world/projection.cjs');
+  const grid = projection.GRID;
+  const at = (eastKm, northKm) => [-62 + eastKm / (111.32 * Math.cos(-35 * Math.PI / 180)), -35 + northKm / 110.57];
+  const network = new Network();
+  const add = (id, points, status) => network.add(traceLine(points.map(point => at(...point)), grid, {}),
+    { id, status, bridgeShare: 0, tunnelShare: 0 });
+  // Two junctions 200 km apart, with a working line straight between them and an abandoned one bowing out 15 km:
+  // the abandoned line is barely longer, so it goes. A spur off the working line has no other way, so it stays.
+  add('main', [[0, 0], [0, 200]], 'current');
+  add('parallel', [[0, 0], [15, 20], [15, 180], [0, 200]], 'abandoned');
+  add('in', [[0, 0], [0, -100]], 'current'); add('out', [[0, 200], [0, 300]], 'current');
+  add('spur', [[0, 100], [-60, 100]], 'current');
+  const before = network.squares.size;
+  const result = pruneParallel(network, new Set(), new Set());
+  assert.ok(result.stretches >= 1 && result.km > 150 && result.km < 260, JSON.stringify(result));
+  assert.ok(network.squares.size < before);
+  const has = point => network.squares.has(projection.cellOf(at(...point), grid).join(','));
+  assert.ok(!has([15, 100]), 'the abandoned line is gone');
+  assert.ok(has([0, 100]) && has([-60, 100]) && has([0, 250]), 'the working line and its spur stay');
+  assert.equal(network.pieces().length, 1);
+});
+
+test('a far scrap of track is not worth a long new line, unless it serves an authored city', () => {
+  const { longJoins, traceLine, Network } = require('../scripts/world/build-network.cjs');
+  const projection = require('../scripts/world/projection.cjs');
+  const grid = projection.GRID;
+  const at = (eastKm, northKm) => [-62 + eastKm / (111.32 * Math.cos(-35 * Math.PI / 180)), -35 + northKm / 110.57];
+  const build = () => {
+    const network = new Network();
+    const add = (id, points) => network.add(traceLine(points.map(point => at(...point)), grid, {}),
+      { id, status: 'current', bridgeShare: 0, tunnelShare: 0 });
+    add('main', [[0, 0], [0, 800]]);          // a big network
+    add('scrap', [[600, 400], [640, 400]]);  // 40 km of track 600 km away
+    add('near', [[150, 0], [190, 0]]);       // 40 km of track 150 km away
+    const groups = network.pieces().map(piece => ({ keys: piece.keys, km: piece.km }));
+    return { network, groups };
+  };
+  const { network, groups } = build();
+  const joins = longJoins(network, groups, grid);
+  const reaches = east => joins.some(join => [join.from, join.to].some(key => {
+    const square = network.squares.get(key);
+    return Math.abs(projection.centreOf([square.x, square.y], grid)[0] - at(east, 0)[0]) < 0.3;
+  }));
+  assert.equal(joins.length, 1, JSON.stringify(joins));
+  assert.ok(reaches(150), 'the near scrap is joined: 150 km is within the 300 km every piece may have');
+  assert.ok(!reaches(600), 'the far one is not: 600 km is more than five times its 40 km of track');
+  // A city on the big network does not make every scrap worth joining to it.
+  const onMain = build();
+  const mainCity = projection.cellOf(at(0, 400), grid).join(',');
+  assert.equal(longJoins(onMain.network, onMain.groups, grid, () => false, new Set([mainCity])).length, 1);
+  // A scrap serving an authored city is always worth it.
+  const cities = build();
+  const city = projection.cellOf(at(620, 400), grid).join(',');
+  assert.equal(longJoins(cities.network, cities.groups, grid, () => false, new Set([city])).length, 2);
 });

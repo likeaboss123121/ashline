@@ -11,6 +11,16 @@ before(async () => {
 });
 after(async () => { if (browser) await browser.close(); });
 
+const escapeRegExp = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// A station's name, and where its exit line leads as its departure link names it: the network is rebuilt from map
+// data, so tests look the names up rather than pinning them.
+const stationName = (page, id) => page.evaluate(id => SugarCube.setup.worldmap.getStationName(id), id);
+const exitName = (page, id) => page.evaluate(id => {
+  const world = SugarCube.setup.worldmap, line = SugarCube.setup.realWorldPilot.getStationLines(id).find(candidate => candidate.side === 'exit');
+  return line.destination ? world.getStationName(line.destination) : world.describePoint(line.destinationName, world.getStationName(id));
+}, id);
+const departTo = async (page, id) => new RegExp('^Depart \\S+ toward ' + escapeRegExp(await exitName(page, id)), 'm');
+
 async function openGame(t, options) {
   const page = await browser.newPage(options);
   // Bound failures and capture state instead of masking broken selectors with retries.
@@ -83,7 +93,7 @@ test('maps are first on desktop and mobile; wide view stays inside the viewport 
     await topMap('.consist-view-wrapper');
     await choose(page, 'Start driving', 'DrivingMode');
     await topMap('.railyard-view-wrapper');
-    await page.locator('#passages').getByText(/^Depart Northbound toward Río Seco/).click();
+    await page.locator('#passages').getByText(/^Depart \S+ toward /).first().click();
     await passage(page, 'OnTheLine');
     await topMap('.driving-view-wrapper');
     await choose(page, 'Enter the train', 'TrainInterior');
@@ -247,7 +257,7 @@ test('walking the sourced line leads back to the parked train',async t=>{
   await choose(page,leave,'OnFoot');
   assert.equal(await page.locator('#passages a').filter({hasText:/onto the branch/}).count(),0);
   const parked=await page.evaluate(()=>JSON.stringify(SugarCube.State.variables.journey));
-  await choose(page,'Enter Km 74 from El Turbio railyard','Railyard');
+  await choose(page,'Enter '+await stationName(page,3)+' railyard','Railyard');
   assert.equal(await page.evaluate(()=>SugarCube.State.variables.currentStation),3);
   assert.equal(await page.evaluate(()=>JSON.stringify(SugarCube.State.variables.journey)),parked);
   assert.equal(await page.evaluate(()=>SugarCube.State.variables.onFoot.inRailyard),true);
@@ -741,7 +751,7 @@ test('the yard and the line are drawn by the light of the time of day', async t 
   drawn = await yard();
   assert.ok(drawn.windows > 0, 'the occupied cab keeps its glow');
   assert.equal(drawn.lit, 1, 'exactly one car is drawn lit');
-  await page.locator('#passages').getByText(/^Depart Northbound toward Río Seco/).first().click();
+  await page.locator('#passages').getByText(/^Depart \S+ toward /).first().click();
   await passage(page, 'OnTheLine');
   const line = await page.evaluate(() => {
     const svg = document.querySelector('#passages svg.driving-view');
@@ -939,7 +949,7 @@ test('the first station teaches shunting: off the stub, onto the flatcar, and aw
   assert.equal(await hint(), 'complete');
 
   // Leaving the station for the first time finishes the tutorial for good.
-  await page.locator('#passages').getByText(/^Depart Northbound toward Río Seco/).first().click();
+  await page.locator('#passages').getByText(/^Depart \S+ toward /).first().click();
   await passage(page, 'OnTheLine');
   assert.equal(await page.evaluate(() => SugarCube.State.variables.tutorialDone), true);
   assert.equal(await hint(), null);
@@ -1098,7 +1108,7 @@ test('the player can get down from the train out on the line and walk the track'
   await begin(page);
   await board(page);
   await choose(page, 'Start driving', 'DrivingMode');
-  await page.locator('#passages').getByText(/^Depart Northbound toward Río Seco/).first().click();
+  await page.locator('#passages').getByText(/^Depart \S+ toward /).first().click();
   await passage(page, 'OnTheLine');
 
   assert.equal(await page.locator('#passages').getByText(/Climb down from the train/).count(),0);
@@ -1178,11 +1188,12 @@ test('new games spawn in and drive the sourced network', async t => {
     time: SugarCube.setup.time.getCurrentTimestampMs(),
     fuel: SugarCube.setup.railyard.getCargoAmount(SugarCube.State.variables.currentTrain[0], 'diesel')
   }));
-  await page.locator('#passages').getByText(/^Depart Northbound toward Km 74 from El Turbio/).click();
+  const [secondName, secondExit] = [await stationName(page, 2), await exitName(page, 2)];
+  await page.locator('#passages').getByText(await departTo(page, 2)).click();
   await passage(page, 'OnTheLine');
   const map = await page.locator('#passages .driving-view-wrapper').boundingBox();
   assert.ok(map && map.y < 100, JSON.stringify(map));
-  assert.match(await page.locator('#passages').innerText(), /Río Seco to Km 74 from El Turbio.*Tile 1 of 14/s);
+  assert.match(await page.locator('#passages').innerText(), new RegExp(escapeRegExp(secondName + ' to ' + secondExit) + '.*Tile 1 of \\d+', 's'));
   await page.locator('#passages a').filter({ hasText: /^Drive [\d.]+ km/ }).first().click();
   await passage(page, 'OnTheLine');
   assert.equal(await page.evaluate(() => SugarCube.State.variables.journey.tileIndex), 1);
@@ -1277,7 +1288,7 @@ test('insufficient fuel explains the failure and leaves the entire move unchange
   await board(page);
   await page.evaluate(() => { SugarCube.State.variables.currentTrain[0].cargo[0].amount = 2; });
   await choose(page, 'Start driving', 'DrivingMode');
-  await page.locator('#passages').getByText(/^Depart Northbound toward Río Seco/).first().click();
+  await page.locator('#passages').getByText(/^Depart \S+ toward /).first().click();
   await passage(page, 'OnTheLine');
   const before = await page.evaluate(() => JSON.stringify(SugarCube.State.variables));
   await page.locator('#passages').getByText(/^Drive [\d.]+ km [a-z-]+ \(/).first().click();
@@ -1581,7 +1592,7 @@ test('stations without an entry or exit track still leave the player a way out',
   assert.deepEqual(second.labels, ['SOUTHBOUND TRACK', '01 \u00b7 120 m free of 120 m']);
   assert.equal(await page.locator('#passages a').filter({ hasText: /^Depart Northbound/ }).count(), 0);
   assert.match(await page.locator('#passages .yard-reason').allTextContents().then(all => all.join(' ')),
-    /Depart Northbound toward Km 74 from El Turbio unavailable: This station has no Northbound Track/);
+    new RegExp('Depart Northbound toward ' + escapeRegExp(await exitName(page, 2)) + ' unavailable: This station has no Northbound Track'));
   assert.doesNotMatch(drivingText, /Drive consist to Northbound Track/);
   await travelLeg(page, 'Southbound');
   assert.equal(await page.evaluate(() => SugarCube.State.variables.currentStation), 1);
@@ -1605,7 +1616,7 @@ test('lead tracks are named for the compass direction a train leaves by', async 
   // The drawing keeps its shape; only the names follow the compass.
   assert.deepEqual(labels, ['SOUTHBOUND TRACK', '01 \u00b7 120 m free of 120 m', 'EASTBOUND TRACK']);
   assert.match(drivingText, /Drive consist to Eastbound Track/);
-  assert.match(drivingText, /Depart Eastbound toward Km 74 from El Turbio/);
+  assert.match(drivingText, new RegExp('Depart Eastbound toward ' + escapeRegExp(await exitName(page, 2))));
   assert.match(drivingText, /Depart Southbound toward Punta Arenas/);
   await choose(page, 'Stop driving', 'TrainInterior');
   await choose(page, 'Leave the train (0:01)', 'Railyard');
@@ -1678,7 +1689,7 @@ test('debug mode draws the complete sourced rail grid', async t => {
   assert.equal(context.labels.length, 35);
   ['Punta Arenas', 'Puerto Montt', 'Santiago', 'Lima', 'Bogotá', 'Caracas', 'Manaus', 'São Paulo'].forEach(city =>
     assert.ok(context.labels.includes(city), city));
-  assert.match(map.heading, /^South America railway network: \d+ grid squares, \d+ legs, \d+ stations; \d+ km of mapped railway joined by \d+ new lines/);
+  assert.match(map.heading, /^[A-Z][A-Za-z ]* railway network: \d+ grid squares, \d+ legs, \d+ stations; \d+ km of mapped railway joined by \d+ new lines/);
   // One line under the map names the square under the pointer.
   await page.locator('#developer-Debug .debug-map-frame').hover();
   assert.match(await page.locator('#developer-Debug .debug-map-hover').innerText(), /^(.+ \| )?grid -?\d+,-?\d+/);
@@ -1742,7 +1753,8 @@ test('debug map teleport carries an onboard consist into a station on the select
   assert.equal(moved.station, 3);
   assert.equal(moved.journey, null);
   assert.equal(moved.onFoot, null);
-  assert.match(await page.locator('.debug-teleport-notice').innerText(), /Teleported the complete consist to Km 74 from El Turbio station/);
+  assert.match(await page.locator('.debug-teleport-notice').innerText(),
+    new RegExp('Teleported the complete consist to ' + escapeRegExp(await stationName(page, 3)) + ' station'));
 });
 
 test('the debug map zooms out to the whole continent and in again, and a drag pans without teleporting', async t => {
@@ -1770,7 +1782,11 @@ test('the debug map zooms out to the whole continent and in again, and a drag pa
   assert.ok((await svg.boundingBox()).width > whole.width * 1.4);
   assert.match(await bar.locator('span').innerText(), /^\d+%$/);
   // A drag that starts and ends on track tiles scrolls the map and teleports nobody.
-  for (let step = 0; step < 4; step++) await bar.getByRole('button', { name: 'Zoom in' }).click();
+  // Zoom in until the squares are drawn: how many steps that takes depends on how big the network is.
+  for (let step = 0; step < 16 && !await svg.locator('.debug-teleport-tile').count(); step++) {
+    await bar.getByRole('button', { name: 'Zoom in' }).click();
+  }
+  for (let step = 0; step < 2; step++) await bar.getByRole('button', { name: 'Zoom in' }).click();
   // Zoomed in, the pan buttons move the view by most of its size, in the direction named.
   const scrollOf = () => frame.evaluate(element => ({ left: element.scrollLeft, top: element.scrollTop }));
   let panBefore = await scrollOf();
@@ -1792,8 +1808,18 @@ test('the debug map zooms out to the whole continent and in again, and a drag pa
   const middle = b => b.x + b.width / 2, row = b => b.y + b.height / 2;
   assert.ok(Math.abs(middle(up) - middle(down)) < 2 && up.y + up.height <= left.y + 1 && left.y + left.height <= down.y + 1);
   assert.ok(Math.abs(row(left) - row(right)) < 2 && left.x + left.width <= up.x + 1 && up.x + up.width <= right.x + 1);
-  // A track tile already in view: scrolling one into view would redraw the map around it.
+  // A track tile already in view: scrolling one into view would redraw the map around it. After the pans the view
+  // may be over open sea, so first bring the train (always drawn, and on track) to the middle and let it redraw.
   await frame.scrollIntoViewIfNeeded();
+  await frame.evaluate(element => {
+    const box = element.getBoundingClientRect();
+    const tile = element.querySelector('svg.worldmap-debug polygon') || element.querySelector('.debug-teleport-tile');
+    if (!tile) return;
+    const at = tile.getBoundingClientRect();
+    element.scrollLeft += at.left - box.left - element.clientWidth / 2;
+    element.scrollTop += at.top - box.top - element.clientHeight / 2;
+  });
+  await page.waitForTimeout(300);
   const start = await page.evaluate(() => {
     const frame = document.querySelector('#developer-Debug .debug-map-frame').getBoundingClientRect();
     const inside = [...document.querySelectorAll('#developer-Debug .debug-teleport-tile')].map(tile => tile.getBoundingClientRect())
@@ -1920,7 +1946,7 @@ test('driving the line goes one tile at a time, and draws the consist on it', as
   await board(page);
   await page.evaluate(() => { SugarCube.State.variables.currentStation = 2; });
   await choose(page, 'Start driving', 'DrivingMode');
-  await page.locator('#passages').getByText(/^Depart Northbound toward Km 74 from El Turbio/).first().click();
+  await page.locator('#passages').getByText(await departTo(page, 2)).first().click();
   await passage(page, 'OnTheLine');
 
   const start = await page.evaluate(() => {
@@ -1974,9 +2000,9 @@ test('driving the line goes one tile at a time, and draws the consist on it', as
 
   // Departing again, the yard is still right there: backing in costs nothing, which is the way out for a
   // consist that sets off without the fuel to get anywhere.
-  await page.locator('#passages').getByText(/^Depart Northbound toward Km 74 from El Turbio/).first().click();
+  await page.locator('#passages').getByText(await departTo(page, 2)).first().click();
   await passage(page, 'OnTheLine');
-  await choose(page, 'Back into Río Seco', 'DrivingMode');
+  await choose(page, 'Back into ' + await stationName(page, 2), 'DrivingMode');
   assert.equal(await page.evaluate(() => SugarCube.State.variables.journey), null);
 });
 
@@ -1992,7 +2018,7 @@ test('the sourced corridor exposes real adjacent stations without fictional side
   await passage(page, 'DrivingMode');
   const text = await page.locator('#passages').innerText();
   assert.match(text, /Depart Southbound toward Punta Arenas/);
-  assert.match(text, /Depart Northbound toward Km 74 from El Turbio/);
+  assert.match(text, await departTo(page, 2));
   assert.doesNotMatch(text, /side track|branch/i);
   assert.deepEqual(await page.evaluate(() => [1, 2, 3, 4].map(index =>
     SugarCube.setup.worldmap.getLeg(SugarCube.setup.worldmap.getSeed(), index).branches.length)), [0, 0, 0, 0]);
@@ -2394,7 +2420,7 @@ test('backing into the station you left turns neither the yard nor the train rou
   const before = await yardView();
 
   // Out onto the line, one tile along, then straight back into the yard it left.
-  await page.locator('#passages').getByText(/^Depart Northbound toward Km 74 from El Turbio/).first().click();
+  await page.locator('#passages').getByText(await departTo(page, 2)).first().click();
   await passage(page, 'OnTheLine');
   await page.locator('#passages').getByText(/^Drive [\d.]+ km [a-z-]+ \(/).first().click();
   await passage(page, 'OnTheLine');

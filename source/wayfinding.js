@@ -160,7 +160,7 @@ setup.wayfinding = {
 			var shown = stations.slice(0, self.SIGN_TOWNS);
 			var city = stations.filter(function(station) { return station.city && shown.indexOf(station) < 0; })[0];
 			if (city) shown.push(city);
-			return { direction: setup.worldmap.describeDirection(way.line.direction), legIndex: way.line.legIndex, destinations: shown };
+			return { direction: setup.worldmap.describeDirection(way.line.direction, route.tiles[node.square]), legIndex: way.line.legIndex, destinations: shown };
 		});
 	},
 

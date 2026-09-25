@@ -36,6 +36,17 @@
       "transformation": "Osmium tag filter, GeoJSON sequence export, deterministic streaming normalization"
     },
     {
+      "id": "openstreetmap-geofabrik-americas-2026-09-24",
+      "name": "OpenStreetMap extracts of the Americas via Geofabrik",
+      "url": "https://download.geofabrik.de/ (south-america, central-america, north-america/canada, north-america/mexico, north-america/us-pacific, north-america/us-west, north-america/us-midwest, north-america/us-south, north-america/us-northeast)",
+      "retrieved": "2026-09-24",
+      "license": "ODbL 1.0",
+      "attribution": "© OpenStreetMap contributors; extracts provided by Geofabrik",
+      "status": "ingested",
+      "use": "Every mapped railway alignment, named station, and named place from cities to farms in South, Central and North America: the playable network from Punta Arenas to Wales, Alaska",
+      "transformation": "scripts/world/fetch-osm-regions.cjs (region by region, filtered to railways, stations and places, then merged), then the rail, station and place extractors with --scope americas: yard, siding and crossover tracks dropped and lines simplified to about 30 m"
+    },
+    {
       "id": "openhistoricalmap-rail",
       "name": "OpenHistoricalMap",
       "url": "https://www.openhistoricalmap.org/",

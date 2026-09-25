@@ -1,0 +1,11 @@
+{
+  "about": "Regions where the network builder (scripts/world/build-network.cjs) invents fewer stops. A region is a polygon of [longitude, latitude] points. In a hard region there are no halts on long sections, no spurs out to hamlets, no stops at bare line ends, and a new line only gets a stop at a town or a city, not a village: the stops there are the stations actually mapped, the towns, and the ends of authored routes. Sparse stops are the point of a hard region, where the player has to stock up beforehand.",
+  "regions": [
+    {
+      "id": "alaska-yukon",
+      "note": "Alaska (with its panhandle) and the Yukon, south to 60 degrees north east of the panhandle, from the continental rail network to the Bering Strait: Ashline's first really hard section (Likea, September 2026).",
+      "hard": true,
+      "polygon": [[-180, 51], [-160, 51], [-160, 54.6], [-130, 54.6], [-130, 56.2], [-132, 57.1], [-133.4, 58.4], [-135.5, 59.8], [-137.5, 59.2], [-139, 60], [-123.8, 60], [-123.8, 72], [-180, 72]]
+    }
+  ]
+}

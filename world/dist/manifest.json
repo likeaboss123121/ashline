@@ -38,6 +38,17 @@
       "transformation": "Osmium tag filter, GeoJSON sequence export, deterministic streaming normalization"
     },
     {
+      "id": "openstreetmap-geofabrik-americas-2026-09-24",
+      "name": "OpenStreetMap extracts of the Americas via Geofabrik",
+      "url": "https://download.geofabrik.de/ (south-america, central-america, north-america/canada, north-america/mexico, north-america/us-pacific, north-america/us-west, north-america/us-midwest, north-america/us-south, north-america/us-northeast)",
+      "retrieved": "2026-09-24",
+      "license": "ODbL 1.0",
+      "attribution": "© OpenStreetMap contributors; extracts provided by Geofabrik",
+      "status": "ingested",
+      "use": "Every mapped railway alignment, named station, and named place from cities to farms in South, Central and North America: the playable network from Punta Arenas to Wales, Alaska",
+      "transformation": "scripts/world/fetch-osm-regions.cjs (region by region, filtered to railways, stations and places, then merged), then the rail, station and place extractors with --scope americas: yard, siding and crossover tracks dropped and lines simplified to about 30 m"
+    },
+    {
       "id": "openhistoricalmap-rail",
       "name": "OpenHistoricalMap",
       "url": "https://www.openhistoricalmap.org/",
@@ -1082,36 +1093,36 @@
     }
   ],
   "network": {
-    "id": "south-america-network",
-    "label": "South America railway network",
+    "id": "americas-network",
+    "label": "The Americas railway network",
     "grid": {
       "projection": "lambert-azimuthal-equal-area",
-      "centre": [-60, -20],
+      "centre": [-102.5, 10],
       "origin": [-70.90114, -53.16472],
       "cellKm": 5
     },
     "sources": {
       "geometry": {
-        "id": "south-america-rail",
-        "sourceId": "openstreetmap-geofabrik-south-america-2026-09-21",
-        "sha256": "63ac0a060e2f1bc03821d3e561b14b1cb66128518d32dac2a76899ce1ad3276a"
+        "id": "americas-rail",
+        "sourceId": "openstreetmap-geofabrik-americas-2026-09-24",
+        "sha256": "d8c38e176250456fa504f350cd83ba95dff2e9264e8d3c3e7ccea56fd1a92cf7"
       },
       "stations": {
-        "id": "south-america-stations",
-        "sourceId": "openstreetmap-geofabrik-south-america-2026-09-21"
+        "id": "americas-stations",
+        "sourceId": "openstreetmap-geofabrik-americas-2026-09-24"
       },
       "settlements": {
-        "id": "south-america-places",
-        "sourceId": "openstreetmap-geofabrik-south-america-2026-09-21"
+        "id": "americas-places",
+        "sourceId": "openstreetmap-geofabrik-americas-2026-09-24"
       },
       "outposts": {
-        "id": "south-america-outposts",
-        "count": 222747
+        "id": "americas-outposts",
+        "count": 456728
       },
       "elevation": {
         "sourceId": "copernicus-dem-glo90",
         "aggregation": "mean-and-population-standard-deviation-within-grid-square",
-        "tileCount": 793
+        "tileCount": 2267
       }
     },
     "parameters": {
@@ -1197,44 +1208,44 @@
       }
     },
     "stats": {
-      "squareCount": 20845,
-      "moveCount": 21081,
-      "stopCount": 3496,
-      "haltCount": 156,
-      "bridgeCount": 1708,
-      "bridgeKm": 32177,
-      "stubJoinCount": 303,
-      "authoredJoinCount": 3,
-      "endJoinCount": 11,
-      "spurCount": 131,
-      "shortcutCount": 8,
-      "parallelStretchesRemoved": 401,
-      "parallelKmRemoved": 12539,
-      "onExistingTrackKm": 2485,
-      "stationsMovedOffJunctions": 465,
-      "junctionPoints": 1105,
-      "bufferPoints": 119,
-      "urbanAreas": 123,
-      "urbanSquaresRemoved": 368,
-      "urbanMovesRemoved": 478,
+      "squareCount": 89583,
+      "moveCount": 92546,
+      "stopCount": 8736,
+      "haltCount": 1653,
+      "bridgeCount": 17382,
+      "bridgeKm": 135390,
+      "stubJoinCount": 4414,
+      "authoredJoinCount": 4,
+      "endJoinCount": 22,
+      "spurCount": 189,
+      "shortcutCount": 9,
+      "parallelStretchesRemoved": 5112,
+      "parallelKmRemoved": 120512,
+      "onExistingTrackKm": 7770,
+      "stationsMovedOffJunctions": 1131,
+      "junctionPoints": 7747,
+      "bufferPoints": 420,
+      "urbanAreas": 376,
+      "urbanSquaresRemoved": 1486,
+      "urbanMovesRemoved": 1976,
       "stopRegions": {
-        "urban": 63,
-        "industrial": 82,
-        "rural": 3351
+        "urban": 162,
+        "industrial": 736,
+        "rural": 7838
       },
       "stationsWithoutYard": {
-        "urban": 368,
-        "industrial": 156,
-        "rural": 1460
+        "urban": 986,
+        "industrial": 505,
+        "rural": 2143
       },
-      "railKm": 114413,
-      "leftOutPieces": 29,
-      "leftOutKm": 129,
+      "railKm": 622773,
+      "leftOutPieces": 93,
+      "leftOutKm": 18874,
       "unreachableCities": [],
-      "prunedStubSquares": 682,
-      "junctionSquares": 1105,
-      "endSquares": 699
+      "prunedStubSquares": 7415,
+      "junctionSquares": 7747,
+      "endSquares": 2552
     },
-    "file": "world/network/south-america-network.json"
+    "file": "world/network/americas-network.json"
   }
 }

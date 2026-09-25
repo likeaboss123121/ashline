@@ -7,8 +7,8 @@
   ],
   "network": [
     {
-      "id": "south-america-network",
-      "file": "world/network/south-america-network.json"
+      "id": "americas-network",
+      "file": "world/network/americas-network.json"
     }
   ]
 }

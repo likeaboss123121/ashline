@@ -438,7 +438,7 @@ test('station lead headings follow the sourced rail grid', () => {
     assert.ok(g.setup.yardGeneration.validate(tracks));
   }
   assert.equal(yard.getLegHeading(1), 'north');
-  assert.equal(world.getStationName(4), 'Gobernador Moyano');
+  assert.equal(world.getStationName(1), 'Punta Arenas');
 });
 
 test('passenger templates exist at their catalogue lengths in both projections', () => {

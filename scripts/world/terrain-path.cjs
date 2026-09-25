@@ -77,7 +77,7 @@ function sampleBox(box, cache = defaultCache()) {
         }
         if (process.env.ASHLINE_WORLD_QUIET !== '1') console.error('Resampling ' + files.length + ' elevation tiles (' + method + ')');
         const output = path.join(temporary, method + '.bin');
-        run('gdalwarp', ['-q', '-overwrite', '-multi', '-wm', '512', '-te', ...box.map(String), '-ts', String(width), String(height),
+        run('gdalwarp', ['-q', '-overwrite', '-multi', '-wm', '128', '-te', ...box.map(String), '-ts', String(width), String(height),
           '-r', method, '-srcnodata', String(NODATA), '-dstnodata', String(NODATA), '-ot', 'Float32', '-of', 'ENVI',
           vrt, output]);
         fs.copyFileSync(output, file + '.part');

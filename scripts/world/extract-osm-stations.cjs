@@ -11,8 +11,9 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '../..');
-const SCOPE = { output: 'world/imported/south-america-stations.json', id: 'south-america-stations',
-  label: 'South America railway stations', sourceId: 'openstreetmap-geofabrik-south-america-2026-09-21' };
+const AREA = require('./scopes.cjs').scopeFromArguments();
+const SCOPE = { output: 'world/imported/' + AREA.prefix + '-stations.json', id: AREA.prefix + '-stations',
+  label: AREA.label.charAt(0).toUpperCase() + AREA.label.slice(1) + ' railway stations', sourceId: AREA.sourceId };
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);

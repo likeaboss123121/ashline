@@ -1548,7 +1548,7 @@ setup.railyard = {
 	getLineHeading: function(stationId, side) {
 		if (!setup.realWorldPilot || !setup.realWorldPilot.getStationLines) return null;
 		var line = setup.realWorldPilot.getStationLines(stationId).filter(function(candidate) { return candidate.side === side; })[0];
-		return line ? setup.worldmap.describeDirection(line.direction) : null;
+		return line ? setup.worldmap.describeDirection(line.direction, setup.realWorldPilot.getStationTile(stationId)) : null;
 	},
 	// legIndex picks one of several lines leaving the same side of a junction; without it, the first line that side.
 	getDepartureBlockReason: function(stationId, playerTrackIndex, towardExit, legIndex) {
@@ -2672,7 +2672,7 @@ Macro.add('drivingTravelButtons', {
 			sideLines.forEach(function(line) {
 				// Travelling reads as the heading the line leaves in, not as next and previous.
 				var heading = sideLines.length > 1
-					? setup.railyard.getDirectionName(setup.worldmap.describeDirection(line.direction))
+					? setup.railyard.getDirectionName(setup.worldmap.describeDirection(line.direction, setup.realWorldPilot.getStationTile(stationId)))
 					: setup.railyard.getDirectionName(setup.railyard.getLeadDirection(tracks, towardExit ? 'exit' : 'entry'));
 				var destination = line.destination;
 				var label = 'Depart ' + heading + ' toward ' + (destination ? setup.worldmap.getStationName(destination)

@@ -146,6 +146,36 @@ The debug map draws the network only when its panel is open, as plain squares an
 under the map naming the square under the pointer; the teleport list holds stations rather than squares. Zoom and
 pan buttons sit above it, the pan arrows in a diamond.
 
+## The Americas
+
+The world was extended from South America to the Americas in September 2026, as a first look at how the game
+works across continents, and to reach Wales, Alaska, where the Bering Strait crossing to Asia will start.
+
+- **Data.** Geofabrik's regional extracts, fetched and filtered one at a time (`scripts/world/fetch-osm-regions.cjs`)
+  and merged. Yard, siding and crossover tracks are left out of the rail import and lines are simplified to about
+  30 m: North America maps its yards in their hundreds of thousands, and they fall inside the squares of the lines
+  they serve. Each script takes `--scope south-america` or `--scope americas` (`scripts/world/scopes.cjs`).
+- **Grid.** One Lambert equal-area grid centred at 102.5°W, 10°N, the centre that keeps the worst stretch lowest
+  over both continents' railways: about 1.5 to 1 at Punta Arenas, Recife and Wales. Punta Arenas is still square
+  (0, 0). Far from the centre grid north is not true north (tens of degrees off in Alaska), so directions are named
+  from the true bearing of a step (`setup.worldmap.describeDirection(index, tile)`).
+- **Rules added for two continents.** A join whose line would cross more than 3 km of open water is not laid, and
+  the joins are tried again in passes without it: islands with railways (Cuba, Vancouver Island, Newfoundland's
+  remnants) are left out. A long join is only worth laying to a piece in proportion to its built track (at most five
+  times its length, never under 300 km, judged by the smaller piece; proposed and planned lines do not count), so a
+  scrap of track in the Arctic is not joined by a thousand kilometres of new line, unless it serves an authored
+  city. Authored routes are laid before the automatic joins, since each is a join chosen by hand. Halts are placed
+  so that no square outside a hard region is more than 50 km from a stop by track, junctions or not.
+- **Hard regions** (`world/authored/regions.json`). Alaska and the Yukon are Ashline's first really hard section
+  (Likea): the builder invents no stops there, no halts, no spurs, no stops at bare line ends, and on new lines only
+  towns and cities. The only way from the continental network to Wales is through Alaska: Fairbanks down the
+  Alaska Railroad to Palmer, 993 km with no stop to the Haines Highway, the White Pass line, then British Columbia;
+  and from Fairbanks the authored route to Wales, 1,256 km from Healy to Nome with no stop, then Nome to Wales.
+  No locomotive does that on one tank: the player has to carry fuel.
+- **Result.** 89,583 squares and 8,736 stops (1,653 halts), 7,747 junctions and 420 buffers; 622,773 km of mapped
+  railway kept and 135,390 km of new line; Punta Arenas to Wales is 25,468 km by track. The game's world data is
+  4.2 MB, the page 5.6 MB, and the network is built in the browser in about 1.7 s on this server.
+
 ## The geographic grid
 
 The network lies on one grid of 5 km squares (`scripts/world/projection.cjs`): a Lambert azimuthal equal-area

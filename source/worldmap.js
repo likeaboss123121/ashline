@@ -172,9 +172,22 @@ setup.worldmap = {
 	// --- directions and track shapes ----------------------------------------------------------------------
 	// The compass name a player would use for a direction, rather than the two letters the map stores.
 	COMPASS_NAMES: { n: 'north', ne: 'north-east', e: 'east', se: 'south-east', s: 'south', sw: 'south-west', w: 'west', nw: 'north-west' },
-	describeDirection: function(index) {
+	// The compass name of a grid direction. Given the square it is taken from, on the network's grid, it names the true
+	// bearing of that step instead: the grid is one projection over a continent or two, and far from its centre grid
+	// north is not true north (at Wales, Alaska, tens of degrees off), which a player reading the sun would notice.
+	COMPASS_ORDER: ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'],
+	describeDirection: function(index, tile) {
 		var direction = this.DIRECTIONS[index];
-		return direction ? this.COMPASS_NAMES[direction.name] : '';
+		if (!direction) return '';
+		var data = setup.worldGraphData && setup.worldGraphData.network;
+		if (tile && data && data.grid && typeof tile.x === 'number' && typeof tile.y === 'number') {
+			var a = this.unprojectGrid(tile.x, tile.y, data.grid), b = this.unprojectGrid(tile.x + direction.dx, tile.y + direction.dy, data.grid);
+			var radians = Math.PI / 180, dLon = (b[0] - a[0]) * radians;
+			var bearing = Math.atan2(Math.sin(dLon) * Math.cos(b[1] * radians),
+				Math.cos(a[1] * radians) * Math.sin(b[1] * radians) - Math.sin(a[1] * radians) * Math.cos(b[1] * radians) * Math.cos(dLon)) / radians;
+			return this.COMPASS_NAMES[this.COMPASS_ORDER[Math.round(((bearing % 360) + 360) % 360 / 45) % 8]];
+		}
+		return this.COMPASS_NAMES[direction.name];
 	},
 	directionIndex: function(name) {
 		for (var i = 0; i < this.DIRECTIONS.length; i++) {
@@ -626,7 +639,7 @@ setup.worldmap = {
 		if (path.leg.realWorld) {
 			return setup.realWorldPilot.getJunctionChoices(journey.legIndex, journey.tileIndex).map(function(line) {
 				var step = self.getLineChoiceStep(line);
-				return { id: 'leg:' + line.legIndex, legIndex: line.legIndex, direction: self.describeDirection(line.direction),
+				return { id: 'leg:' + line.legIndex, legIndex: line.legIndex, direction: self.describeDirection(line.direction, path.tiles[journey.tileIndex]),
 					tiles: step.tileCount, terrain: step.terrain, rejoins: false, grade: step.grade };
 			});
 		}
@@ -741,7 +754,7 @@ setup.worldmap = {
 			var realStep = this.describeStep(forwardStep ? tiles[from].grade : -tiles[realTo].grade, tiles[realTo].terrain, {
 				fromIndex: from, toIndex: realTo, realWorld: true,
 				distanceKm: this.getStepKm(tiles, Math.min(from, realTo)),
-				heading: this.describeDirection(forwardStep ? tiles[from].out : this.opposite(tiles[realTo].out)),
+				heading: this.describeDirection(forwardStep ? tiles[from].out : this.opposite(tiles[realTo].out), forwardStep ? tiles[from] : tiles[realTo]),
 				destinationName: tiles[realTo].station || '',
 				arrivesAt: realTo === 0 ? path.leg.fromStationIndex : (realTo === tiles.length - 1 ? path.leg.toStationIndex : 0)
 			});
@@ -790,7 +803,7 @@ setup.worldmap = {
 		var leg = setup.realWorldPilot.getLeg(line.legIndex);
 		return this.describeStep(line.forward ? tiles[from].grade : -tiles[to].grade, tiles[to].terrain, {
 			fromIndex: from, toIndex: to, realWorld: true, toBranch: 'leg:' + line.legIndex, tileCount: tiles.length,
-			distanceKm: this.getStepKm(tiles, Math.min(from, to)), heading: this.describeDirection(line.direction),
+			distanceKm: this.getStepKm(tiles, Math.min(from, to)), heading: this.describeDirection(line.direction, tiles[from]),
 			destinationName: tiles[to].station || '',
 			arrivesAt: to === 0 ? leg.fromStationIndex : (to === last ? leg.toStationIndex : 0)
 		});
@@ -1176,7 +1189,7 @@ setup.worldmap = {
 			marker.setAttribute('fill', '#e0625c');
 			marker.setAttribute('pointer-events', 'none');
 			var markerTitle = document.createElementNS(ns, 'title');
-			markerTitle.textContent = 'Your train, heading ' + this.describeDirection(facing);
+			markerTitle.textContent = 'Your train, heading ' + this.describeDirection(facing, here.tile);
 			marker.appendChild(markerTitle);
 			svg.appendChild(marker);
 		}

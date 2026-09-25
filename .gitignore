@@ -28,3 +28,7 @@ development materials/
 # Raw geographic inputs are far too large to ship; normalized attributed outputs live under world/ instead.
 world/raw/
 *.osm.pbf
+
+# The Americas imports are rebuilt by scripts/world/fetch-osm-regions.cjs and the extractors; the rail import
+# alone is over GitHub's 100 MB limit.
+world/imported/americas-*.json

@@ -37,12 +37,30 @@ function sha256File(file) {
 // Every railway way in the South America snapshot, normalized: filtered by railway tags first (the reverse order
 // exhausts this server's memory on a continent), exported as a GeoJSON sequence and read record by record, since the
 // export is larger than one string this runtime can hold.
+const { scopeFromArguments } = require('./scopes.cjs');
+const AREA = scopeFromArguments();
 const SCOPE = {
-  output: 'world/imported/south-america-rail.json',
-  id: 'south-america-rail',
-  label: 'South America railway geometry',
-  sourceId: 'openstreetmap-geofabrik-south-america-2026-09-21'
+  output: 'world/imported/' + AREA.prefix + '-rail.json',
+  id: AREA.prefix + '-rail',
+  label: AREA.label.charAt(0).toUpperCase() + AREA.label.slice(1) + ' railway geometry',
+  sourceId: AREA.sourceId
 };
+const DROPPED_SERVICE = new Set(AREA.dropServiceTracks || []);
+
+// Douglas-Peucker over [longitude, latitude] points, keeping both ends.
+function simplify(points, tolerance) {
+  if (points.length <= 2) return points;
+  const [a, b] = [points[0], points[points.length - 1]];
+  let worst = -1, worstIndex = 0;
+  for (let index = 1; index < points.length - 1; index++) {
+    const p = points[index], dx = b[0] - a[0], dy = b[1] - a[1], length = dx * dx + dy * dy;
+    const t = length ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / length)) : 0;
+    const distance = Math.hypot(p[0] - a[0] - dx * t, p[1] - a[1] - dy * t);
+    if (distance > worst) { worst = distance; worstIndex = index; }
+  }
+  if (worst <= tolerance) return [a, b];
+  return simplify(points.slice(0, worstIndex + 1), tolerance).slice(0, -1).concat(simplify(points.slice(worstIndex), tolerance));
+}
 
 async function main() {
   const inputArgument = argument('input');
@@ -70,7 +88,12 @@ async function main() {
     let read = 0;
     for await (const line of lines) {
       if (!line) continue;
-      normalizer.add(JSON.parse(line.replace(/^\x1e/, '')));
+      const feature = JSON.parse(line.replace(/^\x1e/, ''));
+      if (DROPPED_SERVICE.has(feature.properties && feature.properties.service)) continue;
+      if (AREA.simplifyDegrees && feature.geometry && feature.geometry.type === 'LineString') {
+        feature.geometry.coordinates = simplify(feature.geometry.coordinates, AREA.simplifyDegrees);
+      }
+      normalizer.add(feature);
       if (++read % 100000 === 0) console.error('Read ' + read.toLocaleString('en-US') + ' features');
     }
     const normalized = normalizer.finish();
