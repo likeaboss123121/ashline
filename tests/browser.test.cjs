@@ -1646,7 +1646,7 @@ test('debug mode draws the complete sourced rail grid', async t => {
       cells: svg.querySelectorAll('rect.debug-teleport-tile').length,
       track: track.length,
       trackDrawn: track.map(path => (path.getAttribute('d') || '').length > 0),
-      newTrackSegments: (svg.querySelector('path.debug-map-new-track').getAttribute('d').match(/M/g) || []).length,
+      overviews: [...svg.querySelectorAll('image.debug-map-overview')].map(image => image.style.display !== 'none'),
       stations: svg.querySelectorAll('.debug-map-stations circle').length,
       heading: svg.closest('details').querySelector('.debug-map-heading').textContent
     };
@@ -1658,20 +1658,42 @@ test('debug mode draws the complete sourced rail grid', async t => {
   assert.ok(map.cells > 100 && map.cells < squareCount / 4, JSON.stringify({ map, squareCount }));
   assert.equal(map.track, 2, 'mapped track and new lines, each one path');
   assert.ok(map.stations > 0, JSON.stringify(map));
-  // Zoomed out to the whole map, the squares are too small to click and only the track is drawn, all of it.
+  assert.deepEqual(map.overviews, [false, false], 'zoomed in, the squares themselves are drawn');
+  // Zoomed out to the whole map, the squares are too small to click: no squares or track paths, only the picture of
+  // the network drawn once when the map opened.
   await page.getByRole('button', { name: 'Shrink the map until all of it is in view' }).click();
   const whole = await drawing();
   assert.equal(whole.cells, 0, JSON.stringify(whole));
   assert.equal(whole.stations, 0, JSON.stringify(whole));
-  assert.deepEqual(whole.trackDrawn, [true, true]);
-  assert.ok(whole.newTrackSegments > 1000, JSON.stringify(whole));
-  // The network does not run to the edge of the map: there is empty ground all round it.
-  const edges = await page.evaluate(() => {
-    const svg = document.querySelector('#developer-Debug svg.worldmap-debug'), box = svg.getBoundingClientRect();
-    const track = [...svg.querySelectorAll('path.debug-map-track')].map(path => path.getBoundingClientRect());
-    return { left: Math.min(...track.map(b => b.left)) - box.left, right: box.right - Math.max(...track.map(b => b.right)),
-      top: Math.min(...track.map(b => b.top)) - box.top, bottom: box.bottom - Math.max(...track.map(b => b.bottom)), width: box.width };
+  assert.deepEqual(whole.trackDrawn, [false, false]);
+  assert.equal(whole.overviews.filter(Boolean).length, 1, JSON.stringify(whole));
+  // The picture holds the whole network, and the network does not run to the edge of the map: there is empty
+  // ground all round it.
+  await page.waitForFunction(() => [...document.querySelectorAll('image.debug-map-overview')].every(image => image.getAttribute('href')));
+  const edges = await page.evaluate(async () => {
+    const image = [...document.querySelectorAll('image.debug-map-overview')][0];
+    const picture = new Image();
+    picture.src = image.getAttribute('href');
+    await picture.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = picture.width;
+    canvas.height = picture.height;
+    const context = canvas.getContext('2d');
+    context.drawImage(picture, 0, 0);
+    const data = context.getImageData(0, 0, canvas.width, canvas.height).data;
+    let lit = 0, rail = 0, fresh = 0, x0 = Infinity, x1 = -1, y0 = Infinity, y1 = -1;
+    for (let y = 0; y < canvas.height; y++) for (let x = 0; x < canvas.width; x++) {
+      const at = (y * canvas.width + x) * 4;
+      if (!data[at + 3]) continue;
+      lit++;
+      if (data[at] === 217) fresh++; else rail++;
+      x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+    }
+    return { lit, rail, fresh, left: x0, right: canvas.width - 1 - x1, top: y0, bottom: canvas.height - 1 - y1, width: canvas.width,
+      squares: SugarCube.setup.realWorldPilot.getGridRoute().tiles.length };
   });
+  assert.equal(edges.lit, edges.squares, JSON.stringify(edges));
+  assert.ok(edges.rail > 1000 && edges.fresh > 1000, JSON.stringify(edges));
   ['left', 'right', 'top', 'bottom'].forEach(side => assert.ok(edges[side] > edges.width * 0.01, JSON.stringify(edges)));
   // The network is every railway there is, so nothing is drawn around it as context.
   const context = await page.evaluate(() => {

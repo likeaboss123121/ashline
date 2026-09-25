@@ -1049,6 +1049,7 @@ setup.worldmap = {
 	DEBUG_MAP_MARGIN_CELLS: 60, // 300 km of empty ground around the network, so none of it sits against the edge
 	DEBUG_MAP_DETAIL_PX: 3, // on screen: a square smaller than this is too small to click, and is not drawn
 	DEBUG_MAP_CHUNK_CELLS: 32,
+	DEBUG_MAP_OVERVIEW_BLOCK: 4,
 	buildDebugMap: function(stationId, cellSize) {
 		var route = setup.realWorldPilot.getGridRoute(), network = route.rect, margin = this.DEBUG_MAP_MARGIN_CELLS;
 		var rect = { x0: network.x0 - margin, x1: network.x1 + margin, y0: network.y0 - margin, y1: network.y1 + margin };
@@ -1094,6 +1095,43 @@ setup.worldmap = {
 		var stations = document.createElementNS(ns, 'g');
 		stations.setAttribute('class', 'debug-map-stations');
 		svg.appendChild(stations);
+		// Zoomed out, the network is two pictures drawn once: a pixel per square in the track's colours, and for the
+		// whole continent a coarser one, a pixel per OVERVIEW_BLOCK squares either way lit if any of them has track, so
+		// the lines stay visible when a square is a fraction of a pixel. Drawing tens of thousands of track segments as
+		// vector paths on every scroll was what made a two-continent map crawl.
+		var columns = rect.x1 - rect.x0 + 1, rows = rect.y1 - rect.y0 + 1;
+		var overviews = [1, this.DEBUG_MAP_OVERVIEW_BLOCK].map(function(block) {
+			var image = document.createElementNS(ns, 'image');
+			image.setAttribute('x', 0);
+			image.setAttribute('y', 0);
+			image.setAttribute('width', width);
+			image.setAttribute('height', height);
+			image.setAttribute('preserveAspectRatio', 'none');
+			image.setAttribute('pointer-events', 'none');
+			image.setAttribute('class', 'debug-map-overview');
+			image.style.imageRendering = 'pixelated';
+			svg.insertBefore(image, squares);
+			var canvas = document.createElement('canvas');
+			canvas.width = Math.ceil(columns / block);
+			canvas.height = Math.ceil(rows / block);
+			var context = canvas.getContext && canvas.getContext('2d');
+			if (!context) return image;
+			var picture = context.createImageData(canvas.width, canvas.height);
+			route.tiles.forEach(function(tile) {
+				var at = (Math.floor((rect.y1 - tile.y) / block) * canvas.width + Math.floor((tile.x - rect.x0) / block)) * 4;
+				// New line only where the block has no mapped railway.
+				var colour = tile.gapFill ? [217, 98, 79] : [216, 210, 196];
+				if (picture.data[at + 3] && tile.gapFill) return;
+				picture.data[at] = colour[0]; picture.data[at + 1] = colour[1]; picture.data[at + 2] = colour[2]; picture.data[at + 3] = 255;
+			});
+			context.putImageData(picture, 0, 0);
+			if (canvas.toBlob) {
+				canvas.toBlob(function(blob) { if (blob) image.setAttribute('href', URL.createObjectURL(blob)); });
+			} else {
+				image.setAttribute('href', canvas.toDataURL());
+			}
+			return image;
+		});
 		// The squares in blocks, so drawing a view only looks at the blocks it covers.
 		var chunk = this.DEBUG_MAP_CHUNK_CELLS, chunks = {};
 		route.tiles.forEach(function(tile) {
@@ -1108,12 +1146,25 @@ setup.worldmap = {
 			var box = svg.getBoundingClientRect(), frameBox = frame.getBoundingClientRect(), scale = box.width / width;
 			if (!scale) return;
 			var detail = cell * scale >= self.DEBUG_MAP_DETAIL_PX;
+			// The coarse picture while a square is under a pixel, the fine one until the squares themselves are drawn.
+			var coarse = cell * scale < 1;
+			overviews[0].style.display = coarse || detail ? 'none' : '';
+			overviews[1].style.display = coarse ? '' : 'none';
+			if (!detail) {
+				if (drawn && drawn.detail === false) return;
+				drawn = { detail: false };
+				squares.textContent = '';
+				stations.textContent = '';
+				paths[0].setAttribute('d', '');
+				paths[1].setAttribute('d', '');
+				return;
+			}
 			var spanX = Math.ceil(frame.clientWidth / scale / cell), spanY = Math.ceil(frame.clientHeight / scale / cell);
 			var column = Math.floor((frameBox.left - box.left) / scale / cell), row = Math.floor((frameBox.top - box.top) / scale / cell);
 			var view = { x0: rect.x0 + column, x1: rect.x0 + column + spanX, y0: rect.y1 - row - spanY, y1: rect.y1 - row };
-			if (drawn && drawn.scale === scale && view.x0 >= drawn.x0 && view.x1 <= drawn.x1 && view.y0 >= drawn.y0
+			if (drawn && drawn.detail && drawn.scale === scale && view.x0 >= drawn.x0 && view.x1 <= drawn.x1 && view.y0 >= drawn.y0
 				&& view.y1 <= drawn.y1) return;
-			drawn = { scale: scale, x0: view.x0 - spanX, x1: view.x1 + spanX, y0: view.y0 - spanY, y1: view.y1 + spanY };
+			drawn = { detail: true, scale: scale, x0: view.x0 - spanX, x1: view.x1 + spanX, y0: view.y0 - spanY, y1: view.y1 + spanY };
 			var tileSquares = document.createDocumentFragment(), stationMarkers = document.createDocumentFragment();
 			var railPath = [], newPath = [];
 			for (var cx = Math.floor(drawn.x0 / chunk); cx <= Math.floor(drawn.x1 / chunk); cx++) {
@@ -1126,7 +1177,6 @@ setup.worldmap = {
 							(tile.gapFill ? newPath : railPath).push('M' + middleX + ' ' + middleY + 'L'
 								+ (middleX + direction.dx * cell / 2) + ' ' + (middleY - direction.dy * cell / 2));
 						});
-						if (!detail) return;
 						var square = document.createElementNS(ns, 'rect');
 						square.setAttribute('x', left(tile.x));
 						square.setAttribute('y', top(tile.y));
