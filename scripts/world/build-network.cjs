@@ -904,25 +904,50 @@ function bucketsOf(items, pointOf, degrees = 0.5) {
   };
 }
 
+// Items in small buckets, for "everything within this many kilometres of a point": only the buckets the circle can
+// reach are read, however far north. Where villages lie a few kilometres apart (the Ganges plain, Europe) the wide
+// buckets of bucketsOf hold thousands of places each; these, a tenth of a degree across, hold a few dozen. Each item's
+// place in items is kept as its order, so a search that keeps the first of two equally near items keeps the same
+// one a scan of items would. The query returns [item, km, order] for every item within radiusKm.
+function nearIndex(items, pointOf, degrees = 0.1) {
+  const buckets = new Map(), scale = 1 / degrees;
+  items.forEach((item, order) => {
+    const point = pointOf(item), key = Math.floor(point[0] * scale) + ',' + Math.floor(point[1] * scale);
+    if (!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key).push([item, point, order]);
+  });
+  return (point, radiusKm) => {
+    const rows = Math.ceil(radiusKm / (110.5 * degrees)) + 1;
+    const cos = Math.max(0.02, Math.cos(Math.min(89, Math.abs(point[1]) + rows * degrees) * Math.PI / 180));
+    const columns = Math.min(Math.ceil(scale * 360), Math.ceil(radiusKm / (111.3 * degrees * cos)) + 1);
+    const x = Math.floor(point[0] * scale), y = Math.floor(point[1] * scale), found = [];
+    for (let dy = -rows; dy <= rows; dy++) for (let dx = -columns; dx <= columns; dx++) {
+      (buckets.get((x + dx) + ',' + (y + dy)) || []).forEach(([item, at, order]) => {
+        const km = haversineKm(point, at);
+        if (km <= radiusKm) found.push([item, km, order]);
+      });
+    }
+    return found;
+  };
+}
+
 // The region a point is in: 'urban', 'industrial' or 'rural' (see URBAN_POPULATION and INDUSTRIAL_RAIL_KM).
 function regionClassifier(network, settlements, grid) {
-  const peopleNear = bucketsOf(settlements, place => place.coordinates);
+  const peopleNear = nearIndex(settlements, place => place.coordinates);
   const squares = Array.from(network.squares.values()).filter(square => square.railKm > 0)
     .map(square => ({ railKm: square.railKm, centre: projection.centreOf([square.x, square.y], grid) }));
-  const trackNear = bucketsOf(squares, square => square.centre);
-  const peopleAt = point => peopleNear(point).reduce((sum, place) => sum + (haversineKm(point, place.coordinates) <= URBAN_RADIUS_KM
-    ? place.population || DEFAULT_POPULATION[place.kind] || 0 : 0), 0);
+  const trackNear = nearIndex(squares, square => square.centre);
+  const people = place => place.population || DEFAULT_POPULATION[place.kind] || 0;
+  const peopleAt = point => peopleNear(point, URBAN_RADIUS_KM).reduce((sum, [place]) => sum + people(place), 0);
   const regionOf = point => {
     if (peopleAt(point) >= URBAN_POPULATION) return 'urban';
-    const track = trackNear(point).reduce((sum, square) => sum + (haversineKm(point, square.centre) <= INDUSTRIAL_RADIUS_KM
-      ? square.railKm : 0), 0);
+    const track = trackNear(point, INDUSTRIAL_RADIUS_KM).sort((a, b) => a[2] - b[2]).reduce((sum, [square]) => sum + square.railKm, 0);
     return track >= INDUSTRIAL_RAIL_KM ? 'industrial' : 'rural';
   };
   regionOf.peopleAt = peopleAt;
-  // People within a wider radius, for how busy a region is: buckets a degree across, so up to about 60 km.
-  const peopleWide = bucketsOf(settlements, place => place.coordinates, 1);
-  regionOf.peopleWithin = (point, radiusKm) => peopleWide(point).reduce((sum, place) => sum + (haversineKm(point, place.coordinates) <= radiusKm
-    ? place.population || DEFAULT_POPULATION[place.kind] || 0 : 0), 0);
+  // People within a wider radius, for how busy a region is.
+  const peopleWide = nearIndex(settlements, place => place.coordinates, 0.5);
+  regionOf.peopleWithin = (point, radiusKm) => peopleWide(point, radiusKm).reduce((sum, [place]) => sum + people(place), 0);
   return regionOf;
 }
 
@@ -998,18 +1023,20 @@ function spurs(network, grid, places, regionOf, plan, isHard) {
   const adjacent = network.neighbours();
   const branchPoints = new Set(Array.from(network.squares.keys()).filter(key => adjacent.get(key).length !== 2));
   const squares = Array.from(network.squares.values()).map(square => ({ key: square.key, centre: projection.centreOf([square.x, square.y], grid) }));
-  const squaresNear = bucketsOf(squares, square => square.centre);
+  // Squares by where they are: a place with track within SPUR_MIN_KM is passed over at once, and only the rest look
+  // out to SPUR_MAX_KM for the nearest square (the first listed of two as near). Two continents' hamlets are millions.
+  const squaresNear = nearIndex(squares, square => square.centre);
   const nameCount = new Map();
   places.forEach(place => nameCount.set(place.name, (nameCount.get(place.name) || 0) + 1));
   const candidates = [];
   places.forEach(place => {
     if (!PLACE_KIND_RANK[place.kind] || nameCount.get(place.name) > GENERIC_NAME_COUNT) return;
+    if (squaresNear(place.coordinates, SPUR_MIN_KM).length) return;
     let nearest = null;
-    squaresNear(place.coordinates).forEach(square => {
-      const km = haversineKm(place.coordinates, square.centre);
-      if (!nearest || km < nearest.km) nearest = { key: square.key, centre: square.centre, km };
+    squaresNear(place.coordinates, SPUR_MAX_KM).forEach(([square, km, order]) => {
+      if (!nearest || km < nearest.km || (km === nearest.km && order < nearest.order)) nearest = { key: square.key, centre: square.centre, km, order };
     });
-    if (nearest && nearest.km > SPUR_MIN_KM && nearest.km <= SPUR_MAX_KM) candidates.push({ place, from: nearest.key, fromCentre: nearest.centre, km: nearest.km });
+    if (nearest) candidates.push({ place, from: nearest.key, fromCentre: nearest.centre, km: nearest.km });
   });
   candidates.sort((a, b) => PLACE_KIND_RANK[b.place.kind] - PLACE_KIND_RANK[a.place.kind] || a.km - b.km || a.place.id.localeCompare(b.place.id));
   const laid = [];
@@ -1743,7 +1770,23 @@ function stageStops(state, options) {
   // to it on the line nearest the station. Every end of the line is a stop too, unless a busier one is beside it.
   const adjacentStops = network.neighbours();
   const degreeOf = key => adjacentStops.get(key).length;
+  // The nearest settlement within a degree of latitude, the first listed of two as near. Found in a small index, out to
+  // a hundred kilometres, and only past that by reading every settlement: a scan of two continents' villages for every
+  // junction and line end took hours.
+  const settlementsNear = nearIndex(settlements, place => place.coordinates);
+  const nearestWithin = (point, radiusKm, bandDegrees) => {
+    let best = null;
+    settlementsNear(point, radiusKm).forEach(([settlement, km, order]) => {
+      if (Math.abs(settlement.coordinates[1] - point[1]) > bandDegrees) return;
+      if (!best || km < best.km || (km === best.km && order < best.order)) best = { settlement, km, order };
+    });
+    return best;
+  };
   const nearestSettlementName = point => {
+    for (const radiusKm of [25, 100]) {
+      const near = nearestWithin(point, radiusKm, 1);
+      if (near) return near.settlement.name;
+    }
     let best = null;
     settlements.forEach(settlement => {
       if (Math.abs(settlement.coordinates[1] - point[1]) > 1) return;
@@ -1834,13 +1877,8 @@ function stageStops(state, options) {
   const adjacent = network.neighbours();
   const edgeKm = (a, b) => network.edges.get(a < b ? a + '|' + b : b + '|' + a).km;
   const nearestSettlement = point => {
-    let best = null;
-    settlements.forEach(settlement => {
-      if (Math.abs(settlement.coordinates[1] - point[1]) > 0.2) return;
-      const km = haversineKm(point, settlement.coordinates);
-      if (km <= HALT_NAME_KM && (!best || km < best.km)) best = { settlement, km };
-    });
-    return best && best.settlement;
+    const near = nearestWithin(point, HALT_NAME_KM, 0.2);
+    return near && near.settlement;
   };
   const reach = new Map(), from = new Map();
   const spread = (sources, limit) => {
