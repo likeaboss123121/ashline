@@ -32,6 +32,10 @@ const SCOPES = {
     gridCentre: [40, 37.5],
     // Wales, Alaska stands on square (0, 0), so the square it stands on in the Americas' grid is the whole offset.
     gridOrigin: [-168.09035, 65.60829],
+    // [west, south, east, north] in the grid's frame: the terrain router's elevation cells are resampled over this
+    // once (terrain-grid.cjs), from Senegal to Wales and from Cape Town to the Yamal railway, with room for the boxes
+    // new lines are planned in.
+    terrainExtent: [-30, -40, 196, 82],
     // The authored cities of this build, the first the one whose network is kept: Cape Town, the end of the journey.
     places: 'world/authored/afro-eurasia-places.csv',
     startPlace: 'za-cape-town'

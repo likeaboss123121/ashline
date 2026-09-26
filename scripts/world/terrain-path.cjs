@@ -55,17 +55,62 @@ function haversineKm(a, b) {
   return 6371.0088 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
 }
 
+// A scope's terrain grids in the cache (terrain-grid.cjs), read once per process: the cells of a whole scope,
+// resampled once, which a box inside one is read from rather than resampled on its own.
+const grids = new Map();
+function gridsIn(cache) {
+  if (!grids.has(cache)) {
+    const found = [];
+    const suffix = '-' + CELL_DEGREES + '.json';
+    (fs.existsSync(cache) ? fs.readdirSync(cache) : []).filter(file => file.startsWith('terrain-grid-') && file.endsWith(suffix)).forEach(file => {
+      const meta = JSON.parse(fs.readFileSync(path.join(cache, file), 'utf8')), base = path.join(cache, file.slice(0, -5));
+      if (fs.existsSync(base + '-average.f32') && fs.existsSync(base + '-rms.f32')) {
+        found.push({ meta, tiles: new Set(meta.tiles), files: { average: base + '-average.f32', rms: base + '-rms.f32' } });
+      }
+    });
+    grids.set(cache, found);
+  }
+  return grids.get(cache);
+}
+
+// Fills mean and rms for a box from a terrain grid that covers it and was made from every land tile under it (a tile
+// fetched since would be missing from it); false when there is none, and the box is resampled on its own.
+function readFromGrid(box, names, cache, width, height, mean, rms) {
+  const grid = gridsIn(cache).find(candidate => {
+    const [west, south, east, north] = candidate.meta.extent, slack = CELL_DEGREES / 100;
+    return box[0] >= west - slack && box[1] >= south - slack && box[2] <= east + slack && box[3] <= north + slack
+      && names.every(name => candidate.tiles.has(name) || fs.existsSync(path.join(cache, name + '.tif.missing')));
+  });
+  if (!grid) return false;
+  const column = Math.round((box[0] - grid.meta.extent[0]) / CELL_DEGREES), row = Math.round((grid.meta.extent[3] - box[3]) / CELL_DEGREES);
+  [['average', mean], ['rms', rms]].forEach(([method, target]) => {
+    const descriptor = fs.openSync(grid.files[method], 'r');
+    try {
+      for (let line = 0; line < height; line++) {
+        const into = Buffer.from(target.buffer, target.byteOffset + line * width * 4, width * 4);
+        fs.readSync(descriptor, into, 0, width * 4, ((row + line) * grid.meta.width + column) * 4);
+      }
+    } finally {
+      fs.closeSync(descriptor);
+    }
+  });
+  return true;
+}
+
 // The elevation model resampled over a box: mean and root-mean-square per cell, from which the spread follows.
-// Resampling a few hundred tiles takes minutes, so each result is kept beside the tiles, named for its box and cell
-// size; the router asks for the same boxes every time it runs.
+// Resampling a few hundred tiles takes a second or more, so each result is kept beside the tiles, named for its box
+// and cell size; the router asks for the same boxes every time it runs. Where a scope's terrain grid covers the box,
+// its cells are read from that instead.
 function sampleBox(box, cache = defaultCache()) {
-  let files = fetchTiles(tilesForBox(box), cache);
+  const names = tilesForBox(box);
+  let files = fetchTiles(names, cache);
   const width = Math.round((box[2] - box[0]) / CELL_DEGREES), height = Math.round((box[3] - box[1]) / CELL_DEGREES);
   const mean = new Float32Array(width * height).fill(NODATA);
   const rms = new Float32Array(width * height).fill(NODATA);
   if (!files.length) return { width, height, mean, rms };
   const name = 'terrain-' + box.map(value => value.toFixed(2)).join('_') + '-' + CELL_DEGREES;
   const cached = method => path.join(cache, name + '-' + method + '.f32');
+  if (!fs.existsSync(cached('average')) && readFromGrid(box, names, cache, width, height, mean, rms)) return { width, height, mean, rms };
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'ashline-terrain-'));
   try {
     let vrt = null;

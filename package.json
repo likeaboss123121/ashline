@@ -29,6 +29,7 @@
     "world:extract:afro-eurasia:stations": "node scripts/world/run-limited.cjs scripts/world/extract-osm-stations.cjs --scope afro-eurasia",
     "world:extract:afro-eurasia:places": "node scripts/world/run-limited.cjs scripts/world/extract-osm-places.cjs --scope afro-eurasia",
     "world:extract:afro-eurasia:outposts": "node scripts/world/run-limited.cjs scripts/world/extract-osm-places.cjs --scope afro-eurasia --outposts",
+    "world:terrain-grid:afro-eurasia": "node scripts/world/run-limited.cjs scripts/world/terrain-grid.cjs --scope afro-eurasia",
     "world:network:afro-eurasia": "node scripts/world/run-limited.cjs scripts/world/build-network.cjs --scope afro-eurasia"
   },
   "engines": {
