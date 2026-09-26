@@ -1391,10 +1391,11 @@ test('all playable stations come from the sourced network', () => {
   assert.equal(route.corridor.id, 'network');
   // Stations are numbered outward from Punta Arenas, so the first few run up the line from it.
   assert.equal(setup.worldmap.getStationName(1), 'Punta Arenas');
-  // Every authored city is a stop, spurs to termini included.
+  // Every authored city is a stop, spurs to termini included: South America's 35 and Europe, Asia and Africa's 47.
   const cities = route.corridor.stations.filter(station => station.status === 'city').map(station => station.name);
-  assert.equal(cities.length, 35);
-  for (const city of ['Puerto Montt', 'Santiago', 'Arica', 'Lima', 'Quito', 'Bogotá', 'Caracas', 'Manaus', 'São Paulo', 'Buenos Aires']) {
+  assert.equal(cities.length, 35 + 47);
+  for (const city of ['Puerto Montt', 'Santiago', 'Arica', 'Lima', 'Quito', 'Bogotá', 'Caracas', 'Manaus', 'São Paulo', 'Buenos Aires',
+    'Moscow', 'Beijing', 'Tokyo', 'London', 'Casablanca', 'Algiers', 'Cairo', 'Cape Town']) {
     assert.ok(cities.includes(city), city + ' is a stop');
   }
   assert.equal(setup.realWorldPilot.getStation(stationCount + 1), null);

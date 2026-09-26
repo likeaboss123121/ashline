@@ -5,8 +5,9 @@ tools normalize them here, and `scripts/world/compile-world.cjs` compiles the re
 `source/world-data.js`, which the single-file game embeds. See [docs/WORLDMAP.md](../docs/WORLDMAP.md) for how the
 world is built and played.
 
-There are two layers. The **network** is the playable world: every mapped railway in South America on a shared grid
-of 5 km squares, joined into one. The **planning corridors** are three authored Punta Arenas–Panama routes through 35
+There are two layers. The **network** is the playable world: every mapped railway of the Americas and of Europe, Asia
+and Africa, each on a grid of 5 km squares of its own, joined into one at Wales, Alaska, by the Bering Strait tunnel.
+The **planning corridors** are three authored Punta Arenas–Panama routes through 35
 cities, kept as geodesic chords and as routes over the mapped rail for comparison in the debug overview; they are
 marked `navigable: false` and are never played.
 
@@ -14,6 +15,8 @@ marked `navigable: false` and are never played.
 
 - `sources.json` records data versions, licences, attribution and whether each source is ingested.
 - `authored/places.csv` holds the 35 GeoNames cities; `authored/corridors.csv` the three planning corridors.
+  `authored/afro-eurasia-places.csv` holds the 47 GeoNames cities of Europe, Asia and Africa, Cape Town among them.
+- `authored/regions.json` holds the hard regions, where the builder invents no stops, each in its builds' frame.
 - `authored/network-joins.json` lists routes to lay into the network by hand, as stops named by town or coordinates,
   for connections the rules miss. Its `about` field explains the format.
 - `imported/south-america-rail.json`: every railway way in the 2026-09-21 Geofabrik South America extract, with its
@@ -61,6 +64,36 @@ npm run world:build
 The fetch downloads Geofabrik's regional extracts one at a time and keeps only railways, stations and places, so a
 continent never has to fit on disk at once.
 
+### Europe, Asia and Africa
+
+The rest of the world is a scope of its own, on a grid of its own (`world/network/afro-eurasia-network.json`), listed
+in `imports.json` after the Americas with `joinAt` (Wales, Alaska) and `turn`: the compiler joins the two into one
+network there. See docs/WORLDMAP.md, Europe, Asia and Africa.
+
+```sh
+npm run world:fetch:afro-eurasia -- --dir /path/to/sources   # about 63 GB of downloads: europe, asia, russia, africa
+npm run world:extract:afro-eurasia -- --input /path/to/sources/afro-eurasia-filtered.osm.pbf
+npm run world:extract:afro-eurasia:stations -- --input /path/to/sources/afro-eurasia-filtered.osm.pbf
+npm run world:extract:afro-eurasia:places -- --input /path/to/sources/afro-eurasia-filtered.osm.pbf
+npm run world:extract:afro-eurasia:outposts -- --input /path/to/sources/afro-eurasia-filtered.osm.pbf
+export ASHLINE_DEM_CACHE=/somewhere/durable/copernicus
+npm run world:terrain-grid:afro-eurasia   # fetches the elevation tiles, then resamples them once; see below
+npm run world:network:afro-eurasia
+npm run world:build
+```
+
+The terrain grid (`scripts/world/terrain-grid.cjs`) resamples the elevation tiles under the whole scope once onto
+the terrain router's cells, 550 MB beside the tile cache, so planning a new line reads its box from it (a few
+milliseconds) instead of resampling tiles (a second or two). The npm script first fetches the tiles under the rail
+import and a tile round them (about 5,600, some 14 GB), then resamples them (about 17 minutes); a box the grid does
+not cover is resampled on its own as before. Without it the build is the same, only slower.
+New lines are also planned in parallel, a worker thread per core (`scripts/world/terrain-pool.cjs`); set
+`ASHLINE_WORLD_THREADS` to use fewer.
+
+The extractors and the builder need the npm dependencies installed (`npm install`): the place and station extractors
+use `any-ascii` to write names in the Latin alphabet. Rebuilding the Americas is not needed to rebuild this: the
+compiler joins whatever networks `imports.json` lists.
+
 ### Running a build safely, and again quickly
 
 The extract, network and route scripts run through `scripts/world/run-limited.cjs`, which:
@@ -90,7 +123,8 @@ the end of the log lists how long each stage took.
 - `--fresh` ignores every checkpoint; `--from <stage>` reruns that stage and the ones after it.
 - `--no-checkpoints` neither reads nor writes them.
 - `--elevation-only` refills the elevation of a network already written. The Americas imports (`world/imported/americas-*.json`, the rail
-alone 241 MB) are not committed: GitHub refuses files over 100 MB, and the fetch and extract rebuild them.
+alone 241 MB) are not committed: GitHub refuses files over 100 MB, and the fetch and extract rebuild them. Nor are
+Europe, Asia and Africa's (`world/imported/afro-eurasia-*.json`), for the same reason.
 
 The raw `.osm.pbf` snapshot and the Copernicus tiles stay outside the repository; everything derived from them that
 the build needs is committed here. Every lifecycle status (current, disused, abandoned, dismantled, razed,

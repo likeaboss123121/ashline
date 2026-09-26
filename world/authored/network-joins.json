@@ -38,6 +38,15 @@
         { "name": "Wales", "coordinates": [-168.09035, 65.60829], "tunnel": true }]
     },
     {
+      "note": "Gabès along the Libyan coast by Tripoli, Misrata, Sirte, round the Gulf of Sidra by Ajdabiya to Benghazi, then by Bayda and Darnah to the old line at Ain al-Ghazala, which runs on to Egypt: the Maghreb joined to the rest of Africa, where Libya's own coastal railway was being built. The automatic joins try the shortest way, straight across the Gulf of Sidra, and refuse it for crossing open water; the terrain router only looks for a way close to the straight line, so it never goes round the gulf.",
+      "scope": "afro-eurasia",
+      "route": [{ "name": "Gabes", "near": [10.1, 33.89] }, { "name": "Medenine", "near": [10.49, 33.34] }, { "name": "Ben Gardane", "near": [11.22, 33.14] },
+        { "name": "Zuwara", "near": [12.08, 32.93] }, { "name": "Tripoli", "near": [13.18, 32.9] }, { "name": "Misrata", "near": [15.09, 32.37] },
+        { "name": "Sirte", "near": [16.58, 31.21] }, { "name": "Ajdabiya", "near": [20.22, 30.75] }, { "name": "Benghazi", "near": [20.08, 32.12] },
+        { "name": "Bayda", "near": [21.76, 32.76] }, { "name": "Darnah", "near": [22.64, 32.76] },
+        { "name": "Ain al-Ghazala", "coordinates": [23.3599, 32.1408] }]
+    },
+    {
       "note": "A branch from Komsomolsk-on-Amur by Selikhin to Cape Lazarev, then under the Nevelskoy Strait to Pogibi and across Sakhalin to its railway at Nysh (Likea, September 2026)",
       "scope": "afro-eurasia",
       "route": [{ "name": "Komsomolsk-on-Amur", "near": [137.02, 50.54] }, { "name": "Selikhino", "near": [137.51, 50.37] },

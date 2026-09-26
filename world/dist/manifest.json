@@ -1114,14 +1114,81 @@
     }
   ],
   "network": {
-    "id": "americas-network",
-    "label": "The Americas railway network",
+    "id": "world-network",
+    "label": "The world railway network",
     "grid": {
       "projection": "lambert-azimuthal-equal-area",
       "centre": [-102.5, 10],
       "origin": [-70.90114, -53.16472],
       "cellKm": 5
     },
+    "charts": [
+      {
+        "id": "americas-network",
+        "grid": {
+          "projection": "lambert-azimuthal-equal-area",
+          "centre": [-102.5, 10],
+          "origin": [-70.90114, -53.16472],
+          "cellKm": 5
+        },
+        "offset": [0, 0],
+        "count": 89583
+      },
+      {
+        "id": "afro-eurasia-network",
+        "grid": {
+          "projection": "lambert-azimuthal-equal-area",
+          "centre": [40, 37.5],
+          "origin": [-168.09035, 65.60829],
+          "cellKm": 5
+        },
+        "offset": [-1073, 2710],
+        "turn": 2,
+        "count": 163772
+      }
+    ],
+    "joins": [
+      {
+        "networks": [
+          "americas-network",
+          "afro-eurasia-network"
+        ],
+        "square": "-1073,2710",
+        "name": "Wales",
+        "offset": [-1073, 2710],
+        "turn": 2,
+        "note": "Wales, Alaska: where the Americas' route ends and the Bering Strait tunnel comes ashore. Europe, Asia and Africa's grid is turned half round about it, so that it lies north of the Americas' squares rather than over them."
+      }
+    ],
+    "joinedSources": [
+      {
+        "id": "afro-eurasia-network",
+        "sources": {
+          "geometry": {
+            "id": "afro-eurasia-rail",
+            "sourceId": "openstreetmap-geofabrik-afro-eurasia-2026-09-25",
+            "sha256": "e0912a71b81b09836571b56a42b50b057af3347e6c4119ae6debbac69ee8dac4"
+          },
+          "stations": {
+            "id": "afro-eurasia-stations",
+            "sourceId": "openstreetmap-geofabrik-afro-eurasia-2026-09-25"
+          },
+          "settlements": {
+            "id": "afro-eurasia-places",
+            "sourceId": "openstreetmap-geofabrik-afro-eurasia-2026-09-25"
+          },
+          "outposts": {
+            "id": "afro-eurasia-outposts",
+            "count": 2124441
+          },
+          "elevation": {
+            "sourceId": "copernicus-dem-glo90",
+            "aggregation": "mean-and-population-standard-deviation-within-grid-square",
+            "tileCount": 4783
+          }
+        }
+      }
+    ],
     "sources": {
       "geometry": {
         "id": "americas-rail",
@@ -1229,44 +1296,47 @@
       }
     },
     "stats": {
-      "squareCount": 89583,
-      "moveCount": 92546,
-      "stopCount": 8736,
-      "haltCount": 1653,
-      "bridgeCount": 17382,
-      "bridgeKm": 135390,
-      "stubJoinCount": 4414,
-      "authoredJoinCount": 4,
-      "endJoinCount": 22,
-      "spurCount": 189,
-      "shortcutCount": 9,
-      "parallelStretchesRemoved": 5112,
-      "parallelKmRemoved": 120512,
-      "onExistingTrackKm": 7770,
-      "stationsMovedOffJunctions": 1131,
-      "junctionPoints": 7747,
-      "bufferPoints": 420,
-      "urbanAreas": 376,
-      "urbanSquaresRemoved": 1486,
-      "urbanMovesRemoved": 1976,
+      "squareCount": 253355,
+      "moveCount": 260335,
+      "stopCount": 33657,
+      "haltCount": 2142,
+      "bridgeCount": 56149,
+      "bridgeKm": 398336,
+      "stubJoinCount": 10294,
+      "authoredJoinCount": 8,
+      "endJoinCount": 61,
+      "spurCount": 470,
+      "shortcutCount": 32,
+      "parallelStretchesRemoved": 12884,
+      "parallelKmRemoved": 262432,
+      "onExistingTrackKm": 23733,
+      "stationsMovedOffJunctions": 11788,
+      "junctionPoints": 23780,
+      "bufferPoints": 5629,
+      "urbanAreas": 2396,
+      "urbanSquaresRemoved": 8001,
+      "urbanMovesRemoved": 11077,
       "stopRegions": {
-        "urban": 162,
-        "industrial": 736,
-        "rural": 7838
+        "urban": 745,
+        "industrial": 4624,
+        "rural": 28289
       },
       "stationsWithoutYard": {
-        "urban": 986,
-        "industrial": 505,
-        "rural": 2143
+        "urban": 9765,
+        "industrial": 16022,
+        "rural": 31190
       },
-      "railKm": 622773,
-      "leftOutPieces": 93,
-      "leftOutKm": 18874,
+      "railKm": 2030307,
+      "leftOutPieces": 246,
+      "leftOutKm": 59198,
       "unreachableCities": [],
-      "prunedStubSquares": 7415,
-      "junctionSquares": 7747,
-      "endSquares": 2552
+      "prunedStubSquares": 17895,
+      "junctionSquares": 23780,
+      "endSquares": 11837
     },
-    "file": "world/network/americas-network.json"
+    "files": [
+      "world/network/americas-network.json",
+      "world/network/afro-eurasia-network.json"
+    ]
   }
 }

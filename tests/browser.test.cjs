@@ -1702,18 +1702,22 @@ test('debug mode draws the complete sourced rail grid', async t => {
       cells: svg.querySelectorAll('.debug-context-tile').length,
       teleportable: [...svg.querySelectorAll('.debug-context-tile')].filter(cell => cell.hasAttribute('data-debug-teleport')).length,
       labels: [...svg.querySelectorAll('.debug-station-label')].map(label => label.textContent).sort(),
+      cities: SugarCube.setup.realWorldPilot.getGridRoute().corridor.stations.filter(station => station.status === 'city').length,
       line: (document.querySelector('.debug-map-context') || {}).textContent || ''
     };
   });
   assert.equal(context.cells, 0, JSON.stringify(context));
   assert.equal(context.line, '');
-  // Every authored city is named on the map, Puerto Montt at the end of its spur among them.
-  assert.equal(context.labels.length, 35);
-  ['Punta Arenas', 'Puerto Montt', 'Santiago', 'Lima', 'Bogotá', 'Caracas', 'Manaus', 'São Paulo'].forEach(city =>
-    assert.ok(context.labels.includes(city), city));
+  // Every authored city is named on the map, the 35 of South America and the 47 of Europe, Asia and Africa, Puerto
+  // Montt at the end of its spur among them.
+  assert.equal(context.labels.length, context.cities);
+  assert.equal(context.cities, 35 + 47);
+  ['Punta Arenas', 'Puerto Montt', 'Santiago', 'Lima', 'Bogotá', 'Caracas', 'Manaus', 'São Paulo', 'Moscow', 'Tokyo', 'Cape Town']
+    .forEach(city => assert.ok(context.labels.includes(city), city));
   assert.match(map.heading, /^[A-Z][A-Za-z ]* railway network: \d+ grid squares, \d+ legs, \d+ stations; \d+ km of mapped railway joined by \d+ new lines/);
-  // One line under the map names the square under the pointer.
-  await page.locator('#developer-Debug .debug-map-frame').hover();
+  // One line under the map names the square under the pointer. The map itself, not the frame round it: the whole
+  // world, fitted in, is a tall narrow strip that need not reach the middle of the frame.
+  await page.locator('#developer-Debug svg.worldmap-debug').hover();
   assert.match(await page.locator('#developer-Debug .debug-map-hover').innerText(), /^(.+ \| )?grid -?\d+,-?\d+/);
   const prototype = page.locator('details.debug-section').filter({
 		has: page.getByText('Global rail data', { exact: true })
@@ -1804,8 +1808,20 @@ test('the debug map zooms out to the whole continent and in again, and a drag pa
   assert.ok((await svg.boundingBox()).width > whole.width * 1.4);
   assert.match(await bar.locator('span').innerText(), /^\d+%$/);
   // A drag that starts and ends on track tiles scrolls the map and teleports nobody.
+  // Punta Arenas, where the player stands (cities are named at every zoom), brought to the middle of the view, so
+  // zooming in closes on track: the middle of the whole world is open ground between the two grids.
+  const centreOnTrain = () => frame.evaluate(element => {
+    const box = element.getBoundingClientRect();
+    const tile = [...element.querySelectorAll('.debug-station-label')].find(label => label.textContent === 'Punta Arenas')
+      || element.querySelector('svg.worldmap-debug polygon') || element.querySelector('.debug-teleport-tile');
+    if (!tile) return;
+    const at = tile.getBoundingClientRect();
+    element.scrollLeft += at.left + at.width / 2 - box.left - element.clientWidth / 2;
+    element.scrollTop += at.top + at.height / 2 - box.top - element.clientHeight / 2;
+  });
   // Zoom in until the squares are drawn: how many steps that takes depends on how big the network is.
   for (let step = 0; step < 16 && !await svg.locator('.debug-teleport-tile').count(); step++) {
+    await centreOnTrain();
     await bar.getByRole('button', { name: 'Zoom in' }).click();
   }
   for (let step = 0; step < 2; step++) await bar.getByRole('button', { name: 'Zoom in' }).click();

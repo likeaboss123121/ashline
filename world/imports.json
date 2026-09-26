@@ -9,6 +9,15 @@
     {
       "id": "americas-network",
       "file": "world/network/americas-network.json"
+    },
+    {
+      "id": "afro-eurasia-network",
+      "file": "world/network/afro-eurasia-network.json",
+      "joinAt": {
+        "coordinates": [-168.09035, 65.60829],
+        "turn": 2,
+        "note": "Wales, Alaska: where the Americas' route ends and the Bering Strait tunnel comes ashore. Europe, Asia and Africa's grid is turned half round about it, so that it lies north of the Americas' squares rather than over them."
+      }
     }
   ]
 }

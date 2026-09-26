@@ -146,6 +146,8 @@ const RURAL_SPACING_KM = 15;
 const DENSE_SPACING_KM = 25;
 // An authored route's ends must lie within this of the network.
 const AUTHORED_SNAP_KM = 10;
+// In a hard region, a town or a city this near the line is a stop (stageStops).
+const HARD_TOWN_KM = 10;
 // Two places of the same name and size further apart than this are different places, and the route must say which.
 const SAME_PLACE_KM = 20;
 const NODATA = -32768;
@@ -1786,6 +1788,24 @@ function stageStops(state, options) {
     candidates.push({ id: settlement.id, name: settlement.name, status: 'settlement', kind: settlement.kind, square: key,
       population: settlement.population,
       coordinates: settlement.coordinates });
+  });
+  // In a hard region the stops are the stations mapped and the towns (Likea: real towns stay, nothing is invented), so
+  // every town and city within HARD_TOWN_KM of the line is one, at the square nearest it, whatever track passes it: a
+  // line laid through a town can run in the square beside it, or meet mapped track there. Across Chukotka that is the
+  // difference between a stop at Lavrentiya, Anadyr and Bilibino and 3,800 km with none.
+  const hardTownReach = Math.ceil(HARD_TOWN_KM / grid.cellKm) + 1;
+  settlements.forEach(settlement => {
+    if ((settlement.kind !== 'town' && settlement.kind !== 'city') || !isHard(settlement.coordinates)) return;
+    const [cx, cy] = projection.cellOf(settlement.coordinates, grid);
+    let best = null;
+    for (let dx = -hardTownReach; dx <= hardTownReach; dx++) for (let dy = -hardTownReach; dy <= hardTownReach; dy++) {
+      const key = keyOf(cx + dx, cy + dy);
+      if (!network.squares.has(key)) continue;
+      const km = haversineKm(settlement.coordinates, projection.centreOf([cx + dx, cy + dy], grid));
+      if (km <= HARD_TOWN_KM && (!best || km < best.km || (km === best.km && key < best.key))) best = { key, km };
+    }
+    if (best) candidates.push({ id: settlement.id, name: settlement.name, status: 'settlement', kind: settlement.kind, square: best.key,
+      population: settlement.population, coordinates: settlement.coordinates });
   });
   const pickStops = () => {
     const chosen = new Map();

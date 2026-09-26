@@ -10,9 +10,10 @@ a station number and a journey position. Run `npm run world:build` to regenerate
 
 There are two layers:
 
-- **The playable network** (below): every mapped railway in South America on a shared grid of 5 km squares, joined
-  into one. This is the world. The runtime is `setup.realWorldPilot` (`source/world-pilot.js`) and the tiles are read
-  through `setup.worldmap` (`source/worldmap.js`).
+- **The playable network** (below): every mapped railway of the Americas, and of Europe, Asia and Africa, each on a
+  grid of 5 km squares of its own, joined into one at Wales, Alaska, where the Bering Strait tunnel comes ashore. This
+  is the world, from Punta Arenas to Cape Town. The runtime is `setup.realWorldPilot` (`source/world-pilot.js`) and
+  the tiles are read through `setup.worldmap` (`source/worldmap.js`).
 - **The planning corridors**: 35 GeoNames cities and three authored Punta Arenas–Panama corridors, 40 geodesic
   chords marked `navigable: false`. `scripts/world/route-planning-links.cjs` routes each over the continent's mapped
   rail (`npm run world:route:south-america`) into `world/proposals/south-america-routed-links.json`, repairing
@@ -179,12 +180,85 @@ works across continents, and to reach Wales, Alaska, where the Bering Strait cro
   railway kept and 135,390 km of new line; Punta Arenas to Wales is 25,468 km by track. The game's world data is
   4.2 MB, the page 5.6 MB, and the network is built in the browser in about 1.7 s on this server.
 
+## Europe, Asia and Africa
+
+The rest of the world was built in September 2026: every mapped railway in Europe, Asia and Africa, joined to the
+Americas by a tunnel under the Bering Strait, so one railway runs from Punta Arenas to Cape Town. Likea's decisions
+(recorded in DESIGN.md): the strait is crossed by a tunnel by the Diomedes; the hard section runs on from Wales across
+Chukotka and Yakutia to the first real railway at Nizhny Bestyakh; Sakhalin gets a branch from Komsomolsk-on-Amur and
+Japan a tunnel from Sakhalin to Hokkaido; other islands stay unconnected unless Likea asks; and the whole world stays
+embedded in the single-file game.
+
+- **Data.** Geofabrik's `europe`, `asia`, `russia` and `africa` extracts (`npm run world:fetch:afro-eurasia`), filtered
+  and merged as for the Americas, then extracted with `--scope afro-eurasia`. Names are given in the Latin alphabet
+  (`scripts/world/names.cjs`): the local name where it is already Latin (München, Warszawa, as the Americas are named),
+  else `name:en`, `int_name` or an official romanisation (pinyin, Japanese and Korean romaji), else a transliteration
+  by `any-ascii`, which reads well for Cyrillic and Greek and less well for scripts that leave vowels unwritten. The
+  extractors count where the names came from (`stats.nameSources` in each import). The authored cities are 47 from
+  GeoNames (`world/authored/afro-eurasia-places.csv`), Cape Town first: the network kept is the one it stands on.
+  Yakutsk is not among them: its railway ends across the Lena at Nizhny Bestyakh.
+- **A grid of its own.** One projection cannot hold the whole world: squares stretch without limit towards the far
+  side of the globe from its centre. Europe, Asia and Africa have their own Lambert equal-area grid, centred at 40°E,
+  37.5°N, the centre that keeps the worst stretch lowest over their railways, about 1.6 to 1 at Wales, Cape Town and
+  Kagoshima: no worse than the Americas'. Its origin is Wales, Alaska, square (0, 0).
+- **The join.** `world/imports.json` lists both networks; the second has `joinAt`, a point where both have a stop
+  (Wales), and `turn`. The compiler (`joinNetworks`) turns the second grid by that many quarter turns about Wales and
+  moves it so its Wales lands on the Americas' Wales, and that square becomes one station with a line each way. Seen
+  from Wales both continents lie to the south on their own grids, so without the half turn they would lie on each
+  other; turned, Asia lies north of the Americas' squares and they touch only at Wales. Every move is still to a
+  neighbouring square, so the game walks the join like any other track. The compiled network carries `charts`: which
+  run of squares is on which grid, with its offset and turn, so `setup.worldmap.gridFor(tile)` and `unprojectGrid`
+  find any square's place. Grid north on the turned grid points roughly south in Europe and Africa: directions are named
+  from true bearings, as in Alaska, and station maps turn by quarter turns so north is up to within 45 degrees. The
+  debug map draws the grid as it is.
+- **The 180th meridian.** Chukotka lies across it. Every longitude is kept in its grid's frame, within 180 degrees of
+  the grid's centre (`projection.inFrame`), so on Asia's grid Uelen is at 190°E rather than 170°W and a line from
+  Anadyr to Egvekinot is not drawn the long way round the world. Elevation tiles beyond the meridian are moved into the
+  frame when a box crosses it (`dem.tilesInFrame`). Hard regions are drawn in their builds' frames too.
+- **Authored routes** (`world/authored/network-joins.json`). A stop can be a named point (`{ "name", "coordinates" }`)
+  and can be reached through a tunnel (`"tunnel": true`): straight from the stop before, under the sea if need be, the
+  squares on the way marked as tunnels, which the rule against lines over open water would otherwise refuse.
+  - Nizhny Bestyakh by Khandyga, Ust-Nera, Zyryanka, Bilibino, Anadyr, Egvekinot and Lavrentiya to Uelen, then under the
+    strait by Big and Little Diomede to Wales.
+  - Komsomolsk-on-Amur by Selikhin to Cape Lazarev, under the Nevelskoy Strait to Pogibi, and across Sakhalin to Nysh.
+  - Gornozavodsk at the south end of the Sakhalin railway to Cape Crillon, under La Pérouse Strait to Cape Sōya, and
+    on to Wakkanai.
+  - Gabès along the Libyan coast by Tripoli, Misrata and Sirte, round the Gulf of Sidra by Ajdabiya to Benghazi, and
+    by Bayda and Darnah to the old line at Ain al-Ghazala that runs on to Egypt. Libya has no working railway, and the
+    automatic joins try the shortest way, straight over the gulf, and refuse it for crossing open water; the terrain
+    router only searches near the straight line, so it never goes round. Without this the Maghreb, Algiers and
+    Casablanca among it, was left out. A rule that tried a refused join again in a wider box would catch cases like it.
+- **Hard region.** `yakutia-chukotka`: north of 58° and east of 130.05°E, to the tunnel. No halts, spurs or stops at
+  bare line ends there. Its stops are the mapped stations and the towns (Likea: real towns stay), so every town and
+  city within 10 km of the line is a stop (`HARD_TOWN_KM`), whatever track passes it: a line laid through a town can
+  run in the square beside it, or meet mapped track there. Uelen and Egvekinot are villages and have none; Diomede, on
+  Little Diomede in the middle of the tunnel, is mapped as a town and has one.
+- **Scale.** The builder weighs at most 800 settlements as stops for one new line (the Ganges plain holds tens of
+  thousands in a box), finds nearby places and track in a small spatial index, and reads and writes its inputs a record
+  to a line, since a continent's railways or hamlets are more than one string can hold.
+- **Islands.** Great Britain (the Channel Tunnel), Japan (by the Sakhalin tunnels and its own tunnels and bridges),
+  Zealand, Sri Lanka (over the shoals of Adam's Bridge, with under 3 km of open water) and Sicily and the Isle of Wight
+  (joins of 10 km or less are drawn straight and never checked for water, as in the Americas) are on the network.
+  Left off, with railways mapped: Ireland and Northern Ireland, Sardinia, Corsica, Mallorca, Taiwan, Java, Sumatra,
+  Sulawesi, Sabah, Luzon, Hainan, Madagascar, Gotland, Cyprus, Crete, Mauritius and Réunion.
+- **Result.** 163,773 squares and 24,922 stops (489 halts), 16,033 junctions and 5,209 buffers; 1,407,534 km of mapped
+  railway kept (7,772 parallel stretches, 141,920 km, taken up) and 262,946 km of new line: 5,880 stub joins, 39
+  facing-end joins (7,862 km), 23 shortcuts, 281 spurs and the four authored routes; 153 pieces (40,324 km) left out,
+  the islands above among them; every authored city reached. Joined to the Americas: 253,355 squares and 33,657
+  stops. By the shortest way, Punta Arenas to Wales is 25,488 km, to Nizhny Bestyakh 30,323 km, to Moscow 38,011 km
+  and to Cape Town 52,161 km. The game's world data is 10.8 MiB (2.3 MiB gzipped), the page 12.1 MiB (2.7 MiB), and
+  the network is built in the game in about 3.5 s (Node, on the Windows machine the build was run on).
+- **Building it.** From the downloads: filtering and merging about 10 minutes, extracting 8, the terrain grid 17, and
+  the network about 1 h 40 min from scratch with the terrain pool (most of it the facing-ends rule; see Not done yet),
+  minutes when only the stops change. The elevation tiles for the whole scope are about 5,600 files beside the cache.
+
 ## The geographic grid
 
-The network lies on one grid of 5 km squares (`scripts/world/projection.cjs`): a Lambert azimuthal equal-area
-projection centred on South America (60°W, 20°S), shifted so Punta Arenas is square (0, 0). Every square covers the
-same area of ground and shapes bend by no more than about a tenth across the continent, so a tile's grid position is
-where it really is. The browser repeats the inverse formulas (`setup.worldmap.unprojectGrid`) to place each square.
+The network lies on two grids of 5 km squares (`scripts/world/projection.cjs`), each a Lambert azimuthal equal-area
+projection: the Americas', centred at 102.5°W, 10°N and shifted so Punta Arenas is square (0, 0), and Europe, Asia
+and Africa's, centred at 40°E, 37.5°N, turned and moved to meet it at Wales (above). Every square covers the same
+area of ground, so a tile's grid position is where it really is. The browser repeats the inverse formulas
+(`setup.worldmap.unprojectGrid`, with the grid from `setup.worldmap.gridFor`) to place each square.
 
 A line is followed across the grid in steps of an eighth of a square. A square that only clips the corner between
 two diagonal neighbours is folded into them, so diagonal track runs straight rather than in stair steps. A move
@@ -299,6 +373,20 @@ there to inspect compiled data rather than to be a player-facing map.
   review.
 - Panama and Central America are outside the extract: Panama City is reached by a new line across the Darién.
 - Climate, rivers, obstacles, track condition and weather are not yet sourced into gameplay.
+- Names in Europe, Asia and Africa that had no English or official Latin form are transliterated letter by letter
+  (about a fifth of the stations, mostly in Russia, where it reads well; Arabic loses its vowels). They are counted in
+  each import's `stats.nameSources`, for Likea to review with the halt and junction names.
+- Islands left off the network that Likea may want joined by a tunnel or a bridge, each a real proposal: Ireland to
+  Scotland across the North Channel (about 20 km at its narrowest; the whole Irish network), Hainan across the
+  Qiongzhou Strait (about 20 km; it has a train ferry today), Java to Sumatra across the Sunda Strait (about 25 km)
+  and Sumatra to Malaysia across the Strait of Malacca (about 50 km), which together bring in Indonesia's railways, and
+  Taiwan (about 130 km). And Gibraltar, Morocco to Spain (about 14 km, under the strait), a second way between
+  Europe and Africa beside the Sinai; DESIGN.md has it as an open question.
+- The facing-ends rule plans every pair of line ends that face each other across a gap, and only then refuses those
+  over open water. Since Japan joined the network by the Sakhalin tunnel, its line ends face Korea's and each other's
+  across the sea: some 40,000 pairs, nearly all refused, each after a search along the track that takes most of an
+  hour altogether (planning them is quick since the terrain grid). A check against the terrain grid's water cells
+  along the straight line, before anything else, would refuse most of them at once.
 
 ## Legacy generator
 

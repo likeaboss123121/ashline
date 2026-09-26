@@ -6,7 +6,8 @@
 // A line whose box reaches past the grid, or over a tile the grid was made without (fetched since), is resampled on
 // its own as before, so the grid only ever speeds a build up. Rebuild it after fetching more tiles for the scope.
 //
-// Usage: npm run world:terrain-grid:afro-eurasia (the scope's terrainExtent, in its frame; see scopes.cjs)
+// Usage: npm run world:terrain-grid:afro-eurasia (the scope's terrainExtent, in its frame; see scopes.cjs), which
+// passes --fetch to fetch the tiles under the scope's railways first.
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
@@ -35,11 +36,29 @@ function cornerOf(name) {
   return [(match[3] === 'W' ? -1 : 1) * Number(match[4]), (match[1] === 'S' ? -1 : 1) * Number(match[2])];
 }
 
+// With --fetch: every tile under the scope's mapped railways and a tile all round them, fetched into the cache first
+// (about 5,600 for Europe, Asia and Africa), so the grid covers the boxes new lines are planned in.
+function fetchUnderRail(AREA, cache) {
+  const { readRecords } = require('./records.cjs');
+  const { copernicusTileName, fetchTiles } = require('./dem.cjs');
+  const rail = readRecords(path.join(__dirname, '../..', 'world/imported/' + AREA.prefix + '-rail.json'));
+  const degrees = new Set();
+  rail.ways.forEach(way => way.coordinates.forEach(([longitude, latitude]) => degrees.add(Math.floor(longitude) + ',' + Math.floor(latitude))));
+  const names = new Set();
+  degrees.forEach(key => {
+    const [longitude, latitude] = key.split(',').map(Number);
+    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) names.add(copernicusTileName(longitude + dx + 0.5, latitude + dy + 0.5));
+  });
+  console.error('fetching the elevation tiles under ' + degrees.size + ' degree squares of track and a square round them');
+  fetchTiles(Array.from(names).sort(), cache);
+}
+
 function main() {
   const AREA = require('./scopes.cjs').scopeFromArguments();
   const extent = AREA.terrainExtent;
   if (!extent) throw new Error('Scope ' + AREA.name + ' has no terrainExtent in scopes.cjs');
   const cache = defaultCache(), cell = PARAMETERS.cellDegrees, files = gridFiles(cache, AREA.prefix);
+  if (process.argv.includes('--fetch')) fetchUnderRail(AREA, cache);
   // Every tile in the cache under the extent, taken round the 180th meridian into its frame where need be.
   const inFrame = longitude => ((longitude - (extent[0] - 1)) % 360 + 360) % 360 + (extent[0] - 1);
   const names = fs.readdirSync(cache).filter(file => /^Copernicus_.*_DEM\.tif$/.test(file)).map(file => file.slice(0, -4))
@@ -81,4 +100,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { gridFiles };
+module.exports = { gridFiles, fetchUnderRail };
