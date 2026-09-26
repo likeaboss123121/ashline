@@ -15,6 +15,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
+const { threadId } = require('node:worker_threads');
 const { defaultCache, tilesForBox, fetchTiles, tilesInFrame } = require('./dem.cjs');
 
 const CELL_DEGREES = 0.02;
@@ -82,8 +83,10 @@ function sampleBox(box, cache = defaultCache()) {
         run('gdalwarp', ['-q', '-overwrite', '-multi', '-wm', '128', '-te', ...box.map(String), '-ts', String(width), String(height),
           '-r', method, '-srcnodata', String(NODATA), '-dstnodata', String(NODATA), '-ot', 'Float32', '-of', 'ENVI',
           vrt, output]);
-        fs.copyFileSync(output, file + '.part');
-        fs.renameSync(file + '.part', file);
+        // Under a name of this thread's own until complete: the terrain pool's workers may resample one box together.
+        const part = file + '.' + process.pid + '-' + threadId + '.part';
+        fs.copyFileSync(output, part);
+        fs.renameSync(part, file);
       }
       const bytes = fs.readFileSync(file);
       target.set(new Float32Array(bytes.buffer, bytes.byteOffset, width * height));

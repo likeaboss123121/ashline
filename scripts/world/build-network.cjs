@@ -618,7 +618,7 @@ function spliceOntoTrack(network, coordinates, from, to, grid) {
 // moved, which on two continents is the difference between minutes and hours. A null route (no way found) is kept
 // too. Delete the file to start again.
 const routeMemo = { file: null, routes: null, dirty: false, found: 0 };
-function routeOverTerrain(start, end, settlements, cache) {
+function routeKey(start, end, settlements, cache) {
   if (!routeMemo.routes) {
     routeMemo.file = path.join(cache, 'terrain-routes-' + AREA.prefix + '.json');
     try {
@@ -628,7 +628,10 @@ function routeOverTerrain(start, end, settlements, cache) {
     }
     routeMemo.stamp = crypto.createHash('sha1').update(JSON.stringify(terrain.PARAMETERS) + ':' + settlements.length).digest('hex').slice(0, 12);
   }
-  const key = routeMemo.stamp + ':' + start.map(value => value.toFixed(5)).join(',') + '>' + end.map(value => value.toFixed(5)).join(',');
+  return routeMemo.stamp + ':' + start.map(value => value.toFixed(5)).join(',') + '>' + end.map(value => value.toFixed(5)).join(',');
+}
+function routeOverTerrain(start, end, settlements, cache) {
+  const key = routeKey(start, end, settlements, cache);
   if (Object.prototype.hasOwnProperty.call(routeMemo.routes, key)) return routeMemo.routes[key];
   const route = terrain.terrainPath(start, end, settlements, cache);
   routeMemo.routes[key] = route ? { coordinates: route.coordinates, km: route.km, straightKm: route.straightKm,
@@ -643,6 +646,47 @@ function saveRoutes() {
   fs.writeFileSync(routeMemo.file + '.part', JSON.stringify(routeMemo.routes));
   fs.renameSync(routeMemo.file + '.part', routeMemo.file);
   routeMemo.dirty = false;
+}
+
+// Plans ahead, all at once and a worker thread to a core (terrain-pool.cjs), the terrain routes a batch of joins will
+// ask routeOverTerrain for, so laying them one by one finds each already planned. joins are { from, to } square keys;
+// only a join's own ends are planned (not the stops of an authored route), and only those long enough to be routed and
+// not planned before. The same routes, in the same memo, as without it: only sooner. Across two continents a pass
+// can hold tens of thousands of joins, which one thread plans in hours.
+const PREFETCH_MIN_ROUTES = 40;
+function prefetchRoutes(joins, context) {
+  const { grid, settlements, cache, settlementsFile } = context;
+  if (!settlementsFile || !joins.length) return;
+  const tasks = [], seen = new Set();
+  joins.forEach(join => {
+    const [start, end] = [join.from, join.to].map(key => projection.centreOf(key.split(',').map(Number), grid));
+    if (haversineKm(start, end) <= STRAIGHT_BRIDGE_KM) return;
+    const key = routeKey(start, end, settlements, cache);
+    if (seen.has(key) || Object.prototype.hasOwnProperty.call(routeMemo.routes, key)) return;
+    seen.add(key);
+    tasks.push([key, start, end]);
+  });
+  if (tasks.length < PREFETCH_MIN_ROUTES) return;
+  log('planning ' + tasks.length + ' new lines over the terrain in parallel');
+  const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'ashline-terrain-pool-'));
+  try {
+    const tasksFile = path.join(temporary, 'tasks.json'), resultsFile = path.join(temporary, 'results.ndjson');
+    fs.writeFileSync(tasksFile, JSON.stringify({ settlements: settlementsFile, centre: grid.centre, cache, tasks }));
+    const result = spawnSync(process.execPath, [path.join(__dirname, 'terrain-pool.cjs'), tasksFile, resultsFile],
+      { stdio: ['ignore', 'inherit', 'inherit'] });
+    // Whatever the pool finished is kept even if it failed part way; the rest are planned one by one as before.
+    if (fs.existsSync(resultsFile)) {
+      fs.readFileSync(resultsFile, 'utf8').split('\n').filter(Boolean).forEach(line => {
+        const [key, route] = JSON.parse(line);
+        routeMemo.routes[key] = route;
+        routeMemo.dirty = true;
+      });
+    }
+    if (result.status !== 0) log('the terrain pool stopped early (' + (result.error ? result.error.message : 'status ' + result.status) + '); planning the rest one by one');
+    saveRoutes();
+  } finally {
+    fs.rmSync(temporary, { recursive: true, force: true });
+  }
 }
 
 // Whether a planned line is one to lay: found over the terrain, and crossing no more than a river.
@@ -736,8 +780,9 @@ function stubJoins(network, grid) {
 
 // Joins between two line ends that face each other across a gap: see END_JOIN_KM. Accepted shortest first, each
 // end joined once and each join checked against the ones already accepted, so a join that gives a short way round
-// makes the next one across the same gap redundant. plan(join) returns the line to lay, or null to skip the join.
-function endJoins(network, grid, plan) {
+// makes the next one across the same gap redundant. plan(join) returns the line to lay, or null to skip the join;
+// prefetch(joins), when given, is shown every candidate first, to plan their routes ahead (prefetchRoutes).
+function endJoins(network, grid, plan, prefetch) {
   const adjacent = network.neighbours(), limitKm = END_JOIN_KM * END_DETOUR_FACTOR;
   const isLongWayRound = (byTrack, km) => byTrack === undefined || (byTrack >= km * END_DETOUR_FACTOR && byTrack - km >= END_DETOUR_MIN_KM);
   // How far by track two ends km apart must be for that: the same limit the search had when it ran out to it.
@@ -755,6 +800,7 @@ function endJoins(network, grid, plan) {
     near.forEach(pair => { if (isLongWayRound(along.get(pair.other), pair.km)) candidates.push({ from: end, to: pair.other, km: pair.km }); });
   });
   candidates.sort((a, b) => a.km - b.km || (a.from + a.to).localeCompare(b.from + b.to));
+  if (prefetch) prefetch(candidates);
   const accepted = [], extra = {}, joined = new Set();
   candidates.forEach(candidate => {
     if (joined.has(candidate.from) || joined.has(candidate.to)) return;
@@ -772,8 +818,9 @@ function endJoins(network, grid, plan) {
 
 // Shortcuts between two sizeable places that are close together but a long way apart by track: see
 // SHORTCUT_POPULATION. Accepted shortest first, each checked against those before it, so one shortcut serves a
-// cluster of towns rather than each pair getting its own. plan(join) returns the line to lay, or null to skip it.
-function cityShortcuts(network, grid, settlements, plan) {
+// cluster of towns rather than each pair getting its own. plan(join) returns the line to lay, or null to skip it;
+// prefetch(joins), when given, is shown every candidate first, as in endJoins.
+function cityShortcuts(network, grid, settlements, plan, prefetch) {
   const adjacent = network.neighbours(), limitKm = SHORTCUT_KM * SHORTCUT_DETOUR_FACTOR + SHORTCUT_DETOUR_MIN_KM;
   const isLongWayRound = (byTrack, km) => byTrack === undefined || (byTrack >= km * SHORTCUT_DETOUR_FACTOR && byTrack - km >= SHORTCUT_DETOUR_MIN_KM);
   const squares = Array.from(network.squares.values()).map(square => ({ key: square.key, centre: projection.centreOf([square.x, square.y], grid) }));
@@ -803,6 +850,7 @@ function cityShortcuts(network, grid, settlements, plan) {
     });
   });
   candidates.sort((a, b) => a.km - b.km || (a.from + a.to).localeCompare(b.from + b.to));
+  if (prefetch) prefetch(candidates);
   const accepted = [], extra = {};
   candidates.forEach(candidate => {
     if (!isLongWayRound(distancesAlong(network, adjacent, candidate.from, limitKm, extra).get(candidate.to), candidate.km)) return;
@@ -1017,9 +1065,12 @@ function simplifyUrban(network, grid, regionOf, hubs) {
 
 // Spurs out to places off a rural line: see SPUR_SPACING_KM. places are settlements and outposts; regionOf is from
 // regionClassifier. plan(join) returns the line to lay, or null to skip it. Returns the lines and the places they
-// reach, as { line, place }.
+// reach, as { line, place }. prefetch(joins), when given, is shown the next SPUR_LOOKAHEAD spurs that could be laid
+// whenever the one to plan was not shown before, to plan their routes ahead (prefetchRoutes): which are laid still
+// depends on the ones before them, so only a window ahead is worth planning.
 const PLACE_KIND_RANK = { city: 6, town: 5, village: 4, hamlet: 3, isolated_dwelling: 2, farm: 2 };
-function spurs(network, grid, places, regionOf, plan, isHard) {
+const SPUR_LOOKAHEAD = 300;
+function spurs(network, grid, places, regionOf, plan, isHard, prefetch) {
   const adjacent = network.neighbours();
   const branchPoints = new Set(Array.from(network.squares.keys()).filter(key => adjacent.get(key).length !== 2));
   const squares = Array.from(network.squares.values()).map(square => ({ key: square.key, centre: projection.centreOf([square.x, square.y], grid) }));
@@ -1039,19 +1090,34 @@ function spurs(network, grid, places, regionOf, plan, isHard) {
     if (nearest) candidates.push({ place, from: nearest.key, fromCentre: nearest.centre, km: nearest.km });
   });
   candidates.sort((a, b) => PLACE_KIND_RANK[b.place.kind] - PLACE_KIND_RANK[a.place.kind] || a.km - b.km || a.place.id.localeCompare(b.place.id));
-  const laid = [];
-  candidates.forEach(candidate => {
-    if (branchPoints.has(candidate.from)) return;
+  // The spur a candidate would be, given the spurs laid so far, or null when there is to be none.
+  const spurFor = candidate => {
+    if (branchPoints.has(candidate.from)) return null;
     const along = distancesAlong(network, adjacent, candidate.from, SPUR_SPACING_KM);
-    for (const key of along.keys()) if (branchPoints.has(key)) return;
-    if (regionOf(candidate.fromCentre) !== 'rural' || (isHard && isHard(candidate.fromCentre))) return;
+    for (const key of along.keys()) if (branchPoints.has(key)) return null;
+    if (regionOf(candidate.fromCentre) !== 'rural' || (isHard && isHard(candidate.fromCentre))) return null;
     const cell = projection.cellOf(candidate.place.coordinates, grid);
     const to = keyOf(cell[0], cell[1]);
-    if (network.squares.has(to)) return;
-    const line = plan({ from: candidate.from, to, km: candidate.km });
+    if (network.squares.has(to)) return null;
+    return { from: candidate.from, to, km: candidate.km };
+  };
+  const laid = [];
+  let shownUntil = 0;
+  candidates.forEach((candidate, index) => {
+    const join = spurFor(candidate);
+    if (!join) return;
+    if (prefetch && index >= shownUntil) {
+      const ahead = [];
+      for (shownUntil = index; shownUntil < candidates.length && ahead.length < SPUR_LOOKAHEAD; shownUntil++) {
+        const next = spurFor(candidates[shownUntil]);
+        if (next) ahead.push(next);
+      }
+      prefetch(ahead);
+    }
+    const line = plan(join);
     if (!line) return;
     branchPoints.add(candidate.from);
-    laid.push({ line, place: candidate.place, square: to });
+    laid.push({ line, place: candidate.place, square: join.to });
   });
   return laid;
 }
@@ -1533,7 +1599,7 @@ function stageJoins(state, options) {
   // 1-3, in passes: short and long joins between the pieces, each laid over the terrain. A join whose line would
   // cross more than MAX_WATER_KM of open water (a strait, a bay: an island's railway) is not laid, and the next pass
   // looks for another way to join those pieces that does not cross the same water; a piece with none is left out.
-  const context = { grid, settlements, cache, network };
+  const context = { grid, settlements, cache, network, settlementsFile: options.settlementsFile };
   const laidLines = [], rejected = [];
   // Authored routes first, before any automatic join: each is a join chosen by hand, and a piece a route reaches (the
   // old railway at Nome on the way to Wales) needs no other join to bring it in.
@@ -1583,7 +1649,9 @@ function stageJoins(state, options) {
     pieces.forEach((piece, index) => {
       const root = sets.find(index);
       if (!groups.has(root)) groups.set(root, { keys: [], km: 0, builtKm: 0 });
-      groups.get(root).keys.push(...piece.keys);
+      // One at a time: a continent's main piece has more squares than a call can take as arguments.
+      const keys = groups.get(root).keys;
+      piece.keys.forEach(key => keys.push(key));
       groups.get(root).km += piece.km;
       groups.get(root).builtKm += piece.builtKm;
     });
@@ -1594,6 +1662,7 @@ function stageJoins(state, options) {
     if (!bridges.length) break;
     // 3. Lay the new lines: straight when short, over the terrain and through towns when not.
     bridges.sort((a, b) => a.km - b.km || (a.from + a.to).localeCompare(b.from + b.to));
+    prefetchRoutes(bridges, context);
     let refused = 0;
     bridges.forEach((bridge, index) => {
       if (bridge.km > 100) log('laying new line ' + (index + 1) + ' of ' + bridges.length + ', ' + Math.round(bridge.km) + ' km straight');
@@ -1619,7 +1688,8 @@ function stageOutskirts(state, options) {
   const laidLines = state.laidLines.slice();
   const { settlements, grid, cache } = options;
   const isHard = hardRegionTest(options.regions);
-  const context = { grid, settlements, cache, network };
+  const context = { grid, settlements, cache, network, settlementsFile: options.settlementsFile };
+  const prefetch = joins => prefetchRoutes(joins, context);
   // 4. Keep the network the first city stands on.
   const pieces = network.pieces();
   const startKey = cityStops[0].square;
@@ -1638,19 +1708,20 @@ function stageOutskirts(state, options) {
 
   const stubs = stubJoins(network, grid);
   log(stubs.length + ' line ends joined to track they only reached the long way round');
+  prefetch(stubs);
   stubs.forEach(join => laidLines.push(layLine(network, { ...join, kind: 'stub' }, context)));
   const facing = endJoins(network, grid, join => {
     const line = planLine({ ...join, kind: 'ends' }, context);
     if (!buildable(line)) { log('not joining ' + join.from + ' to ' + join.to + ': ' + (line.planned ? line.waterKm + ' km of water' : 'no way over the terrain')); return null; }
     return line;
-  });
+  }, prefetch);
   facing.forEach(line => { addLine(network, line); laidLines.push(line); });
   log(facing.length + ' pairs of facing line ends joined (' + Math.round(facing.reduce((sum, line) => sum + line.km, 0)) + ' km)');
   const shortcuts = cityShortcuts(network, grid, settlements, join => {
     const line = planLine({ ...join, kind: 'shortcut' }, context);
     if (!buildable(line)) { log('no shortcut ' + join.note + ': ' + (line.planned ? line.waterKm + ' km of water' : 'no way over the terrain')); return null; }
     return line;
-  });
+  }, prefetch);
   shortcuts.forEach(line => { addLine(network, line); laidLines.push(line); });
   log(shortcuts.length + ' shortcuts between towns a long way round by track (' + Math.round(shortcuts.reduce((sum, line) => sum + line.km, 0)) + ' km): '
     + shortcuts.map(line => line.note).join(', '));
@@ -1661,7 +1732,7 @@ function stageOutskirts(state, options) {
   const spurLines = spurs(network, grid, spurPlaces, regionOf, join => {
     const line = planLine({ ...join, kind: 'spur' }, context);
     return buildable(line) ? line : null;
-  }, isHard);
+  }, isHard, prefetch);
   spurPlaces = null;
   spurLines.forEach(spur => { addLine(network, spur.line); laidLines.push({ ...spur.line, note: spur.place.name }); });
   log(spurLines.length + ' spurs out to places off rural lines (' + Math.round(spurLines.reduce((sum, spur) => sum + spur.line.km, 0)) + ' km)');
@@ -2049,7 +2120,7 @@ async function main() {
   };
   if (checkpoints) log('checkpoints in ' + checkpoints.dir);
   const built = buildNetwork({ geometry: readGeometry, stations: stationSet.stations, settlements: settlementSet.places, cities, grid, cache,
-    authoredJoins, outposts: readOutposts, regions, checkpoints });
+    authoredJoins, outposts: readOutposts, regions, checkpoints, settlementsFile: path.join(root, scope.settlements) });
   const artifact = {
     formatVersion: 1,
     id: scope.id,

@@ -7,6 +7,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
+const { threadId } = require('node:worker_threads');
 
 const COPERNICUS_URL = 'https://copernicus-dem-90m.s3.amazonaws.com/';
 
@@ -40,20 +41,23 @@ function fetchTiles(names, cache = defaultCache()) {
   fs.mkdirSync(cache, { recursive: true });
   const wanted = names.filter(name => !fs.existsSync(path.join(cache, name + '.tif')) &&
     !fs.existsSync(path.join(cache, name + '.tif.missing')));
+  // Each process and thread downloads under a name of its own, so two planning the same area at once (the terrain
+  // pool's workers) never write one file together; whichever finishes first puts the tile in place.
+  const suffix = '.' + process.pid + '-' + threadId + '.part';
   for (let start = 0; start < wanted.length; start += 40) {
     const batch = wanted.slice(start, start + 40);
     if (process.env.ASHLINE_WORLD_QUIET !== '1') {
       console.error('Fetching elevation tiles ' + (start + 1) + '-' + (start + batch.length) + ' of ' + wanted.length);
     }
     const args = ['-sS', '-Z', '--parallel-max', '8', '--retry', '3', '-w', '%{http_code} %{filename_effective}\\n'];
-    batch.forEach(name => args.push('-o', path.join(cache, name + '.tif.part'), COPERNICUS_URL + name + '/' + name + '.tif'));
+    batch.forEach(name => args.push('-o', path.join(cache, name + '.tif' + suffix), COPERNICUS_URL + name + '/' + name + '.tif'));
     const result = spawnSync('curl', args, { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
     const codes = new Map(result.stdout.trim().split('\n').filter(Boolean).map(line => {
       const [code, file] = line.split(' ');
       return [file, code];
     }));
     batch.forEach(name => {
-      const part = path.join(cache, name + '.tif.part'), code = codes.get(part);
+      const part = path.join(cache, name + '.tif' + suffix), code = codes.get(part);
       if (code === '200') fs.renameSync(part, path.join(cache, name + '.tif'));
       else if (code === '403' || code === '404') { fs.rmSync(part, { force: true }); fs.writeFileSync(path.join(cache, name + '.tif.missing'), ''); }
       else { fs.rmSync(part, { force: true }); throw new Error('Could not fetch ' + name + ' (HTTP ' + code + '): ' + result.stderr); }
