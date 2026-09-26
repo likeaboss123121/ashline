@@ -416,6 +416,19 @@
 	margin-bottom: 4px;
 }
 
+/* True north at the middle of the debug map's view: the arrow turns, the letter stays upright. */
+.debug-map-north {
+	display: inline-flex;
+	align-items: center;
+	padding: 0 6px;
+	font-weight: bold;
+}
+
+.debug-map-north-needle {
+	display: inline-block;
+	transform-origin: 50% 55%;
+}
+
 /* The pan arrows, in a diamond. */
 .debug-map-pan {
 	display: grid;

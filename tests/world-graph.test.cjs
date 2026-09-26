@@ -77,7 +77,8 @@ test('three authored Punta Arenas to Panama corridors are independently queryabl
     'City names, coordinates and population: GeoNames (https://www.geonames.org/)',
     '© OpenStreetMap contributors; extract provided by Geofabrik',
     '© OpenStreetMap contributors; extracts provided by Geofabrik',
-    'Produced using Copernicus WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved'
+    'Produced using Copernicus WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved',
+    'Land outlines made with Natural Earth'
   ]);
 });
 
@@ -444,21 +445,26 @@ test('two networks on grids of their own are joined into one where both have a s
   const square = (x, y, ends) => ({ x, y, elevationM: 0, elevationStdDevM: 0, ends: ends.map(([dx, dy]) => ({ dx, dy, km: 5 })) });
   const network = (id, squares, stops, start) => ({ formatVersion: 1, id, label: id, grid: { centre: [0, 0] }, sources: {},
     parameters: {}, stats: { squareCount: squares.length, stopCount: stops.length, spurCount: 1 }, startSquare: start, squares, stops, points: [] });
-  // The Americas end at Wales, square (-2, 3); Asia's grid has Wales at (0, 0) with its line going west.
+  // The Americas end at Wales, square (-2, 3), coming up from the south; Asia's grid has Wales at (0, 0) with its line
+  // going west.
   const americas = network('americas-network', [square(-2, 1, [[0, 1]]), square(-2, 2, [[0, -1], [0, 1]]), square(-2, 3, [[0, -1]])], [
     { id: 'place:start', name: 'Start', square: '-2,1', coordinates: [0, 0] },
     { id: 'authored-end:-2,3', name: 'Wales', square: '-2,3', coordinates: [-168.09035, 65.60829] }], '-2,1');
-  const asia = network('afro-eurasia-network', [square(-2, 0, [[1, 0]]), square(-1, 0, [[-1, 0], [1, 0]]), square(0, 0, [[-1, 0]])], [
-    { id: 'halt:-2,0', name: 'Uelen', square: '-2,0', coordinates: [190.2, 66.2] },
-    { id: 'authored-end:0,0', name: 'Wales', square: '0,0', coordinates: [191.90965, 65.60829] }], '-2,0');
+  const asia = network('afro-eurasia-network', [square(-3, 0, [[1, 0]]), square(-2, 0, [[-1, 0], [1, 0]]), square(-1, 0, [[-1, 0], [1, 0]]),
+    square(0, 0, [[-1, 0]])], [
+    { id: 'halt:-3,0', name: 'Uelen', square: '-3,0', coordinates: [190.2, 66.2] },
+    { id: 'authored-end:0,0', name: 'Wales', square: '0,0', coordinates: [191.90965, 65.60829] }], '-3,0');
   const world = joinNetworks(americas, asia, { coordinates: [-168.09035, 65.60829] });
   validateNetwork(world);
-  assert.equal(world.squares.length, 5);
-  // Wales is one station with a line each way; Asia's squares moved by the offset, and its halt renamed for its square.
-  assert.deepEqual(world.squares.find(s => s.x === -2 && s.y === 3).ends.map(end => [end.dx, end.dy]), [[-1, 0], [0, -1]]);
-  assert.deepEqual(world.stops.map(stop => stop.id), ['place:start', 'authored-end:-2,3', 'halt:-4,3']);
+  // Wales is one station with a line each way, and a station is straight: Asia's line is brought in from the north,
+  // opposite the Americas', its own Wales square left out and the rest moved by the offset; its halt is renamed for
+  // the square it moved to.
+  assert.equal(world.squares.length, 6);
+  assert.deepEqual(world.squares.find(s => s.x === -2 && s.y === 3).ends.map(end => [end.dx, end.dy]), [[0, -1], [0, 1]]);
+  assert.deepEqual(world.squares.find(s => s.x === -2 && s.y === 4).ends.map(end => [end.dx, end.dy]), [[-1, 0], [0, -1]]);
+  assert.deepEqual(world.stops.map(stop => stop.id), ['place:start', 'authored-end:-2,3', 'halt:-4,4']);
   assert.deepEqual(world.charts.map(chart => [chart.id, chart.offset, chart.count]),
-    [['americas-network', [0, 0], 3], ['afro-eurasia-network', [-2, 3], 2]]);
+    [['americas-network', [0, 0], 3], ['afro-eurasia-network', [-1, 4], 3]]);
   assert.equal(world.stats.spurCount, 2);
   // Grids that would lay squares on each other are refused, and turned half round, the same grid lies clear.
   const clash = () => network('afro-eurasia-network', [square(0, -2, [[0, 1]]), square(0, -1, [[0, -1], [0, 1]]), square(0, 0, [[0, -1]])], [
@@ -729,6 +735,10 @@ test('a build checkpoint reads back exactly what was written, and only for its o
     assert.equal(read.note, 'x');
     // Another key is another build: nothing to read.
     assert.equal(checkpoint.read(dir, 'test', 'joins', 'key-2'), null);
+    // The same source with Windows line endings keys a checkpoint just the same: it can move between computers.
+    fs.writeFileSync(path.join(dir, 'unix.cjs'), 'const a = 1;\nconst b = 2;\n');
+    fs.writeFileSync(path.join(dir, 'windows.cjs'), 'const a = 1;\r\nconst b = 2;\r\n');
+    assert.equal(checkpoint.hashOf({ file: path.join(dir, 'unix.cjs') }), checkpoint.hashOf({ file: path.join(dir, 'windows.cjs') }));
     // A file cut short (the machine died while writing it) is no checkpoint at all.
     const file = checkpoint.fileFor(dir, 'test', 'joins');
     fs.writeFileSync(file, fs.readFileSync(file, 'utf8').slice(0, 5000));
@@ -751,6 +761,8 @@ test('each build stage depends on the code it runs, and not on the stages after 
   [trace, joins, outskirts].forEach(stage => ['YARD_RULES', 'MAX_SECTION_KM', 'pruneParallel', 'simplifyUrban', 'stageStops'].forEach(name =>
     assert.ok(!stage.includes(name), name)));
   assert.ok(!trace.includes('longJoins') && !joins.includes('spurs'));
+  // Nor on where the project lies on this computer.
+  [trace, joins, outskirts].forEach(stage => assert.ok(!stage.includes('root')));
 });
 
 test('a search that stops once its answers are certain agrees with one that searches everything', () => {
@@ -775,4 +787,31 @@ test('a search that stops once its answers are certain agrees with one that sear
     else assert.ok(truth === undefined || truth >= threshold, key + ': ' + truth + ' < ' + threshold);
     if (truth !== undefined && truth < threshold) assert.ok(found.has(key), key);
   });
+});
+
+test('a station stands only where the line runs straight, and every dead end leads to a station', () => {
+  const { isStraightSquare, pruneDeadEnds, Network } = require('../scripts/world/build-network.cjs');
+  const network = new Network();
+  // A line west to east with a branch north from its middle, and a spur off the branch.
+  const add = (from, to) => network.add([{ x: from[0], y: from[1], km: 2.5 }, { x: to[0], y: to[1], km: 2.5 }], { id: 'w', status: 'current', bridgeShare: 0, tunnelShare: 0 });
+  for (let x = 0; x < 10; x++) add([x, 0], [x + 1, 0]);
+  for (let y = 0; y < 4; y++) add([5, y], [5, y + 1]);
+  add([5, 4], [6, 5]);
+  add([6, 5], [7, 5]);
+  const adjacent = network.neighbours();
+  assert.ok(isStraightSquare('2,0', adjacent), 'straight through');
+  assert.ok(isStraightSquare('0,0', adjacent), 'the end of a line');
+  assert.ok(!isStraightSquare('5,0', adjacent), 'a junction');
+  assert.ok(!isStraightSquare('5,4', adjacent), 'a bend');
+  assert.ok(!isStraightSquare('6,5', adjacent), 'a bend of 45 degrees');
+  // Stations at both ends of the main line and one on the branch: the branch beyond it goes, and so does nothing else.
+  const stops = new Set(['0,0', '10,0', '5,2']);
+  const removed = pruneDeadEnds(network, key => stops.has(key));
+  assert.equal(removed, 4, 'from 7,5 back to the station at 5,2');
+  ['5,3', '5,4', '6,5', '7,5'].forEach(key => assert.ok(!network.squares.has(key), key));
+  ['0,0', '5,0', '5,1', '5,2', '10,0'].forEach(key => assert.ok(network.squares.has(key), key));
+  // With no station on the branch, all of it goes, back to the junction.
+  const stationless = pruneDeadEnds(network, key => key === '0,0' || key === '10,0');
+  assert.equal(stationless, 2);
+  assert.ok(network.squares.has('5,0') && !network.squares.has('5,1'));
 });

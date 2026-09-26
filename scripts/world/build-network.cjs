@@ -76,9 +76,6 @@ const BRIDGE_MIN_KM = 0.2;
 const TUNNEL_MIN_SHARE = 0.5;
 const MAX_SECTION_KM = 100;
 const HALT_NAME_KM = 15;
-// An unnamed dead end shorter than this is a yard track, a siding or a tracing stub, and is pruned; a spur with a
-// station at its end is kept however short.
-const MIN_STUB_KM = 10;
 // A line that ends within STUB_JOIN_KM of other track is joined to it, where getting there along the track would be
 // a long way round: at least STUB_DETOUR_FACTOR times as far, and more than STUB_DETOUR_MIN_KM. That is a break in the
 // mapping, a lifted junction, or a branch stopping short of a new line; the rule never loops a branch back onto the
@@ -134,16 +131,23 @@ const CITY_TRACK_KM = 10;
 // A stretch of line between two junctions is taken up when another way between the same two junctions is no more
 // than PARALLEL_FACTOR times as long plus PARALLEL_EXTRA_KM: two lines side by side, or a loop that saves nothing.
 // The least used goes first: new lines, then abandoned, then disused, then working track, and fewer stations first.
-const PARALLEL_FACTOR = 1.4;
-const PARALLEL_EXTRA_KM = 15;
+const PARALLEL_FACTOR = 2;
+const PARALLEL_EXTRA_KM = 40;
 // In the country, how far apart along the track two yards must be depends on how many people live within
-// DENSITY_RADIUS_KM: nowhere near SPARSE_POPULATION, every station; up to DENSE_POPULATION, RURAL_SPACING_KM; beyond,
-// DENSE_SPACING_KM. Whatever the region, no two yards stand in squares that touch: the busier place keeps its yard.
+// DENSITY_RADIUS_KM: under SPARSE_POPULATION, SPARSE_SPACING_KM; up to DENSE_POPULATION, RURAL_SPACING_KM; beyond,
+// DENSE_SPACING_KM. Likea wanted the world's 33,000 stops brought down to about 20,000 (September 2026). Whatever the region, no two yards stand in squares that touch: the busier place keeps its yard.
 const DENSITY_RADIUS_KM = 50;
 const SPARSE_POPULATION = 150000;
 const DENSE_POPULATION = 1000000;
-const RURAL_SPACING_KM = 15;
-const DENSE_SPACING_KM = 25;
+const SPARSE_SPACING_KM = 15;
+const RURAL_SPACING_KM = 25;
+const DENSE_SPACING_KM = 35;
+// A station stands on a square where the line runs straight through (or ends): the yard is drawn straight, with one
+// line at each end. A station mapped on a bend or a junction moves to the nearest straight square along the line
+// within STATION_SHIFT_SQUARES, or has no yard.
+const STATION_SHIFT_SQUARES = 4;
+// In a hard region, where every real town is a stop the player's life can depend on, it may move this far instead.
+const HARD_STATION_SHIFT_SQUARES = 12;
 // An authored route's ends must lie within this of the network.
 const AUTHORED_SNAP_KM = 10;
 // In a hard region, a town or a city this near the line is a stop (stageStops).
@@ -1427,16 +1431,34 @@ function buildNetwork(options) {
     const from = options.checkpoints.from ? STAGES.indexOf(options.checkpoints.from) : STAGES.length;
     assert(from >= 0, 'Unknown stage ' + options.checkpoints.from + '; the stages are ' + STAGES.join(', '));
     for (let index = Math.min(from, STAGES.length) - 1; index >= 0; index--) {
-      const at = Date.now();
-      const read = checkpoint.read(options.checkpoints.dir, options.checkpoints.scope, STAGES[index], keys[STAGES[index]]);
-      if (!read) continue;
+      const at = Date.now(), name = STAGES[index], dir = options.checkpoints.dir, scope = options.checkpoints.scope;
+      // --trust-checkpoint <stage>: use that stage's checkpoint whatever it was keyed by, and key it afresh. Only for a
+      // checkpoint known by other means to be right, such as one made on another computer before keys held across them.
+      const trusted = options.checkpoints.trust === name;
+      const read = checkpoint.read(dir, scope, name, trusted ? null : keys[name]);
+      if (!read) {
+        // Say why a checkpoint there is not used: which of its parts changed.
+        const old = checkpoint.header(dir, scope, name);
+        if (old) {
+          const changed = old.parts ? Object.keys({ ...old.parts, ...keys.parts[name] }).filter(part => old.parts[part] !== keys.parts[name][part]) : null;
+          log('stage ' + name + ': its checkpoint is out of date (' + (changed ? 'changed: ' + changed.join(', ') : 'written before checkpoints recorded their parts') + ')');
+        }
+        continue;
+      }
       state = restoreState(read);
+      if (trusted) {
+        checkpoint.write(dir, scope, name, keys[name], saveState(state), keys.parts[name]);
+        log('stage ' + name + ': checkpoint trusted as asked and keyed afresh');
+      }
       resumeAt = index;
       log('stage ' + STAGES[index] + ': read back from its checkpoint in ' + seconds(Date.now() - at) + ' (' + STAGES.slice(0, index + 1).join(', ') + ' skipped)');
       timings.push(STAGES[index] + ' read back ' + seconds(Date.now() - at));
       break;
     }
   }
+  // --resume-only: build only from the last checkpoint, never from the start (on a machine that cannot).
+  assert(!keys || !options.checkpoints.resumeOnly || resumeAt === STAGES.length - 1,
+    'No current checkpoint for the ' + STAGES.at(-1) + ' stage, and --resume-only was given: not building from the start');
   const runStage = (index, stage) => {
     if (index <= resumeAt) return;
     const name = STAGES[index], at = Date.now();
@@ -1445,7 +1467,7 @@ function buildNetwork(options) {
     let note = '';
     if (keys) {
       const written = Date.now();
-      const bytes = checkpoint.write(options.checkpoints.dir, options.checkpoints.scope, name, keys[name], saveState(state));
+      const bytes = checkpoint.write(options.checkpoints.dir, options.checkpoints.scope, name, keys[name], saveState(state), keys.parts[name]);
       note = ', checkpoint of ' + Math.round(bytes / 1048576) + ' MB written in ' + seconds(Date.now() - written);
     }
     log('stage ' + name + ': done in ' + seconds(Date.now() - at) + note);
@@ -1467,14 +1489,25 @@ function buildNetwork(options) {
 // of every function, class and constant of this file its code refers to, followed through the functions it calls
 // (dependenciesOf), with the other build modules it uses hashed whole. Nothing needs listing by hand: change a rule,
 // a constant or a helper and the first stage that uses it runs again, with everything after it.
+//
+// Each key is the hash of its parts, which the checkpoint keeps beside it, so a checkpoint that no longer matches can
+// say which part changed. Returns { trace, joins, outskirts, parts: { trace: {...}, ... } }.
 function stageKeys(options) {
   const inputs = options.checkpoints.inputs;
+  const hash = value => checkpoint.hashOf(value);
+  const withCode = (fields, stage) => ({ ...fields, ...Object.fromEntries(dependenciesOf(stage)) });
   // How a checkpoint is written is part of every key: a change to it makes the old ones unreadable, so unused.
-  const format = checkpoint.hashOf(saveState, restoreState, HIDDEN_LINE_FIELDS, { file: path.join(__dirname, 'checkpoint.cjs') });
-  const trace = checkpoint.hashOf(BUILDER_VERSION, format, 'trace', options.grid, inputs.geometry, dependenciesOf(stageTrace));
-  const joins = checkpoint.hashOf(trace, 'joins', inputs.cities, inputs.settlements, inputs.authoredJoins, dependenciesOf(stageJoins));
-  const outskirts = checkpoint.hashOf(joins, 'outskirts', inputs.settlements, inputs.outposts, inputs.regions, dependenciesOf(stageOutskirts));
-  return { trace, joins, outskirts };
+  const parts = {};
+  parts.trace = withCode({ builderVersion: hash(BUILDER_VERSION), format: checkpoint.hashOf(saveState, restoreState, HIDDEN_LINE_FIELDS,
+    { file: path.join(__dirname, 'checkpoint.cjs') }), grid: hash(options.grid), geometry: hash(inputs.geometry) }, stageTrace);
+  const trace = hash(parts.trace);
+  parts.joins = withCode({ previous: trace, cities: hash(inputs.cities), settlements: hash(inputs.settlements),
+    authoredJoins: hash(inputs.authoredJoins) }, stageJoins);
+  const joins = hash(parts.joins);
+  parts.outskirts = withCode({ previous: joins, settlements: hash(inputs.settlements), outposts: hash(inputs.outposts),
+    regions: hash(inputs.regions) }, stageOutskirts);
+  const outskirts = hash(parts.outskirts);
+  return { trace, joins, outskirts, parts };
 }
 
 // The top-level declarations of this file, read from its own source: name -> { kind, file }. A function, class or
@@ -1497,9 +1530,10 @@ const MODULE_NAMES = (() => {
     }
   });
   // Logging and checks do not change what a stage builds.
-  // Nor does the state a run keeps as it goes (the terrain route memo, the clock), or the code that runs the stages
-  // rather than being one: a comment that says "main line" must not make a stage depend on main().
-  ['log', 'assert', 'seconds', 'MODULE_NAMES', 'STAGES', 'STARTED', 'routeMemo', 'main', 'elevationOnly', 'buildNetwork',
+  // Nor does the state a run keeps as it goes (the terrain route memo, the clock), where the project is on this
+  // machine (root: a checkpoint made on one computer holds on another), or the code that runs the stages rather than
+  // being one: a comment that says "main line" must not make a stage depend on main().
+  ['log', 'assert', 'seconds', 'MODULE_NAMES', 'STAGES', 'STARTED', 'routeMemo', 'root', 'main', 'elevationOnly', 'buildNetwork',
     'stageKeys', 'dependenciesOf', 'declared', 'saveState', 'restoreState', 'HIDDEN_LINE_FIELDS', 'writeNetwork'].forEach(name => names.delete(name));
   return names;
 })();
@@ -1744,6 +1778,45 @@ function stageOutskirts(state, options) {
   };
 }
 
+// Whether the line runs straight through a square: one line out of it (the end of a line), or two in exactly opposite
+// directions. A railyard is drawn straight, so only such a square can hold one.
+function isStraightSquare(key, adjacent) {
+  const lines = adjacent.get(key);
+  if (!lines || lines.length > 2) return false;
+  if (lines.length < 2) return true;
+  const [x, y] = key.split(',').map(Number), [a, b] = lines.map(other => other.split(',').map(Number));
+  return a[0] - x === x - b[0] && a[1] - y === y - b[1];
+}
+
+// Takes up every dead end that leads to no stop: from each line end that is not a stop, back to the first stop or
+// junction. Repeated, since taking one up can leave another. Returns the number of squares taken up.
+function pruneDeadEnds(network, isStop) {
+  let removed = 0;
+  for (let changed = true; changed;) {
+    changed = false;
+    const adjacent = network.neighbours();
+    Array.from(network.squares.keys()).sort().forEach(end => {
+      if (!network.squares.has(end) || isStop(end) || adjacent.get(end).length !== 1) return;
+      let previous = null, current = end;
+      // Each square walked has the one line back towards the network once the one before it is gone; a junction has more.
+      while (current && !isStop(current) && adjacent.get(current).filter(key => network.squares.has(key)).length <= 1) {
+        const next = adjacent.get(current).find(key => key !== previous && network.squares.has(key));
+        network.squares.delete(current);
+        removed++;
+        previous = current;
+        current = next;
+      }
+      changed = true;
+    });
+    Array.from(network.edges.keys()).forEach(key => {
+      const edge = network.edges.get(key);
+      if (!network.squares.has(edge.a) || !network.squares.has(edge.b)) network.edges.delete(key);
+    });
+    network.forgetLive();
+  }
+  return removed;
+}
+
 // 4. Cities simplified, parallel lines taken up, and the stops, yards, halts and points placed: the network as the
 // game gets it. Quick next to the stages before it, so it always runs.
 function stageStops(state, options) {
@@ -1820,41 +1893,12 @@ function stageStops(state, options) {
   };
   let stopBySquare = pickStops();
 
-  // Prune stubs: walk in from every dead end with no stop on it; if the run back to a junction or a stop is short,
-  // remove it. Repeat, since removing one stub can leave another.
-  let pruned = 0;
-  for (let changed = true; changed;) {
-    changed = false;
-    const adjacentNow = network.neighbours();
-    Array.from(network.squares.keys()).sort().forEach(end => {
-      if (!network.squares.has(end) || stopBySquare.has(end) || adjacentNow.get(end).length !== 1) return;
-      const run = [end];
-      let previous = null, current = end, km = 0;
-      for (;;) {
-        const next = adjacentNow.get(current).find(key => key !== previous && network.squares.has(key));
-        if (!next) break;
-        km += network.edges.get(current < next ? current + '|' + next : next + '|' + current).km;
-        if (stopBySquare.has(next) || adjacentNow.get(next).length !== 2 || km >= MIN_STUB_KM) break;
-        run.push(next);
-        previous = current;
-        current = next;
-      }
-      if (km >= MIN_STUB_KM) return;
-      run.forEach(key => {
-        network.squares.delete(key);
-        adjacentNow.get(key).forEach(other => network.edges.delete(key < other ? key + '|' + other : other + '|' + key));
-      });
-      pruned += run.length;
-      changed = true;
-    });
-    Array.from(network.edges.keys()).forEach(key => {
-      const edge = network.edges.get(key);
-      if (!network.squares.has(edge.a) || !network.squares.has(edge.b)) network.edges.delete(key);
-      network.forgetLive();
-    });
-  }
+  // Dead ends lead somewhere: a line that ends with no station at its end is taken up back to the last station on it,
+  // or to the junction it leaves, and again after the yards are chosen (a station left without one no longer holds the
+  // line out to it).
+  let pruned = pruneDeadEnds(network, key => stopBySquare.has(key));
   stopBySquare = pickStops();
-  log('pruned ' + pruned + ' squares of short unnamed stubs');
+  log('took up ' + pruned + ' squares of line leading to no station');
 
   // Where the stops go. A railyard has two ends and one line at each, so no stop stands where three or more lines
   // meet: the junction is out on the line, where a driver picks a way, and a station there moves to the square next
@@ -1887,22 +1931,25 @@ function stageStops(state, options) {
     return best ? best.name : null;
   };
   const centreOfKey = key => { const square = network.squares.get(key); return projection.centreOf([square.x, square.y], grid); };
+  // A station on a bend or a junction moves along the line to the nearest square where it runs straight through
+  // (STATION_SHIFT_SQUARES), nearest the station itself.
+  const straight = key => isStraightSquare(key, adjacentStops);
   let movedOffJunctions = 0, noRoomBesideJunction = 0;
   const placed = [];
   Array.from(stopBySquare.values()).forEach(candidate => {
-    if (degreeOf(candidate.square) <= 2) { placed.push(candidate); return; }
-    const beside = adjacentStops.get(candidate.square).filter(key => degreeOf(key) === 2)
-      .map(key => ({ key, km: haversineKm(candidate.coordinates, centreOfKey(key)) }))
-      .sort((a, b) => a.km - b.km || a.key.localeCompare(b.key))[0];
+    if (straight(candidate.square)) { placed.push(candidate); return; }
+    const seen = new Set([candidate.square]);
+    let ring = [candidate.square];
+    const found = [];
+    const reach = isHard(candidate.coordinates) ? HARD_STATION_SHIFT_SQUARES : STATION_SHIFT_SQUARES;
+    for (let step = 0; step < reach && !found.length; step++) {
+      ring = ring.flatMap(key => adjacentStops.get(key)).filter(key => !seen.has(key) && seen.add(key));
+      ring.forEach(key => { if (straight(key)) found.push({ key, km: haversineKm(candidate.coordinates, centreOfKey(key)) }); });
+    }
+    const beside = found.sort((a, b) => a.km - b.km || a.key.localeCompare(b.key))[0];
     if (!beside) { noRoomBesideJunction++; return; }
     placed.push({ ...candidate, square: beside.key });
     movedOffJunctions++;
-  });
-  Array.from(network.squares.keys()).sort().forEach(key => {
-    if (degreeOf(key) !== 1) return;
-    if (isHard(centreOfKey(key))) return;
-    const centre = centreOfKey(key);
-    placed.push({ id: 'end:' + key, status: 'end', square: key, coordinates: centre, name: nearestSettlementName(centre) || 'End of the line' });
   });
   const onePerSquare = new Map();
   placed.forEach(candidate => {
@@ -1926,15 +1973,17 @@ function stageStops(state, options) {
     return best ? best.population : 0;
   };
   const spacingFor = stop => {
+    // In a hard region every real town keeps its yard (Likea: real towns stay there).
+    if (isHard(stop.coordinates)) return 0;
     const rule = YARD_RULES[stop.region];
     if (rule.spacingKm !== null) return rule.spacingKm;
     const people = regionOf.peopleWithin(stop.coordinates, DENSITY_RADIUS_KM);
-    return people < SPARSE_POPULATION ? 0 : people < DENSE_POPULATION ? RURAL_SPACING_KM : DENSE_SPACING_KM;
+    return people < SPARSE_POPULATION ? SPARSE_SPACING_KM : people < DENSE_POPULATION ? RURAL_SPACING_KM : DENSE_SPACING_KM;
   };
   const yards = new Map(), maybe = [];
   onePerSquare.forEach(stop => {
     stop.region = regionOf(stop.coordinates);
-    if (stop.status === 'city') yards.set(stop.square, stop);
+    if (stop.status === 'city' || String(stop.id).startsWith('authored-end:')) yards.set(stop.square, stop);
     else maybe.push({ stop, population: populationOf(stop) });
   });
   const touchingYard = key => {
@@ -1958,7 +2007,8 @@ function stageStops(state, options) {
     else thinned[stop.region]++;
   });
   stopBySquare = yards;
-  log(movedOffJunctions + ' stations moved off junctions beside them, ' + noRoomBesideJunction + ' with no room; '
+  pruned += pruneDeadEnds(network, key => stopBySquare.has(key));
+  log(movedOffJunctions + ' stations moved to straight track beside them, ' + noRoomBesideJunction + ' with none near; '
     + (thinned.urban + thinned.industrial + thinned.rural) + ' stops left without a yard: ' + JSON.stringify(thinned));
 
   // 6. Halts, so that outside a hard region no square is more than MAX_SECTION_KM / 2 from a stop by track, junctions
@@ -1988,7 +2038,7 @@ function stageStops(state, options) {
   };
   spread(Array.from(stopBySquare.entries()).map(([key, stop]) => [key, stop.name]), Infinity);
   const halfSection = MAX_SECTION_KM / 2;
-  const wanted = Array.from(network.squares.keys()).filter(key => adjacent.get(key).length === 2 && !stopBySquare.has(key)
+  const wanted = Array.from(network.squares.keys()).filter(key => isStraightSquare(key, adjacent) && adjacent.get(key).length === 2 && !stopBySquare.has(key)
     && (reach.get(key) ?? Infinity) > halfSection && !isHard(centreOfKey(key)))
     .sort((a, b) => (reach.get(b) ?? Infinity) - (reach.get(a) ?? Infinity) || a.localeCompare(b));
   let halts = 0;
@@ -2134,11 +2184,13 @@ async function main() {
   const geometryHash = hashInput(scope.geometry);
   const checkpoints = args.includes('--no-checkpoints') ? null : {
     dir: path.join(process.env.ASHLINE_WORLD_CHECKPOINTS || path.join(cache, 'checkpoints')), scope: AREA.prefix,
-    fresh: args.includes('--fresh'), from: option('from'),
+    fresh: args.includes('--fresh'), from: option('from'), resumeOnly: args.includes('--resume-only'), trust: option('trust-checkpoint'),
     inputs: { geometry: geometryHash, settlements: hashInput(scope.settlements), outposts: hashInput(scope.outposts),
       cities: cities, authoredJoins: authoredJoins, regions: regions }
   };
   if (checkpoints) log('checkpoints in ' + checkpoints.dir);
+  // --keys: print what each stage's checkpoint is keyed by, and stop (to see why a checkpoint is not being used).
+  if (checkpoints && args.includes('--keys')) { const { parts, ...keys } = stageKeys({ grid, checkpoints }); console.log(JSON.stringify(keys)); return; }
   const built = buildNetwork({ geometry: readGeometry, stations: stationSet.stations, settlements: settlementSet.places, cities, grid, cache,
     authoredJoins, outposts: readOutposts, regions, checkpoints, settlementsFile: path.join(root, scope.settlements) });
   const artifact = {
@@ -2157,7 +2209,7 @@ async function main() {
     },
     parameters: { traceStepsPerCell: TRACE_STEPS_PER_CELL, shortBridgeKm: SHORT_BRIDGE_KM, straightBridgeKm: STRAIGHT_BRIDGE_KM,
       longBridgeMaxKm: LONG_BRIDGE_MAX_KM, minPieceKm: MIN_PIECE_KM, cityReachKm: CITY_REACH_KM, bridgeMinKm: BRIDGE_MIN_KM,
-      tunnelMinShare: TUNNEL_MIN_SHARE, maxSectionKm: MAX_SECTION_KM, minStubKm: MIN_STUB_KM, stubJoinKm: STUB_JOIN_KM,
+      tunnelMinShare: TUNNEL_MIN_SHARE, maxSectionKm: MAX_SECTION_KM, stationShiftSquares: STATION_SHIFT_SQUARES, stubJoinKm: STUB_JOIN_KM,
       stubDetourFactor: STUB_DETOUR_FACTOR, stubDetourMinKm: STUB_DETOUR_MIN_KM, authoredSnapKm: AUTHORED_SNAP_KM,
       endJoinKm: END_JOIN_KM, endDetourFactor: END_DETOUR_FACTOR, endDetourMinKm: END_DETOUR_MIN_KM, maxWaterKm: MAX_WATER_KM,
       spurMinKm: SPUR_MIN_KM, spurMaxKm: SPUR_MAX_KM, spurSpacingKm: SPUR_SPACING_KM, genericNameCount: GENERIC_NAME_COUNT,
@@ -2204,4 +2256,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { distancesAlong, distancesTo, dependenciesOf, stageTrace, stageJoins, stageOutskirts, stageStops, hardRegionTest, longJoins, buildNetwork, stubJoins, endJoins, cityShortcuts, pruneParallel, spliceOntoTrack, spurs, regionClassifier, simplifyUrban, traceLine, Network, placeIndex, resolveRoute, planLine, addLine };
+module.exports = { isStraightSquare, pruneDeadEnds, distancesAlong, distancesTo, dependenciesOf, stageTrace, stageJoins, stageOutskirts, stageStops, hardRegionTest, longJoins, buildNetwork, stubJoins, endJoins, cityShortcuts, pruneParallel, spliceOntoTrack, spurs, regionClassifier, simplifyUrban, traceLine, Network, placeIndex, resolveRoute, planLine, addLine };

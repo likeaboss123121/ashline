@@ -84,24 +84,30 @@ American network were turned into these rules (September 2026); a route is only 
    Every line into a city still reaches every other through the hub. Likea chose this over junctions without yards
    (September 2026) to keep the cities simple.
 8. **Parallel lines.** A stretch of line between two junctions is taken up where another way between the same two
-   junctions is no more than 1.4 times as long plus 15 km: two lines side by side, or a loop that saves nothing. The
+   junctions is no more than twice as long plus 40 km: two lines side by side, or a loop that saves little. The
    least used goes first (new lines, then abandoned, disused and working track, and fewer stations first), and the
    authored routes and the cities' squares stay. Around Buenos Aires, where the Pampas lines run side by side,
    this is most of the thinning.
-9. **Stops and railyards.** Unnamed dead ends shorter than 10 km (yard tracks, sidings, tracing stubs) are pruned.
-   Candidates are one per square: an authored city, else a working station (larger EFE category first), a settlement
-   on a new line, a working halt, a closed station, and every end of a line. **A railyard has two ends and one line
-   at each** (Likea, September 2026), so no stop stands where three or more lines meet: that is a junction out on
-   the line, and a station there moves to the square beside it on the line nearest the station. Every stop gets a
+9. **Stops and railyards.** Candidates are one per square: an authored city, else a working station (larger EFE
+   category first), a settlement on a new line, a working halt and a closed station. **Every dead end leads to a
+   station** (Likea, September 2026): a line whose end has no station is taken up back to the last station on it, or
+   to the junction it leaves, and again once the yards are chosen, so there are no buffers and no stops invented at
+   bare line ends. **A railyard has two ends and one line at each, and is straight** (Likea, September 2026: the yard
+   is drawn straight and the interface does not handle curves), so a stop stands only where the line runs straight
+   through a square, its two lines leaving in exactly opposite directions, or where a line ends. A station on a
+   junction or a bend moves along the line to the nearest straight square within 4 squares (12 in a hard region),
+   nearest the station itself, or has no yard. Every stop gets a
    region. **Urban** is where 500,000 people live within 20 km; **industrial** is where, without those people,
    60 km of mapped track lies within 10 km (mines, ports, works); **rural** is the rest. Then which stops get a
    railyard: the authored cities always, then the busiest place first, each only if the place it serves is big
    enough for its region (100,000 people in a city), no yard already kept is too close along the track (40 km in a
-   city, 20 km in an industrial area, and in the country none within 50 km of 150,000 people, 15 km up to a million,
-   25 km beyond), and **no yard stands in a square touching another**, the busier place keeping it. A line end that
-   loses its stop is a buffer. A section with no stop for more than 100 km gets halts, named for the nearest
-   settlement within 15 km or for their distance from the section's first stop, never beside a yard. The compiler
-   refuses a network where a stop has more than two lines or two stops touch.
+   city, 20 km in an industrial area, and in the country 15 km where under 150,000 people live within 50 km, 25 km up
+   to a million, 35 km beyond; none in a hard region, where every real town keeps its yard), and **no yard stands in
+   a square touching another**, the busier place keeping it. Likea wanted the world's 33,000 stops brought down to
+   about 20,000 (September 2026); these spacings and the parallel-line rule do most of that. A section with no stop
+   for more than 100 km gets halts on straight squares, named for the nearest settlement within 15 km or for their
+   distance from the section's first stop, never beside a yard. The compiler refuses a network where a stop has more
+   than two lines or stands on a bend, a line ends with no station, or two stops touch.
 
    The game sizes yards by region (`setup.railyard.YARD_SIZE_BY_REGION`): two or three short tracks in the country,
    three to five in industrial areas, four or five long ones in the cities.
@@ -176,7 +182,9 @@ works across continents, and to reach Wales, Alaska, where the Bering Strait cro
   Alaska Railroad to Palmer, 993 km with no stop to the Haines Highway, the White Pass line, then British Columbia;
   and from Fairbanks the authored route to Wales, 1,256 km from Healy to Nome with no stop, then Nome to Wales.
   No locomotive does that on one tank: the player has to carry fuel.
-- **Result.** 89,583 squares and 8,736 stops (1,653 halts), 7,747 junctions and 420 buffers; 622,773 km of mapped
+- **Result** (after the September 2026 thinning below: stations on straight track, dead ends taken up, fewer parallel
+  lines and wider yard spacing): 65,069 squares and 5,442 stops (1,352 halts), 3,195 junctions and no buffers.
+- **Result before the thinning.** 89,583 squares and 8,736 stops (1,653 halts), 7,747 junctions and 420 buffers; 622,773 km of mapped
   railway kept and 135,390 km of new line; Punta Arenas to Wales is 25,468 km by track. The game's world data is
   4.2 MB, the page 5.6 MB, and the network is built in the browser in about 1.7 s on this server.
 
@@ -241,7 +249,10 @@ embedded in the single-file game.
   (joins of 10 km or less are drawn straight and never checked for water, as in the Americas) are on the network.
   Left off, with railways mapped: Ireland and Northern Ireland, Sardinia, Corsica, Mallorca, Taiwan, Java, Sumatra,
   Sulawesi, Sabah, Luzon, Hainan, Madagascar, Gotland, Cyprus, Crete, Mauritius and Réunion.
-- **Result.** 163,773 squares and 24,922 stops (489 halts), 16,033 junctions and 5,209 buffers; 1,407,534 km of mapped
+- **Result** (after the September 2026 thinning): 131,149 squares and 15,156 stops (391 halts), 7,837 junctions and no
+  buffers. Joined to the Americas: 196,217 squares and 20,597 stops. The game's world data is 8.0 MiB and the page
+  9.3 MiB.
+- **Result before the thinning.** 163,773 squares and 24,922 stops (489 halts), 16,033 junctions and 5,209 buffers; 1,407,534 km of mapped
   railway kept (7,772 parallel stretches, 141,920 km, taken up) and 262,946 km of new line: 5,880 stub joins, 39
   facing-end joins (7,862 km), 23 shortcuts, 281 spurs and the four authored routes; 153 pieces (40,324 km) left out,
   the islands above among them; every authored city reached. Joined to the Americas: 253,355 squares and 33,657
@@ -350,6 +361,12 @@ that, `getClimbBlockReason` explains it and the departure is refused, which is w
 weight limits come from.
 
 ## The debug map
+
+The network is drawn on the grid it was built on, and far from a grid's centre north is seldom up (Europe, Asia and
+Africa lie on a grid turned to meet the Americas). So land and water are drawn underneath, from Natural Earth's
+1:50m land polygons (`scripts/world/land-mask.cjs`, in the compiled data as `network.land`: a block of 2 by 2 squares
+a pixel, each sampled on the grid it lies on), and an arrow above the map points to true north at the middle of the
+view (`setup.worldmap.gridNorthAt`). Pointed at a square with no track, the readout gives its latitude and longitude.
 
 `appendDebugMap(parent, stationId)` draws the network once its panel is open: terrain as coloured cells, mapped
 track and new lines as two paths, every station as a marker with the cities named, and a readout of the square under

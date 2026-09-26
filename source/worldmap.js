@@ -1042,6 +1042,53 @@ setup.worldmap = {
 		}
 		return data.grid;
 	},
+	// The land mask under the network (compile-world.cjs, land-mask.cjs), unpacked once: for each block of land.block
+	// squares, whether it is land and which chart's grid it lies on. null when the data has none.
+	getLandMask: function() {
+		var data = setup.worldGraphData && setup.worldGraphData.network, land = data && data.land;
+		if (!land) return null;
+		if (this._landMask && this._landMask.source === land) return this._landMask;
+		var count = land.width * land.height, isLand = new Uint8Array(count), chart = new Uint8Array(count);
+		var at = 0, value = 0;
+		land.runs.split(',').forEach(function(run) {
+			var length = parseInt(run, 36);
+			if (value) isLand.fill(1, at, at + length);
+			at += length;
+			value = 1 - value;
+		});
+		if (land.charts) {
+			at = 0;
+			land.charts.split(',').forEach(function(run) {
+				var parts = run.split(':'), length = parseInt(parts[1], 36);
+				chart.fill(Number(parts[0]), at, at + length);
+				at += length;
+			});
+		}
+		this._landMask = { source: land, block: land.block, x0: land.x0, y0: land.y0, width: land.width, height: land.height,
+			isLand: isLand, chart: chart };
+		return this._landMask;
+	},
+	// The grid any square of the joined map lies on, on the network or not: the chart of its block in the land mask.
+	gridAt: function(x, y) {
+		var data = setup.worldGraphData && setup.worldGraphData.network;
+		if (!data) return null;
+		var mask = this.getLandMask();
+		if (!data.charts || !mask) return data.grid;
+		var column = Math.floor((x - mask.x0) / mask.block), row = Math.floor((mask.y0 - y) / mask.block);
+		column = Math.max(0, Math.min(mask.width - 1, column));
+		row = Math.max(0, Math.min(mask.height - 1, row));
+		return data.charts[mask.chart[row * mask.width + column]].grid;
+	},
+	// The true bearing of grid north at a square of the joined map, in degrees clockwise from north.
+	gridNorthAt: function(x, y) {
+		var grid = this.gridAt(x, y);
+		if (!grid) return null;
+		var a = this.unprojectGrid(x, y, grid), b = this.unprojectGrid(x, y + 1, grid);
+		var radians = Math.PI / 180, dLon = (b[0] - a[0]) * radians;
+		var bearing = Math.atan2(Math.sin(dLon) * Math.cos(b[1] * radians),
+			Math.cos(a[1] * radians) * Math.sin(b[1] * radians) - Math.sin(a[1] * radians) * Math.cos(b[1] * radians) * Math.cos(dLon)) / radians;
+		return ((bearing % 360) + 360) % 360;
+	},
 	// The middle of a grid square as [longitude, latitude], from the grid's projection (scripts/world/projection.cjs),
 	// for a grid turned and moved to join another (gridFor) its own square found first: the offset taken away, then
 	// its quarter turns undone. The longitude is between -180 and 180.
@@ -1101,9 +1148,39 @@ setup.worldmap = {
 		ground.setAttribute('y', 0);
 		ground.setAttribute('width', width);
 		ground.setAttribute('height', height);
-		ground.setAttribute('fill', '#1b1d1f');
+		var landMask = this.getLandMask();
+		// With land drawn, the ground is the sea.
+		ground.setAttribute('fill', landMask ? '#142029' : '#1b1d1f');
 		ground.setAttribute('class', 'debug-map-ground');
 		svg.appendChild(ground);
+		// Land and water, from Natural Earth: a picture made once, a pixel per block, so the lines can be read against
+		// real coastlines on a grid where north is seldom up.
+		if (landMask) {
+			var landImage = document.createElementNS(ns, 'image');
+			landImage.setAttribute('x', left(landMask.x0));
+			landImage.setAttribute('y', top(landMask.y0));
+			landImage.setAttribute('width', landMask.width * landMask.block * cell);
+			landImage.setAttribute('height', landMask.height * landMask.block * cell);
+			landImage.setAttribute('preserveAspectRatio', 'none');
+			landImage.setAttribute('pointer-events', 'none');
+			landImage.setAttribute('class', 'debug-map-land');
+			svg.appendChild(landImage);
+			var landCanvas = document.createElement('canvas');
+			landCanvas.width = landMask.width;
+			landCanvas.height = landMask.height;
+			var landContext = landCanvas.getContext && landCanvas.getContext('2d');
+			if (landContext) {
+				var landPicture = landContext.createImageData(landMask.width, landMask.height);
+				for (var block = 0; block < landMask.isLand.length; block++) {
+					if (!landMask.isLand[block]) continue;
+					landPicture.data[block * 4] = 44; landPicture.data[block * 4 + 1] = 50; landPicture.data[block * 4 + 2] = 40;
+					landPicture.data[block * 4 + 3] = 255;
+				}
+				landContext.putImageData(landPicture, 0, 0);
+				if (landCanvas.toBlob) landCanvas.toBlob(function(blob) { if (blob) landImage.setAttribute('href', URL.createObjectURL(blob)); });
+				else landImage.setAttribute('href', landCanvas.toDataURL());
+			}
+		}
 		var self = this;
 		var squares = document.createElementNS(ns, 'g');
 		squares.setAttribute('class', 'debug-map-squares');
@@ -1168,10 +1245,24 @@ setup.worldmap = {
 		var drawn = null;
 		// Draws what the frame shows, and a screen more each way so a short scroll needs nothing new. Called on every
 		// scroll and zoom; it does nothing while the view stays inside what is already drawn at the same zoom.
+		// Which way true north lies at the middle of the view: grid north is up, and far from a grid's centre true north
+		// is well off it.
+		var compass = document.createElement('span');
+		compass.className = 'debug-map-north';
+		compass.setAttribute('title', 'True north at the middle of the view');
+		var needle = document.createElement('span');
+		needle.className = 'debug-map-north-needle';
+		needle.textContent = '\u2191';
+		compass.appendChild(needle);
+		compass.appendChild(document.createTextNode(' N'));
 		var redraw = function(frame) {
 			if (!frame || !frame.clientWidth) return;
 			var box = svg.getBoundingClientRect(), frameBox = frame.getBoundingClientRect(), scale = box.width / width;
 			if (!scale) return;
+			var middleX = rect.x0 + Math.floor((frameBox.left + frame.clientWidth / 2 - box.left) / scale / cell);
+			var middleY = rect.y1 - Math.floor((frameBox.top + frame.clientHeight / 2 - box.top) / scale / cell);
+			var north = self.gridNorthAt(middleX, middleY);
+			if (north !== null) needle.style.transform = 'rotate(' + Math.round(-north) + 'deg)';
 			var detail = cell * scale >= self.DEBUG_MAP_DETAIL_PX;
 			// The coarse picture while a square is under a pixel, the fine one until the squares themselves are drawn.
 			var coarse = cell * scale < 1;
@@ -1292,7 +1383,7 @@ setup.worldmap = {
 		var focusTile = hasTrain && here && here.realWorld ? here.tile
 			: setup.onfoot && setup.onfoot.isOnFoot() ? setup.onfoot.getTile()
 				: setup.realWorldPilot.getStationTile(Number(State.variables.currentStation) || 1);
-		return { svg: svg, leg: leg, rect: rect, cell: cell, redraw: redraw,
+		return { svg: svg, leg: leg, rect: rect, cell: cell, redraw: redraw, compass: compass,
 			corridorCentre: { x: left((leg.rect.x0 + leg.rect.x1) / 2), y: top((leg.rect.y0 + leg.rect.y1) / 2) },
 			focus: focusTile ? { x: left(focusTile.x) + cell / 2, y: top(focusTile.y) + cell / 2 } : null };
 	},
@@ -1310,6 +1401,7 @@ setup.worldmap = {
 		var bar = document.createElement('div');
 		bar.className = 'railyard-view-zoom debug-map-zoom';
 		var readout = document.createElement('span');
+		readout.className = 'debug-map-zoom-readout';
 		var currentScale = function() {
 			return svg.getBoundingClientRect().width / Math.max(1, width);
 		};
@@ -1504,6 +1596,7 @@ setup.worldmap = {
 				requestAnimationFrame(function() { pending = false; built.redraw(frame); });
 			}, { passive: true });
 			var zoomBar = this.createDebugMapZoom(built.svg, frame, built);
+			zoomBar.appendChild(built.compass);
 			parent.appendChild(zoomBar);
 			parent.appendChild(frame);
 			built.redraw(frame);
@@ -1522,7 +1615,10 @@ setup.worldmap = {
 						+ 'grid ' + x + ',' + y + ' ' + tile.terrain + ' ' + tile.shape + ' | '
 						+ tile.geoCoordinate[1].toFixed(3) + '\u00b0, ' + tile.geoCoordinate[0].toFixed(3) + '\u00b0 | mean '
 						+ Math.round(tile.elevation) + ' m, relief \u03c3 ' + Math.round(tile.elevationStdDevM) + ' m')
-						: 'grid ' + x + ',' + y + ': no track';
+						: 'grid ' + x + ',' + y + ': no track' + (function() {
+							var grid = setup.worldmap.gridAt(x, y), place = grid && setup.worldmap.unprojectGrid(x, y, grid);
+							return place ? ' | ' + place[1].toFixed(2) + '\u00b0, ' + place[0].toFixed(2) + '\u00b0' : '';
+						})();
 				});
 			}
 			// The debug tools are built inside a hidden panel and a folded section, so the map has no size until the

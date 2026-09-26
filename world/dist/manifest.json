@@ -106,6 +106,17 @@
       "attribution": "Lehner and Grill (2013), HydroRIVERS / HydroSHEDS",
       "status": "planned",
       "use": "River intersections and crossing importance for missing/generated lines"
+    },
+    {
+      "id": "natural-earth-50m-land-5.1.2",
+      "name": "Natural Earth 1:50m land polygons, version 5.1.2",
+      "url": "https://github.com/nvkelso/natural-earth-vector/blob/v5.1.2/geojson/ne_50m_land.geojson",
+      "retrieved": "2026-09-26",
+      "license": "Public domain",
+      "attribution": "Land outlines made with Natural Earth",
+      "status": "ingested",
+      "use": "Land and water drawn under the network on the debug map",
+      "transformation": "scripts/world/land-mask.cjs: filled into a 0.05-degree raster, then sampled for blocks of 2 by 2 grid squares on the grid each block lies on (world/external/natural-earth-50m-land.geojson)"
     }
   ],
   "regions": [
@@ -1132,7 +1143,7 @@
           "cellKm": 5
         },
         "offset": [0, 0],
-        "count": 89583
+        "count": 65069
       },
       {
         "id": "afro-eurasia-network",
@@ -1142,9 +1153,9 @@
           "origin": [-168.09035, 65.60829],
           "cellKm": 5
         },
-        "offset": [-1073, 2710],
+        "offset": [-1073, 2709],
         "turn": 2,
-        "count": 163772
+        "count": 131148
       }
     ],
     "joins": [
@@ -1155,7 +1166,7 @@
         ],
         "square": "-1073,2710",
         "name": "Wales",
-        "offset": [-1073, 2710],
+        "offset": [-1073, 2709],
         "turn": 2,
         "note": "Wales, Alaska: where the Americas' route ends and the Bering Strait tunnel comes ashore. Europe, Asia and Africa's grid is turned half round about it, so that it lies north of the Americas' squares rather than over them."
       }
@@ -1184,7 +1195,7 @@
           "elevation": {
             "sourceId": "copernicus-dem-glo90",
             "aggregation": "mean-and-population-standard-deviation-within-grid-square",
-            "tileCount": 4783
+            "tileCount": 664
           }
         }
       }
@@ -1210,7 +1221,7 @@
       "elevation": {
         "sourceId": "copernicus-dem-glo90",
         "aggregation": "mean-and-population-standard-deviation-within-grid-square",
-        "tileCount": 2267
+        "tileCount": 2121
       }
     },
     "parameters": {
@@ -1223,7 +1234,7 @@
       "bridgeMinKm": 0.2,
       "tunnelMinShare": 0.5,
       "maxSectionKm": 100,
-      "minStubKm": 10,
+      "stationShiftSquares": 4,
       "stubJoinKm": 25,
       "stubDetourFactor": 4,
       "stubDetourMinKm": 60,
@@ -1244,13 +1255,13 @@
       "shortcutDetourFactor": 4,
       "shortcutDetourMinKm": 500,
       "cityTrackKm": 10,
-      "parallelFactor": 1.4,
-      "parallelExtraKm": 15,
+      "parallelFactor": 2,
+      "parallelExtraKm": 40,
       "densityRadiusKm": 50,
       "sparsePopulation": 150000,
       "densePopulation": 1000000,
-      "ruralSpacingKm": 15,
-      "denseSpacingKm": 25,
+      "ruralSpacingKm": 25,
+      "denseSpacingKm": 35,
       "urbanPopulation": 500000,
       "urbanRadiusKm": 20,
       "industrialRailKm": 60,
@@ -1296,10 +1307,10 @@
       }
     },
     "stats": {
-      "squareCount": 253355,
-      "moveCount": 260335,
-      "stopCount": 33657,
-      "haltCount": 2142,
+      "squareCount": 196217,
+      "moveCount": 199075,
+      "stopCount": 20597,
+      "haltCount": 1743,
       "bridgeCount": 56149,
       "bridgeKm": 398336,
       "stubJoinCount": 10294,
@@ -1307,32 +1318,32 @@
       "endJoinCount": 61,
       "spurCount": 470,
       "shortcutCount": 32,
-      "parallelStretchesRemoved": 12884,
-      "parallelKmRemoved": 262432,
+      "parallelStretchesRemoved": 17006,
+      "parallelKmRemoved": 411960,
       "onExistingTrackKm": 23733,
-      "stationsMovedOffJunctions": 11788,
-      "junctionPoints": 23780,
-      "bufferPoints": 5629,
+      "stationsMovedOffJunctions": 46387,
+      "junctionPoints": 11032,
+      "bufferPoints": 0,
       "urbanAreas": 2396,
       "urbanSquaresRemoved": 8001,
       "urbanMovesRemoved": 11077,
       "stopRegions": {
-        "urban": 745,
-        "industrial": 4624,
-        "rural": 28289
+        "urban": 590,
+        "industrial": 4639,
+        "rural": 15369
       },
       "stationsWithoutYard": {
-        "urban": 9765,
-        "industrial": 16022,
-        "rural": 31190
+        "urban": 4897,
+        "industrial": 7279,
+        "rural": 18333
       },
-      "railKm": 2030307,
+      "railKm": 1664216,
       "leftOutPieces": 246,
       "leftOutKm": 59198,
       "unreachableCities": [],
-      "prunedStubSquares": 17895,
-      "junctionSquares": 23780,
-      "endSquares": 11837
+      "prunedStubSquares": 48641,
+      "junctionSquares": 11032,
+      "endSquares": 5773
     },
     "files": [
       "world/network/americas-network.json",

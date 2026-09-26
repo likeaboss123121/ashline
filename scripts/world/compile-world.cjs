@@ -3,6 +3,7 @@ const path = require('node:path');
 const { simplify } = require('./route-planning-links.cjs');
 const { parseCsv } = require('./csv.cjs');
 const { readRecords } = require('./records.cjs');
+const { landMask, rasterizeLand } = require('./land-mask.cjs');
 
 const root = path.resolve(__dirname, '../..');
 const checkOnly = process.argv.includes('--check');
@@ -233,7 +234,23 @@ function joinNetworks(base, other, joinAt) {
   const turn = joinAt.turn || 0;
   const [hx, hy] = here.stop.square.split(',').map(Number);
   const [tx, ty] = quarterTurn(...there.stop.square.split(',').map(Number), turn);
-  const dx = hx - tx, dy = hy - ty, seam = here.stop.square;
+  let dx = hx - tx, dy = hy - ty;
+  const seam = here.stop.square;
+  // A station is drawn straight, so where both lines end at the join, the second network's line is brought in from
+  // exactly opposite the first's: its end square is left out, and the square before it placed beside the join on the
+  // far side, the move between them keeping its length. The grids meet at an arbitrary seam anyway.
+  const baseEnds = base.squares.find(square => square.x + ',' + square.y === seam).ends;
+  const theirs = other.squares.find(square => square.x + ',' + square.y === there.stop.square);
+  let straighten = null;
+  if (baseEnds.length === 1 && theirs.ends.length === 1) {
+    const [bx, by] = [baseEnds[0].dx, baseEnds[0].dy], [ex, ey] = quarterTurn(theirs.ends[0].dx, theirs.ends[0].dy, turn);
+    if (ex !== -bx || ey !== -by) {
+      dx = hx - bx - (tx + ex);
+      dy = hy - by - (ty + ey);
+      straighten = { drop: there.stop.square, next: (theirs.x + theirs.ends[0].dx) + ',' + (theirs.y + theirs.ends[0].dy),
+        back: [-ex, -ey], towardSeam: [bx, by], km: theirs.ends[0].km };
+    }
+  }
   const place = (x, y) => { const [u, v] = quarterTurn(x, y, turn); return [u + dx, v + dy]; };
   const move = key => place(...key.split(',').map(Number)).join(',');
   // Stops and halts named for their square are named for the square they are moved to.
@@ -242,10 +259,22 @@ function joinNetworks(base, other, joinAt) {
   const squares = base.squares.map(square => square.x + ',' + square.y === seam ? { ...square, ends: square.ends.slice() } : square);
   const byKey = new Map(squares.map(square => [square.x + ',' + square.y, square]));
   let added = 0;
-  other.squares.forEach(square => {
-    const [x, y] = place(square.x, square.y), key = x + ',' + y;
-    const ends = square.ends.map(end => { const [edx, edy] = quarterTurn(end.dx, end.dy, turn); return { ...end, dx: edx, dy: edy }; })
+  if (straighten) {
+    const joined = byKey.get(seam);
+    joined.ends = joined.ends.concat([{ dx: -straighten.towardSeam[0] + 0, dy: -straighten.towardSeam[1] + 0, km: straighten.km }])
       .sort((a, b) => a.dx - b.dx || a.dy - b.dy);
+  }
+  other.squares.forEach(square => {
+    if (straighten && square.x + ',' + square.y === straighten.drop) return;
+    const [x, y] = place(square.x, square.y), key = x + ',' + y;
+    const ends = square.ends.map(end => {
+      const [edx, edy] = quarterTurn(end.dx, end.dy, turn);
+      // The move back to the square left out goes to the join instead.
+      if (straighten && square.x + ',' + square.y === straighten.next && edx === straighten.back[0] && edy === straighten.back[1]) {
+        return { ...end, dx: straighten.towardSeam[0], dy: straighten.towardSeam[1] };
+      }
+      return { ...end, dx: edx, dy: edy };
+    }).sort((a, b) => a.dx - b.dx || a.dy - b.dy);
     if (key === seam) {
       const joined = byKey.get(seam);
       ends.forEach(end => assert(!joined.ends.some(mine => mine.dx === end.dx && mine.dy === end.dy),
@@ -320,9 +349,16 @@ function validateNetwork(network) {
   network.stops.forEach(stop => {
     assert(byKey.has(stop.square), 'Network stop is off the network: ' + stop.id);
     assert(!stopSquares.has(stop.square), 'Two network stops share a square: ' + stop.square);
-    // A railyard has two ends, one line at each: junctions are out on the line.
-    assert(network.squares[byKey.get(stop.square)].ends.length <= 2, 'A network stop has more than two lines: ' + stop.id);
+    // A railyard has two ends, one line at each: junctions are out on the line. It is drawn straight, so its lines
+    // leave in exactly opposite directions.
+    const ends = network.squares[byKey.get(stop.square)].ends;
+    assert(ends.length <= 2, 'A network stop has more than two lines: ' + stop.id);
+    assert(ends.length < 2 || (ends[0].dx === -ends[1].dx && ends[0].dy === -ends[1].dy), 'A network stop is on a bend: ' + stop.id);
     stopSquares.add(stop.square);
+  });
+  // Every line leads somewhere: each end of a line is a station.
+  network.squares.forEach(square => {
+    assert(square.ends.length !== 1 || stopSquares.has(square.x + ',' + square.y), 'A line ends with no station: ' + square.x + ',' + square.y);
   });
   // No two railyards in squares that touch.
   stopSquares.forEach(key => {
@@ -370,8 +406,13 @@ function compactNetwork(network) {
     first += chart.count;
     return entry;
   }) : null;
+  // Land and water under the network, for the debug map (scripts/world/land-mask.cjs).
+  const landFile = path.join(root, 'world/external/natural-earth-50m-land.geojson');
+  const land = fs.existsSync(landFile) ? landMask(network.squares,
+    network.charts || [{ grid: network.grid, offset: [0, 0], count: network.squares.length }],
+    rasterizeLand(JSON.parse(fs.readFileSync(landFile, 'utf8')))) : null;
   return { id: network.id, label: network.label, grid: network.grid, ...(charts ? { charts } : {}), start: byKey.get(network.startSquare),
-    stats: network.stats, squares, stops, points };
+    stats: network.stats, squares, stops, points, ...(land ? { land } : {}) };
 }
 
 function validateBundle(bundle) {

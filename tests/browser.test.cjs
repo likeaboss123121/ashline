@@ -1637,7 +1637,7 @@ test('debug mode draws the complete sourced rail grid', async t => {
   assert.equal(await page.locator('#developer-Debug svg.worldmap-debug').count(), 0);
   await page.getByRole('button', { name: 'Debug', exact: true }).click();
   await page.locator('#developer-Debug svg.worldmap-debug').waitFor();
-  await page.waitForFunction(() => /%$/.test((document.querySelector('.debug-map-zoom span') || {}).textContent || ''));
+  await page.waitForFunction(() => /%$/.test((document.querySelector('.debug-map-zoom-readout') || {}).textContent || ''));
   const drawing = () => page.evaluate(() => {
     const svg = document.querySelector('#developer-Debug svg.worldmap-debug');
     if (!svg) return null;
@@ -1796,17 +1796,17 @@ test('the debug map zooms out to the whole continent and in again, and a drag pa
   const svg = mapSection.locator('svg.worldmap-debug');
   const frame = mapSection.locator('.debug-map-frame');
   // The network is drawn when the panel opens, then opened at its starting zoom.
-  await page.waitForFunction(() => /%$/.test((document.querySelector('.debug-map-zoom span') || {}).textContent || ''));
+  await page.waitForFunction(() => /%$/.test((document.querySelector('.debug-map-zoom-readout') || {}).textContent || ''));
   // It opens close enough to click a tile: about 6 px each.
   const opening = (await svg.locator('rect.debug-teleport-tile').first().boundingBox()).width;
   assert.ok(opening > 5 && opening < 7, String(opening));
   await bar.getByRole('button', { name: 'Shrink the map until all of it is in view' }).click();
   const whole = await svg.boundingBox(), box = await frame.boundingBox();
   assert.ok(whole.width <= box.width + 1 && whole.height <= box.height + 1, JSON.stringify({ whole, box }));
-  assert.equal(await bar.locator('span').innerText(), 'Whole map');
+  assert.equal(await bar.locator('.debug-map-zoom-readout').innerText(), 'Whole map');
   await bar.getByRole('button', { name: 'Zoom in' }).click();
   assert.ok((await svg.boundingBox()).width > whole.width * 1.4);
-  assert.match(await bar.locator('span').innerText(), /^\d+%$/);
+  assert.match(await bar.locator('.debug-map-zoom-readout').innerText(), /^\d+%$/);
   // A drag that starts and ends on track tiles scrolls the map and teleports nobody.
   // Punta Arenas, where the player stands (cities are named at every zoom), brought to the middle of the view, so
   // zooming in closes on track: the middle of the whole world is open ground between the two grids.

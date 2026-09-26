@@ -104,6 +104,17 @@
       "attribution": "Lehner and Grill (2013), HydroRIVERS / HydroSHEDS",
       "status": "planned",
       "use": "River intersections and crossing importance for missing/generated lines"
+    },
+    {
+      "id": "natural-earth-50m-land-5.1.2",
+      "name": "Natural Earth 1:50m land polygons, version 5.1.2",
+      "url": "https://github.com/nvkelso/natural-earth-vector/blob/v5.1.2/geojson/ne_50m_land.geojson",
+      "retrieved": "2026-09-26",
+      "license": "Public domain",
+      "attribution": "Land outlines made with Natural Earth",
+      "status": "ingested",
+      "use": "Land and water drawn under the network on the debug map",
+      "transformation": "scripts/world/land-mask.cjs: filled into a 0.05-degree raster, then sampled for blocks of 2 by 2 grid squares on the grid each block lies on (world/external/natural-earth-50m-land.geojson)"
     }
   ]
 }

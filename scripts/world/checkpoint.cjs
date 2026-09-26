@@ -18,12 +18,14 @@ const path = require('node:path');
 
 const LONG_ARRAY = 1000;
 
-// A short hash of anything: functions by their source, files (given as { file }) by their contents.
+// A short hash of anything: functions by their source, files (given as { file }) by their text. Line endings are
+// made alike first, so a checkout with Windows line endings keys its checkpoints as one with Unix ones does.
+const unixLines = text => text.replace(/\r\n/g, '\n');
 function hashOf(...parts) {
   const hash = crypto.createHash('sha256');
   parts.forEach(part => {
-    if (typeof part === 'function') hash.update('fn:' + part.toString());
-    else if (part && typeof part === 'object' && typeof part.file === 'string') hash.update('file:').update(fs.readFileSync(part.file));
+    if (typeof part === 'function') hash.update('fn:' + unixLines(part.toString()));
+    else if (part && typeof part === 'object' && typeof part.file === 'string') hash.update('file:' + unixLines(fs.readFileSync(part.file, 'utf8')));
     else hash.update('json:' + JSON.stringify(part === undefined ? null : part));
     hash.update('\0');
   });
@@ -60,7 +62,7 @@ function fileFor(dir, scope, stage) {
 
 // Writes a stage's state (a plain object of fields) atomically: to a .part file first, renamed into place when
 // complete, so a checkpoint on disk is always a whole one.
-function write(dir, scope, stage, key, state) {
+function write(dir, scope, stage, key, state, parts) {
   fs.mkdirSync(dir, { recursive: true });
   const file = fileFor(dir, scope, stage), part = file + '.part';
   const descriptor = fs.openSync(part, 'w');
@@ -69,7 +71,7 @@ function write(dir, scope, stage, key, state) {
     buffer += line + '\n';
     if (buffer.length > (1 << 20)) { fs.writeSync(descriptor, buffer); buffer = ''; }
   };
-  out(JSON.stringify({ stage, key, written: new Date().toISOString() }));
+  out(JSON.stringify({ stage, key, written: new Date().toISOString(), ...(parts ? { parts } : {}) }));
   Object.entries(state).forEach(([name, value]) => {
     if (Array.isArray(value) && value.length > LONG_ARRAY) {
       out(JSON.stringify([name, '$array', value.length]));
@@ -85,18 +87,36 @@ function write(dir, scope, stage, key, state) {
   return fs.statSync(file).size;
 }
 
-// Reads a stage's state back, or null when there is none or it was written for a different key. A file that cannot
-// be read whole is treated as missing: the stage just runs again.
-function read(dir, scope, stage, key) {
+// A checkpoint's first line: { stage, key, written, parts }, or null when there is none.
+function header(dir, scope, stage) {
   const file = fileFor(dir, scope, stage);
   if (!fs.existsSync(file)) return null;
   try {
     const descriptor = fs.openSync(file, 'r');
-    const first = Buffer.alloc(512);
-    const length = fs.readSync(descriptor, first, 0, first.length, 0);
+    const chunks = [];
+    const buffer = Buffer.alloc(1 << 16);
+    for (let position = 0; ; ) {
+      const length = fs.readSync(descriptor, buffer, 0, buffer.length, position);
+      if (!length) break;
+      chunks.push(Buffer.from(buffer.subarray(0, length)));
+      position += length;
+      if (buffer.subarray(0, length).includes(10)) break;
+    }
     fs.closeSync(descriptor);
-    const header = JSON.parse(first.subarray(0, length).toString('utf8').split('\n')[0]);
-    if (header.key !== key) return null;
+    return JSON.parse(Buffer.concat(chunks).toString('utf8').split('\n')[0]);
+  } catch (error) {
+    return null;
+  }
+}
+
+// Reads a stage's state back, or null when there is none or it was written for a different key (key null: whatever
+// it was written for). A file that cannot be read whole is treated as missing: the stage just runs again.
+function read(dir, scope, stage, key) {
+  const file = fileFor(dir, scope, stage);
+  if (!fs.existsSync(file)) return null;
+  try {
+    const first = header(dir, scope, stage);
+    if (!first || (key !== null && first.key !== key)) return null;
     const lines = fs.readFileSync(file, 'utf8').split('\n');
     const state = {};
     for (let index = 1; index < lines.length; index++) {
@@ -117,4 +137,4 @@ function read(dir, scope, stage, key) {
   }
 }
 
-module.exports = { hashOf, hashFile, write, read, fileFor };
+module.exports = { hashOf, hashFile, write, read, header, fileFor };
