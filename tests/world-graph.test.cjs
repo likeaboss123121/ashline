@@ -455,10 +455,32 @@ test('two networks on grids of their own are joined into one where both have a s
   assert.deepEqual(world.charts.map(chart => [chart.id, chart.offset, chart.count]),
     [['americas-network', [0, 0], 3], ['afro-eurasia-network', [-2, 3], 2]]);
   assert.equal(world.stats.spurCount, 2);
-  // Grids that would lay squares on each other are refused.
-  const clash = network('afro-eurasia-network', [square(0, -1, [[0, 1]]), square(0, 0, [[0, -1]])], [
-    { id: 'authored-end:0,0', name: 'Wales', square: '0,0', coordinates: [191.90965, 65.60829] }], '0,-1');
-  assert.throws(() => joinNetworks(americas, clash, { coordinates: [-168.09035, 65.60829] }), /overlap|same way/);
+  // Grids that would lay squares on each other are refused, and turned half round, the same grid lies clear.
+  const clash = () => network('afro-eurasia-network', [square(0, -2, [[0, 1]]), square(0, -1, [[0, -1], [0, 1]]), square(0, 0, [[0, -1]])], [
+    { id: 'halt:0,-2', name: 'Uelen', square: '0,-2', coordinates: [190.2, 66.2] },
+    { id: 'authored-end:0,0', name: 'Wales', square: '0,0', coordinates: [191.90965, 65.60829] }], '0,-2');
+  assert.throws(() => joinNetworks(americas, clash(), { coordinates: [-168.09035, 65.60829] }), /overlap|same way/);
+  const turned = joinNetworks(americas, clash(), { coordinates: [-168.09035, 65.60829], turn: 2 });
+  validateNetwork(turned);
+  assert.deepEqual(turned.squares.map(s => [s.x, s.y, s.ends.map(end => [end.dx, end.dy])]).sort((a, b) => a[1] - b[1]),
+    [[-2, 1, [[0, 1]]], [-2, 2, [[0, -1], [0, 1]]], [-2, 3, [[0, -1], [0, 1]]], [-2, 4, [[0, -1], [0, 1]]], [-2, 5, [[0, -1]]]]);
+  assert.deepEqual(turned.stops.map(stop => stop.id), ['place:start', 'authored-end:-2,3', 'halt:-2,5']);
+  assert.deepEqual(turned.charts[1].turn, 2);
+});
+
+test('the game finds the place of a square on a grid turned and moved to join another', () => {
+  const projection = require('../scripts/world/projection.cjs');
+  const { setup } = loadGame();
+  const asia = { ...projection.GRID, centre: [40, 37.5], origin: [-168.09035, 65.60829] };
+  // As the compiler lays it: turned half round about Wales, then moved so Wales lands on the Americas' Wales.
+  const joined = { ...asia, offset: [-1073, 2710], turn: 2 };
+  for (const point of [[18.42322, -33.92584], [37.61781, 55.75204], [-169.817, 66.16053], [141.67, 45.41]]) {
+    const [x, y] = projection.cellOf(point, asia), expected = projection.centreOf([x, y], asia);
+    const found = setup.worldmap.unprojectGrid(-x - 1073, -y + 2710, joined);
+    assert.ok(Math.abs(((found[0] - expected[0]) % 360 + 540) % 360 - 180) < 1e-4 && Math.abs(found[1] - expected[1]) < 1e-4,
+      point.join(',') + ': ' + found.join(',') + ' is not ' + expected.join(','));
+    assert.ok(found[0] >= -180 && found[0] < 180);
+  }
 });
 
 test('the generator rules make the connections Likea asked for, and thin the yards in cities', () => {

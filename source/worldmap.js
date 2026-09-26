@@ -173,22 +173,28 @@ setup.worldmap = {
 	// The compass name a player would use for a direction, rather than the two letters the map stores.
 	COMPASS_NAMES: { n: 'north', ne: 'north-east', e: 'east', se: 'south-east', s: 'south', sw: 'south-west', w: 'west', nw: 'north-west' },
 	// The compass name of a grid direction. Given the square it is taken from, on the network's grid, it names the true
-	// bearing of that step instead: the grid is one projection over a continent or two, and far from its centre grid
-	// north is not true north (at Wales, Alaska, tens of degrees off), which a player reading the sun would notice.
+	// bearing of that step instead: the grid is a projection over a continent or two, and far from its centre grid
+	// north is not true north (at Wales, Alaska, tens of degrees off; in Europe, on a grid turned to meet the Americas,
+	// grid north points south), which a player reading the sun would notice.
 	COMPASS_ORDER: ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'],
 	describeDirection: function(index, tile) {
 		var direction = this.DIRECTIONS[index];
 		if (!direction) return '';
-		var data = setup.worldGraphData && setup.worldGraphData.network;
-		if (tile && data && data.grid && typeof tile.x === 'number' && typeof tile.y === 'number') {
-			var grid = this.gridFor(tile);
-			var a = this.unprojectGrid(tile.x, tile.y, grid), b = this.unprojectGrid(tile.x + direction.dx, tile.y + direction.dy, grid);
-			var radians = Math.PI / 180, dLon = (b[0] - a[0]) * radians;
-			var bearing = Math.atan2(Math.sin(dLon) * Math.cos(b[1] * radians),
-				Math.cos(a[1] * radians) * Math.sin(b[1] * radians) - Math.sin(a[1] * radians) * Math.cos(b[1] * radians) * Math.cos(dLon)) / radians;
-			return this.COMPASS_NAMES[this.COMPASS_ORDER[Math.round(((bearing % 360) + 360) % 360 / 45) % 8]];
-		}
+		var bearing = this.gridBearing(tile, direction.dx, direction.dy);
+		if (bearing !== null) return this.COMPASS_NAMES[this.COMPASS_ORDER[Math.round(bearing / 45) % 8]];
 		return this.COMPASS_NAMES[direction.name];
+	},
+	// The true bearing, in degrees clockwise from north, of a step of (dx, dy) squares from a tile of the network; null
+	// for a tile that is not on it.
+	gridBearing: function(tile, dx, dy) {
+		var data = setup.worldGraphData && setup.worldGraphData.network;
+		if (!tile || !data || !data.grid || typeof tile.x !== 'number' || typeof tile.y !== 'number') return null;
+		var grid = this.gridFor(tile);
+		var a = this.unprojectGrid(tile.x, tile.y, grid), b = this.unprojectGrid(tile.x + dx, tile.y + dy, grid);
+		var radians = Math.PI / 180, dLon = (b[0] - a[0]) * radians;
+		var bearing = Math.atan2(Math.sin(dLon) * Math.cos(b[1] * radians),
+			Math.cos(a[1] * radians) * Math.sin(b[1] * radians) - Math.sin(a[1] * radians) * Math.cos(b[1] * radians) * Math.cos(dLon)) / radians;
+		return ((bearing % 360) + 360) % 360;
 	},
 	directionIndex: function(name) {
 		for (var i = 0; i < this.DIRECTIONS.length; i++) {
@@ -1037,9 +1043,11 @@ setup.worldmap = {
 		return data.grid;
 	},
 	// The middle of a grid square as [longitude, latitude], from the grid's projection (scripts/world/projection.cjs),
-	// less the offset of a grid moved to join another (gridFor), and with the longitude between -180 and 180.
+	// for a grid turned and moved to join another (gridFor) its own square found first: the offset taken away, then
+	// its quarter turns undone. The longitude is between -180 and 180.
 	unprojectGrid: function(x, y, grid) {
 		if (grid.offset) { x -= grid.offset[0]; y -= grid.offset[1]; }
+		for (var turn = 0; turn < (((grid.turn || 0) % 4) + 4) % 4; turn++) { var back = x; x = y; y = -back; }
 		var radians = Math.PI / 180, R = 6371.0088;
 		var lambda0 = grid.centre[0] * radians, phi0 = grid.centre[1] * radians;
 		var forward = function(p) {

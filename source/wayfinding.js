@@ -69,8 +69,10 @@ setup.wayfinding = {
 		return centres.length ? this.drawAreas(centres, this.getHereTile(), 'Map of the railways you have seen') : null;
 	},
 
-	// The squares within MAP_RADIUS_KM of any of centres, north up, the stations named and here marked (when it falls
-	// on the drawing).
+	// The squares within MAP_RADIUS_KM of any of centres, the stations named and here marked (when it falls on the
+	// drawing). North is up to within 45 degrees: the drawing is turned by whole quarter turns towards true north, since
+	// grid north can be well off it (tens of degrees in Alaska; south, in Europe, on the grid turned to meet the
+	// Americas). Quarter turns keep the names upright and the drawing square to the page.
 	drawAreas: function(centres, here, label) {
 		var route = setup.realWorldPilot.getGridRoute();
 		var grid = setup.worldGraphData.network.grid, reach = Math.round(this.MAP_RADIUS_KM / grid.cellKm);
@@ -78,10 +80,19 @@ setup.wayfinding = {
 		var x1 = Math.max.apply(null, centres.map(function(tile) { return tile.x; })) + reach;
 		var y0 = Math.min.apply(null, centres.map(function(tile) { return tile.y; })) - reach;
 		var y1 = Math.max.apply(null, centres.map(function(tile) { return tile.y; })) + reach;
-		var cell = this.MAP_CELL_PX, width = (x1 - x0 + 1) * cell, height = (y1 - y0 + 1) * cell, size = width;
+		var cell = this.MAP_CELL_PX, across = (x1 - x0 + 1) * cell, down = (y1 - y0 + 1) * cell;
+		// Quarter turns clockwise that bring grid north nearest true north, from where the grid points at the first centre.
+		var bearing = setup.worldmap.gridBearing(centres[0], 0, 1);
+		var turns = bearing === null ? 0 : Math.round(bearing / 90) % 4;
+		var width = turns % 2 ? down : across, height = turns % 2 ? across : down, size = width;
+		// A point of the drawing, from its place on the grid as it would be drawn grid north up, turned.
+		var turned = function(px, py) {
+			return turns === 1 ? [down - py, px] : turns === 2 ? [across - px, down - py] : turns === 3 ? [py, across - px] : [px, py];
+		};
+		var at = function(x, y) { return turned((x - x0) * cell + cell / 2, (y1 - y) * cell + cell / 2); };
+		var left = function(x, y) { return at(x, y)[0]; };
+		var top = function(x, y) { return at(x, y)[1]; };
 		var ns = 'http://www.w3.org/2000/svg';
-		var left = function(x) { return (x - x0) * cell + cell / 2; };
-		var top = function(y) { return (y1 - y) * cell + cell / 2; };
 		var svg = document.createElementNS(ns, 'svg');
 		svg.setAttribute('class', 'station-map');
 		svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
@@ -104,29 +115,30 @@ setup.wayfinding = {
 		near.forEach(function(tile) {
 			tile.ends.forEach(function(end) {
 				var direction = setup.worldmap.DIRECTIONS[end];
-				track.push('M' + left(tile.x) + ' ' + top(tile.y) + 'L' + (left(tile.x) + direction.dx * cell / 2) + ' '
-					+ (top(tile.y) - direction.dy * cell / 2));
+				// Half way to the next square.
+				var to = at(tile.x + direction.dx / 2, tile.y + direction.dy / 2);
+				track.push('M' + left(tile.x, tile.y) + ' ' + top(tile.x, tile.y) + 'L' + to[0] + ' ' + to[1]);
 			});
 		});
 		add('path', { d: track.join(''), class: 'station-map-track' });
 		near.forEach(function(tile) {
-			if (tile.junction) add('circle', { cx: left(tile.x), cy: top(tile.y), r: cell / 5, class: 'station-map-junction' });
+			if (tile.junction) add('circle', { cx: left(tile.x, tile.y), cy: top(tile.x, tile.y), r: cell / 5, class: 'station-map-junction' });
 		});
 		near.forEach(function(tile) {
 			if (!tile.stationIndex) return;
 			var isHere = !!here && tile.x === here.x && tile.y === here.y;
-			add('circle', { cx: left(tile.x), cy: top(tile.y), r: isHere ? cell / 2 : cell / 3,
+			add('circle', { cx: left(tile.x, tile.y), cy: top(tile.x, tile.y), r: isHere ? cell / 2 : cell / 3,
 				class: isHere ? 'station-map-here' : 'station-map-station' });
 			// A name in the right half of the map reads leftwards from its marker, so it stays on the map.
-			var leftward = left(tile.x) > size / 2;
-			add('text', { x: left(tile.x) + (leftward ? -cell * 0.7 : cell * 0.7), y: top(tile.y) + cell / 3,
+			var leftward = left(tile.x, tile.y) > size / 2;
+			add('text', { x: left(tile.x, tile.y) + (leftward ? -cell * 0.7 : cell * 0.7), y: top(tile.x, tile.y) + cell / 3,
 				'text-anchor': leftward ? 'end' : 'start', class: 'station-map-label' },
 				isHere ? tile.station + ' (you are here)' : tile.station);
 		});
 		// Out on the line, where the train or the walker is.
 		if (here && !here.stationIndex && here.x >= x0 && here.x <= x1 && here.y >= y0 && here.y <= y1) {
-			add('circle', { cx: left(here.x), cy: top(here.y), r: cell / 2, class: 'station-map-here' });
-			add('text', { x: left(here.x) + cell * 0.7, y: top(here.y) + cell / 3, class: 'station-map-label' }, 'You are here');
+			add('circle', { cx: left(here.x, here.y), cy: top(here.x, here.y), r: cell / 2, class: 'station-map-here' });
+			add('text', { x: left(here.x, here.y) + cell * 0.7, y: top(here.x, here.y) + cell / 3, class: 'station-map-label' }, 'You are here');
 		}
 		return svg;
 	},

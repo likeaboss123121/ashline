@@ -214,9 +214,15 @@ function compile() {
 
 // Two networks built on grids of their own, joined into one where both have a stop at joinAt.coordinates (Wales,
 // Alaska, where the Americas' route ends and the Bering Strait tunnel comes ashore). The second network's squares are
-// moved by whole squares so its stop there lands on the first's, and that square becomes one station with the lines
-// of both. Every move is still to a neighbouring square, so the game walks the join like any other track; which grid
-// each square is on is kept in charts, for turning squares back into places. Refuses any other square the two share.
+// turned by joinAt.turn quarter turns anticlockwise about that stop and moved by whole squares so it lands on the
+// first's, and that square becomes one station with the lines of both. Turned, the second grid can lie beside the
+// first rather than over it: seen from Wales, the Americas and Asia both lie to the south. Every move is still to a
+// neighbouring square, so the game walks the join like any other track; which grid each square is on, and how it was
+// turned and moved, is kept in charts, for turning squares back into places. Refuses any other square the two share.
+const quarterTurn = (x, y, turns) => {
+  for (let turn = 0; turn < ((turns % 4) + 4) % 4; turn++) [x, y] = [-y, x];
+  return [x + 0, y + 0];
+};
 function joinNetworks(base, other, joinAt) {
   assert(joinAt && Array.isArray(joinAt.coordinates), 'Network ' + other.id + ' needs joinAt coordinates in world/imports.json');
   const point = { longitude: joinAt.coordinates[0], latitude: joinAt.coordinates[1] };
@@ -224,25 +230,31 @@ function joinNetworks(base, other, joinAt) {
     .sort((a, b) => a.km - b.km)[0];
   const [here, there] = [nearest(base), nearest(other)];
   assert(here && here.km < 1 && there && there.km < 1, 'No stop at ' + joinAt.coordinates.join(', ') + ' in both ' + base.id + ' and ' + other.id);
-  const [hx, hy] = here.stop.square.split(',').map(Number), [tx, ty] = there.stop.square.split(',').map(Number);
+  const turn = joinAt.turn || 0;
+  const [hx, hy] = here.stop.square.split(',').map(Number);
+  const [tx, ty] = quarterTurn(...there.stop.square.split(',').map(Number), turn);
   const dx = hx - tx, dy = hy - ty, seam = here.stop.square;
-  const move = key => { const [x, y] = key.split(',').map(Number); return (x + dx) + ',' + (y + dy); };
+  const place = (x, y) => { const [u, v] = quarterTurn(x, y, turn); return [u + dx, v + dy]; };
+  const move = key => place(...key.split(',').map(Number)).join(',');
   // Stops and halts named for their square are named for the square they are moved to.
   const moveId = id => id.replace(/^((?:halt|end|authored-end):)(-?\d+,-?\d+)$/, (whole, kind, key) => kind + move(key));
-  const byKey = new Map(base.squares.map(square => [square.x + ',' + square.y, square]));
-  const squares = base.squares.slice();
+  // The square where they meet is copied before its lines are joined, so neither network given is changed.
+  const squares = base.squares.map(square => square.x + ',' + square.y === seam ? { ...square, ends: square.ends.slice() } : square);
+  const byKey = new Map(squares.map(square => [square.x + ',' + square.y, square]));
   let added = 0;
   other.squares.forEach(square => {
-    const key = (square.x + dx) + ',' + (square.y + dy);
+    const [x, y] = place(square.x, square.y), key = x + ',' + y;
+    const ends = square.ends.map(end => { const [edx, edy] = quarterTurn(end.dx, end.dy, turn); return { ...end, dx: edx, dy: edy }; })
+      .sort((a, b) => a.dx - b.dx || a.dy - b.dy);
     if (key === seam) {
       const joined = byKey.get(seam);
-      square.ends.forEach(end => assert(!joined.ends.some(mine => mine.dx === end.dx && mine.dy === end.dy),
+      ends.forEach(end => assert(!joined.ends.some(mine => mine.dx === end.dx && mine.dy === end.dy),
         'The two networks leave ' + seam + ' the same way'));
-      joined.ends = joined.ends.concat(square.ends).sort((a, b) => a.dx - b.dx || a.dy - b.dy);
+      joined.ends = joined.ends.concat(ends).sort((a, b) => a.dx - b.dx || a.dy - b.dy);
       return;
     }
-    assert(!byKey.has(key), 'The grids of ' + base.id + ' and ' + other.id + ' overlap at ' + key + '; move the join or turn the second grid');
-    squares.push({ ...square, x: square.x + dx, y: square.y + dy });
+    assert(!byKey.has(key), 'The grids of ' + base.id + ' and ' + other.id + ' overlap at ' + key + '; turn the second grid (joinAt.turn)');
+    squares.push({ ...square, x, y, ends });
     added++;
   });
   const stops = base.stops.concat(other.stops.filter(stop => stop !== there.stop)
@@ -250,7 +262,7 @@ function joinNetworks(base, other, joinAt) {
   const ids = new Set();
   stops.forEach(stop => { assert(!ids.has(stop.id), 'Two stops share the id ' + stop.id); ids.add(stop.id); });
   const charts = (base.charts || [{ id: base.id, grid: base.grid, offset: [0, 0], count: base.squares.length }])
-    .concat([{ id: other.id, grid: other.grid, offset: [dx, dy], count: added }]);
+    .concat([{ id: other.id, grid: other.grid, offset: [dx, dy], ...(turn ? { turn } : {}), count: added }]);
   const sum = (a, b) => {
     if (typeof a === 'number' && typeof b === 'number') return a + b;
     if (Array.isArray(a) && Array.isArray(b)) return a.concat(b);
@@ -268,7 +280,7 @@ function joinNetworks(base, other, joinAt) {
   return {
     formatVersion: 1, id: 'world-network', label: 'The world railway network', builderVersion: base.builderVersion,
     grid: base.grid, charts, joins: (base.joins || []).concat([{ networks: [base.id, other.id], square: seam, name: here.stop.name,
-      offset: [dx, dy], ...(joinAt.note ? { note: joinAt.note } : {}) }]),
+      offset: [dx, dy], ...(turn ? { turn } : {}), ...(joinAt.note ? { note: joinAt.note } : {}) }]),
     sources: base.sources, joinedSources: (base.joinedSources || []).concat([{ id: other.id, sources: other.sources }]),
     parameters: base.parameters, navigable: true, startSquare: base.startSquare, stats,
     stops, points: (base.points || []).concat((other.points || []).map(point => ({ ...point, square: move(point.square) }))),
@@ -350,10 +362,11 @@ function compactNetwork(network) {
     points.square.push(byKey.get(point.square)); points.kind.push(point.kind); points.name.push(point.name);
   });
   // A world of several grids says which squares are on which: the squares of each chart follow those of the one before
-  // it, count of them from first, and its grid carries the offset the compiler moved it by (joinNetworks).
+  // it, count of them from first, and its grid carries the quarter turns and offset the compiler moved it by
+  // (joinNetworks): a square's own place on its grid is the offset taken away, then the turn undone.
   let first = 0;
   const charts = network.charts ? network.charts.map(chart => {
-    const entry = { id: chart.id, grid: { ...chart.grid, offset: chart.offset }, first, count: chart.count };
+    const entry = { id: chart.id, grid: { ...chart.grid, offset: chart.offset, ...(chart.turn ? { turn: chart.turn } : {}) }, first, count: chart.count };
     first += chart.count;
     return entry;
   }) : null;
@@ -450,7 +463,8 @@ function outputsFor(bundle) {
   const browserBundle = { ...bundle, network: undefined };
   const networkFiles = JSON.parse(read('world/imports.json')).network.map(entry => entry.file);
   manifest.network = { id: bundle.network.id, label: bundle.network.label, grid: bundle.network.grid,
-    ...(bundle.network.charts ? { charts: bundle.network.charts.map(chart => ({ id: chart.id, grid: chart.grid, offset: chart.offset, count: chart.count })),
+    ...(bundle.network.charts ? { charts: bundle.network.charts.map(chart => ({ id: chart.id, grid: chart.grid, offset: chart.offset,
+      ...(chart.turn ? { turn: chart.turn } : {}), count: chart.count })),
       joins: bundle.network.joins, joinedSources: bundle.network.joinedSources } : {}),
     sources: bundle.network.sources, parameters: bundle.network.parameters, stats: bundle.network.stats,
     ...(networkFiles.length === 1 ? { file: networkFiles[0] } : { files: networkFiles }) };
