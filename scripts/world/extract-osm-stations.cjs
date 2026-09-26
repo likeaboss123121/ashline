@@ -9,6 +9,8 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
+const readline = require('node:readline');
+const { displayName } = require('./names.cjs');
 
 const root = path.resolve(__dirname, '../..');
 const AREA = require('./scopes.cjs').scopeFromArguments();
@@ -69,7 +71,7 @@ function osmId(id) {
   return { n: 'osm-node', w: 'osm-way', r: 'osm-relation' }[kind] + ':' + number;
 }
 
-function main() {
+async function main() {
   const scope = SCOPE;
   const input = argument('input') && path.resolve(root, argument('input'));
   assert(input && fs.existsSync(input), 'Usage: npm run world:extract:south-america:stations -- --input /path/to/extract.osm.pbf');
@@ -82,21 +84,27 @@ function main() {
       'nwr/historic:railway=station,halt', 'nwr/historic=railway_station']);
     run('osmium', ['export', '--overwrite', '-f', 'geojsonseq', '--add-unique-id=type_id',
       '--geometry-types=point,polygon', '-o', geojson, filtered]);
-    const stations = fs.readFileSync(geojson, 'utf8').split('\n').filter(Boolean).map(line => {
+    // Read a line at a time: a continent's station areas make an export larger than one string can hold.
+    const stations = [], nameSources = {};
+    const lines = readline.createInterface({ input: fs.createReadStream(geojson), crlfDelay: Infinity });
+    for await (const line of lines) {
+      if (!line) continue;
       const feature = JSON.parse(line.replace(/^\x1e/, ''));
       const tags = feature.properties;
-      const status = statusOf(tags);
-      if (!status || !tags.name) return null;
+      const status = statusOf(tags), named = displayName(tags);
+      if (!status || !named) continue;
+      nameSources[named.from] = (nameSources[named.from] || 0) + 1;
       const point = pointOf(feature.geometry);
       const value = [tags.railway, tags['disused:railway'], tags['abandoned:railway'], tags['historic:railway']]
         .find(candidate => STATION_VALUES.includes(candidate));
       const kind = value === 'halt' ? 'halt' : 'station';
       // EFE grades its stations 1 (major) to 3; the category settles which of two close stations is the stop.
       const category = Number(tags['railway:station_category']);
-      return { id: osmId(feature.id), name: tags.name, status, kind,
+      stations.push({ id: osmId(feature.id), name: named.name, status, kind,
         ...(category >= 1 && category <= 3 ? { category } : {}),
-        coordinates: [Math.round(point[0] * 1e7) / 1e7, Math.round(point[1] * 1e7) / 1e7] };
-    }).filter(Boolean).sort((a, b) => a.id.localeCompare(b.id));
+        coordinates: [Math.round(point[0] * 1e7) / 1e7, Math.round(point[1] * 1e7) / 1e7] });
+    }
+    stations.sort((a, b) => a.id.localeCompare(b.id));
     const counts = {};
     stations.forEach(station => { counts[station.status] = (counts[station.status] || 0) + 1; });
     const artifact = {
@@ -106,23 +114,24 @@ function main() {
       sourceId: scope.sourceId,
       sourceSnapshotSha256: sha256File(input),
       navigable: false,
-      stats: { stationCount: stations.length, statusCounts: counts },
+      stats: { stationCount: stations.length, statusCounts: counts, nameSources },
       stations
     };
     const target = path.join(root, scope.output);
-    fs.writeFileSync(target, '{\n' + Object.entries(artifact).filter(([key]) => key !== 'stations')
-      .map(([key, value]) => '  ' + JSON.stringify(key) + ': ' + JSON.stringify(value)).join(',\n') +
-      ',\n  "stations": [\n' + stations.map(station => '    ' + JSON.stringify(station)).join(',\n') + '\n  ]\n}\n');
+    const stream = fs.createWriteStream(target);
+    stream.write('{\n' + Object.entries(artifact).filter(([key]) => key !== 'stations')
+      .map(([key, value]) => '  ' + JSON.stringify(key) + ': ' + JSON.stringify(value)).join(',\n') + ',\n  "stations": [\n');
+    stations.forEach((station, index) => stream.write((index ? ',\n' : '') + '    ' + JSON.stringify(station)));
+    stream.write('\n  ]\n}\n');
+    await new Promise((resolve, reject) => { stream.on('error', reject); stream.end(resolve); });
     console.log('Wrote ' + stations.length + ' named stations to ' + scope.output + ' (' +
-      Object.entries(counts).map(([status, count]) => count + ' ' + status).join(', ') + ')');
+      Object.entries(counts).map(([status, count]) => count + ' ' + status).join(', ') + '; names: ' + JSON.stringify(nameSources) + ')');
   } finally {
     fs.rmSync(temporary, { recursive: true, force: true });
   }
 }
 
-try {
-  main();
-} catch (error) {
+main().catch(error => {
   console.error(error.stack || error.message);
   process.exitCode = 1;
-}
+});

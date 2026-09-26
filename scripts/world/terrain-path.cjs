@@ -15,7 +15,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
-const { defaultCache, tilesForBox, fetchTiles } = require('./dem.cjs');
+const { defaultCache, tilesForBox, fetchTiles, tilesInFrame } = require('./dem.cjs');
 
 const CELL_DEGREES = 0.02;
 const PADDING_SHARE = 0.3; // of the gap's length, added around it for the line to find a way through
@@ -58,7 +58,7 @@ function haversineKm(a, b) {
 // Resampling a few hundred tiles takes minutes, so each result is kept beside the tiles, named for its box and cell
 // size; the router asks for the same boxes every time it runs.
 function sampleBox(box, cache = defaultCache()) {
-  const files = fetchTiles(tilesForBox(box), cache);
+  let files = fetchTiles(tilesForBox(box), cache);
   const width = Math.round((box[2] - box[0]) / CELL_DEGREES), height = Math.round((box[3] - box[1]) / CELL_DEGREES);
   const mean = new Float32Array(width * height).fill(NODATA);
   const rms = new Float32Array(width * height).fill(NODATA);
@@ -73,6 +73,8 @@ function sampleBox(box, cache = defaultCache()) {
       if (!fs.existsSync(file)) {
         if (!vrt) {
           vrt = path.join(temporary, 'dem.vrt');
+          // A box across the 180th meridian takes the tiles beyond it moved into its own frame.
+          if (box[0] < -180 || box[2] > 180) files = tilesInFrame(files, box, temporary);
           run('gdalbuildvrt', ['-q', '-vrtnodata', String(NODATA), vrt].concat(files));
         }
         if (process.env.ASHLINE_WORLD_QUIET !== '1') console.error('Resampling ' + files.length + ' elevation tiles (' + method + ')');
@@ -138,6 +140,30 @@ function simplify(points, tolerance) {
   }
   if (worst <= tolerance) return [a, b];
   return simplify(points.slice(0, worstIndex + 1), tolerance).slice(0, -1).concat(simplify(points.slice(worstIndex), tolerance));
+}
+
+// At most MAX_STOP_CANDIDATES settlements are weighed as stops for one line: choosing the chain compares every pair,
+// and a line across the Ganges plain or Java would otherwise weigh tens of thousands of villages. Where there are
+// more, the box is cut into that many cells and each keeps its biggest place (cities, then towns, then villages, by
+// population), so the line can still run anywhere, through a town wherever there is one. Kept out of PARAMETERS so
+// the terrain routes already cached for the Americas stay usable: where it binds it changes only which of a crowd of
+// villages a line passes through.
+const MAX_STOP_CANDIDATES = 800;
+const KIND_RANK = { city: 3, town: 2, village: 1 };
+function thinCandidates(records, box) {
+  if (records.length <= MAX_STOP_CANDIDATES) return records;
+  const side = Math.sqrt((box[2] - box[0]) * (box[3] - box[1]) / MAX_STOP_CANDIDATES);
+  const best = new Map();
+  records.forEach(record => {
+    const key = Math.floor((record.coordinates[0] - box[0]) / side) + ',' + Math.floor((record.coordinates[1] - box[1]) / side);
+    const current = best.get(key);
+    if (!current || KIND_RANK[record.kind] > KIND_RANK[current.kind] || (KIND_RANK[record.kind] === KIND_RANK[current.kind]
+      && ((record.population || 0) > (current.population || 0)
+        || ((record.population || 0) === (current.population || 0) && String(record.id || record.name) < String(current.id || current.name))))) {
+      best.set(key, record);
+    }
+  });
+  return Array.from(best.values());
 }
 
 // The line between two points of mapped track, [longitude, latitude] each. settlements are { name, kind,
@@ -244,9 +270,9 @@ function terrainPath(from, to, settlements = [], cache) {
   };
   // Choose the stops: the cheapest chain from one end to the other, no hop longer than MAX_HOP_KM.
   const stops = [{ name: '', coordinates: from }]
-    .concat(records.filter(record => STOP_DISCOUNT[record.kind]
+    .concat(thinCandidates(records.filter(record => STOP_DISCOUNT[record.kind]
       && haversineKm(record.coordinates, from) > TOWN_KM * 2 && haversineKm(record.coordinates, to) > TOWN_KM * 2
-      && !water[cellAt(record.coordinates)]))
+      && !water[cellAt(record.coordinates)]), box))
     .concat([{ name: '', coordinates: to }]);
   const last = stops.length - 1, best = new Float64Array(stops.length).fill(Infinity), previousStop = new Int32Array(stops.length).fill(-1);
   const settled = new Uint8Array(stops.length);

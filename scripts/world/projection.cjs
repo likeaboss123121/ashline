@@ -48,4 +48,16 @@ function centreOf(cell, grid = GRID) {
   return [Math.round(centre[0] * 1e7) / 1e7, Math.round(centre[1] * 1e7) / 1e7];
 }
 
-module.exports = { GRID, EARTH_RADIUS_KM, project, cellOf, centreOf };
+// A longitude in the frame of a grid: within 180 degrees either side of its centre. On a grid centred in Asia, Chukotka
+// east of the 180th meridian is at 190 degrees rather than -170, so a line across the meridian is not drawn the
+// other way round the world when its points are interpolated. centreOf already answers in this frame.
+function inFrame(longitude, grid = GRID) {
+  const west = grid.centre[0] - 180;
+  return ((longitude - west) % 360 + 360) % 360 + west;
+}
+
+function pointInFrame(point, grid = GRID) {
+  return [inFrame(point[0], grid), point[1]];
+}
+
+module.exports = { GRID, EARTH_RADIUS_KM, project, cellOf, centreOf, inFrame, pointInFrame };

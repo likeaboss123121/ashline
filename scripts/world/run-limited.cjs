@@ -43,10 +43,11 @@ function main() {
   const memoryMb = Number(option('memory') || process.env.ASHLINE_WORLD_MEMORY_MB)
     || Math.max(1024, Math.min(memoryAvailableMb() - 1024, totalMb - 2048));
   const retries = Number(option('retries') ?? 3);
+  const logOption = option('log');
   const script = args[0];
   if (!script) throw new Error('Usage: run-limited.cjs [--memory MB] [--retries N] [--log file] <script> [arguments...]');
   const name = path.basename(script, '.cjs') + (args.includes('--scope') ? '-' + args[args.indexOf('--scope') + 1] : '');
-  const logFile = option('log') || path.join(defaultCache(), 'logs', name + '-' + new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19) + '.log');
+  const logFile = logOption || path.join(defaultCache(), 'logs', name + '-' + new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19) + '.log');
   fs.mkdirSync(path.dirname(logFile), { recursive: true });
   const logStream = fs.createWriteStream(logFile, { flags: 'a' });
   // Node's own heap is most of what the build holds; the rest (GDAL's warps, buffers) fits in what is left over.

@@ -32,3 +32,6 @@ world/raw/
 # The Americas imports are rebuilt by scripts/world/fetch-osm-regions.cjs and the extractors; the rail import
 # alone is over GitHub's 100 MB limit.
 world/imported/americas-*.json
+
+# Europe, Asia and Africa likewise (world:fetch:afro-eurasia and the extractors with --scope afro-eurasia).
+world/imported/afro-eurasia-*.json

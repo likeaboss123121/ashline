@@ -8,6 +8,8 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
+const readline = require('node:readline');
+const { displayName } = require('./names.cjs');
 
 const root = path.resolve(__dirname, '../..');
 const AREA = require('./scopes.cjs').scopeFromArguments();
@@ -45,7 +47,7 @@ function sha256File(file) {
   return hash.digest('hex');
 }
 
-function main() {
+async function main() {
   const scope = process.argv.includes('--outposts') ? SCOPES.outposts : SCOPES.places;
   const KINDS = scope.kinds;
   const input = argument('input') && path.resolve(root, argument('input'));
@@ -58,32 +60,41 @@ function main() {
     run('osmium', ['tags-filter', '--overwrite', '-o', filtered, input, 'n/place=' + KINDS.join(',')]);
     run('osmium', ['export', '--overwrite', '-f', 'geojsonseq', '--add-unique-id=type_id', '--geometry-types=point',
       '-o', geojson, filtered]);
-    const places = fs.readFileSync(geojson, 'utf8').split('\n').filter(Boolean).map(line => {
+    // Read a line at a time: Europe's hamlets alone make an export larger than one string can hold.
+    const places = [], nameSources = {};
+    const lines = readline.createInterface({ input: fs.createReadStream(geojson), crlfDelay: Infinity });
+    for await (const line of lines) {
+      if (!line) continue;
       const feature = JSON.parse(line.replace(/^\x1e/, ''));
       const tags = feature.properties;
-      if (!tags.name || !KINDS.includes(tags.place)) return null;
+      const named = displayName(tags);
+      if (!named || !KINDS.includes(tags.place)) continue;
+      nameSources[named.from] = (nameSources[named.from] || 0) + 1;
       const population = Number(String(tags.population || '').replace(/[^\d]/g, ''));
-      return { id: 'osm-node:' + String(feature.id).slice(1), name: tags.name, kind: tags.place,
+      places.push({ id: 'osm-node:' + String(feature.id).slice(1), name: named.name, kind: tags.place,
         ...(population > 0 ? { population } : {}),
-        coordinates: feature.geometry.coordinates.map(value => Math.round(value * 1e5) / 1e5) };
-    }).filter(Boolean).sort((a, b) => a.id.localeCompare(b.id));
+        coordinates: feature.geometry.coordinates.map(value => Math.round(value * 1e5) / 1e5) });
+    }
+    places.sort((a, b) => a.id.localeCompare(b.id));
     const counts = {};
     places.forEach(place => { counts[place.kind] = (counts[place.kind] || 0) + 1; });
     const artifact = { formatVersion: 1, id: scope.id, label: scope.label, sourceId: scope.sourceId,
-      sourceSnapshotSha256: sha256File(input), stats: { placeCount: places.length, kindCounts: counts }, places };
-    fs.writeFileSync(path.join(root, scope.output), '{\n' + Object.entries(artifact).filter(([key]) => key !== 'places')
-      .map(([key, value]) => '  ' + JSON.stringify(key) + ': ' + JSON.stringify(value)).join(',\n') +
-      ',\n  "places": [\n' + places.map(place => '    ' + JSON.stringify(place)).join(',\n') + '\n  ]\n}\n');
+      sourceSnapshotSha256: sha256File(input), stats: { placeCount: places.length, kindCounts: counts, nameSources }, places };
+    // Written a record at a time, one to a line, for the same reason.
+    const stream = fs.createWriteStream(path.join(root, scope.output));
+    stream.write('{\n' + Object.entries(artifact).filter(([key]) => key !== 'places')
+      .map(([key, value]) => '  ' + JSON.stringify(key) + ': ' + JSON.stringify(value)).join(',\n') + ',\n  "places": [\n');
+    places.forEach((place, index) => stream.write((index ? ',\n' : '') + '    ' + JSON.stringify(place)));
+    stream.write('\n  ]\n}\n');
+    await new Promise((resolve, reject) => { stream.on('error', reject); stream.end(resolve); });
     console.log('Wrote ' + places.length + ' settlements to ' + scope.output + ' (' +
-      Object.entries(counts).map(([kind, count]) => count + ' ' + kind).join(', ') + ')');
+      Object.entries(counts).map(([kind, count]) => count + ' ' + kind).join(', ') + '; names: ' + JSON.stringify(nameSources) + ')');
   } finally {
     fs.rmSync(temporary, { recursive: true, force: true });
   }
 }
 
-try {
-  main();
-} catch (error) {
+main().catch(error => {
   console.error(error.stack || error.message);
   process.exitCode = 1;
-}
+});

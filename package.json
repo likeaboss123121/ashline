@@ -23,12 +23,19 @@
     "world:extract:americas:stations": "node scripts/world/run-limited.cjs scripts/world/extract-osm-stations.cjs --scope americas",
     "world:extract:americas:places": "node scripts/world/run-limited.cjs scripts/world/extract-osm-places.cjs --scope americas",
     "world:extract:americas:outposts": "node scripts/world/run-limited.cjs scripts/world/extract-osm-places.cjs --scope americas --outposts",
-    "world:network:americas": "node scripts/world/run-limited.cjs scripts/world/build-network.cjs --scope americas"
+    "world:network:americas": "node scripts/world/run-limited.cjs scripts/world/build-network.cjs --scope americas",
+    "world:fetch:afro-eurasia": "node scripts/world/fetch-osm-regions.cjs --output afro-eurasia-filtered.osm.pbf europe asia russia africa",
+    "world:extract:afro-eurasia": "node scripts/world/run-limited.cjs scripts/world/extract-osm-rail.cjs --scope afro-eurasia",
+    "world:extract:afro-eurasia:stations": "node scripts/world/run-limited.cjs scripts/world/extract-osm-stations.cjs --scope afro-eurasia",
+    "world:extract:afro-eurasia:places": "node scripts/world/run-limited.cjs scripts/world/extract-osm-places.cjs --scope afro-eurasia",
+    "world:extract:afro-eurasia:outposts": "node scripts/world/run-limited.cjs scripts/world/extract-osm-places.cjs --scope afro-eurasia --outposts",
+    "world:network:afro-eurasia": "node scripts/world/run-limited.cjs scripts/world/build-network.cjs --scope afro-eurasia"
   },
   "engines": {
     "node": ">=22"
   },
   "devDependencies": {
+    "any-ascii": "0.3.3",
     "playwright": "1.63.0"
   }
 }

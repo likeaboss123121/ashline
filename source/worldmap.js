@@ -181,7 +181,8 @@ setup.worldmap = {
 		if (!direction) return '';
 		var data = setup.worldGraphData && setup.worldGraphData.network;
 		if (tile && data && data.grid && typeof tile.x === 'number' && typeof tile.y === 'number') {
-			var a = this.unprojectGrid(tile.x, tile.y, data.grid), b = this.unprojectGrid(tile.x + direction.dx, tile.y + direction.dy, data.grid);
+			var grid = this.gridFor(tile);
+			var a = this.unprojectGrid(tile.x, tile.y, grid), b = this.unprojectGrid(tile.x + direction.dx, tile.y + direction.dy, grid);
 			var radians = Math.PI / 180, dLon = (b[0] - a[0]) * radians;
 			var bearing = Math.atan2(Math.sin(dLon) * Math.cos(b[1] * radians),
 				Math.cos(a[1] * radians) * Math.sin(b[1] * radians) - Math.sin(a[1] * radians) * Math.cos(b[1] * radians) * Math.cos(dLon)) / radians;
@@ -1020,8 +1021,25 @@ setup.worldmap = {
 	// --- debug map ----------------------------------------------------------------------------------------
 	// A deliberately plain top-down map for debug mode: terrain as coloured cells and track as lines through
 	// them. It is a look at what the network builder produced, not a player-facing map.
-	// The middle of a grid square as [longitude, latitude], from the grid's projection (scripts/world/projection.cjs).
+	// The grid a square of the network is on. The world is two grids joined at Wales, Alaska (the Americas, and Europe,
+	// Asia and Africa: one projection cannot hold both), each chart holding a run of the squares; a square on the
+	// second is given with the offset the compiler moved its grid by. Takes a tile or a square's index.
+	gridFor: function(tileOrIndex) {
+		var data = setup.worldGraphData && setup.worldGraphData.network;
+		if (!data) return null;
+		var index = typeof tileOrIndex === 'number' ? tileOrIndex : tileOrIndex && tileOrIndex.globalPosition;
+		if (data.charts && typeof index === 'number') {
+			for (var i = 0; i < data.charts.length; i++) {
+				var chart = data.charts[i];
+				if (index >= chart.first && index < chart.first + chart.count) return chart.grid;
+			}
+		}
+		return data.grid;
+	},
+	// The middle of a grid square as [longitude, latitude], from the grid's projection (scripts/world/projection.cjs),
+	// less the offset of a grid moved to join another (gridFor), and with the longitude between -180 and 180.
 	unprojectGrid: function(x, y, grid) {
+		if (grid.offset) { x -= grid.offset[0]; y -= grid.offset[1]; }
 		var radians = Math.PI / 180, R = 6371.0088;
 		var lambda0 = grid.centre[0] * radians, phi0 = grid.centre[1] * radians;
 		var forward = function(p) {
@@ -1036,7 +1054,8 @@ setup.worldmap = {
 		var c = 2 * Math.asin(rho / (2 * R));
 		var phi = Math.asin(Math.cos(c) * Math.sin(phi0) + py * Math.sin(c) * Math.cos(phi0) / rho);
 		var lambda = lambda0 + Math.atan2(px * Math.sin(c), rho * Math.cos(phi0) * Math.cos(c) - py * Math.sin(phi0) * Math.sin(c));
-		return [Math.round(lambda / radians * 1e5) / 1e5, Math.round(phi / radians * 1e5) / 1e5];
+		var longitude = ((lambda / radians + 180) % 360 + 360) % 360 - 180;
+		return [Math.round(longitude * 1e5) / 1e5, Math.round(phi / radians * 1e5) / 1e5];
 	},
 	// The network as a drawing: a plain square per grid square, in its terrain's colour and a teleport target; the
 	// track as one path of mapped railway and one of new lines, a fixed width on screen so it shows however far out the

@@ -14,9 +14,10 @@ function defaultCache() {
   return path.resolve(process.env.ASHLINE_DEM_CACHE || path.join(os.tmpdir(), 'ashline-copernicus'));
 }
 
-// Copernicus names each 1-degree tile by its south-west corner.
+// Copernicus names each 1-degree tile by its south-west corner. A longitude beyond the 180th meridian, as a grid
+// centred in Asia gives Chukotka (190 rather than -170), names the tile it wraps round to.
 function copernicusTileName(longitude, latitude) {
-  const south = Math.floor(latitude), west = Math.floor(longitude);
+  const south = Math.floor(latitude), west = Math.floor(((longitude + 180) % 360 + 360) % 360 - 180);
   return 'Copernicus_DSM_COG_30_' + (south < 0 ? 'S' : 'N') + String(Math.abs(south)).padStart(2, '0') + '_00_' +
     (west < 0 ? 'W' : 'E') + String(Math.abs(west)).padStart(3, '0') + '_00_DEM';
 }
@@ -61,4 +62,31 @@ function fetchTiles(names, cache = defaultCache()) {
   return names.map(name => path.join(cache, name + '.tif')).filter(file => fs.existsSync(file));
 }
 
-module.exports = { defaultCache, copernicusTileName, tilesForBox, fetchTiles };
+// Tiles to resample over a box in degrees whose longitudes run past the 180th meridian ([175, 60, 195, 68] across
+// Chukotka): each tile the box takes from the far side of the meridian is given as a small VRT that moves it 360
+// degrees, into the box's frame. Tiles already in the frame are returned as they are. dir is a temporary directory.
+function tilesInFrame(files, box, dir) {
+  return files.map(file => {
+    const match = path.basename(file).match(/_([EW])(\d{3})_00_DEM/);
+    if (!match) return file;
+    const west = (match[1] === 'W' ? -1 : 1) * Number(match[2]);
+    const shift = west + 1 <= box[0] ? 360 : west >= box[2] ? -360 : 0;
+    if (!shift) return file;
+    const info = JSON.parse(run('gdalinfo', ['-json', file]));
+    const [originX, pixelWidth, , originY, , pixelHeight] = info.geoTransform;
+    const [width, height] = info.size;
+    const vrt = path.join(dir, path.basename(file, '.tif') + (shift > 0 ? '-east' : '-west') + '.vrt');
+    run('gdal_translate', ['-q', '-of', 'VRT', '-a_ullr', String(originX + shift), String(originY),
+      String(originX + shift + width * pixelWidth), String(originY + height * pixelHeight), file, vrt]);
+    return vrt;
+  });
+}
+
+function run(command, args) {
+  const result = spawnSync(command, args, { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+  if (result.error) throw result.error;
+  if (result.status !== 0) throw new Error(command + ' exited with status ' + result.status + ': ' + result.stderr);
+  return result.stdout;
+}
+
+module.exports = { defaultCache, copernicusTileName, tilesForBox, fetchTiles, tilesInFrame };

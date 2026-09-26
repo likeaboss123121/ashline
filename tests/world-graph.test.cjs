@@ -364,6 +364,101 @@ test('an authored route names its stops by place, by coordinates, or by place ne
   assert.throws(() => resolveRoute({ route: ['Punta Arenas', 'Atlantis'] }, index), /no place called "Atlantis"/);
   // The older two-point form still reads.
   assert.equal(resolveRoute({ from: [-70, -50], to: [-71, -51] }, index).length, 2);
+  // A named point that is not a mapped place, and a stop reached through a tunnel.
+  assert.deepEqual(resolveRoute({ route: ['Punta Arenas', { name: 'Cape Froward', coordinates: [-71.3, -53.9] },
+    { name: 'Humaita', tunnel: true }] }, index), [
+    { name: 'Punta Arenas', coordinates: [-70.9, -53.16] },
+    { name: 'Cape Froward', coordinates: [-71.3, -53.9] },
+    { name: 'Humaitá', coordinates: [-63.02, -7.51], tunnel: true }
+  ]);
+});
+
+test('a route stop marked as a tunnel is reached straight, under the sea, in tunnel squares', () => {
+  const { planLine, addLine, Network } = require('../scripts/world/build-network.cjs');
+  const projection = require('../scripts/world/projection.cjs');
+  const grid = { ...projection.GRID, centre: [40, 37.5], origin: [-168.09035, 65.60829] };
+  const cell = point => projection.cellOf(point, grid).join(',');
+  // Uelen to Wales by the Diomedes: every hop a tunnel, so nothing is routed over the terrain.
+  const line = planLine({ from: cell([-169.817, 66.16053]), to: cell([-168.09035, 65.60829]), kind: 'authored', toTunnel: true,
+    through: [{ name: 'Big Diomede', coordinates: projection.pointInFrame([-169.06, 65.78], grid), tunnel: true }] },
+  { grid, settlements: [], cache: null, network: null });
+  assert.equal(line.planned, true);
+  assert.equal(line.waterKm, 0);
+  assert.ok(line.tunnelKm > 80 && line.tunnelKm < 120, line.tunnelKm + ' km of tunnel');
+  assert.deepEqual(line.via, ['Big Diomede']);
+  const network = new Network();
+  addLine(network, line);
+  // Wales is square (0, 0) of this grid, and the squares of the crossing hold their new track in the tunnel.
+  assert.ok(network.squares.has('0,0'));
+  const squares = Array.from(network.squares.values());
+  const underground = squares.filter(square => (square.tunnelGapKm || 0) >= square.gapKm * 0.5);
+  assert.ok(underground.length >= squares.length - 2, underground.length + ' of ' + squares.length + ' squares in the tunnel');
+});
+
+test('longitudes are kept in each grid\'s frame, so Chukotka lies east of the 180th meridian in Asia\'s', () => {
+  const projection = require('../scripts/world/projection.cjs');
+  const { copernicusTileName } = require('../scripts/world/dem.cjs');
+  const asia = { ...projection.GRID, centre: [40, 37.5] };
+  const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, actual + ' is not ' + expected);
+  near(projection.inFrame(-169.8, asia), 190.2);
+  near(projection.inFrame(18.4, asia), 18.4);
+  // The Americas' frame leaves their longitudes as they are.
+  near(projection.inFrame(-168.1, { ...projection.GRID, centre: [-102.5, 10] }), -168.1);
+  assert.equal(copernicusTileName(190.2, 66.1), copernicusTileName(-169.8, 66.1));
+  assert.equal(copernicusTileName(190.2, 66.1), 'Copernicus_DSM_COG_30_N66_00_W170_00_DEM');
+  // A square's centre comes back in the frame too: west of the meridian, then east of it.
+  const across = projection.centreOf(projection.cellOf([190.2, 66.1], asia), asia);
+  assert.ok(Math.abs(across[0] - 190.2) < 0.2, across.join(','));
+});
+
+test('place and station names are given in the Latin alphabet', () => {
+  const { displayName } = require('../scripts/world/names.cjs');
+  assert.deepEqual(displayName({ name: 'München', 'name:en': 'Munich' }), { name: 'München', from: 'name' });
+  assert.deepEqual(displayName({ name: 'Москва', 'name:en': 'Moscow' }), { name: 'Moscow', from: 'name:en' });
+  assert.deepEqual(displayName({ name: '北京市', 'name:zh_pinyin': 'Běijīng Shì' }), { name: 'Běijīng Shì', from: 'name:zh_pinyin' });
+  assert.deepEqual(displayName({ name: 'Комсомольск-на-Амуре' }), { name: 'Komsomolsk-na-Amure', from: 'transliterated' });
+  assert.equal(displayName({ name: '北京' }).name, 'Beijing');
+  assert.equal(displayName({}), null);
+});
+
+test('world files are read a record to a line, the same as a whole-file parse', () => {
+  const fs = require('node:fs');
+  const os = require('node:os');
+  const { readRecords } = require('../scripts/world/records.cjs');
+  const value = { id: 'test', stats: { count: 2 }, bounds: [1, 2],
+    places: [{ name: 'Uelen', coordinates: [-169.8, 66.2] }, { name: 'Ёлкино — «ёлка»', coordinates: [30, 60] }], empty: [] };
+  const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'ashline-records-')), 'places.json');
+  fs.writeFileSync(file, '{\n  "id": "test",\n  "stats": {"count":2},\n  "bounds": [1, 2],\n  "places": [\n'
+    + value.places.map(place => '    ' + JSON.stringify(place)).join(',\n') + '\n  ],\n  "empty": [\n\n  ]\n}\n');
+  assert.deepEqual(readRecords(file), value);
+  assert.deepEqual(readRecords(file), JSON.parse(fs.readFileSync(file, 'utf8')));
+});
+
+test('two networks on grids of their own are joined into one where both have a stop', () => {
+  const { joinNetworks, validateNetwork } = require('../scripts/world/compile-world.cjs');
+  const square = (x, y, ends) => ({ x, y, elevationM: 0, elevationStdDevM: 0, ends: ends.map(([dx, dy]) => ({ dx, dy, km: 5 })) });
+  const network = (id, squares, stops, start) => ({ formatVersion: 1, id, label: id, grid: { centre: [0, 0] }, sources: {},
+    parameters: {}, stats: { squareCount: squares.length, stopCount: stops.length, spurCount: 1 }, startSquare: start, squares, stops, points: [] });
+  // The Americas end at Wales, square (-2, 3); Asia's grid has Wales at (0, 0) with its line going west.
+  const americas = network('americas-network', [square(-2, 1, [[0, 1]]), square(-2, 2, [[0, -1], [0, 1]]), square(-2, 3, [[0, -1]])], [
+    { id: 'place:start', name: 'Start', square: '-2,1', coordinates: [0, 0] },
+    { id: 'authored-end:-2,3', name: 'Wales', square: '-2,3', coordinates: [-168.09035, 65.60829] }], '-2,1');
+  const asia = network('afro-eurasia-network', [square(-2, 0, [[1, 0]]), square(-1, 0, [[-1, 0], [1, 0]]), square(0, 0, [[-1, 0]])], [
+    { id: 'halt:-2,0', name: 'Uelen', square: '-2,0', coordinates: [190.2, 66.2] },
+    { id: 'authored-end:0,0', name: 'Wales', square: '0,0', coordinates: [191.90965, 65.60829] }], '-2,0');
+  const world = joinNetworks(americas, asia, { coordinates: [-168.09035, 65.60829] });
+  validateNetwork(world);
+  assert.equal(world.squares.length, 5);
+  // Wales is one station with a line each way; Asia's squares moved by the offset, and its halt renamed for its square.
+  assert.deepEqual(world.squares.find(s => s.x === -2 && s.y === 3).ends.map(end => [end.dx, end.dy]), [[-1, 0], [0, -1]]);
+  assert.deepEqual(world.stops.map(stop => stop.id), ['place:start', 'authored-end:-2,3', 'halt:-4,3']);
+  assert.deepEqual(world.charts.map(chart => [chart.id, chart.offset, chart.count]),
+    [['americas-network', [0, 0], 3], ['afro-eurasia-network', [-2, 3], 2]]);
+  assert.equal(world.stats.spurCount, 2);
+  // Grids that would lay squares on each other are refused.
+  const clash = network('afro-eurasia-network', [square(0, -1, [[0, 1]]), square(0, 0, [[0, -1]])], [
+    { id: 'authored-end:0,0', name: 'Wales', square: '0,0', coordinates: [191.90965, 65.60829] }], '0,-1');
+  assert.throws(() => joinNetworks(americas, clash, { coordinates: [-168.09035, 65.60829] }), /overlap|same way/);
 });
 
 test('the generator rules make the connections Likea asked for, and thin the yards in cities', () => {

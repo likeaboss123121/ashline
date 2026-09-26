@@ -1,11 +1,19 @@
 {
-  "about": "Regions where the network builder (scripts/world/build-network.cjs) invents fewer stops. A region is a polygon of [longitude, latitude] points. In a hard region there are no halts on long sections, no spurs out to hamlets, no stops at bare line ends, and a new line only gets a stop at a town or a city, not a village: the stops there are the stations actually mapped, the towns, and the ends of authored routes. Sparse stops are the point of a hard region, where the player has to stock up beforehand.",
+  "about": "Regions where the network builder (scripts/world/build-network.cjs) invents fewer stops. A region is a polygon of [longitude, latitude] points, drawn in the frame of the builds it belongs to (\"scope\", as for authored routes): within 180 degrees of the grid's centre, so in Europe, Asia and Africa (centred at 40 degrees east) Chukotka runs on past 180 degrees east. In a hard region there are no halts on long sections, no spurs out to hamlets, no stops at bare line ends, and a new line only gets a stop at a town or a city, not a village: the stops there are the stations actually mapped, the towns, and the ends of authored routes. Sparse stops are the point of a hard region, where the player has to stock up beforehand.",
   "regions": [
     {
       "id": "alaska-yukon",
+      "scope": ["south-america", "americas"],
       "note": "Alaska (with its panhandle) and the Yukon, south to 60 degrees north east of the panhandle, from the continental rail network to the Bering Strait: Ashline's first really hard section (Likea, September 2026).",
       "hard": true,
       "polygon": [[-180, 51], [-160, 51], [-160, 54.6], [-130, 54.6], [-130, 56.2], [-132, 57.1], [-133.4, 58.4], [-135.5, 59.8], [-137.5, 59.2], [-139, 60], [-123.8, 60], [-123.8, 72], [-180, 72]]
+    },
+    {
+      "id": "yakutia-chukotka",
+      "scope": "afro-eurasia",
+      "note": "Yakutia east of the railway's end at Nizhny Bestyakh, Kolyma and Chukotka, to the Bering Strait tunnel and Wales: the Asian half of the hard section, from the first real railway to the strait (Likea, September 2026). North of 58 degrees, so the Baikal-Amur line, Sakhalin and the Amur-Yakutsk line up to Nizhny Bestyakh stay as they are.",
+      "hard": true,
+      "polygon": [[130.05, 58], [196, 58], [196, 72.5], [130.05, 72.5]]
     }
   ]
 }

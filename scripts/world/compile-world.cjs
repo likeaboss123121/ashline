@@ -2,6 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { simplify } = require('./route-planning-links.cjs');
 const { parseCsv } = require('./csv.cjs');
+const { readRecords } = require('./records.cjs');
 
 const root = path.resolve(__dirname, '../..');
 const checkOnly = process.argv.includes('--check');
@@ -179,10 +180,11 @@ function compile() {
       linksById[id].routedBy = (linksById[id].routedBy || []).concat(route.id);
     });
   });
-  // The playable network: every mapped railway traced onto the shared grid and joined into one, built by
-  // scripts/world/build-network.cjs. Exactly one: it is the world.
+  // The playable network: every mapped railway traced onto a grid and joined into one, built by
+  // scripts/world/build-network.cjs. The first listed is the one the game starts on; each after it is on a grid of its
+  // own and is joined to it where both have a stop (joinAt), into one network: the world.
   const networks = (importManifest.network || []).map(entry => {
-    const network = JSON.parse(read(entry.file));
+    const network = readRecords(path.join(root, entry.file));
     assert(network.id === entry.id && network.formatVersion === 1, 'Network import ID mismatch: ' + entry.file);
     [network.sources.geometry, network.sources.stations, network.sources.settlements].forEach(part => {
       const source = sourceManifest.sources.find(candidate => candidate.id === part.sourceId);
@@ -191,7 +193,10 @@ function compile() {
     validateNetwork(network);
     return network;
   });
-  assert(networks.length === 1, 'Exactly one playable network is supported');
+  assert(networks.length >= 1, 'At least one playable network is required');
+  const world = networks.slice(1).reduce((merged, network, index) =>
+    joinNetworks(merged, network, importManifest.network[index + 1].joinAt), networks[0]);
+  if (networks.length > 1) validateNetwork(world);
   const bundle = {
     formatVersion: 1,
     datasetVersion: sourceManifest.datasetVersion,
@@ -200,11 +205,75 @@ function compile() {
     regions,
     corridors,
     routedLinks,
-    network: networks[0],
+    network: world,
     chunks: sortedChunks
   };
   validateBundle(bundle);
   return bundle;
+}
+
+// Two networks built on grids of their own, joined into one where both have a stop at joinAt.coordinates (Wales,
+// Alaska, where the Americas' route ends and the Bering Strait tunnel comes ashore). The second network's squares are
+// moved by whole squares so its stop there lands on the first's, and that square becomes one station with the lines
+// of both. Every move is still to a neighbouring square, so the game walks the join like any other track; which grid
+// each square is on is kept in charts, for turning squares back into places. Refuses any other square the two share.
+function joinNetworks(base, other, joinAt) {
+  assert(joinAt && Array.isArray(joinAt.coordinates), 'Network ' + other.id + ' needs joinAt coordinates in world/imports.json');
+  const point = { longitude: joinAt.coordinates[0], latitude: joinAt.coordinates[1] };
+  const nearest = network => network.stops.map(stop => ({ stop, km: haversineKm(point, { longitude: stop.coordinates[0], latitude: stop.coordinates[1] }) }))
+    .sort((a, b) => a.km - b.km)[0];
+  const [here, there] = [nearest(base), nearest(other)];
+  assert(here && here.km < 1 && there && there.km < 1, 'No stop at ' + joinAt.coordinates.join(', ') + ' in both ' + base.id + ' and ' + other.id);
+  const [hx, hy] = here.stop.square.split(',').map(Number), [tx, ty] = there.stop.square.split(',').map(Number);
+  const dx = hx - tx, dy = hy - ty, seam = here.stop.square;
+  const move = key => { const [x, y] = key.split(',').map(Number); return (x + dx) + ',' + (y + dy); };
+  // Stops and halts named for their square are named for the square they are moved to.
+  const moveId = id => id.replace(/^((?:halt|end|authored-end):)(-?\d+,-?\d+)$/, (whole, kind, key) => kind + move(key));
+  const byKey = new Map(base.squares.map(square => [square.x + ',' + square.y, square]));
+  const squares = base.squares.slice();
+  let added = 0;
+  other.squares.forEach(square => {
+    const key = (square.x + dx) + ',' + (square.y + dy);
+    if (key === seam) {
+      const joined = byKey.get(seam);
+      square.ends.forEach(end => assert(!joined.ends.some(mine => mine.dx === end.dx && mine.dy === end.dy),
+        'The two networks leave ' + seam + ' the same way'));
+      joined.ends = joined.ends.concat(square.ends).sort((a, b) => a.dx - b.dx || a.dy - b.dy);
+      return;
+    }
+    assert(!byKey.has(key), 'The grids of ' + base.id + ' and ' + other.id + ' overlap at ' + key + '; move the join or turn the second grid');
+    squares.push({ ...square, x: square.x + dx, y: square.y + dy });
+    added++;
+  });
+  const stops = base.stops.concat(other.stops.filter(stop => stop !== there.stop)
+    .map(stop => ({ ...stop, id: moveId(stop.id), square: move(stop.square) })));
+  const ids = new Set();
+  stops.forEach(stop => { assert(!ids.has(stop.id), 'Two stops share the id ' + stop.id); ids.add(stop.id); });
+  const charts = (base.charts || [{ id: base.id, grid: base.grid, offset: [0, 0], count: base.squares.length }])
+    .concat([{ id: other.id, grid: other.grid, offset: [dx, dy], count: added }]);
+  const sum = (a, b) => {
+    if (typeof a === 'number' && typeof b === 'number') return a + b;
+    if (Array.isArray(a) && Array.isArray(b)) return a.concat(b);
+    if (a && b && typeof a === 'object' && typeof b === 'object') {
+      const result = { ...a };
+      Object.keys(b).forEach(key => { result[key] = key in a ? sum(a[key], b[key]) : b[key]; });
+      return result;
+    }
+    return a;
+  };
+  const stats = sum(base.stats, other.stats);
+  stats.squareCount = squares.length;
+  stats.moveCount = squares.reduce((total, square) => total + square.ends.length, 0) / 2;
+  stats.stopCount = stops.length;
+  return {
+    formatVersion: 1, id: 'world-network', label: 'The world railway network', builderVersion: base.builderVersion,
+    grid: base.grid, charts, joins: (base.joins || []).concat([{ networks: [base.id, other.id], square: seam, name: here.stop.name,
+      offset: [dx, dy], ...(joinAt.note ? { note: joinAt.note } : {}) }]),
+    sources: base.sources, joinedSources: (base.joinedSources || []).concat([{ id: other.id, sources: other.sources }]),
+    parameters: base.parameters, navigable: true, startSquare: base.startSquare, stats,
+    stops, points: (base.points || []).concat((other.points || []).map(point => ({ ...point, square: move(point.square) }))),
+    bridges: (base.bridges || []).concat(other.bridges || []), squares
+  };
 }
 
 // The eight directions, in the order setup.worldmap.DIRECTIONS uses: a square's track ends are a bit each.
@@ -280,7 +349,15 @@ function compactNetwork(network) {
   (network.points || []).forEach(point => {
     points.square.push(byKey.get(point.square)); points.kind.push(point.kind); points.name.push(point.name);
   });
-  return { id: network.id, label: network.label, grid: network.grid, start: byKey.get(network.startSquare),
+  // A world of several grids says which squares are on which: the squares of each chart follow those of the one before
+  // it, count of them from first, and its grid carries the offset the compiler moved it by (joinNetworks).
+  let first = 0;
+  const charts = network.charts ? network.charts.map(chart => {
+    const entry = { id: chart.id, grid: { ...chart.grid, offset: chart.offset }, first, count: chart.count };
+    first += chart.count;
+    return entry;
+  }) : null;
+  return { id: network.id, label: network.label, grid: network.grid, ...(charts ? { charts } : {}), start: byKey.get(network.startSquare),
     stats: network.stats, squares, stops, points };
 }
 
@@ -371,9 +448,12 @@ function outputsFor(bundle) {
   const manifest = { ...bundle };
   delete manifest.chunks;
   const browserBundle = { ...bundle, network: undefined };
+  const networkFiles = JSON.parse(read('world/imports.json')).network.map(entry => entry.file);
   manifest.network = { id: bundle.network.id, label: bundle.network.label, grid: bundle.network.grid,
+    ...(bundle.network.charts ? { charts: bundle.network.charts.map(chart => ({ id: chart.id, grid: chart.grid, offset: chart.offset, count: chart.count })),
+      joins: bundle.network.joins, joinedSources: bundle.network.joinedSources } : {}),
     sources: bundle.network.sources, parameters: bundle.network.parameters, stats: bundle.network.stats,
-    file: JSON.parse(read('world/imports.json')).network[0].file };
+    ...(networkFiles.length === 1 ? { file: networkFiles[0] } : { files: networkFiles }) };
   manifest.routedLinks = bundle.routedLinks.map(route => ({
     id: route.id, proposalSetId: route.proposalSetId, from: route.from, to: route.to,
     planningLinkIds: route.planningLinkIds, status: route.status, chordKm: route.chordKm, routedKm: route.routedKm,
@@ -418,7 +498,7 @@ function writeOrCheck(outputs) {
   if (stale) process.exitCode = 1;
 }
 
-try {
+function main() {
   const bundle = compile();
   const outputs = outputsFor(bundle);
   writeOrCheck(outputs);
@@ -432,7 +512,15 @@ try {
     ' km; ' + bundle.routedLinks.length + ' routed planning link proposal(s); network of ' +
     bundle.network.stats.squareCount.toLocaleString('en-US') + ' squares and ' + bundle.network.stats.stopCount.toLocaleString('en-US') +
     ' stops');
-} catch (error) {
-  console.error(error.stack || error.message);
-  process.exitCode = 1;
 }
+
+if (require.main === module) {
+  try {
+    main();
+  } catch (error) {
+    console.error(error.stack || error.message);
+    process.exitCode = 1;
+  }
+}
+
+module.exports = { joinNetworks, validateNetwork, compactNetwork };

@@ -1,26 +1,55 @@
 {
-  "about": "Lines to lay by hand when building the network (scripts/world/build-network.cjs). Each entry is a route: a list of stops, the first and last within 10 km of existing track. The builder lays new track from each stop to the next over the terrain, through the towns on the way, as it does for every new line; list more stops to steer it, for example the towns along a river. With \"newEnd\": true the last stop may be where there is no track, and the route ends there in a new terminus; with \"scope\" it is laid only in that scope's build (south-america or americas). A stop is a place name (a city, town or village; case and accents do not matter), [longitude, latitude], or { \"name\": \"...\", \"near\": [longitude, latitude] } where several places share a name. A bare name picks the largest place of that name, and the build stops and lists the candidates when two of the same size are far apart. Then run npm run world:network:south-america, npm run world:route:south-america and npm run world:build.",
+  "about": "Lines to lay by hand when building the network (scripts/world/build-network.cjs). Each entry is a route: a list of stops, the first and last within 10 km of existing track. The builder lays new track from each stop to the next over the terrain, through the towns on the way, as it does for every new line; list more stops to steer it, for example the towns along a river. With \"newEnd\": true the last stop may be where there is no track, and the route ends there in a new terminus; with \"scope\" (a scope's name, or a list of them: south-america, americas, afro-eurasia) it is laid only in those builds. A stop is a place name (a city, town or village; case and accents do not matter), [longitude, latitude], { \"name\": \"...\", \"near\": [longitude, latitude] } where several places share a name, or { \"name\": \"...\", \"coordinates\": [longitude, latitude] } for a named point that is not a mapped place (a cape, an island, a station). Add \"tunnel\": true to a stop's object and the line reaches it straight from the stop before, through a tunnel, under the sea if need be: a strait crossed on purpose, which the rule against lines over open water would otherwise refuse. A bare name picks the largest place of that name, and the build stops and lists the candidates when two of the same size are far apart. Then run the scope's network build (npm run world:network:<scope>) and npm run world:build.",
   "joins": [
     {
       "note": "Bariloche over the Cardenal Samoré pass to the Chilean main line at Osorno, for Puerto Montt",
+      "scope": ["south-america", "americas"],
       "route": ["San Carlos de Bariloche", "Villa La Angostura", "Osorno"]
     },
     {
       "note": "Porto Velho down the Madeira to Manaus",
+      "scope": ["south-america", "americas"],
       "route": ["Porto Velho", "Humaitá", "Manicoré", "Novo Aripuanã", "Borba", "Nova Olinda do Norte", "Autazes", "Manaus"]
     },
     {
       "note": "Manaus up the Amazon to Leticia, then across by Puerto Leguízamo and Florencia to Neiva: a direct way through the middle of the continent",
+      "scope": ["south-america", "americas"],
       "route": ["Manaus", "Manacapuru", "Coari", "Tefé", "Fonte Boa", { "name": "Tabatinga", "near": [-69.9, -4.2] }, "Leticia",
         "Puerto Leguízamo", "Florencia", "Neiva"]
     },
     {
-      "note": "Fairbanks down the Tanana and Yukon to Norton Sound, then round the coast by Nome to Wales, at the Bering Strait: where the crossing to Asia will start",
+      "note": "Fairbanks down the Tanana and Yukon to Norton Sound, then round the coast by Nome to Wales, at the Bering Strait: where the crossing to Asia starts",
       "scope": "americas",
       "newEnd": true,
       "route": ["Fairbanks", "Nenana", "Tanana", { "name": "Ruby", "near": [-155.5, 64.7] }, { "name": "Galena", "near": [-156.9, 64.7] },
         "Kaltag", "Unalakleet", "Shaktoolik", "Koyuk", "Elim", "White Mountain", "Nome", "Teller", "Brevig Mission",
         { "name": "Wales", "near": [-168.1, 65.6] }]
+    },
+    {
+      "note": "Nizhny Bestyakh, where the Amur-Yakutsk line ends across the Lena from Yakutsk, east through Yakutia and Chukotka by Khandyga, Ust-Nera, Zyryanka, Bilibino and Anadyr to Uelen, then under the Bering Strait by the Diomedes to Wales, Alaska: the crossing from Asia to the Americas, as a tunnel (Likea, September 2026). Wales is where the Americas' route ends, and the compiler joins the two grids there.",
+      "scope": "afro-eurasia",
+      "newEnd": true,
+      "route": [{ "name": "Nizhny Bestyakh", "coordinates": [129.9573, 61.8677] }, { "name": "Khandyga", "near": [135.58, 62.65] },
+        { "name": "Ust-Nera", "near": [143.24, 64.57] }, { "name": "Zyryanka", "near": [150.89, 65.73] }, { "name": "Bilibino", "near": [166.44, 68.06] },
+        { "name": "Anadyr", "near": [177.51, 64.73] }, { "name": "Egvekinot", "near": [-179.12, 66.32] }, { "name": "Lavrentiya", "near": [-171.01, 65.58] },
+        { "name": "Uelen", "near": [-169.82, 66.16] },
+        { "name": "Big Diomede", "coordinates": [-169.06, 65.78], "tunnel": true },
+        { "name": "Little Diomede", "coordinates": [-168.95, 65.75], "tunnel": true },
+        { "name": "Wales", "coordinates": [-168.09035, 65.60829], "tunnel": true }]
+    },
+    {
+      "note": "A branch from Komsomolsk-on-Amur by Selikhin to Cape Lazarev, then under the Nevelskoy Strait to Pogibi and across Sakhalin to its railway at Nysh (Likea, September 2026)",
+      "scope": "afro-eurasia",
+      "route": [{ "name": "Komsomolsk-on-Amur", "near": [137.02, 50.54] }, { "name": "Selikhino", "near": [137.51, 50.37] },
+        { "name": "Lazarev", "near": [141.52, 52.21] }, { "name": "Pogibi", "coordinates": [141.633, 52.217], "tunnel": true },
+        { "name": "Nysh", "near": [142.76, 51.54] }]
+    },
+    {
+      "note": "The Sakhalin railway's southern end at Gornozavodsk down the coast to Cape Crillon, then under La Pérouse Strait to Cape Sōya and Wakkanai, the northern end of Japan's railways: Japan joined to the mainland (Likea, September 2026)",
+      "scope": "afro-eurasia",
+      "route": [{ "name": "Gornozavodsk", "near": [141.85, 46.56] }, { "name": "Shebunino", "near": [141.86, 46.42] },
+        { "name": "Cape Crillon", "coordinates": [142.08, 45.896] }, { "name": "Cape Sōya", "coordinates": [141.936, 45.523], "tunnel": true },
+        { "name": "Wakkanai", "near": [141.67, 45.41] }]
     }
   ]
 }

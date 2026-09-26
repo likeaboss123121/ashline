@@ -52,8 +52,10 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const projection = require('./projection.cjs');
 const terrain = require('./terrain-path.cjs');
-const { defaultCache, copernicusTileName, fetchTiles } = require('./dem.cjs');
+const { defaultCache, copernicusTileName, fetchTiles, tilesInFrame } = require('./dem.cjs');
 const { parseCsv } = require('./csv.cjs');
+const { readRecords } = require('./records.cjs');
+const { inScope } = require('./scopes.cjs');
 const checkpoint = require('./checkpoint.cjs');
 const { Heap } = terrain;
 
@@ -157,7 +159,7 @@ const SCOPE = {
   output: 'world/network/' + AREA.prefix + '-network.json',
   id: AREA.prefix + '-network',
   label: AREA.label.charAt(0).toUpperCase() + AREA.label.slice(1) + ' railway network',
-  grid: Object.assign({}, projection.GRID, { centre: AREA.gridCentre })
+  grid: Object.assign({}, projection.GRID, { centre: AREA.gridCentre }, AREA.gridOrigin ? { origin: AREA.gridOrigin } : {})
 };
 
 function assert(condition, message) {
@@ -460,10 +462,19 @@ function planLine(join, context) {
   const [a, b] = [join.from, join.to].map(key => { const [x, y] = key.split(',').map(Number); return { x, y }; });
   const from = projection.centreOf([a.x, a.y], grid), to = projection.centreOf([b.x, b.y], grid);
   const straightKm = haversineKm(from, to);
-  const points = [{ coordinates: from }].concat(join.through || [], [{ coordinates: to }]);
+  const points = [{ coordinates: from }].concat(join.through || [], [{ coordinates: to, tunnel: !!join.toTunnel }]);
   let coordinates = [from], via = [], waterKm = 0, planned = true;
+  const tunnels = [];
   for (let hop = 1; hop < points.length; hop++) {
     const start = coordinates.at(-1), end = points[hop].coordinates, long = haversineKm(start, end) > STRAIGHT_BRIDGE_KM;
+    // A hop marked as a tunnel runs straight to its stop under whatever lies between, sea included: a strait crossed
+    // on purpose (the Bering Strait by the Diomedes), which the rule against open water must not refuse.
+    if (points[hop].tunnel) {
+      coordinates.push(end);
+      tunnels.push([start, end]);
+      if (hop < points.length - 1 && points[hop].name) via.push(points[hop].name);
+      continue;
+    }
     const laid = long && routeOverTerrain(start, end, settlements, cache);
     if (laid) { coordinates = coordinates.concat(laid.coordinates.slice(1)); via = via.concat(laid.via); waterKm += laid.waterKm; }
     else { coordinates.push(end); if (long) planned = false; }
@@ -478,6 +489,7 @@ function planLine(join, context) {
   const line = { from: join.from, to: join.to, kind: join.kind, ...(join.note ? { note: join.note } : {}),
     straightKm: round3(straightKm), km: round3(laidKm), waterKm: Math.round(waterKm * 10) / 10, via,
     ...(laidKm < km - 1 ? { plannedKm: round3(km), onExistingTrackKm: round3(km - laidKm) } : {}),
+    ...(tunnels.length ? { tunnels, tunnelKm: round3(tunnels.reduce((sum, [a, b]) => sum + haversineKm(a, b), 0)) } : {}),
     coordinates: rounded, ...(segments.length !== 1 || laidKm < km - 1 ? { segments } : {}) };
   Object.defineProperty(line, 'planned', { value: planned });
   Object.defineProperty(line, 'grid', { value: grid });
@@ -487,6 +499,17 @@ function planLine(join, context) {
 
 function addLine(network, line) {
   const grid = line.grid;
+  // Points every half kilometre along the line's tunnels: a square the line passes through with its middle this close
+  // to one is in the tunnel. Found from the squares the line was traced through, since a tunnel traced on its own can
+  // step round a diagonal by the other square of the staircase.
+  const underground = (line.tunnels || []).flatMap(([a, b]) => {
+    const steps = Math.max(1, Math.ceil(haversineKm(a, b) / 0.5));
+    return Array.from({ length: steps + 1 }, (_, step) => [a[0] + (b[0] - a[0]) * step / steps, a[1] + (b[1] - a[1]) * step / steps]);
+  });
+  const inTunnel = visit => {
+    const centre = projection.centreOf([visit.x, visit.y], grid);
+    return underground.some(point => haversineKm(point, centre) <= grid.cellKm * 0.75);
+  };
   line.parts.forEach(part => {
     const [a, b] = [part.from, part.to].map(key => { const [x, y] = key.split(',').map(Number); return { x, y }; });
     const visits = traceLine(part.coordinates, grid, {});
@@ -495,6 +518,12 @@ function addLine(network, line) {
     if (visits[0].x !== a.x || visits[0].y !== a.y) visits.unshift({ x: a.x, y: a.y, km: 0 });
     if (visits.at(-1).x !== b.x || visits.at(-1).y !== b.y) visits.push({ x: b.x, y: b.y, km: 0 });
     network.add(visits, { id: line.kind + ':' + part.from + '>' + part.to, gap: true });
+    // Those squares hold their new track underground: they are written out as tunnels.
+    if (underground.length) visits.forEach(visit => {
+      if (!inTunnel(visit)) return;
+      const square = network.squares.get(keyOf(visit.x, visit.y));
+      square.tunnelGapKm = (square.tunnelGapKm || 0) + visit.km;
+    });
   });
 }
 
@@ -1068,13 +1097,18 @@ function fillElevation(squares, grid, cache) {
     if (files.length) {
       const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'ashline-network-dem-'));
       try {
+        // A block across the 180th meridian (Chukotka) reads its tiles with longitudes from 0 to 360, those west of the
+        // meridian moved round to meet the rest, rather than as one mosaic the width of the world.
+        const east = files.some(file => /_E17\d_00_DEM/.test(file)), west = files.some(file => /_W1[6-8]\d_00_DEM/.test(file));
+        const across = east && west;
         const listFile = path.join(temporary, 'tiles.txt');
-        fs.writeFileSync(listFile, files.join('\n') + '\n');
+        fs.writeFileSync(listFile, (across ? tilesInFrame(files, [0, -90, 360, 90], temporary) : files).join('\n') + '\n');
         const vrt = path.join(temporary, 'dem.vrt');
         run('gdalbuildvrt', ['-q', '-vrtnodata', String(NODATA), '-input_file_list', listFile, vrt]);
         ['average', 'rms'].forEach(method => {
           const output = path.join(temporary, method + '.bin');
-          run('gdalwarp', ['-q', '-overwrite', '-wm', '64', '--config', 'GDAL_CACHEMAX', '64', '-t_srs', srs,
+          run('gdalwarp', ['-q', '-overwrite', '-wm', '64', '--config', 'GDAL_CACHEMAX', '64',
+            ...(across ? ['-s_srs', '+proj=longlat +datum=WGS84 +lon_wrap=180 +no_defs'] : []), '-t_srs', srs,
             '-te', ...extent.map(String), '-ts', String(width), String(height), '-r', method,
             '-srcnodata', String(NODATA), '-dstnodata', String(NODATA), '-ot', 'Float32', '-of', 'ENVI', vrt, output]);
           const bytes = fs.readFileSync(output);
@@ -1241,9 +1275,20 @@ function placeIndex(cities, settlements) {
 // { "name": ..., "near": [longitude, latitude] } to pick one of several places sharing a name. A bare name picks the
 // largest place of that name; if two of the same size are far apart, the route has to say which.
 function resolveStop(stop, index, label) {
+  // { ..., "tunnel": true }: the line reaches this stop through a tunnel, straight from the stop before (planLine).
+  if (stop && !Array.isArray(stop) && typeof stop === 'object' && stop.tunnel) {
+    const { tunnel, ...place } = stop;
+    return { ...resolveStop(Object.keys(place).length === 1 && place.name ? place.name : place, index, label), tunnel: true };
+  }
   if (Array.isArray(stop)) {
     assert(stop.length === 2 && stop.every(Number.isFinite), label + ': ' + JSON.stringify(stop) + ' is not [longitude, latitude]');
     return { name: null, coordinates: stop };
+  }
+  // { "name": ..., "coordinates": [longitude, latitude] }: a named point that need not be a mapped place, such as a
+  // cape or an island a tunnel passes, or a place outside this build's data (Wales, Alaska, to Europe, Asia and Africa).
+  if (stop && Array.isArray(stop.coordinates)) {
+    assert(stop.coordinates.length === 2 && stop.coordinates.every(Number.isFinite), label + ': ' + JSON.stringify(stop) + ' has no [longitude, latitude]');
+    return { name: stop.name || null, coordinates: stop.coordinates };
   }
   const name = typeof stop === 'string' ? stop : stop && stop.name;
   assert(name, label + ': ' + JSON.stringify(stop) + ' is not a place name, [longitude, latitude] or { name, near }');
@@ -1486,8 +1531,8 @@ function stageJoins(state, options) {
       return best.key;
     });
     log('laying authored route ' + (join.note || stops.map(stop => stop.name).join(' - ')));
-    laidLines.push(layLine(network, { from: ends[0], to: ends[1], through: stops.slice(1, -1), kind: 'authored',
-      note: join.note }, context));
+    laidLines.push(layLine(network, { from: ends[0], to: ends[1], through: stops.slice(1, -1), toTunnel: stops.at(-1).tunnel,
+      kind: 'authored', note: join.note }, context));
     // The new terminus is a stop, named for the place it runs to.
     if (join.newEnd) authoredEnds.push({ id: 'authored-end:' + ends[1], name: stops.at(-1).name || 'End of the line',
       status: 'settlement', kind: 'town', square: ends[1], coordinates: stops.at(-1).coordinates });
@@ -1853,7 +1898,8 @@ function stageStops(state, options) {
     return {
       x: square.x, y: square.y, centre: projection.centreOf([square.x, square.y], grid),
       km: round3(square.km), railKm: round3(square.railKm), gapKm: round3(gapKm), gapFill: gapKm > square.railKm,
-      bridge: square.bridgeKm >= BRIDGE_MIN_KM, tunnel: square.railKm > 0 && square.tunnelKm >= square.railKm * TUNNEL_MIN_SHARE,
+      bridge: square.bridgeKm >= BRIDGE_MIN_KM, tunnel: (square.railKm > 0 && square.tunnelKm >= square.railKm * TUNNEL_MIN_SHARE)
+        || (gapKm > square.railKm && (square.tunnelGapKm || 0) >= gapKm * TUNNEL_MIN_SHARE),
       elevationM: square.elevationM, elevationStdDevM: square.elevationStdDevM,
       statuses: Array.from(square.statuses).sort(), sourceWayCount: square.wayIds.size, ends
     };
@@ -1910,24 +1956,48 @@ async function main() {
   const scope = SCOPE;
   [scope.geometry, scope.stations, scope.settlements].forEach(file =>
     assert(fs.existsSync(path.join(root, file)), 'Missing ' + file + '; see world/README.md'));
-  const read = file => { log('reading ' + file); return JSON.parse(fs.readFileSync(path.join(root, file), 'utf8')); };
+  // Read a record to a line: a continent's railways or hamlets are more than one string can hold (records.cjs).
+  const read = file => { log('reading ' + file); return readRecords(path.join(root, file)); };
   const args = process.argv.slice(2), option = name => { const index = args.indexOf('--' + name); return index >= 0 ? args[index + 1] : null; };
-  // The geometry is the largest input by far, and only tracing reads it: read when that stage runs, not before.
-  const readGeometry = () => read(scope.geometry);
-  const stationSet = read(scope.stations), settlementSet = read(scope.settlements);
-  // Punta Arenas first: the network kept is the one the game starts on.
-  const cities = parseCsv(fs.readFileSync(path.join(root, 'world/authored/places.csv'), 'utf8'))
-    .map(row => ({ id: row.place_id, name: row.name, latitude: Number(row.latitude), longitude: Number(row.longitude) }))
-    .sort((a, b) => (a.id === 'cl-punta-arenas' ? -1 : b.id === 'cl-punta-arenas' ? 1 : a.id.localeCompare(b.id)));
   const grid = scope.grid, cache = defaultCache();
+  // Every longitude in the grid's own frame, so nothing is interpolated the long way round across the 180th meridian
+  // (projection.inFrame). Changes nothing for the Americas, whose data lies inside their frame already.
+  const frame = point => { point[0] = projection.inFrame(point[0], grid); return point; };
+  // The geometry is the largest input by far, and only tracing reads it: read when that stage runs, not before.
+  const readGeometry = () => {
+    const geometry = read(scope.geometry);
+    geometry.ways.forEach(way => way.coordinates.forEach(frame));
+    return geometry;
+  };
+  const stationSet = read(scope.stations), settlementSet = read(scope.settlements);
+  stationSet.stations.forEach(station => frame(station.coordinates));
+  settlementSet.places.forEach(place => frame(place.coordinates));
+  // The scope's authored cities, its start place first: the network kept is the one the game starts on (Punta Arenas),
+  // or for Europe, Asia and Africa the one the journey ends on (Cape Town).
+  const cities = parseCsv(fs.readFileSync(path.join(root, AREA.places), 'utf8'))
+    .map(row => ({ id: row.place_id, name: row.name, latitude: Number(row.latitude), longitude: projection.inFrame(Number(row.longitude), grid) }))
+    .sort((a, b) => (a.id === AREA.startPlace ? -1 : b.id === AREA.startPlace ? 1 : a.id.localeCompare(b.id)));
+  assert(cities.length && cities[0].id === AREA.startPlace, 'No place ' + AREA.startPlace + ' in ' + AREA.places);
   const joinsFile = path.join(root, 'world/authored/network-joins.json');
-  // A route with a "scope" is laid only in that scope's build (a route in Alaska means nothing to South America's).
+  // A route with a "scope" is laid only in that scope's builds (a route in Alaska means nothing to South America's).
   const authoredJoins = (fs.existsSync(joinsFile) ? JSON.parse(fs.readFileSync(joinsFile, 'utf8')).joins : [])
-    .filter(join => !join.scope || join.scope === AREA.name);
+    .filter(join => inScope(join, AREA.name));
+  authoredJoins.forEach(join => (join.route || [join.from, join.to]).forEach(stop => {
+    if (Array.isArray(stop)) frame(stop);
+    else if (stop && Array.isArray(stop.coordinates)) frame(stop.coordinates);
+  }));
   const outpostsFile = path.join(root, scope.outposts);
-  const readOutposts = () => fs.existsSync(outpostsFile) ? read(scope.outposts).places : [];
+  const readOutposts = () => {
+    if (!fs.existsSync(outpostsFile)) return [];
+    const places = read(scope.outposts).places;
+    places.forEach(place => frame(place.coordinates));
+    return places;
+  };
+  // Hard regions are drawn in the frame of the builds they belong to (a region across the 180th meridian in Asia's
+  // frame runs past 180 degrees east).
   const regionsFile = path.join(root, 'world/authored/regions.json');
-  const regions = fs.existsSync(regionsFile) ? JSON.parse(fs.readFileSync(regionsFile, 'utf8')).regions : [];
+  const regions = (fs.existsSync(regionsFile) ? JSON.parse(fs.readFileSync(regionsFile, 'utf8')).regions : [])
+    .filter(region => inScope(region, AREA.name));
   // Checkpoints go beside the other build caches, one set per scope. --fresh ignores them all; --from <stage> runs
   // that stage and those after it again.
   const hashInput = file => fs.existsSync(path.join(root, file)) ? checkpoint.hashFile(path.join(root, file)) : null;
@@ -2005,4 +2075,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { distancesAlong, distancesTo, dependenciesOf, stageTrace, stageJoins, stageOutskirts, stageStops, hardRegionTest, longJoins, buildNetwork, stubJoins, endJoins, cityShortcuts, pruneParallel, spliceOntoTrack, spurs, regionClassifier, simplifyUrban, traceLine, Network, placeIndex, resolveRoute };
+module.exports = { distancesAlong, distancesTo, dependenciesOf, stageTrace, stageJoins, stageOutskirts, stageStops, hardRegionTest, longJoins, buildNetwork, stubJoins, endJoins, cityShortcuts, pruneParallel, spliceOntoTrack, spurs, regionClassifier, simplifyUrban, traceLine, Network, placeIndex, resolveRoute, planLine, addLine };

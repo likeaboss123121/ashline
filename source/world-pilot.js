@@ -44,7 +44,7 @@ setup.realWorldPilot = (function () {
 				elevation: squares.elevation[index], elevationStdDevM: squares.relief[index], gapFill: !!(flags & 1),
 				grade: 0, out: -1, distanceKm: 0, railwayStatuses: [], sourceSliceId: 'square:' + index,
 				station: 0, stationId: null, stationIndex: 0,
-				geoCoordinate: setup.worldmap.unprojectGrid(squares.x[index], squares.y[index], data.grid), globalPosition: index
+				geoCoordinate: setup.worldmap.unprojectGrid(squares.x[index], squares.y[index], setup.worldmap.gridFor(index)), globalPosition: index
 			};
 			kmByEnd[index] = km;
 			byKey[setup.worldmap.key(tiles[index].x, tiles[index].y)] = index;

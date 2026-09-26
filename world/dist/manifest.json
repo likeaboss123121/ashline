@@ -49,6 +49,27 @@
       "transformation": "scripts/world/fetch-osm-regions.cjs (region by region, filtered to railways, stations and places, then merged), then the rail, station and place extractors with --scope americas: yard, siding and crossover tracks dropped and lines simplified to about 30 m"
     },
     {
+      "id": "openstreetmap-geofabrik-afro-eurasia-2026-09-25",
+      "name": "OpenStreetMap extracts of Europe, Asia, Russia and Africa via Geofabrik",
+      "url": "https://download.geofabrik.de/ (europe, asia, russia, africa)",
+      "retrieved": "2026-09-25",
+      "license": "ODbL 1.0",
+      "attribution": "© OpenStreetMap contributors; extracts provided by Geofabrik",
+      "status": "ingested",
+      "use": "Every mapped railway alignment, named station, and named place from cities to farms in Europe, Asia and Africa: the playable network from Wales, Alaska across the Bering Strait tunnel to Cape Town",
+      "transformation": "scripts/world/fetch-osm-regions.cjs (region by region, filtered to railways, stations and places, then merged), then the rail, station and place extractors with --scope afro-eurasia: yard, siding and crossover tracks dropped, lines simplified to about 30 m, and names given in the Latin alphabet (scripts/world/names.cjs: the local name where it is Latin, else name:en, int_name or an official romanisation, else a transliteration by any-ascii)"
+    },
+    {
+      "id": "geonames-cities15000-2026-09-25",
+      "name": "GeoNames cities15000",
+      "url": "https://download.geonames.org/export/dump/cities15000.zip",
+      "retrieved": "2026-09-25",
+      "license": "CC BY 4.0",
+      "attribution": "City names, coordinates and population: GeoNames (https://www.geonames.org/)",
+      "status": "ingested",
+      "use": "Stable external IDs and coordinates for the authored cities of Europe, Asia and Africa (world/authored/afro-eurasia-places.csv)"
+    },
+    {
       "id": "openhistoricalmap-rail",
       "name": "OpenHistoricalMap",
       "url": "https://www.openhistoricalmap.org/",
