@@ -537,3 +537,70 @@ test('a far scrap of track is not worth a long new line, unless it serves an aut
   const city = projection.cellOf(at(620, 400), grid).join(',');
   assert.equal(longJoins(cities.network, cities.groups, grid, () => false, new Set([city])).length, 2);
 });
+
+test('a build checkpoint reads back exactly what was written, and only for its own key', () => {
+  const fs = require('node:fs');
+  const os = require('node:os');
+  const checkpoint = require('../scripts/world/checkpoint.cjs');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ashline-checkpoint-'));
+  try {
+    const squares = Array.from({ length: 2500 }, (_, index) => ({ key: index + ',0', statuses: new Set(['current', 'disused']), km: index / 3 }));
+    const state = { squares, lines: [{ kind: 'stub', parts: [{ coordinates: [[1.5, -2], [3, 4]] }] }], counts: new Map([['a', 1], ['b', 2]]), note: 'x' };
+    checkpoint.write(dir, 'test', 'joins', 'key-1', state);
+    const read = checkpoint.read(dir, 'test', 'joins', 'key-1');
+    assert.equal(read.squares.length, 2500);
+    assert.deepEqual(read.squares[7], squares[7]);
+    assert.ok(read.squares[7].statuses instanceof Set);
+    assert.deepEqual(Array.from(read.squares[7].statuses), ['current', 'disused']);
+    assert.deepEqual(read.lines, state.lines);
+    assert.deepEqual(Array.from(read.counts.entries()), [['a', 1], ['b', 2]]);
+    assert.equal(read.note, 'x');
+    // Another key is another build: nothing to read.
+    assert.equal(checkpoint.read(dir, 'test', 'joins', 'key-2'), null);
+    // A file cut short (the machine died while writing it) is no checkpoint at all.
+    const file = checkpoint.fileFor(dir, 'test', 'joins');
+    fs.writeFileSync(file, fs.readFileSync(file, 'utf8').slice(0, 5000));
+    assert.equal(checkpoint.read(dir, 'test', 'joins', 'key-1'), null);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('each build stage depends on the code it runs, and not on the stages after it', () => {
+  const { dependenciesOf, stageTrace, stageJoins, stageOutskirts } = require('../scripts/world/build-network.cjs');
+  const names = stage => dependenciesOf(stage).map(([name]) => name);
+  const trace = names(stageTrace), joins = names(stageJoins), outskirts = names(stageOutskirts);
+  // Followed through the functions a stage calls: tracing uses the grid projection through traceLine.
+  ['traceLine', 'Network', 'TRACE_STEPS_PER_CELL', 'projection'].forEach(name => assert.ok(trace.includes(name), name));
+  ['longJoins', 'shortCandidates', 'planLine', 'routeOverTerrain', 'terrain', 'MAX_WATER_KM', 'LONG_JOIN_MIN_KM'].forEach(name =>
+    assert.ok(joins.includes(name), name));
+  ['stubJoins', 'endJoins', 'cityShortcuts', 'spurs', 'SPUR_SPACING_KM', 'regionClassifier'].forEach(name => assert.ok(outskirts.includes(name), name));
+  // Where the stops and yards go is decided after every checkpoint, so changing it reruns none of them.
+  [trace, joins, outskirts].forEach(stage => ['YARD_RULES', 'MAX_SECTION_KM', 'pruneParallel', 'simplifyUrban', 'stageStops'].forEach(name =>
+    assert.ok(!stage.includes(name), name)));
+  assert.ok(!trace.includes('longJoins') && !joins.includes('spurs'));
+});
+
+test('a search that stops once its answers are certain agrees with one that searches everything', () => {
+  const { distancesAlong, distancesTo, traceLine, Network } = require('../scripts/world/build-network.cjs');
+  const projection = require('../scripts/world/projection.cjs');
+  const grid = projection.GRID;
+  const at = (eastKm, northKm) => [-62 + eastKm / (111.32 * Math.cos(-35 * Math.PI / 180)), -35 + northKm / 110.57];
+  const network = new Network();
+  const add = (id, points) => network.add(traceLine(points.map(point => at(...point)), grid, {}), { id, status: 'current', bridgeShare: 0, tunnelShare: 0 });
+  // A loop with a branch off it, and a piece of track on its own.
+  add('loop', [[0, 0], [300, 0], [300, 300], [0, 300], [0, 0]]);
+  add('branch', [[300, 150], [600, 150]]);
+  add('alone', [[800, 800], [900, 800]]);
+  const adjacent = network.neighbours(), keys = Array.from(network.squares.keys()).sort();
+  const start = keys[0], all = distancesAlong(network, adjacent, start, Infinity);
+  const targets = new Map(keys.filter((_, index) => index % 7 === 0).map((key, index) => [key, 50 + index * 37]));
+  const found = distancesTo(network, adjacent, start, targets);
+  targets.forEach((threshold, key) => {
+    const truth = all.get(key);
+    // Either the exact distance, or missing only when it is at least the threshold (or not reachable at all).
+    if (found.has(key)) assert.equal(found.get(key), truth, key);
+    else assert.ok(truth === undefined || truth >= threshold, key + ': ' + truth + ' < ' + threshold);
+    if (truth !== undefined && truth < threshold) assert.ok(found.has(key), key);
+  });
+});

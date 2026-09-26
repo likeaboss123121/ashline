@@ -120,7 +120,10 @@ City, through Patagonia, and through the Guianas and Amazonia), 303 stub joins (
 (2,384 km), 8 shortcuts (1,789 km), 131 spurs (2,567 km) and 3 authored routes (3,773 km); 2,485 km of planned new
 line was laid onto existing track instead. All 35 authored cities are stops, Puerto Montt at the end of its spur
 among them. Within 500 km of Buenos Aires there are 742 stops (1,561 before), and 5 within 60 km.
-A full rebuild takes about sixteen minutes once the elevation tiles are cached.
+A full rebuild takes about five minutes once the elevation tiles are cached, and seconds when only where stops go
+has changed: the build keeps a checkpoint after each slow stage (see world/README.md, Running a build safely). The
+Americas take about 15 minutes from scratch once terrain routes and elevation are cached (the first elevation pass
+adds 10), and a minute and a half to redo the stops.
 
 **In play.** `setup.realWorldPilot` builds the network's tiles, stations and legs when first asked (about 0.4 s in a
 browser). The nodes are stations, junctions and buffers; a leg is the plain line between two of them. Stations are

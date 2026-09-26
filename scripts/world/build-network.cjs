@@ -54,6 +54,7 @@ const projection = require('./projection.cjs');
 const terrain = require('./terrain-path.cjs');
 const { defaultCache, copernicusTileName, fetchTiles } = require('./dem.cjs');
 const { parseCsv } = require('./csv.cjs');
+const checkpoint = require('./checkpoint.cjs');
 const { Heap } = terrain;
 
 const root = path.resolve(__dirname, '../..');
@@ -163,8 +164,18 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+// Every line of the log says when it was written, how long the build has been running and how much memory it holds,
+// so a slow stage or a leak shows in the log of any run.
+const STARTED = Date.now();
 function log(message) {
-  if (process.env.ASHLINE_WORLD_QUIET !== '1') console.error('[network] ' + message);
+  if (process.env.ASHLINE_WORLD_QUIET === '1') return;
+  const now = new Date(), memory = process.memoryUsage().rss / 1073741824;
+  console.error('[network ' + now.toISOString().slice(11, 19) + ' +' + seconds(Date.now() - STARTED) + ' ' + memory.toFixed(1) + ' GB] ' + message);
+}
+function seconds(ms) {
+  const total = Math.round(ms / 1000), hours = Math.floor(total / 3600), minutes = Math.floor(total / 60) % 60;
+  return (hours ? hours + 'h' : '') + (hours || minutes ? String(minutes).padStart(hours ? 2 : 1, '0') + 'm' : '')
+    + String(total % 60).padStart(hours || minutes ? 2 : 1, '0') + 's';
 }
 
 function haversineKm(a, b) {
@@ -627,6 +638,39 @@ function distancesAlong(network, adjacent, start, limitKm, extra = {}) {
   return distance;
 }
 
+// Track distances from one square to some others, each only as far as it matters: targets maps a square to the
+// distance beyond which it counts as far (its threshold). The search stops once every target is either reached or
+// has a threshold no further than the search has already gone, so it is certainly beyond it. Returns the reached
+// targets' distances; a target missing from the result is at least its threshold away by track. The same answers
+// as distancesAlong out to the largest threshold, without searching a continent's track for every line end.
+function distancesTo(network, adjacent, start, targets, extra = {}) {
+  const distance = new Map([[start, 0]]), settled = new Set(), queue = new Heap(), found = new Map();
+  const waiting = new Map(targets);
+  let farthest = Math.max(0, ...waiting.values());
+  queue.push(0, start);
+  while (queue.size && waiting.size) {
+    const key = queue.pop();
+    if (settled.has(key)) continue;
+    settled.add(key);
+    const km = distance.get(key);
+    if (km >= farthest) break;
+    if (waiting.has(key)) {
+      found.set(key, km);
+      const threshold = waiting.get(key);
+      waiting.delete(key);
+      if (threshold === farthest) farthest = Math.max(0, ...waiting.values());
+      if (!waiting.size) break;
+    }
+    const steps = adjacent.get(key).map(next => [next, network.edges.get(key < next ? key + '|' + next : next + '|' + key).km])
+      .concat(extra[key] || []);
+    steps.forEach(([next, stepKm]) => {
+      const total = km + stepKm;
+      if (total < farthest && total < (distance.get(next) ?? Infinity)) { distance.set(next, total); queue.push(total, next); }
+    });
+  }
+  return found;
+}
+
 // Joins for line ends: each end's nearest track within STUB_JOIN_KM that the track only reaches the long way round.
 // They are accepted shortest first, each checked against the network with the joins already accepted, so one join
 // that already gives a short way round makes another redundant rather than closing a small loop.
@@ -667,6 +711,8 @@ function stubJoins(network, grid) {
 function endJoins(network, grid, plan) {
   const adjacent = network.neighbours(), limitKm = END_JOIN_KM * END_DETOUR_FACTOR;
   const isLongWayRound = (byTrack, km) => byTrack === undefined || (byTrack >= km * END_DETOUR_FACTOR && byTrack - km >= END_DETOUR_MIN_KM);
+  // How far by track two ends km apart must be for that: the same limit the search had when it ran out to it.
+  const thresholdOf = km => Math.min(limitKm, Math.max(km * END_DETOUR_FACTOR, km + END_DETOUR_MIN_KM));
   const ends = Array.from(network.squares.keys()).sort().filter(key => adjacent.get(key).length === 1);
   const candidates = [];
   ends.forEach((end, index) => {
@@ -675,17 +721,16 @@ function endJoins(network, grid, plan) {
     const near = ends.slice(index + 1).map(other => ({ other, km: gridKm(square, network.squares.get(other), grid) }))
       .filter(pair => pair.km > STUB_JOIN_KM && pair.km <= END_JOIN_KM);
     if (!near.length) return;
-    // Only as far along the track as the farthest of those ends needs to count as the long way round.
-    const farthest = Math.max(...near.map(pair => pair.km));
-    const along = distancesAlong(network, adjacent, end, Math.min(limitKm, Math.max(farthest * END_DETOUR_FACTOR, farthest + END_DETOUR_MIN_KM)));
+    // Each end only as far along the track as it needs to be to count as the long way round.
+    const along = distancesTo(network, adjacent, end, new Map(near.map(pair => [pair.other, thresholdOf(pair.km)])));
     near.forEach(pair => { if (isLongWayRound(along.get(pair.other), pair.km)) candidates.push({ from: end, to: pair.other, km: pair.km }); });
   });
   candidates.sort((a, b) => a.km - b.km || (a.from + a.to).localeCompare(b.from + b.to));
   const accepted = [], extra = {}, joined = new Set();
   candidates.forEach(candidate => {
     if (joined.has(candidate.from) || joined.has(candidate.to)) return;
-    const reach = Math.min(limitKm, Math.max(candidate.km * END_DETOUR_FACTOR, candidate.km + END_DETOUR_MIN_KM));
-    if (!isLongWayRound(distancesAlong(network, adjacent, candidate.from, reach, extra).get(candidate.to), candidate.km)) return;
+    const along = distancesTo(network, adjacent, candidate.from, new Map([[candidate.to, thresholdOf(candidate.km)]]), extra);
+    if (!isLongWayRound(along.get(candidate.to), candidate.km)) return;
     const line = plan(candidate);
     if (!line) return;
     accepted.push(line);
@@ -970,16 +1015,36 @@ function run(command, args) {
 // Mean elevation and relief for every square, resampled from the elevation tiles onto the grid a block of
 // ELEVATION_BLOCK squares at a time, each block warping only the tiles under it: one warp over two continents' worth
 // of tiles took this server down. squares are the network's square records ({ x, y, elevationM, elevationStdDevM }),
-// filled in place. Returns the names of the tiles used.
+// filled in place. Returns the names of the tiles under them.
+//
+// A square's elevation never changes for a given grid, so every one worked out is kept in a file beside the tiles,
+// appended to a block at a time: a rebuild only resamples squares it has not seen, and a build that dies part way
+// through keeps every block it finished.
 const ELEVATION_BLOCK = 256;
 function fillElevation(squares, grid, cache) {
-  const blocks = new Map();
+  const known = elevationCache(grid, cache);
+  const tileNames = new Set();
   squares.forEach(square => {
+    [[-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [0.5, 0.5], [0, 0]].forEach(([dx, dy]) => {
+      const point = projection.centreOf([square.x + dx, square.y + dy], grid);
+      tileNames.add(copernicusTileName(point[0], point[1]));
+    });
+  });
+  const missing = squares.filter(square => {
+    const found = known.values.get(keyOf(square.x, square.y));
+    if (!found) return true;
+    square.elevationM = found[0];
+    square.elevationStdDevM = found[1];
+    return false;
+  });
+  log('elevation: ' + (squares.length - missing.length) + ' squares already known, ' + missing.length + ' to resample');
+  const blocks = new Map();
+  missing.forEach(square => {
     const key = Math.floor(square.x / ELEVATION_BLOCK) + ',' + Math.floor(square.y / ELEVATION_BLOCK);
     if (!blocks.has(key)) blocks.set(key, []);
     blocks.get(key).push(square);
   });
-  const origin = projection.project(grid.origin, grid), used = new Set();
+  const origin = projection.project(grid.origin, grid);
   const srs = '+proj=laea +lat_0=' + grid.centre[1] + ' +lon_0=' + grid.centre[0] + ' +x_0=0 +y_0=0 +R=' +
     (projection.EARTH_RADIUS_KM * 1000) + ' +units=m +no_defs';
   let done = 0;
@@ -996,7 +1061,6 @@ function fillElevation(squares, grid, cache) {
       });
     });
     const files = fetchTiles(Array.from(tiles).sort(), cache);
-    files.forEach(file => used.add(path.basename(file)));
     const width = box[2] - box[0] + 1, height = box[3] - box[1] + 1;
     const extent = [(origin[0] + (box[0] - 0.5) * grid.cellKm) * 1000, (origin[1] + (box[1] - 0.5) * grid.cellKm) * 1000,
       (origin[0] + (box[2] + 0.5) * grid.cellKm) * 1000, (origin[1] + (box[3] + 0.5) * grid.cellKm) * 1000];
@@ -1030,10 +1094,36 @@ function fillElevation(squares, grid, cache) {
         square.elevationStdDevM = Math.round(Math.sqrt(Math.max(0, rms * rms - mean * mean)) * 10) / 10;
       }
     });
+    known.add(list);
     done++;
     if (done % 10 === 0 || done === blocks.size) log('elevation: ' + done + ' of ' + blocks.size + ' blocks');
   });
-  return Array.from(used).sort();
+  // The tiles under the squares that exist (tiles all of sea do not), whether or not this run read them.
+  return Array.from(tileNames).filter(name => fs.existsSync(path.join(cache, name + '.tif'))).map(name => name + '.tif').sort();
+}
+
+// The elevations already worked out on a grid: { values: Map of 'x,y' -> [elevationM, elevationStdDevM], add(squares) }.
+// One tab-separated line per square, appended as blocks finish; a line cut short by a crash is ignored.
+function elevationCache(grid, cache) {
+  const file = path.join(cache, 'elevation-squares-' + checkpoint.hashOf(grid, NODATA, 'mean-and-rms-v1') + '.tsv');
+  const values = new Map();
+  if (fs.existsSync(file)) {
+    fs.readFileSync(file, 'utf8').split('\n').forEach(line => {
+      const fields = line.split('\t');
+      if (fields.length !== 4 || fields.some(field => field === '' || !Number.isFinite(Number(field)))) return;
+      values.set(fields[0] + ',' + fields[1], [Number(fields[2]), Number(fields[3])]);
+    });
+  }
+  return {
+    values,
+    add: squares => {
+      fs.mkdirSync(cache, { recursive: true });
+      fs.appendFileSync(file, squares.map(square => {
+        values.set(keyOf(square.x, square.y), [square.elevationM, square.elevationStdDevM]);
+        return [square.x, square.y, square.elevationM, square.elevationStdDevM].join('\t') + '\n';
+      }).join(''));
+    }
+  };
 }
 
 function sampleElevation(network, grid, cache) {
@@ -1182,9 +1272,157 @@ function resolveRoute(join, index) {
 
 // --- the stage ----------------------------------------------------------------------------------------------------
 
+// The build, in stages. Each stage takes the state the one before it left and returns what it adds; with
+// options.checkpoints, the state after each of the first three (the slow ones: tracing, joining the pieces, the new
+// lines out from the network) is kept on disk (checkpoint.cjs) and read back while nothing it depends on has changed.
+// See stageKeys for what each stage depends on.
+const STAGES = ['trace', 'joins', 'outskirts'];
 function buildNetwork(options) {
-  const { geometry, stations, settlements, cities, grid, cache } = options;
-  const isHard = hardRegionTest(options.regions);
+  const began = Date.now(), timings = [];
+  const keys = options.checkpoints ? stageKeys(options) : null;
+  let state = {};
+  // The last stage whose checkpoint can be read: everything up to it is skipped.
+  let resumeAt = -1;
+  if (keys && !options.checkpoints.fresh) {
+    const from = options.checkpoints.from ? STAGES.indexOf(options.checkpoints.from) : STAGES.length;
+    assert(from >= 0, 'Unknown stage ' + options.checkpoints.from + '; the stages are ' + STAGES.join(', '));
+    for (let index = Math.min(from, STAGES.length) - 1; index >= 0; index--) {
+      const at = Date.now();
+      const read = checkpoint.read(options.checkpoints.dir, options.checkpoints.scope, STAGES[index], keys[STAGES[index]]);
+      if (!read) continue;
+      state = restoreState(read);
+      resumeAt = index;
+      log('stage ' + STAGES[index] + ': read back from its checkpoint in ' + seconds(Date.now() - at) + ' (' + STAGES.slice(0, index + 1).join(', ') + ' skipped)');
+      timings.push(STAGES[index] + ' read back ' + seconds(Date.now() - at));
+      break;
+    }
+  }
+  const runStage = (index, stage) => {
+    if (index <= resumeAt) return;
+    const name = STAGES[index], at = Date.now();
+    log('stage ' + name + ': starting');
+    state = { ...state, ...stage(state, options) };
+    let note = '';
+    if (keys) {
+      const written = Date.now();
+      const bytes = checkpoint.write(options.checkpoints.dir, options.checkpoints.scope, name, keys[name], saveState(state));
+      note = ', checkpoint of ' + Math.round(bytes / 1048576) + ' MB written in ' + seconds(Date.now() - written);
+    }
+    log('stage ' + name + ': done in ' + seconds(Date.now() - at) + note);
+    timings.push(name + ' ' + seconds(Date.now() - at));
+  };
+  runStage(0, stageTrace);
+  runStage(1, stageJoins);
+  runStage(2, stageOutskirts);
+  const at = Date.now();
+  log('stage stops: starting');
+  const built = stageStops(state, options);
+  log('stage stops: done in ' + seconds(Date.now() - at));
+  timings.push('stops ' + seconds(Date.now() - at));
+  log('stages: ' + timings.join(', ') + '; ' + seconds(Date.now() - began) + ' in all');
+  return built;
+}
+
+// What each stage's checkpoint depends on: the key of the stage before it, the input files it reads, and the source
+// of every function, class and constant of this file its code refers to, followed through the functions it calls
+// (dependenciesOf), with the other build modules it uses hashed whole. Nothing needs listing by hand: change a rule,
+// a constant or a helper and the first stage that uses it runs again, with everything after it.
+function stageKeys(options) {
+  const inputs = options.checkpoints.inputs;
+  // How a checkpoint is written is part of every key: a change to it makes the old ones unreadable, so unused.
+  const format = checkpoint.hashOf(saveState, restoreState, HIDDEN_LINE_FIELDS, { file: path.join(__dirname, 'checkpoint.cjs') });
+  const trace = checkpoint.hashOf(BUILDER_VERSION, format, 'trace', options.grid, inputs.geometry, dependenciesOf(stageTrace));
+  const joins = checkpoint.hashOf(trace, 'joins', inputs.cities, inputs.settlements, inputs.authoredJoins, dependenciesOf(stageJoins));
+  const outskirts = checkpoint.hashOf(joins, 'outskirts', inputs.settlements, inputs.outposts, inputs.regions, dependenciesOf(stageOutskirts));
+  return { trace, joins, outskirts };
+}
+
+// The top-level declarations of this file, read from its own source: name -> { kind, file }. A function, class or
+// constant is looked up by name when it is hashed; a module required from beside this one is hashed by its file.
+const MODULE_NAMES = (() => {
+  const names = new Map(), source = fs.readFileSync(__filename, 'utf8');
+  const moduleFile = name => { const entry = names.get(name); return entry && entry.file; };
+  source.split('\n').forEach(line => {
+    let match;
+    if ((match = line.match(/^const \{([^}]+)\} = require\('(\.\/[^']+)'\)/))) {
+      match[1].split(',').forEach(name => names.set(name.trim(), { file: path.join(__dirname, match[2]) }));
+    } else if ((match = line.match(/^const (\w+) = require\('(\.\/[^']+)'\)/))) {
+      names.set(match[1], { file: path.join(__dirname, match[2]) });
+    } else if ((match = line.match(/^const \{([^}]+)\} = (\w+);/)) && moduleFile(match[2])) {
+      match[1].split(',').forEach(name => names.set(name.trim(), { file: moduleFile(match[2]) }));
+    } else if (/require\('node:/.test(line)) {
+      // Node's own modules: not the build's to change.
+    } else if ((match = line.match(/^(?:async )?function (\w+)|^class (\w+)|^const (\w+) = /))) {
+      names.set(match[1] || match[2] || match[3], { kind: 'declaration' });
+    }
+  });
+  // Logging and checks do not change what a stage builds.
+  // Nor does the state a run keeps as it goes (the terrain route memo, the clock), or the code that runs the stages
+  // rather than being one: a comment that says "main line" must not make a stage depend on main().
+  ['log', 'assert', 'seconds', 'MODULE_NAMES', 'STAGES', 'STARTED', 'routeMemo', 'main', 'elevationOnly', 'buildNetwork',
+    'stageKeys', 'dependenciesOf', 'declared', 'saveState', 'restoreState', 'HIDDEN_LINE_FIELDS', 'writeNetwork'].forEach(name => names.delete(name));
+  return names;
+})();
+// The value of a top-level declaration of this file, by name: only ever called with names MODULE_NAMES found here.
+function declared(name) {
+  return eval(name); // eslint-disable-line no-eval
+}
+function dependenciesOf(start) {
+  const seen = new Set(), queue = [start.name], parts = [];
+  while (queue.length) {
+    const name = queue.shift();
+    if (seen.has(name)) continue;
+    seen.add(name);
+    const entry = MODULE_NAMES.get(name);
+    if (!entry) continue;
+    if (entry.file) { parts.push([name, checkpoint.hashOf({ file: entry.file })]); continue; }
+    const value = declared(name);
+    const text = typeof value === 'function' ? value.toString() : JSON.stringify(value, (key, item) =>
+      item instanceof Set ? Array.from(item) : item instanceof Map ? Array.from(item.entries()) : item);
+    parts.push([name, checkpoint.hashOf(text)]);
+    if (typeof value !== 'function' && (!value || typeof value !== 'object')) continue;
+    // Every word in the source that names another declaration: over-generous (a word in a comment counts too), never short.
+    ((typeof value === 'function' ? text : JSON.stringify(Object.keys(value))).match(/[A-Za-z_$][\w$]*/g) || []).forEach(word => {
+      if (MODULE_NAMES.has(word) && !seen.has(word)) queue.push(word);
+    });
+  }
+  return parts.sort((a, b) => a[0].localeCompare(b[0]));
+}
+
+// A stage's state, ready for a checkpoint: the network as its squares and moves, in the order they were made, and
+// the laid lines with the properties planLine keeps out of the output (planned, grid, parts) written out too.
+const HIDDEN_LINE_FIELDS = ['planned', 'grid', 'parts'];
+function saveState(state) {
+  const { network, ...rest } = state;
+  if (rest.laidLines) rest.laidLines = rest.laidLines.map(line => {
+    const hidden = {};
+    HIDDEN_LINE_FIELDS.forEach(field => { if (line[field] !== undefined) hidden[field] = line[field]; });
+    return { ...line, $hidden: hidden };
+  });
+  return { ...rest, squares: Array.from(network.squares.values()), edges: Array.from(network.edges.values()) };
+}
+function restoreState(saved) {
+  const { squares, edges, ...rest } = saved;
+  const network = new Network();
+  squares.forEach(square => network.squares.set(square.key, square));
+  edges.forEach(edge => network.edges.set(edge.key, edge));
+  if (rest.laidLines) rest.laidLines = rest.laidLines.map(({ $hidden, ...line }) => {
+    Object.entries($hidden || {}).forEach(([field, value]) => Object.defineProperty(line, field, { value }));
+    return line;
+  });
+  return { ...rest, network };
+}
+
+// An input given as data, or as a function that reads it when first wanted: a stage read back from its checkpoint
+// never reads the files it would have needed.
+function loadInput(input) {
+  return typeof input === 'function' ? input() : input;
+}
+
+// 1. Every mapped railway, traced across the grid.
+function stageTrace(state, options) {
+  const { grid } = options;
+  const geometry = loadInput(options.geometry);
   const network = new Network();
   log('tracing ' + geometry.ways.length + ' ways');
   geometry.ways.forEach(way => {
@@ -1194,6 +1432,13 @@ function buildNetwork(options) {
   });
   // The traced squares hold everything the rest of the build needs; the geometry is the largest thing in memory.
   geometry.ways = null;
+  return { network, geometry: { id: geometry.id, sourceId: geometry.sourceId } };
+}
+
+// 2. The authored routes, then the pieces of track joined into one network.
+function stageJoins(state, options) {
+  const { network } = state;
+  const { settlements, cities, grid, cache } = options;
   // Authored cities must be reachable: each is joined to the square nearest it within reach, or stands as a piece of
   // its own when no railway comes near.
   const cityStops = cities.map(city => {
@@ -1293,8 +1538,18 @@ function buildNetwork(options) {
     if (!refused) break;
   }
 
+  return { cityStops, laidLines, authoredEnds };
+}
+
+// 3. The network the game starts on, and the new lines out from it: stub joins, facing ends, shortcuts and spurs.
+function stageOutskirts(state, options) {
+  const { network, cityStops } = state;
+  const laidLines = state.laidLines.slice();
+  const { settlements, grid, cache } = options;
+  const isHard = hardRegionTest(options.regions);
+  const context = { grid, settlements, cache, network };
   // 4. Keep the network the first city stands on.
-  pieces = network.pieces();
+  const pieces = network.pieces();
   const startKey = cityStops[0].square;
   const main = pieces.find(piece => piece.keys.includes(startKey));
   const kept = new Set(main.keys);
@@ -1328,9 +1583,9 @@ function buildNetwork(options) {
   log(shortcuts.length + ' shortcuts between towns a long way round by track (' + Math.round(shortcuts.reduce((sum, line) => sum + line.km, 0)) + ' km): '
     + shortcuts.map(line => line.note).join(', '));
   const regionOf = regionClassifier(network, settlements, grid);
-  let spurPlaces = settlements.concat(options.outposts || []);
-  // The outposts are half a million records on two continents, and nothing after the spurs needs them.
-  options.outposts = null;
+  // The outposts are half a million records on two continents: read only when the spurs are laid, and let go after.
+  let spurPlaces = settlements.concat(loadInput(options.outposts) || []);
+  const outpostCount = spurPlaces.length - settlements.length;
   const spurLines = spurs(network, grid, spurPlaces, regionOf, join => {
     const line = planLine({ ...join, kind: 'spur' }, context);
     return buildable(line) ? line : null;
@@ -1338,6 +1593,21 @@ function buildNetwork(options) {
   spurPlaces = null;
   spurLines.forEach(spur => { addLine(network, spur.line); laidLines.push({ ...spur.line, note: spur.place.name }); });
   log(spurLines.length + ' spurs out to places off rural lines (' + Math.round(spurLines.reduce((sum, spur) => sum + spur.line.km, 0)) + ' km)');
+  return {
+    laidLines, kept: Array.from(kept), startKey, spurLines: spurLines.map(spur => ({ place: spur.place, square: spur.square })),
+    outpostCount, facingCount: facing.length, shortcutCount: shortcuts.length, leftOutPieces: dropped.length, leftOutKm: droppedKm, lostCities
+  };
+}
+
+// 4. Cities simplified, parallel lines taken up, and the stops, yards, halts and points placed: the network as the
+// game gets it. Quick next to the stages before it, so it always runs.
+function stageStops(state, options) {
+  const { network, cityStops, laidLines, spurLines, authoredEnds, startKey } = state;
+  const kept = new Set(state.kept);
+  const { stations, settlements, grid } = options;
+  const isHard = hardRegionTest(options.regions);
+  // The regions from the mapped track, which the new lines of the stage before did not change.
+  const regionOf = regionClassifier(network, settlements, grid);
   const simplified = simplifyUrban(network, grid, regionOf, new Set(cityStops.map(stop => stop.square)));
   log('cities reduced to a hub and the lines into it: ' + simplified.areas + ' urban areas, ' + simplified.squares +
     ' squares and ' + simplified.moves + ' moves of track taken up');
@@ -1606,7 +1876,7 @@ function buildNetwork(options) {
       bridgeCount: laidLines.length, bridgeKm: Math.round(laidLines.reduce((sum, line) => sum + line.km, 0)),
       stubJoinCount: laidLines.filter(line => line.kind === 'stub').length,
       authoredJoinCount: laidLines.filter(line => line.kind === 'authored').length,
-      endJoinCount: facing.length, spurCount: spurLines.length, shortcutCount: shortcuts.length,
+      endJoinCount: state.facingCount, spurCount: spurLines.length, shortcutCount: state.shortcutCount,
       parallelStretchesRemoved: parallel.stretches, parallelKmRemoved: parallel.km,
       onExistingTrackKm: Math.round(laidLines.reduce((sum, line) => sum + (line.onExistingTrackKm || 0), 0)),
       stationsMovedOffJunctions: movedOffJunctions, junctionPoints: points.filter(point => point.kind === 'junction').length,
@@ -1614,11 +1884,12 @@ function buildNetwork(options) {
       urbanAreas: simplified.areas, urbanSquaresRemoved: simplified.squares, urbanMovesRemoved: simplified.moves,
       stopRegions: regionCounts, stationsWithoutYard: thinned,
       railKm: Math.round(squares.reduce((sum, square) => sum + square.railKm, 0)),
-      leftOutPieces: dropped.length, leftOutKm: Math.round(droppedKm), unreachableCities: lostCities, prunedStubSquares: pruned,
+      leftOutPieces: state.leftOutPieces, leftOutKm: Math.round(state.leftOutKm), unreachableCities: state.lostCities, prunedStubSquares: pruned,
       junctionSquares: squares.filter(square => square.ends.length >= 3).length,
       endSquares: squares.filter(square => square.ends.length === 1).length
     },
-    elevationTiles: tiles
+    elevationTiles: tiles,
+    geometry: state.geometry, outpostCount: state.outpostCount
   };
 }
 
@@ -1635,22 +1906,15 @@ function writeNetwork(target, artifact) {
   return new Promise((resolve, reject) => { stream.on('error', reject); stream.end(resolve); });
 }
 
-function sha256File(file) {
-  const hash = crypto.createHash('sha256');
-  const descriptor = fs.openSync(file, 'r');
-  const buffer = Buffer.alloc(1 << 20);
-  let read;
-  while ((read = fs.readSync(descriptor, buffer, 0, buffer.length, null)) > 0) hash.update(buffer.subarray(0, read));
-  fs.closeSync(descriptor);
-  return hash.digest('hex');
-}
-
 async function main() {
   const scope = SCOPE;
   [scope.geometry, scope.stations, scope.settlements].forEach(file =>
     assert(fs.existsSync(path.join(root, file)), 'Missing ' + file + '; see world/README.md'));
-  const read = file => JSON.parse(fs.readFileSync(path.join(root, file), 'utf8'));
-  const geometry = read(scope.geometry), stationSet = read(scope.stations), settlementSet = read(scope.settlements);
+  const read = file => { log('reading ' + file); return JSON.parse(fs.readFileSync(path.join(root, file), 'utf8')); };
+  const args = process.argv.slice(2), option = name => { const index = args.indexOf('--' + name); return index >= 0 ? args[index + 1] : null; };
+  // The geometry is the largest input by far, and only tracing reads it: read when that stage runs, not before.
+  const readGeometry = () => read(scope.geometry);
+  const stationSet = read(scope.stations), settlementSet = read(scope.settlements);
   // Punta Arenas first: the network kept is the one the game starts on.
   const cities = parseCsv(fs.readFileSync(path.join(root, 'world/authored/places.csv'), 'utf8'))
     .map(row => ({ id: row.place_id, name: row.name, latitude: Number(row.latitude), longitude: Number(row.longitude) }))
@@ -1660,16 +1924,24 @@ async function main() {
   // A route with a "scope" is laid only in that scope's build (a route in Alaska means nothing to South America's).
   const authoredJoins = (fs.existsSync(joinsFile) ? JSON.parse(fs.readFileSync(joinsFile, 'utf8')).joins : [])
     .filter(join => !join.scope || join.scope === AREA.name);
-  const outpostCount = { value: 0 };
-  const readOutposts = () => {
-    const places = fs.existsSync(path.join(root, scope.outposts)) ? read(scope.outposts).places : [];
-    outpostCount.value = places.length;
-    return places;
-  };
+  const outpostsFile = path.join(root, scope.outposts);
+  const readOutposts = () => fs.existsSync(outpostsFile) ? read(scope.outposts).places : [];
   const regionsFile = path.join(root, 'world/authored/regions.json');
   const regions = fs.existsSync(regionsFile) ? JSON.parse(fs.readFileSync(regionsFile, 'utf8')).regions : [];
-  const built = buildNetwork({ geometry, stations: stationSet.stations, settlements: settlementSet.places, cities, grid, cache,
-    authoredJoins, outposts: readOutposts(), regions });
+  // Checkpoints go beside the other build caches, one set per scope. --fresh ignores them all; --from <stage> runs
+  // that stage and those after it again.
+  const hashInput = file => fs.existsSync(path.join(root, file)) ? checkpoint.hashFile(path.join(root, file)) : null;
+  log('hashing the inputs');
+  const geometryHash = hashInput(scope.geometry);
+  const checkpoints = args.includes('--no-checkpoints') ? null : {
+    dir: path.join(process.env.ASHLINE_WORLD_CHECKPOINTS || path.join(cache, 'checkpoints')), scope: AREA.prefix,
+    fresh: args.includes('--fresh'), from: option('from'),
+    inputs: { geometry: geometryHash, settlements: hashInput(scope.settlements), outposts: hashInput(scope.outposts),
+      cities: cities, authoredJoins: authoredJoins, regions: regions }
+  };
+  if (checkpoints) log('checkpoints in ' + checkpoints.dir);
+  const built = buildNetwork({ geometry: readGeometry, stations: stationSet.stations, settlements: settlementSet.places, cities, grid, cache,
+    authoredJoins, outposts: readOutposts, regions, checkpoints });
   const artifact = {
     formatVersion: 1,
     id: scope.id,
@@ -1677,10 +1949,10 @@ async function main() {
     builderVersion: BUILDER_VERSION,
     grid,
     sources: {
-      geometry: { id: geometry.id, sourceId: geometry.sourceId, sha256: sha256File(path.join(root, scope.geometry)) },
+      geometry: { id: built.geometry.id, sourceId: built.geometry.sourceId, sha256: geometryHash },
       stations: { id: stationSet.id, sourceId: stationSet.sourceId },
       settlements: { id: settlementSet.id, sourceId: settlementSet.sourceId },
-      outposts: { id: AREA.prefix + '-outposts', count: outpostCount.value },
+      outposts: { id: AREA.prefix + '-outposts', count: built.outpostCount },
       elevation: { sourceId: 'copernicus-dem-glo90', aggregation: 'mean-and-population-standard-deviation-within-grid-square',
         tileCount: 0 }
     },
@@ -1733,4 +2005,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { hardRegionTest, longJoins, buildNetwork, stubJoins, endJoins, cityShortcuts, pruneParallel, spliceOntoTrack, spurs, regionClassifier, simplifyUrban, traceLine, Network, placeIndex, resolveRoute };
+module.exports = { distancesAlong, distancesTo, dependenciesOf, stageTrace, stageJoins, stageOutskirts, stageStops, hardRegionTest, longJoins, buildNetwork, stubJoins, endJoins, cityShortcuts, pruneParallel, spliceOntoTrack, spurs, regionClassifier, simplifyUrban, traceLine, Network, placeIndex, resolveRoute };
