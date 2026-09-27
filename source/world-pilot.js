@@ -46,6 +46,7 @@ setup.realWorldPilot = (function () {
 				station: 0, stationId: null, stationIndex: 0,
 				geoCoordinate: setup.worldmap.unprojectGrid(squares.x[index], squares.y[index], setup.worldmap.gridFor(index)), globalPosition: index
 			};
+			tiles[index].terrain = setup.locales.terrain(tiles[index]);
 			kmByEnd[index] = km;
 			byKey[setup.worldmap.key(tiles[index].x, tiles[index].y)] = index;
 		}

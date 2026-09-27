@@ -2,7 +2,7 @@
 // All upgrades run on a detached copy; failed upgrades never modify a slot/file or
 // replace the live run. Add the next numbered step instead of rewriting old steps.
 setup.saveMigrations = {
-	CURRENT: 2,
+	CURRENT: 3,
 	notice: '',
 	recovery: null,
 	copy: function(value) { return JSON.parse(JSON.stringify(value)); },
@@ -218,6 +218,13 @@ setup.saveMigrations = {
 };
 setup.saveMigrations.steps[0] = function(moment) { setup.saveMigrations.upgradeUnversioned(moment); };
 setup.saveMigrations.steps[1] = function(moment) { setup.saveMigrations.upgradeSourcedWorld(moment); };
+// Regional generation adds stock/cargo catalogues, not a new world or replacement rolling stock.
+// Refresh definitions only; visited yards, carried cars, positions and cargo are byte-for-byte preserved.
+setup.saveMigrations.steps[2] = function(moment) {
+	var v = moment.variables, definitions = setup.currentDefinitions;
+	v.defaultTrains = Object.assign({}, v.defaultTrains, setup.saveMigrations.copy(definitions.defaultTrains));
+	v.cargoTypes = Object.assign({}, v.cargoTypes, setup.saveMigrations.copy(definitions.cargoTypes));
+};
 if (typeof Config !== 'undefined') {
 	Config.saves.version = setup.saveMigrations.CURRENT;
 	// Saving waits for the game to start; loading is allowed everywhere.

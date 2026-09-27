@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="14" height="12" viewBox="0 0 14 12" shape-rendering="crispEdges" data-template="railyard-plant-scrub" data-anchor-x="8" data-anchor-y="8">
+<title>Ashline rail yard template: Scrub</title>
+<g id="vegetation-scrub">
+<polygon points="2,5 1,1 4,4 5,2 6,7" fill="#92905c"/>
+<polygon points="6,7 5,3 8,6 9,4 10,9" fill="#92905c"/>
+<polygon points="9,9 8,4 11,7 12,5 13,11" fill="#92905c"/>
+</g>
+</svg>

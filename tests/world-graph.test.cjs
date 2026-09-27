@@ -123,7 +123,7 @@ test('the sourced grid is the default playable world without copying static data
     { legIndex: 1, tileIndex: 0, forward: true });
   const route = game.setup.realWorldPilot.getGridRoute();
   assert.ok(route.tiles.every(tile => Number.isFinite(tile.elevation) && Number.isFinite(tile.elevationStdDevM)));
-  assert.ok(route.tiles.every(tile => ['plains', 'mountain', 'bridge', 'tunnel'].includes(tile.terrain)));
+  assert.ok(route.tiles.every(tile => ['plains', 'forest', 'desert', 'arctic', 'mountain', 'bridge', 'tunnel'].includes(tile.terrain)));
   assert.equal(game.setup.realWorldPilot.terrainFor({ bridge: false, tunnel: false },
     { meanElevationM: 3000, elevationStdDevM: 20 }, 120), 'plains', 'high and flat is not mountainous');
   assert.equal(game.setup.realWorldPilot.terrainFor({ bridge: false, tunnel: false },

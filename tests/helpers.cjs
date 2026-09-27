@@ -16,6 +16,7 @@ function loadGame() {
     Wikifier: function (output, text) { if (output) output.push(text); }
   });
   vm.runInContext(code, context, { filename: embedded ? 'main.tw script' : 'scripts.js' });
+  vm.runInContext(fs.readFileSync(path.join(root, 'source/locales.js'), 'utf8'), context, { filename: 'locales.js' });
   vm.runInContext(fs.readFileSync(path.join(root, 'source/world-data.js'), 'utf8'), context, { filename: 'world-data.js' });
   vm.runInContext(fs.readFileSync(path.join(root, 'source/world-graph.js'), 'utf8'), context, { filename: 'world-graph.js' });
   vm.runInContext(fs.readFileSync(path.join(root, 'source/worldmap.js'), 'utf8'), context, { filename: 'worldmap.js' });

@@ -414,6 +414,300 @@ setup.drivingTemplates = {
 			]
 		},
 		{
+			"file": "driving-car-hopper.svg",
+			"passage": "driving-car-hopper",
+			"title": "Covered hopper",
+			"width": 32,
+			"height": 19,
+			"anchorX": 2,
+			"anchorY": 14,
+			"lengthMetres": 14,
+			"rear": [
+				2,
+				11
+			],
+			"front": [
+				30,
+				11
+			],
+			"top": [
+				16,
+				3
+			]
+		},
+		{
+			"file": "driving-car-refrigerated.svg",
+			"passage": "driving-car-refrigerated",
+			"title": "Refrigerated boxcar",
+			"width": 34,
+			"height": 21,
+			"anchorX": 2,
+			"anchorY": 16,
+			"lengthMetres": 15,
+			"rear": [
+				2,
+				13
+			],
+			"front": [
+				32,
+				13
+			],
+			"top": [
+				17,
+				3
+			]
+		},
+		{
+			"file": "driving-loco-diesel-old-road-right.svg",
+			"passage": "driving-loco-diesel-old-road-right",
+			"title": "Four axle old road diesel, facing right",
+			"width": 36,
+			"height": 23,
+			"anchorX": 2,
+			"anchorY": 18,
+			"lengthMetres": 16,
+			"rear": [
+				2,
+				15
+			],
+			"front": [
+				34,
+				15
+			],
+			"top": [
+				18,
+				5
+			],
+			"cab": [
+				28,
+				5
+			]
+		},
+		{
+			"file": "driving-loco-diesel-old-road-left.svg",
+			"passage": "driving-loco-diesel-old-road-left",
+			"title": "Four axle old road diesel, facing left",
+			"width": 36,
+			"height": 23,
+			"anchorX": 2,
+			"anchorY": 18,
+			"lengthMetres": 16,
+			"rear": [
+				2,
+				15
+			],
+			"front": [
+				34,
+				15
+			],
+			"top": [
+				18,
+				5
+			],
+			"cab": [
+				8,
+				5
+			]
+		},
+		{
+			"file": "driving-terrain-local-steppe.svg",
+			"passage": "driving-terrain-local-steppe",
+			"title": "Steppe",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-steppe-mountain.svg",
+			"passage": "driving-terrain-local-steppe-mountain",
+			"title": "Steppe",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-pampas.svg",
+			"passage": "driving-terrain-local-pampas",
+			"title": "Pampas",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-pampas-mountain.svg",
+			"passage": "driving-terrain-local-pampas-mountain",
+			"title": "Pampas",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-savanna.svg",
+			"passage": "driving-terrain-local-savanna",
+			"title": "Savanna",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-savanna-mountain.svg",
+			"passage": "driving-terrain-local-savanna-mountain",
+			"title": "Savanna",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-rainforest.svg",
+			"passage": "driving-terrain-local-rainforest",
+			"title": "Rainforest",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-rainforest-mountain.svg",
+			"passage": "driving-terrain-local-rainforest-mountain",
+			"title": "Rainforest",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-wetland.svg",
+			"passage": "driving-terrain-local-wetland",
+			"title": "Wetland",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-wetland-mountain.svg",
+			"passage": "driving-terrain-local-wetland-mountain",
+			"title": "Wetland",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-desert.svg",
+			"passage": "driving-terrain-local-desert",
+			"title": "Desert",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-desert-mountain.svg",
+			"passage": "driving-terrain-local-desert-mountain",
+			"title": "Desert",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-mediterranean.svg",
+			"passage": "driving-terrain-local-mediterranean",
+			"title": "Mediterranean",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-mediterranean-mountain.svg",
+			"passage": "driving-terrain-local-mediterranean-mountain",
+			"title": "Mediterranean",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-temperate.svg",
+			"passage": "driving-terrain-local-temperate",
+			"title": "Temperate",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-temperate-mountain.svg",
+			"passage": "driving-terrain-local-temperate-mountain",
+			"title": "Temperate",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-taiga.svg",
+			"passage": "driving-terrain-local-taiga",
+			"title": "Taiga",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-taiga-mountain.svg",
+			"passage": "driving-terrain-local-taiga-mountain",
+			"title": "Taiga",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-tundra.svg",
+			"passage": "driving-terrain-local-tundra",
+			"title": "Tundra",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-tundra-mountain.svg",
+			"passage": "driving-terrain-local-tundra-mountain",
+			"title": "Tundra",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-alpine.svg",
+			"passage": "driving-terrain-local-alpine",
+			"title": "Alpine",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-alpine-mountain.svg",
+			"passage": "driving-terrain-local-alpine-mountain",
+			"title": "Alpine",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
 			"file": "driving-track.svg",
 			"passage": "driving-track",
 			"title": "Track",

@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="82" height="61" viewBox="0 0 82 61" shape-rendering="crispEdges" data-template="driving-terrain-local-tundra-mountain" data-anchor-x="1" data-anchor-y="43">
+<title>Ashline driving template: Tundra</title>
+<g id="sky">
+<polygon points="1,1 81,1 81,23 1,23" fill="#b3c2c6"/>
+</g>
+<g id="far">
+<polygon points="1,18 11,18 11,23 1,23" fill="#8a9790"/>
+<polygon points="11,8 21,8 21,23 11,23" fill="#8a9790"/>
+<polygon points="11,8 21,8 21,10 11,10" fill="#a9b0b4"/>
+<polygon points="21,15 31,15 31,23 21,23" fill="#8a9790"/>
+<polygon points="31,8 41,8 41,23 31,23" fill="#8a9790"/>
+<polygon points="31,8 41,8 41,11 31,11" fill="#a9b0b4"/>
+<polygon points="41,13 51,13 51,23 41,23" fill="#8a9790"/>
+<polygon points="41,13 51,13 51,15 41,15" fill="#a9b0b4"/>
+<polygon points="51,10 61,10 61,23 51,23" fill="#8a9790"/>
+<polygon points="51,10 61,10 61,12 51,12" fill="#a9b0b4"/>
+<polygon points="61,11 71,11 71,23 61,23" fill="#8a9790"/>
+<polygon points="61,11 71,11 71,13 61,13" fill="#a9b0b4"/>
+<polygon points="71,12 81,12 81,23 71,23" fill="#8a9790"/>
+<polygon points="71,12 81,12 81,14 71,14" fill="#a9b0b4"/>
+</g>
+<g id="ground">
+<polygon points="1,23 81,23 81,60 1,60" fill="#777d70"/>
+</g>
+<g id="near">
+<polygon points="1,54 81,54 81,60 1,60" fill="#898b79"/>
+</g>
+<g id="detail">
+<polygon points="5,29 8,29 8,27 5,27" fill="#9c9a71"/>
+<polygon points="17,39 20,39 20,37 17,37" fill="#9c9a71"/>
+<polygon points="29,49 32,49 32,47 29,47" fill="#9c9a71"/>
+<polygon points="41,34 44,34 44,32 41,32" fill="#9c9a71"/>
+<polygon points="53,44 56,44 56,42 53,42" fill="#9c9a71"/>
+<polygon points="65,29 68,29 68,27 65,27" fill="#9c9a71"/>
+</g>
+<g id="vegetation-moss">
+<polygon points="4,26 3,25 6,25 7,25 8,26" fill="#9c9a71"/>
+<polygon points="8,26 7,25 10,25 11,25 12,26" fill="#9c9a71"/>
+<polygon points="11,26 10,25 13,25 14,25 15,26" fill="#9c9a71"/>
+</g>
+<g id="vegetation-moss">
+<polygon points="20,29 19,28 22,28 23,27 24,29" fill="#9c9a71"/>
+<polygon points="24,29 23,28 26,28 27,27 28,29" fill="#9c9a71"/>
+<polygon points="27,29 26,28 29,28 30,27 31,29" fill="#9c9a71"/>
+</g>
+<g id="vegetation-moss">
+<polygon points="38,26 37,25 40,25 41,25 42,26" fill="#9c9a71"/>
+<polygon points="42,26 41,25 44,25 45,25 46,26" fill="#9c9a71"/>
+<polygon points="45,26 44,25 47,25 48,25 49,26" fill="#9c9a71"/>
+</g>
+<g id="vegetation-moss">
+<polygon points="54,29 53,28 56,28 57,27 58,29" fill="#9c9a71"/>
+<polygon points="58,29 57,28 60,28 61,27 62,29" fill="#9c9a71"/>
+<polygon points="61,29 60,28 63,28 64,27 65,29" fill="#9c9a71"/>
+</g>
+<g id="vegetation-moss">
+<polygon points="65,26 64,25 67,25 68,25 69,26" fill="#9c9a71"/>
+<polygon points="69,26 68,25 71,25 72,25 73,26" fill="#9c9a71"/>
+<polygon points="72,26 71,25 74,25 75,25 76,26" fill="#9c9a71"/>
+</g>
+</svg>

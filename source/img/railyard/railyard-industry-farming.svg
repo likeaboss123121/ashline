@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="58" height="48" viewBox="0 0 58 48" shape-rendering="crispEdges" data-template="railyard-industry-farming" data-anchor-x="1" data-anchor-y="29">
+<title>Ashline rail yard template: Abandoned farming loading site</title>
+<g id="loading-apron">
+<polygon points="1,28 21,18 57,36 57,37 37,47 1,29" fill="#41493f"/>
+<polygon points="1,29 37,47 37,46 1,28" fill="#4c5147"/>
+<polygon points="57,37 37,47 37,46 57,36" fill="#41493f"/>
+<polygon points="21,18 57,36 37,46 1,28" fill="#626457"/>
+</g>
+<g id="industry">
+<polygon points="10,7 21,1 30,6 30,26 19,31 10,27" fill="#727b6b"/>
+<polygon points="10,27 19,31 19,11 10,7" fill="#8b917f"/>
+<polygon points="30,26 19,31 19,11 30,6" fill="#727b6b"/>
+<polygon points="21,1 30,6 19,11 10,7" fill="#b1b09a"/>
+<polygon points="14,5 21,1 26,4 26,6 19,9 14,7" fill="#5e6959"/>
+<polygon points="14,7 19,9 19,7 14,5" fill="#737e6b"/>
+<polygon points="26,6 19,9 19,7 26,4" fill="#5e6959"/>
+<polygon points="21,1 26,4 19,7 14,5" fill="#969d87"/>
+<polygon points="22,13 33,7 42,12 42,32 31,37 22,33" fill="#727b6b"/>
+<polygon points="22,33 31,37 31,17 22,13" fill="#8b917f"/>
+<polygon points="42,32 31,37 31,17 42,12" fill="#727b6b"/>
+<polygon points="33,7 42,12 31,17 22,13" fill="#b1b09a"/>
+<polygon points="26,11 33,7 38,10 38,12 31,15 26,13" fill="#5e6959"/>
+<polygon points="26,13 31,15 31,13 26,11" fill="#737e6b"/>
+<polygon points="38,12 31,15 31,13 38,10" fill="#5e6959"/>
+<polygon points="33,7 38,10 31,13 26,11" fill="#969d87"/>
+<polygon points="9,16 12,15 37,27 37,29 34,31 9,18" fill="#43543f"/>
+<polygon points="9,18 34,31 34,29 9,16" fill="#515e4d"/>
+<polygon points="37,29 34,31 34,29 37,27" fill="#43543f"/>
+<polygon points="12,15 37,27 34,29 9,16" fill="#8b937e"/>
+</g>
+</svg>

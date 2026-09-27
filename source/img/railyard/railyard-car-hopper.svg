@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="33" viewBox="0 0 40 33" shape-rendering="crispEdges" data-template="railyard-car-hopper" data-anchor-x="6" data-anchor-y="16" data-length-m="14">
+<title>Ashline rail yard template: Covered hopper</title>
+<g id="coupler">
+<polygon points="4,12 6,11 8,12 8,13 6,14 4,13" fill="#5f5a50"/>
+<polygon points="4,13 6,14 6,13 4,12" fill="#7f786a"/>
+<polygon points="8,13 6,14 6,13 8,12" fill="#5f5a50"/>
+<polygon points="6,11 8,12 6,13 4,12" fill="#bbb09a"/>
+</g>
+<g id="trucks">
+<polygon points="3,18 15,12 21,15 21,18 9,24 3,21" fill="#1a1e20"/>
+<polygon points="3,21 9,24 9,21 3,18" fill="#111416"/>
+<polygon points="21,18 9,24 9,21 21,15" fill="#1a1e20"/>
+<polygon points="15,12 21,15 9,21 3,18" fill="#383c3b"/>
+<polygon points="19,26 31,20 37,23 37,26 25,32 19,29" fill="#1a1e20"/>
+<polygon points="19,29 25,32 25,29 19,26" fill="#111416"/>
+<polygon points="37,26 25,32 25,29 37,23" fill="#1a1e20"/>
+<polygon points="31,20 37,23 25,29 19,26" fill="#383c3b"/>
+</g>
+<g id="underframe">
+<polygon points="1,14 11,9 39,23 39,25 29,30 1,16" fill="#1e2022"/>
+<polygon points="1,16 29,30 29,28 1,14" fill="#232626"/>
+<polygon points="39,25 29,30 29,28 39,23" fill="#1e2022"/>
+<polygon points="11,9 39,23 29,28 1,14" fill="#454440"/>
+</g>
+<g id="discharge-bays">
+<polygon points="8,14 14,11 19,14 19,18 13,21 8,18" fill="#484b42"/>
+<polygon points="8,18 13,21 13,17 8,14" fill="#444b45"/>
+<polygon points="19,18 13,21 13,17 19,14" fill="#484b42"/>
+<polygon points="14,11 19,14 13,17 8,14" fill="#6d7063"/>
+<polygon points="18,19 24,16 29,19 29,23 23,26 18,23" fill="#484b42"/>
+<polygon points="18,23 23,26 23,22 18,19" fill="#444b45"/>
+<polygon points="29,23 23,26 23,22 29,19" fill="#484b42"/>
+<polygon points="24,16 29,19 23,22 18,19" fill="#6d7063"/>
+</g>
+<g id="body">
+<polygon points="3,6 13,1 37,13 37,21 27,26 3,14" fill="#525f52"/>
+<polygon points="3,14 27,26 27,18 3,6" fill="#727d6a"/>
+<polygon points="37,21 27,26 27,18 37,13" fill="#525f52"/>
+<polygon points="13,1 37,13 27,18 3,6" fill="#979b88"/>
+<polygon points="6,7 7,7 7,15 6,15" fill="#a1a592"/>
+<polygon points="12,10 13,10 13,18 12,18" fill="#a1a592"/>
+<polygon points="18,13 19,13 19,21 18,21" fill="#a1a592"/>
+<polygon points="24,16 25,16 25,24 24,24" fill="#a1a592"/>
+</g>
+<g id="roof-hatches">
+<polygon points="9,5 13,3 17,5 17,6 13,8 9,6" fill="#484b42"/>
+<polygon points="9,6 13,8 13,7 9,5" fill="#757e6b"/>
+<polygon points="17,6 13,8 13,7 17,5" fill="#484b42"/>
+<polygon points="13,3 17,5 13,7 9,5" fill="#b1b3a1"/>
+<polygon points="16,8 20,6 24,8 24,9 20,11 16,9" fill="#484b42"/>
+<polygon points="16,9 20,11 20,10 16,8" fill="#757e6b"/>
+<polygon points="24,9 20,11 20,10 24,8" fill="#484b42"/>
+<polygon points="20,6 24,8 20,10 16,8" fill="#b1b3a1"/>
+<polygon points="23,12 27,10 31,12 31,13 27,15 23,13" fill="#484b42"/>
+<polygon points="23,13 27,15 27,14 23,12" fill="#757e6b"/>
+<polygon points="31,13 27,15 27,14 31,12" fill="#484b42"/>
+<polygon points="27,10 31,12 27,14 23,12" fill="#b1b3a1"/>
+</g>
+<g id="coupler">
+<polygon points="32,26 34,25 36,26 36,27 34,28 32,27" fill="#5f5a50"/>
+<polygon points="32,27 34,28 34,27 32,26" fill="#7f786a"/>
+<polygon points="36,27 34,28 34,27 36,26" fill="#5f5a50"/>
+<polygon points="34,25 36,26 34,27 32,26" fill="#bbb09a"/>
+</g>
+</svg>

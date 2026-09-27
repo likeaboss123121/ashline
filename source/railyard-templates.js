@@ -650,6 +650,237 @@ setup.railyardTemplates = {
 				26,
 				8
 			]
+		},
+		{
+			"file": "railyard-plant-scrub.svg",
+			"passage": "railyard-plant-scrub",
+			"title": "Scrub",
+			"width": 14,
+			"height": 12,
+			"anchorX": 8,
+			"anchorY": 8
+		},
+		{
+			"file": "railyard-plant-grass.svg",
+			"passage": "railyard-plant-grass",
+			"title": "Grass",
+			"width": 14,
+			"height": 11,
+			"anchorX": 8,
+			"anchorY": 7
+		},
+		{
+			"file": "railyard-plant-acacia.svg",
+			"passage": "railyard-plant-acacia",
+			"title": "Acacia",
+			"width": 24,
+			"height": 23,
+			"anchorX": 12,
+			"anchorY": 21
+		},
+		{
+			"file": "railyard-plant-broadleaf.svg",
+			"passage": "railyard-plant-broadleaf",
+			"title": "Broadleaf",
+			"width": 22,
+			"height": 30,
+			"anchorX": 11,
+			"anchorY": 28
+		},
+		{
+			"file": "railyard-plant-cypress.svg",
+			"passage": "railyard-plant-cypress",
+			"title": "Cypress",
+			"width": 10,
+			"height": 31,
+			"anchorX": 5,
+			"anchorY": 29
+		},
+		{
+			"file": "railyard-plant-olive.svg",
+			"passage": "railyard-plant-olive",
+			"title": "Olive",
+			"width": 18,
+			"height": 19,
+			"anchorX": 9,
+			"anchorY": 17
+		},
+		{
+			"file": "railyard-plant-oak.svg",
+			"passage": "railyard-plant-oak",
+			"title": "Oak",
+			"width": 18,
+			"height": 26,
+			"anchorX": 9,
+			"anchorY": 24
+		},
+		{
+			"file": "railyard-plant-pine.svg",
+			"passage": "railyard-plant-pine",
+			"title": "Pine",
+			"width": 16,
+			"height": 29,
+			"anchorX": 8,
+			"anchorY": 27
+		},
+		{
+			"file": "railyard-plant-moss.svg",
+			"passage": "railyard-plant-moss",
+			"title": "Moss",
+			"width": 14,
+			"height": 9,
+			"anchorX": 8,
+			"anchorY": 5
+		},
+		{
+			"file": "railyard-plant-rock.svg",
+			"passage": "railyard-plant-rock",
+			"title": "Rock",
+			"width": 14,
+			"height": 12,
+			"anchorX": 7,
+			"anchorY": 8
+		},
+		{
+			"file": "railyard-industry-farming.svg",
+			"passage": "railyard-industry-farming",
+			"title": "Abandoned farming loading site",
+			"width": 58,
+			"height": 48,
+			"anchorX": 1,
+			"anchorY": 29
+		},
+		{
+			"file": "railyard-industry-forestry.svg",
+			"passage": "railyard-industry-forestry",
+			"title": "Abandoned forestry loading site",
+			"width": 58,
+			"height": 33,
+			"anchorX": 1,
+			"anchorY": 14
+		},
+		{
+			"file": "railyard-industry-mining.svg",
+			"passage": "railyard-industry-mining",
+			"title": "Abandoned mining loading site",
+			"width": 58,
+			"height": 34,
+			"anchorX": 1,
+			"anchorY": 15
+		},
+		{
+			"file": "railyard-industry-oil.svg",
+			"passage": "railyard-industry-oil",
+			"title": "Abandoned oil loading site",
+			"width": 58,
+			"height": 36,
+			"anchorX": 1,
+			"anchorY": 17
+		},
+		{
+			"file": "railyard-industry-manufacturing.svg",
+			"passage": "railyard-industry-manufacturing",
+			"title": "Abandoned manufacturing loading site",
+			"width": 58,
+			"height": 43,
+			"anchorX": 1,
+			"anchorY": 24
+		},
+		{
+			"file": "railyard-car-hopper.svg",
+			"passage": "railyard-car-hopper",
+			"title": "Covered hopper",
+			"width": 40,
+			"height": 33,
+			"anchorX": 6,
+			"anchorY": 16,
+			"lengthMetres": 14,
+			"rear": [
+				6,
+				12
+			],
+			"front": [
+				34,
+				26
+			],
+			"top": [
+				20,
+				8
+			]
+		},
+		{
+			"file": "railyard-car-refrigerated.svg",
+			"passage": "railyard-car-refrigerated",
+			"title": "Refrigerated boxcar",
+			"width": 42,
+			"height": 37,
+			"anchorX": 6,
+			"anchorY": 19,
+			"lengthMetres": 15,
+			"rear": [
+				6,
+				15
+			],
+			"front": [
+				36,
+				30
+			],
+			"top": [
+				21,
+				9
+			]
+		},
+		{
+			"file": "railyard-loco-diesel-old-road-right.svg",
+			"passage": "railyard-loco-diesel-old-road-right",
+			"title": "Four axle old road diesel, facing right",
+			"width": 44,
+			"height": 35,
+			"anchorX": 6,
+			"anchorY": 17,
+			"lengthMetres": 16,
+			"rear": [
+				6,
+				13
+			],
+			"front": [
+				38,
+				29
+			],
+			"top": [
+				22,
+				7
+			],
+			"cab": [
+				32,
+				12
+			]
+		},
+		{
+			"file": "railyard-loco-diesel-old-road-left.svg",
+			"passage": "railyard-loco-diesel-old-road-left",
+			"title": "Four axle old road diesel, facing left",
+			"width": 44,
+			"height": 39,
+			"anchorX": 6,
+			"anchorY": 21,
+			"lengthMetres": 16,
+			"rear": [
+				6,
+				17
+			],
+			"front": [
+				38,
+				33
+			],
+			"top": [
+				22,
+				11
+			],
+			"cab": [
+				12,
+				6
+			]
 		}
 	]
 };

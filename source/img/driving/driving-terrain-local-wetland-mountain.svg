@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="82" height="61" viewBox="0 0 82 61" shape-rendering="crispEdges" data-template="driving-terrain-local-wetland-mountain" data-anchor-x="1" data-anchor-y="43">
+<title>Ashline driving template: Wetland</title>
+<g id="sky">
+<polygon points="1,1 81,1 81,23 1,23" fill="#a2beb8"/>
+</g>
+<g id="far">
+<polygon points="1,18 11,18 11,23 1,23" fill="#56736a"/>
+<polygon points="11,8 21,8 21,23 11,23" fill="#56736a"/>
+<polygon points="11,8 21,8 21,10 11,10" fill="#56736a"/>
+<polygon points="21,15 31,15 31,23 21,23" fill="#56736a"/>
+<polygon points="31,8 41,8 41,23 31,23" fill="#56736a"/>
+<polygon points="31,8 41,8 41,11 31,11" fill="#56736a"/>
+<polygon points="41,13 51,13 51,23 41,23" fill="#56736a"/>
+<polygon points="41,13 51,13 51,15 41,15" fill="#56736a"/>
+<polygon points="51,10 61,10 61,23 51,23" fill="#56736a"/>
+<polygon points="51,10 61,10 61,12 51,12" fill="#56736a"/>
+<polygon points="61,11 71,11 71,23 61,23" fill="#56736a"/>
+<polygon points="61,11 71,11 71,13 61,13" fill="#56736a"/>
+<polygon points="71,12 81,12 81,23 71,23" fill="#56736a"/>
+<polygon points="71,12 81,12 81,14 71,14" fill="#56736a"/>
+</g>
+<g id="ground">
+<polygon points="1,23 81,23 81,60 1,60" fill="#485b49"/>
+</g>
+<g id="near">
+<polygon points="1,54 81,54 81,60 1,60" fill="#506754"/>
+</g>
+<g id="detail">
+<polygon points="5,29 8,29 8,27 5,27" fill="#5b7954"/>
+<polygon points="17,39 20,39 20,37 17,37" fill="#5b7954"/>
+<polygon points="29,49 32,49 32,47 29,47" fill="#5b7954"/>
+<polygon points="41,34 44,34 44,32 41,32" fill="#5b7954"/>
+<polygon points="53,44 56,44 56,42 53,42" fill="#5b7954"/>
+<polygon points="65,29 68,29 68,27 65,27" fill="#5b7954"/>
+</g>
+<g id="standing-water">
+<polygon points="1,25 31,25 23,35 4,36" fill="#657e79"/>
+<polygon points="40,25 70,25 62,35 43,36" fill="#657e79"/>
+</g>
+<g id="vegetation-cypress">
+<polygon points="9,26 9,10 11,10 12,26" fill="#665b42"/>
+<polygon points="6,22 10,10 14,22" fill="#5b7954"/>
+<polygon points="7,18 10,8 13,18" fill="#5b7954"/>
+<polygon points="8,15 10,6 12,15" fill="#5b7954"/>
+<polygon points="10,6 13,12 10,10" fill="#759078"/>
+</g>
+<g id="vegetation-cypress">
+<polygon points="25,29 25,12 27,12 28,29" fill="#665b42"/>
+<polygon points="22,25 26,12 30,25" fill="#5b7954"/>
+<polygon points="23,21 26,10 29,21" fill="#5b7954"/>
+<polygon points="24,18 26,8 28,18" fill="#5b7954"/>
+<polygon points="26,8 29,14 26,13" fill="#759078"/>
+</g>
+<g id="vegetation-cypress">
+<polygon points="43,26 43,8 45,8 46,26" fill="#665b42"/>
+<polygon points="40,22 44,9 48,22" fill="#5b7954"/>
+<polygon points="41,18 44,7 47,18" fill="#5b7954"/>
+<polygon points="42,15 44,5 46,15" fill="#5b7954"/>
+<polygon points="44,5 47,10 44,9" fill="#759078"/>
+</g>
+<g id="vegetation-cypress">
+<polygon points="59,29 59,13 61,13 62,29" fill="#665b42"/>
+<polygon points="56,25 60,13 64,25" fill="#5b7954"/>
+<polygon points="57,21 60,11 63,21" fill="#5b7954"/>
+<polygon points="58,18 60,9 62,18" fill="#5b7954"/>
+<polygon points="60,9 63,15 60,13" fill="#759078"/>
+</g>
+<g id="vegetation-cypress">
+<polygon points="70,26 70,9 72,9 73,26" fill="#665b42"/>
+<polygon points="67,22 71,9 75,22" fill="#5b7954"/>
+<polygon points="68,18 71,7 74,18" fill="#5b7954"/>
+<polygon points="69,15 71,6 73,15" fill="#5b7954"/>
+<polygon points="71,6 74,11 71,10" fill="#759078"/>
+</g>
+</svg>

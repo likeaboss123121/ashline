@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="34" height="21" viewBox="0 0 34 21" shape-rendering="crispEdges" data-template="driving-car-refrigerated" data-anchor-x="2" data-anchor-y="16" data-length-m="15">
+<title>Ashline driving template: Refrigerated boxcar</title>
+<g id="coupler">
+<polygon points="1,15 3,15 3,14 1,14" fill="#7f786a"/>
+<polygon points="1,12 3,12 3,14 1,14" fill="#bbb09a"/>
+</g>
+<g id="trucks">
+<polygon points="5,20 11,20 11,18 5,18" fill="#111416"/>
+<polygon points="5,10 11,10 11,18 5,18" fill="#383c3b"/>
+<polygon points="8,17 8,16 7,15 6,15 5,16 5,17 5,18 6,19 7,19 8,18" fill="#1b1f20"/>
+<polygon points="7,17 7,17 7,16 6,16 6,17 6,17 6,18 6,18 7,18 7,18" fill="#8c3b2e"/>
+<polygon points="11,17 11,16 10,15 9,15 8,16 8,17 8,18 9,19 10,19 11,18" fill="#1b1f20"/>
+<polygon points="10,17 10,17 10,16 9,16 9,17 9,17 9,18 9,18 10,18 10,18" fill="#8c3b2e"/>
+<polygon points="23,20 29,20 29,18 23,18" fill="#111416"/>
+<polygon points="23,10 29,10 29,18 23,18" fill="#383c3b"/>
+<polygon points="26,17 26,16 25,15 24,15 23,16 23,17 23,18 24,19 25,19 26,18" fill="#1b1f20"/>
+<polygon points="25,17 25,17 25,16 24,16 24,17 24,17 24,18 24,18 25,18 25,18" fill="#8c3b2e"/>
+<polygon points="29,17 29,16 28,15 27,15 26,16 26,17 26,18 27,19 28,19 29,18" fill="#1b1f20"/>
+<polygon points="28,17 28,17 28,16 27,16 27,17 27,17 27,18 27,18 28,18 28,18" fill="#8c3b2e"/>
+</g>
+<g id="underframe">
+<polygon points="2,17 32,17 32,16 2,16" fill="#232626"/>
+<polygon points="2,9 32,9 32,16 2,16" fill="#454440"/>
+</g>
+<g id="insulated-body">
+<polygon points="3,16 31,16 31,9 3,9" fill="#969c8d"/>
+<polygon points="3,2 31,2 31,9 3,9" fill="#b7b6a3"/>
+<polygon points="4,14 30,14 30,15 4,15" fill="#537881"/>
+</g>
+<g id="sealed-door">
+<polygon points="14,16 21,16 21,10 14,10" fill="#808b80"/>
+<polygon points="14,10 21,10 21,10 14,10" fill="#bec0ab"/>
+<polygon points="14,11 15,11 15,16 14,16" fill="#c0bd9e"/>
+<polygon points="20,11 21,11 21,16 20,16" fill="#c0bd9e"/>
+</g>
+<g id="cooling-unit">
+<polygon points="4,8 9,8 9,5 4,5" fill="#465b57"/>
+<polygon points="4,1 9,1 9,5 4,5" fill="#7e8981"/>
+<polygon points="5,5 6,5 6,8 5,8" fill="#293c3c"/>
+<polygon points="7,5 8,5 8,8 7,8" fill="#293c3c"/>
+</g>
+<g id="coupler">
+<polygon points="31,15 33,15 33,14 31,14" fill="#7f786a"/>
+<polygon points="31,12 33,12 33,14 31,14" fill="#bbb09a"/>
+</g>
+</svg>

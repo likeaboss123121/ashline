@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="82" height="61" viewBox="0 0 82 61" shape-rendering="crispEdges" data-template="driving-terrain-local-alpine" data-anchor-x="1" data-anchor-y="43">
+<title>Ashline driving template: Alpine</title>
+<g id="sky">
+<polygon points="1,1 81,1 81,23 1,23" fill="#afc3cd"/>
+</g>
+<g id="far">
+<polygon points="1,21 11,21 11,23 1,23" fill="#88938f"/>
+<polygon points="11,17 21,17 21,23 11,23" fill="#88938f"/>
+<polygon points="21,20 31,20 31,23 21,23" fill="#88938f"/>
+<polygon points="31,17 41,17 41,23 31,23" fill="#88938f"/>
+<polygon points="41,19 51,19 51,23 41,23" fill="#88938f"/>
+<polygon points="51,18 61,18 61,23 51,23" fill="#88938f"/>
+<polygon points="61,18 71,18 71,23 61,23" fill="#88938f"/>
+<polygon points="71,18 81,18 81,23 71,23" fill="#88938f"/>
+</g>
+<g id="ground">
+<polygon points="1,23 81,23 81,60 1,60" fill="#73766c"/>
+</g>
+<g id="near">
+<polygon points="1,54 81,54 81,60 1,60" fill="#838378"/>
+</g>
+<g id="detail">
+<polygon points="5,27 6,27 6,29 5,29" fill="#a7aaa0"/>
+<polygon points="6,28 7,28 7,29 6,29" fill="#a7aaa0"/>
+<polygon points="17,37 18,37 18,39 17,39" fill="#a7aaa0"/>
+<polygon points="18,37 19,37 19,39 18,39" fill="#a7aaa0"/>
+<polygon points="29,46 30,46 30,49 29,49" fill="#a7aaa0"/>
+<polygon points="30,48 31,48 31,49 30,49" fill="#a7aaa0"/>
+<polygon points="41,32 42,32 42,34 41,34" fill="#a7aaa0"/>
+<polygon points="42,32 43,32 43,34 42,34" fill="#a7aaa0"/>
+<polygon points="53,42 54,42 54,44 53,44" fill="#a7aaa0"/>
+<polygon points="54,43 55,43 55,44 54,44" fill="#a7aaa0"/>
+<polygon points="65,26 66,26 66,29 65,29" fill="#a7aaa0"/>
+<polygon points="66,27 67,27 67,29 66,29" fill="#a7aaa0"/>
+</g>
+<g id="vegetation-rock">
+<polygon points="4,26 6,22 12,21 16,24 16,26" fill="#747b78"/>
+<polygon points="6,22 12,21 16,24 11,23" fill="#a7aaa0"/>
+</g>
+<g id="vegetation-rock">
+<polygon points="20,29 22,25 28,24 32,27 32,29" fill="#747b78"/>
+<polygon points="22,25 28,24 32,27 27,26" fill="#a7aaa0"/>
+</g>
+<g id="vegetation-rock">
+<polygon points="38,26 40,22 46,21 50,24 50,26" fill="#747b78"/>
+<polygon points="40,22 46,21 50,24 45,23" fill="#a7aaa0"/>
+</g>
+<g id="vegetation-rock">
+<polygon points="54,29 56,25 62,24 66,27 66,29" fill="#747b78"/>
+<polygon points="56,25 62,24 66,27 61,26" fill="#a7aaa0"/>
+</g>
+<g id="vegetation-rock">
+<polygon points="65,26 67,22 73,21 77,24 77,26" fill="#747b78"/>
+<polygon points="67,22 73,21 77,24 72,23" fill="#a7aaa0"/>
+</g>
+</svg>

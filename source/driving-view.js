@@ -72,6 +72,8 @@ setup.drivingView = {
 		if (type === 'flatcar') return 'driving-car-flatcar';
 		if (type === 'tanker car') return 'driving-car-tanker';
 		if (type === 'gondola') return 'driving-car-gondola';
+		if (type === 'hopper car') return 'driving-car-hopper';
+		if (type === 'refrigerated car') return 'driving-car-refrigerated';
 		var passenger = { 'passenger coach': 'passenger', 'sleeper coach': 'sleeper',
 			'observation car': 'observation', 'kitchen car': 'kitchen', 'private car': 'private' };
 		if (passenger[type]) return 'driving-car-' + passenger[type];
@@ -234,7 +236,15 @@ setup.drivingView = {
 			return template;
 		};
 		// The backdrop stays level: it is scenery, not the line the train is standing on.
-		var terrainName = this.getTerrainTemplateName(view.terrain);
+		var locale = view.tile && view.tile.geoCoordinate ? setup.locales.forTile(view.tile)
+			: view.terrain === 'yard' ? setup.locales.forStation(State.variables.currentStation) : null;
+		var terrainName = locale && view.terrain !== 'bridge' && view.terrain !== 'tunnel'
+			? 'driving-terrain-local-' + locale.biome + (view.terrain === 'mountain' ? '-mountain' : '')
+			: this.getTerrainTemplateName(view.terrain);
+		if (locale) {
+			svg.setAttribute('data-biome', locale.biome);
+			svg.setAttribute('aria-label', svg.getAttribute('aria-label') + '; ' + setup.locales.BIOMES[locale.biome].name);
+		}
 		var terrainTemplate = this.getTemplate(terrainName);
 		var backdrop = document.createElementNS(ns, 'g');
 		svg.appendChild(backdrop);

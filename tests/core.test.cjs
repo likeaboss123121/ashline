@@ -931,13 +931,13 @@ test('wood comes from gondolas, is cut from timber aboard, and is felled green i
   assert.equal(jobFor(setup, [diesel, flatcar], 0, 'cut-timber'), undefined);
 });
 
-test('the four locomotives differ in pull, speed and art, and a consist runs at its slowest', () => {
+test('the locomotives differ in pull, speed and art, and a consist runs at its slowest', () => {
   const { setup, State } = loadGame();
-  const keys = ['dieselShunter', 'dieselRoad', 'steamShunter', 'steamPrairie'];
+  const keys = ['dieselShunter', 'dieselRoad', 'steamShunter', 'steamPrairie', 'dieselOldRoad'];
   assert.deepEqual([...setup.railyard.locomotiveKeys], keys);
   const locos = keys.map(key => setup.railyard.createLocomotiveCar(key));
   assert.deepEqual(locos.map(loco => setup.railyard.getLocomotiveModel(loco)),
-    ['diesel-shunter', 'diesel-road', 'steam-shunter', 'steam-prairie']);
+    ['diesel-shunter', 'diesel-road', 'steam-shunter', 'steam-prairie', 'diesel-old-road']);
   const templates = new Set([...setup.railyardTemplates.templates].map(t => t.passage));
   const driving = new Set([...setup.drivingTemplates.templates].map(t => t.passage));
   locos.forEach(loco => {

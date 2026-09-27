@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="82" height="61" viewBox="0 0 82 61" shape-rendering="crispEdges" data-template="driving-terrain-local-rainforest" data-anchor-x="1" data-anchor-y="43">
+<title>Ashline driving template: Rainforest</title>
+<g id="sky">
+<polygon points="1,1 81,1 81,23 1,23" fill="#8eafa3"/>
+</g>
+<g id="far">
+<polygon points="1,21 11,21 11,23 1,23" fill="#456553"/>
+<polygon points="11,17 21,17 21,23 11,23" fill="#456553"/>
+<polygon points="21,20 31,20 31,23 21,23" fill="#456553"/>
+<polygon points="31,17 41,17 41,23 31,23" fill="#456553"/>
+<polygon points="41,19 51,19 51,23 41,23" fill="#456553"/>
+<polygon points="51,18 61,18 61,23 51,23" fill="#456553"/>
+<polygon points="61,18 71,18 71,23 61,23" fill="#456553"/>
+<polygon points="71,18 81,18 81,23 71,23" fill="#456553"/>
+</g>
+<g id="ground">
+<polygon points="1,23 81,23 81,60 1,60" fill="#384e37"/>
+</g>
+<g id="near">
+<polygon points="1,54 81,54 81,60 1,60" fill="#435a39"/>
+</g>
+<g id="detail">
+<polygon points="5,27 6,27 6,29 5,29" fill="#54754a"/>
+<polygon points="6,28 7,28 7,29 6,29" fill="#54754a"/>
+<polygon points="17,37 18,37 18,39 17,39" fill="#54754a"/>
+<polygon points="18,37 19,37 19,39 18,39" fill="#54754a"/>
+<polygon points="29,46 30,46 30,49 29,49" fill="#54754a"/>
+<polygon points="30,48 31,48 31,49 30,49" fill="#54754a"/>
+<polygon points="41,32 42,32 42,34 41,34" fill="#54754a"/>
+<polygon points="42,32 43,32 43,34 42,34" fill="#54754a"/>
+<polygon points="53,42 54,42 54,44 53,44" fill="#54754a"/>
+<polygon points="54,43 55,43 55,44 54,44" fill="#54754a"/>
+<polygon points="65,26 66,26 66,29 65,29" fill="#54754a"/>
+<polygon points="66,27 67,27 67,29 66,29" fill="#54754a"/>
+</g>
+<g id="vegetation-broadleaf">
+<polygon points="12,26 12,12 14,12 15,26" fill="#665b42"/>
+<polygon points="3,15 3,11 8,8 17,8 23,10 23,15 16,16 8,15" fill="#54754a"/>
+<polygon points="3,11 8,8 17,8 18,10 11,11" fill="#829464"/>
+<polygon points="18,13 19,23 20,23 20,13" fill="#638052"/>
+</g>
+<g id="vegetation-broadleaf">
+<polygon points="38,29 38,14 40,14 41,29" fill="#665b42"/>
+<polygon points="29,17 29,13 34,10 43,10 49,13 49,17 42,18 34,18" fill="#54754a"/>
+<polygon points="29,13 34,10 43,10 44,13 37,13" fill="#829464"/>
+<polygon points="44,15 45,26 46,26 46,15" fill="#638052"/>
+</g>
+<g id="vegetation-broadleaf">
+<polygon points="65,26 65,10 67,10 68,26" fill="#665b42"/>
+<polygon points="56,13 56,10 61,7 70,6 76,9 76,13 69,15 61,14" fill="#54754a"/>
+<polygon points="56,10 61,7 70,6 71,9 64,10" fill="#829464"/>
+<polygon points="71,11 72,23 73,23 73,12" fill="#638052"/>
+</g>
+</svg>

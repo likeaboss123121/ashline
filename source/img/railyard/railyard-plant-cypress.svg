@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="10" height="31" viewBox="0 0 10 31" shape-rendering="crispEdges" data-template="railyard-plant-cypress" data-anchor-x="5" data-anchor-y="29">
+<title>Ashline rail yard template: Cypress</title>
+<g id="vegetation-cypress">
+<polygon points="4,29 4,6 6,7 7,30" fill="#665b42"/>
+<polygon points="1,22 5,7 9,26" fill="#5b7954"/>
+<polygon points="2,17 5,4 8,20" fill="#5b7954"/>
+<polygon points="3,12 5,1 7,14" fill="#5b7954"/>
+<polygon points="5,1 8,11 5,7" fill="#759078"/>
+</g>
+</svg>

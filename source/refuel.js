@@ -33,6 +33,8 @@ setup.refuel = {
 			where: 'beside-water', into: 'water', unit: 'L', rate: 20, batch: 400, fatigue: 0.15, grade: 40 },
 		{ id: 'coal-from-gondola', label: 'Shovel coal from the gondola into the bunker', loco: 'steam', tool: 'toolkit',
 			from: { carType: 'gondola', cargo: 'coal' }, into: 'coal', unit: 'kg', rate: 25, batch: 200, fatigue: 0.4 },
+		{ id: 'coal-from-hopper', label: 'Shovel coal from the hopper into the bunker', loco: 'steam', tool: 'toolkit',
+			from: { carType: 'hopper car', cargo: 'coal' }, into: 'coal', unit: 'kg', rate: 25, batch: 200, fatigue: 0.4 },
 		{ id: 'firewood-from-gondola', label: 'Load firewood from the gondola', loco: 'steam',
 			from: { carType: 'gondola', cargo: 'firewood' }, into: 'firewood', unit: 'kg', rate: 30, batch: 200, fatigue: 0.35 },
 		{ id: 'cut-timber', label: 'Cut timber into firewood', loco: 'steam', tool: 'axe',

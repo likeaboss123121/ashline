@@ -100,6 +100,8 @@ setup.railyardView = {
 		if (type === 'flatcar') return 'railyard-car-flatcar';
 		if (type === 'tanker car') return 'railyard-car-tanker';
 		if (type === 'gondola') return 'railyard-car-gondola';
+		if (type === 'hopper car') return 'railyard-car-hopper';
+		if (type === 'refrigerated car') return 'railyard-car-refrigerated';
 		var passenger = { 'passenger coach': 'passenger', 'sleeper coach': 'sleeper',
 			'observation car': 'observation', 'kitchen car': 'kitchen', 'private car': 'private' };
 		if (passenger[type]) return 'railyard-car-' + passenger[type];
@@ -482,6 +484,11 @@ setup.railyardView = {
 			result.groundSpans.push({ u0: buildingU - 2, u1: buildingU + width + 2, v: -self.BUILDING_OFFSET_UNITS - 12 });
 			buildingU += width + self.BUILDING_GAP_METRES;
 		});
+		// A freight landmark, not another supply container. Existing station stores remain authoritative.
+		var industry = setup.locales.forStation(State.variables.currentStation).industry;
+		result.buildings.push({ name: 'railyard-industry-' + industry, u: buildingU, v: -self.BUILDING_OFFSET_UNITS,
+			title: setup.locales.INDUSTRIES[industry].name + ' loading site (scenery).' });
+		result.groundSpans.push({ u0: buildingU - 2, u1: buildingU + 20, v: -self.BUILDING_OFFSET_UNITS - 12 });
 		result.flipped = flipped;
 		return result;
 	},
@@ -822,6 +829,8 @@ setup.railyardView = {
 	render: function(tracks, player) {
 		var M = setup.railyardTemplates.unitsPerMetre;
 		var layout = this.layout(tracks, player);
+		var locale = setup.locales.forStation(State.variables.currentStation);
+		var biome = setup.locales.BIOMES[locale.biome];
 		var self = this;
 		var byDepth = function(a, b) { return a.v - b.v || a.u - b.u; };
 		var images = [];
@@ -841,6 +850,22 @@ setup.railyardView = {
 		layout.flat.sort(byDepth).forEach(function(piece) {
 			place(piece.name, piece.u, piece.v, '', true);
 		});
+		// Vegetation stays behind the building row: never over a rail, train, or click target.
+		var sceneryStation = setup.realWorldPilot.getStation(State.variables.currentStation);
+		var sceneryRng = setup.railyard.mulberry32(setup.railyard.seedFromString(
+			(State.variables.randomSeed || 'ashline') + ':scenery:' + (sceneryStation ? sceneryStation.id : State.variables.currentStation)));
+		var sceneryLength = Math.max(60, Math.min(300, tracks.reduce(function(longest, track) {
+			return track.infinite ? longest : Math.max(longest, track.length || 0);
+		}, 0)));
+		layout.groundSpans.push({ u0: 6, u1: sceneryLength, v: -100 });
+		var scenery = [];
+		for (var vegetationU = 10; vegetationU < sceneryLength; vegetationU += 12 + Math.floor(sceneryRng() * 14)) {
+			scenery.push({ plant: biome.plant, u: vegetationU, v: -82 - Math.floor(sceneryRng() * 25) });
+			if (sceneryRng() < 0.55) scenery.push({ plant: biome.plant, u: vegetationU + 4, v: -100 });
+			scenery.push({ plant: locale.biome === 'tundra' ? 'moss' : locale.biome === 'alpine' ? 'rock' : 'scrub',
+				u: vegetationU + 3, v: -59 - Math.floor(sceneryRng() * 16) });
+		}
+		scenery.sort(byDepth).forEach(function(plant) { place('railyard-plant-' + plant.plant, plant.u, plant.v, biome.name); });
 		(layout.buildings || []).forEach(function(building) {
 			place(building.name, building.u, building.v, building.title);
 		});
@@ -936,12 +961,14 @@ setup.railyardView = {
 		var grader = graded ? setup.daylight.createGrader(light, 'subject') : null;
 		var litGrader = graded ? setup.daylight.createGrader(light, 'subject', true) : null;
 		svg.setAttribute('data-light', light.phase);
+		svg.setAttribute('data-biome', locale.biome);
+		svg.setAttribute('data-industry', locale.industry);
+		svg.setAttribute('aria-label', svg.getAttribute('aria-label') + '; ' + biome.name
+			+ '; ' + setup.locales.INDUSTRIES[locale.industry].name);
 		grounds.forEach(function(shape) {
 			var groundShape = document.createElementNS(ns, 'polygon');
 			groundShape.setAttribute('class', 'railyard-ground');
-			if (grader) {
-				groundShape.style.fill = grader(self.GROUND_COLOUR);
-			}
+			groundShape.style.fill = grader ? grader(biome.ground) : biome.ground;
 			groundShape.setAttribute('points', shape.map(function(p) { return p.x + ',' + p.y; }).join(' '));
 			svg.appendChild(groundShape);
 		});

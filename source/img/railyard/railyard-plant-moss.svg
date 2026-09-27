@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="14" height="9" viewBox="0 0 14 9" shape-rendering="crispEdges" data-template="railyard-plant-moss" data-anchor-x="8" data-anchor-y="5">
+<title>Ashline rail yard template: Moss</title>
+<g id="vegetation-moss">
+<polygon points="2,2 1,1 4,2 5,2 6,4" fill="#9c9a71"/>
+<polygon points="6,4 5,3 8,4 9,4 10,6" fill="#9c9a71"/>
+<polygon points="9,6 8,4 11,6 12,5 13,8" fill="#9c9a71"/>
+</g>
+</svg>

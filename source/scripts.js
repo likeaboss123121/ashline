@@ -466,6 +466,13 @@ State.variables.defaultTrains = {
 		dieselLitresPerMinute: 10, // a big engine working hard drinks about ten litres a minute
 		length: 20
 	},
+	dieselOldRoad: {
+		type: 'diesel loco', model: 'diesel-old-road', name: 'four axle old road diesel',
+		hasInterior: true, cargo: [], baseWeight: 72000,
+		maxCargoCapacityKg: 3000, maxCargoCapacityVolume: 3500,
+		acceptedCargo: ['liquid fuel'], tractiveCapacity: 210, topSpeedKmh: 75,
+		dieselLitresPerMinute: 5, length: 16
+	},
 	steamShunter: {
 		type: 'steam loco',
 		model: 'steam-shunter',
@@ -554,6 +561,16 @@ State.variables.defaultTrains = {
 		tractiveCapacity: 0,
 		length: 13
 	},
+	hopper: {
+		type: 'hopper car', name: 'covered hopper', hasInterior: false, cargo: [],
+		baseWeight: 23000, maxCargoCapacityKg: 65000, maxCargoCapacityVolume: 55000,
+		acceptedCargo: ['coal', 'iron ore', 'fertilizer', 'food'], fuelConsumption: [], tractiveCapacity: 0, length: 14
+	},
+	refrigerated: {
+		type: 'refrigerated car', name: 'refrigerated boxcar', hasInterior: true, cargo: [],
+		baseWeight: 26000, maxCargoCapacityKg: 40000, maxCargoCapacityVolume: 45000,
+		acceptedCargo: ['food'], fuelConsumption: [], tractiveCapacity: 0, length: 15
+	},
 	passengerCoach: {
 		type: 'passenger coach', name: 'passenger coach', hasInterior: true, cargo: [],
 		baseWeight: 48000, maxCargoCapacityKg: 5000, maxCargoCapacityVolume: 12000,
@@ -584,6 +601,9 @@ State.variables.defaultTrains = {
 // Tags: 'aggregate'=loose bulk, 'rigid'=discrete items, 'liquid'=fluids,
 //        'solid fuel'/'liquid fuel'=loco-specific fuels
 State.variables.cargoTypes = {
+	'iron ore':    { density: 2.5, rarity: 'common', tags: ['aggregate'] },
+	fertilizer:    { density: 1.1, rarity: 'uncommon', tags: ['aggregate'] },
+	cotton:        { density: 0.2, rarity: 'uncommon', tags: ['rigid'] },
 	coal:          { density: 0.8,  rarity: 'common',   tags: ['aggregate', 'solid fuel'] },
 	water:         { density: 1.0,  rarity: 'common',   tags: ['liquid'] },
 	timber:        { density: 0.6,  rarity: 'common',   tags: ['rigid'] },
@@ -598,10 +618,10 @@ setup.currentDefinitions = JSON.parse(JSON.stringify({ defaultTrains: State.vari
 	cargoTypes: State.variables.cargoTypes }));
 // Core railyard helpers power train generation, placement, shunting, and debug tooling.
 setup.railyard = {
-	locomotiveKeys: ['dieselShunter', 'dieselRoad', 'steamShunter', 'steamPrairie'],
-	carKeys: ['boxcar', 'flatcar', 'tanker', 'gondola', 'passengerCoach', 'sleeperCoach', 'observationCar', 'kitchenCar', 'privateCar'],
+	locomotiveKeys: ['dieselShunter', 'dieselRoad', 'steamShunter', 'steamPrairie', 'dieselOldRoad'],
+	carKeys: ['boxcar', 'flatcar', 'tanker', 'gondola', 'passengerCoach', 'sleeperCoach', 'observationCar', 'kitchenCar', 'privateCar', 'hopper', 'refrigerated'],
 	carWeights: { boxcar: 5, flatcar: 5, tanker: 5, gondola: 5, passengerCoach: 5,
-		sleeperCoach: 5, observationCar: 5, kitchenCar: 5, privateCar: 1 },
+		sleeperCoach: 5, observationCar: 5, kitchenCar: 5, privateCar: 1, hopper: 5, refrigerated: 5 },
 	DERELICT_CHANCE: 0.2, // of stations with a dead car standing in the way of something
 	cargoPresets: [
 		// grade: the range a found load is drawn from. Years of storage mean most diesel is well past its best.
@@ -613,7 +633,10 @@ setup.railyard = {
 		{type: 'timber', amount: 8000, rarity: 'common', grade: [50, 95], cars: ['flatcar']},
 		{type: 'scrap metal', amount: 20, rarity: 'uncommon'},
 		{type: 'machinery', amount: 10, rarity: 'uncommon'},
-		{type: 'food', amount: 45, rarity: 'rare'}
+		{type: 'food', amount: 45, rarity: 'rare'},
+		{type: 'iron ore', amount: 10000, rarity: 'common'},
+		{type: 'fertilizer', amount: 6000, rarity: 'uncommon'},
+		{type: 'cotton', amount: 8000, rarity: 'uncommon'}
 	],
 	// Deep-clones a car/template object so runtime edits do not mutate shared defaults.
 	cloneCar: function(car) {
@@ -1057,7 +1080,8 @@ setup.railyard = {
 		}
 	},
 	// Private cars are deliberately uncommon; every other ordinary car has five times its weight.
-	randomCarKey: function(rng) {
+	randomCarKey: function(rng, locale) {
+		if (locale) return setup.locales.choose(this.carKeys, setup.locales.INDUSTRIES[locale.industry].cars, rng, this.carWeights);
 		var self = this;
 		var total = this.carKeys.reduce(function(sum, key) { return sum + (self.carWeights[key] || 1); }, 0);
 		var pick = rng() * total;
@@ -1068,7 +1092,7 @@ setup.railyard = {
 		return this.carKeys[this.carKeys.length - 1];
 	},
 	// Generates initial cargo for a newly spawned car while respecting accepted cargo constraints.
-	generateCargoForCar: function(carKey, rng) {
+	generateCargoForCar: function(carKey, rng, locale) {
 		if (this.locomotiveKeys.indexOf(carKey) !== -1) {
 			return [];
 		}
@@ -1085,7 +1109,9 @@ setup.railyard = {
 		var count = carKey === 'boxcar' ? this.randomInt(rng, 1, 2) : 1;
 		var cargo = [];
 		for (var i = 0; i < count; i++) {
-			var item = this.randomChoice(rng, filteredPresets);
+			var item = locale ? filteredPresets[setup.locales.choose(filteredPresets.map(function(_, index) { return index; }),
+				filteredPresets.map(function(preset) { return setup.locales.INDUSTRIES[locale.industry].cargo[preset.type] || 1; }), rng)]
+				: this.randomChoice(rng, filteredPresets);
 			var stack = {
 				type: item.type,
 				amount: this.randomInt(rng, Math.max(1, Math.floor(item.amount * 0.5)), item.amount)
@@ -2114,7 +2140,7 @@ setup.railyard = {
 	},
 	// Procedurally generates middle-yard tracks and train placements from a deterministic seed.
 	// Fills a yard whose track lengths have already been settled by its geometry (getYardTrackLengths).
-	generateRailyardTracks: function(seed, lengths, reservedIndex) {
+	generateRailyardTracks: function(seed, lengths, reservedIndex, locale) {
 		var rng = this.mulberry32(this.seedFromString(seed));
 		var trackCount = lengths.length;
 		var tracks = [];
@@ -2146,7 +2172,8 @@ setup.railyard = {
 				// Occasional locomotive, or force one if none have spawned yet.
 				var shouldStartWithLoco = (!hasLoco && rng() < 0.45) || (hasLoco && rng() < 0.12);
 				if (shouldStartWithLoco) {
-					var locoKey = this.randomChoice(rng, this.locomotiveKeys);
+					var locoKey = locale ? setup.locales.choose(this.locomotiveKeys, setup.locales.FLEETS[locale.fleet], rng)
+						: this.randomChoice(rng, this.locomotiveKeys);
 					var loco = this.createLocomotiveCar(locoKey);
 					if (loco.length <= remaining) {
 						train.push(loco);
@@ -2155,9 +2182,9 @@ setup.railyard = {
 					}
 				}
 				for (var c = train.length; c < carTarget; c++) {
-					var carKey = this.randomCarKey(rng);
+					var carKey = this.randomCarKey(rng, locale);
 					var car = this.cloneCar(State.variables.defaultTrains[carKey]);
-					car.cargo = this.generateCargoForCar(carKey, rng);
+					car.cargo = this.generateCargoForCar(carKey, rng, locale);
 					if (trainLength + car.length > remaining) {
 						break;
 					}
@@ -2247,7 +2274,7 @@ setup.railyard = {
 		var reserveRow = clearRow === 0 ? 1 : 0;
 		var generationLengths = lengths.slice();
 		generationLengths[reserveRow] -= 9;
-		var yardTracks = this.generateRailyardTracks(baseSeed + stationId, generationLengths, clearRow);
+		var yardTracks = this.generateRailyardTracks(baseSeed + stationId, generationLengths, clearRow, setup.locales.forStation(stationId, baseSeed));
 		yardTracks[reserveRow].length = lengths[reserveRow];
 		for (var closed = 1; closed <= yardCount; closed++) {
 			if (closures[closed] === 'exit') {
@@ -2295,7 +2322,7 @@ setup.railyard = {
 		}
 		var generationLengths = lengths.slice();
 		generationLengths[1] -= 9;
-		var yardTracks = this.generateRailyardTracks(baseSeed + stationId, generationLengths, 0);
+		var yardTracks = this.generateRailyardTracks(baseSeed + stationId, generationLengths, 0, setup.locales.forStation(stationId, baseSeed));
 		yardTracks[1].length = lengths[1];
 		var tracks = [{ length: 999999, infinite: true, trains: [] }]
 			.concat(yardTracks)

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="36" height="23" viewBox="0 0 36 23" shape-rendering="crispEdges" data-template="driving-loco-diesel-old-road-right" data-anchor-x="2" data-anchor-y="18" data-length-m="16">
+<title>Ashline driving template: Four axle old road diesel, facing right</title>
+<g id="coupler">
+<polygon points="1,17 3,17 3,16 1,16" fill="#7f786a"/>
+<polygon points="1,14 3,14 3,16 1,16" fill="#bbb09a"/>
+</g>
+<g id="trucks">
+<polygon points="5,22 12,22 12,19 5,19" fill="#3e4640"/>
+<polygon points="5,12 12,12 12,19 5,19" fill="#747a6d"/>
+<polygon points="8,21 8,20 7,19 6,19 5,20 5,21 5,22 6,22 7,22 8,22" fill="#666d62"/>
+<polygon points="7,21 7,20 7,20 6,20 6,20 6,21 6,21 6,21 7,21 7,21" fill="#303a35"/>
+<polygon points="12,21 12,20 11,19 10,19 9,20 9,21 9,22 10,22 11,22 12,22" fill="#666d62"/>
+<polygon points="11,21 11,20 11,20 10,20 10,20 10,21 10,21 10,21 11,21 11,21" fill="#303a35"/>
+<polygon points="24,22 31,22 31,19 24,19" fill="#3e4640"/>
+<polygon points="24,12 31,12 31,19 24,19" fill="#747a6d"/>
+<polygon points="27,21 27,20 26,19 25,19 24,20 24,21 24,22 25,22 26,22 27,22" fill="#666d62"/>
+<polygon points="26,21 26,20 26,20 25,20 25,20 25,21 25,21 25,21 26,21 26,21" fill="#303a35"/>
+<polygon points="31,21 31,20 30,19 29,19 28,20 28,21 28,22 29,22 30,22 31,22" fill="#666d62"/>
+<polygon points="30,21 30,20 30,20 29,20 29,20 29,21 29,21 29,21 30,21 30,21" fill="#303a35"/>
+</g>
+<g id="frame">
+<polygon points="2,19 34,19 34,18 2,18" fill="#4e544a"/>
+<polygon points="2,11 34,11 34,18 2,18" fill="#858571"/>
+<polygon points="2,19 34,19 34,20 2,20" fill="#c0a477"/>
+</g>
+<g id="engine-body">
+<polygon points="4,18 25,18 25,11 4,11" fill="#775b46"/>
+<polygon points="4,4 25,4 25,11 4,11" fill="#a1825d"/>
+<polygon points="7,12 8,12 8,16 7,16" fill="#443e35"/>
+<polygon points="10,12 11,12 11,16 10,16" fill="#443e35"/>
+<polygon points="13,12 14,12 14,16 13,16" fill="#443e35"/>
+<polygon points="16,12 17,12 17,16 16,16" fill="#443e35"/>
+<polygon points="19,12 20,12 20,16 19,16" fill="#443e35"/>
+<polygon points="8,9 12,9 12,8 8,8" fill="#3f493e"/>
+<polygon points="8,5 12,5 12,8 8,8" fill="#575b50"/>
+<polygon points="16,9 20,9 20,8 16,8" fill="#3f493e"/>
+<polygon points="16,5 20,5 20,8 16,8" fill="#575b50"/>
+</g>
+<g id="cab">
+<polygon points="25,18 32,18 32,10 25,10" fill="#8b6c4e"/>
+<polygon points="25,2 32,2 32,10 25,10" fill="#ab9270"/>
+<polygon points="27,13 30,13 30,11 27,11" fill="#dec38a"/>
+<polygon points="25,10 33,10 33,9 25,9" fill="#82715a"/>
+<polygon points="25,1 33,1 33,9 25,9" fill="#b3a186"/>
+</g>
+<g id="coupler">
+<polygon points="33,17 35,17 35,16 33,16" fill="#7f786a"/>
+<polygon points="33,14 35,14 35,16 33,16" fill="#bbb09a"/>
+</g>
+</svg>

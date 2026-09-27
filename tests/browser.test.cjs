@@ -7,7 +7,11 @@ const { chromium } = require('playwright');
 
 let browser;
 before(async () => {
-  browser = await chromium.launch({ channel: process.env.ASHLINE_BROWSER || 'chrome', headless: true });
+  // On ARM Linux use the bundled Chromium headless shell, not its desktop-app integration.
+  const channel = process.env.ASHLINE_BROWSER === 'chromium' ? undefined : (process.env.ASHLINE_BROWSER || 'chrome');
+  // Make V8 collect before a large debug-map redraw reaches the server's process-group memory cap.
+  browser = await chromium.launch({ channel, headless: true,
+    args: channel ? [] : ['--js-flags=--max-old-space-size=512'] });
 });
 after(async () => { if (browser) await browser.close(); });
 
@@ -28,7 +32,9 @@ async function openGame(t, options) {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('dialog', async dialog => { errors.push(dialog.message()); await dialog.dismiss(); });
-  t.after(async () => {
+  // Multi-fixture/viewport tests must release each full world before opening the next one.
+  page.closeChecked = async () => {
+    if (page.isClosed()) return;
     const markupErrors = await page.locator('#passages .error').allTextContents();
     if (t.passed !== true || errors.length || markupErrors.length) {
       const artifact = path.join('test-results', t.name.replace(/[^a-z0-9]+/gi, '-').slice(0, 140));
@@ -40,7 +46,8 @@ async function openGame(t, options) {
     await page.close();
     assert.deepEqual(errors, [], 'No uncaught errors or error dialogs');
     assert.deepEqual(markupErrors, [], 'No SugarCube macro errors');
-  });
+  };
+  t.after(() => page.closeChecked());
   await page.goto(pathToFileURL(path.resolve(process.env.ASHLINE_HTML || 'index.html')).href);
   // Each newPage has isolated browser storage; clear slots explicitly for fixture clarity.
   await page.waitForFunction(() => !!window.SugarCube);
@@ -55,6 +62,63 @@ async function openGame(t, options) {
   await page.evaluate(() => { SugarCube.State.variables.randomSeed = 'browser-regression'; });
   return page;
 }
+
+test('regional scenery, industry landmarks and new rolling stock render in both views by day and night', async t => {
+  const page = await openGame(t, { viewport: { width: 1280, height: 900 } });
+  await beginTutorial(page);
+  const result = await page.evaluate(() => {
+    const s = SugarCube.setup, v = SugarCube.State.variables, host = document.querySelector('#passages');
+    const samples = [
+      ['Patagonia', [-70.9, -53.2]], ['Pampas', [-60, -34]], ['Highveld', [28, -26]],
+      ['Siberia', [105, 58]], ['Gulf Coast', [-90, 30]], ['Amazon', [-60, -3]],
+      ['Sahara', [15, 25]], ['Cape', [20, -34]], ['Arctic', [135, 69]], ['Europe', [10, 48]]
+    ];
+    const train = ['dieselOldRoad', 'hopper', 'refrigerated'].map(key => s.railyard.cloneCar(v.defaultTrains[key]));
+    host.replaceChildren();
+    const results = [];
+    for (const [name, geoCoordinate] of samples) {
+      const title = document.createElement('h3'); title.textContent = name; host.appendChild(title);
+      const tile = { geoCoordinate, elevation: 100, terrain: 'plains' };
+      for (const night of [false, true]) {
+        const drawn = s.drivingView.render({ tile, terrain: s.locales.terrain(tile), grade: 0, forward: !night,
+          light: s.daylight.getLight(night ? -20 : 40) }, train, 0);
+        host.appendChild(drawn);
+        const svg = drawn.querySelector('svg');
+        results.push([svg.getAttribute('data-biome'), svg.getAttribute('data-light')]);
+      }
+    }
+    const tile = { geoCoordinate: [85, 30], elevation: 4200, terrain: 'mountain' };
+    for (const terrain of ['mountain', 'bridge', 'tunnel']) {
+      host.appendChild(s.drivingView.render({ tile, terrain, grade: 3, forward: true }, train, 0));
+    }
+    return results;
+  });
+  assert.deepEqual(result.filter((_, i) => i % 2 === 0).map(row => row[0]),
+    ['steppe', 'pampas', 'savanna', 'taiga', 'wetland', 'rainforest', 'desert', 'mediterranean', 'tundra', 'temperate']);
+  fs.mkdirSync('test-results', { recursive: true });
+  await page.screenshot({ path: 'test-results/locale-driving-gallery.png', fullPage: true });
+  const yard = await page.evaluate(() => {
+    const s = SugarCube.setup, v = SugarCube.State.variables, host = document.querySelector('#passages');
+    const stations = s.realWorldPilot.getCorridor().stations;
+    const selected = ['taiga', 'wetland', 'savanna', 'rainforest'].map(biome =>
+      stations.findIndex((_, index) => s.locales.forStation(index + 1).biome === biome) + 1);
+    host.replaceChildren();
+    const results = [];
+    for (const id of selected) {
+      v.currentStation = id;
+      const tracks = s.railyard.generateStationTracks(id, v.randomSeed);
+      tracks[1].trains = [['dieselOldRoad', 'hopper', 'refrigerated'].map(key => s.railyard.cloneCar(v.defaultTrains[key]))];
+      const drawn = s.railyardView.render(tracks, null); host.appendChild(drawn);
+      const svg = drawn.querySelector('svg');
+      results.push({ biome: svg.getAttribute('data-biome'), industry: svg.getAttribute('data-industry'),
+        plants: svg.querySelectorAll('use[data-template^="railyard-plant-"]').length,
+        industryArt: svg.querySelectorAll('use[data-template^="railyard-industry-"]').length });
+    }
+    return results;
+  });
+  assert.ok(yard.every(row => row.plants > 0 && row.industryArt === 1), JSON.stringify(yard));
+  await page.screenshot({ path: 'test-results/locale-yard-gallery.png', fullPage: true });
+});
 
 test('maps are first on desktop and mobile; wide view stays inside the viewport and closes with Escape', async t => {
   for (const viewport of [{ width: 1280, height: 800 }, { width: 768, height: 700 }, { width: 390, height: 844 }]) {
@@ -98,6 +162,7 @@ test('maps are first on desktop and mobile; wide view stays inside the viewport 
     await topMap('.driving-view-wrapper');
     await choose(page, 'Enter the train', 'TrainInterior');
     await topMap('.consist-view-wrapper');
+    await page.closeChecked();
   }
 });
 
@@ -188,9 +253,10 @@ test('actual v0.1.0 exports migrate every passage and preserve stock, cargo and 
     // Old saves from the title or introduction still load, but nothing can be saved there.
     const inGame=await page.evaluate(()=>SugarCube.setup.isInGame());
     assert.equal(await page.evaluate(()=>SugarCube.setup.saves.save(1)),inGame,name);
-    if(!inGame) continue;
+    if(!inGame) { await page.closeChecked(); continue; }
     assert.equal(await page.evaluate(()=>SugarCube.setup.saves.load(1)),true);
     await passage(page,title);
+    await page.closeChecked();
   }
 });
 
@@ -735,11 +801,16 @@ test('the yard and the line are drawn by the light of the time of day', async t 
   await setHour(13);
   let drawn = await yard();
   assert.equal(drawn.light, 'day');
-  assert.equal(drawn.ground, '');
+  const dayGround = await page.evaluate(() => {
+    const s = SugarCube.setup, profile = s.locales.forStation(SugarCube.State.variables.currentStation);
+    const probe = document.createElement('span'); probe.style.fill = s.locales.BIOMES[profile.biome].ground;
+    return probe.style.fill;
+  });
+  assert.equal(drawn.ground, dayGround);
   await setHour(1);
   drawn = await yard();
   assert.equal(drawn.light, 'night');
-  assert.notEqual(drawn.ground, '', 'the ground is graded at night');
+  assert.notEqual(drawn.ground, dayGround, 'the regional ground is graded at night');
   assert.equal(drawn.windows, 0, 'an empty cab is dark at night');
   assert.equal(drawn.lit, 0);
   assert.match(await page.locator('#developer-Debug').innerText(), /Light: night, sun -\d/);

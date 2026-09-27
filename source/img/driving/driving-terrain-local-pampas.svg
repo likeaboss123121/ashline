@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="82" height="61" viewBox="0 0 82 61" shape-rendering="crispEdges" data-template="driving-terrain-local-pampas" data-anchor-x="1" data-anchor-y="43">
+<title>Ashline driving template: Pampas</title>
+<g id="sky">
+<polygon points="1,1 81,1 81,23 1,23" fill="#93b9c6"/>
+</g>
+<g id="far">
+<polygon points="1,21 11,21 11,23 1,23" fill="#7b8861"/>
+<polygon points="11,17 21,17 21,23 11,23" fill="#7b8861"/>
+<polygon points="21,20 31,20 31,23 21,23" fill="#7b8861"/>
+<polygon points="31,17 41,17 41,23 31,23" fill="#7b8861"/>
+<polygon points="41,19 51,19 51,23 41,23" fill="#7b8861"/>
+<polygon points="51,18 61,18 61,23 51,23" fill="#7b8861"/>
+<polygon points="61,18 71,18 71,23 61,23" fill="#7b8861"/>
+<polygon points="71,18 81,18 81,23 71,23" fill="#7b8861"/>
+</g>
+<g id="ground">
+<polygon points="1,23 81,23 81,60 1,60" fill="#65734c"/>
+</g>
+<g id="near">
+<polygon points="1,54 81,54 81,60 1,60" fill="#738153"/>
+</g>
+<g id="detail">
+<polygon points="5,27 6,27 6,29 5,29" fill="#a2a16a"/>
+<polygon points="6,28 7,28 7,29 6,29" fill="#a2a16a"/>
+<polygon points="17,37 18,37 18,39 17,39" fill="#a2a16a"/>
+<polygon points="18,37 19,37 19,39 18,39" fill="#a2a16a"/>
+<polygon points="29,46 30,46 30,49 29,49" fill="#a2a16a"/>
+<polygon points="30,48 31,48 31,49 30,49" fill="#a2a16a"/>
+<polygon points="41,32 42,32 42,34 41,34" fill="#a2a16a"/>
+<polygon points="42,32 43,32 43,34 42,34" fill="#a2a16a"/>
+<polygon points="53,42 54,42 54,44 53,44" fill="#a2a16a"/>
+<polygon points="54,43 55,43 55,44 54,44" fill="#a2a16a"/>
+<polygon points="65,26 66,26 66,29 65,29" fill="#a2a16a"/>
+<polygon points="66,27 67,27 67,29 66,29" fill="#a2a16a"/>
+</g>
+<g id="vegetation-grass">
+<polygon points="4,26 3,24 6,25 7,23 8,26" fill="#a2a16a"/>
+<polygon points="8,26 7,24 10,25 11,23 12,26" fill="#a2a16a"/>
+<polygon points="11,26 10,24 13,25 14,23 15,26" fill="#a2a16a"/>
+</g>
+<g id="vegetation-grass">
+<polygon points="20,29 19,27 22,27 23,26 24,29" fill="#a2a16a"/>
+<polygon points="24,29 23,27 26,27 27,26 28,29" fill="#a2a16a"/>
+<polygon points="27,29 26,27 29,27 30,26 31,29" fill="#a2a16a"/>
+</g>
+<g id="vegetation-grass">
+<polygon points="38,26 37,24 40,25 41,23 42,26" fill="#a2a16a"/>
+<polygon points="42,26 41,24 44,25 45,23 46,26" fill="#a2a16a"/>
+<polygon points="45,26 44,24 47,25 48,23 49,26" fill="#a2a16a"/>
+</g>
+<g id="vegetation-grass">
+<polygon points="54,29 53,27 56,27 57,26 58,29" fill="#a2a16a"/>
+<polygon points="58,29 57,27 60,27 61,26 62,29" fill="#a2a16a"/>
+<polygon points="61,29 60,27 63,27 64,26 65,29" fill="#a2a16a"/>
+</g>
+<g id="vegetation-grass">
+<polygon points="65,26 64,24 67,25 68,23 69,26" fill="#a2a16a"/>
+<polygon points="69,26 68,24 71,25 72,23 73,26" fill="#a2a16a"/>
+<polygon points="72,26 71,24 74,25 75,23 76,26" fill="#a2a16a"/>
+</g>
+</svg>

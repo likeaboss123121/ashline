@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="58" height="36" viewBox="0 0 58 36" shape-rendering="crispEdges" data-template="railyard-industry-oil" data-anchor-x="1" data-anchor-y="17">
+<title>Ashline rail yard template: Abandoned oil loading site</title>
+<g id="loading-apron">
+<polygon points="1,16 21,6 57,24 57,25 37,35 1,17" fill="#41493f"/>
+<polygon points="1,17 37,35 37,34 1,16" fill="#4c5147"/>
+<polygon points="57,25 37,35 37,34 57,24" fill="#41493f"/>
+<polygon points="21,6 57,24 37,34 1,16" fill="#626457"/>
+</g>
+<g id="industry">
+<polygon points="10,6 20,1 27,4 27,13 17,18 10,15" fill="#586956"/>
+<polygon points="10,15 17,18 17,9 10,6" fill="#767e6b"/>
+<polygon points="27,13 17,18 17,9 27,4" fill="#586956"/>
+<polygon points="20,1 27,4 17,9 10,6" fill="#999b84"/>
+<polygon points="10,9 20,4 27,7 27,9 17,14 10,11" fill="#6e7356"/>
+<polygon points="10,11 17,14 17,12 10,9" fill="#8b8762"/>
+<polygon points="27,9 17,14 17,12 27,7" fill="#6e7356"/>
+<polygon points="20,4 27,7 17,12 10,9" fill="#aba681"/>
+<polygon points="22,12 32,7 39,10 39,19 29,24 22,21" fill="#586956"/>
+<polygon points="22,21 29,24 29,15 22,12" fill="#767e6b"/>
+<polygon points="39,19 29,24 29,15 39,10" fill="#586956"/>
+<polygon points="32,7 39,10 29,15 22,12" fill="#999b84"/>
+<polygon points="22,15 32,10 39,13 39,15 29,20 22,17" fill="#6e7356"/>
+<polygon points="22,17 29,20 29,18 22,15" fill="#8b8762"/>
+<polygon points="39,15 29,20 29,18 39,13" fill="#6e7356"/>
+<polygon points="32,10 39,13 29,18 22,15" fill="#aba681"/>
+<polygon points="34,18 44,13 51,16 51,25 41,30 34,27" fill="#586956"/>
+<polygon points="34,27 41,30 41,21 34,18" fill="#767e6b"/>
+<polygon points="51,25 41,30 41,21 51,16" fill="#586956"/>
+<polygon points="44,13 51,16 41,21 34,18" fill="#999b84"/>
+<polygon points="34,21 44,16 51,19 51,21 41,26 34,23" fill="#6e7356"/>
+<polygon points="34,23 41,26 41,24 34,21" fill="#8b8762"/>
+<polygon points="51,21 41,26 41,24 51,19" fill="#6e7356"/>
+<polygon points="44,16 51,19 41,24 34,21" fill="#aba681"/>
+</g>
+</svg>

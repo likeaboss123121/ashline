@@ -28,6 +28,7 @@ left = x(u, v) - anchorX, top = y(u, v) - anchorY.
 import json
 import math
 from pathlib import Path
+from locale_art import driving_landscapes, rolling_stock
 
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = ROOT / 'source' / 'img' / 'driving'
@@ -595,6 +596,8 @@ def build_all():
         *[passenger_car(kind, length) for kind, length in
           [('passenger', 24), ('sleeper', 25), ('observation', 23), ('kitchen', 24), ('private', 22)]],
         *locomotives,
+        *rolling_stock(globals(), False),
+        *driving_landscapes(globals()),
         track_strip(),
         terrain('yard', 'Rail yard', '#494c42', '#55584f', '#3b3e37', '#78a9c4', '#75654d'),
         terrain('plains', 'Plains', P['plains_ground'], P['plains_near'], P['plains_far'], P['plains_sky'], P['plains_tuft']),

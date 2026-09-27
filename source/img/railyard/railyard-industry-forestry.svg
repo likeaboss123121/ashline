@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="58" height="33" viewBox="0 0 58 33" shape-rendering="crispEdges" data-template="railyard-industry-forestry" data-anchor-x="1" data-anchor-y="14">
+<title>Ashline rail yard template: Abandoned forestry loading site</title>
+<g id="loading-apron">
+<polygon points="1,13 21,3 57,21 57,22 37,32 1,14" fill="#41493f"/>
+<polygon points="1,14 37,32 37,31 1,13" fill="#4c5147"/>
+<polygon points="57,22 37,32 37,31 57,21" fill="#41493f"/>
+<polygon points="21,3 57,21 37,31 1,13" fill="#626457"/>
+</g>
+<g id="industry">
+<polygon points="16,4 20,2 34,9 34,13 30,15 16,8" fill="#c1a675"/>
+<polygon points="16,8 30,15 30,11 16,4" fill="#6e573a"/>
+<polygon points="34,13 30,15 30,11 34,9" fill="#c1a675"/>
+<polygon points="20,2 34,9 30,11 16,4" fill="#a18c62"/>
+<polygon points="34,13 38,11 52,18 52,22 48,24 34,17" fill="#c1a675"/>
+<polygon points="34,17 48,24 48,20 34,13" fill="#6e573a"/>
+<polygon points="52,22 48,24 48,20 52,18" fill="#c1a675"/>
+<polygon points="38,11 52,18 48,20 34,13" fill="#a18c62"/>
+<polygon points="11,3 15,1 29,8 29,15 25,17 11,10" fill="#c1a675"/>
+<polygon points="11,10 25,17 25,10 11,3" fill="#6e573a"/>
+<polygon points="29,15 25,17 25,10 29,8" fill="#c1a675"/>
+<polygon points="15,1 29,8 25,10 11,3" fill="#a18c62"/>
+<polygon points="29,12 33,10 47,17 47,24 43,26 29,19" fill="#c1a675"/>
+<polygon points="29,19 43,26 43,19 29,12" fill="#6e573a"/>
+<polygon points="47,24 43,26 43,19 47,17" fill="#c1a675"/>
+<polygon points="33,10 47,17 43,19 29,12" fill="#a18c62"/>
+<polygon points="6,9 10,7 24,14 24,18 20,20 6,13" fill="#c1a675"/>
+<polygon points="6,13 20,20 20,16 6,9" fill="#6e573a"/>
+<polygon points="24,18 20,20 20,16 24,14" fill="#c1a675"/>
+<polygon points="10,7 24,14 20,16 6,9" fill="#a18c62"/>
+<polygon points="24,18 28,16 42,23 42,27 38,29 24,22" fill="#c1a675"/>
+<polygon points="24,22 38,29 38,25 24,18" fill="#6e573a"/>
+<polygon points="42,27 38,29 38,25 42,23" fill="#c1a675"/>
+<polygon points="28,16 42,23 38,25 24,18" fill="#a18c62"/>
+</g>
+</svg>

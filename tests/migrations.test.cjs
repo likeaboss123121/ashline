@@ -96,7 +96,7 @@ test('v0.2.0 saves outside the sourced corridor keep their train and return safe
   assert.equal(result.variables.currentStation,1);
   assert.equal(result.variables.journey,null);assert.equal(result.variables.onFoot,null);
   assert.equal(result.variables.currentTrain[0].model,'diesel-shunter');
-  assert.equal(result.variables.saveSchemaVersion,2);
+  assert.equal(result.variables.saveSchemaVersion,s.saveMigrations.CURRENT);
 });
 
 test('legacy steam engines and pending placement retain loads and order while adopting shunter specs', () => {
