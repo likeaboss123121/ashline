@@ -405,8 +405,8 @@ def steam_shunter(length_m=10):
     s.box(0, -4, 3, L, 8, 2, P['frame_top'], P['frame_side'])
     s.part('wheels')
     for uc in (5.5, 10.5, 15.5):
-        s.disc_side(uc, 2.4, 2.4, P['wheel_rim'], P['wheel_hub'])
-    rod(s, 5.5, 15.5, 2.4)
+        s.disc_side(uc, 2.4, 2.4, P['truck_top'], P['wheel_hub'], sides=12, v=5.5)
+    rod(s, 5.5, 15.5, 2.4, v=5.6)
     s.part('running-board')
     s.box(1, -5, 5, L - 2, 10, 1, P['walkway_top'], P['walkway_side'])
     s.part('bunker')

@@ -90,6 +90,70 @@ test('six bridge structures stay with graded track and render by day and night',
   await page.screenshot({path:'test-results/bridge-art-gallery.png',fullPage:true});
 });
 
+test('steam wheel assemblies remain pixel-connected to their chassis in both views', async t => {
+  // Small standalone SVG fixtures: no world generation or game boot needed.
+  const page = await browser.newPage();
+  t.after(() => page.close());
+  const axles = {
+    'steam-shunter': [[5.5,2.4],[10.5,2.4],[15.5,2.4]],
+    'steam-american': [[3,1.5],[7,1.5],[16,3.2],[23,3.2],[29,1.5],[32,1.5]],
+    'steam-streamliner': [[3,1.5],[7,1.5],[18,1.5],[24,3.2],[30,3.2],[36,3.2],[39,1.5],[42,1.5]],
+    'steam-mikado': [[3,1.5],[7,1.5],[14,1.5],[19,2.2],[24,2.2],[29,2.2],[34,2.2],[38,1.5]],
+    'steam-garratt': [2,4,7,11,15,19,23,33,37,41,45,49,52,54].map(u =>
+      [u,[2,4,23,33,52,54].includes(u) ? .9 : 1.8])
+  };
+  const fixtures = [];
+  for (const [model,wheels] of Object.entries(axles)) for (const view of ['railyard','driving']) {
+    for (const facing of ['left','right']) {
+      const name = `${view}-loco-${model}-${facing}`;
+      fixtures.push({name,model,view,facing,wheels,
+        svg:fs.readFileSync(path.join('source/img',view,name+'.svg'),'utf8')});
+    }
+  }
+  const failures = await page.evaluate(async fixtures => {
+    const failures = [];
+    for (const {name,model,view,facing,wheels,svg} of fixtures) {
+      const root = new DOMParser().parseFromString(svg,'image/svg+xml').documentElement;
+      const img = new Image(); img.src = 'data:image/svg+xml;base64,'+btoa(svg); await img.decode();
+      const scale=4, canvas=document.createElement('canvas');
+      canvas.width=img.naturalWidth*scale; canvas.height=img.naturalHeight*scale;
+      const ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      const pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+      const labels=new Int32Array(canvas.width*canvas.height), sizes=[0];
+      for (let start=0;start<labels.length;start++) {
+        if (labels[start] || pixels[start*4+3]<128) continue;
+        const id=sizes.length, queue=[start]; labels[start]=id;
+        for (let at=0;at<queue.length;at++) {
+          const p=queue[at], x=p%canvas.width;
+          for (const next of [x>0?p-1:-1,x+1<canvas.width?p+1:-1,p-canvas.width,p+canvas.width]) {
+            if (next>=0 && next<labels.length && !labels[next] && pixels[next*4+3]>=128) {
+              labels[next]=id; queue.push(next);
+            }
+          }
+        }
+        sizes.push(queue.length);
+      }
+      const body=sizes.indexOf(Math.max(...sizes));
+      const ax=Number(root.getAttribute('data-anchor-x')), ay=Number(root.getAttribute('data-anchor-y'));
+      const length=Number(root.getAttribute('data-length-m'))*2;
+      for (const [axle,radius] of wheels) {
+        const u=facing==='left'?length-axle:axle;
+        const v=model==='steam-shunter'?(view==='driving'?5.5:5):5.2;
+        const x=(ax+(view==='railyard'?u-v:u))*scale;
+        const y=(ay+(view==='railyard'?(u+v)/2-radius:(v-radius)*Math.SQRT1_2))*scale;
+        // Half a native pixel accommodates the SVG's intentional pixel snapping.
+        const nearby=[];
+        for(let dy=-2;dy<=2;dy++) for(let dx=-2;dx<=2;dx++) {
+          nearby.push(labels[Math.floor(y+dy)*canvas.width+Math.floor(x+dx)]);
+        }
+        if(!nearby.includes(body)) failures.push(`${name}: disconnected axle ${axle}`);
+      }
+    }
+    return failures;
+  },fixtures);
+  assert.deepEqual(failures,[]);
+});
+
 test('expanded stock renders both facings and visual variants survive browser saves', async t => {
   const page=await openGame(t);await begin(page);await board(page);
   const result=await page.evaluate(()=>{

@@ -55,6 +55,16 @@ class Builder:
     def rod(self, a, b, z=3):
         self.poly([(a, 5.5, z-.35), (b, 5.5, z-.35), (b, 5.5, z+.35), (a, 5.5, z+.35)], '#a0a395')
 
+    def wheel_carrier(self, axles, radius):
+        # A thin bogie beam behind the wheel faces and a mounting block into the
+        # chassis. Small wheels cannot reach the frame by themselves. Keep the
+        # beam at axle height, not down to the rail like the old square wheels.
+        start, end = min(axles), max(axles)
+        self.box(start-.7, -5.2, radius, end-start+1.4, 10.4, .8,
+                 '#535c50', '#343c35', '#29312b')
+        self.box((start+end)/2-.7, -4, radius+.8, 1.4, 8, 4.3-radius-.8,
+                 '#535c50', '#343c35', '#29312b')
+
     def boiler(self, start, length, top, side):
         # One closed octagonal section. The crown, shoulder, side and underside
         # have distinct face lighting, not a single roof-coloured strip.
@@ -108,19 +118,32 @@ def locomotive(api, iso, spec, facing):
     top, side, trim = spec['colours']
     style = spec['design']
     api['coupler'](s, 0)
-    s.part('running-gear')
+    carriers = []
     if style == 'mechanical':
         wheels = [(3,2),(L-3,2)]
     elif style in ('hydraulic', 'cab-unit'):
         wheels = [(u,2) for u in (3,7,L-7,L-3)]
     elif style == 'garratt':
-        wheels = [(u,1.8) for u in (7,11,15,19,L-19,L-15,L-11,L-7)]
-        wheels += [(u,.9) for u in (2,4,23,L-23,L-4,L-2)]
+        carriers = [((2,4),.9), ((7,11,15,19),1.8), ((23,),.9),
+                    ((L-23,),.9), ((L-19,L-15,L-11,L-7),1.8), ((L-4,L-2),.9)]
+        wheels = []
     else:
-        wheels = [(u,1.5) for u in (3,7)]
-        if style == 'american': wheels += [(16,3.2),(23,3.2),(L-5,1.5),(L-2,1.5)]
-        elif style == 'streamliner': wheels += [(18,1.5),(24,3.2),(30,3.2),(36,3.2),(L-5,1.5),(L-2,1.5)]
-        else: wheels += [(14,1.5),(19,2.2),(24,2.2),(29,2.2),(34,2.2),(L-2,1.5)]
+        carriers = [((3,7),1.5)]
+        if style == 'american':
+            wheels = [(16,3.2),(23,3.2)]
+            carriers += [((L-5,L-2),1.5)]
+        elif style == 'streamliner':
+            wheels = [(24,3.2),(30,3.2),(36,3.2)]
+            carriers += [((18,),1.5), ((L-5,L-2),1.5)]
+        else:
+            wheels = []
+            carriers += [((14,),1.5), ((19,24,29,34),2.2), ((L-2,),1.5)]
+    if carriers:
+        s.part('wheel-carriers')
+    for axles, radius in carriers:
+        b.wheel_carrier(axles, radius)
+        wheels += [(u,radius) for u in axles]
+    s.part('running-gear')
     for u, radius in sorted(wheels, key=lambda wheel:b.u(wheel[0])):
         if style in ('mikado', 'garratt'):
             b.wheel(u, radius, rim='#444b46', hub='#242b2b')
