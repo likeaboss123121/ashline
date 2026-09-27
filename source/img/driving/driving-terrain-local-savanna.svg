@@ -34,21 +34,26 @@
 <polygon points="66,27 67,27 67,29 66,29" fill="#657347"/>
 </g>
 <g id="vegetation-acacia">
-<polygon points="12,26 12,18 14,18 15,26" fill="#665b42"/>
-<polygon points="13,22 7,17 8,16 14,20 19,16 20,17 14,22" fill="#665b42"/>
-<polygon points="2,18 4,15 9,14 20,14 24,16 20,18" fill="#657347"/>
-<polygon points="4,15 9,14 20,14 22,15" fill="#8b9563"/>
+<polygon points="11,26 11,18 13,18 14,26" fill="#665b42"/>
+<polygon points="12,22 6,17 7,16 13,20 18,16 19,17 13,22" fill="#665b42"/>
+<polygon points="1,18 3,15 8,14 19,14 23,16 19,18" fill="#657347"/>
+<polygon points="3,15 8,14 19,14 21,15" fill="#8b9563"/>
 </g>
-<g id="vegetation-acacia">
-<polygon points="38,29 38,20 40,20 41,29" fill="#665b42"/>
-<polygon points="39,25 33,20 34,19 40,22 45,19 46,20 40,25" fill="#665b42"/>
-<polygon points="28,20 30,18 35,16 46,16 50,19 46,20" fill="#657347"/>
-<polygon points="30,18 35,16 46,16 48,18" fill="#8b9563"/>
+<g id="vegetation-baobab">
+<polygon points="27,29 27,18 35,18 36,29" fill="#665b42"/>
+<polygon points="31,25 25,20 26,19 32,22 37,19 38,20 32,25" fill="#665b42"/>
+<polygon points="20,20 22,18 27,15 38,15 42,19 38,20" fill="#81864d"/>
+<polygon points="22,18 27,15 38,15 40,18" fill="#8b9563"/>
 </g>
-<g id="vegetation-acacia">
-<polygon points="65,26 65,16 67,16 68,26" fill="#665b42"/>
-<polygon points="66,22 60,17 61,16 67,20 72,16 73,17 67,22" fill="#665b42"/>
-<polygon points="55,18 57,15 62,13 73,13 77,16 73,18" fill="#657347"/>
-<polygon points="57,15 62,13 73,13 75,15" fill="#8b9563"/>
+<g id="vegetation-mopane">
+<polygon points="49,26 49,12 51,12 52,26" fill="#665b42"/>
+<polygon points="50,22 44,17 45,16 51,20 56,16 57,17 51,22" fill="#665b42"/>
+<polygon points="39,18 41,15 46,8 57,8 61,16 57,18" fill="#6d8659"/>
+<polygon points="41,15 46,8 57,8 59,15" fill="#8b9563"/>
+</g>
+<g id="vegetation-grass">
+<polygon points="63,29 62,27 65,27 66,26 67,29" fill="#a2a16a"/>
+<polygon points="67,29 66,27 69,27 70,26 71,29" fill="#a2a16a"/>
+<polygon points="70,29 69,27 72,27 73,26 74,29" fill="#a2a16a"/>
 </g>
 </svg>

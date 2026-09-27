@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="19" viewBox="0 0 30 19" shape-rendering="crispEdges" data-template="driving-car-gondola-high-sided" data-anchor-x="2" data-anchor-y="14" data-length-m="13">
+<title>Ashline driving template: High-sided mineral wagon, South Africa 1970s</title>
+<g id="coupler">
+<polygon points="1,13 3,13 3,12 1,12" fill="#7f786a"/>
+<polygon points="1,10 3,10 3,12 1,12" fill="#bbb09a"/>
+</g>
+<g id="trucks">
+<polygon points="5,18 11,18 11,16 5,16" fill="#111416"/>
+<polygon points="5,8 11,8 11,16 5,16" fill="#383c3b"/>
+<polygon points="8,15 8,14 7,13 6,13 5,14 5,15 5,16 6,17 7,17 8,16" fill="#1b1f20"/>
+<polygon points="7,15 7,15 7,14 6,14 6,15 6,15 6,16 6,16 7,16 7,16" fill="#8c3b2e"/>
+<polygon points="11,15 11,14 10,13 9,13 8,14 8,15 8,16 9,17 10,17 11,16" fill="#1b1f20"/>
+<polygon points="10,15 10,15 10,14 9,14 9,15 9,15 9,16 9,16 10,16 10,16" fill="#8c3b2e"/>
+<polygon points="19,18 25,18 25,16 19,16" fill="#111416"/>
+<polygon points="19,8 25,8 25,16 19,16" fill="#383c3b"/>
+<polygon points="22,15 22,14 21,13 20,13 19,14 19,15 19,16 20,17 21,17 22,16" fill="#1b1f20"/>
+<polygon points="21,15 21,15 21,14 20,14 20,15 20,15 20,16 20,16 21,16 21,16" fill="#8c3b2e"/>
+<polygon points="25,15 25,14 24,13 23,13 22,14 22,15 22,16 23,17 24,17 25,16" fill="#1b1f20"/>
+<polygon points="24,15 24,15 24,14 23,14 23,15 23,15 23,16 23,16 24,16 24,16" fill="#8c3b2e"/>
+</g>
+<g id="underframe">
+<polygon points="2,15 28,15 28,14 2,14" fill="#232626"/>
+<polygon points="2,7 28,7 28,14 2,14" fill="#454440"/>
+</g>
+<g id="body">
+<polygon points="3,14 27,14 27,13 3,13" fill="#755440"/>
+<polygon points="3,6 27,6 27,13 3,13" fill="#a08165"/>
+<polygon points="3,7 27,7 27,2 3,2" fill="#755440"/>
+<polygon points="3,1 27,1 27,2 3,2" fill="#a08165"/>
+<polygon points="3,13 27,13 27,8 3,8" fill="#755440"/>
+<polygon points="3,8 27,8 27,8 3,8" fill="#a08165"/>
+<polygon points="3,13 4,13 4,8 3,8" fill="#755440"/>
+<polygon points="3,1 4,1 4,8 3,8" fill="#a08165"/>
+<polygon points="26,13 27,13 27,8 26,8" fill="#755440"/>
+<polygon points="26,1 27,1 27,8 26,8" fill="#a08165"/>
+<polygon points="5,14 6,14 6,9 5,9" fill="#a08165"/>
+<polygon points="5,8 6,8 6,9 5,9" fill="#a08165"/>
+<polygon points="9,14 10,14 10,9 9,9" fill="#a08165"/>
+<polygon points="9,8 10,8 10,9 9,9" fill="#a08165"/>
+<polygon points="13,14 14,14 14,9 13,9" fill="#a08165"/>
+<polygon points="13,8 14,8 14,9 13,9" fill="#a08165"/>
+<polygon points="17,14 18,14 18,9 17,9" fill="#a08165"/>
+<polygon points="17,8 18,8 18,9 17,9" fill="#a08165"/>
+<polygon points="21,14 22,14 22,9 21,9" fill="#a08165"/>
+<polygon points="21,8 22,8 22,9 21,9" fill="#a08165"/>
+<polygon points="25,14 26,14 26,9 25,9" fill="#a08165"/>
+<polygon points="25,8 26,8 26,9 25,9" fill="#a08165"/>
+</g>
+<g id="coupler">
+<polygon points="27,13 29,13 29,12 27,12" fill="#7f786a"/>
+<polygon points="27,10 29,10 29,12 27,12" fill="#bbb09a"/>
+</g>
+</svg>

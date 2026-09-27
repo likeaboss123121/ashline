@@ -34,28 +34,21 @@
 <polygon points="65,29 68,29 68,27 65,27" fill="#a69a66"/>
 </g>
 <g id="vegetation-scrub">
-<polygon points="4,26 3,23 6,24 7,22 8,26" fill="#a69a66"/>
-<polygon points="8,26 7,23 10,24 11,22 12,26" fill="#a69a66"/>
-<polygon points="11,26 10,23 13,24 14,22 15,26" fill="#a69a66"/>
+<polygon points="6,26 5,23 8,24 9,22 10,26" fill="#92905c"/>
+<polygon points="10,26 9,23 12,24 13,22 14,26" fill="#92905c"/>
+<polygon points="13,26 12,23 15,24 16,22 17,26" fill="#92905c"/>
+</g>
+<g id="vegetation-rock">
+<polygon points="25,29 27,25 33,24 37,27 37,29" fill="#747b78"/>
+<polygon points="27,25 33,24 37,27 32,26" fill="#a7aaa0"/>
 </g>
 <g id="vegetation-scrub">
-<polygon points="20,29 19,26 22,27 23,25 24,29" fill="#a69a66"/>
-<polygon points="24,29 23,26 26,27 27,25 28,29" fill="#a69a66"/>
-<polygon points="27,29 26,26 29,27 30,25 31,29" fill="#a69a66"/>
+<polygon points="44,26 43,23 46,24 47,22 48,26" fill="#92905c"/>
+<polygon points="48,26 47,23 50,24 51,22 52,26" fill="#92905c"/>
+<polygon points="51,26 50,23 53,24 54,22 55,26" fill="#92905c"/>
 </g>
-<g id="vegetation-scrub">
-<polygon points="38,26 37,23 40,24 41,22 42,26" fill="#a69a66"/>
-<polygon points="42,26 41,23 44,24 45,22 46,26" fill="#a69a66"/>
-<polygon points="45,26 44,23 47,24 48,22 49,26" fill="#a69a66"/>
-</g>
-<g id="vegetation-scrub">
-<polygon points="54,29 53,26 56,27 57,25 58,29" fill="#a69a66"/>
-<polygon points="58,29 57,26 60,27 61,25 62,29" fill="#a69a66"/>
-<polygon points="61,29 60,26 63,27 64,25 65,29" fill="#a69a66"/>
-</g>
-<g id="vegetation-scrub">
-<polygon points="65,26 64,23 67,24 68,22 69,26" fill="#a69a66"/>
-<polygon points="69,26 68,23 71,24 72,22 73,26" fill="#a69a66"/>
-<polygon points="72,26 71,23 74,24 75,22 76,26" fill="#a69a66"/>
+<g id="vegetation-rock">
+<polygon points="63,29 65,25 71,24 75,27 75,29" fill="#747b78"/>
+<polygon points="65,25 71,24 75,27 70,26" fill="#a7aaa0"/>
 </g>
 </svg>

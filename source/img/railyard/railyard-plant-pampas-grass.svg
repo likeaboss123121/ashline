@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="12" height="15" viewBox="0 0 12 15" shape-rendering="crispEdges" data-template="railyard-plant-pampas-grass" data-anchor-x="6" data-anchor-y="13">
+<title>Ashline rail yard template: Pampas-Grass</title>
+<g id="vegetation-pampas-grass">
+<polygon points="6,13 1,5 2,4 3,6 7,14" fill="#6d8659"/>
+<polygon points="1,4 1,1 3,1 3,5" fill="#c1b388"/>
+<polygon points="6,13 3,5 4,4 5,6 7,14" fill="#6d8659"/>
+<polygon points="3,4 3,1 5,1 5,5" fill="#c1b388"/>
+<polygon points="6,13 5,5 6,4 7,6 7,14" fill="#6d8659"/>
+<polygon points="5,4 5,1 7,1 7,5" fill="#c1b388"/>
+<polygon points="6,13 7,7 8,6 9,8 7,14" fill="#6d8659"/>
+<polygon points="7,6 7,3 9,3 9,7" fill="#c1b388"/>
+<polygon points="6,13 9,9 10,8 11,10 7,14" fill="#6d8659"/>
+<polygon points="9,8 9,5 11,5 11,9" fill="#c1b388"/>
+</g>
+</svg>

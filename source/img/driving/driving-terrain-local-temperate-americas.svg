@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="82" height="61" viewBox="0 0 82 61" shape-rendering="crispEdges" data-template="driving-terrain-local-temperate-americas" data-anchor-x="1" data-anchor-y="43">
+<title>Ashline driving template: Temperate-Americas</title>
+<g id="sky">
+<polygon points="1,1 81,1 81,23 1,23" fill="#94b4c3"/>
+</g>
+<g id="far">
+<polygon points="1,21 11,21 11,23 1,23" fill="#657f68"/>
+<polygon points="11,17 21,17 21,23 11,23" fill="#657f68"/>
+<polygon points="21,20 31,20 31,23 21,23" fill="#657f68"/>
+<polygon points="31,17 41,17 41,23 31,23" fill="#657f68"/>
+<polygon points="41,19 51,19 51,23 41,23" fill="#657f68"/>
+<polygon points="51,18 61,18 61,23 51,23" fill="#657f68"/>
+<polygon points="61,18 71,18 71,23 61,23" fill="#657f68"/>
+<polygon points="71,18 81,18 81,23 71,23" fill="#657f68"/>
+</g>
+<g id="ground">
+<polygon points="1,23 81,23 81,60 1,60" fill="#4e6045"/>
+</g>
+<g id="near">
+<polygon points="1,54 81,54 81,60 1,60" fill="#5c6c49"/>
+</g>
+<g id="detail">
+<polygon points="5,27 6,27 6,29 5,29" fill="#647d4f"/>
+<polygon points="6,28 7,28 7,29 6,29" fill="#647d4f"/>
+<polygon points="17,37 18,37 18,39 17,39" fill="#647d4f"/>
+<polygon points="18,37 19,37 19,39 18,39" fill="#647d4f"/>
+<polygon points="29,46 30,46 30,49 29,49" fill="#647d4f"/>
+<polygon points="30,48 31,48 31,49 30,49" fill="#647d4f"/>
+<polygon points="41,32 42,32 42,34 41,34" fill="#647d4f"/>
+<polygon points="42,32 43,32 43,34 42,34" fill="#647d4f"/>
+<polygon points="53,42 54,42 54,44 53,44" fill="#647d4f"/>
+<polygon points="54,43 55,43 55,44 54,44" fill="#647d4f"/>
+<polygon points="65,26 66,26 66,29 65,29" fill="#647d4f"/>
+<polygon points="66,27 67,27 67,29 66,29" fill="#647d4f"/>
+</g>
+<g id="vegetation-oak">
+<polygon points="11,26 11,15 13,15 14,26" fill="#665b42"/>
+<polygon points="4,18 4,14 7,11 16,10 20,13 20,18 15,19 7,18" fill="#647d4f"/>
+<polygon points="4,14 7,11 16,10 17,13 10,14" fill="#829464"/>
+</g>
+<g id="vegetation-maple">
+<polygon points="30,29 30,15 32,15 33,29" fill="#665b42"/>
+<polygon points="23,18 23,15 26,12 35,11 39,14 39,18 34,20 26,19" fill="#809053"/>
+<polygon points="23,15 26,12 35,11 36,14 29,15" fill="#829464"/>
+<polygon points="24,15 27,10 31,11 35,9 39,15" fill="#809053"/>
+</g>
+<g id="vegetation-birch">
+<polygon points="49,26 49,13 51,13 52,26" fill="#b9b5a0"/>
+<polygon points="42,15 42,12 45,9 54,8 58,11 58,15 53,17 45,16" fill="#96a270"/>
+<polygon points="42,12 45,9 54,8 55,11 48,12" fill="#829464"/>
+<polygon points="49,24 51,24 51,23 49,23" fill="#595e51"/>
+<polygon points="49,22 51,22 51,21 49,21" fill="#595e51"/>
+<polygon points="49,20 51,20 51,19 49,19" fill="#595e51"/>
+</g>
+<g id="vegetation-fern">
+<polygon points="69,29 64,27 65,27 66,27 70,29" fill="#53845b"/>
+<polygon points="69,27 63,27 65,28" fill="#53845b"/>
+<polygon points="69,27 63,26 65,27" fill="#53845b"/>
+<polygon points="69,29 66,27 67,26 68,27 70,29" fill="#53845b"/>
+<polygon points="69,27 66,27 67,28" fill="#53845b"/>
+<polygon points="69,27 66,26 67,27" fill="#53845b"/>
+<polygon points="69,29 68,26 69,25 70,26 70,29" fill="#53845b"/>
+<polygon points="69,27 69,27 69,28" fill="#53845b"/>
+<polygon points="69,27 69,26 69,27" fill="#53845b"/>
+<polygon points="69,29 70,27 71,26 72,27 70,29" fill="#53845b"/>
+<polygon points="69,27 72,27 71,28" fill="#53845b"/>
+<polygon points="69,27 72,26 71,27" fill="#53845b"/>
+<polygon points="69,29 72,27 73,27 74,27 70,29" fill="#53845b"/>
+<polygon points="69,27 75,27 73,28" fill="#53845b"/>
+<polygon points="69,27 75,26 73,27" fill="#53845b"/>
+</g>
+</svg>

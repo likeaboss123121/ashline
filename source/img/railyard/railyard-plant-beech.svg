@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="31" viewBox="0 0 18 31" shape-rendering="crispEdges" data-template="railyard-plant-beech" data-anchor-x="9" data-anchor-y="29">
+<title>Ashline rail yard template: Beech</title>
+<g id="vegetation-beech">
+<polygon points="8,29 8,11 10,12 11,30" fill="#665b42"/>
+<polygon points="1,11 1,6 4,4 13,7 17,13 17,19 12,19 4,14" fill="#6d8659"/>
+<polygon points="1,6 4,4 13,7 14,12 7,9" fill="#829464"/>
+<polygon points="2,8 5,1 9,5 13,4 17,15" fill="#6d8659"/>
+</g>
+</svg>

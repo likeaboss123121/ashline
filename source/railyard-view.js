@@ -92,6 +92,8 @@ setup.railyardView = {
 	// exit, -1 the other way. Shunting never turns a car round, so the facing survives coupling, decoupling and
 	// travel; seeing the yard from its other end is what swaps left for right on screen.
 	getCarTemplateName: function(car, flipped) {
+		var variant = setup.stockVariety.variantName(car, 'railyard');
+		if (variant) return variant;
 		var type = car && car.type;
 		if (type === 'steam loco' || type === 'diesel loco') {
 			var facing = setup.railyard.getCarFacing(car) * (flipped ? -1 : 1);
@@ -859,9 +861,11 @@ setup.railyardView = {
 		}, 0)));
 		layout.groundSpans.push({ u0: 6, u1: sceneryLength, v: -100 });
 		var scenery = [];
+		var plants = setup.locales.plants(locale);
+		function nextPlant() { return plants[Math.floor(sceneryRng() * plants.length)]; }
 		for (var vegetationU = 10; vegetationU < sceneryLength; vegetationU += 12 + Math.floor(sceneryRng() * 14)) {
-			scenery.push({ plant: biome.plant, u: vegetationU, v: -82 - Math.floor(sceneryRng() * 25) });
-			if (sceneryRng() < 0.55) scenery.push({ plant: biome.plant, u: vegetationU + 4, v: -100 });
+			scenery.push({ plant: nextPlant(), u: vegetationU, v: -82 - Math.floor(sceneryRng() * 25) });
+			if (sceneryRng() < 0.55) scenery.push({ plant: nextPlant(), u: vegetationU + 4, v: -100 });
 			scenery.push({ plant: locale.biome === 'tundra' ? 'moss' : locale.biome === 'alpine' ? 'rock' : 'scrub',
 				u: vegetationU + 3, v: -59 - Math.floor(sceneryRng() * 16) });
 		}

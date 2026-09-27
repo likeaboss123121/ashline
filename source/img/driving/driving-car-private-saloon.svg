@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="21" viewBox="0 0 48 21" shape-rendering="crispEdges" data-template="driving-car-private-saloon" data-anchor-x="2" data-anchor-y="16" data-length-m="22">
+<title>Ashline driving template: Wood-panelled saloon car, Argentina 1910s</title>
+<g id="coupler">
+<polygon points="1,15 3,15 3,14 1,14" fill="#7f786a"/>
+<polygon points="1,12 3,12 3,14 1,14" fill="#bbb09a"/>
+</g>
+<g id="trucks">
+<polygon points="5,20 11,20 11,18 5,18" fill="#111416"/>
+<polygon points="5,10 11,10 11,18 5,18" fill="#383c3b"/>
+<polygon points="8,17 8,16 7,15 6,15 5,16 5,17 5,18 6,19 7,19 8,18" fill="#1b1f20"/>
+<polygon points="7,17 7,17 7,16 6,16 6,17 6,17 6,18 6,18 7,18 7,18" fill="#8c3b2e"/>
+<polygon points="11,17 11,16 10,15 9,15 8,16 8,17 8,18 9,19 10,19 11,18" fill="#1b1f20"/>
+<polygon points="10,17 10,17 10,16 9,16 9,17 9,17 9,18 9,18 10,18 10,18" fill="#8c3b2e"/>
+<polygon points="37,20 43,20 43,18 37,18" fill="#111416"/>
+<polygon points="37,10 43,10 43,18 37,18" fill="#383c3b"/>
+<polygon points="40,17 40,16 39,15 38,15 37,16 37,17 37,18 38,19 39,19 40,18" fill="#1b1f20"/>
+<polygon points="39,17 39,17 39,16 38,16 38,17 38,17 38,18 38,18 39,18 39,18" fill="#8c3b2e"/>
+<polygon points="43,17 43,16 42,15 41,15 40,16 40,17 40,18 41,19 42,19 43,18" fill="#1b1f20"/>
+<polygon points="42,17 42,17 42,16 41,16 41,17 41,17 41,18 41,18 42,18 42,18" fill="#8c3b2e"/>
+</g>
+<g id="underframe">
+<polygon points="2,17 46,17 46,16 2,16" fill="#232626"/>
+<polygon points="2,9 46,9 46,16 2,16" fill="#454440"/>
+</g>
+<g id="body">
+<polygon points="3,16 45,16 45,9 3,9" fill="#68563c"/>
+<polygon points="3,2 45,2 45,9 3,9" fill="#a49168"/>
+</g>
+<g id="windows">
+<polygon points="6,13 9,13 9,10 6,10" fill="#293f40"/>
+<polygon points="12,13 15,13 15,10 12,10" fill="#293f40"/>
+<polygon points="18,13 21,13 21,10 18,10" fill="#293f40"/>
+<polygon points="24,13 27,13 27,10 24,10" fill="#293f40"/>
+<polygon points="30,13 33,13 33,10 30,10" fill="#293f40"/>
+<polygon points="36,13 39,13 39,10 36,10" fill="#293f40"/>
+</g>
+<g id="roof">
+<polygon points="2,9 46,9 46,9 2,9" fill="#707c71"/>
+<polygon points="2,1 46,1 46,9 2,9" fill="#b0b2a3"/>
+<polygon points="6,6 42,6 42,4 6,4" fill="#68563c"/>
+<polygon points="6,1 42,1 42,4 6,4" fill="#a49168"/>
+<polygon points="7,6 9,6 9,5 7,5" fill="#344946"/>
+<polygon points="7,5 9,5 9,5 7,5" fill="#344946"/>
+<polygon points="11,6 13,6 13,5 11,5" fill="#344946"/>
+<polygon points="11,5 13,5 13,5 11,5" fill="#344946"/>
+<polygon points="15,6 17,6 17,5 15,5" fill="#344946"/>
+<polygon points="15,5 17,5 17,5 15,5" fill="#344946"/>
+<polygon points="19,6 21,6 21,5 19,5" fill="#344946"/>
+<polygon points="19,5 21,5 21,5 19,5" fill="#344946"/>
+<polygon points="23,6 25,6 25,5 23,5" fill="#344946"/>
+<polygon points="23,5 25,5 25,5 23,5" fill="#344946"/>
+<polygon points="27,6 29,6 29,5 27,5" fill="#344946"/>
+<polygon points="27,5 29,5 29,5 27,5" fill="#344946"/>
+<polygon points="31,6 33,6 33,5 31,5" fill="#344946"/>
+<polygon points="31,5 33,5 33,5 31,5" fill="#344946"/>
+<polygon points="35,6 37,6 37,5 35,5" fill="#344946"/>
+<polygon points="35,5 37,5 37,5 35,5" fill="#344946"/>
+<polygon points="39,6 41,6 41,5 39,5" fill="#344946"/>
+<polygon points="39,5 41,5 41,5 39,5" fill="#344946"/>
+</g>
+<g id="coupler">
+<polygon points="45,15 47,15 47,14 45,14" fill="#7f786a"/>
+<polygon points="45,12 47,12 47,14 45,14" fill="#bbb09a"/>
+</g>
+</svg>

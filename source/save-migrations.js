@@ -2,7 +2,7 @@
 // All upgrades run on a detached copy; failed upgrades never modify a slot/file or
 // replace the live run. Add the next numbered step instead of rewriting old steps.
 setup.saveMigrations = {
-	CURRENT: 3,
+	CURRENT: 4,
 	notice: '',
 	recovery: null,
 	copy: function(value) { return JSON.parse(JSON.stringify(value)); },
@@ -224,6 +224,11 @@ setup.saveMigrations.steps[2] = function(moment) {
 	var v = moment.variables, definitions = setup.currentDefinitions;
 	v.defaultTrains = Object.assign({}, v.defaultTrains, setup.saveMigrations.copy(definitions.defaultTrains));
 	v.cargoTypes = Object.assign({}, v.cargoTypes, setup.saveMigrations.copy(definitions.cargoTypes));
+};
+// Expanded fleet: refresh presets, retaining every instantiated car and its selected artwork.
+setup.saveMigrations.steps[3] = function(moment) {
+	moment.variables.defaultTrains = Object.assign({}, moment.variables.defaultTrains,
+		setup.saveMigrations.copy(setup.currentDefinitions.defaultTrains));
 };
 if (typeof Config !== 'undefined') {
 	Config.saves.version = setup.saveMigrations.CURRENT;

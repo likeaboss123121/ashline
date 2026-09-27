@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="30" viewBox="0 0 18 30" shape-rendering="crispEdges" data-template="railyard-plant-fir" data-anchor-x="9" data-anchor-y="28">
+<title>Ashline rail yard template: Fir</title>
+<g id="vegetation-fir">
+<polygon points="8,28 8,6 10,7 11,29" fill="#665b42"/>
+<polygon points="1,19 9,7 17,27" fill="#6d8659"/>
+<polygon points="2,14 9,4 16,21" fill="#6d8659"/>
+<polygon points="3,9 9,1 15,15" fill="#6d8659"/>
+<polygon points="9,1 12,11 9,7" fill="#759078"/>
+</g>
+</svg>

@@ -71,7 +71,7 @@ setup.svgWiki = {
 	assetCategory: function(template) {
 		var name = template.passage.replace(/^(railyard|driving)-/, '');
 		if (name.indexOf('loco-') === 0) return 'Locomotives';
-		if (name.indexOf('car-') === 0) return /^car-(passenger|sleeper|observation|kitchen|private)$/.test(name) ? 'Passenger cars' : 'Freight cars';
+		if (name.indexOf('car-') === 0) return /^car-(passenger|sleeper|observation|kitchen|private)(?:-|$)/.test(name) ? 'Passenger cars' : 'Freight cars';
 		return ({ track: 'Tracks', building: 'Buildings', plant: 'Vegetation and rocks',
 			industry: 'Industry', terrain: 'Terrain and backgrounds' })[name.split('-')[0]] || 'Other';
 	},
@@ -83,6 +83,8 @@ setup.svgWiki = {
 		figure.style.margin = '1em 0';
 		var caption = document.createElement('figcaption');
 		caption.textContent = template.file + ' (' + template.width + ' × ' + template.height + ')';
+		var description = document.createElement('p'); description.textContent = template.title;
+		figure.appendChild(description);
 		figure.appendChild(caption);
 		var source = Story.has(template.passage) ? Story.get(template.passage).text.trim() : '';
 		if (/^data:image\/svg\+xml[;,]/i.test(source)) {
@@ -110,6 +112,7 @@ setup.svgWiki = {
 			loaded = true;
 			// Use exactly the same model/type resolution as the actual views (including both facings).
 			var names = [];
+			['railyard', 'driving'].forEach(function(prefix) { names = names.concat(setup.stockVariety.artNames(car, prefix)); });
 			[setup.railyardView, setup.drivingView].forEach(function(view) {
 				[false, true].forEach(function(flipped) { names.push(view.getCarTemplateName(car, flipped)); });
 			});

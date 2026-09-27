@@ -510,6 +510,700 @@ setup.drivingTemplates = {
 			]
 		},
 		{
+			"file": "driving-loco-diesel-mechanical-right.svg",
+			"passage": "driving-loco-diesel-mechanical-right",
+			"title": "Two axle mechanical diesel, Germany 1930s, facing right",
+			"width": 18,
+			"height": 22,
+			"anchorX": 2,
+			"anchorY": 17,
+			"lengthMetres": 7,
+			"rear": [
+				2,
+				14
+			],
+			"front": [
+				16,
+				14
+			],
+			"top": [
+				9,
+				0
+			],
+			"cab": [
+				6,
+				4
+			]
+		},
+		{
+			"file": "driving-loco-diesel-mechanical-left.svg",
+			"passage": "driving-loco-diesel-mechanical-left",
+			"title": "Two axle mechanical diesel, Germany 1930s, facing left",
+			"width": 18,
+			"height": 22,
+			"anchorX": 2,
+			"anchorY": 17,
+			"lengthMetres": 7,
+			"rear": [
+				2,
+				14
+			],
+			"front": [
+				16,
+				14
+			],
+			"top": [
+				9,
+				0
+			],
+			"cab": [
+				12,
+				4
+			]
+		},
+		{
+			"file": "driving-loco-diesel-hydraulic-right.svg",
+			"passage": "driving-loco-diesel-hydraulic-right",
+			"title": "Four axle hydraulic diesel, Germany 1960s, facing right",
+			"width": 30,
+			"height": 22,
+			"anchorX": 2,
+			"anchorY": 17,
+			"lengthMetres": 13,
+			"rear": [
+				2,
+				14
+			],
+			"front": [
+				28,
+				14
+			],
+			"top": [
+				15,
+				0
+			],
+			"cab": [
+				16,
+				4
+			]
+		},
+		{
+			"file": "driving-loco-diesel-hydraulic-left.svg",
+			"passage": "driving-loco-diesel-hydraulic-left",
+			"title": "Four axle hydraulic diesel, Germany 1960s, facing left",
+			"width": 30,
+			"height": 22,
+			"anchorX": 2,
+			"anchorY": 17,
+			"lengthMetres": 13,
+			"rear": [
+				2,
+				14
+			],
+			"front": [
+				28,
+				14
+			],
+			"top": [
+				15,
+				0
+			],
+			"cab": [
+				14,
+				4
+			]
+		},
+		{
+			"file": "driving-loco-diesel-cab-unit-right.svg",
+			"passage": "driving-loco-diesel-cab-unit-right",
+			"title": "Four axle cab diesel, United States 1950s, facing right",
+			"width": 38,
+			"height": 22,
+			"anchorX": 2,
+			"anchorY": 17,
+			"lengthMetres": 17,
+			"rear": [
+				2,
+				14
+			],
+			"front": [
+				36,
+				14
+			],
+			"top": [
+				19,
+				0
+			],
+			"cab": [
+				30,
+				4
+			]
+		},
+		{
+			"file": "driving-loco-diesel-cab-unit-left.svg",
+			"passage": "driving-loco-diesel-cab-unit-left",
+			"title": "Four axle cab diesel, United States 1950s, facing left",
+			"width": 38,
+			"height": 22,
+			"anchorX": 2,
+			"anchorY": 17,
+			"lengthMetres": 17,
+			"rear": [
+				2,
+				14
+			],
+			"front": [
+				36,
+				14
+			],
+			"top": [
+				19,
+				0
+			],
+			"cab": [
+				8,
+				4
+			]
+		},
+		{
+			"file": "driving-loco-steam-american-right.svg",
+			"passage": "driving-loco-steam-american-right",
+			"title": "4-4-0 old steam engine, United States 1880s, facing right",
+			"width": 38,
+			"height": 24,
+			"anchorX": 2,
+			"anchorY": 19,
+			"lengthMetres": 17,
+			"rear": [
+				2,
+				16
+			],
+			"front": [
+				36,
+				16
+			],
+			"top": [
+				19,
+				2
+			],
+			"cab": [
+				14,
+				6
+			]
+		},
+		{
+			"file": "driving-loco-steam-american-left.svg",
+			"passage": "driving-loco-steam-american-left",
+			"title": "4-4-0 old steam engine, United States 1880s, facing left",
+			"width": 38,
+			"height": 24,
+			"anchorX": 2,
+			"anchorY": 19,
+			"lengthMetres": 17,
+			"rear": [
+				2,
+				16
+			],
+			"front": [
+				36,
+				16
+			],
+			"top": [
+				19,
+				2
+			],
+			"cab": [
+				24,
+				6
+			]
+		},
+		{
+			"file": "driving-loco-steam-streamliner-right.svg",
+			"passage": "driving-loco-steam-streamliner-right",
+			"title": "4-6-2 streamlined steam engine, Britain 1930s, facing right",
+			"width": 48,
+			"height": 23,
+			"anchorX": 2,
+			"anchorY": 18,
+			"lengthMetres": 22,
+			"rear": [
+				2,
+				15
+			],
+			"front": [
+				46,
+				15
+			],
+			"top": [
+				24,
+				1
+			],
+			"cab": [
+				16,
+				5
+			]
+		},
+		{
+			"file": "driving-loco-steam-streamliner-left.svg",
+			"passage": "driving-loco-steam-streamliner-left",
+			"title": "4-6-2 streamlined steam engine, Britain 1930s, facing left",
+			"width": 48,
+			"height": 23,
+			"anchorX": 2,
+			"anchorY": 18,
+			"lengthMetres": 22,
+			"rear": [
+				2,
+				15
+			],
+			"front": [
+				46,
+				15
+			],
+			"top": [
+				24,
+				1
+			],
+			"cab": [
+				32,
+				5
+			]
+		},
+		{
+			"file": "driving-loco-steam-mikado-right.svg",
+			"passage": "driving-loco-steam-mikado-right",
+			"title": "2-8-2 freight steam engine, Japan 1930s, facing right",
+			"width": 44,
+			"height": 23,
+			"anchorX": 2,
+			"anchorY": 18,
+			"lengthMetres": 20,
+			"rear": [
+				2,
+				15
+			],
+			"front": [
+				42,
+				15
+			],
+			"top": [
+				22,
+				1
+			],
+			"cab": [
+				16,
+				5
+			]
+		},
+		{
+			"file": "driving-loco-steam-mikado-left.svg",
+			"passage": "driving-loco-steam-mikado-left",
+			"title": "2-8-2 freight steam engine, Japan 1930s, facing left",
+			"width": 44,
+			"height": 23,
+			"anchorX": 2,
+			"anchorY": 18,
+			"lengthMetres": 20,
+			"rear": [
+				2,
+				15
+			],
+			"front": [
+				42,
+				15
+			],
+			"top": [
+				22,
+				1
+			],
+			"cab": [
+				28,
+				5
+			]
+		},
+		{
+			"file": "driving-loco-steam-garratt-right.svg",
+			"passage": "driving-loco-steam-garratt-right",
+			"title": "Double mountain articulated steam engine, South Africa / Britain 1950s, facing right",
+			"width": 60,
+			"height": 23,
+			"anchorX": 2,
+			"anchorY": 18,
+			"lengthMetres": 28,
+			"rear": [
+				2,
+				15
+			],
+			"front": [
+				58,
+				15
+			],
+			"top": [
+				30,
+				1
+			],
+			"cab": [
+				26,
+				5
+			]
+		},
+		{
+			"file": "driving-loco-steam-garratt-left.svg",
+			"passage": "driving-loco-steam-garratt-left",
+			"title": "Double mountain articulated steam engine, South Africa / Britain 1950s, facing left",
+			"width": 60,
+			"height": 23,
+			"anchorX": 2,
+			"anchorY": 18,
+			"lengthMetres": 28,
+			"rear": [
+				2,
+				15
+			],
+			"front": [
+				58,
+				15
+			],
+			"top": [
+				30,
+				1
+			],
+			"cab": [
+				34,
+				5
+			]
+		},
+		{
+			"file": "driving-car-boxcar-planked.svg",
+			"passage": "driving-car-boxcar-planked",
+			"title": "Planked goods van, Britain 1930s",
+			"width": 28,
+			"height": 20,
+			"anchorX": 2,
+			"anchorY": 15,
+			"lengthMetres": 12,
+			"rear": [
+				2,
+				12
+			],
+			"front": [
+				26,
+				12
+			],
+			"top": [
+				14,
+				2
+			]
+		},
+		{
+			"file": "driving-car-boxcar-ribbed.svg",
+			"passage": "driving-car-boxcar-ribbed",
+			"title": "Ribbed steel boxcar, China 1970s",
+			"width": 28,
+			"height": 20,
+			"anchorX": 2,
+			"anchorY": 15,
+			"lengthMetres": 12,
+			"rear": [
+				2,
+				12
+			],
+			"front": [
+				26,
+				12
+			],
+			"top": [
+				14,
+				2
+			]
+		},
+		{
+			"file": "driving-car-flatcar-stakes.svg",
+			"passage": "driving-car-flatcar-stakes",
+			"title": "Stake flatcar, Sweden 1960s",
+			"width": 32,
+			"height": 14,
+			"anchorX": 2,
+			"anchorY": 9,
+			"lengthMetres": 14,
+			"rear": [
+				2,
+				6
+			],
+			"front": [
+				30,
+				6
+			],
+			"top": [
+				16,
+				-4
+			]
+		},
+		{
+			"file": "driving-car-tanker-banded.svg",
+			"passage": "driving-car-tanker-banded",
+			"title": "Banded tank wagon, Soviet Union 1960s",
+			"width": 32,
+			"height": 19,
+			"anchorX": 2,
+			"anchorY": 14,
+			"lengthMetres": 14,
+			"rear": [
+				2,
+				11
+			],
+			"front": [
+				30,
+				11
+			],
+			"top": [
+				16,
+				1
+			]
+		},
+		{
+			"file": "driving-car-gondola-high-sided.svg",
+			"passage": "driving-car-gondola-high-sided",
+			"title": "High-sided mineral wagon, South Africa 1970s",
+			"width": 30,
+			"height": 19,
+			"anchorX": 2,
+			"anchorY": 14,
+			"lengthMetres": 13,
+			"rear": [
+				2,
+				11
+			],
+			"front": [
+				28,
+				11
+			],
+			"top": [
+				15,
+				1
+			]
+		},
+		{
+			"file": "driving-car-hopper-cylindrical.svg",
+			"passage": "driving-car-hopper-cylindrical",
+			"title": "Cylindrical grain hopper, Canada 1970s",
+			"width": 32,
+			"height": 19,
+			"anchorX": 2,
+			"anchorY": 14,
+			"lengthMetres": 14,
+			"rear": [
+				2,
+				11
+			],
+			"front": [
+				30,
+				11
+			],
+			"top": [
+				16,
+				1
+			]
+		},
+		{
+			"file": "driving-car-refrigerated-ice.svg",
+			"passage": "driving-car-refrigerated-ice",
+			"title": "Ice-cooled refrigerator car, United States 1920s",
+			"width": 34,
+			"height": 20,
+			"anchorX": 2,
+			"anchorY": 15,
+			"lengthMetres": 15,
+			"rear": [
+				2,
+				12
+			],
+			"front": [
+				32,
+				12
+			],
+			"top": [
+				17,
+				2
+			]
+		},
+		{
+			"file": "driving-car-passenger-clerestory.svg",
+			"passage": "driving-car-passenger-clerestory",
+			"title": "Clerestory passenger coach, Britain 1910s",
+			"width": 52,
+			"height": 21,
+			"anchorX": 2,
+			"anchorY": 16,
+			"lengthMetres": 24,
+			"rear": [
+				2,
+				13
+			],
+			"front": [
+				50,
+				13
+			],
+			"top": [
+				26,
+				3
+			]
+		},
+		{
+			"file": "driving-car-passenger-stainless.svg",
+			"passage": "driving-car-passenger-stainless",
+			"title": "Stainless passenger coach, United States 1950s",
+			"width": 52,
+			"height": 21,
+			"anchorX": 2,
+			"anchorY": 16,
+			"lengthMetres": 24,
+			"rear": [
+				2,
+				13
+			],
+			"front": [
+				50,
+				13
+			],
+			"top": [
+				26,
+				3
+			]
+		},
+		{
+			"file": "driving-car-passenger-suburban.svg",
+			"passage": "driving-car-passenger-suburban",
+			"title": "Suburban passenger coach, Japan 1970s",
+			"width": 52,
+			"height": 21,
+			"anchorX": 2,
+			"anchorY": 16,
+			"lengthMetres": 24,
+			"rear": [
+				2,
+				13
+			],
+			"front": [
+				50,
+				13
+			],
+			"top": [
+				26,
+				3
+			]
+		},
+		{
+			"file": "driving-car-sleeper-blue.svg",
+			"passage": "driving-car-sleeper-blue",
+			"title": "Blue sleeping car, France 1930s",
+			"width": 54,
+			"height": 21,
+			"anchorX": 2,
+			"anchorY": 16,
+			"lengthMetres": 25,
+			"rear": [
+				2,
+				13
+			],
+			"front": [
+				52,
+				13
+			],
+			"top": [
+				27,
+				3
+			]
+		},
+		{
+			"file": "driving-car-sleeper-green.svg",
+			"passage": "driving-car-sleeper-green",
+			"title": "Green sleeping car, Soviet Union 1960s",
+			"width": 54,
+			"height": 21,
+			"anchorX": 2,
+			"anchorY": 16,
+			"lengthMetres": 25,
+			"rear": [
+				2,
+				13
+			],
+			"front": [
+				52,
+				13
+			],
+			"top": [
+				27,
+				3
+			]
+		},
+		{
+			"file": "driving-car-observation-dome.svg",
+			"passage": "driving-car-observation-dome",
+			"title": "Dome observation car, United States 1950s",
+			"width": 50,
+			"height": 23,
+			"anchorX": 2,
+			"anchorY": 18,
+			"lengthMetres": 23,
+			"rear": [
+				2,
+				15
+			],
+			"front": [
+				48,
+				15
+			],
+			"top": [
+				25,
+				3
+			]
+		},
+		{
+			"file": "driving-car-kitchen-diner.svg",
+			"passage": "driving-car-kitchen-diner",
+			"title": "Red dining car, Germany 1960s",
+			"width": 52,
+			"height": 21,
+			"anchorX": 2,
+			"anchorY": 16,
+			"lengthMetres": 24,
+			"rear": [
+				2,
+				13
+			],
+			"front": [
+				50,
+				13
+			],
+			"top": [
+				26,
+				3
+			]
+		},
+		{
+			"file": "driving-car-private-saloon.svg",
+			"passage": "driving-car-private-saloon",
+			"title": "Wood-panelled saloon car, Argentina 1910s",
+			"width": 48,
+			"height": 21,
+			"anchorX": 2,
+			"anchorY": 16,
+			"lengthMetres": 22,
+			"rear": [
+				2,
+				13
+			],
+			"front": [
+				46,
+				13
+			],
+			"top": [
+				24,
+				3
+			]
+		},
+		{
 			"file": "driving-terrain-local-steppe.svg",
 			"passage": "driving-terrain-local-steppe",
 			"title": "Steppe",
@@ -702,6 +1396,186 @@ setup.drivingTemplates = {
 			"file": "driving-terrain-local-alpine-mountain.svg",
 			"passage": "driving-terrain-local-alpine-mountain",
 			"title": "Alpine",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-temperate-pacific.svg",
+			"passage": "driving-terrain-local-temperate-pacific",
+			"title": "Temperate-Pacific",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-temperate-pacific-mountain.svg",
+			"passage": "driving-terrain-local-temperate-pacific-mountain",
+			"title": "Temperate-Pacific",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-temperate-eastasia.svg",
+			"passage": "driving-terrain-local-temperate-eastasia",
+			"title": "Temperate-Eastasia",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-temperate-eastasia-mountain.svg",
+			"passage": "driving-terrain-local-temperate-eastasia-mountain",
+			"title": "Temperate-Eastasia",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-temperate-americas.svg",
+			"passage": "driving-terrain-local-temperate-americas",
+			"title": "Temperate-Americas",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-temperate-americas-mountain.svg",
+			"passage": "driving-terrain-local-temperate-americas-mountain",
+			"title": "Temperate-Americas",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-temperate-south.svg",
+			"passage": "driving-terrain-local-temperate-south",
+			"title": "Temperate-South",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-temperate-south-mountain.svg",
+			"passage": "driving-terrain-local-temperate-south-mountain",
+			"title": "Temperate-South",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-rainforest-africa.svg",
+			"passage": "driving-terrain-local-rainforest-africa",
+			"title": "Rainforest-Africa",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-rainforest-africa-mountain.svg",
+			"passage": "driving-terrain-local-rainforest-africa-mountain",
+			"title": "Rainforest-Africa",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-rainforest-eastasia.svg",
+			"passage": "driving-terrain-local-rainforest-eastasia",
+			"title": "Rainforest-Eastasia",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-rainforest-eastasia-mountain.svg",
+			"passage": "driving-terrain-local-rainforest-eastasia-mountain",
+			"title": "Rainforest-Eastasia",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-taiga-americas.svg",
+			"passage": "driving-terrain-local-taiga-americas",
+			"title": "Taiga-Americas",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-taiga-americas-mountain.svg",
+			"passage": "driving-terrain-local-taiga-americas-mountain",
+			"title": "Taiga-Americas",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-savanna-americas.svg",
+			"passage": "driving-terrain-local-savanna-americas",
+			"title": "Savanna-Americas",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-savanna-americas-mountain.svg",
+			"passage": "driving-terrain-local-savanna-americas-mountain",
+			"title": "Savanna-Americas",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-pampas-north.svg",
+			"passage": "driving-terrain-local-pampas-north",
+			"title": "Pampas-North",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-pampas-north-mountain.svg",
+			"passage": "driving-terrain-local-pampas-north-mountain",
+			"title": "Pampas-North",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-desert-americas.svg",
+			"passage": "driving-terrain-local-desert-americas",
+			"title": "Desert-Americas",
+			"width": 82,
+			"height": 61,
+			"anchorX": 1,
+			"anchorY": 43
+		},
+		{
+			"file": "driving-terrain-local-desert-americas-mountain.svg",
+			"passage": "driving-terrain-local-desert-americas-mountain",
+			"title": "Desert-Americas",
 			"width": 82,
 			"height": 61,
 			"anchorX": 1,

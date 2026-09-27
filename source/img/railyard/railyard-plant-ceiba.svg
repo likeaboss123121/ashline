@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="22" height="36" viewBox="0 0 22 36" shape-rendering="crispEdges" data-template="railyard-plant-ceiba" data-anchor-x="11" data-anchor-y="33">
+<title>Ashline rail yard template: Ceiba</title>
+<g id="vegetation-ceiba">
+<polygon points="10,33 10,8 12,9 13,34" fill="#665b42"/>
+<polygon points="1,7 1,2 6,1 15,4 21,11 21,17 14,16 6,11" fill="#6d8659"/>
+<polygon points="1,2 6,1 15,4 16,9 9,6" fill="#829464"/>
+<polygon points="7,31 10,25 11,25 15,35" fill="#807255"/>
+</g>
+</svg>

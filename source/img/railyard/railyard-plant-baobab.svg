@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="26" viewBox="0 0 24 26" shape-rendering="crispEdges" data-template="railyard-plant-baobab" data-anchor-x="12" data-anchor-y="22">
+<title>Ashline rail yard template: Baobab</title>
+<g id="vegetation-baobab">
+<polygon points="8,20 8,6 16,10 17,25" fill="#665b42"/>
+<polygon points="12,16 6,6 7,6 13,14 18,11 19,13 13,17" fill="#665b42"/>
+<polygon points="1,5 3,2 8,1 19,7 23,14 19,14" fill="#81864d"/>
+<polygon points="3,2 8,1 19,7 21,11" fill="#8b9563"/>
+</g>
+</svg>

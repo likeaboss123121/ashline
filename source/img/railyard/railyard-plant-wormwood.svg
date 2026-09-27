@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" shape-rendering="crispEdges" data-template="railyard-plant-wormwood" data-anchor-x="6" data-anchor-y="6">
+<title>Ashline rail yard template: Wormwood</title>
+<g id="vegetation-wormwood">
+<polygon points="6,6 1,2 2,1 3,3 7,7" fill="#6d8659"/>
+<polygon points="6,6 3,2 4,1 5,3 7,7" fill="#6d8659"/>
+<polygon points="6,6 5,2 6,1 7,3 7,7" fill="#6d8659"/>
+<polygon points="6,6 7,4 8,3 9,5 7,7" fill="#6d8659"/>
+<polygon points="6,6 9,6 10,5 11,7 7,7" fill="#6d8659"/>
+</g>
+</svg>

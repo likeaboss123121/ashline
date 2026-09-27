@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="51" height="43" viewBox="0 0 51 43" shape-rendering="crispEdges" data-template="railyard-loco-steam-mikado-left" data-anchor-x="6" data-anchor-y="21" data-length-m="20">
+<title>Ashline rail yard template: 2-8-2 freight steam engine, Japan 1930s, facing left</title>
+<g id="coupler">
+<polygon points="4,17 6,16 8,17 8,18 6,19 4,18" fill="#5f5a50"/>
+<polygon points="4,18 6,19 6,18 4,17" fill="#7f786a"/>
+<polygon points="8,18 6,19 6,18 8,17" fill="#5f5a50"/>
+<polygon points="6,16 8,17 6,18 4,17" fill="#bbb09a"/>
+</g>
+<g id="running-gear">
+<polygon points="4,24 4,23 3,22 2,21 2,22 1,22 2,23 2,24 3,25 4,25" fill="#242b2b"/>
+<polygon points="3,23 3,23 3,23 3,22 2,22 2,23 2,23 3,24 3,24 3,24" fill="#95816a"/>
+<polygon points="9,25 9,24 8,22 6,21 5,21 4,23 5,24 6,26 8,27 9,27" fill="#242b2b"/>
+<polygon points="8,25 8,24 7,23 6,23 6,23 6,23 6,24 6,25 7,25 8,25" fill="#95816a"/>
+<polygon points="14,28 14,26 13,24 11,24 10,24 9,25 10,27 11,29 13,29 14,29" fill="#242b2b"/>
+<polygon points="13,27 13,26 12,26 11,25 11,25 11,26 11,27 11,27 12,28 13,28" fill="#95816a"/>
+<polygon points="19,30 19,29 18,27 16,26 15,26 14,28 15,29 16,31 18,32 19,32" fill="#242b2b"/>
+<polygon points="18,30 18,29 17,28 16,28 16,28 16,28 16,29 16,30 17,30 18,30" fill="#95816a"/>
+<polygon points="24,33 24,31 23,29 21,29 20,29 19,30 20,32 21,34 23,34 24,34" fill="#242b2b"/>
+<polygon points="23,32 23,31 22,31 21,30 21,30 21,31 21,32 21,32 22,33 23,33" fill="#95816a"/>
+<polygon points="28,36 28,35 27,34 26,33 26,34 25,34 26,35 26,36 27,37 28,37" fill="#242b2b"/>
+<polygon points="27,35 27,35 27,35 27,34 26,34 26,35 26,35 27,36 27,36 27,36" fill="#95816a"/>
+<polygon points="35,39 35,38 34,37 33,37 33,37 32,38 33,39 33,40 34,40 35,40" fill="#242b2b"/>
+<polygon points="34,39 34,38 34,38 34,38 33,38 33,38 33,39 34,39 34,39 34,39" fill="#95816a"/>
+<polygon points="39,41 39,40 38,39 37,39 37,39 36,40 37,41 37,42 38,42 39,42" fill="#242b2b"/>
+<polygon points="38,41 38,40 38,40 38,40 37,40 37,40 37,41 38,41 38,41 38,41" fill="#95816a"/>
+</g>
+<g id="frame">
+<polygon points="2,18 10,14 50,34 50,35 42,39 2,19" fill="#41483f"/>
+<polygon points="2,19 42,39 42,38 2,18" fill="#343c35"/>
+<polygon points="50,35 42,39 42,38 50,34" fill="#41483f"/>
+<polygon points="10,14 50,34 42,38 2,18" fill="#747764"/>
+</g>
+<g id="coupling-rods">
+<polygon points="22,31 8,24 8,23 22,30" fill="#a0a395"/>
+</g>
+<g id="boiler">
+</g>
+<g id="boiler">
+<polygon points="31,18 12,8 11,5 30,14" fill="#616562"/>
+<polygon points="30,14 11,5 6,6 25,16" fill="#616562"/>
+<polygon points="25,16 6,6 4,10 23,20" fill="#616562"/>
+<polygon points="23,20 4,10 4,14 23,24" fill="#343b39"/>
+<polygon points="23,24 4,14 6,15 25,25" fill="#29302c"/>
+<polygon points="23,21 24,17 27,15 30,14 32,17 30,21 27,24 24,24" fill="#2d3431"/>
+<polygon points="19,10 22,8 25,10 25,12 22,13 19,12" fill="#41483f"/>
+<polygon points="19,12 22,13 22,11 19,10" fill="#343b39"/>
+<polygon points="25,12 22,13 22,11 25,10" fill="#41483f"/>
+<polygon points="22,8 25,10 22,11 19,10" fill="#9d966f"/>
+<polygon points="8,2 10,1 12,2 12,7 10,8 8,7" fill="#41483f"/>
+<polygon points="8,7 10,8 10,3 8,2" fill="#272f2b"/>
+<polygon points="12,7 10,8 10,3 12,2" fill="#41483f"/>
+<polygon points="10,1 12,2 10,3 8,2" fill="#484e45"/>
+</g>
+<g id="smoke-deflector">
+<polygon points="5,9 10,11 10,19 5,17" fill="#41483f"/>
+<polygon points="5,17 10,19 10,11 5,9" fill="#343b39"/>
+<polygon points="10,19 10,19 10,11 10,11" fill="#41483f"/>
+<polygon points="5,9 10,11 10,11 5,9" fill="#616562"/>
+</g>
+<g id="cab">
+<polygon points="22,17 32,12 39,16 39,27 29,32 22,28" fill="#41483f"/>
+<polygon points="22,28 29,32 29,21 22,17" fill="#343b39"/>
+<polygon points="39,27 29,32 29,21 39,16" fill="#41483f"/>
+<polygon points="32,12 39,16 29,21 22,17" fill="#616562"/>
+<polygon points="28,25 24,23 24,20 28,22" fill="#dec38a"/>
+<polygon points="21,16 32,11 40,15 40,16 29,21 21,17" fill="#41483f"/>
+<polygon points="21,17 29,21 29,20 21,16" fill="#343b39"/>
+<polygon points="40,16 29,21 29,20 40,15" fill="#41483f"/>
+<polygon points="32,11 40,15 29,20 21,16" fill="#616562"/>
+</g>
+<g id="tender">
+<polygon points="30,25 40,20 50,25 50,33 40,38 30,33" fill="#41483f"/>
+<polygon points="30,33 40,38 40,30 30,25" fill="#343b39"/>
+<polygon points="50,33 40,38 40,30 50,25" fill="#41483f"/>
+<polygon points="40,20 50,25 40,30 30,25" fill="#616562"/>
+<polygon points="34,24 40,21 46,24 46,25 40,28 34,25" fill="#41483f"/>
+<polygon points="34,25 40,28 40,27 34,24" fill="#1d241e"/>
+<polygon points="46,25 40,28 40,27 46,24" fill="#41483f"/>
+<polygon points="40,21 46,24 40,27 34,24" fill="#30352e"/>
+<polygon points="32,30 38,33 38,34 32,31" fill="#41483f"/>
+<polygon points="32,31 38,34 38,33 32,30" fill="#9d966f"/>
+<polygon points="38,34 38,34 38,33 38,33" fill="#41483f"/>
+<polygon points="32,30 38,33 38,33 32,30" fill="#9d966f"/>
+</g>
+<g id="coupler">
+<polygon points="44,37 46,36 48,37 48,38 46,39 44,38" fill="#5f5a50"/>
+<polygon points="44,38 46,39 46,38 44,37" fill="#7f786a"/>
+<polygon points="48,38 46,39 46,38 48,37" fill="#5f5a50"/>
+<polygon points="46,36 48,37 46,38 44,37" fill="#bbb09a"/>
+</g>
+</svg>

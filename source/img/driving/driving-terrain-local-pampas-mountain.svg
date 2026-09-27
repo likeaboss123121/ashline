@@ -34,28 +34,39 @@
 <polygon points="65,29 68,29 68,27 65,27" fill="#a2a16a"/>
 </g>
 <g id="vegetation-grass">
-<polygon points="4,26 3,24 6,25 7,23 8,26" fill="#a2a16a"/>
-<polygon points="8,26 7,24 10,25 11,23 12,26" fill="#a2a16a"/>
-<polygon points="11,26 10,24 13,25 14,23 15,26" fill="#a2a16a"/>
+<polygon points="6,26 5,24 8,25 9,23 10,26" fill="#a2a16a"/>
+<polygon points="10,26 9,24 12,25 13,23 14,26" fill="#a2a16a"/>
+<polygon points="13,26 12,24 15,25 16,23 17,26" fill="#a2a16a"/>
 </g>
-<g id="vegetation-grass">
-<polygon points="20,29 19,27 22,27 23,26 24,29" fill="#a2a16a"/>
-<polygon points="24,29 23,27 26,27 27,26 28,29" fill="#a2a16a"/>
-<polygon points="27,29 26,27 29,27 30,26 31,29" fill="#a2a16a"/>
+<g id="vegetation-pampas-grass">
+<polygon points="31,29 26,25 27,24 28,25 32,29" fill="#6d8659"/>
+<polygon points="26,24 26,22 28,21 28,24" fill="#c1b388"/>
+<polygon points="31,29 28,24 29,23 30,24 32,29" fill="#6d8659"/>
+<polygon points="28,23 28,21 30,20 30,23" fill="#c1b388"/>
+<polygon points="31,29 30,23 31,22 32,23 32,29" fill="#6d8659"/>
+<polygon points="30,22 30,20 32,20 32,22" fill="#c1b388"/>
+<polygon points="31,29 32,24 33,23 34,24 32,29" fill="#6d8659"/>
+<polygon points="32,23 32,21 34,20 34,23" fill="#c1b388"/>
+<polygon points="31,29 34,25 35,24 36,25 32,29" fill="#6d8659"/>
+<polygon points="34,24 34,22 36,21 36,24" fill="#c1b388"/>
 </g>
-<g id="vegetation-grass">
-<polygon points="38,26 37,24 40,25 41,23 42,26" fill="#a2a16a"/>
-<polygon points="42,26 41,24 44,25 45,23 46,26" fill="#a2a16a"/>
-<polygon points="45,26 44,24 47,25 48,23 49,26" fill="#a2a16a"/>
+<g id="vegetation-flowering-shrub">
+<polygon points="50,26 45,25 46,24 47,25 51,26" fill="#6d8659"/>
+<polygon points="45,24 46,23 47,24" fill="#c5ae8b"/>
+<polygon points="50,26 47,24 48,23 49,24 51,26" fill="#6d8659"/>
+<polygon points="47,23 48,22 49,23" fill="#c5ae8b"/>
+<polygon points="50,26 49,23 50,22 51,23 51,26" fill="#6d8659"/>
+<polygon points="49,22 50,22 51,22" fill="#c5ae8b"/>
+<polygon points="50,26 51,24 52,23 53,24 51,26" fill="#6d8659"/>
+<polygon points="51,23 52,22 53,23" fill="#c5ae8b"/>
+<polygon points="50,26 53,25 54,24 55,25 51,26" fill="#6d8659"/>
+<polygon points="53,24 54,23 55,24" fill="#c5ae8b"/>
 </g>
-<g id="vegetation-grass">
-<polygon points="54,29 53,27 56,27 57,26 58,29" fill="#a2a16a"/>
-<polygon points="58,29 57,27 60,27 61,26 62,29" fill="#a2a16a"/>
-<polygon points="61,29 60,27 63,27 64,26 65,29" fill="#a2a16a"/>
-</g>
-<g id="vegetation-grass">
-<polygon points="65,26 64,24 67,25 68,23 69,26" fill="#a2a16a"/>
-<polygon points="69,26 68,24 71,25 72,23 73,26" fill="#a2a16a"/>
-<polygon points="72,26 71,24 74,25 75,23 76,26" fill="#a2a16a"/>
+<g id="vegetation-thorn">
+<polygon points="69,29 64,27 65,27 66,27 70,29" fill="#6d8659"/>
+<polygon points="69,29 66,27 67,26 68,27 70,29" fill="#6d8659"/>
+<polygon points="69,29 68,26 69,25 70,26 70,29" fill="#6d8659"/>
+<polygon points="69,29 70,27 71,26 72,27 70,29" fill="#6d8659"/>
+<polygon points="69,29 72,27 73,27 74,27 70,29" fill="#6d8659"/>
 </g>
 </svg>

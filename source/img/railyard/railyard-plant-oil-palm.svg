@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="22" height="28" viewBox="0 0 22 28" shape-rendering="crispEdges" data-template="railyard-plant-oil-palm" data-anchor-x="11" data-anchor-y="26">
+<title>Ashline rail yard template: Oil-Palm</title>
+<g id="vegetation-oil-palm">
+<polygon points="10,26 12,10 14,11 12,27" fill="#907452"/>
+<polygon points="13,10 1,8 6,9 14,10" fill="#6d8659"/>
+<polygon points="13,10 3,4 7,4 14,10" fill="#6d8659"/>
+<polygon points="13,10 7,2 9,1 14,10" fill="#6d8659"/>
+<polygon points="13,10 16,8 14,4 14,10" fill="#6d8659"/>
+<polygon points="13,10 21,14 16,10 14,10" fill="#6d8659"/>
+<polygon points="13,10 20,19 16,14 14,10" fill="#6d8659"/>
+</g>
+</svg>

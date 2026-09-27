@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="36" height="33" viewBox="0 0 36 33" shape-rendering="crispEdges" data-template="railyard-car-boxcar-planked" data-anchor-x="6" data-anchor-y="18" data-length-m="12">
+<title>Ashline rail yard template: Planked goods van, Britain 1930s</title>
+<g id="coupler">
+<polygon points="4,14 6,13 8,14 8,15 6,16 4,15" fill="#5f5a50"/>
+<polygon points="4,15 6,16 6,15 4,14" fill="#7f786a"/>
+<polygon points="8,15 6,16 6,15 8,14" fill="#5f5a50"/>
+<polygon points="6,13 8,14 6,15 4,14" fill="#bbb09a"/>
+</g>
+<g id="trucks">
+<polygon points="3,20 15,14 21,17 21,20 9,26 3,23" fill="#1a1e20"/>
+<polygon points="3,23 9,26 9,23 3,20" fill="#111416"/>
+<polygon points="21,20 9,26 9,23 21,17" fill="#1a1e20"/>
+<polygon points="15,14 21,17 9,23 3,20" fill="#383c3b"/>
+<polygon points="15,26 27,20 33,23 33,26 21,32 15,29" fill="#1a1e20"/>
+<polygon points="15,29 21,32 21,29 15,26" fill="#111416"/>
+<polygon points="33,26 21,32 21,29 33,23" fill="#1a1e20"/>
+<polygon points="27,20 33,23 21,29 15,26" fill="#383c3b"/>
+</g>
+<g id="underframe">
+<polygon points="1,16 11,11 35,23 35,25 25,30 1,18" fill="#1e2022"/>
+<polygon points="1,18 25,30 25,28 1,16" fill="#232626"/>
+<polygon points="35,25 25,30 25,28 35,23" fill="#1e2022"/>
+<polygon points="11,11 35,23 25,28 1,16" fill="#454440"/>
+</g>
+<g id="body">
+<polygon points="2,6 12,1 34,12 34,22 24,27 2,16" fill="#41483f"/>
+<polygon points="2,16 24,27 24,17 2,6" fill="#796346"/>
+<polygon points="34,22 24,27 24,17 34,12" fill="#41483f"/>
+<polygon points="12,1 34,12 24,17 2,6" fill="#aa916d"/>
+</g>
+<g id="door">
+<polygon points="10,11 16,14 16,23 10,20" fill="#41483f"/>
+<polygon points="10,20 16,23 16,14 10,11" fill="#655f4d"/>
+<polygon points="16,23 16,23 16,14 16,14" fill="#41483f"/>
+<polygon points="10,11 16,14 16,14 10,11" fill="#aa916d"/>
+<polygon points="3,15 23,25 23,26 3,16" fill="#41483f"/>
+<polygon points="3,16 23,26 23,25 3,15" fill="#544b3c"/>
+<polygon points="23,26 23,26 23,25 23,25" fill="#41483f"/>
+<polygon points="3,15 23,25 23,25 3,15" fill="#544b3c"/>
+<polygon points="3,13 23,23 23,24 3,14" fill="#41483f"/>
+<polygon points="3,14 23,24 23,23 3,13" fill="#544b3c"/>
+<polygon points="23,24 23,24 23,23 23,23" fill="#41483f"/>
+<polygon points="3,13 23,23 23,23 3,13" fill="#544b3c"/>
+<polygon points="3,11 23,21 23,22 3,12" fill="#41483f"/>
+<polygon points="3,12 23,22 23,21 3,11" fill="#544b3c"/>
+<polygon points="23,22 23,22 23,21 23,21" fill="#41483f"/>
+<polygon points="3,11 23,21 23,21 3,11" fill="#544b3c"/>
+<polygon points="3,9 23,19 23,20 3,10" fill="#41483f"/>
+<polygon points="3,10 23,20 23,19 3,9" fill="#544b3c"/>
+<polygon points="23,20 23,20 23,19 23,19" fill="#41483f"/>
+<polygon points="3,9 23,19 23,19 3,9" fill="#544b3c"/>
+<polygon points="3,7 23,17 23,18 3,8" fill="#41483f"/>
+<polygon points="3,8 23,18 23,17 3,7" fill="#544b3c"/>
+<polygon points="23,18 23,18 23,17 23,17" fill="#41483f"/>
+<polygon points="3,7 23,17 23,17 3,7" fill="#544b3c"/>
+</g>
+<g id="coupler">
+<polygon points="28,26 30,25 32,26 32,27 30,28 28,27" fill="#5f5a50"/>
+<polygon points="28,27 30,28 30,27 28,26" fill="#7f786a"/>
+<polygon points="32,27 30,28 30,27 32,26" fill="#5f5a50"/>
+<polygon points="30,25 32,26 30,27 28,26" fill="#bbb09a"/>
+</g>
+</svg>

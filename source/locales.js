@@ -6,12 +6,12 @@ setup.locales = {
 		steppe: { name: 'Dry steppe', plant: 'scrub', ground: '#69674c' },
 		pampas: { name: 'Grassland', plant: 'grass', ground: '#65734c' },
 		savanna: { name: 'Savanna', plant: 'acacia', ground: '#81744c' },
-		rainforest: { name: 'Tropical forest', plant: 'broadleaf', ground: '#384e37' },
+		rainforest: { name: 'Tropical rain forest', plant: 'broadleaf', ground: '#384e37' },
 		wetland: { name: 'Coastal wetland', plant: 'cypress', ground: '#485b49' },
 		desert: { name: 'Desert', plant: 'scrub', ground: '#897b59' },
 		mediterranean: { name: 'Dry woodland', plant: 'olive', ground: '#72704e' },
-		temperate: { name: 'Temperate woodland', plant: 'oak', ground: '#4e6045' },
-		taiga: { name: 'Boreal forest', plant: 'pine', ground: '#485747' },
+		temperate: { name: 'Temperate forest', plant: 'oak', ground: '#4e6045' },
+		taiga: { name: 'Taiga', plant: 'pine', ground: '#485747' },
 		tundra: { name: 'Tundra', plant: 'moss', ground: '#777d70' },
 		alpine: { name: 'Highland', plant: 'rock', ground: '#73766c' }
 	},
@@ -32,7 +32,7 @@ setup.locales = {
 	profile: function(coordinate, elevation) {
 		var lon = coordinate && coordinate[0], lat = coordinate && coordinate[1];
 		var id = 'temperate', fleet = 'mixed', industries = ['manufacturing', 'farming', 'forestry'];
-		if (!Number.isFinite(lon) || !Number.isFinite(lat)) return { biome: id, fleet: fleet, industries: industries };
+		if (!Number.isFinite(lon) || !Number.isFinite(lat)) return { biome: id, vegetation: id, stockRegion: 'europe', fleet: fleet, industries: industries };
 		if (lon < -30) {
 			if (lat < -40) { id = lon < -72 ? 'temperate' : 'steppe'; industries = ['farming', 'mining']; fleet = 'legacy'; }
 			else if (lat < -28) { id = lon < -70 ? 'mediterranean' : 'pampas'; industries = ['farming', 'farming', 'manufacturing']; fleet = 'legacy'; }
@@ -42,6 +42,7 @@ setup.locales = {
 			else if (lat < 35 && lon > -101 && lon < -77) { id = 'wetland'; industries = ['oil', 'forestry', 'farming']; fleet = 'heavy'; }
 			else if (lat < 41 && lon < -103) { id = 'desert'; industries = ['mining', 'oil', 'farming']; fleet = 'heavy'; }
 			else if (lat >= 66) { id = 'tundra'; industries = ['mining', 'oil']; fleet = 'heavy'; }
+			else if (lat >= 40 && lat < 60 && lon < -121) { id = 'temperate'; industries = ['forestry', 'manufacturing']; fleet = 'heavy'; }
 			else if (lat >= 51) { id = 'taiga'; industries = ['forestry', 'mining', 'oil']; fleet = 'heavy'; }
 			else { id = lon < -95 ? 'pampas' : 'temperate'; industries = ['farming', 'manufacturing', 'forestry']; fleet = 'heavy'; }
 		} else if (lon < 53 && lat < 37 && lat > -36) {
@@ -59,8 +60,21 @@ setup.locales = {
 		else { id = 'temperate'; industries = ['manufacturing', 'farming']; fleet = 'heavy'; }
 		// Mean elevation supplies a coarse treeline; relief still decides mountain geometry independently.
 		if (Number(elevation) > (Math.abs(lat) < 28 ? 3300 : 2200)) id = 'alpine';
-		return { biome: id, fleet: fleet, industries: industries };
+		var region = lon < -30 ? 'americas' : lon > 100 ? 'east-asia' : lat < 37 && lon < 53 ? 'africa' : lon > 40 ? 'eurasia' : 'europe';
+		var vegetation = id;
+		if (id === 'temperate') {
+			if (lon < -121 && lat >= 40) vegetation += '-pacific';
+			else if (lon < -30 && lat < 0) vegetation += '-south';
+			else if (lon < -30) vegetation += '-americas';
+			else if (lon > 100) vegetation += '-eastasia';
+		} else if (id === 'rainforest') {
+			if (region === 'africa') vegetation += '-africa';
+			else if (lon > 70) vegetation += '-eastasia';
+		} else if (['taiga', 'savanna', 'desert'].indexOf(id) >= 0 && region === 'americas') vegetation += '-americas';
+		else if (id === 'pampas' && lat > 0) vegetation += '-north';
+		return { biome: id, vegetation: vegetation, stockRegion: region, fleet: fleet, industries: industries };
 	},
+	plants: function(profile) { return setup.vegetation[profile.vegetation || profile.biome].plants; },
 	forTile: function(tile) { return this.profile(tile && tile.geoCoordinate, tile && tile.elevation); },
 	forStation: function(stationId, seedOverride) {
 		var pilot = setup.realWorldPilot, tile = pilot && pilot.getStationTile(stationId);

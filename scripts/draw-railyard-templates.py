@@ -26,6 +26,7 @@ import json
 import math
 from pathlib import Path
 from locale_art import yard_plants, yard_industries, rolling_stock
+from fleet_art import extra_stock
 
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = ROOT / 'source' / 'img' / 'railyard'
@@ -906,7 +907,7 @@ def build_all():
         diagonal_track(up=True), y_split_both(), y_merge_both(),
         buffer_stop_start(), track_fade(True), track_fade(False),
         water_tower(), coal_tower(), diesel_tank(), station_hq(),
-        *yard_plants(globals()), *yard_industries(globals()), *rolling_stock(globals(), True),
+        *yard_plants(globals()), *yard_industries(globals()), *rolling_stock(globals(), True), *extra_stock(globals(), True),
     ]
 
 

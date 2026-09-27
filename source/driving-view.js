@@ -64,6 +64,8 @@ setup.drivingView = {
 	// Right on screen is the direction of travel, and every car keeps its own facing, so a locomotive pointing the
 	// other way is drawn with the mirrored texture. Running a leg backwards mirrors the whole consist with it.
 	getCarTemplateName: function(car, reversed) {
+		var variant = setup.stockVariety.variantName(car, 'driving');
+		if (variant) return variant;
 		var type = car && car.type;
 		if (type === 'steam loco' || type === 'diesel loco') {
 			var facing = setup.railyard.getCarFacing(car) * (reversed ? -1 : 1);
@@ -239,7 +241,7 @@ setup.drivingView = {
 		var locale = view.tile && view.tile.geoCoordinate ? setup.locales.forTile(view.tile)
 			: view.terrain === 'yard' ? setup.locales.forStation(State.variables.currentStation) : null;
 		var terrainName = locale && view.terrain !== 'bridge' && view.terrain !== 'tunnel'
-			? 'driving-terrain-local-' + locale.biome + (view.terrain === 'mountain' ? '-mountain' : '')
+			? 'driving-terrain-local-' + locale.vegetation + (view.terrain === 'mountain' ? '-mountain' : '')
 			: this.getTerrainTemplateName(view.terrain);
 		if (locale) {
 			svg.setAttribute('data-biome', locale.biome);

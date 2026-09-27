@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="35" viewBox="0 0 20 35" shape-rendering="crispEdges" data-template="railyard-plant-douglas-fir" data-anchor-x="10" data-anchor-y="33">
+<title>Ashline rail yard template: Douglas-Fir</title>
+<g id="vegetation-douglas-fir">
+<polygon points="9,33 9,6 11,7 12,34" fill="#665b42"/>
+<polygon points="1,24 10,7 19,33" fill="#6d8659"/>
+<polygon points="2,18 10,4 18,26" fill="#6d8659"/>
+<polygon points="3,14 10,1 17,21" fill="#6d8659"/>
+<polygon points="10,1 13,11 10,7" fill="#759078"/>
+</g>
+</svg>

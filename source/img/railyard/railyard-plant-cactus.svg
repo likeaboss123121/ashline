@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="12" height="18" viewBox="0 0 12 18" shape-rendering="crispEdges" data-template="railyard-plant-cactus" data-anchor-x="6" data-anchor-y="16">
+<title>Ashline rail yard template: Cactus</title>
+<g id="vegetation-cactus">
+<polygon points="5,16 5,1 7,1 8,17" fill="#76836a"/>
+<polygon points="5,9 1,7 1,2 3,3 3,6 5,7" fill="#76836a"/>
+<polygon points="7,12 11,14 11,9 9,8 9,11 7,10" fill="#76836a"/>
+</g>
+</svg>

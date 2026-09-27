@@ -34,21 +34,41 @@
 <polygon points="65,29 68,29 68,27 65,27" fill="#54754a"/>
 </g>
 <g id="vegetation-broadleaf">
-<polygon points="12,26 12,12 14,12 15,26" fill="#665b42"/>
-<polygon points="3,15 3,11 8,8 17,8 23,10 23,15 16,16 8,15" fill="#54754a"/>
-<polygon points="3,11 8,8 17,8 18,10 11,11" fill="#829464"/>
-<polygon points="18,13 19,23 20,23 20,13" fill="#638052"/>
+<polygon points="11,26 11,12 13,12 14,26" fill="#665b42"/>
+<polygon points="2,15 2,11 7,8 16,8 22,10 22,15 15,16 7,15" fill="#54754a"/>
+<polygon points="2,11 7,8 16,8 17,10 10,11" fill="#829464"/>
+<polygon points="17,13 18,23 19,23 19,13" fill="#638052"/>
 </g>
-<g id="vegetation-broadleaf">
-<polygon points="38,29 38,14 40,14 41,29" fill="#665b42"/>
-<polygon points="29,17 29,13 34,10 43,10 49,13 49,17 42,18 34,18" fill="#54754a"/>
-<polygon points="29,13 34,10 43,10 44,13 37,13" fill="#829464"/>
-<polygon points="44,15 45,26 46,26 46,15" fill="#638052"/>
+<g id="vegetation-ceiba">
+<polygon points="30,29 30,10 32,10 33,29" fill="#665b42"/>
+<polygon points="21,13 21,10 26,7 35,6 41,9 41,13 34,15 26,14" fill="#6d8659"/>
+<polygon points="21,10 26,7 35,6 36,9 29,10" fill="#829464"/>
+<polygon points="27,29 30,23 31,23 35,29" fill="#807255"/>
 </g>
-<g id="vegetation-broadleaf">
-<polygon points="65,26 65,10 67,10 68,26" fill="#665b42"/>
-<polygon points="56,13 56,10 61,7 70,6 76,9 76,13 69,15 61,14" fill="#54754a"/>
-<polygon points="56,10 61,7 70,6 71,9 64,10" fill="#829464"/>
-<polygon points="71,11 72,23 73,23 73,12" fill="#638052"/>
+<g id="vegetation-palm">
+<polygon points="49,26 51,10 53,10 51,26" fill="#907452"/>
+<polygon points="52,10 40,13 45,12 53,10" fill="#6d8659"/>
+<polygon points="52,10 42,10 46,8 53,10" fill="#6d8659"/>
+<polygon points="52,10 46,7 48,6 53,10" fill="#6d8659"/>
+<polygon points="52,10 55,8 53,6 53,10" fill="#6d8659"/>
+<polygon points="52,10 60,10 55,9 53,10" fill="#6d8659"/>
+<polygon points="52,10 59,14 55,13 53,10" fill="#6d8659"/>
+</g>
+<g id="vegetation-fern">
+<polygon points="69,29 64,27 65,27 66,27 70,29" fill="#53845b"/>
+<polygon points="69,27 63,27 65,28" fill="#53845b"/>
+<polygon points="69,27 63,26 65,27" fill="#53845b"/>
+<polygon points="69,29 66,27 67,26 68,27 70,29" fill="#53845b"/>
+<polygon points="69,27 66,27 67,28" fill="#53845b"/>
+<polygon points="69,27 66,26 67,27" fill="#53845b"/>
+<polygon points="69,29 68,26 69,25 70,26 70,29" fill="#53845b"/>
+<polygon points="69,27 69,27 69,28" fill="#53845b"/>
+<polygon points="69,27 69,26 69,27" fill="#53845b"/>
+<polygon points="69,29 70,27 71,26 72,27 70,29" fill="#53845b"/>
+<polygon points="69,27 72,27 71,28" fill="#53845b"/>
+<polygon points="69,27 72,26 71,27" fill="#53845b"/>
+<polygon points="69,29 72,27 73,27 74,27 70,29" fill="#53845b"/>
+<polygon points="69,27 75,27 73,28" fill="#53845b"/>
+<polygon points="69,27 75,26 73,27" fill="#53845b"/>
 </g>
 </svg>

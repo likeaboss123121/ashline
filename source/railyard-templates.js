@@ -742,6 +742,276 @@ setup.railyardTemplates = {
 			"anchorY": 8
 		},
 		{
+			"file": "railyard-plant-feather-grass.svg",
+			"passage": "railyard-plant-feather-grass",
+			"title": "Feather-Grass",
+			"width": 12,
+			"height": 12,
+			"anchorX": 6,
+			"anchorY": 10
+		},
+		{
+			"file": "railyard-plant-wormwood.svg",
+			"passage": "railyard-plant-wormwood",
+			"title": "Wormwood",
+			"width": 12,
+			"height": 8,
+			"anchorX": 6,
+			"anchorY": 6
+		},
+		{
+			"file": "railyard-plant-pampas-grass.svg",
+			"passage": "railyard-plant-pampas-grass",
+			"title": "Pampas-Grass",
+			"width": 12,
+			"height": 15,
+			"anchorX": 6,
+			"anchorY": 13
+		},
+		{
+			"file": "railyard-plant-flowering-shrub.svg",
+			"passage": "railyard-plant-flowering-shrub",
+			"title": "Flowering-Shrub",
+			"width": 12,
+			"height": 9,
+			"anchorX": 6,
+			"anchorY": 7
+		},
+		{
+			"file": "railyard-plant-thorn.svg",
+			"passage": "railyard-plant-thorn",
+			"title": "Thorn",
+			"width": 12,
+			"height": 8,
+			"anchorX": 6,
+			"anchorY": 6
+		},
+		{
+			"file": "railyard-plant-baobab.svg",
+			"passage": "railyard-plant-baobab",
+			"title": "Baobab",
+			"width": 24,
+			"height": 26,
+			"anchorX": 12,
+			"anchorY": 22
+		},
+		{
+			"file": "railyard-plant-mopane.svg",
+			"passage": "railyard-plant-mopane",
+			"title": "Mopane",
+			"width": 24,
+			"height": 28,
+			"anchorX": 12,
+			"anchorY": 26
+		},
+		{
+			"file": "railyard-plant-ceiba.svg",
+			"passage": "railyard-plant-ceiba",
+			"title": "Ceiba",
+			"width": 22,
+			"height": 36,
+			"anchorX": 11,
+			"anchorY": 33
+		},
+		{
+			"file": "railyard-plant-palm.svg",
+			"passage": "railyard-plant-palm",
+			"title": "Palm",
+			"width": 22,
+			"height": 33,
+			"anchorX": 11,
+			"anchorY": 31
+		},
+		{
+			"file": "railyard-plant-fern.svg",
+			"passage": "railyard-plant-fern",
+			"title": "Fern",
+			"width": 14,
+			"height": 10,
+			"anchorX": 7,
+			"anchorY": 8
+		},
+		{
+			"file": "railyard-plant-willow.svg",
+			"passage": "railyard-plant-willow",
+			"title": "Willow",
+			"width": 18,
+			"height": 28,
+			"anchorX": 9,
+			"anchorY": 26
+		},
+		{
+			"file": "railyard-plant-reed.svg",
+			"passage": "railyard-plant-reed",
+			"title": "Reed",
+			"width": 12,
+			"height": 16,
+			"anchorX": 6,
+			"anchorY": 14
+		},
+		{
+			"file": "railyard-plant-beech.svg",
+			"passage": "railyard-plant-beech",
+			"title": "Beech",
+			"width": 18,
+			"height": 31,
+			"anchorX": 9,
+			"anchorY": 29
+		},
+		{
+			"file": "railyard-plant-birch.svg",
+			"passage": "railyard-plant-birch",
+			"title": "Birch",
+			"width": 18,
+			"height": 27,
+			"anchorX": 9,
+			"anchorY": 25
+		},
+		{
+			"file": "railyard-plant-spruce.svg",
+			"passage": "railyard-plant-spruce",
+			"title": "Spruce",
+			"width": 14,
+			"height": 31,
+			"anchorX": 7,
+			"anchorY": 29
+		},
+		{
+			"file": "railyard-plant-larch.svg",
+			"passage": "railyard-plant-larch",
+			"title": "Larch",
+			"width": 16,
+			"height": 28,
+			"anchorX": 8,
+			"anchorY": 26
+		},
+		{
+			"file": "railyard-plant-dwarf-willow.svg",
+			"passage": "railyard-plant-dwarf-willow",
+			"title": "Dwarf-Willow",
+			"width": 12,
+			"height": 8,
+			"anchorX": 6,
+			"anchorY": 4
+		},
+		{
+			"file": "railyard-plant-douglas-fir.svg",
+			"passage": "railyard-plant-douglas-fir",
+			"title": "Douglas-Fir",
+			"width": 20,
+			"height": 35,
+			"anchorX": 10,
+			"anchorY": 33
+		},
+		{
+			"file": "railyard-plant-cedar.svg",
+			"passage": "railyard-plant-cedar",
+			"title": "Cedar",
+			"width": 22,
+			"height": 32,
+			"anchorX": 11,
+			"anchorY": 30
+		},
+		{
+			"file": "railyard-plant-maple.svg",
+			"passage": "railyard-plant-maple",
+			"title": "Maple",
+			"width": 18,
+			"height": 31,
+			"anchorX": 9,
+			"anchorY": 29
+		},
+		{
+			"file": "railyard-plant-bamboo.svg",
+			"passage": "railyard-plant-bamboo",
+			"title": "Bamboo",
+			"width": 20,
+			"height": 35,
+			"anchorX": 10,
+			"anchorY": 31
+		},
+		{
+			"file": "railyard-plant-chestnut.svg",
+			"passage": "railyard-plant-chestnut",
+			"title": "Chestnut",
+			"width": 18,
+			"height": 31,
+			"anchorX": 9,
+			"anchorY": 29
+		},
+		{
+			"file": "railyard-plant-southern-beech.svg",
+			"passage": "railyard-plant-southern-beech",
+			"title": "Southern-Beech",
+			"width": 18,
+			"height": 31,
+			"anchorX": 9,
+			"anchorY": 29
+		},
+		{
+			"file": "railyard-plant-araucaria.svg",
+			"passage": "railyard-plant-araucaria",
+			"title": "Araucaria",
+			"width": 20,
+			"height": 29,
+			"anchorX": 10,
+			"anchorY": 27
+		},
+		{
+			"file": "railyard-plant-iroko.svg",
+			"passage": "railyard-plant-iroko",
+			"title": "Iroko",
+			"width": 22,
+			"height": 34,
+			"anchorX": 11,
+			"anchorY": 32
+		},
+		{
+			"file": "railyard-plant-oil-palm.svg",
+			"passage": "railyard-plant-oil-palm",
+			"title": "Oil-Palm",
+			"width": 22,
+			"height": 28,
+			"anchorX": 11,
+			"anchorY": 26
+		},
+		{
+			"file": "railyard-plant-dipterocarp.svg",
+			"passage": "railyard-plant-dipterocarp",
+			"title": "Dipterocarp",
+			"width": 22,
+			"height": 37,
+			"anchorX": 11,
+			"anchorY": 34
+		},
+		{
+			"file": "railyard-plant-fir.svg",
+			"passage": "railyard-plant-fir",
+			"title": "Fir",
+			"width": 18,
+			"height": 30,
+			"anchorX": 9,
+			"anchorY": 28
+		},
+		{
+			"file": "railyard-plant-sage.svg",
+			"passage": "railyard-plant-sage",
+			"title": "Sage",
+			"width": 12,
+			"height": 8,
+			"anchorX": 6,
+			"anchorY": 6
+		},
+		{
+			"file": "railyard-plant-cactus.svg",
+			"passage": "railyard-plant-cactus",
+			"title": "Cactus",
+			"width": 12,
+			"height": 18,
+			"anchorX": 6,
+			"anchorY": 16
+		},
+		{
 			"file": "railyard-industry-farming.svg",
 			"passage": "railyard-industry-farming",
 			"title": "Abandoned farming loading site",
@@ -880,6 +1150,700 @@ setup.railyardTemplates = {
 			"cab": [
 				12,
 				6
+			]
+		},
+		{
+			"file": "railyard-loco-diesel-mechanical-right.svg",
+			"passage": "railyard-loco-diesel-mechanical-right",
+			"title": "Two axle mechanical diesel, Germany 1930s, facing right",
+			"width": 24,
+			"height": 29,
+			"anchorX": 5,
+			"anchorY": 20,
+			"lengthMetres": 7,
+			"rear": [
+				5,
+				16
+			],
+			"front": [
+				19,
+				23
+			],
+			"top": [
+				12,
+				0
+			],
+			"cab": [
+				9,
+				4
+			]
+		},
+		{
+			"file": "railyard-loco-diesel-mechanical-left.svg",
+			"passage": "railyard-loco-diesel-mechanical-left",
+			"title": "Two axle mechanical diesel, Germany 1930s, facing left",
+			"width": 24,
+			"height": 26,
+			"anchorX": 5,
+			"anchorY": 17,
+			"lengthMetres": 7,
+			"rear": [
+				5,
+				13
+			],
+			"front": [
+				19,
+				20
+			],
+			"top": [
+				12,
+				-3
+			],
+			"cab": [
+				15,
+				4
+			]
+		},
+		{
+			"file": "railyard-loco-diesel-hydraulic-right.svg",
+			"passage": "railyard-loco-diesel-hydraulic-right",
+			"title": "Four axle hydraulic diesel, Germany 1960s, facing right",
+			"width": 36,
+			"height": 30,
+			"anchorX": 5,
+			"anchorY": 15,
+			"lengthMetres": 13,
+			"rear": [
+				5,
+				11
+			],
+			"front": [
+				31,
+				24
+			],
+			"top": [
+				18,
+				-2
+			],
+			"cab": [
+				19,
+				4
+			]
+		},
+		{
+			"file": "railyard-loco-diesel-hydraulic-left.svg",
+			"passage": "railyard-loco-diesel-hydraulic-left",
+			"title": "Four axle hydraulic diesel, Germany 1960s, facing left",
+			"width": 36,
+			"height": 32,
+			"anchorX": 5,
+			"anchorY": 17,
+			"lengthMetres": 13,
+			"rear": [
+				5,
+				13
+			],
+			"front": [
+				31,
+				26
+			],
+			"top": [
+				18,
+				0
+			],
+			"cab": [
+				17,
+				5
+			]
+		},
+		{
+			"file": "railyard-loco-diesel-cab-unit-right.svg",
+			"passage": "railyard-loco-diesel-cab-unit-right",
+			"title": "Four axle cab diesel, United States 1950s, facing right",
+			"width": 44,
+			"height": 37,
+			"anchorX": 5,
+			"anchorY": 18,
+			"lengthMetres": 17,
+			"rear": [
+				5,
+				14
+			],
+			"front": [
+				39,
+				31
+			],
+			"top": [
+				22,
+				3
+			],
+			"cab": [
+				33,
+				14
+			]
+		},
+		{
+			"file": "railyard-loco-diesel-cab-unit-left.svg",
+			"passage": "railyard-loco-diesel-cab-unit-left",
+			"title": "Four axle cab diesel, United States 1950s, facing left",
+			"width": 44,
+			"height": 37,
+			"anchorX": 5,
+			"anchorY": 18,
+			"lengthMetres": 17,
+			"rear": [
+				5,
+				14
+			],
+			"front": [
+				39,
+				31
+			],
+			"top": [
+				22,
+				3
+			],
+			"cab": [
+				11,
+				3
+			]
+		},
+		{
+			"file": "railyard-loco-steam-american-right.svg",
+			"passage": "railyard-loco-steam-american-right",
+			"title": "4-4-0 old steam engine, United States 1880s, facing right",
+			"width": 46,
+			"height": 37,
+			"anchorX": 5,
+			"anchorY": 17,
+			"lengthMetres": 17,
+			"rear": [
+				5,
+				13
+			],
+			"front": [
+				39,
+				30
+			],
+			"top": [
+				22,
+				2
+			],
+			"cab": [
+				17,
+				5
+			]
+		},
+		{
+			"file": "railyard-loco-steam-american-left.svg",
+			"passage": "railyard-loco-steam-american-left",
+			"title": "4-4-0 old steam engine, United States 1880s, facing left",
+			"width": 46,
+			"height": 43,
+			"anchorX": 7,
+			"anchorY": 24,
+			"lengthMetres": 17,
+			"rear": [
+				7,
+				20
+			],
+			"front": [
+				41,
+				37
+			],
+			"top": [
+				24,
+				9
+			],
+			"cab": [
+				29,
+				17
+			]
+		},
+		{
+			"file": "railyard-loco-steam-streamliner-right.svg",
+			"passage": "railyard-loco-steam-streamliner-right",
+			"title": "4-6-2 streamlined steam engine, Britain 1930s, facing right",
+			"width": 54,
+			"height": 41,
+			"anchorX": 5,
+			"anchorY": 16,
+			"lengthMetres": 22,
+			"rear": [
+				5,
+				12
+			],
+			"front": [
+				49,
+				34
+			],
+			"top": [
+				27,
+				3
+			],
+			"cab": [
+				19,
+				5
+			]
+		},
+		{
+			"file": "railyard-loco-steam-streamliner-left.svg",
+			"passage": "railyard-loco-steam-streamliner-left",
+			"title": "4-6-2 streamlined steam engine, Britain 1930s, facing left",
+			"width": 55,
+			"height": 40,
+			"anchorX": 6,
+			"anchorY": 16,
+			"lengthMetres": 22,
+			"rear": [
+				6,
+				12
+			],
+			"front": [
+				50,
+				34
+			],
+			"top": [
+				28,
+				3
+			],
+			"cab": [
+				36,
+				13
+			]
+		},
+		{
+			"file": "railyard-loco-steam-mikado-right.svg",
+			"passage": "railyard-loco-steam-mikado-right",
+			"title": "2-8-2 freight steam engine, Japan 1930s, facing right",
+			"width": 50,
+			"height": 39,
+			"anchorX": 5,
+			"anchorY": 16,
+			"lengthMetres": 20,
+			"rear": [
+				5,
+				12
+			],
+			"front": [
+				45,
+				32
+			],
+			"top": [
+				25,
+				2
+			],
+			"cab": [
+				19,
+				5
+			]
+		},
+		{
+			"file": "railyard-loco-steam-mikado-left.svg",
+			"passage": "railyard-loco-steam-mikado-left",
+			"title": "2-8-2 freight steam engine, Japan 1930s, facing left",
+			"width": 51,
+			"height": 43,
+			"anchorX": 6,
+			"anchorY": 21,
+			"lengthMetres": 20,
+			"rear": [
+				6,
+				17
+			],
+			"front": [
+				46,
+				37
+			],
+			"top": [
+				26,
+				7
+			],
+			"cab": [
+				32,
+				16
+			]
+		},
+		{
+			"file": "railyard-loco-steam-garratt-right.svg",
+			"passage": "railyard-loco-steam-garratt-right",
+			"title": "Double mountain articulated steam engine, South Africa / Britain 1950s, facing right",
+			"width": 66,
+			"height": 47,
+			"anchorX": 5,
+			"anchorY": 16,
+			"lengthMetres": 28,
+			"rear": [
+				5,
+				12
+			],
+			"front": [
+				61,
+				40
+			],
+			"top": [
+				33,
+				6
+			],
+			"cab": [
+				29,
+				10
+			]
+		},
+		{
+			"file": "railyard-loco-steam-garratt-left.svg",
+			"passage": "railyard-loco-steam-garratt-left",
+			"title": "Double mountain articulated steam engine, South Africa / Britain 1950s, facing left",
+			"width": 66,
+			"height": 46,
+			"anchorX": 5,
+			"anchorY": 15,
+			"lengthMetres": 28,
+			"rear": [
+				5,
+				11
+			],
+			"front": [
+				61,
+				39
+			],
+			"top": [
+				33,
+				5
+			],
+			"cab": [
+				37,
+				13
+			]
+		},
+		{
+			"file": "railyard-car-boxcar-planked.svg",
+			"passage": "railyard-car-boxcar-planked",
+			"title": "Planked goods van, Britain 1930s",
+			"width": 36,
+			"height": 33,
+			"anchorX": 6,
+			"anchorY": 18,
+			"lengthMetres": 12,
+			"rear": [
+				6,
+				14
+			],
+			"front": [
+				30,
+				26
+			],
+			"top": [
+				18,
+				5
+			]
+		},
+		{
+			"file": "railyard-car-boxcar-ribbed.svg",
+			"passage": "railyard-car-boxcar-ribbed",
+			"title": "Ribbed steel boxcar, China 1970s",
+			"width": 36,
+			"height": 33,
+			"anchorX": 6,
+			"anchorY": 18,
+			"lengthMetres": 12,
+			"rear": [
+				6,
+				14
+			],
+			"front": [
+				30,
+				26
+			],
+			"top": [
+				18,
+				5
+			]
+		},
+		{
+			"file": "railyard-car-flatcar-stakes.svg",
+			"passage": "railyard-car-flatcar-stakes",
+			"title": "Stake flatcar, Sweden 1960s",
+			"width": 40,
+			"height": 26,
+			"anchorX": 6,
+			"anchorY": 9,
+			"lengthMetres": 14,
+			"rear": [
+				6,
+				5
+			],
+			"front": [
+				34,
+				19
+			],
+			"top": [
+				20,
+				-3
+			]
+		},
+		{
+			"file": "railyard-car-tanker-banded.svg",
+			"passage": "railyard-car-tanker-banded",
+			"title": "Banded tank wagon, Soviet Union 1960s",
+			"width": 40,
+			"height": 31,
+			"anchorX": 6,
+			"anchorY": 14,
+			"lengthMetres": 14,
+			"rear": [
+				6,
+				10
+			],
+			"front": [
+				34,
+				24
+			],
+			"top": [
+				20,
+				2
+			]
+		},
+		{
+			"file": "railyard-car-gondola-high-sided.svg",
+			"passage": "railyard-car-gondola-high-sided",
+			"title": "High-sided mineral wagon, South Africa 1970s",
+			"width": 38,
+			"height": 32,
+			"anchorX": 6,
+			"anchorY": 16,
+			"lengthMetres": 13,
+			"rear": [
+				6,
+				12
+			],
+			"front": [
+				32,
+				25
+			],
+			"top": [
+				19,
+				4
+			]
+		},
+		{
+			"file": "railyard-car-hopper-cylindrical.svg",
+			"passage": "railyard-car-hopper-cylindrical",
+			"title": "Cylindrical grain hopper, Canada 1970s",
+			"width": 40,
+			"height": 33,
+			"anchorX": 6,
+			"anchorY": 16,
+			"lengthMetres": 14,
+			"rear": [
+				6,
+				12
+			],
+			"front": [
+				34,
+				26
+			],
+			"top": [
+				20,
+				4
+			]
+		},
+		{
+			"file": "railyard-car-refrigerated-ice.svg",
+			"passage": "railyard-car-refrigerated-ice",
+			"title": "Ice-cooled refrigerator car, United States 1920s",
+			"width": 42,
+			"height": 36,
+			"anchorX": 6,
+			"anchorY": 18,
+			"lengthMetres": 15,
+			"rear": [
+				6,
+				14
+			],
+			"front": [
+				36,
+				29
+			],
+			"top": [
+				21,
+				7
+			]
+		},
+		{
+			"file": "railyard-car-passenger-clerestory.svg",
+			"passage": "railyard-car-passenger-clerestory",
+			"title": "Clerestory passenger coach, Britain 1910s",
+			"width": 61,
+			"height": 47,
+			"anchorX": 6,
+			"anchorY": 20,
+			"lengthMetres": 24,
+			"rear": [
+				6,
+				16
+			],
+			"front": [
+				54,
+				40
+			],
+			"top": [
+				30,
+				13
+			]
+		},
+		{
+			"file": "railyard-car-passenger-stainless.svg",
+			"passage": "railyard-car-passenger-stainless",
+			"title": "Stainless passenger coach, United States 1950s",
+			"width": 61,
+			"height": 47,
+			"anchorX": 6,
+			"anchorY": 20,
+			"lengthMetres": 24,
+			"rear": [
+				6,
+				16
+			],
+			"front": [
+				54,
+				40
+			],
+			"top": [
+				30,
+				13
+			]
+		},
+		{
+			"file": "railyard-car-passenger-suburban.svg",
+			"passage": "railyard-car-passenger-suburban",
+			"title": "Suburban passenger coach, Japan 1970s",
+			"width": 61,
+			"height": 47,
+			"anchorX": 6,
+			"anchorY": 20,
+			"lengthMetres": 24,
+			"rear": [
+				6,
+				16
+			],
+			"front": [
+				54,
+				40
+			],
+			"top": [
+				30,
+				13
+			]
+		},
+		{
+			"file": "railyard-car-sleeper-blue.svg",
+			"passage": "railyard-car-sleeper-blue",
+			"title": "Blue sleeping car, France 1930s",
+			"width": 63,
+			"height": 48,
+			"anchorX": 6,
+			"anchorY": 20,
+			"lengthMetres": 25,
+			"rear": [
+				6,
+				16
+			],
+			"front": [
+				56,
+				41
+			],
+			"top": [
+				31,
+				14
+			]
+		},
+		{
+			"file": "railyard-car-sleeper-green.svg",
+			"passage": "railyard-car-sleeper-green",
+			"title": "Green sleeping car, Soviet Union 1960s",
+			"width": 63,
+			"height": 48,
+			"anchorX": 6,
+			"anchorY": 20,
+			"lengthMetres": 25,
+			"rear": [
+				6,
+				16
+			],
+			"front": [
+				56,
+				41
+			],
+			"top": [
+				31,
+				14
+			]
+		},
+		{
+			"file": "railyard-car-observation-dome.svg",
+			"passage": "railyard-car-observation-dome",
+			"title": "Dome observation car, United States 1950s",
+			"width": 59,
+			"height": 46,
+			"anchorX": 6,
+			"anchorY": 20,
+			"lengthMetres": 23,
+			"rear": [
+				6,
+				16
+			],
+			"front": [
+				52,
+				39
+			],
+			"top": [
+				29,
+				11
+			]
+		},
+		{
+			"file": "railyard-car-kitchen-diner.svg",
+			"passage": "railyard-car-kitchen-diner",
+			"title": "Red dining car, Germany 1960s",
+			"width": 61,
+			"height": 47,
+			"anchorX": 6,
+			"anchorY": 20,
+			"lengthMetres": 24,
+			"rear": [
+				6,
+				16
+			],
+			"front": [
+				54,
+				40
+			],
+			"top": [
+				30,
+				13
+			]
+		},
+		{
+			"file": "railyard-car-private-saloon.svg",
+			"passage": "railyard-car-private-saloon",
+			"title": "Wood-panelled saloon car, Argentina 1910s",
+			"width": 57,
+			"height": 45,
+			"anchorX": 6,
+			"anchorY": 20,
+			"lengthMetres": 22,
+			"rear": [
+				6,
+				16
+			],
+			"front": [
+				50,
+				38
+			],
+			"top": [
+				28,
+				12
 			]
 		}
 	]

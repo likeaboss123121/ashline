@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="14" height="31" viewBox="0 0 14 31" shape-rendering="crispEdges" data-template="railyard-plant-spruce" data-anchor-x="7" data-anchor-y="29">
+<title>Ashline rail yard template: Spruce</title>
+<g id="vegetation-spruce">
+<polygon points="6,29 6,6 8,7 9,30" fill="#665b42"/>
+<polygon points="1,21 7,7 13,27" fill="#6d8659"/>
+<polygon points="2,16 7,4 12,21" fill="#6d8659"/>
+<polygon points="3,11 7,1 11,15" fill="#6d8659"/>
+<polygon points="7,1 10,11 7,7" fill="#759078"/>
+</g>
+</svg>

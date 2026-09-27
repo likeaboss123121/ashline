@@ -789,6 +789,8 @@ setup.railyard = {
 			['Weight', setup.units.tonnes(Math.round(car.baseWeight / 100) / 10)],
 			['Length', setup.units.metres(car.length)]
 		];
+		var drivetrain = car.drivetrain || this.getModelDefault(car, 'drivetrain', '');
+		if (drivetrain) rows.push(['Drive', drivetrain]);
 		if (this.isDieselLocomotiveCar(car)) {
 			rows.push(['Tank', setup.units.litres(this.getCargoAmount(car, 'diesel')) + ' of '
 				+ setup.units.litres(car.maxCargoCapacityVolume)]);
@@ -2172,7 +2174,7 @@ setup.railyard = {
 				// Occasional locomotive, or force one if none have spawned yet.
 				var shouldStartWithLoco = (!hasLoco && rng() < 0.45) || (hasLoco && rng() < 0.12);
 				if (shouldStartWithLoco) {
-					var locoKey = locale ? setup.locales.choose(this.locomotiveKeys, setup.locales.FLEETS[locale.fleet], rng)
+					var locoKey = locale ? setup.locales.choose(this.locomotiveKeys, setup.stockVariety.fleetWeights(locale), rng)
 						: this.randomChoice(rng, this.locomotiveKeys);
 					var loco = this.createLocomotiveCar(locoKey);
 					if (loco.length <= remaining) {
@@ -2184,6 +2186,7 @@ setup.railyard = {
 				for (var c = train.length; c < carTarget; c++) {
 					var carKey = this.randomCarKey(rng, locale);
 					var car = this.cloneCar(State.variables.defaultTrains[carKey]);
+					setup.stockVariety.assign(car, rng, locale);
 					car.cargo = this.generateCargoForCar(carKey, rng, locale);
 					if (trainLength + car.length > remaining) {
 						break;
@@ -2964,10 +2967,11 @@ Macro.add('debugTools', {
 		};
 		var stock = State.variables.defaultTrains || {};
 		['Locomotives', 'Freight cars', 'Passenger cars'].forEach(function(category) {
-		addReferenceTable(category, ['Type', 'Length', 'Empty weight', 'Cargo capacity', 'Pull', 'Top speed'],
+		addReferenceTable(category, ['Type', 'Origin / era', 'Drive', 'Length', 'Empty weight', 'Cargo capacity', 'Pull', 'Top speed'],
 			Object.keys(stock).filter(function(key) { return setup.svgWiki.carCategory(stock[key]) === category; }).map(function(key) {
 				var car = stock[key];
-				return [setup.svgWiki.carEntry(car, car.name || car.type || key), (car.length || 0) + ' m', (car.baseWeight || 0) + ' kg',
+				return [setup.svgWiki.carEntry(car, car.name || car.type || key), car.origin ? car.origin + ' / ' + car.era : 'Varies (see graphics)',
+					car.drivetrain || 'Unpowered', (car.length || 0) + ' m', (car.baseWeight || 0) + ' kg',
 					(car.maxCargoCapacityKg || 0) + ' kg / ' + (car.maxCargoCapacityVolume || 0) + ' L',
 					(car.tractiveCapacity || 0) + ' kN', (car.topSpeedKmh || 0) + ' km/h'];
 			}));

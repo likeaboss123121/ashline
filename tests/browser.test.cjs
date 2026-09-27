@@ -63,6 +63,50 @@ async function openGame(t, options) {
   return page;
 }
 
+test('expanded stock renders both facings and visual variants survive browser saves', async t => {
+  const page=await openGame(t);await begin(page);await board(page);
+  const result=await page.evaluate(()=>{
+    const s=SugarCube.setup,v=SugarCube.State.variables,host=document.querySelector('#passages');
+    const models=s.railyard.locomotiveKeys.map(key=>s.railyard.createLocomotiveCar(key));
+    const variants=[];
+    for(const key of s.railyard.carKeys) {
+      const preset=v.defaultTrains[key],entry=s.stockVariety.definition(preset);
+      for(const variant of entry.spec.variants) variants.push(Object.assign({},preset,{graphicVariant:variant.id}));
+    }
+    host.replaceChildren();
+    let rendered=0;
+    for(const car of models.concat(variants)) {
+      for(const flipped of [false,true]) {
+        car.facing=flipped?-1:1;
+        const drawing=s.drivingView.render({terrain:'plains',tile:{terrain:'plains',geoCoordinate:[115,30],elevation:100},grade:0,forward:true},[car],0);
+        host.appendChild(drawing);rendered++;
+        for(const prefix of ['railyard','driving']) {
+          const name=s[prefix+'View'].getCarTemplateName(car,false);
+          if(!SugarCube.Story.has(name)) throw Error('Missing image '+name);
+        }
+      }
+    }
+    const tracks=s.railyard.generateStationTracks(1,'variety');
+    tracks[1].trains=[models.slice(0,6)];tracks[1].length=300;
+    tracks[2].trains=[models.slice(6)];tracks[2].length=300;
+    host.appendChild(s.railyardView.render(tracks,null));
+    return {models:models.length,variants:variants.length,rendered};
+  });
+  assert.equal(result.models,12);assert.ok(result.variants>=14);assert.equal(result.rendered,2*(12+result.variants));
+  await page.screenshot({path:'test-results/expanded-stock-gallery.png',fullPage:true});
+  await page.evaluate(()=>{
+    const s=SugarCube.setup,v=SugarCube.State.variables;
+    v.currentTrain=[s.railyard.createLocomotiveCar('dieselMechanical'),s.railyard.cloneCar(v.defaultTrains.passengerCoach)];
+    v.currentTrain[1].graphicVariant='clerestory';v.currentCarIndex=0;
+    SugarCube.Engine.play('TrainInterior');
+  });
+  await passage(page,'TrainInterior');
+  assert.equal(await page.evaluate(()=>SugarCube.setup.saves.save(0)),true);
+  await page.evaluate(()=>{SugarCube.State.variables.currentTrain[1].graphicVariant='stainless';SugarCube.Save.slots.load(0);});
+  await page.waitForFunction(()=>SugarCube.State.variables.currentTrain[1].graphicVariant==='clerestory');
+  assert.equal(await page.evaluate(()=>SugarCube.State.variables.currentTrain[0].drivetrain),'diesel-mechanical');
+});
+
 test('regional scenery, industry landmarks and new rolling stock render in both views by day and night', async t => {
   const page = await openGame(t, { viewport: { width: 1280, height: 900 } });
   await beginTutorial(page);
@@ -71,7 +115,8 @@ test('regional scenery, industry landmarks and new rolling stock render in both 
     const samples = [
       ['Patagonia', [-70.9, -53.2]], ['Pampas', [-60, -34]], ['Highveld', [28, -26]],
       ['Siberia', [105, 58]], ['Gulf Coast', [-90, 30]], ['Amazon', [-60, -3]],
-      ['Sahara', [15, 25]], ['Cape', [20, -34]], ['Arctic', [135, 69]], ['Europe', [10, 48]]
+      ['Sahara', [15, 25]], ['Cape', [20, -34]], ['Arctic', [135, 69]], ['Europe', [10, 48]],
+      ['China', [115,30]], ['Pacific Northwest',[-123,47]]
     ];
     const train = ['dieselOldRoad', 'hopper', 'refrigerated'].map(key => s.railyard.cloneCar(v.defaultTrains[key]));
     host.replaceChildren();
@@ -94,7 +139,7 @@ test('regional scenery, industry landmarks and new rolling stock render in both 
     return results;
   });
   assert.deepEqual(result.filter((_, i) => i % 2 === 0).map(row => row[0]),
-    ['steppe', 'pampas', 'savanna', 'taiga', 'wetland', 'rainforest', 'desert', 'mediterranean', 'tundra', 'temperate']);
+    ['steppe', 'pampas', 'savanna', 'taiga', 'wetland', 'rainforest', 'desert', 'mediterranean', 'tundra', 'temperate', 'temperate', 'temperate']);
   fs.mkdirSync('test-results', { recursive: true });
   await page.screenshot({ path: 'test-results/locale-driving-gallery.png', fullPage: true });
   const yard = await page.evaluate(() => {
@@ -1849,7 +1894,10 @@ test('debug mode draws the complete sourced rail grid', async t => {
   const reference = page.locator('details.debug-section').filter({ has: page.getByText('Reference data', { exact: true }) });
   await page.getByRole('button', { name: 'Wiki', exact: true }).click();
   await reference.getByText('Railcars', { exact: true }).click();
+  await reference.getByText('Locomotives', { exact: true }).click();
+  await reference.getByText('Cargo and fuel', { exact: true }).click();
   await reference.getByText('Fuel', { exact: true }).click();
+  await reference.getByText('Inventory and survival', { exact: true }).click();
   await reference.getByText('Pack items', { exact: true }).click();
   const referenceText = await reference.innerText();
   assert.match(referenceText, /two axle diesel shunter/);

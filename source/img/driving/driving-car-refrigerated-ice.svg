@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="34" height="20" viewBox="0 0 34 20" shape-rendering="crispEdges" data-template="driving-car-refrigerated-ice" data-anchor-x="2" data-anchor-y="15" data-length-m="15">
+<title>Ashline driving template: Ice-cooled refrigerator car, United States 1920s</title>
+<g id="coupler">
+<polygon points="1,14 3,14 3,13 1,13" fill="#7f786a"/>
+<polygon points="1,11 3,11 3,13 1,13" fill="#bbb09a"/>
+</g>
+<g id="trucks">
+<polygon points="5,19 11,19 11,17 5,17" fill="#111416"/>
+<polygon points="5,9 11,9 11,17 5,17" fill="#383c3b"/>
+<polygon points="8,16 8,15 7,14 6,14 5,15 5,16 5,17 6,18 7,18 8,17" fill="#1b1f20"/>
+<polygon points="7,16 7,16 7,15 6,15 6,16 6,16 6,17 6,17 7,17 7,17" fill="#8c3b2e"/>
+<polygon points="11,16 11,15 10,14 9,14 8,15 8,16 8,17 9,18 10,18 11,17" fill="#1b1f20"/>
+<polygon points="10,16 10,16 10,15 9,15 9,16 9,16 9,17 9,17 10,17 10,17" fill="#8c3b2e"/>
+<polygon points="23,19 29,19 29,17 23,17" fill="#111416"/>
+<polygon points="23,9 29,9 29,17 23,17" fill="#383c3b"/>
+<polygon points="26,16 26,15 25,14 24,14 23,15 23,16 23,17 24,18 25,18 26,17" fill="#1b1f20"/>
+<polygon points="25,16 25,16 25,15 24,15 24,16 24,16 24,17 24,17 25,17 25,17" fill="#8c3b2e"/>
+<polygon points="29,16 29,15 28,14 27,14 26,15 26,16 26,17 27,18 28,18 29,17" fill="#1b1f20"/>
+<polygon points="28,16 28,16 28,15 27,15 27,16 27,16 27,17 27,17 28,17 28,17" fill="#8c3b2e"/>
+</g>
+<g id="underframe">
+<polygon points="2,16 32,16 32,15 2,15" fill="#232626"/>
+<polygon points="2,8 32,8 32,15 2,15" fill="#454440"/>
+</g>
+<g id="body">
+<polygon points="3,15 31,15 31,8 3,8" fill="#a49367"/>
+<polygon points="3,1 31,1 31,8 3,8" fill="#d0bd8a"/>
+</g>
+<g id="door">
+<polygon points="14,15 20,15 20,9 14,9" fill="#655f4d"/>
+<polygon points="14,9 20,9 20,9 14,9" fill="#d0bd8a"/>
+<polygon points="4,15 30,15 30,14 4,14" fill="#544b3c"/>
+<polygon points="4,14 30,14 30,14 4,14" fill="#544b3c"/>
+<polygon points="4,13 30,13 30,13 4,13" fill="#544b3c"/>
+<polygon points="4,13 30,13 30,13 4,13" fill="#544b3c"/>
+<polygon points="4,12 30,12 30,12 4,12" fill="#544b3c"/>
+<polygon points="4,11 30,11 30,12 4,12" fill="#544b3c"/>
+<polygon points="4,10 30,10 30,10 4,10" fill="#544b3c"/>
+<polygon points="4,10 30,10 30,10 4,10" fill="#544b3c"/>
+<polygon points="4,9 30,9 30,9 4,9" fill="#544b3c"/>
+<polygon points="4,9 30,9 30,9 4,9" fill="#544b3c"/>
+</g>
+<g id="ice-hatches">
+<polygon points="5,7 9,7 9,6 5,6" fill="#a49367"/>
+<polygon points="5,2 9,2 9,6 5,6" fill="#ced0b5"/>
+<polygon points="25,7 29,7 29,6 25,6" fill="#a49367"/>
+<polygon points="25,2 29,2 29,6 25,6" fill="#ced0b5"/>
+</g>
+<g id="coupler">
+<polygon points="31,14 33,14 33,13 31,13" fill="#7f786a"/>
+<polygon points="31,11 33,11 33,13 31,13" fill="#bbb09a"/>
+</g>
+</svg>

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="63" height="48" viewBox="0 0 63 48" shape-rendering="crispEdges" data-template="railyard-car-sleeper-green" data-anchor-x="6" data-anchor-y="20" data-length-m="25">
+<title>Ashline rail yard template: Green sleeping car, Soviet Union 1960s</title>
+<g id="coupler">
+<polygon points="4,16 6,15 8,16 8,17 6,18 4,17" fill="#5f5a50"/>
+<polygon points="4,17 6,18 6,17 4,16" fill="#7f786a"/>
+<polygon points="8,17 6,18 6,17 8,16" fill="#5f5a50"/>
+<polygon points="6,15 8,16 6,17 4,16" fill="#bbb09a"/>
+</g>
+<g id="trucks">
+<polygon points="3,22 15,16 21,19 21,22 9,28 3,25" fill="#1a1e20"/>
+<polygon points="3,25 9,28 9,25 3,22" fill="#111416"/>
+<polygon points="21,22 9,28 9,25 21,19" fill="#1a1e20"/>
+<polygon points="15,16 21,19 9,25 3,22" fill="#383c3b"/>
+<polygon points="41,41 53,35 59,38 59,41 47,47 41,44" fill="#1a1e20"/>
+<polygon points="41,44 47,47 47,44 41,41" fill="#111416"/>
+<polygon points="59,41 47,47 47,44 59,38" fill="#1a1e20"/>
+<polygon points="53,35 59,38 47,44 41,41" fill="#383c3b"/>
+</g>
+<g id="underframe">
+<polygon points="1,18 11,13 61,38 61,40 51,45 1,20" fill="#1e2022"/>
+<polygon points="1,20 51,45 51,43 1,18" fill="#232626"/>
+<polygon points="61,40 51,45 51,43 61,38" fill="#1e2022"/>
+<polygon points="11,13 61,38 51,43 1,18" fill="#454440"/>
+</g>
+<g id="body">
+<polygon points="2,8 12,3 60,27 60,37 50,42 2,18" fill="#41483f"/>
+<polygon points="2,18 50,42 50,32 2,8" fill="#4e603f"/>
+<polygon points="60,37 50,42 50,32 60,27" fill="#41483f"/>
+<polygon points="12,3 60,27 50,32 2,8" fill="#8b9472"/>
+</g>
+<g id="windows">
+<polygon points="5,16 8,17 8,13 5,12" fill="#293f40"/>
+<polygon points="10,18 13,20 13,16 10,14" fill="#293f40"/>
+<polygon points="15,21 18,22 18,18 15,17" fill="#293f40"/>
+<polygon points="20,23 23,25 23,21 20,19" fill="#293f40"/>
+<polygon points="25,26 28,27 28,23 25,22" fill="#293f40"/>
+<polygon points="30,28 33,30 33,26 30,24" fill="#293f40"/>
+<polygon points="35,31 38,32 38,28 35,27" fill="#293f40"/>
+<polygon points="40,33 43,35 43,31 40,29" fill="#293f40"/>
+<polygon points="45,36 48,37 48,33 45,32" fill="#293f40"/>
+</g>
+<g id="roof">
+<polygon points="1,7 12,1 62,26 62,27 51,33 1,8" fill="#41483f"/>
+<polygon points="1,8 51,33 51,32 1,7" fill="#707c71"/>
+<polygon points="62,27 51,33 51,32 62,26" fill="#41483f"/>
+<polygon points="12,1 62,26 51,32 1,7" fill="#b0b2a3"/>
+</g>
+<g id="coupler">
+<polygon points="54,41 56,40 58,41 58,42 56,43 54,42" fill="#5f5a50"/>
+<polygon points="54,42 56,43 56,42 54,41" fill="#7f786a"/>
+<polygon points="58,42 56,43 56,42 58,41" fill="#5f5a50"/>
+<polygon points="56,40 58,41 56,42 54,41" fill="#bbb09a"/>
+</g>
+</svg>
