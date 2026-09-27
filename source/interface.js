@@ -58,6 +58,23 @@ Macro.add('uiSection', {
 });
 // Inspect the shipped artwork, without copying image data into saves or drawing the whole catalogue.
 setup.svgWiki = {
+	folder: function(parent, title, key) {
+		var folder = document.createElement('details'); folder.className = 'debug-section';
+		folder.dataset.wikiFolder = key;
+		var summary = document.createElement('summary'); summary.textContent = title;
+		folder.appendChild(summary); parent.appendChild(folder); return folder;
+	},
+	carCategory: function(car) {
+		if (/ loco$/.test(car.type)) return 'Locomotives';
+		return /coach|observation|kitchen|private/.test(car.type) ? 'Passenger cars' : 'Freight cars';
+	},
+	assetCategory: function(template) {
+		var name = template.passage.replace(/^(railyard|driving)-/, '');
+		if (name.indexOf('loco-') === 0) return 'Locomotives';
+		if (name.indexOf('car-') === 0) return /^car-(passenger|sleeper|observation|kitchen|private)$/.test(name) ? 'Passenger cars' : 'Freight cars';
+		return ({ track: 'Tracks', building: 'Buildings', plant: 'Vegetation and rocks',
+			industry: 'Industry', terrain: 'Terrain and backgrounds' })[name.split('-')[0]] || 'Other';
+	},
 	catalogue: function() {
 		return setup.railyardTemplates.templates.concat(setup.drivingTemplates.templates);
 	},
@@ -102,18 +119,29 @@ setup.svgWiki = {
 		entry.appendChild(section); return entry;
 	},
 	appendBrowser: function(parent) {
-		var section = document.createElement('details'); section.className = 'debug-section';
+		var section = this.folder(parent, 'SVG browser', 'svg');
 		section.id = 'wiki-svg-browser';
-		var summary = document.createElement('summary'); summary.textContent = 'SVG browser';
-		section.appendChild(summary); parent.appendChild(section);
+		var views = {}, folders = {};
+		this.catalogue().forEach(function(template) {
+			var view = template.passage.indexOf('railyard-') === 0 ? 'Railyard' : 'Driving';
+			var category = setup.svgWiki.assetCategory(template), key = view + '/' + category;
+			if (!views[view]) views[view] = setup.svgWiki.folder(section, view, 'svg/' + view);
+			if (!folders[key]) folders[key] = { parent: setup.svgWiki.folder(views[view], category, 'svg/' + key), templates: [] };
+			folders[key].templates.push(template);
+		});
+		Object.keys(folders).forEach(function(key) {
+			setup.svgWiki.appendPicker(folders[key].parent, folders[key].templates, key);
+		});
+	},
+	appendPicker: function(section, entries, key) {
 		var loaded = false;
 		section.addEventListener('toggle', function() {
 			if (!section.open || loaded) return;
 			loaded = true;
 			var label = document.createElement('label'); label.textContent = 'Graphic: ';
-			var select = document.createElement('select'); select.setAttribute('aria-label', 'SVG graphic');
+			var select = document.createElement('select'); select.setAttribute('aria-label', 'SVG graphic: ' + key);
 			select.style.maxWidth = '100%';
-			var templates = setup.svgWiki.catalogue().slice().sort(function(a, b) { return a.file.localeCompare(b.file); });
+			var templates = entries.slice().sort(function(a, b) { return a.file.localeCompare(b.file); });
 			templates.forEach(function(template, index) {
 				var option = document.createElement('option'); option.value = String(index); option.textContent = template.file;
 				select.appendChild(option);
@@ -133,7 +161,8 @@ setup.sideTabs = {
 	refresh: function() {
 		var old = document.getElementById('developer-tabs'), previous = old && old.querySelector('.developer-panel:not([hidden])');
 		var scroll = previous ? previous.scrollTop : 0;
-		var opened = old ? Array.from(old.querySelectorAll('details[open] > summary')).map(function(s) { return (s.querySelector('[data-disclosure-label]') || s).textContent; }) : [];
+		function sectionKey(s) { return s.parentElement.dataset.wikiFolder || (s.querySelector('[data-disclosure-label]') || s).textContent; }
+		var opened = old ? Array.from(old.querySelectorAll('details[open] > summary')).map(sectionKey) : [];
 		if (old) old.remove();
 		document.querySelectorAll('#menu-story .developer-menu-item').forEach(function(item) { item.remove(); });
 		// The debug tools belong to a game in progress, never to the title, the introduction or save recovery.
@@ -164,7 +193,7 @@ setup.sideTabs = {
 		var reference = debug.querySelector('.procedural-wiki');
 		if (reference) { reference.open = true; wiki.appendChild(reference); }
 		setup.svgWiki.appendBrowser(wiki);
-		root.querySelectorAll('details > summary').forEach(function(s) { if (opened.indexOf(s.textContent) >= 0) s.parentElement.open = true; });
+		root.querySelectorAll('details > summary').forEach(function(s) { if (opened.indexOf(sectionKey(s)) >= 0) s.parentElement.open = true; });
 		root.addEventListener('keydown', function(e) { if (e.key === 'Escape') close(); });
 		document.body.appendChild(root);
 		setup.pages.disclosures(root);

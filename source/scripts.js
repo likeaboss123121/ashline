@@ -2928,6 +2928,13 @@ Macro.add('debugTools', {
 		// is using, so it cannot drift from the train, fuel or pack systems as a separately written wiki would.
 		startSection('Reference data');
 		wrapper.parentElement.classList.add('procedural-wiki');
+		var referenceFolders = {};
+		['Railcars', 'Cargo and fuel', 'Inventory and survival', 'Stations'].forEach(function(title) {
+			referenceFolders[title] = setup.svgWiki.folder(wrapper, title, 'reference/' + title);
+		});
+		var referenceGroups = { Locomotives: 'Railcars', 'Freight cars': 'Railcars', 'Passenger cars': 'Railcars',
+			'Broken stock': 'Railcars', Cargo: 'Cargo and fuel', Fuel: 'Cargo and fuel',
+			'Pack items': 'Inventory and survival', 'Food preparation': 'Inventory and survival', 'Station stores': 'Stations' };
 		var addReferenceTable = function(title, headings, rows) {
 			var block = document.createElement('details');
 			block.className = 'debug-section';
@@ -2953,16 +2960,18 @@ Macro.add('debugTools', {
 				table.appendChild(line);
 			});
 			block.appendChild(table);
-			wrapper.appendChild(block);
+			(referenceFolders[referenceGroups[title]] || wrapper).appendChild(block);
 		};
 		var stock = State.variables.defaultTrains || {};
-		addReferenceTable('Railcars', ['Type', 'Length', 'Empty weight', 'Cargo capacity', 'Pull', 'Top speed'],
-			Object.keys(stock).map(function(key) {
+		['Locomotives', 'Freight cars', 'Passenger cars'].forEach(function(category) {
+		addReferenceTable(category, ['Type', 'Length', 'Empty weight', 'Cargo capacity', 'Pull', 'Top speed'],
+			Object.keys(stock).filter(function(key) { return setup.svgWiki.carCategory(stock[key]) === category; }).map(function(key) {
 				var car = stock[key];
 				return [setup.svgWiki.carEntry(car, car.name || car.type || key), (car.length || 0) + ' m', (car.baseWeight || 0) + ' kg',
 					(car.maxCargoCapacityKg || 0) + ' kg / ' + (car.maxCargoCapacityVolume || 0) + ' L',
 					(car.tractiveCapacity || 0) + ' kN', (car.topSpeedKmh || 0) + ' km/h'];
 			}));
+		});
 		var cargoTypes = State.variables.cargoTypes || {};
 		addReferenceTable('Cargo', ['Cargo', 'Density', 'Rarity', 'Tags'], Object.keys(cargoTypes).map(function(key) {
 			var cargo = cargoTypes[key];

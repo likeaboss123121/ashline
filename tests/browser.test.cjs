@@ -462,6 +462,7 @@ test('wiki links railcar graphics and lazily previews the shipped SVG catalogue'
   const wiki=page.locator('#developer-Wiki');
   assert.equal(await wiki.locator('img').count(),0,'closed graphics do not load images');
   await wiki.locator('summary').filter({hasText:/^\+ Railcars$/}).click();
+  await wiki.locator('.procedural-wiki summary').filter({hasText:/^\+ Locomotives$/}).click();
   const shunter=wiki.locator('tr').filter({hasText:/diesel shunter/i}).first();
   await shunter.locator('summary').click();
   await shunter.locator('img').nth(3).waitFor();
@@ -471,10 +472,14 @@ test('wiki links railcar graphics and lazily previews the shipped SVG catalogue'
   }
   await page.waitForFunction(()=>Array.from(document.querySelectorAll('#developer-Wiki img')).every(img=>img.complete&&img.naturalWidth>0));
   await wiki.locator('#wiki-svg-browser > summary').click();
-  const select=wiki.getByLabel('SVG graphic');
+  const folder=key=>wiki.locator(`[data-wiki-folder="${key}"]`);
+  assert.equal(await wiki.locator('#wiki-svg-browser img').count(),0);
+  await folder('svg/Railyard').locator(':scope > summary').click();
+  await folder('svg/Railyard/Vegetation and rocks').locator(':scope > summary').click();
+  const select=wiki.getByLabel('SVG graphic: Railyard/Vegetation and rocks',{exact:true});
   await select.waitFor();
-  assert.equal(await select.locator('option').count(),await page.evaluate(()=>SugarCube.setup.svgWiki.catalogue().length));
   const files=await select.locator('option').allTextContents();
+  assert.ok(files.length>0 && files.every(file=>file.startsWith('railyard-plant-')));
   await select.selectOption({label:files.find(file=>file.includes('plant-'))});
   assert.equal(await wiki.locator('#wiki-svg-browser img').count(),1);
   assert.match(await wiki.locator('#wiki-svg-browser figcaption').innerText(),/plant-/);
@@ -482,6 +487,16 @@ test('wiki links railcar graphics and lazily previews the shipped SVG catalogue'
   await page.getByRole('button',{name:'Wiki',exact:true}).click();
   await wiki.locator('.procedural-wiki img').nth(3).waitFor({state:'attached'});
   assert.equal(await wiki.locator('.procedural-wiki img').count(),4,'refresh does not open every car graphics entry');
+  assert.equal(await folder('svg/Railyard/Vegetation and rocks').getAttribute('open'),'');
+  assert.equal(await folder('svg/Driving/Locomotives').getAttribute('open'),null,'same-named folders stay independent');
+  for (const group of ['Railcars','Cargo and fuel','Inventory and survival','Stations']) {
+    assert.equal(await folder('reference/'+group).count(),1);
+  }
+  // Every shipped asset appears in exactly one leaf folder; opening parents alone loads no images.
+  await wiki.locator('#wiki-svg-browser details').evaluateAll(nodes=>nodes.forEach(node=>{node.open=true;}));
+  await page.waitForFunction(()=>document.querySelectorAll('#wiki-svg-browser option').length===SugarCube.setup.svgWiki.catalogue().length);
+  const allFiles=await wiki.locator('#wiki-svg-browser option').allTextContents();
+  assert.equal(new Set(allFiles).size,allFiles.length);
 });
 
 test('red developer sidebar menus work on mobile with keyboard and close controls',async t=>{
