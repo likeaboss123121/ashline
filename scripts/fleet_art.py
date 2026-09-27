@@ -133,14 +133,38 @@ def locomotive(api, iso, spec, facing):
             elif part=='cab':
                 b.box(u,-5,6,7,10,11,top,side)
                 b.poly([(u+1,5,12),(u+5,5,12),(u+5,5,15),(u+1,5,15)],'#dec38a')
-                b.box(u-.5,-5.5,17,8,11,1,top,side)
+                if style == 'streamliner':
+                    b.poly([(u,-5,17),(u,0,19),(u+7,0,19),(u+7,-5,17)],top)
+                    b.poly([(u,0,19),(u,5,17),(u+7,5,17),(u+7,0,19)],'#547f92')
+                    b.box(u,5,8,7,.2,1,trim,trim)
+                else:
+                    b.box(u-.5,-5.5,17,8,11,1,top,side)
             else:
                 end = L-17 if style=='garratt' else L-2
                 if style=='streamliner':
                     s.part('streamlined-casing')
-                    b.poly([(u,5,6),(end,5,6),(end+1,5,10),(end-3,5,16),(u,5,18)],side)
-                    b.poly([(u,-5,18),(end-3,-4,16),(end+1,-3,10),(end+1,5,10),(end-3,5,16),(u,5,18)],top)
-                    b.poly([(u,5.2,10),(end,5.2,8),(end,5.2,9),(u,5.2,11)],trim)
+                    # A rounded crown and several tapered nose facets, not one flat wedge.
+                    # Longitudinal rings share vertices, including at the narrow nose.
+                    rings = [(u,5,19),(end-7,5,19),(end-3,4.5,17),(end,3.5,13),(end+1,3,9)]
+                    faces = [(-1,0,-1,1,side),(-1,1,-.45,2,top),
+                             (-.45,2,.35,2,'#89aab3'),(.35,2,1,1,'#547f92'),
+                             (1,1,1,0,side)]
+                    # Levels: skirt, shoulder, crown.
+                    for va,da,vb,db,colour in faces:
+                        for (a,w,h),(c,w2,h2) in zip(rings,rings[1:]):
+                            za, zb = (6,h-2,h)[da], (6,h-2,h)[db]
+                            zc, zd = (6,h2-2,h2)[da], (6,h2-2,h2)[db]
+                            b.poly([(a,va*w,za),(c,va*w2,zc),(c,vb*w2,zd),(a,vb*w,zb)],colour)
+                    if not b.reverse:
+                        b.poly([(end+1,-3,6),(end+1,-3,7),(end+1,-1.35,9),
+                                (end+1,1.05,9),(end+1,3,7),(end+1,3,6)],'#284b60')
+                    s.part('casing-details')
+                    b.poly([(u,5.1,8),(end-5,5.1,8),(end+1,3.1,6),
+                            (end+1,3.1,7),(end-5,5.1,9),(u,5.1,9)],trim)
+                    for panel in (u+3,u+9,u+15):
+                        b.poly([(panel,5.1,10),(panel+.5,5.1,10),(panel+.5,5.1,15),(panel,5.1,15)],'#466d80')
+                    s.part('recessed-chimney')
+                    b.box(end-8,-1.3,19,3,2.6,1,'#303d43','#213038')
                 else:
                     b.boiler(u,end-u,top,side)
                     b.box(u+4,-1.5,17,3,3,2,trim,side)
@@ -169,15 +193,22 @@ def car(api, iso, kind, spec, variant):
         for u in range(2,int(L),5): b.box(u,5,5,1,1,6,'#797d6c','#4b594e')
     elif kind=='tanker':
         # Rounded eight-sided tank with retaining bands, not a recoloured rectangular van.
-        for v0,z0,v1,z1 in [(-4,9,-3,13),(-3,13,2,14),(2,14,4,12),(4,12,4,8),(4,8,2,6)]:
-            b.poly([(2,v0,z0),(L-2,v0,z0),(L-2,v1,z1),(2,v1,z1)],top if z1>12 else side)
+        for name,v0,z0,v1,z1,colour in [('far',-4,9,-3,13,side),('crown',-3,13,2,14,top),
+                ('near-shoulder',2,14,4,12,'#a7956c'),('near-side',4,12,4,8,side),
+                ('underside',4,8,2,6,'#62573f')]:
+            s.part('tank-'+name)
+            b.poly([(2,v0,z0),(L-2,v0,z0),(L-2,v1,z1),(2,v1,z1)],colour)
+        s.part('tank-end')
         b.poly([(L-2,4,8),(L-2,4,12),(L-2,2,14),(L-2,-3,13),(L-2,-4,9),(L-2,-2,6),(L-2,2,6)],side)
         for u in (6,L-7): b.box(u,4,7,1,.4,6,'#454d43','#454d43')
         b.box(L/2,-2,14,3,4,2,top,side)
     elif kind=='gondola':
         b.box(1,-5,5,L-2,10,1,top,side)
-        b.box(1,-5,6,L-2,1,7,top,side); b.box(1,4,6,L-2,1,7,top,side)
-        for u in (1,L-2): b.box(u,-5,6,1,10,7,top,side)
+        s.part('far-wall'); b.box(1,-5,6,L-2,1,7,top,side)
+        s.part('rear-wall'); b.box(1,-5,6,1,10,7,top,side)
+        s.part('near-wall'); b.box(1,4,6,L-2,1,7,top,side)
+        s.part('front-wall'); b.box(L-2,-5,6,1,10,7,top,side)
+        s.part('wall-ribs')
         for u in range(3,int(L-2),4): b.box(u,5,6,1,.3,7,top,top)
     elif kind=='hopper':
         b.box(2,-4,7,L-4,8,7,top,side)

@@ -72,7 +72,7 @@ setup.svgWiki = {
 		var name = template.passage.replace(/^(railyard|driving)-/, '');
 		if (name.indexOf('loco-') === 0) return 'Locomotives';
 		if (name.indexOf('car-') === 0) return /^car-(passenger|sleeper|observation|kitchen|private)(?:-|$)/.test(name) ? 'Passenger cars' : 'Freight cars';
-		return ({ track: 'Tracks', building: 'Buildings', plant: 'Vegetation and rocks',
+		return ({ track: 'Tracks', bridge: 'Bridges', building: 'Buildings', plant: 'Vegetation and rocks',
 			industry: 'Industry', terrain: 'Terrain and backgrounds' })[name.split('-')[0]] || 'Other';
 	},
 	catalogue: function() {

@@ -27,22 +27,32 @@
 <polygon points="2,14 26,26 26,25 2,13" fill="#755440"/>
 <polygon points="36,21 26,26 26,25 36,20" fill="#41483f"/>
 <polygon points="12,8 36,20 26,25 2,13" fill="#a08165"/>
+</g>
+<g id="far-wall">
 <polygon points="11,2 12,1 36,13 36,20 35,21 11,9" fill="#41483f"/>
 <polygon points="11,9 35,21 35,14 11,2" fill="#755440"/>
 <polygon points="36,20 35,21 35,14 36,13" fill="#41483f"/>
 <polygon points="12,1 36,13 35,14 11,2" fill="#a08165"/>
-<polygon points="2,6 3,6 27,18 27,25 26,25 2,13" fill="#41483f"/>
-<polygon points="2,13 26,25 26,18 2,6" fill="#755440"/>
-<polygon points="27,25 26,25 26,18 27,18" fill="#41483f"/>
-<polygon points="3,6 27,18 26,18 2,6" fill="#a08165"/>
+</g>
+<g id="rear-wall">
 <polygon points="2,6 12,1 13,2 13,9 3,14 2,13" fill="#41483f"/>
 <polygon points="2,13 3,14 3,7 2,6" fill="#755440"/>
 <polygon points="13,9 3,14 3,7 13,2" fill="#41483f"/>
 <polygon points="12,1 13,2 3,7 2,6" fill="#a08165"/>
+</g>
+<g id="near-wall">
+<polygon points="2,6 3,6 27,18 27,25 26,25 2,13" fill="#41483f"/>
+<polygon points="2,13 26,25 26,18 2,6" fill="#755440"/>
+<polygon points="27,25 26,25 26,18 27,18" fill="#41483f"/>
+<polygon points="3,6 27,18 26,18 2,6" fill="#a08165"/>
+</g>
+<g id="front-wall">
 <polygon points="25,18 35,13 36,13 36,20 26,25 25,25" fill="#41483f"/>
 <polygon points="25,25 26,25 26,18 25,18" fill="#755440"/>
 <polygon points="36,20 26,25 26,18 36,13" fill="#41483f"/>
 <polygon points="35,13 36,13 26,18 25,18" fill="#a08165"/>
+</g>
+<g id="wall-ribs">
 <polygon points="4,7 5,8 5,15 4,14" fill="#41483f"/>
 <polygon points="4,14 5,15 5,8 4,7" fill="#a08165"/>
 <polygon points="5,15 5,15 5,8 5,8" fill="#41483f"/>

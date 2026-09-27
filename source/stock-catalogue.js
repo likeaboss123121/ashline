@@ -130,8 +130,8 @@ setup.stockCatalogue = {
 			"steamUseScale": 1.3,
 			"design": "american",
 			"colours": [
-				"#657f67",
-				"#344f40",
+				"#95666a",
+				"#593d49",
 				"#bb9760"
 			]
 		},

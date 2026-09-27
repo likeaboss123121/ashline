@@ -25,14 +25,24 @@
 <g id="body">
 <polygon points="3,14 27,14 27,13 3,13" fill="#755440"/>
 <polygon points="3,6 27,6 27,13 3,13" fill="#a08165"/>
+</g>
+<g id="far-wall">
 <polygon points="3,7 27,7 27,2 3,2" fill="#755440"/>
 <polygon points="3,1 27,1 27,2 3,2" fill="#a08165"/>
-<polygon points="3,13 27,13 27,8 3,8" fill="#755440"/>
-<polygon points="3,8 27,8 27,8 3,8" fill="#a08165"/>
+</g>
+<g id="rear-wall">
 <polygon points="3,13 4,13 4,8 3,8" fill="#755440"/>
 <polygon points="3,1 4,1 4,8 3,8" fill="#a08165"/>
+</g>
+<g id="near-wall">
+<polygon points="3,13 27,13 27,8 3,8" fill="#755440"/>
+<polygon points="3,8 27,8 27,8 3,8" fill="#a08165"/>
+</g>
+<g id="front-wall">
 <polygon points="26,13 27,13 27,8 26,8" fill="#755440"/>
 <polygon points="26,1 27,1 27,8 26,8" fill="#a08165"/>
+</g>
+<g id="wall-ribs">
 <polygon points="5,14 6,14 6,9 5,9" fill="#a08165"/>
 <polygon points="5,8 6,8 6,9 5,9" fill="#a08165"/>
 <polygon points="9,14 10,14 10,9 9,9" fill="#a08165"/>

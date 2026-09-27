@@ -24,24 +24,24 @@
 <polygon points="2,19 34,19 34,20 2,20" fill="#c0a477"/>
 </g>
 <g id="engine-body">
-<polygon points="4,18 25,18 25,11 4,11" fill="#775b46"/>
-<polygon points="4,4 25,4 25,11 4,11" fill="#a1825d"/>
-<polygon points="7,12 8,12 8,16 7,16" fill="#443e35"/>
-<polygon points="10,12 11,12 11,16 10,16" fill="#443e35"/>
-<polygon points="13,12 14,12 14,16 13,16" fill="#443e35"/>
-<polygon points="16,12 17,12 17,16 16,16" fill="#443e35"/>
-<polygon points="19,12 20,12 20,16 19,16" fill="#443e35"/>
+<polygon points="4,18 25,18 25,11 4,11" fill="#45676f"/>
+<polygon points="4,4 25,4 25,11 4,11" fill="#739698"/>
+<polygon points="7,12 8,12 8,16 7,16" fill="#2f454d"/>
+<polygon points="10,12 11,12 11,16 10,16" fill="#2f454d"/>
+<polygon points="13,12 14,12 14,16 13,16" fill="#2f454d"/>
+<polygon points="16,12 17,12 17,16 16,16" fill="#2f454d"/>
+<polygon points="19,12 20,12 20,16 19,16" fill="#2f454d"/>
 <polygon points="8,9 12,9 12,8 8,8" fill="#3f493e"/>
 <polygon points="8,5 12,5 12,8 8,8" fill="#575b50"/>
 <polygon points="16,9 20,9 20,8 16,8" fill="#3f493e"/>
 <polygon points="16,5 20,5 20,8 16,8" fill="#575b50"/>
 </g>
 <g id="cab">
-<polygon points="25,18 32,18 32,10 25,10" fill="#8b6c4e"/>
-<polygon points="25,2 32,2 32,10 25,10" fill="#ab9270"/>
+<polygon points="25,18 32,18 32,10 25,10" fill="#537982"/>
+<polygon points="25,2 32,2 32,10 25,10" fill="#86a5a3"/>
 <polygon points="27,13 30,13 30,11 27,11" fill="#dec38a"/>
-<polygon points="25,10 33,10 33,9 25,9" fill="#82715a"/>
-<polygon points="25,1 33,1 33,9 25,9" fill="#b3a186"/>
+<polygon points="25,10 33,10 33,9 25,9" fill="#69858b"/>
+<polygon points="25,1 33,1 33,9 25,9" fill="#a6b8b0"/>
 </g>
 <g id="coupler">
 <polygon points="33,17 35,17 35,16 33,16" fill="#7f786a"/>

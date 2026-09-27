@@ -1391,25 +1391,25 @@ setup.railyardTemplates = {
 			"passage": "railyard-loco-steam-streamliner-left",
 			"title": "4-6-2 streamlined steam engine, Britain 1930s, facing left",
 			"width": 55,
-			"height": 40,
+			"height": 42,
 			"anchorX": 6,
-			"anchorY": 16,
+			"anchorY": 18,
 			"lengthMetres": 22,
 			"rear": [
 				6,
-				12
+				14
 			],
 			"front": [
 				50,
-				34
+				36
 			],
 			"top": [
 				28,
-				3
+				5
 			],
 			"cab": [
 				36,
-				13
+				15
 			]
 		},
 		{

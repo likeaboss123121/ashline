@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="82" height="30" viewBox="0 0 82 30" shape-rendering="crispEdges" data-template="driving-bridge-concrete" data-anchor-x="1" data-anchor-y="8">
+<title>Ashline driving template: Newer short concrete beams</title>
+<g id="piers">
+<polygon points="1,29 5,29 5,15 1,15" fill="#808e86"/>
+<polygon points="1,5 5,5 5,15 1,15" fill="#afb5a7"/>
+<polygon points="1,18 6,18 6,16 1,16" fill="#52665f"/>
+<polygon points="1,4 6,4 6,16 1,16" fill="#afb5a7"/>
+<polygon points="2,19 3,19 3,28 2,28" fill="#52665f"/>
+<polygon points="21,29 25,29 25,15 21,15" fill="#808e86"/>
+<polygon points="21,5 25,5 25,15 21,15" fill="#afb5a7"/>
+<polygon points="21,18 26,18 26,16 21,16" fill="#52665f"/>
+<polygon points="21,4 26,4 26,16 21,16" fill="#afb5a7"/>
+<polygon points="22,19 23,19 23,28 22,28" fill="#52665f"/>
+<polygon points="41,29 45,29 45,15 41,15" fill="#808e86"/>
+<polygon points="41,5 45,5 45,15 41,15" fill="#afb5a7"/>
+<polygon points="41,18 46,18 46,16 41,16" fill="#52665f"/>
+<polygon points="41,4 46,4 46,16 41,16" fill="#afb5a7"/>
+<polygon points="42,19 43,19 43,28 42,28" fill="#52665f"/>
+<polygon points="61,29 65,29 65,15 61,15" fill="#808e86"/>
+<polygon points="61,5 65,5 65,15 61,15" fill="#afb5a7"/>
+<polygon points="61,18 66,18 66,16 61,16" fill="#52665f"/>
+<polygon points="61,4 66,4 66,16 61,16" fill="#afb5a7"/>
+<polygon points="62,19 63,19 63,28 62,28" fill="#52665f"/>
+</g>
+<g id="structure">
+<polygon points="1,16 81,16 81,15 1,15" fill="#808e86"/>
+<polygon points="1,16 81,16 81,18 1,18" fill="#52665f"/>
+<polygon points="1,15 81,15 81,16 1,16" fill="#afb5a7"/>
+</g>
+<g id="deck">
+<polygon points="1,15 81,15 81,14 1,14" fill="#52665f"/>
+<polygon points="1,4 81,4 81,14 1,14" fill="#afb5a7"/>
+</g>
+<g id="far-railing">
+<polygon points="1,1 81,1 81,2 1,2" fill="#afb5a7"/>
+<polygon points="1,1 2,1 2,4 1,4" fill="#808e86"/>
+<polygon points="9,1 10,1 10,4 9,4" fill="#808e86"/>
+<polygon points="17,1 18,1 18,4 17,4" fill="#808e86"/>
+<polygon points="25,1 26,1 26,4 25,4" fill="#808e86"/>
+<polygon points="33,1 34,1 34,4 33,4" fill="#808e86"/>
+<polygon points="41,1 42,1 42,4 41,4" fill="#808e86"/>
+<polygon points="49,1 50,1 50,4 49,4" fill="#808e86"/>
+<polygon points="57,1 58,1 58,4 57,4" fill="#808e86"/>
+<polygon points="65,1 66,1 66,4 65,4" fill="#808e86"/>
+<polygon points="73,1 74,1 74,4 73,4" fill="#808e86"/>
+</g>
+<g id="near-kerb">
+<polygon points="1,14 81,14 81,15 1,15" fill="#afb5a7"/>
+</g>
+</svg>

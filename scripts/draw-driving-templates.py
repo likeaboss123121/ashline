@@ -544,25 +544,73 @@ def forest():
 
 
 def bridge_span():
-    """A bridge: water below, a deck the track sits on, and girders along the near side."""
-    s = Sprite('driving-terrain-bridge', 'Bridge')
+    """Level water backdrop; the selected structure is placed with the graded track."""
+    s = Sprite('driving-terrain-bridge', 'Bridge water backdrop')
     T = TERRAIN_TILE_UNITS
     s.part('sky')
     s.world_poly([(0, -GROUND_DEPTH, SKY_HEIGHT), (T, -GROUND_DEPTH, SKY_HEIGHT),
-                  (T, -GROUND_DEPTH, 2), (0, -GROUND_DEPTH, 2)], P['bridge_sky'])
+                  (T, -GROUND_DEPTH, -22), (0, -GROUND_DEPTH, -22)], P['bridge_sky'])
     s.part('water')
-    s.world_poly([(0, -GROUND_DEPTH, 2), (T, -GROUND_DEPTH, 2), (T, GROUND_DEPTH, 2), (0, GROUND_DEPTH, 2)], P['bridge_water'])
-    for i in range(5):
-        u = 3 + i * (T - 6) / 5
-        s.world_poly([(u, -6 + (i % 3) * 8, 2), (u + 9, -6 + (i % 3) * 8, 2),
-                      (u + 9, -4 + (i % 3) * 8, 2), (u, -4 + (i % 3) * 8, 2)], P['bridge_water_light'])
+    s.world_poly([(0, -GROUND_DEPTH, -22), (T, -GROUND_DEPTH, -22),
+                  (T, GROUND_DEPTH, -22), (0, GROUND_DEPTH, -22)], '#344f59')
+    for i in range(18):
+        u, v = (i*17)%68+2, (i*11)%48-24
+        s.line_u(u,u+4+i%7,v,-22,'#4e6970' if i%3 else '#293f49')
+    return s
+
+
+BRIDGES = [('masonry','Old short masonry arches',20), ('riveted','Old medium riveted girders',40),
+           ('lattice','Old long steel deck truss',80), ('concrete','Newer short concrete beams',20),
+           ('plate','Newer medium welded girders',40), ('box','Newer long concrete box girder',80)]
+
+
+def bridge_structure(kind, title, span):
+    """Repeatable structural bays; all bearing surfaces share the railhead origin."""
+    s = Sprite('driving-bridge-'+kind, title)
+    T = TERRAIN_TILE_UNITS
+    old = kind in ('masonry','riveted','lattice')
+    pale, face, dark = ('#a49b83','#756c59','#4f5049') if old else ('#afb5a7','#808e86','#52665f')
+    s.part('piers')
+    for u in range(0,T,span):
+        s.box(u,-7,-23,4,14,20,pale,face)
+        s.box(u,-8,-6,5,16,3,pale,dark)
+        s.line_z(u+1,7,-21,-8,dark)
+    s.part('structure')
+    if kind == 'masonry':
+        # Closed spandrel above each open, polygonal arch (no water-coloured cutouts).
+        for u in range(0,T,span):
+            inner=[(u+4,7,-19),(u+6,7,-11),(u+9,7,-8),(u+13,7,-8),(u+17,7,-11),(u+20,7,-19)]
+            s.world_poly([(u,7,-3),(u+span,7,-3)]+list(reversed(inner))+[(u,7,-19)],face)
+            for a,b in zip(inner,inner[1:]):
+                s.world_poly([a,b,(b[0],b[1],b[2]+2),(a[0],a[1],a[2]+2)],pale)
+            for z in (-5,-8):
+                s.line_u(u,u+span,7,z,dark)
+            for x in range(u+2,u+span,5): s.line_z(x,7,-7,-4,pale)
+    elif kind == 'lattice':
+        s.slab(0,T,-17,-15,dark,v=7)
+        for u in range(0,T,10):
+            s.world_poly([(u,7,-4),(u+10,7,-15),(u+10,7,-17),(u,7,-6)],face)
+            s.world_poly([(u,7,-17),(u+10,7,-6),(u+10,7,-4),(u,7,-15)],pale)
+            s.line_z(u,7,-16,-4,dark)
+    else:
+        depth = 8 if kind in ('riveted','plate','box') else 5
+        s.slab(0,T,-depth,-3,face,v=7)
+        s.line_u(0,T,7,-depth,dark,2)
+        s.line_u(0,T,7,-3,pale)
+        if kind in ('riveted','plate'):
+            for u in range(3,T,6):
+                s.line_z(u,7,-depth,-3,pale)
+                if kind=='riveted':
+                    for z in (-4,-6): s.slab(u+2,u+3,z,z+1,dark,v=7)
+        elif kind=='box':
+            for u in range(4,T,8): s.line_z(u,7,-7,-4,'#929e94')
     s.part('deck')
-    s.world_poly([(0, -10, 1), (T, -10, 1), (T, 10, 0), (0, 10, 0)], P['bridge_ground'])
-    s.part('girders')
-    s.slab(0, T, -2, 0, P['bridge_girder_dark'], v=10)
-    for i in range(6):
-        u = 2 + i * (T - 4) / 6
-        s.line_z(u, 10, -4, 2, P['bridge_girder'], thickness=2)
+    s.box(0,-7,-3,T,14,1,pale,dark)
+    # Far railing cannot obscure car windows; near kerb stays below the wheels.
+    s.part('far-railing')
+    s.line_u(0,T,-7,3,pale)
+    for u in range(0,T,8): s.line_z(u,-7,-2,3,face)
+    s.part('near-kerb'); s.line_u(0,T,7,-2,pale)
     return s
 
 
@@ -607,7 +655,7 @@ def build_all():
         terrain('arctic', 'Arctic', P['arctic_ground'], P['arctic_near'], P['arctic_far'], P['arctic_sky'], P['arctic_tuft']),
         terrain('mountain', 'Mountain', P['mountain_ground'], P['mountain_near'], P['mountain_far'], P['mountain_sky'],
                 P['mountain_rock'], snow=True),
-        forest(), bridge_span(), tunnel_bore(),
+        forest(), bridge_span(), *[bridge_structure(*entry) for entry in BRIDGES], tunnel_bore(),
     ]
 
 
@@ -622,6 +670,9 @@ def preview(sprites):
         width = 300
         for u in range(0, width, TERRAIN_TILE_UNITS):
             placed.append((by_name['driving-terrain-' + terrain_name], u, 0))
+        if terrain_name == 'bridge':
+            for u in range(0, width, TERRAIN_TILE_UNITS):
+                placed.append((by_name['driving-bridge-lattice'], u, 0))
         for u in range(0, width, TRACK_TILE_UNITS):
             placed.append((by_name['driving-track'], u, 0))
         u = 20

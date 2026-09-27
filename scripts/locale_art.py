@@ -232,16 +232,16 @@ def rolling_stock(api, iso):
         # A high, full-width rounded-era body and end cab, distinct from the modern road engine's narrow hood.
         def body():
             s.part('engine-body')
-            box(s, U(2, 21), -4.5, 5, 21, 9, 10, '#a1825d', '#775b46', '#594b3b')
+            box(s, U(2, 21), -4.5, 5, 21, 9, 10, '#739698', '#45676f', '#344c57')
             for start in (5, 8, 11, 14, 17):
-                s.line_z(U(start), 4.5, 7, 13, '#443e35')
+                s.line_z(U(start), 4.5, 7, 13, '#2f454d')
             for start in (6, 14):
                 box(s, U(start, 4), -2, 15, 4, 4, 1, '#575b50', '#3f493e')
         def cab():
             s.part('cab')
-            box(s, U(23, 7), -5, 5, 7, 10, 12, '#ab9270', '#8b6c4e', '#69543e')
+            box(s, U(23, 7), -5, 5, 7, 10, 12, '#86a5a3', '#537982', '#395661')
             s.world_poly([(U(25), 5, 12), (U(28), 5, 12), (U(28), 5, 15), (U(25), 5, 15)], '#dec38a')
-            box(s, U(22.5, 8), -5.5, 17, 8, 11, 1, '#b3a186', '#82715a')
+            box(s, U(22.5, 8), -5.5, 17, 8, 11, 1, '#a6b8b0', '#69858b')
         for _, draw in sorted(((U(12), body), (U(26), cab)), key=lambda entry: entry[0]):
             draw()
         finish(s, L, 18)

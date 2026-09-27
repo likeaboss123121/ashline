@@ -89,6 +89,43 @@ test('all generated SVG catalogue entries are unique, bounded and present on dis
   }
 });
 
+test('bridge art selects six size/era combinations without mutating tiles or depending on travel direction',()=>{
+  const {setup:s}=catalogue(), seen=new Set();
+  for(const era of ['old','modern']) for(const span of [10,30,100]) {
+    const tile={bridgeId:'crossing-1',bridgeEra:era,bridgeSpanMetres:span,geoCoordinate:[4,48]}, before=JSON.stringify(tile);
+    const name=s.drivingView.getBridgeTemplateName(tile);seen.add(name);
+    assert.ok(s.drivingView.getTemplate(name));
+    assert.equal(s.drivingView.getBridgeTemplateName({...tile,forward:false}),name);
+    assert.equal(s.drivingView.getBridgeTemplateName({...tile,geoCoordinate:[4.01,48]}),name);
+    assert.equal(JSON.stringify(tile),before);
+  }
+  assert.equal(seen.size,6);
+  const generated=new Set();
+  for(let i=0;i<80;i++) {
+    const tile={geoCoordinate:[i,40]};const name=s.drivingView.getBridgeTemplateName(tile);
+    generated.add(name);assert.equal(s.drivingView.getBridgeTemplateName(JSON.parse(JSON.stringify(tile))),name);
+  }
+  assert.equal(generated.size,6);
+  assert.ok(s.drivingView.getTemplate(s.drivingView.getBridgeTemplateName()));
+});
+
+test('revised wagons preserve near-side shades and back-to-front wall ordering in both projections',()=>{
+  for(const view of ['driving','railyard']) {
+    const read=name=>fs.readFileSync(path.join(__dirname,'../source/img',view,view+'-'+name+'.svg'),'utf8');
+    const tank=read('car-tanker-banded');
+    for(const [part,colour] of [['near-shoulder','#a7956c'],['near-side','#8a7957'],['underside','#62573f']])
+      assert.match(tank,new RegExp('id="tank-'+part+'">[\\s\\S]*?fill="'+colour+'"'));
+    const wagon=read('car-gondola-high-sided');
+    assert.ok(wagon.indexOf('id="rear-wall"')<wagon.indexOf('id="near-wall"'));
+    assert.ok(wagon.indexOf('id="near-wall"')<wagon.indexOf('id="front-wall"'));
+    for(const facing of ['left','right']) {
+      assert.match(read('loco-steam-streamliner-'+facing),/id="recessed-chimney"/);
+      assert.match(read('loco-diesel-old-road-'+facing),/#45676f/);
+      assert.match(read('loco-steam-american-'+facing),/#593d49/);
+    }
+  }
+});
+
 test('schema 3 upgrade adds the expanded fleet without repainting or replacing owned stock',()=>{
   const {setup:s,State}=require('./helpers.cjs').loadGame();s.startNewRun();
   const v=State.variables;v.saveSchemaVersion=3;

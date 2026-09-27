@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="82" height="30" viewBox="0 0 82 30" shape-rendering="crispEdges" data-template="driving-bridge-plate" data-anchor-x="1" data-anchor-y="8">
+<title>Ashline driving template: Newer medium welded girders</title>
+<g id="piers">
+<polygon points="1,29 5,29 5,15 1,15" fill="#808e86"/>
+<polygon points="1,5 5,5 5,15 1,15" fill="#afb5a7"/>
+<polygon points="1,18 6,18 6,16 1,16" fill="#52665f"/>
+<polygon points="1,4 6,4 6,16 1,16" fill="#afb5a7"/>
+<polygon points="2,19 3,19 3,28 2,28" fill="#52665f"/>
+<polygon points="41,29 45,29 45,15 41,15" fill="#808e86"/>
+<polygon points="41,5 45,5 45,15 41,15" fill="#afb5a7"/>
+<polygon points="41,18 46,18 46,16 41,16" fill="#52665f"/>
+<polygon points="41,4 46,4 46,16 41,16" fill="#afb5a7"/>
+<polygon points="42,19 43,19 43,28 42,28" fill="#52665f"/>
+</g>
+<g id="structure">
+<polygon points="1,19 81,19 81,15 1,15" fill="#808e86"/>
+<polygon points="1,19 81,19 81,21 1,21" fill="#52665f"/>
+<polygon points="1,15 81,15 81,16 1,16" fill="#afb5a7"/>
+<polygon points="4,15 5,15 5,19 4,19" fill="#afb5a7"/>
+<polygon points="10,15 11,15 11,19 10,19" fill="#afb5a7"/>
+<polygon points="16,15 17,15 17,19 16,19" fill="#afb5a7"/>
+<polygon points="22,15 23,15 23,19 22,19" fill="#afb5a7"/>
+<polygon points="28,15 29,15 29,19 28,19" fill="#afb5a7"/>
+<polygon points="34,15 35,15 35,19 34,19" fill="#afb5a7"/>
+<polygon points="40,15 41,15 41,19 40,19" fill="#afb5a7"/>
+<polygon points="46,15 47,15 47,19 46,19" fill="#afb5a7"/>
+<polygon points="52,15 53,15 53,19 52,19" fill="#afb5a7"/>
+<polygon points="58,15 59,15 59,19 58,19" fill="#afb5a7"/>
+<polygon points="64,15 65,15 65,19 64,19" fill="#afb5a7"/>
+<polygon points="70,15 71,15 71,19 70,19" fill="#afb5a7"/>
+<polygon points="76,15 77,15 77,19 76,19" fill="#afb5a7"/>
+</g>
+<g id="deck">
+<polygon points="1,15 81,15 81,14 1,14" fill="#52665f"/>
+<polygon points="1,4 81,4 81,14 1,14" fill="#afb5a7"/>
+</g>
+<g id="far-railing">
+<polygon points="1,1 81,1 81,2 1,2" fill="#afb5a7"/>
+<polygon points="1,1 2,1 2,4 1,4" fill="#808e86"/>
+<polygon points="9,1 10,1 10,4 9,4" fill="#808e86"/>
+<polygon points="17,1 18,1 18,4 17,4" fill="#808e86"/>
+<polygon points="25,1 26,1 26,4 25,4" fill="#808e86"/>
+<polygon points="33,1 34,1 34,4 33,4" fill="#808e86"/>
+<polygon points="41,1 42,1 42,4 41,4" fill="#808e86"/>
+<polygon points="49,1 50,1 50,4 49,4" fill="#808e86"/>
+<polygon points="57,1 58,1 58,4 57,4" fill="#808e86"/>
+<polygon points="65,1 66,1 66,4 65,4" fill="#808e86"/>
+<polygon points="73,1 74,1 74,4 73,4" fill="#808e86"/>
+</g>
+<g id="near-kerb">
+<polygon points="1,14 81,14 81,15 1,15" fill="#afb5a7"/>
+</g>
+</svg>

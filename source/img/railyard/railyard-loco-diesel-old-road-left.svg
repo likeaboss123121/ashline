@@ -32,26 +32,26 @@
 <polygon points="1,20 33,36 33,37 1,21" fill="#c0a477"/>
 </g>
 <g id="cab">
-<polygon points="3,8 13,3 20,6 20,18 10,23 3,20" fill="#69543e"/>
-<polygon points="3,20 10,23 10,11 3,8" fill="#8b6c4e"/>
-<polygon points="20,18 10,23 10,11 20,6" fill="#69543e"/>
-<polygon points="13,3 20,6 10,11 3,8" fill="#ab9270"/>
+<polygon points="3,8 13,3 20,6 20,18 10,23 3,20" fill="#395661"/>
+<polygon points="3,20 10,23 10,11 3,8" fill="#537982"/>
+<polygon points="20,18 10,23 10,11 20,6" fill="#395661"/>
+<polygon points="13,3 20,6 10,11 3,8" fill="#86a5a3"/>
 <polygon points="8,15 5,14 5,11 8,12" fill="#dec38a"/>
 <polygon points="2,7 13,1 21,5 21,6 10,12 2,8" fill="#484b42"/>
-<polygon points="2,8 10,12 10,11 2,7" fill="#82715a"/>
+<polygon points="2,8 10,12 10,11 2,7" fill="#69858b"/>
 <polygon points="21,6 10,12 10,11 21,5" fill="#484b42"/>
-<polygon points="13,1 21,5 10,11 2,7" fill="#b3a186"/>
+<polygon points="13,1 21,5 10,11 2,7" fill="#a6b8b0"/>
 </g>
 <g id="engine-body">
-<polygon points="11,13 20,8 41,19 41,29 32,33 11,23" fill="#594b3b"/>
-<polygon points="11,23 32,33 32,23 11,13" fill="#775b46"/>
-<polygon points="41,29 32,33 32,23 41,19" fill="#594b3b"/>
-<polygon points="20,8 41,19 32,23 11,13" fill="#a1825d"/>
-<polygon points="29,24 30,24 30,30 29,30" fill="#443e35"/>
-<polygon points="26,22 27,22 27,28 26,28" fill="#443e35"/>
-<polygon points="23,21 24,21 24,27 23,27" fill="#443e35"/>
-<polygon points="20,19 21,19 21,25 20,25" fill="#443e35"/>
-<polygon points="17,18 18,18 18,24 17,24" fill="#443e35"/>
+<polygon points="11,13 20,8 41,19 41,29 32,33 11,23" fill="#344c57"/>
+<polygon points="11,23 32,33 32,23 11,13" fill="#45676f"/>
+<polygon points="41,29 32,33 32,23 41,19" fill="#344c57"/>
+<polygon points="20,8 41,19 32,23 11,13" fill="#739698"/>
+<polygon points="29,24 30,24 30,30 29,30" fill="#2f454d"/>
+<polygon points="26,22 27,22 27,28 26,28" fill="#2f454d"/>
+<polygon points="23,21 24,21 24,27 23,27" fill="#2f454d"/>
+<polygon points="20,19 21,19 21,25 20,25" fill="#2f454d"/>
+<polygon points="17,18 18,18 18,24 17,24" fill="#2f454d"/>
 <polygon points="26,17 30,15 34,17 34,18 30,20 26,18" fill="#484b42"/>
 <polygon points="26,18 30,20 30,19 26,17" fill="#3f493e"/>
 <polygon points="34,18 30,20 30,19 34,17" fill="#484b42"/>

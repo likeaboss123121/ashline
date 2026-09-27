@@ -63,6 +63,33 @@ async function openGame(t, options) {
   return page;
 }
 
+test('six bridge structures stay with graded track and render by day and night', async t => {
+  const page=await openGame(t);await beginTutorial(page);
+  const result=await page.evaluate(()=>{
+    const s=SugarCube.setup,v=SugarCube.State.variables,host=document.querySelector('#passages');
+    host.replaceChildren();const names=new Set();let drawings=0;
+    for(const hour of [12,0]) for(const bridgeEra of ['old','modern']) for(const bridgeSpanMetres of [10,30,100]) {
+      v.gameTimeTimestampMs=Date.UTC(2000,2,21,hour);
+      const wrapper=s.drivingView.render({terrain:'bridge',grade:hour===12?4:-4,forward:hour===12,
+        tile:{terrain:'bridge',geoCoordinate:[2,47],bridgeEra,bridgeSpanMetres}},
+        [s.railyard.createLocomotiveCar('steamStreamliner')],0);
+      const svg=wrapper.querySelector('svg'),name=svg.getAttribute('data-bridge');names.add(name);
+      if(svg.getAttribute('data-light')!==(hour===12?'day':'night')) throw Error('Wrong lighting fixture');
+      const structure=svg.querySelector('use[data-template="'+name+'"]'),track=svg.querySelector('use[data-template="driving-track"]');
+      if(!structure||!track||structure.parentElement!==track.parentElement) throw Error('Bridge deck does not follow track');
+      if(!structure.parentElement.getAttribute('transform').startsWith('rotate(')) throw Error('Bridge grade missing');
+      const uses=[...structure.parentElement.children];
+      if(uses.indexOf(structure)>uses.indexOf(track)) throw Error('Bridge obscures rails');
+      if(!SugarCube.Story.has(name)) throw Error('Bridge not bundled');
+      if(s.svgWiki.assetCategory(s.drivingView.getTemplate(name))!=='Bridges') throw Error('Bridge wiki folder missing');
+      host.appendChild(wrapper);drawings++;
+    }
+    return {count:names.size,drawings};
+  });
+  assert.deepEqual(result,{count:6,drawings:12});
+  await page.screenshot({path:'test-results/bridge-art-gallery.png',fullPage:true});
+});
+
 test('expanded stock renders both facings and visual variants survive browser saves', async t => {
   const page=await openGame(t);await begin(page);await board(page);
   const result=await page.evaluate(()=>{

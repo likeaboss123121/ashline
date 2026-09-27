@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="82" height="30" viewBox="0 0 82 30" shape-rendering="crispEdges" data-template="driving-bridge-masonry" data-anchor-x="1" data-anchor-y="8">
+<title>Ashline driving template: Old short masonry arches</title>
+<g id="piers">
+<polygon points="1,29 5,29 5,15 1,15" fill="#756c59"/>
+<polygon points="1,5 5,5 5,15 1,15" fill="#a49b83"/>
+<polygon points="1,18 6,18 6,16 1,16" fill="#4f5049"/>
+<polygon points="1,4 6,4 6,16 1,16" fill="#a49b83"/>
+<polygon points="2,19 3,19 3,28 2,28" fill="#4f5049"/>
+<polygon points="21,29 25,29 25,15 21,15" fill="#756c59"/>
+<polygon points="21,5 25,5 25,15 21,15" fill="#a49b83"/>
+<polygon points="21,18 26,18 26,16 21,16" fill="#4f5049"/>
+<polygon points="21,4 26,4 26,16 21,16" fill="#a49b83"/>
+<polygon points="22,19 23,19 23,28 22,28" fill="#4f5049"/>
+<polygon points="41,29 45,29 45,15 41,15" fill="#756c59"/>
+<polygon points="41,5 45,5 45,15 41,15" fill="#a49b83"/>
+<polygon points="41,18 46,18 46,16 41,16" fill="#4f5049"/>
+<polygon points="41,4 46,4 46,16 41,16" fill="#a49b83"/>
+<polygon points="42,19 43,19 43,28 42,28" fill="#4f5049"/>
+<polygon points="61,29 65,29 65,15 61,15" fill="#756c59"/>
+<polygon points="61,5 65,5 65,15 61,15" fill="#a49b83"/>
+<polygon points="61,18 66,18 66,16 61,16" fill="#4f5049"/>
+<polygon points="61,4 66,4 66,16 61,16" fill="#a49b83"/>
+<polygon points="62,19 63,19 63,28 62,28" fill="#4f5049"/>
+</g>
+<g id="structure">
+<polygon points="1,15 21,15 21,26 18,21 14,19 10,19 7,21 5,26 1,26" fill="#756c59"/>
+<polygon points="5,26 7,21 7,19 5,25" fill="#a49b83"/>
+<polygon points="7,21 10,19 10,17 7,19" fill="#a49b83"/>
+<polygon points="10,19 14,19 14,17 10,17" fill="#a49b83"/>
+<polygon points="14,19 18,21 18,19 14,17" fill="#a49b83"/>
+<polygon points="18,21 21,26 21,25 18,19" fill="#a49b83"/>
+<polygon points="1,16 21,16 21,17 1,17" fill="#4f5049"/>
+<polygon points="1,19 21,19 21,20 1,20" fill="#4f5049"/>
+<polygon points="3,16 4,16 4,18 3,18" fill="#a49b83"/>
+<polygon points="8,16 9,16 9,18 8,18" fill="#a49b83"/>
+<polygon points="13,16 14,16 14,18 13,18" fill="#a49b83"/>
+<polygon points="18,16 19,16 19,18 18,18" fill="#a49b83"/>
+<polygon points="21,15 41,15 41,26 38,21 34,19 30,19 27,21 25,26 21,26" fill="#756c59"/>
+<polygon points="25,26 27,21 27,19 25,25" fill="#a49b83"/>
+<polygon points="27,21 30,19 30,17 27,19" fill="#a49b83"/>
+<polygon points="30,19 34,19 34,17 30,17" fill="#a49b83"/>
+<polygon points="34,19 38,21 38,19 34,17" fill="#a49b83"/>
+<polygon points="38,21 41,26 41,25 38,19" fill="#a49b83"/>
+<polygon points="21,16 41,16 41,17 21,17" fill="#4f5049"/>
+<polygon points="21,19 41,19 41,20 21,20" fill="#4f5049"/>
+<polygon points="23,16 24,16 24,18 23,18" fill="#a49b83"/>
+<polygon points="28,16 29,16 29,18 28,18" fill="#a49b83"/>
+<polygon points="33,16 34,16 34,18 33,18" fill="#a49b83"/>
+<polygon points="38,16 39,16 39,18 38,18" fill="#a49b83"/>
+<polygon points="41,15 61,15 61,26 58,21 54,19 50,19 47,21 45,26 41,26" fill="#756c59"/>
+<polygon points="45,26 47,21 47,19 45,25" fill="#a49b83"/>
+<polygon points="47,21 50,19 50,17 47,19" fill="#a49b83"/>
+<polygon points="50,19 54,19 54,17 50,17" fill="#a49b83"/>
+<polygon points="54,19 58,21 58,19 54,17" fill="#a49b83"/>
+<polygon points="58,21 61,26 61,25 58,19" fill="#a49b83"/>
+<polygon points="41,16 61,16 61,17 41,17" fill="#4f5049"/>
+<polygon points="41,19 61,19 61,20 41,20" fill="#4f5049"/>
+<polygon points="43,16 44,16 44,18 43,18" fill="#a49b83"/>
+<polygon points="48,16 49,16 49,18 48,18" fill="#a49b83"/>
+<polygon points="53,16 54,16 54,18 53,18" fill="#a49b83"/>
+<polygon points="58,16 59,16 59,18 58,18" fill="#a49b83"/>
+<polygon points="61,15 81,15 81,26 78,21 74,19 70,19 67,21 65,26 61,26" fill="#756c59"/>
+<polygon points="65,26 67,21 67,19 65,25" fill="#a49b83"/>
+<polygon points="67,21 70,19 70,17 67,19" fill="#a49b83"/>
+<polygon points="70,19 74,19 74,17 70,17" fill="#a49b83"/>
+<polygon points="74,19 78,21 78,19 74,17" fill="#a49b83"/>
+<polygon points="78,21 81,26 81,25 78,19" fill="#a49b83"/>
+<polygon points="61,16 81,16 81,17 61,17" fill="#4f5049"/>
+<polygon points="61,19 81,19 81,20 61,20" fill="#4f5049"/>
+<polygon points="63,16 64,16 64,18 63,18" fill="#a49b83"/>
+<polygon points="68,16 69,16 69,18 68,18" fill="#a49b83"/>
+<polygon points="73,16 74,16 74,18 73,18" fill="#a49b83"/>
+<polygon points="78,16 79,16 79,18 78,18" fill="#a49b83"/>
+</g>
+<g id="deck">
+<polygon points="1,15 81,15 81,14 1,14" fill="#4f5049"/>
+<polygon points="1,4 81,4 81,14 1,14" fill="#a49b83"/>
+</g>
+<g id="far-railing">
+<polygon points="1,1 81,1 81,2 1,2" fill="#a49b83"/>
+<polygon points="1,1 2,1 2,4 1,4" fill="#756c59"/>
+<polygon points="9,1 10,1 10,4 9,4" fill="#756c59"/>
+<polygon points="17,1 18,1 18,4 17,4" fill="#756c59"/>
+<polygon points="25,1 26,1 26,4 25,4" fill="#756c59"/>
+<polygon points="33,1 34,1 34,4 33,4" fill="#756c59"/>
+<polygon points="41,1 42,1 42,4 41,4" fill="#756c59"/>
+<polygon points="49,1 50,1 50,4 49,4" fill="#756c59"/>
+<polygon points="57,1 58,1 58,4 57,4" fill="#756c59"/>
+<polygon points="65,1 66,1 66,4 65,4" fill="#756c59"/>
+<polygon points="73,1 74,1 74,4 73,4" fill="#756c59"/>
+</g>
+<g id="near-kerb">
+<polygon points="1,14 81,14 81,15 1,15" fill="#a49b83"/>
+</g>
+</svg>

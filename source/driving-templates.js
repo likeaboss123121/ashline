@@ -722,25 +722,25 @@ setup.drivingTemplates = {
 			"passage": "driving-loco-steam-streamliner-right",
 			"title": "4-6-2 streamlined steam engine, Britain 1930s, facing right",
 			"width": 48,
-			"height": 23,
+			"height": 22,
 			"anchorX": 2,
-			"anchorY": 18,
+			"anchorY": 17,
 			"lengthMetres": 22,
 			"rear": [
 				2,
-				15
+				14
 			],
 			"front": [
 				46,
-				15
+				14
 			],
 			"top": [
 				24,
-				1
+				0
 			],
 			"cab": [
 				16,
-				5
+				4
 			]
 		},
 		{
@@ -748,25 +748,25 @@ setup.drivingTemplates = {
 			"passage": "driving-loco-steam-streamliner-left",
 			"title": "4-6-2 streamlined steam engine, Britain 1930s, facing left",
 			"width": 48,
-			"height": 23,
+			"height": 22,
 			"anchorX": 2,
-			"anchorY": 18,
+			"anchorY": 17,
 			"lengthMetres": 22,
 			"rear": [
 				2,
-				15
+				14
 			],
 			"front": [
 				46,
-				15
+				14
 			],
 			"top": [
 				24,
-				1
+				0
 			],
 			"cab": [
 				32,
-				5
+				4
 			]
 		},
 		{
@@ -1647,11 +1647,65 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-terrain-bridge.svg",
 			"passage": "driving-terrain-bridge",
-			"title": "Bridge",
+			"title": "Bridge water backdrop",
 			"width": 82,
-			"height": 61,
+			"height": 78,
 			"anchorX": 1,
 			"anchorY": 43
+		},
+		{
+			"file": "driving-bridge-masonry.svg",
+			"passage": "driving-bridge-masonry",
+			"title": "Old short masonry arches",
+			"width": 82,
+			"height": 30,
+			"anchorX": 1,
+			"anchorY": 8
+		},
+		{
+			"file": "driving-bridge-riveted.svg",
+			"passage": "driving-bridge-riveted",
+			"title": "Old medium riveted girders",
+			"width": 82,
+			"height": 30,
+			"anchorX": 1,
+			"anchorY": 8
+		},
+		{
+			"file": "driving-bridge-lattice.svg",
+			"passage": "driving-bridge-lattice",
+			"title": "Old long steel deck truss",
+			"width": 82,
+			"height": 30,
+			"anchorX": 1,
+			"anchorY": 8
+		},
+		{
+			"file": "driving-bridge-concrete.svg",
+			"passage": "driving-bridge-concrete",
+			"title": "Newer short concrete beams",
+			"width": 82,
+			"height": 30,
+			"anchorX": 1,
+			"anchorY": 8
+		},
+		{
+			"file": "driving-bridge-plate.svg",
+			"passage": "driving-bridge-plate",
+			"title": "Newer medium welded girders",
+			"width": 82,
+			"height": 30,
+			"anchorX": 1,
+			"anchorY": 8
+		},
+		{
+			"file": "driving-bridge-box.svg",
+			"passage": "driving-bridge-box",
+			"title": "Newer long concrete box girder",
+			"width": 82,
+			"height": 30,
+			"anchorX": 1,
+			"anchorY": 8
 		},
 		{
 			"file": "driving-terrain-tunnel.svg",

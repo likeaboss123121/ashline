@@ -32,15 +32,15 @@
 <polygon points="1,16 33,32 33,33 1,17" fill="#c0a477"/>
 </g>
 <g id="engine-body">
-<polygon points="4,5 13,1 34,11 34,21 25,26 4,15" fill="#594b3b"/>
-<polygon points="4,15 25,26 25,16 4,5" fill="#775b46"/>
-<polygon points="34,21 25,26 25,16 34,11" fill="#594b3b"/>
-<polygon points="13,1 34,11 25,16 4,5" fill="#a1825d"/>
-<polygon points="7,9 8,9 8,15 7,15" fill="#443e35"/>
-<polygon points="10,10 11,10 11,16 10,16" fill="#443e35"/>
-<polygon points="13,12 14,12 14,18 13,18" fill="#443e35"/>
-<polygon points="16,13 17,13 17,19 16,19" fill="#443e35"/>
-<polygon points="19,15 20,15 20,21 19,21" fill="#443e35"/>
+<polygon points="4,5 13,1 34,11 34,21 25,26 4,15" fill="#344c57"/>
+<polygon points="4,15 25,26 25,16 4,5" fill="#45676f"/>
+<polygon points="34,21 25,26 25,16 34,11" fill="#344c57"/>
+<polygon points="13,1 34,11 25,16 4,5" fill="#739698"/>
+<polygon points="7,9 8,9 8,15 7,15" fill="#2f454d"/>
+<polygon points="10,10 11,10 11,16 10,16" fill="#2f454d"/>
+<polygon points="13,12 14,12 14,18 13,18" fill="#2f454d"/>
+<polygon points="16,13 17,13 17,19 16,19" fill="#2f454d"/>
+<polygon points="19,15 20,15 20,21 19,21" fill="#2f454d"/>
 <polygon points="10,5 14,3 18,5 18,6 14,8 10,6" fill="#484b42"/>
 <polygon points="10,6 14,8 14,7 10,5" fill="#3f493e"/>
 <polygon points="18,6 14,8 14,7 18,5" fill="#484b42"/>
@@ -51,15 +51,15 @@
 <polygon points="22,7 26,9 22,11 18,9" fill="#575b50"/>
 </g>
 <g id="cab">
-<polygon points="24,14 34,9 41,13 41,25 31,30 24,26" fill="#69543e"/>
-<polygon points="24,26 31,30 31,18 24,14" fill="#8b6c4e"/>
-<polygon points="41,25 31,30 31,18 41,13" fill="#69543e"/>
-<polygon points="34,9 41,13 31,18 24,14" fill="#ab9270"/>
+<polygon points="24,14 34,9 41,13 41,25 31,30 24,26" fill="#395661"/>
+<polygon points="24,26 31,30 31,18 24,14" fill="#537982"/>
+<polygon points="41,25 31,30 31,18 41,13" fill="#395661"/>
+<polygon points="34,9 41,13 31,18 24,14" fill="#86a5a3"/>
 <polygon points="26,20 29,22 29,19 26,17" fill="#dec38a"/>
 <polygon points="23,13 34,8 42,12 42,13 31,18 23,14" fill="#484b42"/>
-<polygon points="23,14 31,18 31,17 23,13" fill="#82715a"/>
+<polygon points="23,14 31,18 31,17 23,13" fill="#69858b"/>
 <polygon points="42,13 31,18 31,17 42,12" fill="#484b42"/>
-<polygon points="34,8 42,12 31,17 23,13" fill="#b3a186"/>
+<polygon points="34,8 42,12 31,17 23,13" fill="#a6b8b0"/>
 </g>
 <g id="coupler">
 <polygon points="36,29 38,28 40,29 40,30 38,31 36,30" fill="#5f5a50"/>

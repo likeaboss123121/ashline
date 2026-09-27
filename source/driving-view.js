@@ -86,6 +86,17 @@ setup.drivingView = {
 		var known = ['plains', 'forest', 'desert', 'arctic', 'mountain', 'bridge', 'tunnel', 'yard'];
 		return 'driving-terrain-' + (known.indexOf(terrain) === -1 ? 'plains' : terrain);
 	},
+	getBridgeTemplateName: function(tile) {
+		// The grid currently only records a bridge flag. Stable art-only defaults are
+		// not surveyed dimensions or dates, and must never change distance or physics.
+		tile = tile || {};
+		var key = tile.bridgeId || (tile.geoCoordinate ? tile.geoCoordinate.join(',') : [tile.x || 0, tile.y || 0].join(','));
+		var hash = setup.railyard.seedFromString('bridge-art:' + key) >>> 0;
+		var span = Number(tile.bridgeSpanMetres);
+		var size = span > 0 ? (span <= 15 ? 0 : span <= 40 ? 1 : 2) : hash % 3;
+		var old = tile.bridgeEra === 'old' || (tile.bridgeEra !== 'modern' && ((hash >>> 8) % 2 === 0));
+		return 'driving-bridge-' + (old ? ['masonry', 'riveted', 'lattice'] : ['concrete', 'plate', 'box'])[size];
+	},
 	getCarLengthUnits: function(car) {
 		var metres = Number(car && car.length) || 12;
 		return metres * setup.drivingTemplates.unitsPerMetre;
@@ -259,6 +270,13 @@ setup.drivingView = {
 		var line = document.createElementNS(ns, 'g');
 		line.setAttribute('transform', 'rotate(' + (-tilt).toFixed(3) + ' ' + (width / 2) + ' 0)');
 		svg.appendChild(line);
+		if (view.terrain === 'bridge') {
+			var bridgeName = this.getBridgeTemplateName(view.tile);
+			svg.setAttribute('data-bridge', bridgeName);
+			for (var b = -data.terrainTileUnits; b < width + data.terrainTileUnits; b += data.terrainTileUnits) {
+				place(line, bridgeName, b, 0, null);
+			}
+		}
 		for (var r = -data.trackTileUnits; r < width + data.trackTileUnits; r += data.trackTileUnits) {
 			place(line, 'driving-track', r, 0, null);
 		}

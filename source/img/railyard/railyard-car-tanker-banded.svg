@@ -23,11 +23,23 @@
 <polygon points="11,7 39,21 29,26 1,12" fill="#454440"/>
 </g>
 <g id="body">
-<polygon points="12,4 36,16 35,13 11,1" fill="#bdad83"/>
+</g>
+<g id="tank-far">
+<polygon points="12,4 36,16 35,13 11,1" fill="#8a7957"/>
+</g>
+<g id="tank-crown">
 <polygon points="11,1 35,13 30,14 6,2" fill="#bdad83"/>
-<polygon points="6,2 30,14 28,17 4,5" fill="#8a7957"/>
+</g>
+<g id="tank-near-shoulder">
+<polygon points="6,2 30,14 28,17 4,5" fill="#a7956c"/>
+</g>
+<g id="tank-near-side">
 <polygon points="4,5 28,17 28,21 4,9" fill="#8a7957"/>
-<polygon points="4,9 28,21 30,22 6,10" fill="#8a7957"/>
+</g>
+<g id="tank-underside">
+<polygon points="4,9 28,21 30,22 6,10" fill="#62573f"/>
+</g>
+<g id="tank-end">
 <polygon points="28,21 28,17 30,14 35,13 36,16 34,20 30,22" fill="#8a7957"/>
 <polygon points="8,6 9,7 9,13 8,12" fill="#41483f"/>
 <polygon points="8,12 9,13 9,7 8,6" fill="#454d43"/>
