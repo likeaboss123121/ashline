@@ -17,9 +17,10 @@ test('text extraction preserves labels, tooltips, branches, escapes and dynamic 
   const rows = scriptEntries(input, 'source/fixture.js');
   const texts = rows.map(row => row[4]);
   assert.ok(texts.includes('Fuel "grade"'));
-  assert.ok(texts.includes('Leave [PLACEHOLDER] now'));
-  assert.ok(texts.includes('Cold [PLACEHOLDER] degrees'));
-  assert.equal(rows.find(row=>row[4]==='Cold [PLACEHOLDER] degrees')[5],false,
+  assert.ok(texts.includes('Leave \uE0000\uE001 now'));
+  assert.ok(texts.includes('Cold \uE0000\uE001 degrees'));
+  assert.deepEqual(rows.find(row=>row[4].startsWith('Cold '))[6][0].plan,['get',['name','weather'],['literal','temperature']]);
+  assert.equal(rows.find(row=>row[4].startsWith('Cold '))[5],false,
     'dynamic-value markers are not authorship labels');
   assert.ok(texts.includes('Ready') && texts.includes('Wait'));
   assert.ok(!texts.includes('not game text') && !texts.includes('not a string'));
@@ -38,6 +39,7 @@ test('generated catalogue covers every script and passage file and stays current
   const setup = {};
   vm.runInNewContext(fs.readFileSync('source/text-catalogue.js','utf8'), { setup });
   assert.deepEqual(JSON.parse(setup.textCatalogueSource), rows);
+  assert.deepEqual(JSON.parse(JSON.stringify(setup.textExpressionPlans)),JSON.parse(JSON.stringify(require('../scripts/text-expressions.cjs').plansFor(rows))));
   const files = new Set(rows.map(row => row[1]));
   for (const name of fs.readdirSync('source').filter(name => /\.(js|tw)$/.test(name))) {
     if (['world-data.js','text-catalogue.js'].includes(name)) continue;
@@ -52,7 +54,7 @@ test('generated catalogue covers every script and passage file and stays current
 test('text search is lazy, read-only, includes geographic and engine text, and filters placeholders without guessing authorship', () => {
   const setup = { textCatalogueSource: JSON.stringify([
     ['passages','source/test.tw',2,'Start','Human wording'],
-    ['scripts','source/test.js',8,'','PLACEHOLDER — Write a hint here']
+    ['scripts','source/test.js',8,'','[NEEDS WRITING PASS] — Write a hint here']
   ]), worldGraphData: { names: ['Punta Arenas'], coords: [1,2,3] } };
   const State = { variables: { health: 7 } }, before = JSON.stringify(State);
   vm.runInNewContext(fs.readFileSync('source/text-wiki.js','utf8'), {setup,State,l10nStrings:{savesTitle:'Saves'}});
@@ -96,8 +98,35 @@ test('preview formatting removes actions and hidden code while preserving link t
     '<<run evil("quoted >> text")>><p>\'\'Bold\'\'</p>[[Go->Yard][$fuel=0]]'+
     '<<link "Continue">><<set $fuel=0>><</link>><<print setup.example()>>');
   assert.match(html,/<strong>Bold<\/strong>/);
-  assert.match(html,/<a>Go<\/a>/);
-  assert.match(html,/<a>Continue<\/a>/);
-  assert.match(html,/\[PLACEHOLDER\]/);
+  assert.match(html,/<a>\[LINK\]<\/a>/);
+  assert.match(html,/\[VALUE\]/);
   assert.doesNotMatch(html,/evil|secret|nested|fuel|setup\.|<<|>>/);
+});
+
+test('preview values read memory without executing game functions, getters or prototype chains',()=>{
+  const {parse}=require('../scripts/text-expressions.cjs');
+  let calls=0;const setup={}, variables={player:{health:73},amount:12.345,list:[4,7]};
+  Object.defineProperty(variables,'danger',{get(){calls++;return 99;}});
+  vm.runInNewContext(fs.readFileSync('source/text-values.js','utf8'),{setup});
+  const roots={variables,temporary:{value:6},setup:{stats:{getValue(){calls++;}}}};
+  const read=expression=>setup.textValues.evaluate(parse(expression),roots);
+  assert.equal(read('$amount.toFixed(1)'),'12.3');
+  assert.equal(read('State.variables.list[1] + _value'),13);
+  assert.equal(read('setup.stats.getValue("health")'),73);
+  assert.equal(read('setup.stats.getPercent("health",18)'),18);
+  assert.equal(read('$danger'),undefined);
+  assert.equal(read('$amount.constructor'),undefined);
+  assert.equal(read('setup.stats.setValue("health",0)'),undefined);
+  assert.equal(read('$player.health = 0'),undefined);
+  assert.equal(read('(()=>{throw Error("unsafe")})()'),undefined);
+  assert.equal(calls,0);assert.equal(variables.player.health,73);
+  const slot={kind:'STAT',memory:73};
+  assert.equal(setup.textValues.value(slot,'zero'),0);
+  assert.equal(setup.textValues.value(slot,'memory'),73);
+  assert.equal(setup.textValues.value(slot,'tokens'),'[STAT]');
+  assert.equal(setup.textValues.value(slot,'memory',{mode:'custom',value:8}),8);
+  assert.equal(setup.textValues.value({kind:'LINK',memory:'Go'},'zero'),null);
+  const row=scriptEntries('const text = "Health: " + State.variables.player.health;', 'fixture.js')[0];
+  assert.equal(setup.textValues.evaluate(row[6][0].plan,roots),73,'script concatenations retain live data paths');
+  assert.equal(parse('12n'),null,'unsupported BigInt literals never enter JSON plans');
 });
