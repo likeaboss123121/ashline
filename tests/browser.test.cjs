@@ -640,6 +640,20 @@ test('wiki text browser safely searches source text, preserves filters and stays
   const page=await openGame(t,{viewport:{width:390,height:844}});await enableDebug(page);await beginTutorial(page);
   if(await page.locator('#ui-bar').evaluate(el=>el.classList.contains('stowed'))) await page.locator('#ui-bar-toggle').click();
   const before=await page.evaluate(()=>JSON.stringify(SugarCube.State.variables));
+  const previewCheck=await page.evaluate(()=>{
+    const preview=SugarCube.setup.textPreview.render('<h3>Heading</h3><p>Read <strong>bold</strong> &amp; \'\'Twine bold\'\'.</p>'+
+      '<<silently>>private code<<silently>>nested<</silently>>hidden<</silently>>'+
+      '<<run State.variables.previewExecuted = true>><<print setup.dangerous()>>'+
+      '<script>window.previewExecuted=true</script><img src="https://preview.invalid/image" onerror="window.previewExecuted=true">'+
+      '<a href="javascript:alert(1)" onclick="window.previewExecuted=true">Read more</a>');
+    document.body.appendChild(preview);
+    const check={text:preview.textContent,headings:preview.querySelectorAll('h3').length,
+      bold:preview.querySelectorAll('strong').length,unsafe:preview.querySelectorAll('script,img,[href],[onclick]').length};
+    preview.remove();return check;
+  });
+  assert.equal(previewCheck.headings,1);assert.equal(previewCheck.bold,2);assert.equal(previewCheck.unsafe,0);
+  assert.match(previewCheck.text,/Read bold & Twine bold/);
+  assert.doesNotMatch(previewCheck.text,/private code|nested|hidden|setup\.|State\.|window\.|<<|<script/);
   await page.getByRole('button',{name:'Wiki',exact:true}).click();
   const text=page.locator('#wiki-text-browser');
   assert.equal(await text.locator('input').count(),0,'catalogue controls stay lazy');
@@ -653,9 +667,12 @@ test('wiki text browser safely searches source text, preserves filters and stays
   const result=text.locator('[data-text-results] > details');
   await page.waitForFunction(()=>document.querySelectorAll('#wiki-text-browser [data-text-results] > details').length===1);
   await result.locator('summary').click();
-  await result.locator('pre').waitFor();
-  assert.match(await result.locator('pre').innerText(),/<<startNewGame true>>/,'actions displayed as text, never invoked');
+  await result.locator('[data-text-preview]').waitFor();
+  assert.match(await result.locator('[data-text-preview]').innerText(),/Begin your journey/);
+  assert.doesNotMatch(await result.innerText(),/<<|startNewGame|<\/link>/);
+  await result.locator('[data-text-preview] a').evaluate(el=>el.click());
   assert.equal(await page.evaluate(()=>JSON.stringify(SugarCube.State.variables)),before);
+  await page.screenshot({path:'test-results/text-wiki-rendered.png'});
   await text.getByLabel('PLACEHOLDER — Category',{exact:true}).selectOption('');
   await query.fill('Punta Arenas');
   await page.waitForTimeout(180);
@@ -668,8 +685,8 @@ test('wiki text browser safely searches source text, preserves filters and stays
   await text.getByLabel('PLACEHOLDER — Only marked text',{exact:true}).check();
   assert.ok(await result.count()>0);
   await result.first().locator('summary').click();
-  await result.first().locator('pre').waitFor();
-  assert.match(await result.first().locator('pre').innerText(),/PLACEHOLDER/);
+  await result.first().locator('[data-text-preview]').waitFor();
+  assert.match(await result.first().locator('[data-text-preview]').innerText(),/PLACEHOLDER/);
   const overflow=await text.evaluate(el=>el.scrollWidth>el.clientWidth+1);
   assert.equal(overflow,false,'source text wraps inside the mobile panel');
   await page.getByRole('button',{name:'Close Wiki',exact:true}).click();

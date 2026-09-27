@@ -9,7 +9,8 @@ function scriptEntries(code, file) {
   const entries = [], consumed = new Set();
   const tree = acorn.parse(code, { ecmaVersion: 'latest', locations: true });
   function add(node, text) {
-    if (text.trim()) entries.push(['scripts', file, node.loc.start.line, '', text]);
+    if (text.trim()) entries.push(['scripts', file, node.loc.start.line, '', text,
+      /\bPLACEHOLDER\b/.test(code.slice(node.start,node.end))]);
   }
   function pieces(node) {
     if (node.type === 'Literal' && typeof node.value === 'string') {
@@ -19,9 +20,9 @@ function scriptEntries(code, file) {
     if (node.type === 'TemplateLiteral') {
       consumed.add(node);
       return node.quasis.map((q, i) => (q.value.cooked ?? q.value.raw) +
-        (node.expressions[i] ? '{' + code.slice(node.expressions[i].start, node.expressions[i].end) + '}' : '')).join('');
+        (node.expressions[i] ? '[PLACEHOLDER]' : '')).join('');
     }
-    return '{' + code.slice(node.start, node.end) + '}';
+    return '[PLACEHOLDER]';
   }
   function hasText(node) {
     return node.type === 'Literal' && typeof node.value === 'string' || node.type === 'TemplateLiteral' ||
@@ -51,10 +52,11 @@ function scriptEntries(code, file) {
 
 function passageEntries(code, file) {
   const headers = [...code.matchAll(/^::\s+([^\r\n]+)\r?\n/gm)];
-  return headers.map((match, i) => ['passages', file,
+  return headers.map((match, i) => /\[[^\]]*\b(?:script|stylesheet)\b[^\]]*\]/.test(match[1]) ? null : ['passages', file,
     code.slice(0, match.index).split('\n').length + 1,
     match[1].replace(/\s+(?:\[|\{).*$/, '').trim(),
-    code.slice(match.index + match[0].length, headers[i+1]?.index ?? code.length).trim()]);
+    code.slice(match.index + match[0].length, headers[i+1]?.index ?? code.length).trim()])
+    .filter(row => row && !/^(StoryData|StoryInit)$/.test(row[3]));
 }
 
 function buildCatalogue(root = ROOT) {

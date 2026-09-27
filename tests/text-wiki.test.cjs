@@ -17,8 +17,10 @@ test('text extraction preserves labels, tooltips, branches, escapes and dynamic 
   const rows = scriptEntries(input, 'source/fixture.js');
   const texts = rows.map(row => row[4]);
   assert.ok(texts.includes('Fuel "grade"'));
-  assert.ok(texts.includes('Leave {station.name} now'));
-  assert.ok(texts.includes('Cold {weather.temperature} degrees'));
+  assert.ok(texts.includes('Leave [PLACEHOLDER] now'));
+  assert.ok(texts.includes('Cold [PLACEHOLDER] degrees'));
+  assert.equal(rows.find(row=>row[4]==='Cold [PLACEHOLDER] degrees')[5],false,
+    'dynamic-value markers are not authorship labels');
   assert.ok(texts.includes('Ready') && texts.includes('Wait'));
   assert.ok(!texts.includes('not game text') && !texts.includes('not a string'));
   assert.equal(rows.find(row => row[4] === 'Fuel "grade"')[2], 4);
@@ -85,4 +87,17 @@ test('watch builds refresh the catalogue without reacting to their own generated
   changes('change','text-catalogue.js'); assert.equal(refreshes,1);
   changes('change','main.tw'); assert.equal(refreshes,2);
   child.emit('exit',0); assert.equal(closed,true);
+});
+
+test('preview formatting removes actions and hidden code while preserving link text and emphasis', () => {
+  const setup={};
+  vm.runInNewContext(fs.readFileSync('source/text-preview.js','utf8'),{setup});
+  const html=setup.textPreview.markup('<<silently>>secret<<silently>>nested<</silently>>secret<</silently>>'+
+    '<<run evil("quoted >> text")>><p>\'\'Bold\'\'</p>[[Go->Yard][$fuel=0]]'+
+    '<<link "Continue">><<set $fuel=0>><</link>><<print setup.example()>>');
+  assert.match(html,/<strong>Bold<\/strong>/);
+  assert.match(html,/<a>Go<\/a>/);
+  assert.match(html,/<a>Continue<\/a>/);
+  assert.match(html,/\[PLACEHOLDER\]/);
+  assert.doesNotMatch(html,/evil|secret|nested|fuel|setup\.|<<|>>/);
 });

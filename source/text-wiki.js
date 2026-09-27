@@ -32,7 +32,7 @@ setup.textWiki = {
 		var needle = selection.query.trim().toLocaleLowerCase();
 		return this.catalogue().filter(function(row) {
 			return (!selection.category || row[0] === selection.category) && (!selection.file || row[1] === selection.file) &&
-				(!selection.placeholders || /\bPLACEHOLDER\b/.test(row[4])) &&
+				(!selection.placeholders || (typeof row[5] === 'boolean' ? row[5] : /\bPLACEHOLDER\b/.test(row[4]))) &&
 				(!needle || [row[1], row[3], row[4]].join('\n').toLocaleLowerCase().indexOf(needle) !== -1);
 		});
 	},
@@ -48,7 +48,7 @@ setup.textWiki = {
 	controls: function(section) {
 		var self = this, state = this.selection, rows = this.catalogue();
 		var note = document.createElement('p');
-		note.textContent = 'PLACEHOLDER — Read-only source text, including inactive branches and internal identifiers. Markup is shown, never executed. {Expressions} are dynamic values. Existing unmarked text has unverified authorship; new AI-written text must say PLACEHOLDER.';
+		note.textContent = 'PLACEHOLDER — Formatted text previews. Links do not perform actions. Dynamic values use [PLACEHOLDER]; conditional alternatives are shown together.';
 		section.appendChild(note);
 		function field(labelText, element) {
 			var p = document.createElement('p'), label = document.createElement('label');
@@ -96,14 +96,14 @@ setup.textWiki = {
 			results.replaceChildren();
 			matches.slice(state.page * 25, state.page * 25 + 25).forEach(function(row) {
 				var entry = document.createElement('details'), summary = document.createElement('summary');
+				var preview = setup.textPreview.render(row[4]);
 				entry.className = 'debug-section';
-				summary.textContent = row[1] + (row[2] ? ':' + row[2] : '') + (row[3] ? ' — ' + row[3] : '') +
-					' — ' + row[4].replace(/\s+/g, ' ').slice(0, 110);
+				summary.textContent = row[1] + (row[2] ? ':' + row[2] : '') + (row[0] === 'passages' && row[3] ? ' — ' + row[3] : '') +
+					' — ' + preview.textContent.replace(/\s+/g, ' ').slice(0, 110);
 				summary.style.overflowWrap = 'anywhere'; entry.appendChild(summary);
 				entry.addEventListener('toggle', function() {
-					if (!entry.open || entry.querySelector('pre')) return;
-					var text = document.createElement('pre'); text.textContent = row[4];
-					text.style.whiteSpace = 'pre-wrap'; text.style.overflowWrap = 'anywhere'; entry.appendChild(text);
+					if (!entry.open || entry.querySelector('[data-text-preview]')) return;
+					entry.appendChild(preview);
 				});
 				results.appendChild(entry);
 			});
