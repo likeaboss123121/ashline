@@ -192,6 +192,8 @@ setup.sideTabs = {
 			root.appendChild(panel);
 		});
 		var debug = root.querySelector('#developer-Debug'), wiki = root.querySelector('#developer-Wiki');
+		setup.textWiki.appendWarning(debug);
+		setup.textWiki.appendWarning(wiki);
 		new Wikifier(debug, '<<debugTools>>');
 		var reference = debug.querySelector('.procedural-wiki');
 		if (reference) { reference.open = true; wiki.appendChild(reference); }

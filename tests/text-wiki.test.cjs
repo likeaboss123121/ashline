@@ -39,6 +39,7 @@ test('generated catalogue covers every script and passage file and stays current
   const setup = {};
   vm.runInNewContext(fs.readFileSync('source/text-catalogue.js','utf8'), { setup });
   assert.deepEqual(JSON.parse(setup.textCatalogueSource), rows);
+  assert.equal(setup.textWritingPendingCount,rows.filter(row=>typeof row[5]==='boolean'?row[5]:row[4].includes('[NEEDS WRITING PASS]')).length);
   assert.deepEqual(JSON.parse(JSON.stringify(setup.textExpressionPlans)),JSON.parse(JSON.stringify(require('../scripts/text-expressions.cjs').plansFor(rows))));
   const files = new Set(rows.map(row => row[1]));
   for (const name of fs.readdirSync('source').filter(name => /\.(js|tw)$/.test(name))) {
@@ -49,6 +50,34 @@ test('generated catalogue covers every script and passage file and stays current
   assert.ok(rows.some(row => row[3] === 'Help'));
   assert.ok(rows.some(row => row[1] === 'source/tutorial.js'));
   assert.ok(!files.has('source/text-catalogue.js'));
+});
+
+test('writing-pass cleanup is dry-run by default and requires explicit approval for writes',()=>{
+  const os=require('node:os'),path=require('node:path');
+  const {run}=require('../scripts/clear-writing-pass.cjs');
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'ashline-writing-pass-'));
+  try {
+    fs.mkdirSync(path.join(root,'source'));fs.mkdirSync(path.join(root,'scripts'));
+    const file=path.join(root,'source','main.tw');
+    const original=':: Start\r\n[NEEDS WRITING PASS] — Test text.\r\n[NEEDS WRITING PASS] Other text.\r\n';
+    fs.writeFileSync(file,original);
+    fs.writeFileSync(path.join(root,'source','text-catalogue.js'),'[NEEDS WRITING PASS] generated');
+    fs.writeFileSync(path.join(root,'AGENTS.md'),'Keep [NEEDS WRITING PASS] policy');
+    fs.writeFileSync(path.join(root,'scripts','art.py'),'label = "[NEEDS WRITING PASS] — Caption"');
+    assert.equal(run([],root,()=>{}).length,2);
+    assert.equal(fs.readFileSync(file,'utf8'),original);
+    assert.throws(()=>run(['--write'],root,()=>{}),/Refusing/);
+    assert.throws(()=>run(['--write','--user-approved','--dry-run'],root,()=>{}),/Usage|Refusing/);
+    assert.equal(fs.readFileSync(file,'utf8'),original);
+    run(['--write','--user-approved','Unit-test fixture approval only'],root,()=>{});
+    assert.equal(fs.readFileSync(file,'utf8'),':: Start\r\nTest text.\r\nOther text.\r\n');
+    assert.match(fs.readFileSync(path.join(root,'AGENTS.md'),'utf8'),/NEEDS WRITING PASS/);
+    assert.match(fs.readFileSync(path.join(root,'source','text-catalogue.js'),'utf8'),/NEEDS WRITING PASS/);
+    assert.equal(run([],root,()=>{}).length,0,'cleanup is idempotent');
+    require('../scripts/build-text-catalogue.cjs').compile(root);
+    const setup={};vm.runInNewContext(fs.readFileSync(path.join(root,'source','text-catalogue.js'),'utf8'),{setup});
+    assert.equal(setup.textWritingPendingCount,0,'rebuilding after approved cleanup clears the warning count');
+  } finally {fs.rmSync(root,{recursive:true,force:true});}
 });
 
 test('text search is lazy, read-only, includes geographic and engine text, and filters placeholders without guessing authorship', () => {

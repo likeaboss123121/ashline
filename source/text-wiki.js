@@ -1,6 +1,15 @@
 // Authoring tools only. Do not put this catalogue, filters or search results in State.variables.
 // New AI-written interface wording is explicitly marked, just like future game prose.
 setup.textWiki = {
+	appendWarning: function(parent) {
+		var count=setup.textWritingPendingCount||0;
+		if(!count) return;
+		var warning=document.createElement('p');
+		warning.setAttribute('role','alert');warning.dataset.writingWarning='';
+		var text=document.createElement('strong');
+		text.textContent='[NEEDS WRITING PASS] — Writing review outstanding: '+count+' marked text entries. See Wiki → Game text → Only marked text.';
+		warning.appendChild(text);parent.appendChild(warning);
+	},
 	selection: { query: '', category: '', file: '', placeholders: false, page: 0, mode: 'tokens' },
 	overrides: new Map(),
 	previewContext: function(row,interactive) {

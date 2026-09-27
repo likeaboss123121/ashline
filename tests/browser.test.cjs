@@ -656,6 +656,14 @@ test('wiki text browser safely searches source text, preserves filters and stays
   assert.doesNotMatch(previewCheck.text,/private code|nested|hidden|setup\.|State\.|window\.|<<|<script/);
   await page.getByRole('button',{name:'Wiki',exact:true}).click();
   const text=page.locator('#wiki-text-browser');
+  assert.match(await page.locator('#developer-Wiki [data-writing-warning]').innerText(),/Writing review outstanding: \d+ marked text entries/);
+  assert.equal(await page.locator('#developer-Wiki [data-writing-warning]').getAttribute('role'),'alert');
+  assert.equal(await page.locator('#developer-Debug [data-writing-warning]').count(),1);
+  assert.equal(await page.evaluate(()=>{
+    const s=SugarCube.setup,previous=s.textWritingPendingCount,host=document.createElement('div');
+    try {s.textWritingPendingCount=0;s.textWiki.appendWarning(host);return host.childElementCount;}
+    finally {s.textWritingPendingCount=previous;}
+  }),0,'no warning when all writing tags have been cleared');
   assert.equal(await text.locator('input').count(),0,'catalogue controls stay lazy');
   assert.equal(await page.evaluate(()=>SugarCube.setup.textWiki.entries),null);
   await text.locator(':scope > summary').click();
