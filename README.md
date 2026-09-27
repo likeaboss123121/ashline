@@ -25,6 +25,7 @@ The game compiles to a single HTML file with [Tweego](https://github.com/tmedwar
 
 1. **Tweego 2.1.1 or newer.** Download it from the [Tweego releases page](https://github.com/tmedwards/tweego/releases). See the [Tweego documentation](https://www.motoslave.net/tweego/docs/) for installation details.
 2. **SugarCube 2.36.1.** Tweego 2.1.1 ships with an older SugarCube (2.30.0), but Ashline targets 2.36.1. Download `sugarcube-2.36.1-for-twine-2.1-local.zip` from the [SugarCube releases page](https://github.com/tmedwards/sugarcube-2/releases/tag/v2.36.1). Then replace the `sugarcube-2` folder inside Tweego's `storyformats` directory with the one from the archive.
+3. **Node.js 22 or newer**, with npm.
 
 Confirm that Tweego finds the correct story format:
 
@@ -39,13 +40,14 @@ The list should include `sugarcube-2   SugarCube (2.36.1)`.
 From the repository root, run:
 
 ```sh
-tweego -f sugarcube-2 -o index.html source
+npm ci
+npm run build
 ```
 
-This compiles every passage and script in `source/` into `index.html`, which you can open directly in a browser. To recompile automatically whenever a source file changes, add `--watch`:
+This regenerates the build data and compiles every passage and script in `source/` into `index.html`, which you can open directly in a browser. To recompile automatically whenever a source file changes:
 
 ```sh
-tweego --watch -f sugarcube-2 -o index.html source
+npm run watch
 ```
 
 ### Tests and artwork

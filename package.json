@@ -9,7 +9,7 @@
     "world:build": "node scripts/world/compile-world.cjs",
     "world:check": "node scripts/world/compile-world.cjs --check",
     "world:benchmark": "node scripts/world/benchmark-world.cjs",
-    "test": "node --test --test-concurrency=1 tests/core.test.cjs tests/review.test.cjs tests/migrations.test.cjs tests/world-graph.test.cjs tests/locales.test.cjs tests/variety.test.cjs",
+    "test": "node --test --test-concurrency=1 tests/core.test.cjs tests/review.test.cjs tests/migrations.test.cjs tests/world-graph.test.cjs tests/locales.test.cjs tests/variety.test.cjs tests/text-wiki.test.cjs",
     "test:browser": "node scripts/build.cjs && node --test tests/browser.test.cjs",
     "verify": "npm run build && npm test && npm run test:browser",
     "world:extract:south-america": "node scripts/world/run-limited.cjs scripts/world/extract-osm-rail.cjs",
@@ -36,6 +36,7 @@
     "node": ">=22"
   },
   "devDependencies": {
+    "acorn": "8.18.0",
     "any-ascii": "0.3.3",
     "playwright": "1.63.0"
   }

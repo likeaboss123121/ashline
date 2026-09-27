@@ -636,6 +636,52 @@ test('wiki links railcar graphics and lazily previews the shipped SVG catalogue'
   assert.equal(new Set(allFiles).size,allFiles.length);
 });
 
+test('wiki text browser safely searches source text, preserves filters and stays bounded on mobile',async t=>{
+  const page=await openGame(t,{viewport:{width:390,height:844}});await enableDebug(page);await beginTutorial(page);
+  if(await page.locator('#ui-bar').evaluate(el=>el.classList.contains('stowed'))) await page.locator('#ui-bar-toggle').click();
+  const before=await page.evaluate(()=>JSON.stringify(SugarCube.State.variables));
+  await page.getByRole('button',{name:'Wiki',exact:true}).click();
+  const text=page.locator('#wiki-text-browser');
+  assert.equal(await text.locator('input').count(),0,'catalogue controls stay lazy');
+  assert.equal(await page.evaluate(()=>SugarCube.setup.textWiki.entries),null);
+  await text.locator(':scope > summary').click();
+  const query=text.getByLabel('PLACEHOLDER — Search',{exact:true});
+  await query.waitFor();
+  assert.ok(await text.locator('[data-text-results] > details').count()<=25);
+  await text.getByLabel('PLACEHOLDER — Category',{exact:true}).selectOption('passages');
+  await query.fill('lone train engineer');
+  const result=text.locator('[data-text-results] > details');
+  await page.waitForFunction(()=>document.querySelectorAll('#wiki-text-browser [data-text-results] > details').length===1);
+  await result.locator('summary').click();
+  await result.locator('pre').waitFor();
+  assert.match(await result.locator('pre').innerText(),/<<startNewGame true>>/,'actions displayed as text, never invoked');
+  assert.equal(await page.evaluate(()=>JSON.stringify(SugarCube.State.variables)),before);
+  await text.getByLabel('PLACEHOLDER — Category',{exact:true}).selectOption('');
+  await query.fill('Punta Arenas');
+  await page.waitForTimeout(180);
+  assert.ok(await result.count()>0);
+  await text.getByLabel('PLACEHOLDER — Category',{exact:true}).selectOption('engine');
+  await query.fill('');
+  await page.waitForTimeout(180);
+  assert.ok(await result.count()>0,'SugarCube UI strings are indexed too');
+  await text.getByLabel('PLACEHOLDER — Category',{exact:true}).selectOption('scripts');
+  await text.getByLabel('PLACEHOLDER — Only marked text',{exact:true}).check();
+  assert.ok(await result.count()>0);
+  await result.first().locator('summary').click();
+  await result.first().locator('pre').waitFor();
+  assert.match(await result.first().locator('pre').innerText(),/PLACEHOLDER/);
+  const overflow=await text.evaluate(el=>el.scrollWidth>el.clientWidth+1);
+  assert.equal(overflow,false,'source text wraps inside the mobile panel');
+  await page.getByRole('button',{name:'Close Wiki',exact:true}).click();
+  await page.getByRole('button',{name:'Wiki',exact:true}).click();
+  await query.waitFor();
+  assert.equal(await text.getByLabel('PLACEHOLDER — Category',{exact:true}).inputValue(),'scripts');
+  assert.equal(await text.getByLabel('PLACEHOLDER — Only marked text',{exact:true}).isChecked(),true);
+  await page.screenshot({path:'test-results/text-wiki-mobile.png',fullPage:true});
+  await page.setViewportSize({width:1280,height:900});
+  await page.screenshot({path:'test-results/text-wiki-desktop.png',fullPage:true});
+});
+
 test('red developer sidebar menus work on mobile with keyboard and close controls',async t=>{
   const page=await openGame(t,{viewport:{width:390,height:844}});await enableDebug(page);await beginTutorial(page);
   if(await page.locator('#ui-bar').evaluate(el=>el.classList.contains('stowed'))) await page.locator('#ui-bar-toggle').click();

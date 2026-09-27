@@ -196,6 +196,7 @@ setup.sideTabs = {
 		var reference = debug.querySelector('.procedural-wiki');
 		if (reference) { reference.open = true; wiki.appendChild(reference); }
 		setup.svgWiki.appendBrowser(wiki);
+		setup.textWiki.appendBrowser(wiki);
 		root.querySelectorAll('details > summary').forEach(function(s) { if (opened.indexOf(sectionKey(s)) >= 0) s.parentElement.open = true; });
 		root.addEventListener('keydown', function(e) { if (e.key === 'Escape') close(); });
 		document.body.appendChild(root);
