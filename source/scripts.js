@@ -2946,7 +2946,8 @@ Macro.add('debugTools', {
 				var line = document.createElement('tr');
 				row.forEach(function(value) {
 					var cell = document.createElement('td');
-					cell.textContent = String(value);
+					if (value && value.nodeType === 1) cell.appendChild(value);
+					else cell.textContent = String(value);
 					line.appendChild(cell);
 				});
 				table.appendChild(line);
@@ -2958,7 +2959,7 @@ Macro.add('debugTools', {
 		addReferenceTable('Railcars', ['Type', 'Length', 'Empty weight', 'Cargo capacity', 'Pull', 'Top speed'],
 			Object.keys(stock).map(function(key) {
 				var car = stock[key];
-				return [car.name || car.type || key, (car.length || 0) + ' m', (car.baseWeight || 0) + ' kg',
+				return [setup.svgWiki.carEntry(car, car.name || car.type || key), (car.length || 0) + ' m', (car.baseWeight || 0) + ' kg',
 					(car.maxCargoCapacityKg || 0) + ' kg / ' + (car.maxCargoCapacityVolume || 0) + ' L',
 					(car.tractiveCapacity || 0) + ' kN', (car.topSpeedKmh || 0) + ' km/h'];
 			}));

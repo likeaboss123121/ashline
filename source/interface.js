@@ -56,6 +56,78 @@ Macro.add('uiSection', {
 		section.appendChild(summary); section.appendChild(body); this.output.appendChild(section);
 	}
 });
+// Inspect the shipped artwork, without copying image data into saves or drawing the whole catalogue.
+setup.svgWiki = {
+	catalogue: function() {
+		return setup.railyardTemplates.templates.concat(setup.drivingTemplates.templates);
+	},
+	preview: function(parent, template) {
+		var figure = document.createElement('figure');
+		figure.style.margin = '1em 0';
+		var caption = document.createElement('figcaption');
+		caption.textContent = template.file + ' (' + template.width + ' × ' + template.height + ')';
+		figure.appendChild(caption);
+		var source = Story.has(template.passage) ? Story.get(template.passage).text.trim() : '';
+		if (/^data:image\/svg\+xml[;,]/i.test(source)) {
+			var img = document.createElement('img');
+			img.alt = template.title;
+			img.src = source;
+			img.width = template.width * 3;
+			img.style.maxWidth = '100%';
+			img.style.height = 'auto';
+			figure.appendChild(img);
+		} else {
+			var missing = document.createElement('p'); missing.textContent = 'SVG unavailable.';
+			figure.appendChild(missing);
+		}
+		parent.appendChild(figure);
+	},
+	carEntry: function(car, label) {
+		var entry = document.createElement('div'); entry.textContent = label;
+		var section = document.createElement('details'); section.className = 'debug-section';
+		var summary = document.createElement('summary'); summary.textContent = 'Graphics — ' + label;
+		section.appendChild(summary);
+		var loaded = false;
+		section.addEventListener('toggle', function() {
+			if (!section.open || loaded) return;
+			loaded = true;
+			// Use exactly the same model/type resolution as the actual views (including both facings).
+			var names = [];
+			[setup.railyardView, setup.drivingView].forEach(function(view) {
+				[false, true].forEach(function(flipped) { names.push(view.getCarTemplateName(car, flipped)); });
+			});
+			setup.svgWiki.catalogue().filter(function(template) { return names.indexOf(template.passage) >= 0; })
+				.forEach(function(template) { setup.svgWiki.preview(section, template); });
+		});
+		entry.appendChild(section); return entry;
+	},
+	appendBrowser: function(parent) {
+		var section = document.createElement('details'); section.className = 'debug-section';
+		section.id = 'wiki-svg-browser';
+		var summary = document.createElement('summary'); summary.textContent = 'SVG browser';
+		section.appendChild(summary); parent.appendChild(section);
+		var loaded = false;
+		section.addEventListener('toggle', function() {
+			if (!section.open || loaded) return;
+			loaded = true;
+			var label = document.createElement('label'); label.textContent = 'Graphic: ';
+			var select = document.createElement('select'); select.setAttribute('aria-label', 'SVG graphic');
+			select.style.maxWidth = '100%';
+			var templates = setup.svgWiki.catalogue().slice().sort(function(a, b) { return a.file.localeCompare(b.file); });
+			templates.forEach(function(template, index) {
+				var option = document.createElement('option'); option.value = String(index); option.textContent = template.file;
+				select.appendChild(option);
+			});
+			label.appendChild(select); section.appendChild(label);
+			var preview = document.createElement('div'); section.appendChild(preview);
+			function show() {
+				preview.replaceChildren();
+				if (templates[select.value]) setup.svgWiki.preview(preview, templates[select.value]);
+			}
+			select.addEventListener('change', show); show();
+		});
+	}
+};
 setup.sideTabs = {
 	active: null,
 	refresh: function() {
@@ -91,6 +163,7 @@ setup.sideTabs = {
 		new Wikifier(debug, '<<debugTools>>');
 		var reference = debug.querySelector('.procedural-wiki');
 		if (reference) { reference.open = true; wiki.appendChild(reference); }
+		setup.svgWiki.appendBrowser(wiki);
 		root.querySelectorAll('details > summary').forEach(function(s) { if (opened.indexOf(s.textContent) >= 0) s.parentElement.open = true; });
 		root.addEventListener('keydown', function(e) { if (e.key === 'Escape') close(); });
 		document.body.appendChild(root);

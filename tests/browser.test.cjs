@@ -456,6 +456,34 @@ test('finished help, deferred journal, separate debug tabs, and same-page scroll
   assert.equal(await page.locator('#menu-story .developer-menu-item').count(),0);
 });
 
+test('wiki links railcar graphics and lazily previews the shipped SVG catalogue',async t=>{
+  const page=await openGame(t);await enableDebug(page);await beginTutorial(page);
+  await page.getByRole('button',{name:'Wiki',exact:true}).click();
+  const wiki=page.locator('#developer-Wiki');
+  assert.equal(await wiki.locator('img').count(),0,'closed graphics do not load images');
+  await wiki.locator('summary').filter({hasText:/^\+ Railcars$/}).click();
+  const shunter=wiki.locator('tr').filter({hasText:/diesel shunter/i}).first();
+  await shunter.locator('summary').click();
+  await shunter.locator('img').nth(3).waitFor();
+  const captions=await shunter.locator('figcaption').allTextContents();
+  for(const view of ['railyard','driving']) for(const facing of ['left','right']) {
+    assert.ok(captions.some(text=>text.includes(`${view}-loco-diesel-shunter-${facing}.svg`)),captions.join('\n'));
+  }
+  await page.waitForFunction(()=>Array.from(document.querySelectorAll('#developer-Wiki img')).every(img=>img.complete&&img.naturalWidth>0));
+  await wiki.locator('#wiki-svg-browser > summary').click();
+  const select=wiki.getByLabel('SVG graphic');
+  await select.waitFor();
+  assert.equal(await select.locator('option').count(),await page.evaluate(()=>SugarCube.setup.svgWiki.catalogue().length));
+  const files=await select.locator('option').allTextContents();
+  await select.selectOption({label:files.find(file=>file.includes('plant-'))});
+  assert.equal(await wiki.locator('#wiki-svg-browser img').count(),1);
+  assert.match(await wiki.locator('#wiki-svg-browser figcaption').innerText(),/plant-/);
+  await page.getByRole('button',{name:'Close Wiki',exact:true}).click();
+  await page.getByRole('button',{name:'Wiki',exact:true}).click();
+  await wiki.locator('.procedural-wiki img').nth(3).waitFor({state:'attached'});
+  assert.equal(await wiki.locator('.procedural-wiki img').count(),4,'refresh does not open every car graphics entry');
+});
+
 test('red developer sidebar menus work on mobile with keyboard and close controls',async t=>{
   const page=await openGame(t,{viewport:{width:390,height:844}});await enableDebug(page);await beginTutorial(page);
   if(await page.locator('#ui-bar').evaluate(el=>el.classList.contains('stowed'))) await page.locator('#ui-bar-toggle').click();
