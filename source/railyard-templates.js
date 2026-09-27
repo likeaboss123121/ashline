@@ -10,7 +10,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-diesel-shunter-right.svg",
 			"passage": "railyard-loco-diesel-shunter-right",
-			"title": "Two axle diesel shunter, facing right",
+			"title": "DE2-GB, Britain 1950s, facing right",
 			"width": 30,
 			"height": 32,
 			"anchorX": 6,
@@ -36,7 +36,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-diesel-shunter-left.svg",
 			"passage": "railyard-loco-diesel-shunter-left",
-			"title": "Two axle diesel shunter, facing left",
+			"title": "DE2-GB, Britain 1950s, facing left",
 			"width": 30,
 			"height": 28,
 			"anchorX": 6,
@@ -62,7 +62,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-diesel-road-right.svg",
 			"passage": "railyard-loco-diesel-road-right",
-			"title": "Six axle road diesel, facing right",
+			"title": "DE6-US, United States 1970s, facing right",
 			"width": 52,
 			"height": 38,
 			"anchorX": 6,
@@ -88,7 +88,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-diesel-road-left.svg",
 			"passage": "railyard-loco-diesel-road-left",
-			"title": "Six axle road diesel, facing left",
+			"title": "DE6-US, United States 1970s, facing left",
 			"width": 52,
 			"height": 42,
 			"anchorX": 6,
@@ -114,7 +114,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-steam-shunter-right.svg",
 			"passage": "railyard-loco-steam-shunter-right",
-			"title": "0-6-0 steam shunter, facing right",
+			"title": "S060-GB, Britain 1920s, facing right",
 			"width": 30,
 			"height": 32,
 			"anchorX": 5,
@@ -140,7 +140,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-steam-shunter-left.svg",
 			"passage": "railyard-loco-steam-shunter-left",
-			"title": "0-6-0 steam shunter, facing left",
+			"title": "S060-GB, Britain 1920s, facing left",
 			"width": 31,
 			"height": 31,
 			"anchorX": 5,
@@ -166,7 +166,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-steam-prairie-right.svg",
 			"passage": "railyard-loco-steam-prairie-right",
-			"title": "2-6-2 steam engine with tender, facing right",
+			"title": "S262-PL, Poland 1950s, facing right",
 			"width": 58,
 			"height": 41,
 			"anchorX": 6,
@@ -192,7 +192,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-steam-prairie-left.svg",
 			"passage": "railyard-loco-steam-prairie-left",
-			"title": "2-6-2 steam engine with tender, facing left",
+			"title": "S262-PL, Poland 1950s, facing left",
 			"width": 58,
 			"height": 49,
 			"anchorX": 6,
@@ -1103,7 +1103,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-diesel-old-road-right.svg",
 			"passage": "railyard-loco-diesel-old-road-right",
-			"title": "Four axle old road diesel, facing right",
+			"title": "DE4-SU, Soviet Union 1960s, facing right",
 			"width": 44,
 			"height": 35,
 			"anchorX": 6,
@@ -1129,7 +1129,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-diesel-old-road-left.svg",
 			"passage": "railyard-loco-diesel-old-road-left",
-			"title": "Four axle old road diesel, facing left",
+			"title": "DE4-SU, Soviet Union 1960s, facing left",
 			"width": 44,
 			"height": 39,
 			"anchorX": 6,
@@ -1155,7 +1155,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-diesel-mechanical-right.svg",
 			"passage": "railyard-loco-diesel-mechanical-right",
-			"title": "Two axle mechanical diesel, Germany 1930s, facing right",
+			"title": "DM2-DE, Germany 1930s, facing right",
 			"width": 24,
 			"height": 29,
 			"anchorX": 5,
@@ -1181,7 +1181,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-diesel-mechanical-left.svg",
 			"passage": "railyard-loco-diesel-mechanical-left",
-			"title": "Two axle mechanical diesel, Germany 1930s, facing left",
+			"title": "DM2-DE, Germany 1930s, facing left",
 			"width": 24,
 			"height": 26,
 			"anchorX": 5,
@@ -1207,7 +1207,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-diesel-hydraulic-right.svg",
 			"passage": "railyard-loco-diesel-hydraulic-right",
-			"title": "Four axle hydraulic diesel, Germany 1960s, facing right",
+			"title": "DH4-DE, Germany 1960s, facing right",
 			"width": 36,
 			"height": 30,
 			"anchorX": 5,
@@ -1233,7 +1233,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-diesel-hydraulic-left.svg",
 			"passage": "railyard-loco-diesel-hydraulic-left",
-			"title": "Four axle hydraulic diesel, Germany 1960s, facing left",
+			"title": "DH4-DE, Germany 1960s, facing left",
 			"width": 36,
 			"height": 32,
 			"anchorX": 5,
@@ -1259,7 +1259,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-diesel-cab-unit-right.svg",
 			"passage": "railyard-loco-diesel-cab-unit-right",
-			"title": "Four axle cab diesel, United States 1950s, facing right",
+			"title": "DE4-US, United States 1950s, facing right",
 			"width": 44,
 			"height": 39,
 			"anchorX": 5,
@@ -1285,7 +1285,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-diesel-cab-unit-left.svg",
 			"passage": "railyard-loco-diesel-cab-unit-left",
-			"title": "Four axle cab diesel, United States 1950s, facing left",
+			"title": "DE4-US, United States 1950s, facing left",
 			"width": 44,
 			"height": 37,
 			"anchorX": 5,
@@ -1311,8 +1311,8 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-steam-american-right.svg",
 			"passage": "railyard-loco-steam-american-right",
-			"title": "4-4-0 old steam engine, United States 1880s, facing right",
-			"width": 46,
+			"title": "S440-US, United States 1880s, facing right",
+			"width": 45,
 			"height": 37,
 			"anchorX": 5,
 			"anchorY": 17,
@@ -1337,33 +1337,33 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-steam-american-left.svg",
 			"passage": "railyard-loco-steam-american-left",
-			"title": "4-4-0 old steam engine, United States 1880s, facing left",
-			"width": 46,
-			"height": 43,
-			"anchorX": 7,
-			"anchorY": 24,
+			"title": "S440-US, United States 1880s, facing left",
+			"width": 45,
+			"height": 41,
+			"anchorX": 6,
+			"anchorY": 22,
 			"lengthMetres": 17,
 			"rear": [
-				7,
-				20
+				6,
+				18
 			],
 			"front": [
-				41,
-				37
+				40,
+				35
 			],
 			"top": [
-				24,
-				9
+				23,
+				7
 			],
 			"cab": [
-				29,
-				17
+				28,
+				15
 			]
 		},
 		{
 			"file": "railyard-loco-steam-streamliner-right.svg",
 			"passage": "railyard-loco-steam-streamliner-right",
-			"title": "4-6-2 streamlined steam engine, Britain 1930s, facing right",
+			"title": "S462-GB, Britain 1930s, facing right",
 			"width": 54,
 			"height": 41,
 			"anchorX": 5,
@@ -1389,7 +1389,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-steam-streamliner-left.svg",
 			"passage": "railyard-loco-steam-streamliner-left",
-			"title": "4-6-2 streamlined steam engine, Britain 1930s, facing left",
+			"title": "S462-GB, Britain 1930s, facing left",
 			"width": 55,
 			"height": 42,
 			"anchorX": 6,
@@ -1415,7 +1415,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-steam-mikado-right.svg",
 			"passage": "railyard-loco-steam-mikado-right",
-			"title": "2-8-2 freight steam engine, Japan 1930s, facing right",
+			"title": "S282-JP, Japan 1930s, facing right",
 			"width": 50,
 			"height": 39,
 			"anchorX": 5,
@@ -1441,33 +1441,33 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-steam-mikado-left.svg",
 			"passage": "railyard-loco-steam-mikado-left",
-			"title": "2-8-2 freight steam engine, Japan 1930s, facing left",
+			"title": "S282-JP, Japan 1930s, facing left",
 			"width": 51,
-			"height": 43,
+			"height": 40,
 			"anchorX": 6,
-			"anchorY": 21,
+			"anchorY": 18,
 			"lengthMetres": 20,
 			"rear": [
 				6,
-				17
+				14
 			],
 			"front": [
 				46,
-				37
+				34
 			],
 			"top": [
 				26,
-				7
+				4
 			],
 			"cab": [
 				32,
-				16
+				13
 			]
 		},
 		{
 			"file": "railyard-loco-steam-garratt-right.svg",
 			"passage": "railyard-loco-steam-garratt-right",
-			"title": "Double mountain articulated steam engine, South Africa / Britain 1950s, facing right",
+			"title": "S482+284-ZA, South Africa / Britain 1950s, facing right",
 			"width": 66,
 			"height": 47,
 			"anchorX": 5,
@@ -1493,7 +1493,7 @@ setup.railyardTemplates = {
 		{
 			"file": "railyard-loco-steam-garratt-left.svg",
 			"passage": "railyard-loco-steam-garratt-left",
-			"title": "Double mountain articulated steam engine, South Africa / Britain 1950s, facing left",
+			"title": "S482+284-ZA, South Africa / Britain 1950s, facing left",
 			"width": 66,
 			"height": 46,
 			"anchorX": 5,

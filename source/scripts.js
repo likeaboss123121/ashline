@@ -783,7 +783,7 @@ setup.railyard = {
 	// What a locomotive is and what it can do, as rows for the cab's own panel.
 	getLocomotiveStats: function(car) {
 		var rows = [
-			['Model', car.name || car.type],
+			['Model', this.getCarName(car)],
 			['Pull', setup.units.force(car.tractiveCapacity)],
 			['Top speed', setup.units.kilometresPerHour(car.topSpeedKmh || setup.worldmap.REFERENCE_SPEED_KMH)],
 			['Weight', setup.units.tonnes(Math.round(car.baseWeight / 100) / 10)],
@@ -1194,7 +1194,7 @@ setup.railyard = {
 			if (!preset) {
 				continue;
 			}
-			var label = (preset.name || preset.type)
+			var label = this.getCarName(preset)
 				.split(' ')
 				.map(function(word) {
 					return word.charAt(0).toUpperCase() + word.slice(1);
@@ -2359,7 +2359,17 @@ setup.railyard = {
 	},
 	// Returns a grammatically correct location string for the current car.
 	getCarLocationText: function(car) {
-		return (car.hasInterior ? 'in the ' : 'on the ') + (car.broken ? 'broken ' : '') + (car.name || car.type);
+		return (car.hasInterior ? 'in the ' : 'on the ') + (car.broken ? 'broken ' : '') + this.getCarName(car);
+	},
+	// Model labels are presentation data, including for cars and presets in older saves.
+	getCarName: function(car) {
+		if (!car) return 'Unknown railcar';
+		if (setup.stockCatalogue && (this.isDieselLocomotiveCar(car) || this.isSteamLocomotiveCar(car))) {
+			var model = this.getLocomotiveModel(car);
+			var spec = setup.stockCatalogue.locomotives.find(function(entry) { return entry.model === model; });
+			if (spec && spec.name) return spec.name;
+		}
+		return car.name || car.type || 'Railcar';
 	},
 	// Serializes car type names for compact consist labels.
 	getTrainCarListText: function(train) {
@@ -2426,8 +2436,8 @@ setup.railyard = {
 		if (!car) {
 			return 'Unknown railcar';
 		}
-		if (car.name) {
-			return (car.broken ? 'Broken ' : '') + car.name.replace(/\b\w/g, function(letter) { return letter.toUpperCase(); });
+		if (car.name || this.isDieselLocomotiveCar(car) || this.isSteamLocomotiveCar(car)) {
+			return (car.broken ? 'Broken ' : '') + this.getCarName(car).replace(/\b\w/g, function(letter) { return letter.toUpperCase(); });
 		}
 		var names = {
 			boxcar: 'Boxcar', flatcar: 'Flatcar', gondola: 'Gondola', 'tanker car': 'Tank car',
@@ -2970,7 +2980,7 @@ Macro.add('debugTools', {
 		addReferenceTable(category, ['Type', 'Origin / era', 'Drive', 'Length', 'Empty weight', 'Cargo capacity', 'Pull', 'Top speed'],
 			Object.keys(stock).filter(function(key) { return setup.svgWiki.carCategory(stock[key]) === category; }).map(function(key) {
 				var car = stock[key];
-				return [setup.svgWiki.carEntry(car, car.name || car.type || key), car.origin ? car.origin + ' / ' + car.era : 'Varies (see graphics)',
+				return [setup.svgWiki.carEntry(car, setup.railyard.getCarName(car)), car.origin ? car.origin + ' / ' + car.era : 'Varies (see graphics)',
 					car.drivetrain || 'Unpowered', (car.length || 0) + ' m', (car.baseWeight || 0) + ' kg',
 					(car.maxCargoCapacityKg || 0) + ' kg / ' + (car.maxCargoCapacityVolume || 0) + ' L',
 					(car.tractiveCapacity || 0) + ' kN', (car.topSpeedKmh || 0) + ' km/h'];

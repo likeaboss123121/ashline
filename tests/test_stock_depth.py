@@ -143,6 +143,8 @@ class StockDepthTests(unittest.TestCase):
                     colours = [fill for _, polys in sprite.parts for _, fill, _ in polys]
                     self.assertEqual(colours[:4], [top, blend(top,side,.5), side, blend(side,'#000000',.3)])
                     faces = list(sprite.depth_faces.values())
+                    self.assertEqual(min(p[2] for face in faces for p in face), 5.5, 'boiler meets chassis top')
+                    self.assertEqual(max(p[2] for face in faces for p in face), 14.5)
                     if iso:
                         end = set(faces[-1])
                         for face in faces[:4]:
@@ -154,6 +156,52 @@ class StockDepthTests(unittest.TestCase):
                     for name, polys in actual.parts:
                         if name in ('cab','tender','rear-tank','front-tank','smoke-deflector'):
                             self.assertNotIn('#41483f', [fill for _,fill,_ in polys], 'no unrelated default green end')
+
+    def test_mikado_and_garratt_wheels_do_not_intersect_and_rods_meet_axles(self):
+        for spec in DATA['locomotives']:
+            if spec.get('design') not in ('mikado', 'garratt'):
+                continue
+            for module in MODULES:
+                for facing in ('left','right'):
+                    sprite = locomotive(vars(module), module is MODULES[0], spec, facing)
+                    rims = [world for (part,index),world in sprite.depth_faces.items()
+                            if sprite.parts[part][0] == 'running-gear' and index % 2 == 0]
+                    spans = sorted((min(p[0] for p in face),max(p[0] for p in face)) for face in rims)
+                    for left, right in zip(spans,spans[1:]):
+                        self.assertLessEqual(left[1],right[0], 'adjacent wheels must not intersect')
+                    centres = [(sum(p[0] for p in face)/len(face),sum(p[2] for p in face)/len(face)) for face in rims]
+                    rods = [world for (part,_),world in sprite.depth_faces.items()
+                            if sprite.parts[part][0] == 'coupling-rods']
+                    for rod in rods:
+                        z = (min(p[2] for p in rod)+max(p[2] for p in rod))/2
+                        for u in (min(p[0] for p in rod),max(p[0] for p in rod)):
+                            self.assertTrue(any(abs(u-x)<1e-6 and abs(z-y)<1e-6 for x,y in centres))
+
+    def test_diesel_shunter_driving_wheels_remain_visible_in_both_facings(self):
+        module = MODULES[1]
+        right = module.diesel_shunter()
+        left = module.mirrored(right, 'driving-loco-diesel-shunter-left', 'Left')
+        for sprite in (right,left):
+            sprite.resolve_depth()
+            rims = sum(abs(area(points)) for name,polys in sprite.parts if name == 'wheels'
+                       for points,fill,_ in polys if fill == module.P['truck_top'])
+            self.assertGreater(rims,10, 'both round wheel faces must remain outside the frame')
+            self.assertGreater(coverage(sprite,module.P['wheel_hub']),1)
+
+    def test_cowcatcher_is_a_joined_wedge_with_a_visible_side_in_both_views(self):
+        for module in MODULES:
+            for facing in ('left','right'):
+                sprite = module.Sprite('test-loco-pilot','Pilot',17)
+                Builder(vars(module),module is MODULES[0],sprite,34,facing).pilot('#bb9760')
+                faces = list(sprite.depth_faces.values())
+                self.assertEqual(len(faces),4)
+                self.assertEqual(min(p[2] for face in faces for p in face),1)
+                self.assertEqual(max(p[2] for face in faces for p in face),4)
+                for face in faces:
+                    self.assertTrue(all(0 <= p[0] <= 34 for p in face))
+                sprite.resolve_depth()
+                self.assertGreater(coverage(sprite,'#bb9760'),0)
+                self.assertGreater(coverage(sprite,blend('#bb9760','#000000',.3)),0)
 
 
 if __name__ == '__main__':

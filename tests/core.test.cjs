@@ -1457,7 +1457,7 @@ test('a dead car in the road has to be shunted, and another engine can be robbed
 
   const options = setup.refuel.getSiphonOptions(State.variables.currentTrain, 0);
   assert.equal(options.length, 2, JSON.stringify(options.map(option => option.label)));
-  assert.match(options[0].label, /Siphon diesel from the six axle road diesel in your consist/);
+  assert.match(options[0].label, /Siphon diesel from the DE6-US in your consist/);
   assert.match(options[1].label, /parked alongside/);
 
   // Taking a batch moves it, at the grade it was stored at, and costs the work it should.

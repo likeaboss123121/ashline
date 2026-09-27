@@ -29,7 +29,7 @@ import json
 import math
 from pathlib import Path
 from locale_art import driving_landscapes, rolling_stock
-from fleet_art import extra_stock
+from fleet_art import extra_stock, locomotive_title
 from stock_depth import StockDepth
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -160,6 +160,7 @@ class Sprite(StockDepth):
 
     def render(self):
         self.resolve_depth()
+        self.title = locomotive_title(self.name, self.title)
         minx, miny, maxx, maxy = self.bounds()
         width, height = maxx - minx, maxy - miny
         ax, ay = -minx, -miny
@@ -332,9 +333,9 @@ def mirrored(sprite, name, title):
     return flipped
 
 
-def rod(s, u0, u1, z):
+def rod(s, u0, u1, z, v=WHEEL_V + 0.1):
     s.part('rods')
-    s.line_u(u0, u1, WHEEL_V + 0.1, z, P['rod'])
+    s.line_u(u0, u1, v, z, P['rod'])
 
 
 def diesel_shunter(length_m=9):
@@ -346,8 +347,8 @@ def diesel_shunter(length_m=9):
     s.line_u(0, L, HALF_WIDTH, 4, P['stripe'])
     s.part('wheels')
     for uc in (4.5, 13.5):
-        s.disc_side(uc, 2.2, 2.2, P['wheel_rim'], P['wheel_hub'])
-    rod(s, 4.5, 13.5, 2.2)
+        s.disc_side(uc, 2.2, 2.2, P['truck_top'], P['wheel_hub'], sides=12, v=5.5)
+    rod(s, 4.5, 13.5, 2.2, v=5.6)
     s.part('cab')
     s.box(1, -5, 5, 7, 10, 12, P['cab_top'], P['cab_side'])
     s.slab(2.5, 6.5, 11, 14.5, P['window'])

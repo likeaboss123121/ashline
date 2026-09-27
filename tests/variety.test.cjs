@@ -35,6 +35,37 @@ test('twelve functional locomotives include six steam, six diesel, a mechanical 
   }
 });
 
+test('locomotive codes are consistent across old saves, menus, refuelling and SVG titles',()=>{
+  const {setup:s,State}=require('./helpers.cjs').loadGame();s.startNewRun();
+  const expected=['DE2-GB','DE6-US','DE4-SU','S060-GB','S262-PL','DM2-DE','DH4-DE',
+    'DE4-US','S440-US','S462-GB','S282-JP','S482+284-ZA'];
+  assert.deepEqual(Array.from(s.stockCatalogue.locomotives,c=>c.name),expected);
+  for(const spec of s.stockCatalogue.locomotives) {
+    const car=s.railyard.createLocomotiveCar(spec.key);
+    assert.equal(car.name,spec.name);
+    car.name='old stored label';car.broken=true;
+    car.cargo=[{type:'food',amount:4}];car.facing=-1;
+    const before=JSON.stringify(car);
+    State.variables.defaultTrains[spec.key].name='old preset label';
+    assert.equal(s.railyard.getCarName(car),spec.name);
+    assert.equal(s.railyard.getCarDescription(car),'Broken '+spec.name);
+    assert.equal(s.railyard.getCarLocationText(car),'in the broken '+spec.name);
+    assert.equal(s.railyard.getLocomotiveStats(car)[0][1],spec.name);
+    assert.equal(s.railyard.getDebugTrainTypeOptions().find(o=>o.value===spec.key).label,spec.name);
+    assert.equal(JSON.stringify(car),before,'labels do not migrate or mutate owned stock');
+    for(const view of ['railyard','driving']) for(const facing of ['left','right']) {
+      const name=view+'-loco-'+spec.model+'-'+facing;
+      const meta=s[view+'Templates'].templates.find(t=>t.passage===name);
+      assert.ok(meta.title.startsWith(spec.name+','));
+    }
+  }
+  const mine=s.railyard.createLocomotiveCar('dieselShunter'), donor=s.railyard.createLocomotiveCar('dieselRoad');
+  mine.inventory=s.items.createStartingKit();donor.name='six axle road diesel';
+  s.fuel.addCargo(donor,'diesel',300,80);
+  State.variables.currentTrain=[mine,donor];State.variables.currentCarIndex=0;
+  assert.ok(s.refuel.getSiphonOptions(State.variables.currentTrain,0).some(o=>o.label.includes('DE6-US')));
+});
+
 test('every car type has several persisted graphic choices with identical gameplay dimensions',()=>{
   const {setup:s,State}=catalogue();
   for(const key of s.railyard.carKeys) {

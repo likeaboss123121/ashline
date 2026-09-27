@@ -26,7 +26,7 @@ import json
 import math
 from pathlib import Path
 from locale_art import yard_plants, yard_industries, rolling_stock
-from fleet_art import extra_stock
+from fleet_art import extra_stock, locomotive_title
 from stock_depth import StockDepth
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -234,6 +234,7 @@ class Sprite(StockDepth):
 
     def render(self):
         self.resolve_depth()
+        self.title = locomotive_title(self.name, self.title)
         minx, miny, maxx, maxy = self.bounds()
         width, height = maxx - minx, maxy - miny
         ax, ay = -minx, -miny
@@ -504,7 +505,7 @@ def diesel_shunter(facing, length_m=9):
     s.part('wheels')
     for uc in sorted((4.5, 13.5), key=U):
         s.box(U(uc - 1.5, 3), 4, 3.2, 3, 1.5, 1.6, P['truck_top'], P['truck_side'], P['truck_end'])
-        s.disc_side(U(uc), 5.5, 2.2, 2.2, P['wheel_rim'], P['wheel_hub'])
+        s.disc_side(U(uc), 5.5, 2.2, 2.2, P['truck_top'], P['wheel_hub'], sides=12)
     coupling_rod(s, U, 4.5, 13.5, 2.2)
 
     def cab():

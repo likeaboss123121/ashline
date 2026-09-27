@@ -45,6 +45,7 @@ setup.stockCatalogue.locomotives.forEach(function(spec) {
 		defaults[spec.key] = definition;
 		if (setup.railyard.locomotiveKeys.indexOf(spec.key) < 0) setup.railyard.locomotiveKeys.push(spec.key);
 	}
+	definition.name = spec.name;
 	definition.origin = spec.origin; definition.era = spec.era; definition.drivetrain = spec.drivetrain;
 });
 setup.currentDefinitions.defaultTrains = JSON.parse(JSON.stringify(State.variables.defaultTrains));

@@ -16,6 +16,14 @@ def blend(a, b, amount):
                          for i in (1,3,5))
 
 
+def locomotive_title(template, fallback):
+    for spec in DATA['locomotives']:
+        for facing in ('left', 'right'):
+            if template.endswith('-loco-'+spec['model']+'-'+facing):
+                return spec['name']+', '+spec['origin']+' '+spec['era']+', facing '+facing
+    return fallback
+
+
 def write_catalogue():
     (ROOT / 'source/stock-catalogue.js').write_text(
         '// Generated from scripts/stock-designs.json by the art generators.\n'
@@ -37,22 +45,22 @@ class Builder:
     def poly(self, points, colour):
         self.s.world_poly([(self.u(u), v, z) for u, v, z in points], colour)
 
-    def wheel(self, u, radius=2, z=None):
+    def wheel(self, u, radius=2, z=None, rim='#242b2b', hub='#95816a'):
         z = radius if z is None else z
         if self.iso:
-            self.s.disc_side(self.u(u), 5.2, z, radius, '#242b2b', '#95816a')
+            self.s.disc_side(self.u(u), 5.2, z, radius, rim, hub, sides=12)
         else:
-            self.s.disc_side(self.u(u), z, radius, '#242b2b', '#95816a', v=5.2)
+            self.s.disc_side(self.u(u), z, radius, rim, hub, sides=12, v=5.2)
 
     def rod(self, a, b, z=3):
-        self.poly([(a, 5.5, z), (b, 5.5, z), (b, 5.5, z+1), (a, 5.5, z+1)], '#a0a395')
+        self.poly([(a, 5.5, z-.35), (b, 5.5, z-.35), (b, 5.5, z+.35), (a, 5.5, z+.35)], '#a0a395')
 
     def boiler(self, start, length, top, side):
         # One closed octagonal section. The crown, shoulder, side and underside
         # have distinct face lighting, not a single roof-coloured strip.
         self.s.part('boiler')
-        ring = [(-4.5,10.5),(-4.5,14.5),(-2.5,17),(2.5,17),
-                (4.5,14.5),(4.5,10.5),(2.5,8),(-2.5,8)]
+        ring = [(-4.5,8),(-4.5,12),(-2.5,14.5),(2.5,14.5),
+                (4.5,12),(4.5,8),(2.5,5.5),(-2.5,5.5)]
         colours = [side,top,top,blend(top,side,.5),side,blend(side,'#000000',.3),side,side]
         for (v0,z0),(v1,z1),colour in zip(ring,ring[1:]+ring[:1],colours):
             if -(z1-z0)+(v1-v0) <= 0:
@@ -61,6 +69,16 @@ class Builder:
         end = start if self.reverse else start + length
         if self.iso:
             self.poly([(end,v,z) for v,z in ring], '#2d3431')
+
+    def pilot(self, colour):
+        # A closed, shallow wedge attached to the front beam, not a floating sheet.
+        self.s.part('cowcatcher')
+        rear, front = self.length-3, self.length
+        side = blend(colour, '#000000', .3)
+        self.poly([(rear,-3.5,4),(front,-5,1.5),(front,5,1.5),(rear,3.5,4)], colour)
+        self.poly([(rear,3.5,1),(front,5,1),(front,5,1.5),(rear,3.5,4)], side)
+        self.poly([(rear,-3.5,1),(rear,3.5,1),(rear,3.5,4),(rear,-3.5,4)], side)
+        self.poly([(front,-5,1),(front,5,1),(front,5,1.5),(front,-5,1.5)], side)
 
 
 def cab_shell(b, top, side, trim):
@@ -85,7 +103,7 @@ def locomotive(api, iso, spec, facing):
     prefix = 'railyard' if iso else 'driving'
     L = spec['length']*2
     s = api['Sprite'](prefix+'-loco-'+spec['model']+'-'+facing,
-                      spec['name'].capitalize()+', '+spec['origin']+' '+spec['era']+', facing '+facing, spec['length'])
+                      spec['name']+', '+spec['origin']+' '+spec['era']+', facing '+facing, spec['length'])
     b = Builder(api, iso, s, L, facing)
     top, side, trim = spec['colours']
     style = spec['design']
@@ -96,15 +114,18 @@ def locomotive(api, iso, spec, facing):
     elif style in ('hydraulic', 'cab-unit'):
         wheels = [(u,2) for u in (3,7,L-7,L-3)]
     elif style == 'garratt':
-        wheels = [(u,2.2) for u in (7,11,15,19,L-19,L-15,L-11,L-7)]
-        wheels += [(u,1.3) for u in (2,4,23,L-23,L-4,L-2)]
+        wheels = [(u,1.8) for u in (7,11,15,19,L-19,L-15,L-11,L-7)]
+        wheels += [(u,.9) for u in (2,4,23,L-23,L-4,L-2)]
     else:
         wheels = [(u,1.5) for u in (3,7)]
         if style == 'american': wheels += [(16,3.2),(23,3.2),(L-5,1.5),(L-2,1.5)]
         elif style == 'streamliner': wheels += [(18,1.5),(24,3.2),(30,3.2),(36,3.2),(L-5,1.5),(L-2,1.5)]
-        else: wheels += [(14,1.5),(19,2.6),(24,2.6),(29,2.6),(34,2.6),(L-2,1.5)]
+        else: wheels += [(14,1.5),(19,2.2),(24,2.2),(29,2.2),(34,2.2),(L-2,1.5)]
     for u, radius in sorted(wheels, key=lambda wheel:b.u(wheel[0])):
-        b.wheel(u, radius)
+        if style in ('mikado', 'garratt'):
+            b.wheel(u, radius, rim='#444b46', hub='#242b2b')
+        else:
+            b.wheel(u, radius)
     s.part('frame')
     b.box(0,-4,4,L,8,1.5,'#747764','#343c35')
     cab_u = 3
@@ -141,11 +162,13 @@ def locomotive(api, iso, spec, facing):
         body_end = blend(side, '#000000', .25)
         s.part('coupling-rods')
         if style == 'garratt':
-            b.rod(7,19); b.rod(L-19,L-7)
+            b.rod(7,19,1.8); b.rod(L-19,L-7,1.8)
             cab_u=22
             segments=[(1,'rear-tank'),(22,'cab'),(28,'boiler'),(L-16,'front-tank')]
         else:
-            b.rod(16 if style=='american' else 19,23 if style=='american' else L-7)
+            if style == 'american': b.rod(16,23,3.2)
+            elif style == 'mikado': b.rod(19,34,2.2)
+            else: b.rod(24,36,3.2)
             cab_u=10 if style=='american' else 12
             segments=[(1,'tender'),(cab_u,'cab'),(cab_u+7,'boiler')]
         for u, part in sorted(segments,key=lambda item:b.u(item[0])):
@@ -192,13 +215,13 @@ def locomotive(api, iso, spec, facing):
                     b.box(end-8,-1.3,19,3,2.6,1,'#303d43','#213038')
                 else:
                     b.boiler(u,end-u,top,side)
-                    b.box(u+4,-1.5,17,3,3,2,trim,side,body_end)
-                    b.box(end-3,-1,16,2,2,5,'#484e45','#272f2b','#1d2320')
+                    b.box(u+4,-1.5,14.5,3,3,2,trim,side,body_end)
+                    b.box(end-3,-1,13.5,2,2,5,'#484e45','#272f2b','#1d2320')
                     if style=='american':
-                        s.part('spark-arrestor'); b.box(end-4,-2.5,20,4,5,3,trim,'#494f44','#363b32')
-                        s.part('cowcatcher'); b.poly([(L-4,-5,4),(L,-6,1),(L,6,1),(L-4,5,4)],trim)
+                        s.part('spark-arrestor'); b.box(end-4,-2.5,17.5,4,5,3,trim,'#494f44','#363b32')
+                        b.pilot(trim)
                     if style=='mikado':
-                        s.part('smoke-deflector'); b.box(end-7,5,9,5,.5,8,top,side,body_end)
+                        s.part('smoke-deflector'); b.box(end-7,5,6.5,5,.5,8,top,side,body_end)
     api['finish_car'](s,L,24)
     s.mark('cab',b.u(cab_u+2),0,18)
     return s

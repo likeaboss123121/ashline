@@ -208,9 +208,9 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-diesel-shunter-right.svg",
 			"passage": "driving-loco-diesel-shunter-right",
-			"title": "Two axle diesel shunter, facing right",
+			"title": "DE2-GB, Britain 1950s, facing right",
 			"width": 22,
-			"height": 22,
+			"height": 24,
 			"anchorX": 2,
 			"anchorY": 18,
 			"lengthMetres": 9,
@@ -234,9 +234,9 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-diesel-shunter-left.svg",
 			"passage": "driving-loco-diesel-shunter-left",
-			"title": "Two axle diesel shunter, facing left",
+			"title": "DE2-GB, Britain 1950s, facing left",
 			"width": 22,
-			"height": 22,
+			"height": 24,
 			"anchorX": 2,
 			"anchorY": 18,
 			"lengthMetres": 9,
@@ -260,7 +260,7 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-diesel-road-right.svg",
 			"passage": "driving-loco-diesel-road-right",
-			"title": "Six axle road diesel, facing right",
+			"title": "DE6-US, United States 1970s, facing right",
 			"width": 44,
 			"height": 24,
 			"anchorX": 2,
@@ -286,7 +286,7 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-diesel-road-left.svg",
 			"passage": "driving-loco-diesel-road-left",
-			"title": "Six axle road diesel, facing left",
+			"title": "DE6-US, United States 1970s, facing left",
 			"width": 44,
 			"height": 24,
 			"anchorX": 2,
@@ -312,7 +312,7 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-steam-shunter-right.svg",
 			"passage": "driving-loco-steam-shunter-right",
-			"title": "0-6-0 steam shunter, facing right",
+			"title": "S060-GB, Britain 1920s, facing right",
 			"width": 24,
 			"height": 22,
 			"anchorX": 2,
@@ -338,7 +338,7 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-steam-shunter-left.svg",
 			"passage": "driving-loco-steam-shunter-left",
-			"title": "0-6-0 steam shunter, facing left",
+			"title": "S060-GB, Britain 1920s, facing left",
 			"width": 24,
 			"height": 22,
 			"anchorX": 2,
@@ -364,7 +364,7 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-steam-prairie-right.svg",
 			"passage": "driving-loco-steam-prairie-right",
-			"title": "2-6-2 steam engine with tender, facing right",
+			"title": "S262-PL, Poland 1950s, facing right",
 			"width": 50,
 			"height": 23,
 			"anchorX": 2,
@@ -390,7 +390,7 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-steam-prairie-left.svg",
 			"passage": "driving-loco-steam-prairie-left",
-			"title": "2-6-2 steam engine with tender, facing left",
+			"title": "S262-PL, Poland 1950s, facing left",
 			"width": 50,
 			"height": 23,
 			"anchorX": 2,
@@ -460,7 +460,7 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-diesel-old-road-right.svg",
 			"passage": "driving-loco-diesel-old-road-right",
-			"title": "Four axle old road diesel, facing right",
+			"title": "DE4-SU, Soviet Union 1960s, facing right",
 			"width": 36,
 			"height": 23,
 			"anchorX": 2,
@@ -486,7 +486,7 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-diesel-old-road-left.svg",
 			"passage": "driving-loco-diesel-old-road-left",
-			"title": "Four axle old road diesel, facing left",
+			"title": "DE4-SU, Soviet Union 1960s, facing left",
 			"width": 36,
 			"height": 23,
 			"anchorX": 2,
@@ -512,7 +512,7 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-diesel-mechanical-right.svg",
 			"passage": "driving-loco-diesel-mechanical-right",
-			"title": "Two axle mechanical diesel, Germany 1930s, facing right",
+			"title": "DM2-DE, Germany 1930s, facing right",
 			"width": 18,
 			"height": 22,
 			"anchorX": 2,
@@ -538,7 +538,7 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-diesel-mechanical-left.svg",
 			"passage": "driving-loco-diesel-mechanical-left",
-			"title": "Two axle mechanical diesel, Germany 1930s, facing left",
+			"title": "DM2-DE, Germany 1930s, facing left",
 			"width": 18,
 			"height": 22,
 			"anchorX": 2,
@@ -564,7 +564,7 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-diesel-hydraulic-right.svg",
 			"passage": "driving-loco-diesel-hydraulic-right",
-			"title": "Four axle hydraulic diesel, Germany 1960s, facing right",
+			"title": "DH4-DE, Germany 1960s, facing right",
 			"width": 30,
 			"height": 22,
 			"anchorX": 2,
@@ -590,7 +590,7 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-diesel-hydraulic-left.svg",
 			"passage": "driving-loco-diesel-hydraulic-left",
-			"title": "Four axle hydraulic diesel, Germany 1960s, facing left",
+			"title": "DH4-DE, Germany 1960s, facing left",
 			"width": 30,
 			"height": 22,
 			"anchorX": 2,
@@ -616,7 +616,7 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-diesel-cab-unit-right.svg",
 			"passage": "driving-loco-diesel-cab-unit-right",
-			"title": "Four axle cab diesel, United States 1950s, facing right",
+			"title": "DE4-US, United States 1950s, facing right",
 			"width": 38,
 			"height": 22,
 			"anchorX": 2,
@@ -642,7 +642,7 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-diesel-cab-unit-left.svg",
 			"passage": "driving-loco-diesel-cab-unit-left",
-			"title": "Four axle cab diesel, United States 1950s, facing left",
+			"title": "DE4-US, United States 1950s, facing left",
 			"width": 38,
 			"height": 22,
 			"anchorX": 2,
@@ -668,61 +668,61 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-steam-american-right.svg",
 			"passage": "driving-loco-steam-american-right",
-			"title": "4-4-0 old steam engine, United States 1880s, facing right",
+			"title": "S440-US, United States 1880s, facing right",
 			"width": 38,
 			"height": 24,
 			"anchorX": 2,
-			"anchorY": 19,
+			"anchorY": 18,
 			"lengthMetres": 17,
 			"rear": [
 				2,
-				16
+				15
 			],
 			"front": [
 				36,
-				16
+				15
 			],
 			"top": [
 				19,
-				2
+				1
 			],
 			"cab": [
 				14,
-				6
+				5
 			]
 		},
 		{
 			"file": "driving-loco-steam-american-left.svg",
 			"passage": "driving-loco-steam-american-left",
-			"title": "4-4-0 old steam engine, United States 1880s, facing left",
+			"title": "S440-US, United States 1880s, facing left",
 			"width": 38,
 			"height": 24,
 			"anchorX": 2,
-			"anchorY": 19,
+			"anchorY": 18,
 			"lengthMetres": 17,
 			"rear": [
 				2,
-				16
+				15
 			],
 			"front": [
 				36,
-				16
+				15
 			],
 			"top": [
 				19,
-				2
+				1
 			],
 			"cab": [
 				24,
-				6
+				5
 			]
 		},
 		{
 			"file": "driving-loco-steam-streamliner-right.svg",
 			"passage": "driving-loco-steam-streamliner-right",
-			"title": "4-6-2 streamlined steam engine, Britain 1930s, facing right",
+			"title": "S462-GB, Britain 1930s, facing right",
 			"width": 48,
-			"height": 22,
+			"height": 23,
 			"anchorX": 2,
 			"anchorY": 17,
 			"lengthMetres": 22,
@@ -746,9 +746,9 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-steam-streamliner-left.svg",
 			"passage": "driving-loco-steam-streamliner-left",
-			"title": "4-6-2 streamlined steam engine, Britain 1930s, facing left",
+			"title": "S462-GB, Britain 1930s, facing left",
 			"width": 48,
-			"height": 22,
+			"height": 23,
 			"anchorX": 2,
 			"anchorY": 17,
 			"lengthMetres": 22,
@@ -772,7 +772,7 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-steam-mikado-right.svg",
 			"passage": "driving-loco-steam-mikado-right",
-			"title": "2-8-2 freight steam engine, Japan 1930s, facing right",
+			"title": "S282-JP, Japan 1930s, facing right",
 			"width": 44,
 			"height": 23,
 			"anchorX": 2,
@@ -798,7 +798,7 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-steam-mikado-left.svg",
 			"passage": "driving-loco-steam-mikado-left",
-			"title": "2-8-2 freight steam engine, Japan 1930s, facing left",
+			"title": "S282-JP, Japan 1930s, facing left",
 			"width": 44,
 			"height": 23,
 			"anchorX": 2,
@@ -824,7 +824,7 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-steam-garratt-right.svg",
 			"passage": "driving-loco-steam-garratt-right",
-			"title": "Double mountain articulated steam engine, South Africa / Britain 1950s, facing right",
+			"title": "S482+284-ZA, South Africa / Britain 1950s, facing right",
 			"width": 60,
 			"height": 23,
 			"anchorX": 2,
@@ -850,7 +850,7 @@ setup.drivingTemplates = {
 		{
 			"file": "driving-loco-steam-garratt-left.svg",
 			"passage": "driving-loco-steam-garratt-left",
-			"title": "Double mountain articulated steam engine, South Africa / Britain 1950s, facing left",
+			"title": "S482+284-ZA, South Africa / Britain 1950s, facing left",
 			"width": 60,
 			"height": 23,
 			"anchorX": 2,

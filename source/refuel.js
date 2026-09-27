@@ -147,7 +147,7 @@ setup.refuel = {
 				return;
 			}
 			seen.push(car);
-			sources.push({ car: car, where: where, name: car.name || car.type });
+			sources.push({ car: car, where: where, name: setup.railyard.getCarName(car) });
 		};
 		(Array.isArray(train) ? train : []).forEach(function(car) { add(car, 'in your consist'); });
 		var variables = State.variables;

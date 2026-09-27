@@ -128,6 +128,7 @@ test('expanded stock renders both facings and visual variants survive browser sa
     SugarCube.Engine.play('TrainInterior');
   });
   await passage(page,'TrainInterior');
+  assert.match(await page.locator('#passages').innerText(), /DM2-DE/);
   assert.equal(await page.evaluate(()=>SugarCube.setup.saves.save(0)),true);
   await page.evaluate(()=>{SugarCube.State.variables.currentTrain[1].graphicVariant='stainless';SugarCube.Save.slots.load(0);});
   await page.waitForFunction(()=>SugarCube.State.variables.currentTrain[1].graphicVariant==='clerestory');
@@ -535,7 +536,7 @@ test('wiki links railcar graphics and lazily previews the shipped SVG catalogue'
   assert.equal(await wiki.locator('img').count(),0,'closed graphics do not load images');
   await wiki.locator('summary').filter({hasText:/^\+ Railcars$/}).click();
   await wiki.locator('.procedural-wiki summary').filter({hasText:/^\+ Locomotives$/}).click();
-  const shunter=wiki.locator('tr').filter({hasText:/diesel shunter/i}).first();
+  const shunter=wiki.locator('tr').filter({hasText:/DE2-GB/}).first();
   await shunter.locator('summary').click();
   await shunter.locator('img').nth(3).waitFor();
   const captions=await shunter.locator('figcaption').allTextContents();
@@ -882,7 +883,7 @@ test('a Prairie is drawn as itself, shows its graded fuel, and cuts timber from 
   await board(page);
   let text = await page.locator('#passages').innerText();
   const stats = await page.locator('.loco-panel .loco-stat').allTextContents();
-  assert.ok(stats.some(row => /Model.*2-6-2 steam engine/.test(row)), stats.join(' | '));
+  assert.ok(stats.some(row => /Model.*S262-PL/.test(row)), stats.join(' | '));
   assert.ok(stats.some(row => /Pull.*170 kN/.test(row)), stats.join(' | '));
   assert.ok(stats.some(row => /Top speed.*90 km\/h/.test(row)), stats.join(' | '));
   assert.match(text, /Coal: 500 L, grade 30% \(very poor\)/);
@@ -1927,7 +1928,7 @@ test('debug mode draws the complete sourced rail grid', async t => {
   await reference.getByText('Inventory and survival', { exact: true }).click();
   await reference.getByText('Pack items', { exact: true }).click();
   const referenceText = await reference.innerText();
-  assert.match(referenceText, /two axle diesel shunter/);
+  assert.match(referenceText, /DE2-GB/);
   assert.match(referenceText, /Diesel minimum usable grade/);
   assert.match(referenceText, /Hand pump/);
 });
