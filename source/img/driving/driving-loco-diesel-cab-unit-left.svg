@@ -1,99 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="38" height="21" viewBox="0 0 38 21" shape-rendering="crispEdges" data-template="driving-loco-diesel-cab-unit-left" data-anchor-x="2" data-anchor-y="16" data-length-m="17">
+<svg xmlns="http://www.w3.org/2000/svg" width="38" height="22" viewBox="0 0 38 22" shape-rendering="crispEdges" data-template="driving-loco-diesel-cab-unit-left" data-anchor-x="2" data-anchor-y="17" data-length-m="17">
 <title>Ashline driving template: Four axle cab diesel, United States 1950s, facing left</title>
+<g id="silhouette-underlays">
+</g>
 <g id="coupler">
-<polygon points="1,15 3,15 3,14 1,14" fill="#7f786a"/>
-<polygon points="1,12 3,12 3,14 1,14" fill="#bbb09a"/>
+<path d="M1,15 2,15 2,16 1,16Z" fill="#7f786a"/>
+<path d="M1,13 2,13 2,15 1,15Z" fill="#bbb09a"/>
 </g>
 <g id="running-gear">
-<polygon points="7,18 7,17 6,16 4,16 3,17 3,18 3,19 4,20 6,20 7,19" fill="#242b2b"/>
-<polygon points="6,18 6,18 5,17 5,17 4,18 4,18 4,19 5,19 5,19 6,19" fill="#95816a"/>
-<polygon points="11,18 11,17 10,16 8,16 7,17 7,18 7,19 8,20 10,20 11,19" fill="#242b2b"/>
-<polygon points="10,18 10,18 9,17 9,17 8,18 8,18 8,19 9,19 9,19 10,19" fill="#95816a"/>
-<polygon points="31,18 31,17 30,16 28,16 27,17 27,18 27,19 28,20 30,20 31,19" fill="#242b2b"/>
-<polygon points="30,18 30,18 29,17 29,17 28,18 28,18 28,19 29,19 29,19 30,19" fill="#95816a"/>
-<polygon points="35,18 35,17 34,16 32,16 31,17 31,18 31,19 32,20 34,20 35,19" fill="#242b2b"/>
-<polygon points="34,18 34,18 33,17 33,17 32,18 32,18 32,19 33,19 33,19 34,19" fill="#95816a"/>
+<path d="M7,20 7,20 6,21 4,21 3,20 3,20ZM7,20 7,20 3,20 3,20 3,19 3,18 4,17 6,17 7,18 7,19ZM4,20 3,20 3,20 3,19 3,18 4,17 4,17ZM7,20 7,20 4,20 4,17 4,17 6,17 7,18 7,19ZM4,19 4,17 4,17 6,17 6,17ZM7,20 7,20 4,20 4,19 6,17 6,17 7,18 7,19ZM7,20 7,20 7,20 5,18 6,17 6,17 7,18 7,19ZM7,20 7,20 7,20 4,20 4,19 5,18ZM6,19 7,20 7,20 7,20 6,20ZM11,20 11,20 10,21 8,21 7,20 7,20ZM11,20 11,20 7,20 7,20 7,19 7,18 8,17 10,17 11,18 11,19ZM8,20 7,20 7,20 7,19 7,18 8,17 8,17ZM11,20 11,20 8,20 8,17 8,17 10,17 11,18 11,19ZM8,19 8,17 8,17 10,17 10,17ZM11,20 11,20 8,20 8,19 10,17 10,17 11,18 11,19ZM11,20 11,20 11,20 9,18 10,17 10,17 11,18 11,19ZM11,20 11,20 11,20 8,20 8,19 9,18ZM10,19 11,20 11,20 11,20 10,20ZM31,20 31,20 30,21 28,21 27,20 27,20ZM31,20 31,20 27,20 27,20 27,19 27,18 28,17 30,17 31,18 31,19ZM28,20 27,20 27,20 27,19 27,18 28,17 28,17ZM31,20 31,20 28,20 28,17 28,17 30,17 31,18 31,19ZM28,19 28,17 28,17 30,17 30,17ZM31,20 31,20 28,20 28,19 30,17 30,17 31,18 31,19ZM31,20 31,20 31,20 29,18 30,17 30,17 31,18 31,19ZM31,20 31,20 31,20 28,20 28,19 29,18ZM30,19 31,20 31,20 31,20 30,20ZM35,20 35,20 34,21 32,21 31,20 31,20ZM35,20 35,20 31,20 31,20 31,19 31,18 32,17 34,17 35,18 35,19ZM32,20 31,20 31,20 31,19 31,18 32,17 32,17ZM35,20 35,20 32,20 32,17 32,17 34,17 35,18 35,19ZM32,19 32,17 32,17 34,17 34,17ZM35,20 35,20 32,20 32,19 34,17 34,17 35,18 35,19ZM35,20 35,20 35,20 33,18 34,17 34,17 35,18 35,19ZM35,20 35,20 35,20 32,20 32,19 33,18ZM34,19 35,20 35,20 35,20 34,20Z" fill="#242b2b"/>
+<path d="M6,20 5,20 5,20 4,20 4,19 4,19 5,18 5,18 6,19 6,19ZM10,20 9,20 9,20 8,20 8,19 8,19 9,18 9,18 10,19 10,19ZM30,20 29,20 29,20 28,20 28,19 28,19 29,18 29,18 30,19 30,19ZM34,20 33,20 33,20 32,20 32,19 32,19 33,18 33,18 34,19 34,19Z" fill="#95816a"/>
 </g>
 <g id="frame">
-<polygon points="2,16 36,16 36,15 2,15" fill="#343c35"/>
-<polygon points="2,9 36,9 36,15 2,15" fill="#747764"/>
+<path d="M2,16 3,16 3,17 2,17ZM35,16 36,16 36,17 35,17Z" fill="#343c35"/>
+<path d="M2,10 3,10 3,16 2,16ZM35,10 36,10 36,16 35,16Z" fill="#747764"/>
 </g>
-<g id="cab-unit-far-side">
-<polygon points="35,9 13,9 13,2 35,2" fill="#7e8d88"/>
-<polygon points="13,9 10,9 10,1 13,2" fill="#7e8d88"/>
-<polygon points="10,9 8,9 8,4 10,1" fill="#7e8d88"/>
-<polygon points="8,9 5,10 5,6 8,4" fill="#7e8d88"/>
-<polygon points="5,10 3,11 3,9 5,6" fill="#7e8d88"/>
+<g id="diesel-body">
 </g>
-<g id="cab-unit-far-shoulder">
-<polygon points="35,2 13,2 13,3 35,3" fill="#b3b3a1"/>
-<polygon points="13,2 10,1 10,2 13,3" fill="#b3b3a1"/>
-<polygon points="10,1 8,4 8,4 10,2" fill="#b3b3a1"/>
-<polygon points="8,4 5,6 5,6 8,4" fill="#b3b3a1"/>
-<polygon points="5,6 3,9 3,8 5,6" fill="#b3b3a1"/>
+<g id="cab-shell">
 </g>
-<g id="cab-unit-roof">
-<polygon points="35,3 13,3 13,5 35,5" fill="#c6c7b4"/>
-<polygon points="13,3 10,2 10,5 13,5" fill="#c6c7b4"/>
-<polygon points="10,2 8,4 8,7 10,5" fill="#c6c7b4"/>
-<polygon points="8,4 5,6 5,8 8,7" fill="#c6c7b4"/>
-<polygon points="5,6 3,8 3,10 5,8" fill="#c6c7b4"/>
+<g id="cab-shell">
+<path d="M13,12 13,16 3,16 3,13 3.75,12ZM14,12 16,12 16,16 14,16ZM17,12 19,12 19,16 17,16ZM20,12 22,12 22,16 20,16ZM23,12 25,12 25,16 23,16ZM26,12 28,12 28,16 26,16ZM29,12 31,12 31,16 29,16ZM32,12 35,12 35,16 32,16ZM6,12 3.75,12 6,9 7.5,9ZM35,10 7,10 7.5,9 35,9ZM9,10 13,10 13,12 9,12ZM13,11 13,10 16,10 16,11ZM14,11 16,11 16,12 14,12ZM16,11 16,10 19,10 19,11ZM17,11 19,11 19,12 17,12ZM19,11 19,10 22,10 22,11ZM20,11 22,11 22,12 20,12ZM22,11 22,10 25,10 25,11ZM23,11 25,11 25,12 23,12ZM25,11 25,10 28,10 28,11ZM26,11 28,11 28,12 26,12ZM28,11 28,10 31,10 31,11ZM29,11 31,11 31,12 29,12ZM31,11 31,10 35,10 35,11ZM32,11 35,11 35,12 32,12Z" fill="#7e8d88"/>
+<path d="M30,9 6,9 6,1 30,1ZM35,3 30,3 30,1 35,1ZM32,3 35,3 35,4 32,4ZM32,4 35,4 35,9 32,9ZM32,5.68629 32,9 30,9 30,5.68629ZM6,9 3,13 3,6 6,1Z" fill="#b3b3a1"/>
 </g>
-<g id="cab-unit-near-shoulder">
-<polygon points="35,5 13,5 13,9 35,9" fill="#9aa89e"/>
-<polygon points="13,5 10,5 10,8 13,9" fill="#9aa89e"/>
-<polygon points="10,5 8,7 8,10 10,8" fill="#9aa89e"/>
-<polygon points="8,7 5,8 5,11 8,10" fill="#9aa89e"/>
-<polygon points="5,8 3,10 3,12 5,11" fill="#9aa89e"/>
+<g id="windows">
+<path d="M9,12 6,12 7,10 9,10Z" fill="#dec38a"/>
 </g>
-<g id="cab-unit-near-side">
-<polygon points="35,9 13,9 13,16 35,16" fill="#7e8d88"/>
-<polygon points="13,9 10,8 10,16 13,16" fill="#7e8d88"/>
-<polygon points="10,8 8,10 8,15 10,16" fill="#7e8d88"/>
-<polygon points="8,10 5,11 5,15 8,15" fill="#7e8d88"/>
-<polygon points="5,11 3,12 3,14 5,15" fill="#7e8d88"/>
+<g id="vents">
+<path d="M32,16 31,16 31,11 32,11ZM29,16 28,16 28,11 29,11ZM26,16 25,16 25,11 26,11ZM23,16 22,16 22,11 23,11ZM20,16 19,16 19,11 20,11ZM17,16 16,16 16,11 17,11ZM14,16 13,16 13,11 14,11Z" fill="#303e3c"/>
+<path d="M30,5.68629 30,4 32,4 32,5.68629Z" fill="#333f37"/>
+<path d="M30,3 32,3 32,4 30,4Z" fill="#515950"/>
 </g>
-<g id="cab-unit-stripe">
-<polygon points="35,14 13,14 13,14 35,14" fill="#bd6b46"/>
-<polygon points="13,14 10,14 10,14 13,14" fill="#bd6b46"/>
-<polygon points="10,14 8,14 8,13 10,14" fill="#bd6b46"/>
-<polygon points="8,14 5,14 5,13 8,13" fill="#bd6b46"/>
-<polygon points="5,14 3,13 3,12 5,13" fill="#bd6b46"/>
-</g>
-<g id="cab-unit-grilles">
-<polygon points="33,12 15,12 15,9 33,9" fill="#455955"/>
-<polygon points="32,12 31,12 31,9 32,9" fill="#87998e"/>
-<polygon points="30,12 29,12 29,9 30,9" fill="#87998e"/>
-<polygon points="28,12 27,12 27,9 28,9" fill="#87998e"/>
-<polygon points="26,12 25,12 25,9 26,9" fill="#87998e"/>
-<polygon points="24,12 23,12 23,9 24,9" fill="#87998e"/>
-<polygon points="22,12 21,12 21,9 22,9" fill="#87998e"/>
-<polygon points="20,12 19,12 19,9 20,9" fill="#87998e"/>
-<polygon points="18,12 17,12 17,9 18,9" fill="#87998e"/>
-<polygon points="16,12 15,12 15,9 16,9" fill="#87998e"/>
-</g>
-<g id="cab-unit-portholes">
-<polygon points="26,13 26,12 27,12 28,12 28,13 28,13 27,13 26,13" fill="#334b4c"/>
-<polygon points="18,13 18,12 19,12 20,12 20,13 20,13 19,13 18,13" fill="#334b4c"/>
-</g>
-<g id="cab-unit-roof-fans">
-<polygon points="14,4 15,5 16,5 17,5 18,4 17,3 16,3 15,3" fill="#73847c"/>
-<polygon points="15,4 15,4 16,5 17,4 17,4 17,3 16,3 15,3" fill="#394c49"/>
-<polygon points="21,4 22,5 23,5 24,5 25,4 24,3 23,3 22,3" fill="#73847c"/>
-<polygon points="22,4 22,4 23,5 24,4 24,4 24,3 23,3 22,3" fill="#394c49"/>
-<polygon points="28,4 29,5 30,5 31,5 32,4 31,3 30,3 29,3" fill="#73847c"/>
-<polygon points="29,4 29,4 30,5 31,4 31,4 31,3 30,3 29,3" fill="#394c49"/>
-</g>
-<g id="cab-unit-windows">
-<polygon points="14,11 11,11 11,8 14,9" fill="#dec38a"/>
-<polygon points="10,2 10,3 8,5 8,4" fill="#dec38a"/>
-<polygon points="10,4 10,7 8,8 8,5" fill="#dec38a"/>
-</g>
-<g id="cab-unit-headlight">
-<polygon points="4,8 4,9 3,9 3,8" fill="#d8cfaf"/>
+<g id="stripe">
+<path d="M3,16 35,16 35,17 3,17Z" fill="#bd6b46"/>
 </g>
 <g id="coupler">
-<polygon points="35,15 37,15 37,14 35,14" fill="#7f786a"/>
-<polygon points="35,12 37,12 37,14 35,14" fill="#bbb09a"/>
+<path d="M36,15 37,15 37,16 36,16Z" fill="#7f786a"/>
+<path d="M36,13 37,13 37,15 36,15Z" fill="#bbb09a"/>
 </g>
 </svg>

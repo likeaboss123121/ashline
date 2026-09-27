@@ -126,13 +126,14 @@ test('revised wagons preserve near-side shades and back-to-front wall ordering i
   }
 });
 
-test('cab diesel has a continuous rounded shell, roof fans and cab details in all four sprites',()=>{
+test('cab diesel keeps a simple joined shell and valid anchors in all four sprites',()=>{
   const {setup:s}=catalogue();
   for(const view of ['driving','railyard']) for(const facing of ['left','right']) {
     const name=view+'-loco-diesel-cab-unit-'+facing;
     const svg=fs.readFileSync(path.join(__dirname,'../source/img',view,name+'.svg'),'utf8');
-    for(const part of ['roof','near-shoulder','near-side','roof-fans','windows','headlight','grilles'])
-      assert.ok(svg.includes('id="cab-unit-'+part+'"'),name+': '+part);
+    for(const part of ['cab-shell','windows','vents'])
+      assert.ok(svg.includes('id="'+part+'"'),name+': '+part);
+    assert.doesNotMatch(svg,/roof-fans|portholes|windscreen-wipers/,'no extra detailing');
     assert.doesNotMatch(svg,/id="full-body"|id="nose"/,'old overlapping body and nose are gone');
     const template=s[view+'Templates'].templates.find(t=>t.passage===name);
     assert.equal(template.lengthMetres,17);
@@ -143,21 +144,28 @@ test('cab diesel has a continuous rounded shell, roof fans and cab details in al
   }
 });
 
-test('steam touch-ups retain lengths and include rounded boilers and their distinct fittings',()=>{
+test('steam occlusion fixes retain lengths and the original simple detail level',()=>{
   const {setup:s}=catalogue();
-  for(const [model,length,detail] of [['steam-american',17,'slatted-pilot'],
-    ['steam-mikado',20,'smoke-deflector'],['steam-garratt',28,'water-tank-roof']]) {
+  for(const [model,length,detail] of [['steam-american',17,'cowcatcher'],
+    ['steam-mikado',20,'smoke-deflector'],['steam-garratt',28,'front-tank']]) {
     for(const view of ['driving','railyard']) for(const facing of ['left','right']) {
       const name=view+'-loco-'+model+'-'+facing;
       const svg=fs.readFileSync(path.join(__dirname,'../source/img',view,name+'.svg'),'utf8');
-      for(const part of ['boiler-bands','arched-cab-roof','coal-load','driver-spokes',detail])
+      for(const part of ['boiler','cab',detail])
         assert.ok(svg.includes('id="'+part+'"'),name+': '+part);
+      assert.doesNotMatch(svg,/boiler-bands|arched-cab-roof|coal-load|driver-spokes|slatted-pilot/);
       const template=s[view+'Templates'].templates.find(t=>t.passage===name);
       assert.equal(template.lengthMetres,length);
       assert.ok(template.cab[0]>=0&&template.cab[0]<=template.width);
       assert.ok(template.cab[1]>=0&&template.cab[1]<=template.height);
     }
   }
+});
+
+test('stock depth regression fixtures pass without booting the game',()=>{
+  const result=require('node:child_process').spawnSync('python3',[path.join(__dirname,'test_stock_depth.py')],
+    {encoding:'utf8',timeout:15000});
+  assert.equal(result.status,0,result.stderr||result.error?.message);
 });
 
 test('schema 3 upgrade adds the expanded fleet without repainting or replacing owned stock',()=>{

@@ -30,6 +30,7 @@ import math
 from pathlib import Path
 from locale_art import driving_landscapes, rolling_stock
 from fleet_art import extra_stock
+from stock_depth import StockDepth
 
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = ROOT / 'source' / 'img' / 'driving'
@@ -96,7 +97,7 @@ def project(u, v, z=0.0):
     return (u, (v - z) * PITCH)
 
 
-class Sprite:
+class Sprite(StockDepth):
     """Flat-coloured screen polygons, in draw order, grouped into named parts."""
 
     def __init__(self, name, title, length_m=None):
@@ -105,6 +106,7 @@ class Sprite:
         self.length_m = length_m
         self.parts = []
         self.points = {}
+        self.init_depth(project, False)
 
     def part(self, name):
         self.parts.append((name, []))
@@ -114,6 +116,7 @@ class Sprite:
 
     def world_poly(self, points, fill, opacity=1):
         self.poly([project(*pt) for pt in points], fill, opacity)
+        self.record_face(points)
 
     def box(self, u, v, z, length, width, height, top, side):
         """Axis-aligned box. At yaw 90 only the near side and the top are ever visible."""
@@ -130,11 +133,13 @@ class Sprite:
         (x0, y0), (x1, y1) = project(u0, v, z), project(u1, v, z)
         x0, y0, x1, y1 = px(x0), px(y0), px(x1), px(y1)
         self.parts[-1][1].append(([(x0, y0), (x1, y1), (x1, y1 + thickness), (x0, y0 + thickness)], fill, 1))
+        self.record_side_line(v)
 
     def line_z(self, u, v, z0, z1, fill, thickness=1):
         (x, y_top), (_, y_bottom) = project(u, v, z1), project(u, v, z0)
         x, y_top, y_bottom = px(x), px(y_top), px(y_bottom)
         self.parts[-1][1].append(([(x, y_top), (x + thickness, y_top), (x + thickness, y_bottom), (x, y_bottom)], fill, 1))
+        self.record_side_line(v)
 
     def disc_side(self, uc, zc, radius, rim, hub, sides=10, v=WHEEL_V):
         """A wheel, drawn on the near rail so the train sits on the track rather than above it. Wheels in a truck
@@ -147,11 +152,14 @@ class Sprite:
         self.points[key] = project(u, v, z)
 
     def bounds(self):
+        if hasattr(self, 'depth_bounds'):
+            return self.depth_bounds
         xs = [x for _, polys in self.parts for pts, *_ in polys for x, _ in pts]
         ys = [y for _, polys in self.parts for pts, *_ in polys for _, y in pts]
         return min(xs) - 1, min(ys) - 1, max(xs) + 1, max(ys) + 1
 
     def render(self):
+        self.resolve_depth()
         minx, miny, maxx, maxy = self.bounds()
         width, height = maxx - minx, maxy - miny
         ax, ay = -minx, -miny
@@ -168,6 +176,10 @@ class Sprite:
                  f'<title>Ashline driving template: {self.title}</title>']
         for name, polys in self.parts:
             lines.append(f'<g id="{name}">')
+            if self.depth_enabled:
+                lines.extend(self.stock_svg_part(name, polys, ax, ay))
+                lines.append('</g>')
+                continue
             for pts, fill, opacity in polys:
                 extra = f' fill-opacity="{opacity}"' if opacity < 1 else ''
                 lines.append('<polygon points="' + ' '.join(f'{x + ax},{y + ay}' for x, y in pts) + f'" fill="{fill}"{extra}/>')
@@ -189,7 +201,7 @@ def running_gear(s, length, wheel_starts=None):
     for start in (wheel_starts or (3, length - 9)):
         s.box(start, -6, 0, 6, 12, 3, P['truck_top'], P['truck_side'])
         for offset in (1.5, 4.5):
-            s.disc_side(start + offset, 1.8, 1.8, P['wheel_rim'], P['wheel_hub'])
+            s.disc_side(start + offset, 1.8, 1.8, P['wheel_rim'], P['wheel_hub'], v=6)
     s.part('underframe')
     s.box(0, -5, 3, length, 10, 2, P['frame_top'], P['frame_side'])
 
@@ -257,7 +269,7 @@ def flatcar(length_m=14):
     s.part('deck')
     s.box(1, -5, 5, L - 2, 10, 2, P['flat_top'], P['flat_side'])
     s.part('planks')
-    s.line_u(2, L - 2, 0, 7, P['flat_plank'])
+    s.world_poly([(2,0,7),(L-2,0,7),(L-2,1,7),(2,1,7)], P['flat_plank'])
     s.part('stakes')
     for u in range(4, L - 2, 6):
         s.line_z(u, HALF_WIDTH, 7, 10, P['flat_stake'])
@@ -305,7 +317,11 @@ def mirrored(sprite, name, title):
     with it, so the cab is still the cab.
     """
     span = sprite.length_m * UNITS_PER_METRE
+    sprite.resolve_depth()
     flipped = Sprite(name, title, sprite.length_m)
+    flipped.depth_resolved = True
+    minx, miny, maxx, maxy = sprite.bounds()
+    flipped.depth_bounds = (span-maxx, miny, span-minx, maxy)
     for part_name, polys in sprite.parts:
         flipped.part(part_name)
         for pts, fill, opacity in polys:

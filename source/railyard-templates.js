@@ -1261,25 +1261,25 @@ setup.railyardTemplates = {
 			"passage": "railyard-loco-diesel-cab-unit-right",
 			"title": "Four axle cab diesel, United States 1950s, facing right",
 			"width": 44,
-			"height": 38,
+			"height": 39,
 			"anchorX": 5,
-			"anchorY": 19,
+			"anchorY": 20,
 			"lengthMetres": 17,
 			"rear": [
 				5,
-				15
+				16
 			],
 			"front": [
 				39,
-				32
+				33
 			],
 			"top": [
 				22,
-				4
+				5
 			],
 			"cab": [
-				29,
-				13
+				33,
+				16
 			]
 		},
 		{
@@ -1287,24 +1287,24 @@ setup.railyardTemplates = {
 			"passage": "railyard-loco-diesel-cab-unit-left",
 			"title": "Four axle cab diesel, United States 1950s, facing left",
 			"width": 44,
-			"height": 35,
+			"height": 37,
 			"anchorX": 5,
-			"anchorY": 16,
+			"anchorY": 18,
 			"lengthMetres": 17,
 			"rear": [
 				5,
-				12
+				14
 			],
 			"front": [
 				39,
-				29
+				31
 			],
 			"top": [
 				22,
-				1
+				3
 			],
 			"cab": [
-				15,
+				11,
 				3
 			]
 		},
@@ -1312,52 +1312,52 @@ setup.railyardTemplates = {
 			"file": "railyard-loco-steam-american-right.svg",
 			"passage": "railyard-loco-steam-american-right",
 			"title": "4-4-0 old steam engine, United States 1880s, facing right",
-			"width": 44,
-			"height": 35,
+			"width": 46,
+			"height": 37,
 			"anchorX": 5,
-			"anchorY": 15,
+			"anchorY": 17,
 			"lengthMetres": 17,
 			"rear": [
 				5,
-				11
+				13
 			],
 			"front": [
 				39,
-				28
+				30
 			],
 			"top": [
 				22,
-				0
+				2
 			],
 			"cab": [
 				17,
-				3
+				5
 			]
 		},
 		{
 			"file": "railyard-loco-steam-american-left.svg",
 			"passage": "railyard-loco-steam-american-left",
 			"title": "4-4-0 old steam engine, United States 1880s, facing left",
-			"width": 45,
-			"height": 40,
-			"anchorX": 6,
-			"anchorY": 21,
+			"width": 46,
+			"height": 43,
+			"anchorX": 7,
+			"anchorY": 24,
 			"lengthMetres": 17,
 			"rear": [
-				6,
-				17
+				7,
+				20
 			],
 			"front": [
-				40,
-				34
+				41,
+				37
 			],
 			"top": [
-				23,
-				6
+				24,
+				9
 			],
 			"cab": [
-				28,
-				14
+				29,
+				17
 			]
 		},
 		{
@@ -1417,25 +1417,25 @@ setup.railyardTemplates = {
 			"passage": "railyard-loco-steam-mikado-right",
 			"title": "2-8-2 freight steam engine, Japan 1930s, facing right",
 			"width": 50,
-			"height": 38,
+			"height": 39,
 			"anchorX": 5,
-			"anchorY": 15,
+			"anchorY": 16,
 			"lengthMetres": 20,
 			"rear": [
 				5,
-				11
+				12
 			],
 			"front": [
 				45,
-				31
+				32
 			],
 			"top": [
 				25,
-				1
+				2
 			],
 			"cab": [
 				19,
-				4
+				5
 			]
 		},
 		{
@@ -1443,25 +1443,25 @@ setup.railyardTemplates = {
 			"passage": "railyard-loco-steam-mikado-left",
 			"title": "2-8-2 freight steam engine, Japan 1930s, facing left",
 			"width": 51,
-			"height": 42,
+			"height": 43,
 			"anchorX": 6,
-			"anchorY": 20,
+			"anchorY": 21,
 			"lengthMetres": 20,
 			"rear": [
 				6,
-				16
+				17
 			],
 			"front": [
 				46,
-				36
+				37
 			],
 			"top": [
 				26,
-				6
+				7
 			],
 			"cab": [
 				32,
-				15
+				16
 			]
 		},
 		{
@@ -1469,25 +1469,25 @@ setup.railyardTemplates = {
 			"passage": "railyard-loco-steam-garratt-right",
 			"title": "Double mountain articulated steam engine, South Africa / Britain 1950s, facing right",
 			"width": 66,
-			"height": 46,
+			"height": 47,
 			"anchorX": 5,
-			"anchorY": 15,
+			"anchorY": 16,
 			"lengthMetres": 28,
 			"rear": [
 				5,
-				11
+				12
 			],
 			"front": [
 				61,
-				39
+				40
 			],
 			"top": [
 				33,
-				5
+				6
 			],
 			"cab": [
-				22,
-				6
+				29,
+				10
 			]
 		},
 		{
@@ -1512,8 +1512,8 @@ setup.railyardTemplates = {
 				5
 			],
 			"cab": [
-				44,
-				17
+				37,
+				13
 			]
 		},
 		{

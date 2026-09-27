@@ -27,6 +27,7 @@ import math
 from pathlib import Path
 from locale_art import yard_plants, yard_industries, rolling_stock
 from fleet_art import extra_stock
+from stock_depth import StockDepth
 
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = ROOT / 'source' / 'img' / 'railyard'
@@ -115,7 +116,7 @@ def convex_hull(points):
     return lower[:-1] + upper[:-1]
 
 
-class Sprite:
+class Sprite(StockDepth):
     """Flat-coloured screen polygons, in draw order, grouped into named parts."""
 
     def __init__(self, name, title, length_m=None):
@@ -124,6 +125,7 @@ class Sprite:
         self.length_m = length_m
         self.parts = []
         self.points = {}
+        self.init_depth(project, True)
 
     def part(self, name):
         self.parts.append((name, []))
@@ -133,6 +135,7 @@ class Sprite:
 
     def world_poly(self, points, fill, opacity=1):
         self.poly([project(*pt) for pt in points], fill, opacity)
+        self.record_face(points)
 
     def silhouette(self, points3d, fill):
         """Underlay in a dark shade so rounded face edges never show the background."""
@@ -209,23 +212,28 @@ class Sprite:
         (x0, y0), (x1, y1) = project(u0, v, z), project(u1, v, z)
         x0, y0, x1, y1 = px(x0), px(y0), px(x1), px(y1)
         self.parts[-1][1].append(([(x0, y0), (x1, y1), (x1, y1 + thickness), (x0, y0 + thickness)], fill, opacity))
+        self.record_side_line(v)
 
     def line_z(self, u, v, z0, z1, fill):
         """A vertical line one pixel wide."""
         (x, y_top), (_, y_bottom) = project(u, v, z1), project(u, v, z0)
         x, y_top, y_bottom = px(x), px(y_top), px(y_bottom)
         self.parts[-1][1].append(([(x, y_top), (x + 1, y_top), (x + 1, y_bottom), (x, y_bottom)], fill, 1))
+        self.record_side_line(v)
 
     def mark(self, key, u, v, z):
         """Record a world point (label or shortcut spot) to publish in placement data."""
         self.points[key] = project(u, v, z)
 
     def bounds(self):
+        if hasattr(self, 'depth_bounds'):
+            return self.depth_bounds
         xs = [x for _, polys in self.parts for pts, *_ in polys for x, _ in pts]
         ys = [y for _, polys in self.parts for pts, *_ in polys for _, y in pts]
         return min(xs) - 1, min(ys) - 1, max(xs) + 1, max(ys) + 1
 
     def render(self):
+        self.resolve_depth()
         minx, miny, maxx, maxy = self.bounds()
         width, height = maxx - minx, maxy - miny
         ax, ay = -minx, -miny
@@ -242,6 +250,10 @@ class Sprite:
                  f'<title>Ashline rail yard template: {self.title}</title>']
         for name, polys in self.parts:
             lines.append(f'<g id="{name}">')
+            if self.depth_enabled:
+                lines.extend(self.stock_svg_part(name, polys, ax, ay))
+                lines.append('</g>')
+                continue
             for pts, fill, opacity in polys:
                 extra = f' fill-opacity="{opacity}"' if opacity < 1 else ''
                 lines.append('<polygon points="' + ' '.join(f'{x + ax},{y + ay}' for x, y in pts) + f'" fill="{fill}"{extra}/>')
@@ -328,8 +340,8 @@ def flatcar(length_m=14):
     running_gear(s, L)
     s.part('deck')
     s.box(1, -5, 5, L - 2, 10, 2, P['flat_top'], P['flat_side'], P['flat_end'])
-    s.line_u(2, L - 2, -2, 7, P['flat_plank'])
-    s.line_u(2, L - 2, 2, 7, P['flat_plank'])
+    for v in (-2, 2):
+        s.world_poly([(2,v,7),(L-2,v,7),(L-2,v+1,7),(2,v+1,7)], P['flat_plank'])
     s.part('stakes')
     for u in range(4, L - 2, 6):
         s.line_z(u, 5, 7, 10, P['flat_stake'])
@@ -474,7 +486,7 @@ def side_window(s, u, length, v, z0, z1):
 
 def coupling_rod(s, U, u0, u1, z):
     a, b = sorted((U(u0), U(u1)))
-    s.line_u(a, b, 5.4, z, P['rod'])
+    s.line_u(a, b, 5.6, z, P['rod'])
 
 
 def diesel_shunter(facing, length_m=9):

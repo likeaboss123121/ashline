@@ -12,7 +12,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-boxcar",
 			"title": "Boxcar",
 			"width": 28,
-			"height": 20,
+			"height": 21,
 			"anchorX": 2,
 			"anchorY": 15,
 			"lengthMetres": 12,
@@ -34,7 +34,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-flatcar",
 			"title": "Flatcar",
 			"width": 32,
-			"height": 14,
+			"height": 15,
 			"anchorX": 2,
 			"anchorY": 9,
 			"lengthMetres": 14,
@@ -56,7 +56,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-gondola",
 			"title": "Gondola",
 			"width": 30,
-			"height": 17,
+			"height": 18,
 			"anchorX": 2,
 			"anchorY": 12,
 			"lengthMetres": 13,
@@ -78,7 +78,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-tanker",
 			"title": "Tanker car",
 			"width": 32,
-			"height": 20,
+			"height": 21,
 			"anchorX": 2,
 			"anchorY": 15,
 			"lengthMetres": 14,
@@ -100,7 +100,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-passenger",
 			"title": "Passenger",
 			"width": 52,
-			"height": 20,
+			"height": 21,
 			"anchorX": 2,
 			"anchorY": 15,
 			"lengthMetres": 24,
@@ -122,7 +122,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-sleeper",
 			"title": "Sleeper",
 			"width": 54,
-			"height": 20,
+			"height": 21,
 			"anchorX": 2,
 			"anchorY": 15,
 			"lengthMetres": 25,
@@ -144,7 +144,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-observation",
 			"title": "Observation",
 			"width": 50,
-			"height": 22,
+			"height": 23,
 			"anchorX": 2,
 			"anchorY": 17,
 			"lengthMetres": 23,
@@ -166,7 +166,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-kitchen",
 			"title": "Kitchen",
 			"width": 52,
-			"height": 20,
+			"height": 21,
 			"anchorX": 2,
 			"anchorY": 15,
 			"lengthMetres": 24,
@@ -188,7 +188,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-private",
 			"title": "Private",
 			"width": 48,
-			"height": 20,
+			"height": 21,
 			"anchorX": 2,
 			"anchorY": 15,
 			"lengthMetres": 22,
@@ -418,7 +418,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-hopper",
 			"title": "Covered hopper",
 			"width": 32,
-			"height": 19,
+			"height": 20,
 			"anchorX": 2,
 			"anchorY": 14,
 			"lengthMetres": 14,
@@ -440,7 +440,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-refrigerated",
 			"title": "Refrigerated boxcar",
 			"width": 34,
-			"height": 21,
+			"height": 22,
 			"anchorX": 2,
 			"anchorY": 16,
 			"lengthMetres": 15,
@@ -618,25 +618,25 @@ setup.drivingTemplates = {
 			"passage": "driving-loco-diesel-cab-unit-right",
 			"title": "Four axle cab diesel, United States 1950s, facing right",
 			"width": 38,
-			"height": 21,
+			"height": 22,
 			"anchorX": 2,
-			"anchorY": 16,
+			"anchorY": 17,
 			"lengthMetres": 17,
 			"rear": [
 				2,
-				13
+				14
 			],
 			"front": [
 				36,
-				13
+				14
 			],
 			"top": [
 				19,
-				-1
+				0
 			],
 			"cab": [
-				26,
-				3
+				30,
+				4
 			]
 		},
 		{
@@ -644,25 +644,25 @@ setup.drivingTemplates = {
 			"passage": "driving-loco-diesel-cab-unit-left",
 			"title": "Four axle cab diesel, United States 1950s, facing left",
 			"width": 38,
-			"height": 21,
+			"height": 22,
 			"anchorX": 2,
-			"anchorY": 16,
+			"anchorY": 17,
 			"lengthMetres": 17,
 			"rear": [
 				2,
-				13
+				14
 			],
 			"front": [
 				36,
-				13
+				14
 			],
 			"top": [
 				19,
-				-1
+				0
 			],
 			"cab": [
-				12,
-				3
+				8,
+				4
 			]
 		},
 		{
@@ -670,25 +670,25 @@ setup.drivingTemplates = {
 			"passage": "driving-loco-steam-american-right",
 			"title": "4-4-0 old steam engine, United States 1880s, facing right",
 			"width": 38,
-			"height": 22,
+			"height": 24,
 			"anchorX": 2,
-			"anchorY": 17,
+			"anchorY": 19,
 			"lengthMetres": 17,
 			"rear": [
 				2,
-				14
+				16
 			],
 			"front": [
 				36,
-				14
+				16
 			],
 			"top": [
 				19,
-				0
+				2
 			],
 			"cab": [
 				14,
-				4
+				6
 			]
 		},
 		{
@@ -696,25 +696,25 @@ setup.drivingTemplates = {
 			"passage": "driving-loco-steam-american-left",
 			"title": "4-4-0 old steam engine, United States 1880s, facing left",
 			"width": 38,
-			"height": 22,
+			"height": 24,
 			"anchorX": 2,
-			"anchorY": 17,
+			"anchorY": 19,
 			"lengthMetres": 17,
 			"rear": [
 				2,
-				14
+				16
 			],
 			"front": [
 				36,
-				14
+				16
 			],
 			"top": [
 				19,
-				0
+				2
 			],
 			"cab": [
 				24,
-				4
+				6
 			]
 		},
 		{
@@ -774,25 +774,25 @@ setup.drivingTemplates = {
 			"passage": "driving-loco-steam-mikado-right",
 			"title": "2-8-2 freight steam engine, Japan 1930s, facing right",
 			"width": 44,
-			"height": 21,
+			"height": 23,
 			"anchorX": 2,
-			"anchorY": 16,
+			"anchorY": 18,
 			"lengthMetres": 20,
 			"rear": [
 				2,
-				13
+				15
 			],
 			"front": [
 				42,
-				13
+				15
 			],
 			"top": [
 				22,
-				-1
+				1
 			],
 			"cab": [
 				16,
-				3
+				5
 			]
 		},
 		{
@@ -800,25 +800,25 @@ setup.drivingTemplates = {
 			"passage": "driving-loco-steam-mikado-left",
 			"title": "2-8-2 freight steam engine, Japan 1930s, facing left",
 			"width": 44,
-			"height": 21,
+			"height": 23,
 			"anchorX": 2,
-			"anchorY": 16,
+			"anchorY": 18,
 			"lengthMetres": 20,
 			"rear": [
 				2,
-				13
+				15
 			],
 			"front": [
 				42,
-				13
+				15
 			],
 			"top": [
 				22,
-				-1
+				1
 			],
 			"cab": [
 				28,
-				3
+				5
 			]
 		},
 		{
@@ -826,25 +826,25 @@ setup.drivingTemplates = {
 			"passage": "driving-loco-steam-garratt-right",
 			"title": "Double mountain articulated steam engine, South Africa / Britain 1950s, facing right",
 			"width": 60,
-			"height": 21,
+			"height": 23,
 			"anchorX": 2,
-			"anchorY": 16,
+			"anchorY": 18,
 			"lengthMetres": 28,
 			"rear": [
 				2,
-				13
+				15
 			],
 			"front": [
 				58,
-				13
+				15
 			],
 			"top": [
 				30,
-				-1
+				1
 			],
 			"cab": [
-				19,
-				3
+				26,
+				5
 			]
 		},
 		{
@@ -852,25 +852,25 @@ setup.drivingTemplates = {
 			"passage": "driving-loco-steam-garratt-left",
 			"title": "Double mountain articulated steam engine, South Africa / Britain 1950s, facing left",
 			"width": 60,
-			"height": 21,
+			"height": 23,
 			"anchorX": 2,
-			"anchorY": 16,
+			"anchorY": 18,
 			"lengthMetres": 28,
 			"rear": [
 				2,
-				13
+				15
 			],
 			"front": [
 				58,
-				13
+				15
 			],
 			"top": [
 				30,
-				-1
+				1
 			],
 			"cab": [
-				41,
-				3
+				34,
+				5
 			]
 		},
 		{
@@ -878,7 +878,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-boxcar-planked",
 			"title": "Planked goods van, Britain 1930s",
 			"width": 28,
-			"height": 20,
+			"height": 21,
 			"anchorX": 2,
 			"anchorY": 15,
 			"lengthMetres": 12,
@@ -900,7 +900,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-boxcar-ribbed",
 			"title": "Ribbed steel boxcar, China 1970s",
 			"width": 28,
-			"height": 20,
+			"height": 21,
 			"anchorX": 2,
 			"anchorY": 15,
 			"lengthMetres": 12,
@@ -922,7 +922,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-flatcar-stakes",
 			"title": "Stake flatcar, Sweden 1960s",
 			"width": 32,
-			"height": 14,
+			"height": 15,
 			"anchorX": 2,
 			"anchorY": 9,
 			"lengthMetres": 14,
@@ -944,7 +944,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-tanker-banded",
 			"title": "Banded tank wagon, Soviet Union 1960s",
 			"width": 32,
-			"height": 19,
+			"height": 20,
 			"anchorX": 2,
 			"anchorY": 14,
 			"lengthMetres": 14,
@@ -966,7 +966,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-gondola-high-sided",
 			"title": "High-sided mineral wagon, South Africa 1970s",
 			"width": 30,
-			"height": 19,
+			"height": 20,
 			"anchorX": 2,
 			"anchorY": 14,
 			"lengthMetres": 13,
@@ -988,7 +988,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-hopper-cylindrical",
 			"title": "Cylindrical grain hopper, Canada 1970s",
 			"width": 32,
-			"height": 19,
+			"height": 20,
 			"anchorX": 2,
 			"anchorY": 14,
 			"lengthMetres": 14,
@@ -1010,7 +1010,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-refrigerated-ice",
 			"title": "Ice-cooled refrigerator car, United States 1920s",
 			"width": 34,
-			"height": 20,
+			"height": 21,
 			"anchorX": 2,
 			"anchorY": 15,
 			"lengthMetres": 15,
@@ -1032,7 +1032,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-passenger-clerestory",
 			"title": "Clerestory passenger coach, Britain 1910s",
 			"width": 52,
-			"height": 21,
+			"height": 22,
 			"anchorX": 2,
 			"anchorY": 16,
 			"lengthMetres": 24,
@@ -1054,7 +1054,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-passenger-stainless",
 			"title": "Stainless passenger coach, United States 1950s",
 			"width": 52,
-			"height": 21,
+			"height": 22,
 			"anchorX": 2,
 			"anchorY": 16,
 			"lengthMetres": 24,
@@ -1076,7 +1076,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-passenger-suburban",
 			"title": "Suburban passenger coach, Japan 1970s",
 			"width": 52,
-			"height": 21,
+			"height": 22,
 			"anchorX": 2,
 			"anchorY": 16,
 			"lengthMetres": 24,
@@ -1098,7 +1098,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-sleeper-blue",
 			"title": "Blue sleeping car, France 1930s",
 			"width": 54,
-			"height": 21,
+			"height": 22,
 			"anchorX": 2,
 			"anchorY": 16,
 			"lengthMetres": 25,
@@ -1120,7 +1120,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-sleeper-green",
 			"title": "Green sleeping car, Soviet Union 1960s",
 			"width": 54,
-			"height": 21,
+			"height": 22,
 			"anchorX": 2,
 			"anchorY": 16,
 			"lengthMetres": 25,
@@ -1142,7 +1142,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-observation-dome",
 			"title": "Dome observation car, United States 1950s",
 			"width": 50,
-			"height": 23,
+			"height": 24,
 			"anchorX": 2,
 			"anchorY": 18,
 			"lengthMetres": 23,
@@ -1164,7 +1164,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-kitchen-diner",
 			"title": "Red dining car, Germany 1960s",
 			"width": 52,
-			"height": 21,
+			"height": 22,
 			"anchorX": 2,
 			"anchorY": 16,
 			"lengthMetres": 24,
@@ -1186,7 +1186,7 @@ setup.drivingTemplates = {
 			"passage": "driving-car-private-saloon",
 			"title": "Wood-panelled saloon car, Argentina 1910s",
 			"width": 48,
-			"height": 21,
+			"height": 22,
 			"anchorX": 2,
 			"anchorY": 16,
 			"lengthMetres": 22,

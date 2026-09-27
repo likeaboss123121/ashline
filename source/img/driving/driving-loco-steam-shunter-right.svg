@@ -1,61 +1,54 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="22" viewBox="0 0 24 22" shape-rendering="crispEdges" data-template="driving-loco-steam-shunter-right" data-anchor-x="2" data-anchor-y="18" data-length-m="10">
 <title>Ashline driving template: 0-6-0 steam shunter, facing right</title>
+<g id="silhouette-underlays">
+</g>
 <g id="coupler">
-<polygon points="1,17 3,17 3,16 1,16" fill="#7f786a"/>
-<polygon points="1,14 3,14 3,16 1,16" fill="#bbb09a"/>
+<path d="M1,16 2,16 2,17 1,17Z" fill="#7f786a"/>
+<path d="M1,14 2,14 2,16 1,16Z" fill="#bbb09a"/>
 </g>
 <g id="frame">
-<polygon points="2,19 22,19 22,17 2,17" fill="#232626"/>
-<polygon points="2,12 22,12 22,17 2,17" fill="#454440"/>
+<path d="M21,17 22,17 22,19 21,19ZM2,18 21,18 21,19 2,19ZM3,18 2,18 2,17 3,17Z" fill="#232626"/>
+<path d="M2,12 3,12 3,17 2,17Z" fill="#454440"/>
 </g>
 <g id="wheels">
-<polygon points="10,19 9,17 8,16 7,16 6,17 5,19 6,20 7,21 8,21 9,20" fill="#1b1f20"/>
-<polygon points="9,19 8,18 8,18 7,18 7,18 6,19 7,19 7,20 8,20 8,19" fill="#8c3b2e"/>
-<polygon points="15,19 14,17 13,16 12,16 11,17 10,19 11,20 12,21 13,21 14,20" fill="#1b1f20"/>
-<polygon points="14,19 13,18 13,18 12,18 12,18 11,19 12,19 12,20 13,20 13,19" fill="#8c3b2e"/>
-<polygon points="20,19 19,17 18,16 17,16 16,17 15,19 16,20 17,21 18,21 19,20" fill="#1b1f20"/>
-<polygon points="19,19 18,18 18,18 17,18 17,18 16,19 17,19 17,20 18,20 18,19" fill="#8c3b2e"/>
+<path d="M9,20 9,20 8,21 8,21 8,20ZM8,20 8,21 8,21 7,21 6,20 6,20ZM7,20 7,20 6,20 6,20 5,19 5,19 7,19ZM14,20 14,20 13,21 13,21 13,20ZM13,20 13,21 13,21 12,21 11,20 11,20ZM19,20 18,21 18,21 18,19 20,19 20,19ZM18,20 18,21 18,21 17,21 16,20 16,20Z" fill="#1b1f20"/>
+<path d="M8,19 8,20 7,20ZM8,19 7,20 7,19Z" fill="#8c3b2e"/>
 </g>
 <g id="rods">
-<polygon points="8,19 18,19 18,20 8,20" fill="#9aa0a0"/>
+<path d="M8,19 18,19 18,20 8,20Z" fill="#9aa0a0"/>
 </g>
 <g id="running-board">
-<polygon points="3,18 21,18 21,17 3,17" fill="#2d302c"/>
-<polygon points="3,10 21,10 21,17 3,17" fill="#55584f"/>
+<path d="M3,17 21,17 21,18 3,18Z" fill="#2d302c"/>
+<path d="M19,11 19,10 21,10 21,11Z" fill="#55584f"/>
 </g>
 <g id="bunker">
-<polygon points="3,17 6,17 6,12 3,12" fill="#5b3a32"/>
-<polygon points="3,5 6,5 6,12 3,12" fill="#7a4a3c"/>
-<polygon points="3,12 6,12 6,11 3,11" fill="#1a1a19"/>
-<polygon points="3,5 6,5 6,11 3,11" fill="#2c2b28"/>
+<path d="M3,12 6,12 6,17 3,17Z" fill="#5b3a32"/>
+<path d="M3,11.63604 6,11.63604 6,12 3,12Z" fill="#7a4a3c"/>
+<path d="M3,11.63604 3,11 6,11 6,11.63604Z" fill="#1a1a19"/>
+<path d="M5,9 3,9 3,5 5,5ZM3,10 6,10 6,11 3,11ZM5,10 3,10 3,9 5,9Z" fill="#2c2b28"/>
 </g>
 <g id="cab">
-<polygon points="6,17 12,17 12,10 6,10" fill="#5b3a32"/>
-<polygon points="6,2 12,2 12,10 6,10" fill="#7a4a3c"/>
-<polygon points="7,13 10,13 10,11 7,11" fill="#dec38a"/>
-<polygon points="5,10 12,10 12,9 5,9" fill="#5b3a32"/>
-<polygon points="5,1 12,1 12,9 5,9" fill="#7a4a3c"/>
+<path d="M6,11 6,10 12,10 12,11ZM10,11 12,11 12,17 10,17ZM6,13 10,13 10,17 6,17ZM7,13 6,13 6,11 7,11ZM5,9.86827 5,9 12,9 12,9.86827ZM5,9.86827 6,9.86827 6,10 5,10Z" fill="#5b3a32"/>
+<path d="M6,9.86827 12,9.86827 12,10 6,10ZM5,1 12,1 12,9 5,9Z" fill="#7a4a3c"/>
+<path d="M7,11 10,11 10,13 7,13Z" fill="#dec38a"/>
 </g>
 <g id="side-tank">
-<polygon points="12,17 19,17 19,13 12,13" fill="#2c3131"/>
-<polygon points="12,6 19,6 19,13 12,13" fill="#4a5150"/>
-<polygon points="12,15 19,15 19,16 12,16" fill="#c9a15f"/>
+<path d="M12,15 12,13 19,13 19,15ZM12,16 19,16 19,17 12,17Z" fill="#2c3131"/>
+<path d="M12,11.98959 19,11.98959 19,13 12,13Z" fill="#4a5150"/>
+<path d="M12,15 19,15 19,16 12,16Z" fill="#c9a15f"/>
 </g>
 <g id="boiler">
-<polygon points="12,12 19,12 19,10 12,10" fill="#171a1a"/>
-<polygon points="12,5 19,5 19,10 12,10" fill="#4a5150"/>
-<polygon points="14,8 16,8 16,7 14,7" fill="#2c3131"/>
-<polygon points="14,5 16,5 16,7 14,7" fill="#c9a15f"/>
+<path d="M12,11.98959 12,10 19,10 19,11.98959Z" fill="#171a1a"/>
+<path d="M16,7 16,5 19,5 19,7ZM14,7 12,7 12,5 14,5ZM16,7 19,7 19,10 16,10ZM12,8 16,8 16,10 12,10ZM14,8 12,8 12,7 14,7Z" fill="#4a5150"/>
+<path d="M14,7 16,7 16,8 14,8Z" fill="#2c3131"/>
+<path d="M14,5 16,5 16,7 14,7Z" fill="#c9a15f"/>
 </g>
 <g id="smokebox">
-<polygon points="19,17 22,17 22,11 19,11" fill="#1f2222"/>
-<polygon points="19,10 22,10 22,10 19,10" fill="#383c3c"/>
-<polygon points="19,4 22,4 22,10 19,10" fill="#383c3c"/>
-<polygon points="19,8 21,8 21,5 19,5" fill="#1f2222"/>
-<polygon points="19,4 21,4 21,5 19,5" fill="#383c3c"/>
+<path d="M19,11 22,11 22,17 19,17ZM19,7.74695 19,5 21,5 21,7.74695Z" fill="#1f2222"/>
+<path d="M21,5 21,4 22,4 22,5ZM21,5 22,5 22,10 21,10ZM19,7.74695 21,7.74695 21,10 19,10ZM19,4 21,4 21,5 19,5Z" fill="#383c3c"/>
 </g>
 <g id="coupler">
-<polygon points="21,17 23,17 23,16 21,16" fill="#7f786a"/>
-<polygon points="21,14 23,14 23,16 21,16" fill="#bbb09a"/>
+<path d="M22,16 23,16 23,17 22,17Z" fill="#7f786a"/>
+<path d="M22,14 23,14 23,16 22,16Z" fill="#bbb09a"/>
 </g>
 </svg>
