@@ -11,6 +11,11 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA = json.loads((ROOT / 'scripts/stock-designs.json').read_text())
 
 
+def blend(a, b, amount):
+    return '#' + ''.join(f'{round(int(a[i:i+2],16)*(1-amount)+int(b[i:i+2],16)*amount):02x}'
+                         for i in (1,3,5))
+
+
 def write_catalogue():
     (ROOT / 'source/stock-catalogue.js').write_text(
         '// Generated from scripts/stock-designs.json by the art generators.\n'
@@ -43,15 +48,19 @@ class Builder:
         self.poly([(a, 5.5, z), (b, 5.5, z), (b, 5.5, z+1), (a, 5.5, z+1)], '#a0a395')
 
     def boiler(self, start, length, top, side):
-        # Faceted cylinder, with the visible end drawn last in the isometric projection.
+        # One closed octagonal section. The crown, shoulder, side and underside
+        # have distinct face lighting, not a single roof-coloured strip.
         self.s.part('boiler')
-        for v0, z0, v1, z1, colour in [(-4, 12, -3, 16, top), (-3, 16, 2, 17, top),
-                                      (2, 17, 4.5, 14, top), (4.5, 14, 4.5, 10, side),
-                                      (4.5, 10, 2, 8, '#29302c')]:
+        ring = [(-4.5,10.5),(-4.5,14.5),(-2.5,17),(2.5,17),
+                (4.5,14.5),(4.5,10.5),(2.5,8),(-2.5,8)]
+        colours = [side,top,top,blend(top,side,.5),side,blend(side,'#000000',.3),side,side]
+        for (v0,z0),(v1,z1),colour in zip(ring,ring[1:]+ring[:1],colours):
+            if -(z1-z0)+(v1-v0) <= 0:
+                continue  # outward face points away from both stock cameras
             self.poly([(start,v0,z0),(start+length,v0,z0),(start+length,v1,z1),(start,v1,z1)], colour)
         end = start if self.reverse else start + length
-        self.poly([(end, v, z) for v, z in [(-4,12),(-3,16),(2,17),(4.5,14),
-                   (4.5,10),(2,8),(-2,8)]], '#2d3431')
+        if self.iso:
+            self.poly([(end,v,z) for v,z in ring], '#2d3431')
 
 
 def cab_shell(b, top, side, trim):
@@ -129,6 +138,7 @@ def locomotive(api, iso, spec, facing):
         if style == 'mechanical':
             s.part('chain-drive'); b.rod(3,L-3,2); b.wheel(L/2,1.3,3)
     else:
+        body_end = blend(side, '#000000', .25)
         s.part('coupling-rods')
         if style == 'garratt':
             b.rod(7,19); b.rod(L-19,L-7)
@@ -142,18 +152,18 @@ def locomotive(api, iso, spec, facing):
             s.part(part)
             if part in ('tender','rear-tank','front-tank'):
                 length = 14 if 'tank' in part else cab_u-2
-                b.box(u,-5,5,length,10,8,top,side)
-                if part != 'front-tank': b.box(u+2,-3,13,length-4,6,1,'#30352e','#1d241e')
-                b.box(u+2,5,8,length-4,.2,1,trim,trim)
+                b.box(u,-5,5,length,10,8,top,side,body_end)
+                if part != 'front-tank': b.box(u+2,-3,13,length-4,6,1,'#30352e','#1d241e','#171c18')
+                b.box(u+2,5,8,length-4,.2,1,trim,trim,trim)
             elif part=='cab':
-                b.box(u,-5,6,7,10,11,top,side)
+                b.box(u,-5,6,7,10,11,top,side,body_end)
                 b.poly([(u+1,5,12),(u+5,5,12),(u+5,5,15),(u+1,5,15)],'#dec38a')
                 if style == 'streamliner':
                     b.poly([(u,-5,17),(u,0,19),(u+7,0,19),(u+7,-5,17)],top)
                     b.poly([(u,0,19),(u,5,17),(u+7,5,17),(u+7,0,19)],'#547f92')
                     b.box(u,5,8,7,.2,1,trim,trim)
                 else:
-                    b.box(u-.5,-5.5,17,8,11,1,top,side)
+                    b.box(u-.5,-5.5,17,8,11,1,top,side,body_end)
             else:
                 end = L-17 if style=='garratt' else L-2
                 if style=='streamliner':
@@ -182,13 +192,13 @@ def locomotive(api, iso, spec, facing):
                     b.box(end-8,-1.3,19,3,2.6,1,'#303d43','#213038')
                 else:
                     b.boiler(u,end-u,top,side)
-                    b.box(u+4,-1.5,17,3,3,2,trim,side)
-                    b.box(end-3,-1,16,2,2,5,'#484e45','#272f2b')
+                    b.box(u+4,-1.5,17,3,3,2,trim,side,body_end)
+                    b.box(end-3,-1,16,2,2,5,'#484e45','#272f2b','#1d2320')
                     if style=='american':
-                        s.part('spark-arrestor'); b.box(end-4,-2.5,20,4,5,3,trim,'#494f44')
+                        s.part('spark-arrestor'); b.box(end-4,-2.5,20,4,5,3,trim,'#494f44','#363b32')
                         s.part('cowcatcher'); b.poly([(L-4,-5,4),(L,-6,1),(L,6,1),(L-4,5,4)],trim)
                     if style=='mikado':
-                        s.part('smoke-deflector'); b.box(end-7,5,9,5,.5,8,top,side)
+                        s.part('smoke-deflector'); b.box(end-7,5,9,5,.5,8,top,side,body_end)
     api['finish_car'](s,L,24)
     s.mark('cab',b.u(cab_u+2),0,18)
     return s

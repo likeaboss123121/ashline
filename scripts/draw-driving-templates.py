@@ -197,11 +197,12 @@ def coupler(s, u):
 
 def running_gear(s, length, wheel_starts=None):
     coupler(s, 0)
-    s.part('trucks')
     for start in (wheel_starts or (3, length - 9)):
-        s.box(start, -6, 0, 6, 12, 3, P['truck_top'], P['truck_side'])
-        for offset in (1.5, 4.5):
-            s.disc_side(start + offset, 1.8, 1.8, P['wheel_rim'], P['wheel_hub'], v=6)
+        s.part('trucks')
+        s.box(start, -3, 2.5, 6, 6, 1, P['truck_top'], P['truck_side'])
+        s.part('wheels')
+        for offset in (1, 5):
+            s.disc_side(start + offset, 2, 2, P['truck_top'], P['wheel_hub'], sides=12, v=5.5)
     s.part('underframe')
     s.box(0, -5, 3, length, 10, 2, P['frame_top'], P['frame_side'])
 
@@ -435,9 +436,9 @@ def steam_prairie(length_m=23):
     coupler(s, 0)
     s.part('tender-trucks')
     for start in (1.5, 8.5):
-        s.box(start, -6, 0, 5, 12, 3, P['truck_top'], P['truck_side'])
-        for offset in (1.5, 3.5):
-            s.disc_side(start + offset, 1.4, 1.3, P['wheel_rim'], P['wheel_hub'], v=6)
+        s.box(start, -3, 2.5, 5, 6, 1, P['truck_top'], P['truck_side'])
+        for offset in (1, 4):
+            s.disc_side(start + offset, 1.6, 1.6, P['truck_top'], P['wheel_hub'], sides=12, v=5.5)
     s.part('frame')
     s.box(0, -4, 3, L, 8, 2, P['frame_top'], P['frame_side'])
     s.part('wheels')

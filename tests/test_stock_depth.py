@@ -4,10 +4,12 @@ import math
 from pathlib import Path
 import sys
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from stock_depth import area
+from fleet_art import Builder, DATA, blend, locomotive
 
 
 def generator(view):
@@ -111,6 +113,47 @@ class StockDepthTests(unittest.TestCase):
         sprite = module.boxcar()
         sprite.resolve_depth()
         self.assertGreater(coverage(sprite, module.P['wheel_hub']), 1)
+
+    def test_every_wagon_variant_has_four_round_wheels_in_both_views(self):
+        for module in MODULES:
+            with patch('fleet_art.write_catalogue'):
+                cars = [s for s in module.build_all() if '-car-' in s.name]
+            self.assertEqual(len(cars), 26)
+            for sprite in cars:
+                with self.subTest(sprite=sprite.name):
+                    wheels = [pts for name, polygons in sprite.parts if name == 'wheels'
+                              for pts, _, _ in polygons]
+                    self.assertEqual(len(wheels), 8, 'four rims and four hubs, not truck boxes')
+                    for pts in wheels[::2]:
+                        self.assertGreaterEqual(len(set(pts)), 8, 'round perimeter survives pixel snapping')
+                    sprite.resolve_depth()
+                    self.assertGreater(coverage(sprite, module.P['wheel_hub']), 2)
+
+    def test_three_steam_boilers_have_ordered_face_shades_and_closed_end_sections(self):
+        for spec in DATA['locomotives']:
+            if spec.get('design') not in ('american', 'mikado', 'garratt'):
+                continue
+            top, side, _ = spec['colours']
+            for module in MODULES:
+                for facing in ('left', 'right'):
+                    sprite = module.Sprite('test-loco-boiler', 'Boiler fixture', 20)
+                    iso = module is MODULES[0]
+                    b = Builder(vars(module), iso, sprite, 40, facing)
+                    b.boiler(10, 20, top, side)
+                    colours = [fill for _, polys in sprite.parts for _, fill, _ in polys]
+                    self.assertEqual(colours[:4], [top, blend(top,side,.5), side, blend(side,'#000000',.3)])
+                    faces = list(sprite.depth_faces.values())
+                    if iso:
+                        end = set(faces[-1])
+                        for face in faces[:4]:
+                            self.assertEqual(sum(p in end for p in face), 2, 'cap and side share their seam')
+                    sprite.resolve_depth()
+                    for colour in colours[:3]:
+                        self.assertGreater(coverage(sprite, colour), 0, 'face shade remains visible')
+                    actual = locomotive(vars(module), iso, spec, facing)
+                    for name, polys in actual.parts:
+                        if name in ('cab','tender','rear-tank','front-tank','smoke-deflector'):
+                            self.assertNotIn('#41483f', [fill for _,fill,_ in polys], 'no unrelated default green end')
 
 
 if __name__ == '__main__':
