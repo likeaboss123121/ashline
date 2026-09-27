@@ -618,25 +618,25 @@ setup.drivingTemplates = {
 			"passage": "driving-loco-diesel-cab-unit-right",
 			"title": "Four axle cab diesel, United States 1950s, facing right",
 			"width": 38,
-			"height": 22,
+			"height": 21,
 			"anchorX": 2,
-			"anchorY": 17,
+			"anchorY": 16,
 			"lengthMetres": 17,
 			"rear": [
 				2,
-				14
+				13
 			],
 			"front": [
 				36,
-				14
+				13
 			],
 			"top": [
 				19,
-				0
+				-1
 			],
 			"cab": [
-				30,
-				4
+				26,
+				3
 			]
 		},
 		{
@@ -644,6 +644,32 @@ setup.drivingTemplates = {
 			"passage": "driving-loco-diesel-cab-unit-left",
 			"title": "Four axle cab diesel, United States 1950s, facing left",
 			"width": 38,
+			"height": 21,
+			"anchorX": 2,
+			"anchorY": 16,
+			"lengthMetres": 17,
+			"rear": [
+				2,
+				13
+			],
+			"front": [
+				36,
+				13
+			],
+			"top": [
+				19,
+				-1
+			],
+			"cab": [
+				12,
+				3
+			]
+		},
+		{
+			"file": "driving-loco-steam-american-right.svg",
+			"passage": "driving-loco-steam-american-right",
+			"title": "4-4-0 old steam engine, United States 1880s, facing right",
+			"width": 38,
 			"height": 22,
 			"anchorX": 2,
 			"anchorY": 17,
@@ -661,34 +687,8 @@ setup.drivingTemplates = {
 				0
 			],
 			"cab": [
-				8,
-				4
-			]
-		},
-		{
-			"file": "driving-loco-steam-american-right.svg",
-			"passage": "driving-loco-steam-american-right",
-			"title": "4-4-0 old steam engine, United States 1880s, facing right",
-			"width": 38,
-			"height": 24,
-			"anchorX": 2,
-			"anchorY": 19,
-			"lengthMetres": 17,
-			"rear": [
-				2,
-				16
-			],
-			"front": [
-				36,
-				16
-			],
-			"top": [
-				19,
-				2
-			],
-			"cab": [
 				14,
-				6
+				4
 			]
 		},
 		{
@@ -696,25 +696,25 @@ setup.drivingTemplates = {
 			"passage": "driving-loco-steam-american-left",
 			"title": "4-4-0 old steam engine, United States 1880s, facing left",
 			"width": 38,
-			"height": 24,
+			"height": 22,
 			"anchorX": 2,
-			"anchorY": 19,
+			"anchorY": 17,
 			"lengthMetres": 17,
 			"rear": [
 				2,
-				16
+				14
 			],
 			"front": [
 				36,
-				16
+				14
 			],
 			"top": [
 				19,
-				2
+				0
 			],
 			"cab": [
 				24,
-				6
+				4
 			]
 		},
 		{
@@ -774,25 +774,25 @@ setup.drivingTemplates = {
 			"passage": "driving-loco-steam-mikado-right",
 			"title": "2-8-2 freight steam engine, Japan 1930s, facing right",
 			"width": 44,
-			"height": 23,
+			"height": 21,
 			"anchorX": 2,
-			"anchorY": 18,
+			"anchorY": 16,
 			"lengthMetres": 20,
 			"rear": [
 				2,
-				15
+				13
 			],
 			"front": [
 				42,
-				15
+				13
 			],
 			"top": [
 				22,
-				1
+				-1
 			],
 			"cab": [
 				16,
-				5
+				3
 			]
 		},
 		{
@@ -800,25 +800,25 @@ setup.drivingTemplates = {
 			"passage": "driving-loco-steam-mikado-left",
 			"title": "2-8-2 freight steam engine, Japan 1930s, facing left",
 			"width": 44,
-			"height": 23,
+			"height": 21,
 			"anchorX": 2,
-			"anchorY": 18,
+			"anchorY": 16,
 			"lengthMetres": 20,
 			"rear": [
 				2,
-				15
+				13
 			],
 			"front": [
 				42,
-				15
+				13
 			],
 			"top": [
 				22,
-				1
+				-1
 			],
 			"cab": [
 				28,
-				5
+				3
 			]
 		},
 		{
@@ -826,25 +826,25 @@ setup.drivingTemplates = {
 			"passage": "driving-loco-steam-garratt-right",
 			"title": "Double mountain articulated steam engine, South Africa / Britain 1950s, facing right",
 			"width": 60,
-			"height": 23,
+			"height": 21,
 			"anchorX": 2,
-			"anchorY": 18,
+			"anchorY": 16,
 			"lengthMetres": 28,
 			"rear": [
 				2,
-				15
+				13
 			],
 			"front": [
 				58,
-				15
+				13
 			],
 			"top": [
 				30,
-				1
+				-1
 			],
 			"cab": [
-				26,
-				5
+				19,
+				3
 			]
 		},
 		{
@@ -852,25 +852,25 @@ setup.drivingTemplates = {
 			"passage": "driving-loco-steam-garratt-left",
 			"title": "Double mountain articulated steam engine, South Africa / Britain 1950s, facing left",
 			"width": 60,
-			"height": 23,
+			"height": 21,
 			"anchorX": 2,
-			"anchorY": 18,
+			"anchorY": 16,
 			"lengthMetres": 28,
 			"rear": [
 				2,
-				15
+				13
 			],
 			"front": [
 				58,
-				15
+				13
 			],
 			"top": [
 				30,
-				1
+				-1
 			],
 			"cab": [
-				34,
-				5
+				41,
+				3
 			]
 		},
 		{

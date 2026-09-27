@@ -126,6 +126,40 @@ test('revised wagons preserve near-side shades and back-to-front wall ordering i
   }
 });
 
+test('cab diesel has a continuous rounded shell, roof fans and cab details in all four sprites',()=>{
+  const {setup:s}=catalogue();
+  for(const view of ['driving','railyard']) for(const facing of ['left','right']) {
+    const name=view+'-loco-diesel-cab-unit-'+facing;
+    const svg=fs.readFileSync(path.join(__dirname,'../source/img',view,name+'.svg'),'utf8');
+    for(const part of ['roof','near-shoulder','near-side','roof-fans','windows','headlight','grilles'])
+      assert.ok(svg.includes('id="cab-unit-'+part+'"'),name+': '+part);
+    assert.doesNotMatch(svg,/id="full-body"|id="nose"/,'old overlapping body and nose are gone');
+    const template=s[view+'Templates'].templates.find(t=>t.passage===name);
+    assert.equal(template.lengthMetres,17);
+    for(const point of ['cab','front','rear']) {
+      assert.ok(template[point][0]>=0&&template[point][0]<=template.width);
+      assert.ok(template[point][1]>=0&&template[point][1]<=template.height);
+    }
+  }
+});
+
+test('steam touch-ups retain lengths and include rounded boilers and their distinct fittings',()=>{
+  const {setup:s}=catalogue();
+  for(const [model,length,detail] of [['steam-american',17,'slatted-pilot'],
+    ['steam-mikado',20,'smoke-deflector'],['steam-garratt',28,'water-tank-roof']]) {
+    for(const view of ['driving','railyard']) for(const facing of ['left','right']) {
+      const name=view+'-loco-'+model+'-'+facing;
+      const svg=fs.readFileSync(path.join(__dirname,'../source/img',view,name+'.svg'),'utf8');
+      for(const part of ['boiler-bands','arched-cab-roof','coal-load','driver-spokes',detail])
+        assert.ok(svg.includes('id="'+part+'"'),name+': '+part);
+      const template=s[view+'Templates'].templates.find(t=>t.passage===name);
+      assert.equal(template.lengthMetres,length);
+      assert.ok(template.cab[0]>=0&&template.cab[0]<=template.width);
+      assert.ok(template.cab[1]>=0&&template.cab[1]<=template.height);
+    }
+  }
+});
+
 test('schema 3 upgrade adds the expanded fleet without repainting or replacing owned stock',()=>{
   const {setup:s,State}=require('./helpers.cjs').loadGame();s.startNewRun();
   const v=State.variables;v.saveSchemaVersion=3;
