@@ -2,7 +2,7 @@
 // All upgrades run on a detached copy; failed upgrades never modify a slot/file or
 // replace the live run. Add the next numbered step instead of rewriting old steps.
 setup.saveMigrations = {
-	CURRENT: 4,
+	CURRENT: 5,
 	notice: '',
 	recovery: null,
 	copy: function(value) { return JSON.parse(JSON.stringify(value)); },
@@ -18,7 +18,7 @@ setup.saveMigrations = {
 		if (!this.object(source) || !Array.isArray(source.history) || !source.history.length
 			|| !Number.isInteger(source.index) || source.index < 0 || source.index >= source.history.length)
 			throw new Error('Invalid save history.');
-		var self = this, state = this.copy(source), upgraded = false;
+		var self = this, state = this.copy(source), upgraded = false, relocated = false;
 		state.history.forEach(function(moment) {
 			if (!self.object(moment) || !self.object(moment.variables)) throw new Error('Invalid save history.');
 			var v = moment.variables, version = self.checkVersion(v.saveSchemaVersion);
@@ -31,6 +31,8 @@ setup.saveMigrations = {
 				v.saveSchemaVersion = ++version;
 				upgraded = true;
 			}
+			if (!v.worldIdentity) { v.worldIdentity=self.anchorFor(v); upgraded=true; }
+			if (self.relocateMoment(moment)) { upgraded = true; relocated = true; }
 		});
 		setup.saves.validateState(state);
 		if (upgraded) {
@@ -43,7 +45,7 @@ setup.saveMigrations = {
 				moment.variables.pendingBuildNotice = '';
 			});
 		}
-		return { state: state, upgraded: upgraded };
+		return { state: state, upgraded: upgraded, relocated: relocated };
 	},
 	// Schema 0 includes the public 0.1.0 release and unversioned 0.2.0 development saves.
 	upgradeUnversioned: function(moment) {
@@ -176,20 +178,134 @@ setup.saveMigrations = {
 			moment.title = Array.isArray(v.currentTrain) && v.currentTrain.length ? 'TrainInterior' : 'Railyard';
 	},
 	steps: {},
-	afterUpgrade: function(upgraded) {
+	// Station UUIDs and grid coordinates are the save identity. Numeric station/leg indexes
+	// are only lookup indexes for this particular compiled network.
+	anchorFor: function(v) {
+		var route=setup.realWorldPilot.getGridRoute(), stations=route.corridor.stations;
+		var station=function(index) {
+			var item=stations[Number(index)-1], tile=item && route.tiles[item.square];
+			return item && tile ? {uuid:item.uuid,coordinate:tile.geoCoordinate} : null;
+		};
+		var tile=function(position) {
+			var leg=position && route.legs[position.legIndex], item=leg && leg.tiles[position.tileIndex];
+			return item ? {x:item.x,y:item.y,coordinate:item.geoCoordinate} : null;
+		};
+		var yards={};Object.keys(v.stationTracks||{}).forEach(function(key){var found=station(key);if(found) yards[key]=found;});
+		return {revision:setup.worldGraphData.networkRevision,station:station(v.currentStation),yards:yards,
+			journey:tile(v.journey),onFoot:tile(v.onFoot)};
+	},
+	stampState: function(state) {
+		if(state && Array.isArray(state.history)) state.history.forEach(function(moment){
+			if(moment && moment.variables && moment.variables.saveSchemaVersion===5)
+				moment.variables.worldIdentity=setup.saveMigrations.anchorFor(moment.variables);
+		});
+	},
+	nearestStation: function(coordinate,route) {
+		if(!Array.isArray(coordinate)||coordinate.length!==2||!coordinate.every(function(x){return typeof x==='number'&&isFinite(x);}))
+			throw new Error('A removed location has no valid coordinates for relocation.');
+		var best=0,score=Infinity;
+		route.corridor.stations.forEach(function(item,index){
+			var point=route.tiles[item.square].geoCoordinate;
+			var dlon=((point[0]-coordinate[0]+540)%360)-180;
+			var lat1=coordinate[1]*Math.PI/180,lat2=point[1]*Math.PI/180;
+			var a=Math.sin((lat2-lat1)/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dlon*Math.PI/360)**2;
+			var distance=2*Math.atan2(Math.sqrt(a),Math.sqrt(Math.max(0,1-a)));
+			if(distance<score){score=distance;best=index+1;}
+		});
+		return best;
+	},
+	relocateMoment: function(moment) {
+		var v=moment.variables, old=v.worldIdentity, revision=setup.worldGraphData.networkRevision;
+		if(!old || !old.revision || old.revision===revision) return false;
+		var route=setup.realWorldPilot.getGridRoute(), stations=route.corridor.stations, self=this, byUuid={};
+		stations.forEach(function(item,index){byUuid[item.uuid]=index+1;});
+		function resolve(anchor){
+			if(!anchor) throw new Error('A saved station has no stable identity.');
+			return byUuid[anchor.uuid] || self.nearestStation(anchor.coordinate,route);
+		}
+		function locate(anchor){
+			if(!anchor) return null;
+			if(!Number.isInteger(anchor.x)||!Number.isInteger(anchor.y)) throw new Error('A saved tile has invalid grid coordinates.');
+			if(!Array.isArray(anchor.coordinate)||anchor.coordinate.length!==2||!anchor.coordinate.every(function(x){return typeof x==='number'&&isFinite(x);}))
+				throw new Error('A saved tile has invalid fallback coordinates.');
+			var square=route.byKey[anchor.x+','+anchor.y], place=square && route.place[square.globalPosition];
+			if(square) {
+				var dlon=((square.geoCoordinate[0]-anchor.coordinate[0]+540)%360)-180;
+				var a=Math.sin((square.geoCoordinate[1]-anchor.coordinate[1])*Math.PI/360)**2
+					+Math.cos(square.geoCoordinate[1]*Math.PI/180)*Math.cos(anchor.coordinate[1]*Math.PI/180)
+						*Math.sin(dlon*Math.PI/360)**2;
+				if(12742*Math.asin(Math.min(1,Math.sqrt(a)))>15) return null;
+			}
+			return place ? {legIndex:place.legIndex,tileIndex:place.tileIndex} : null;
+		}
+		var station=resolve(old.station), moved=false, oldStationKey=String(v.currentStation), oldYard=v.stationTracks[oldStationKey];
+		if(v.journey) {
+			var journey=locate(old.journey), foot=v.onFoot && locate(old.onFoot);
+			if(!journey || (v.onFoot && !foot)) {
+				var point=(v.onFoot && old.onFoot || old.journey);
+				station=self.nearestStation(point && point.coordinate,route);
+				v.journey=null;v.onFoot=null;moved=true;
+				moment.title=Array.isArray(v.currentTrain)&&v.currentTrain.length?'TrainInterior':'Railyard';
+			} else {
+				v.journey={legIndex:journey.legIndex,tileIndex:journey.tileIndex,forward:v.journey.forward!==false};
+				if(foot) v.onFoot={legIndex:foot.legIndex,tileIndex:foot.tileIndex,branch:null};
+			}
+		}
+		v.currentStation=station;
+		if(v.enteredStation!=null) v.enteredStation=old.yards && old.yards[v.enteredStation]
+			? resolve(old.yards[v.enteredStation]) : station;
+		var yards={};v.orphanedStationYards=v.orphanedStationYards||{};
+		Object.keys(v.stationTracks||{}).forEach(function(key){
+			var identity=old.yards&&old.yards[key];
+			if(!identity) throw new Error('A visited yard has no stable identity.');
+			var exact=byUuid[identity.uuid];
+			if(exact && !yards[exact]) yards[exact]=v.stationTracks[key];
+			else v.orphanedStationYards[identity.uuid||key]=v.stationTracks[key];
+		});
+		v.stationTracks=yards;
+		// A removed yard cannot safely be interpreted as a different yard layout. Keep
+		// its stock in the save and put the player/consist at the nearest live station.
+		if(!byUuid[old.station.uuid]) moved=true;
+		if(moved) {
+			if(!v.currentTrain || !v.currentTrain.length) {
+				var selected=null;
+				if(oldYard) oldYard.some(function(track){return track.trains.some(function(train,index){
+					if(train.visited || train.some(function(car){return car.visited;})) {
+						selected=track.trains.splice(index,1)[0];return true;
+					} return false;
+				});});
+				if(selected) v.currentTrain=selected;
+			}
+			v.enteredStation=station;delete v.enteredTrackIndex;delete v.enteredTrainIndex;
+			if(v.leavingTrain && !v.currentTrain) {v.currentTrain=v.leavingTrain;v.leavingTrain=null;}
+			if(moment.title==='Railyard' && v.currentTrain && v.currentTrain.length) moment.title='TrainInterior';
+		}
+		v.worldIdentity=this.anchorFor(v);
+		return true;
+	},
+	afterUpgrade: function(upgraded,relocated) {
 		this.recovery = null;
 		setup.buildCheckDone = false;
 		if (setup.worldmap) setup.worldmap.clearCache();
 		if (setup.bugReport) setup.bugReport.recent = [];
 		this.notice = upgraded ? 'Save upgraded to v' + setup.releaseVersion
 			+ '. Your original save has not been overwritten. Export a new backup from Saves.' : '';
+		if(relocated) this.notice += ' [NEEDS WRITING PASS] — The railway map changed. Your location was matched by station UUID or moved to a nearby station. Stock from removed yards remains in the save.';
 	},
 	// Browser-tab restoration bypasses Save.onLoad. Upgrade it before Engine.show(),
 	// including every history moment, then persist the converted session snapshot.
 	restoreSession: function() {
-		if (!State.history.length || State.history.every(function(moment) {
-			return moment.variables && moment.variables.saveSchemaVersion === setup.saveMigrations.CURRENT;
-		})) return;
+		if (!State.history.length) return;
+		if (State.history.every(function(moment) {
+			return moment.variables && moment.variables.saveSchemaVersion === setup.saveMigrations.CURRENT
+				&& moment.variables.worldIdentity && moment.variables.worldIdentity.revision===setup.worldGraphData.networkRevision;
+		})) {
+			// SugarCube writes session storage before :historyupdate. Refresh the active
+			// position anchor and write the completed moment as well.
+			this.stampState({history:[State.active]});
+			this.persistSession();
+			return;
+		}
 		var original = State.marshalForSave();
 		var result;
 		try {
@@ -204,8 +320,11 @@ setup.saveMigrations = {
 		State.history.splice.apply(State.history, [0, State.history.length].concat(result.state.history));
 		var active = this.copy(result.state.history[result.state.index]);
 		State.active.title = active.title; State.active.variables = active.variables;
-		this.afterUpgrade(result.upgraded);
+		this.afterUpgrade(result.upgraded,result.relocated);
 		setup.applyHistorySetting();
+		this.persistSession();
+	},
+	persistSession: function() {
 		// SugarCube exposes marshalForSave(), not its internal session marshaler.
 		var snapshot = State.marshalForSave();
 		snapshot.delta = State.deltaEncode(snapshot.history); delete snapshot.history;
@@ -230,6 +349,9 @@ setup.saveMigrations.steps[3] = function(moment) {
 	moment.variables.defaultTrains = Object.assign({}, moment.variables.defaultTrains,
 		setup.saveMigrations.copy(setup.currentDefinitions.defaultTrains));
 };
+setup.saveMigrations.steps[4] = function(moment) {
+	moment.variables.worldIdentity=setup.saveMigrations.anchorFor(moment.variables);
+};
 if (typeof Config !== 'undefined') {
 	Config.saves.version = setup.saveMigrations.CURRENT;
 	// Saving waits for the game to start; loading is allowed everywhere.
@@ -239,7 +361,7 @@ Save.onLoad.add(function(save) {
 	var result = setup.saveMigrations.upgradeState(save.state, save.version);
 	save.state = result.state;
 	save.version = setup.saveMigrations.CURRENT;
-	setup.saveMigrations.afterUpgrade(result.upgraded);
+	setup.saveMigrations.afterUpgrade(result.upgraded,result.relocated);
 });
 jQuery(document).on(':historyupdate.ashline-migrations', function() { setup.saveMigrations.restoreSession(); });
 Macro.add('saveMigrationRecovery', {

@@ -11,6 +11,7 @@ if (typeof Save !== 'undefined' && Save.onSave) Save.onSave.add(function(save) {
 	if (save.state && save.state.history && save.state.history[save.state.index]) {
 		save.state.history[save.state.index].variables = JSON.parse(JSON.stringify(State.variables));
 	}
+	setup.saveMigrations.stampState(save.state);
 	save.state = setup.saveMigrations.upgradeState(save.state).state;
 	save.version = setup.saveMigrations.CURRENT;
 });

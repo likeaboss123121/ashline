@@ -302,9 +302,13 @@ directory.
 
 ## Static world data is never saved
 
-Compiled rail cells and station records live in `setup`, not `State.variables`. Saves contain only stable route
-positions and mutable state such as the active consist, parked trains and looted supplies. This keeps save size
-independent of map size and lets a world-data migration translate old position identifiers explicitly.
+Compiled rail cells and station records live in `setup`, not `State.variables`. A save records deterministic
+version-5 station UUIDs derived from stop source IDs, tile grid coordinates, geographic fallback coordinates and
+the world revision alongside the runtime numeric indexes. On a rebuilt network, loading resolves UUIDs to the new
+indexes; a removed player station or tile sends the player and active consist to the geographically nearest
+surviving station. Removed visited yards remain in `orphanedStationYards` in the save so their cars and depleted
+stores are not silently treated as a different yard. New games do not carry a copy of the whole world in saves.
+Public v0.2.0 saves have no map; their explicit Punta Arenas placement is a separate future conversion task.
 
 ## Coordinates and legs
 
