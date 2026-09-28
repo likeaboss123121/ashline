@@ -1089,6 +1089,39 @@ setup.worldmap = {
 			Math.cos(a[1] * radians) * Math.sin(b[1] * radians) - Math.sin(a[1] * radians) * Math.cos(b[1] * radians) * Math.cos(dLon)) / radians;
 		return ((bearing % 360) + 360) % 360;
 	},
+	// Where a longitude and latitude falls on a grid of the joined map, as unrounded square coordinates: the grid's own
+	// projection, then its quarter turns and offset (the reverse of unprojectGrid).
+	projectToGrid: function(longitude, latitude, grid) {
+		var radians = Math.PI / 180, R = 6371.0088;
+		var lambda0 = grid.centre[0] * radians, phi0 = grid.centre[1] * radians;
+		var forward = function(lon, lat) {
+			var lambda = lon * radians, phi = lat * radians;
+			var k = Math.sqrt(2 / (1 + Math.sin(phi0) * Math.sin(phi) + Math.cos(phi0) * Math.cos(phi) * Math.cos(lambda - lambda0)));
+			return [R * k * Math.cos(phi) * Math.sin(lambda - lambda0),
+				R * k * (Math.cos(phi0) * Math.sin(phi) - Math.sin(phi0) * Math.cos(phi) * Math.cos(lambda - lambda0))];
+		};
+		var origin = forward(grid.origin[0], grid.origin[1]), here = forward(longitude, latitude);
+		var x = (here[0] - origin[0]) / grid.cellKm, y = (here[1] - origin[1]) / grid.cellKm;
+		for (var turn = 0; turn < (((grid.turn || 0) % 4) + 4) % 4; turn++) { var back = x; x = -y; y = back; }
+		if (grid.offset) { x += grid.offset[0]; y += grid.offset[1]; }
+		return [x, y];
+	},
+	// Whether a longitude and latitude is land, from the land mask: true, false, or null where the mask does not reach.
+	// On a world of several grids the place is tried on each, and counts only where its block is on that grid.
+	isLandAt: function(longitude, latitude) {
+		var data = setup.worldGraphData && setup.worldGraphData.network, mask = this.getLandMask();
+		if (!data || !mask) return null;
+		var charts = data.charts || [{ grid: data.grid }];
+		for (var i = 0; i < charts.length; i++) {
+			var at = this.projectToGrid(longitude, latitude, charts[i].grid);
+			var column = Math.floor((at[0] + 0.5 - mask.x0) / mask.block), row = Math.floor((mask.y0 - at[1] + 0.5) / mask.block);
+			if (column < 0 || row < 0 || column >= mask.width || row >= mask.height) continue;
+			var index = row * mask.width + column;
+			if (data.charts && mask.chart[index] !== i) continue;
+			return mask.isLand[index] === 1;
+		}
+		return null;
+	},
 	// The middle of a grid square as [longitude, latitude], from the grid's projection (scripts/world/projection.cjs),
 	// for a grid turned and moved to join another (gridFor) its own square found first: the offset taken away, then
 	// its quarter turns undone. The longitude is between -180 and 180.

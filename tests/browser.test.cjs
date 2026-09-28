@@ -2278,11 +2278,20 @@ test('a station at the end of a line has a map of the railways around it', async
     new RegExp(terminus.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ' \\(you are here\\)'));
   const listed = await section.locator('.station-map-list li').allInnerTexts();
   assert.ok(listed.every(line => /: [\d.,]+ (km|mi)$/.test(line)), JSON.stringify(listed));
-  // Having looked at it, the Map tab draws it, with where the player is.
+  // Having looked at it, the Map tab's globe opens on where the player is, marked in red at the middle, and names the
+  // maps read.
   await page.locator('#menu-story').getByText('Map', { exact: true }).click();
   const dialog = page.locator('#ui-dialog');
-  await dialog.locator('svg.station-map').waitFor();
-  assert.ok((await dialog.locator('.station-map-label').allTextContents()).some(label => label === terminus.name + ' (you are here)'));
+  await dialog.locator('canvas.globe-map-canvas').waitFor();
+  await page.waitForFunction(() => document.querySelector('canvas.globe-map-canvas').width > 200);
+  const globe = await page.evaluate(() => {
+    const canvas = document.querySelector('canvas.globe-map-canvas'), view = document.querySelector('.globe-map').globeView;
+    const middle = canvas.getContext('2d').getImageData(Math.floor(canvas.width / 2), Math.floor(canvas.height / 2), 1, 1).data;
+    const here = SugarCube.setup.wayfinding.getHereTile().geoCoordinate;
+    return { middle: Array.from(middle), view: [view.lon * 180 / Math.PI, view.lat * 180 / Math.PI], here };
+  });
+  assert.ok(Math.abs(globe.view[0] - globe.here[0]) < 0.01 && Math.abs(globe.view[1] - globe.here[1]) < 0.01, JSON.stringify(globe));
+  assert.ok(globe.middle[0] > 180 && globe.middle[1] < 140, 'here is marked in red: ' + JSON.stringify(globe.middle));
   assert.match(await dialog.innerText(), new RegExp('Maps from ' + terminus.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   await page.evaluate(() => SugarCube.Dialog.close());
   // A station on a through line has none.

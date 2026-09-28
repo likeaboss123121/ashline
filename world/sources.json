@@ -115,6 +115,17 @@
       "status": "ingested",
       "use": "Land and water drawn under the network on the debug map",
       "transformation": "scripts/world/land-mask.cjs: filled into a 0.05-degree raster, then sampled for blocks of 2 by 2 grid squares on the grid each block lies on (world/external/natural-earth-50m-land.geojson)"
+    },
+    {
+      "id": "natural-earth-50m-shaded-relief-2.0.0",
+      "name": "Natural Earth 1:50m shaded relief (SR_50M), version 2.0.0",
+      "url": "https://naciscdn.org/naturalearth/50m/raster/SR_50M.zip",
+      "retrieved": "2026-09-28",
+      "license": "Public domain",
+      "attribution": "Relief made with Natural Earth",
+      "status": "ingested",
+      "use": "The shape of the land on the Map tab's globe",
+      "transformation": "scripts/world/globe-texture.cjs: averaged to 2048 by 1024, water set to 0 from the 1:50m land polygons, stored as a greyscale PNG (world/external/globe-texture.png)"
     }
   ]
 }

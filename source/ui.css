@@ -449,12 +449,31 @@
 	height: auto;
 	border: 1px solid #3a2a2e;
 }
-.station-map .station-map-ground { fill: #1b1d1f; }
-.station-map .station-map-track { fill: none; stroke: #d8d2c4; stroke-width: 1.5; }
+/* Drawn from where things really are, north up: water, land, the track as a light line on a dark casing, fog over
+   country no map has shown, and the names with a dark halo so they read over land, water and track alike. */
+.station-map .station-map-ground { fill: #15212a; }
+.station-map .station-map-track-casing { fill: none; stroke: #101416; stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; }
+.station-map .station-map-track { fill: none; stroke: #d8d2c4; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .station-map .station-map-junction { fill: #d8d2c4; }
-.station-map .station-map-station { fill: #e5c58a; }
-.station-map .station-map-here { fill: #e0625c; }
-.station-map .station-map-label { fill: #e5c58a; font-size: 9px; font-family: sans-serif; }
+.station-map .station-map-fog { fill: #0c1013; opacity: 0.72; }
+.station-map .station-map-station { fill: #e5c58a; stroke: #101416; stroke-width: 1.5; }
+.station-map .station-map-city { fill: #f2dcae; }
+.station-map .station-map-here { fill: #e0625c; stroke: #101416; stroke-width: 1.5; }
+.station-map .station-map-here-ring { fill: none; stroke: #e0625c; stroke-width: 2; opacity: 0.8; }
+.station-map .station-map-label {
+	fill: #e5c58a;
+	font-size: 10.5px;
+	font-family: sans-serif;
+	paint-order: stroke;
+	stroke: #101416;
+	stroke-width: 3px;
+	stroke-linejoin: round;
+}
+.station-map .station-map-label-city { fill: #f2dcae; font-size: 12px; font-weight: bold; }
+.station-map .station-map-label-here { fill: #f08a84; font-size: 12px; font-weight: bold; }
+.station-map .station-map-scale { fill: none; stroke: #d8d2c4; stroke-width: 1.5; }
+.station-map .station-map-scale-label,
+.station-map .station-map-north { fill: #d8d2c4; font-size: 10px; font-family: sans-serif; paint-order: stroke; stroke: #101416; stroke-width: 2px; }
 .station-map-list { margin-top: 0.5em; }
 
 /* A signpost at a junction out on the line: each way on and the places down it. */
@@ -465,15 +484,31 @@
 }
 .junction-sign p { margin: 0.2em 0; }
 
-/* The Map tab: every station map seen, drawn together at the station maps' scale, scrolling when large. */
-.combined-map-frame {
-	max-height: 70vh;
-	max-width: 100%;
-	overflow: auto;
+/* The Map tab's globe: a canvas the width of the dialog, with its buttons over its top right corner. */
+.globe-map {
+	position: relative;
+	width: 100%;
 	border: 1px solid #3a2a2e;
+	background: #0a0d11;
 }
-.combined-map-frame svg.station-map {
+.globe-map-canvas {
 	display: block;
-	max-width: none;
-	border: 0;
+	cursor: grab;
+	touch-action: none;
+}
+.globe-map-canvas:active { cursor: grabbing; }
+.globe-map-controls {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+.globe-map-controls button {
+	min-width: 2em;
+	min-height: 2em;
+	padding: 0.1em 0.4em;
+	font-size: 1.1em;
+	line-height: 1;
 }

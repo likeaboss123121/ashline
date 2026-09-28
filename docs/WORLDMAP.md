@@ -147,10 +147,22 @@ of its yard, has a building with a map of the railways within 150 km and the nea
 go down a branch. Its art is still to come; for now the railyard has a "Station map" section with a plain drawing.
 At a junction out on the line a signpost gives, for each way out, the next two stations that way (halts left out)
 and the first city beyond them, with the distance to each by track, driving or on foot. Both are worked out from the
-compiled network when shown. The **Map** tab in the sidebar draws every station map the player has looked at as
-one map, with where they are now; the list of stations whose maps have been seen (`$seenMaps`) is the one thing
-saved, by each station's stable id (its OSM node, authored place or halt square) rather than its number, which
-changes when the network is rebuilt. Punta Arenas is the end of a line, so its map is the first one seen.
+compiled network when shown. The list of stations whose maps have been seen (`$seenMaps`) is the one thing saved, by
+each station's stable id (its OSM node, authored place or halt square) rather than its number, which changes when
+the network is rebuilt. Punta Arenas is the end of a line, so its map is the first one seen.
+
+Both maps are drawn from where things really are, not from the build grids, which are stretched up to about 1.6 to 1
+far from their centres and, in Europe, Asia and Africa, turned: north is always up. The **station map** is flat (an
+azimuthal equidistant projection about the station), with land and water, the track, the stations named where the
+names fit without overlapping (cities first), a scale bar, a north arrow, and fog beyond its 150 km.
+
+The **Map** tab in the sidebar is a globe (`source/globe.js`, `setup.globe`) the player can turn by dragging and zoom
+with the wheel, a pinch or its buttons; it opens on the player. The land is drawn everywhere, shaded by its relief, from
+a 2048 by 1024 texture baked from Natural Earth's shaded relief (`scripts/world/globe-texture.cjs`, committed as
+`world/external/globe-texture.png`), with coastlines from a finer land and water layer (about 5 km) so they stay
+sharp close in. The track, stations and names are drawn only where the player knows them, under fog of war elsewhere:
+150 km round every station map read, and 50 km round every station visited (the journal) and where they are now. The
+globe stops zooming in at about 1.2 pixels a kilometre; closer detail is the station maps' job.
 
 The debug map draws the network only when its panel is open, as plain squares and one path of track, with a line
 under the map naming the square under the pointer; the teleport list holds stations rather than squares. Zoom and
@@ -217,8 +229,8 @@ embedded in the single-file game.
   neighbouring square, so the game walks the join like any other track. The compiled network carries `charts`: which
   run of squares is on which grid, with its offset and turn, so `setup.worldmap.gridFor(tile)` and `unprojectGrid`
   find any square's place. Grid north on the turned grid points roughly south in Europe and Africa: directions are named
-  from true bearings, as in Alaska, and station maps turn by quarter turns so north is up to within 45 degrees. The
-  debug map draws the grid as it is.
+  from true bearings, as in Alaska, and the player's maps are drawn from latitude and longitude, north up. The debug
+  map draws the grid as it is.
 - **The 180th meridian.** Chukotka lies across it. Every longitude is kept in its grid's frame, within 180 degrees of
   the grid's centre (`projection.inFrame`), so on Asia's grid Uelen is at 190°E rather than 170°W and a line from
   Anadyr to Egvekinot is not drawn the long way round the world. Elevation tiles beyond the meridian are moved into the

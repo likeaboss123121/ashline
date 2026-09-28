@@ -78,7 +78,8 @@ test('three authored Punta Arenas to Panama corridors are independently queryabl
     '© OpenStreetMap contributors; extract provided by Geofabrik',
     '© OpenStreetMap contributors; extracts provided by Geofabrik',
     'Produced using Copernicus WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved',
-    'Land outlines made with Natural Earth'
+    'Land outlines made with Natural Earth',
+    'Relief made with Natural Earth'
   ]);
 });
 
