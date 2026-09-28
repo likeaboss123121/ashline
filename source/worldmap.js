@@ -1191,7 +1191,7 @@ setup.worldmap = {
 				+ networkStats.bridgeKm + ' km). Yard contents still use seed ' + this.getSeed() + '.';
 			parent.appendChild(heading);
 			var instructions = document.createElement('p');
-			instructions.textContent = 'Debug teleport: click the track on the map, or choose a station below. If you are aboard, your entire consist moves with you; on foot, only you move.';
+			instructions.textContent = '[NEEDS WRITING PASS] Debug teleport: click the track on the map, or choose a station below. If you are aboard, your entire consist moves with you; on foot, only you move.';
 			var self = this;
 			var teleport = function(legIndex, x, y) {
 				var result = self.debugTeleportToTile(Number(legIndex), Number(x), Number(y));
@@ -1207,9 +1207,9 @@ setup.worldmap = {
 			var controls = document.createElement('div');
 			controls.className = 'debug-map-teleport-controls';
 			var label = document.createElement('label');
-			label.textContent = 'Station: ';
+			label.textContent = '[NEEDS WRITING PASS] Station: ';
 			var select = document.createElement('select');
-			select.setAttribute('aria-label', 'Station to teleport to');
+			select.setAttribute('aria-label', '[NEEDS WRITING PASS] Station to teleport to');
 			// Every station: listing hundreds of thousands of squares would make the list useless.
 			var listed = route.tiles.filter(function(tile) { return tile.stationIndex; })
 				.sort(function(a, b) { return a.stationIndex - b.stationIndex; });
@@ -1256,7 +1256,7 @@ setup.worldmap = {
 			parent.appendChild(globe);
 			parent.appendChild(readout);
 			var legend = document.createElement('p');
-			legend.textContent = 'Mapped railway is light, new lines red. Far out the track is drawn from a raster; close in, as lines, with every station, and a click on it teleports.';
+			legend.textContent = '[NEEDS WRITING PASS] Mapped railway is light, new lines red. Far out the track is drawn from a raster; close in, as lines, with every station, and a click on it teleports.';
 			parent.appendChild(legend);
 		} catch (error) {
 			var failure = document.createElement('p');

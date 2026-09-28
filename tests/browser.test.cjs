@@ -746,8 +746,8 @@ test('red developer sidebar menus work on mobile with keyboard and close control
   await page.locator('#developer-Debug .globe-map').waitFor();
   const debugMapBox=await page.locator('#developer-Debug .globe-map').boundingBox();
   assert.ok(debugMapBox.width>=260&&debugMapBox.width<=391,JSON.stringify(debugMapBox));
-  assert.equal(await page.locator('#developer-Debug .globe-map-controls button').count(),3);
-  assert.ok(await page.locator('#developer-Debug select[aria-label="Station to teleport to"] option').count()>1);
+  assert.equal(await page.locator('#developer-Debug .globe-map-controls button').count(),9);
+  assert.ok(await page.locator('#developer-Debug select[aria-label$="Station to teleport to"] option').count()>1);
   const closeDebug=page.getByRole('button',{name:'Close Debug',exact:true});
   assert.equal(await closeDebug.evaluate(el=>getComputedStyle(el).textTransform),'uppercase');
   assert.ok(await closeDebug.evaluate(el=>el.offsetWidth/el.parentElement.clientWidth>.9));
@@ -2058,7 +2058,7 @@ test('debug map teleport carries an onboard consist into a station clicked on th
     has: page.getByText('World rail grid', { exact: true })
   });
   if (!await mapSection.evaluate(element => element.open)) await mapSection.locator(':scope > summary').click();
-  assert.ok(await mapSection.locator('select[aria-label="Station to teleport to"] option').count() > 1);
+  assert.ok(await mapSection.locator('select[aria-label$="Station to teleport to"] option').count() > 1);
   await page.waitForFunction(() => document.querySelector('#developer-Debug .globe-map-canvas').width > 200);
   // Station 3, brought to the middle of the view close in, and clicked.
   const at = await page.evaluate(() => {
@@ -2096,7 +2096,7 @@ test('the debug globe zooms with its buttons and the wheel, and a drag turns it 
   await page.waitForFunction(() => document.querySelector('#developer-Debug .globe-map-canvas').width > 200);
   const view = () => page.evaluate(() => {
     const v = document.querySelector('#developer-Debug .globe-map').globeView;
-    return { lon: v.lon, lat: v.lat, pxPerKm: v.pxPerKm };
+    return { lon: v.lon, lat: v.lat, pxPerKm: v.pxPerKm, rotation: v.rotation * 180 / Math.PI };
   });
   const opening = await view();
   await mapSection.getByRole('button', { name: 'Zoom out' }).click();
@@ -2119,6 +2119,22 @@ test('the debug globe zooms with its buttons and the wheel, and a drag turns it 
   await page.mouse.wheel(0, -400);
   await page.waitForTimeout(100);
   assert.ok((await view()).pxPerKm > beforeWheel.pxPerKm);
+  // The pad turns the map by 15 degrees a press, pans by compass direction however it is turned, and its pan arrows
+  // turn to point their way; the compass needle turns it back to north up.
+  await mapSection.getByRole('button', { name: 'Turn the map 15 degrees clockwise' }).click();
+  await mapSection.getByRole('button', { name: 'Turn the map 15 degrees clockwise' }).click();
+  assert.ok(Math.abs((await view()).rotation - 30) < 0.01, JSON.stringify(await view()));
+  const beforeNorth = await view();
+  await mapSection.getByRole('button', { name: 'Pan north' }).click();
+  const afterNorth = await view();
+  assert.ok(afterNorth.lat > beforeNorth.lat, JSON.stringify({ beforeNorth, afterNorth }));
+  await mapSection.getByRole('button', { name: 'Pan east' }).click();
+  assert.ok((await view()).lon > afterNorth.lon);
+  assert.equal(await mapSection.getByRole('button', { name: 'Pan north' }).locator('span').evaluate(span => span.style.transform), 'rotate(-30deg)');
+  await mapSection.getByRole('button', { name: 'Turn the map 15 degrees anticlockwise' }).click();
+  assert.ok(Math.abs((await view()).rotation - 15) < 0.01);
+  await page.mouse.click(box.x + 20, box.y + 22);
+  assert.equal((await view()).rotation, 0);
   // A drag turns the globe and teleports nobody, even when it starts on the track.
   await mapSection.getByRole('button', { name: 'Centre on where you are' }).click();
   const before = await page.evaluate(() => JSON.stringify([SugarCube.State.passage, SugarCube.State.variables.currentStation, SugarCube.State.variables.journey]));

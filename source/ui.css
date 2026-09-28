@@ -473,9 +473,14 @@
 	position: absolute;
 	top: 8px;
 	right: 8px;
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
+	display: grid;
+	grid-template-columns: repeat(3, auto);
+	gap: 3px;
+	opacity: 0.9;
+}
+.globe-map-controls .globe-map-glyph {
+	display: inline-block;
+	transition: transform 0.15s;
 }
 .globe-map-controls button {
 	min-width: 2em;

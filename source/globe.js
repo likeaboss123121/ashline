@@ -216,16 +216,21 @@ setup.globe = {
 		var canvas = document.createElement('canvas');
 		canvas.className = 'globe-map-canvas';
 		canvas.setAttribute('role', 'img');
-		canvas.setAttribute('aria-label', options.revealAll ? 'World railway network' : 'Map of the railways you have seen');
+		canvas.setAttribute('aria-label', options.revealAll ? '[NEEDS WRITING PASS] World railway network' : 'Map of the railways you have seen');
 		var overlay = document.createElement('canvas');
 		overlay.className = 'globe-map-overlay';
 		overlay.setAttribute('aria-hidden', 'true');
 		var bar = document.createElement('div');
 		bar.className = 'globe-map-controls';
-		var button = function(text, label, onClick) {
+		// The pad: three by three buttons, their glyph in a span so a pan arrow can turn to point its way on the map.
+		var button = function(text, label, onClick, className) {
 			var b = document.createElement('button');
 			b.type = 'button';
-			b.textContent = text;
+			b.className = className || '';
+			var glyph = document.createElement('span');
+			glyph.className = 'globe-map-glyph';
+			glyph.textContent = text;
+			b.appendChild(glyph);
 			b.title = label;
 			b.setAttribute('aria-label', label);
 			b.addEventListener('click', onClick);
@@ -238,7 +243,8 @@ setup.globe = {
 
 		// The view: the point at the middle of the globe, and its size in pixels per kilometre.
 		var start = known.here && known.here.geoCoordinate ? known.here.geoCoordinate : [0, 0];
-		var view = { lon: start[0] * radians, lat: start[1] * radians, pxPerKm: null };
+		// rotation: the bearing at the top of the view, in radians; 0 is north up.
+		var view = { lon: start[0] * radians, lat: start[1] * radians, pxPerKm: null, rotation: 0 };
 		var texture = null, knownBytes = null, trackBytes = null, settleTimer = null, pixels = null, lastSize = null;
 		var size = function() {
 			var width = Math.max(260, Math.round(holder.clientWidth || 600));
@@ -249,17 +255,21 @@ setup.globe = {
 		var clampZoom = function() {
 			view.pxPerKm = Math.max(fitPxPerKm(size()), Math.min(self.MAX_PX_PER_KM, view.pxPerKm));
 		};
-		// A longitude and latitude (radians) on the view, or null on the far side of the globe.
+		// A longitude and latitude (radians) on the view, or null on the far side of the globe. The globe is worked out
+		// north up and turned by the view's rotation.
 		var toScreen = function(lon, lat, s) {
 			var cosC = Math.sin(view.lat) * Math.sin(lat) + Math.cos(view.lat) * Math.cos(lat) * Math.cos(lon - view.lon);
 			if (cosC < 0) return null;
-			var r = R * view.pxPerKm;
-			return [s.width / 2 + r * Math.cos(lat) * Math.sin(lon - view.lon),
-				s.height / 2 - r * (Math.cos(view.lat) * Math.sin(lat) - Math.sin(view.lat) * Math.cos(lat) * Math.cos(lon - view.lon))];
+			var r = R * view.pxPerKm, c = Math.cos(view.rotation), sn = Math.sin(view.rotation);
+			var east = r * Math.cos(lat) * Math.sin(lon - view.lon);
+			var north = r * (Math.cos(view.lat) * Math.sin(lat) - Math.sin(view.lat) * Math.cos(lat) * Math.cos(lon - view.lon));
+			return [s.width / 2 + east * c - north * sn, s.height / 2 - (east * sn + north * c)];
 		};
 		// A point of the view back to longitude and latitude (degrees), or null off the globe.
 		var fromScreen = function(x, y, s) {
-			var r = R * view.pxPerKm, nx = (x - s.width / 2) / r, ny = (s.height / 2 - y) / r, rho2 = nx * nx + ny * ny;
+			var r = R * view.pxPerKm, c = Math.cos(view.rotation), sn = Math.sin(view.rotation);
+			var right = (x - s.width / 2) / r, up = (s.height / 2 - y) / r;
+			var nx = right * c + up * sn, ny = -right * sn + up * c, rho2 = nx * nx + ny * ny;
 			if (rho2 > 1) return null;
 			var z = Math.sqrt(1 - rho2);
 			var lat = Math.asin(z * Math.sin(view.lat) + ny * Math.cos(view.lat));
@@ -307,10 +317,12 @@ setup.globe = {
 				var i = row * fine.columns + column;
 				return (fine.bits[i >> 3] >> (i & 7)) & 1;
 			};
-			var graticule = 15 * radians, lineWidth = 0.7 / r;
+			var graticule = 15 * radians, lineWidth = 0.7 / r, turnC = Math.cos(view.rotation), turnS = Math.sin(view.rotation);
 			for (var y = 0; y < h; y += step) {
 				for (var x = 0; x < w; x += step) {
-					var nx = (x + step / 2 - cx) / r, ny = (cy - y - step / 2) / r, rho2 = nx * nx + ny * ny, red, green, blue;
+					// Screen right and up, turned back to east and north.
+					var right = (x + step / 2 - cx) / r, up = (cy - y - step / 2) / r;
+					var nx = right * turnC + up * turnS, ny = -right * turnS + up * turnC, rho2 = nx * nx + ny * ny, red, green, blue;
 					if (rho2 > 1) {
 						// Space, with a faint glow round the edge of the Earth.
 						var glow = Math.max(0, 1 - (Math.sqrt(rho2) - 1) * r / (14 * ratio));
@@ -491,7 +503,7 @@ setup.globe = {
 				} else {
 					var lat2 = here.geoCoordinate[1] * radians, dLon = here.geoCoordinate[0] * radians - view.lon;
 					var bearing = Math.atan2(Math.sin(dLon) * Math.cos(lat2), Math.cos(view.lat) * Math.sin(lat2) - Math.sin(view.lat) * Math.cos(lat2) * Math.cos(dLon));
-					angle = bearing - Math.PI / 2;
+					angle = bearing - view.rotation - Math.PI / 2;
 				}
 				var ex = Math.cos(angle), ey = Math.sin(angle), inset = 26;
 				var t = Math.min((s.width / 2 - inset) / Math.max(1e-6, Math.abs(ex)), (s.height / 2 - inset) / Math.max(1e-6, Math.abs(ey)));
@@ -538,6 +550,22 @@ setup.globe = {
 					return;
 				}
 			});
+			// A compass needle, top left, pointing north; a click on it turns the map back to north up.
+			var nx0 = 20, ny0 = 22;
+			context.save();
+			context.translate(nx0, ny0);
+			context.rotate(-view.rotation);
+			context.beginPath();
+			context.moveTo(0, -13); context.lineTo(5, 0); context.lineTo(-5, 0); context.closePath();
+			context.fillStyle = '#e0625c'; context.fill();
+			context.beginPath();
+			context.moveTo(0, 13); context.lineTo(5, 0); context.lineTo(-5, 0); context.closePath();
+			context.fillStyle = '#d8d2c4'; context.fill();
+			context.beginPath();
+			context.moveTo(0, -13); context.lineTo(5, 0); context.lineTo(0, 13); context.lineTo(-5, 0); context.closePath();
+			context.strokeStyle = '#101416'; context.lineWidth = 1.2; context.stroke();
+			context.restore();
+			compassBox = { x: nx0, y: ny0 };
 			// A scale bar, bottom left, true at the middle of the view.
 			var steps = [5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000], target = s.width / 5 / zoom, barKm = steps[0];
 			steps.forEach(function(km) { if (km <= target) barKm = km; });
@@ -553,7 +581,7 @@ setup.globe = {
 			context.fillStyle = '#d8d2c4';
 			context.fillText(setup.units.kilometres(barKm), bx, by - 11);
 		};
-		var arrowBox = null;
+		var arrowBox = null, compassBox = null;
 
 		// The here mark beats while the map is on the page (not on the debug map, whose overlay is heavy).
 		var beatStart = Date.now(), beating = false;
@@ -565,6 +593,7 @@ setup.globe = {
 		var draw = function(step) {
 			drawGlobe(step);
 			if (!beating) drawOverlay(0);
+			if (typeof turnArrows === 'function') turnArrows();
 		};
 
 		// Moving: a third of the resolution now, sharp once it has stopped for a moment.
@@ -584,15 +613,42 @@ setup.globe = {
 			view.lat = known.here.geoCoordinate[1] * radians;
 			redraw();
 		};
-		if (options.revealAll) {
-			button('+', 'Zoom in', function() { zoomBy(1.6); });
-			button('−', 'Zoom out', function() { zoomBy(1 / 1.6); });
-			button('◎', 'Centre on where you are', centreOnHere);
-		} else {
-			button('+', '[NEEDS WRITING PASS] Zoom in', function() { zoomBy(1.6); });
-			button('−', '[NEEDS WRITING PASS] Zoom out', function() { zoomBy(1 / 1.6); });
-			button('◎', '[NEEDS WRITING PASS] Centre on where you are', centreOnHere);
-		}
+		// Pan: a third of the view's width towards a compass bearing (radians), along the great circle.
+		var panTowards = function(bearing) {
+			var s = lastSize || size(), d = s.width / 3 / view.pxPerKm / R, lat1 = view.lat;
+			var lat2 = Math.asin(Math.sin(lat1) * Math.cos(d) + Math.cos(lat1) * Math.sin(d) * Math.cos(bearing));
+			view.lon += Math.atan2(Math.sin(bearing) * Math.sin(d) * Math.cos(lat1), Math.cos(d) - Math.sin(lat1) * Math.sin(lat2));
+			view.lat = Math.max(-1.5, Math.min(1.5, lat2));
+			redraw();
+		};
+		var turnTo = function(rotation) {
+			var full = 2 * Math.PI;
+			view.rotation = ((rotation % full) + full) % full;
+			if (Math.abs(view.rotation - full) < 1e-9) view.rotation = 0;
+			redraw();
+		};
+		var turnStep = 15 * radians;
+		var pans = [];
+		var pan = function(glyph, label, bearing) {
+			var b = button(glyph, label, function() { panTowards(bearing * radians); }, 'globe-map-pan');
+			pans.push({ element: b.firstChild, bearing: bearing });
+			return b;
+		};
+		button('↺', '[NEEDS WRITING PASS] Turn the map 15 degrees anticlockwise', function() { turnTo(view.rotation - turnStep); });
+		pan('↑', '[NEEDS WRITING PASS] Pan north', 0);
+		button('↻', '[NEEDS WRITING PASS] Turn the map 15 degrees clockwise', function() { turnTo(view.rotation + turnStep); });
+		pan('↑', '[NEEDS WRITING PASS] Pan west', 270);
+		button('◎', '[NEEDS WRITING PASS] Centre on where you are', centreOnHere);
+		pan('↑', '[NEEDS WRITING PASS] Pan east', 90);
+		button('−', '[NEEDS WRITING PASS] Zoom out', function() { zoomBy(1 / 1.6); });
+		pan('↑', '[NEEDS WRITING PASS] Pan south', 180);
+		button('+', '[NEEDS WRITING PASS] Zoom in', function() { zoomBy(1.6); });
+		// Each pan arrow points the way it pans, as the map is turned.
+		var turnArrows = function() {
+			pans.forEach(function(item) {
+				item.element.style.transform = 'rotate(' + Math.round(item.bearing - view.rotation / radians) + 'deg)';
+			});
+		};
 
 		// The square nearest a point of the view, within a few pixels, from the buckets round it: for picking.
 		var nearestTile = function(x, y) {
@@ -646,8 +702,12 @@ setup.globe = {
 				clampZoom();
 			} else if (ids.length === 1 && moved) {
 				var perRadian = R * view.pxPerKm;
-				view.lon -= (event.clientX - last[0]) / perRadian / Math.max(0.2, Math.cos(view.lat));
-				view.lat = Math.max(-1.5, Math.min(1.5, view.lat + (event.clientY - last[1]) / perRadian));
+				// The drag in screen right and up, turned into east and north.
+				var dRight = event.clientX - last[0], dUp = last[1] - event.clientY;
+				var dEast = dRight * Math.cos(view.rotation) + dUp * Math.sin(view.rotation);
+				var dNorth = -dRight * Math.sin(view.rotation) + dUp * Math.cos(view.rotation);
+				view.lon -= dEast / perRadian / Math.max(0.2, Math.cos(view.lat));
+				view.lat = Math.max(-1.5, Math.min(1.5, view.lat - dNorth / perRadian));
 			} else {
 				return;
 			}
@@ -660,6 +720,7 @@ setup.globe = {
 			if (!wasClick) return;
 			var box = overlay.getBoundingClientRect(), x = event.clientX - box.left, y = event.clientY - box.top;
 			if (arrowBox && Math.hypot(x - arrowBox.x, y - arrowBox.y) < 20) { centreOnHere(); return; }
+			if (compassBox && Math.hypot(x - compassBox.x, y - compassBox.y) < 16) { turnTo(0); return; }
 			if (options.onPick) {
 				var found = nearestTile(x, y);
 				if (found.tile) options.onPick(found.tile);
