@@ -37,7 +37,10 @@ function rasterizeLand(geojson) {
       const [ax, ay] = ring[index], [bx, by] = ring[index + 1];
       if (ay === by) continue;
       const top = Math.max(ay, by), bottom = Math.min(ay, by);
-      const first = Math.max(0, Math.ceil((90 - top) / RASTER_DEGREES - 0.5)), last = Math.min(rows - 1, Math.floor((90 - bottom) / RASTER_DEGREES - 0.5));
+      // A row either side as well: where a vertex lies exactly on a row's middle, rounding could otherwise leave the edge
+      // out of a row whose crossing test counts it, and that row would come out with land and water swapped. The test
+      // below decides.
+      const first = Math.max(0, Math.ceil((90 - top) / RASTER_DEGREES - 0.5) - 1), last = Math.min(rows - 1, Math.floor((90 - bottom) / RASTER_DEGREES - 0.5) + 1);
       for (let row = first; row <= last; row++) byRow[row].push([ax, ay, bx, by]);
     }
   });

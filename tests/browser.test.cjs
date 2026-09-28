@@ -742,11 +742,12 @@ test('red developer sidebar menus work on mobile with keyboard and close control
   await debug.focus();await page.keyboard.press('Enter');
   assert.equal(await page.locator('#developer-Debug').isVisible(),true);
   const box=await page.locator('#developer-Debug').boundingBox();assert.ok(box.x>=0 && box.x+box.width<=391);assert.ok(box.width>=389,JSON.stringify(box));
-  // The map opens zoomed in and scrolls inside its frame; the frame is what has to fit the phone.
-  const debugMapBox=await page.locator('#developer-Debug .debug-map-frame').boundingBox();
-  assert.ok(debugMapBox.width>=260&&debugMapBox.width<=340,JSON.stringify(debugMapBox));
-  assert.equal(await page.locator('#developer-Debug .debug-map-zoom button').count(),8);
-  assert.ok(await page.locator('#developer-Debug select[aria-label="Exact track tile"] option').count()>1);
+  // The map is a globe the width of the panel, which has to fit the phone.
+  await page.locator('#developer-Debug .globe-map').waitFor();
+  const debugMapBox=await page.locator('#developer-Debug .globe-map').boundingBox();
+  assert.ok(debugMapBox.width>=260&&debugMapBox.width<=391,JSON.stringify(debugMapBox));
+  assert.equal(await page.locator('#developer-Debug .globe-map-controls button').count(),3);
+  assert.ok(await page.locator('#developer-Debug select[aria-label="Station to teleport to"] option').count()>1);
   const closeDebug=page.getByRole('button',{name:'Close Debug',exact:true});
   assert.equal(await closeDebug.evaluate(el=>getComputedStyle(el).textTransform),'uppercase');
   assert.ok(await closeDebug.evaluate(el=>el.offsetWidth/el.parentElement.clientWidth>.9));
@@ -1757,7 +1758,7 @@ test('rail yard view draws the station layout and the player\'s consist', async 
       selectedTiles: templates.filter(name => name === 'railyard-track-tile-selected').length,
       unbundled: [...view.querySelectorAll('use')].filter(use => {
         const target = view.querySelector(use.getAttribute('href'));
-        return !target || !target.querySelector('polygon');
+        return !target || !target.querySelector('polygon, path, circle, ellipse, rect');
       }).length,
       labels: [...view.querySelectorAll('text')].map(text => text.textContent),
       markers: view.querySelectorAll('.railyard-player-marker').length
@@ -1975,7 +1976,7 @@ test('lead tracks are named for the compass direction a train leaves by', async 
   assert.ok(headers.some(header => header.startsWith('Southbound Track')), headers.join(' | '));
 });
 
-test('debug mode draws the complete sourced rail grid', async t => {
+test('debug mode draws the whole world network on the globe, and names the square under the pointer', async t => {
   const page = await openGame(t);
   await begin(page);
   await page.evaluate(() => {
@@ -1984,90 +1985,36 @@ test('debug mode draws the complete sourced rail grid', async t => {
   });
   await passage(page, 'Railyard');
   // The network is only drawn once the panel is open.
-  assert.equal(await page.locator('#developer-Debug svg.worldmap-debug').count(), 0);
+  assert.equal(await page.locator('#developer-Debug .globe-map').count(), 0);
   await page.getByRole('button', { name: 'Debug', exact: true }).click();
-  await page.locator('#developer-Debug svg.worldmap-debug').waitFor();
-  await page.waitForFunction(() => /%$/.test((document.querySelector('.debug-map-zoom-readout') || {}).textContent || ''));
-  const drawing = () => page.evaluate(() => {
-    const svg = document.querySelector('#developer-Debug svg.worldmap-debug');
-    if (!svg) return null;
-    const track = [...svg.querySelectorAll('path.debug-map-track')];
-    return {
-      cells: svg.querySelectorAll('rect.debug-teleport-tile').length,
-      track: track.length,
-      trackDrawn: track.map(path => (path.getAttribute('d') || '').length > 0),
-      overviews: [...svg.querySelectorAll('image.debug-map-overview')].map(image => image.style.display !== 'none'),
-      stations: svg.querySelectorAll('.debug-map-stations circle').length,
-      heading: svg.closest('details').querySelector('.debug-map-heading').textContent
-    };
+  const globe = page.locator('#developer-Debug .globe-map');
+  await globe.waitFor();
+  await page.waitForFunction(() => document.querySelector('#developer-Debug .globe-map-canvas').width > 200);
+  // Everything revealed: every square, every station, no fog; opened on the player.
+  const map = await page.evaluate(() => {
+    const holder = document.querySelector('#developer-Debug .globe-map'), known = holder.globeKnown;
+    const route = SugarCube.setup.realWorldPilot.getGridRoute();
+    const here = SugarCube.setup.wayfinding.getHereTile().geoCoordinate, view = holder.globeView;
+    return { revealAll: known.revealAll, squares: Object.keys(known.tiles).length, allSquares: route.tiles.length,
+      stations: known.stations.length, allStations: route.corridor.stations.length, segments: known.segments.length,
+      newLines: known.segments.filter(segment => segment.kind === 'new').length,
+      view: [view.lon * 180 / Math.PI, view.lat * 180 / Math.PI], here,
+      heading: holder.closest('details').querySelector('.debug-map-heading').textContent };
   });
-  const map = await drawing();
-  const squareCount = await page.evaluate(() => SugarCube.setup.realWorldPilot.getGridRoute().tiles.length);
-  assert.ok(map, 'the debug panel should draw a world map');
-  // Opened close to the player, only the squares around them are drawn, not the whole continent.
-  assert.ok(map.cells > 100 && map.cells < squareCount / 4, JSON.stringify({ map, squareCount }));
-  assert.equal(map.track, 2, 'mapped track and new lines, each one path');
-  assert.ok(map.stations > 0, JSON.stringify(map));
-  assert.deepEqual(map.overviews, [false, false], 'zoomed in, the squares themselves are drawn');
-  // Zoomed out to the whole map, the squares are too small to click: no squares or track paths, only the picture of
-  // the network drawn once when the map opened.
-  await page.getByRole('button', { name: 'Shrink the map until all of it is in view' }).click();
-  const whole = await drawing();
-  assert.equal(whole.cells, 0, JSON.stringify(whole));
-  assert.equal(whole.stations, 0, JSON.stringify(whole));
-  assert.deepEqual(whole.trackDrawn, [false, false]);
-  assert.equal(whole.overviews.filter(Boolean).length, 1, JSON.stringify(whole));
-  // The picture holds the whole network, and the network does not run to the edge of the map: there is empty
-  // ground all round it.
-  await page.waitForFunction(() => [...document.querySelectorAll('image.debug-map-overview')].every(image => image.getAttribute('href')));
-  const edges = await page.evaluate(async () => {
-    const image = [...document.querySelectorAll('image.debug-map-overview')][0];
-    const picture = new Image();
-    picture.src = image.getAttribute('href');
-    await picture.decode();
-    const canvas = document.createElement('canvas');
-    canvas.width = picture.width;
-    canvas.height = picture.height;
-    const context = canvas.getContext('2d');
-    context.drawImage(picture, 0, 0);
-    const data = context.getImageData(0, 0, canvas.width, canvas.height).data;
-    let lit = 0, rail = 0, fresh = 0, x0 = Infinity, x1 = -1, y0 = Infinity, y1 = -1;
-    for (let y = 0; y < canvas.height; y++) for (let x = 0; x < canvas.width; x++) {
-      const at = (y * canvas.width + x) * 4;
-      if (!data[at + 3]) continue;
-      lit++;
-      if (data[at] === 217) fresh++; else rail++;
-      x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
-    }
-    return { lit, rail, fresh, left: x0, right: canvas.width - 1 - x1, top: y0, bottom: canvas.height - 1 - y1, width: canvas.width,
-      squares: SugarCube.setup.realWorldPilot.getGridRoute().tiles.length };
-  });
-  assert.equal(edges.lit, edges.squares, JSON.stringify(edges));
-  assert.ok(edges.rail > 1000 && edges.fresh > 1000, JSON.stringify(edges));
-  ['left', 'right', 'top', 'bottom'].forEach(side => assert.ok(edges[side] > edges.width * 0.01, JSON.stringify(edges)));
-  // The network is every railway there is, so nothing is drawn around it as context.
-  const context = await page.evaluate(() => {
-    const svg = document.querySelector('svg.worldmap-debug');
-    return {
-      cells: svg.querySelectorAll('.debug-context-tile').length,
-      teleportable: [...svg.querySelectorAll('.debug-context-tile')].filter(cell => cell.hasAttribute('data-debug-teleport')).length,
-      labels: [...svg.querySelectorAll('.debug-station-label')].map(label => label.textContent).sort(),
-      cities: SugarCube.setup.realWorldPilot.getGridRoute().corridor.stations.filter(station => station.status === 'city').length,
-      line: (document.querySelector('.debug-map-context') || {}).textContent || ''
-    };
-  });
-  assert.equal(context.cells, 0, JSON.stringify(context));
-  assert.equal(context.line, '');
-  // Every authored city is named on the map, the 35 of South America and the 47 of Europe, Asia and Africa, Puerto
-  // Montt at the end of its spur among them.
-  assert.equal(context.labels.length, context.cities);
-  assert.equal(context.cities, 35 + 47);
-  ['Punta Arenas', 'Puerto Montt', 'Santiago', 'Lima', 'Bogotá', 'Caracas', 'Manaus', 'São Paulo', 'Moscow', 'Tokyo', 'Cape Town']
-    .forEach(city => assert.ok(context.labels.includes(city), city));
+  assert.equal(map.revealAll, true);
+  assert.equal(map.squares, map.allSquares);
+  assert.equal(map.stations, map.allStations);
+  assert.ok(map.segments > 100000 && map.newLines > 1000, JSON.stringify(map));
+  assert.ok(Math.abs(map.view[0] - map.here[0]) < 0.01 && Math.abs(map.view[1] - map.here[1]) < 0.01, JSON.stringify(map));
   assert.match(map.heading, /^[A-Z][A-Za-z ]* railway network: \d+ grid squares, \d+ legs, \d+ stations; \d+ km of mapped railway joined by \d+ new lines/);
-  // One line under the map names the square under the pointer. The map itself, not the frame round it: the whole
-  // world, fitted in, is a tall narrow strip that need not reach the middle of the frame.
-  await page.locator('#developer-Debug svg.worldmap-debug').hover();
+  // One line under the map names the square under the pointer: over the player, a square on the track.
+  const at = await page.evaluate(() => {
+    const holder = document.querySelector('#developer-Debug .globe-map'), here = SugarCube.setup.wayfinding.getHereTile().geoCoordinate;
+    holder.centreOn(here[0], here[1], 1);
+    const p = holder.screenOf(here[0], here[1]), box = holder.querySelector('.globe-map-overlay').getBoundingClientRect();
+    return { x: box.left + p[0], y: box.top + p[1] };
+  });
+  await page.mouse.move(at.x + 1, at.y + 1);
   assert.match(await page.locator('#developer-Debug .debug-map-hover').innerText(), /^(.+ \| )?grid -?\d+,-?\d+/);
   const prototype = page.locator('details.debug-section').filter({
 		has: page.getByText('Global rail data', { exact: true })
@@ -2096,7 +2043,7 @@ test('debug mode draws the complete sourced rail grid', async t => {
   assert.match(referenceText, /Hand pump/);
 });
 
-test('debug map teleport carries an onboard consist into a station on the selected tile', async t => {
+test('debug map teleport carries an onboard consist into a station clicked on the globe', async t => {
   const page = await openGame(t);
   await begin(page);
   await board(page);
@@ -2111,10 +2058,17 @@ test('debug map teleport carries an onboard consist into a station on the select
     has: page.getByText('World rail grid', { exact: true })
   });
   if (!await mapSection.evaluate(element => element.open)) await mapSection.locator(':scope > summary').click();
-  assert.ok(await mapSection.locator('select[aria-label="Exact track tile"] option').count() > 1);
-  const target = mapSection.locator('svg.worldmap-debug [data-station-index="3"]');
-  const address = (await target.getAttribute('data-debug-teleport')).split(':').map(Number);
-  await target.click();
+  assert.ok(await mapSection.locator('select[aria-label="Station to teleport to"] option').count() > 1);
+  await page.waitForFunction(() => document.querySelector('#developer-Debug .globe-map-canvas').width > 200);
+  // Station 3, brought to the middle of the view close in, and clicked.
+  const at = await page.evaluate(() => {
+    const holder = document.querySelector('#developer-Debug .globe-map');
+    const place = SugarCube.setup.realWorldPilot.getStationTile(3).geoCoordinate;
+    holder.centreOn(place[0], place[1], 1.2);
+    const p = holder.screenOf(place[0], place[1]), box = holder.querySelector('.globe-map-overlay').getBoundingClientRect();
+    return { x: box.left + p[0], y: box.top + p[1] };
+  });
+  await page.mouse.click(at.x, at.y);
   await passage(page, 'TrainInterior');
   const moved = await page.evaluate(() => ({
     consist: JSON.stringify(SugarCube.State.variables.currentTrain),
@@ -2122,13 +2076,7 @@ test('debug map teleport carries an onboard consist into a station on the select
     onFoot: SugarCube.State.variables.onFoot,
     station: SugarCube.State.variables.currentStation
   }));
-  const expected = await page.evaluate(([legIndex, x, y]) => {
-    const target = SugarCube.setup.worldmap.getDebugTeleportTarget(legIndex, x, y);
-    return { legIndex: target.legIndex, tileIndex: target.tileIndex, branch: target.branch,
-      stationIndex: target.tile.stationIndex };
-  }, address);
   assert.equal(moved.consist, consistBefore);
-  assert.equal(expected.stationIndex, 3);
   assert.equal(moved.station, 3);
   assert.equal(moved.journey, null);
   assert.equal(moved.onFoot, null);
@@ -2136,7 +2084,7 @@ test('debug map teleport carries an onboard consist into a station on the select
     new RegExp('Teleported the complete consist to ' + escapeRegExp(await stationName(page, 3)) + ' station'));
 });
 
-test('the debug map zooms out to the whole continent and in again, and a drag pans without teleporting', async t => {
+test('the debug globe zooms with its buttons and the wheel, and a drag turns it without teleporting', async t => {
   const page = await openGame(t, { viewport: { width: 1300, height: 950 } });
   await begin(page);
   await board(page);
@@ -2145,86 +2093,42 @@ test('the debug map zooms out to the whole continent and in again, and a drag pa
   await page.getByRole('button', { name: 'Debug', exact: true }).click();
   const mapSection = page.locator('details.debug-section').filter({ has: page.getByText('World rail grid', { exact: true }) });
   if (!await mapSection.evaluate(element => element.open)) await mapSection.locator(':scope > summary').click();
-  const bar = mapSection.locator('.debug-map-zoom');
-  const svg = mapSection.locator('svg.worldmap-debug');
-  const frame = mapSection.locator('.debug-map-frame');
-  // The network is drawn when the panel opens, then opened at its starting zoom.
-  await page.waitForFunction(() => /%$/.test((document.querySelector('.debug-map-zoom-readout') || {}).textContent || ''));
-  // It opens close enough to click a tile: about 6 px each.
-  const opening = (await svg.locator('rect.debug-teleport-tile').first().boundingBox()).width;
-  assert.ok(opening > 5 && opening < 7, String(opening));
-  await bar.getByRole('button', { name: 'Shrink the map until all of it is in view' }).click();
-  const whole = await svg.boundingBox(), box = await frame.boundingBox();
-  assert.ok(whole.width <= box.width + 1 && whole.height <= box.height + 1, JSON.stringify({ whole, box }));
-  assert.equal(await bar.locator('.debug-map-zoom-readout').innerText(), 'Whole map');
-  await bar.getByRole('button', { name: 'Zoom in' }).click();
-  assert.ok((await svg.boundingBox()).width > whole.width * 1.4);
-  assert.match(await bar.locator('.debug-map-zoom-readout').innerText(), /^\d+%$/);
-  // A drag that starts and ends on track tiles scrolls the map and teleports nobody.
-  // Punta Arenas, where the player stands (cities are named at every zoom), brought to the middle of the view, so
-  // zooming in closes on track: the middle of the whole world is open ground between the two grids.
-  const centreOnTrain = () => frame.evaluate(element => {
-    const box = element.getBoundingClientRect();
-    const tile = [...element.querySelectorAll('.debug-station-label')].find(label => label.textContent === 'Punta Arenas')
-      || element.querySelector('svg.worldmap-debug polygon') || element.querySelector('.debug-teleport-tile');
-    if (!tile) return;
-    const at = tile.getBoundingClientRect();
-    element.scrollLeft += at.left + at.width / 2 - box.left - element.clientWidth / 2;
-    element.scrollTop += at.top + at.height / 2 - box.top - element.clientHeight / 2;
+  await page.waitForFunction(() => document.querySelector('#developer-Debug .globe-map-canvas').width > 200);
+  const view = () => page.evaluate(() => {
+    const v = document.querySelector('#developer-Debug .globe-map').globeView;
+    return { lon: v.lon, lat: v.lat, pxPerKm: v.pxPerKm };
   });
-  // Zoom in until the squares are drawn: how many steps that takes depends on how big the network is.
-  for (let step = 0; step < 16 && !await svg.locator('.debug-teleport-tile').count(); step++) {
-    await centreOnTrain();
-    await bar.getByRole('button', { name: 'Zoom in' }).click();
-  }
-  for (let step = 0; step < 2; step++) await bar.getByRole('button', { name: 'Zoom in' }).click();
-  // Zoomed in, the pan buttons move the view by most of its size, in the direction named.
-  const scrollOf = () => frame.evaluate(element => ({ left: element.scrollLeft, top: element.scrollTop }));
-  let panBefore = await scrollOf();
-  await bar.getByRole('button', { name: 'Pan right' }).click();
-  let panAfter = await scrollOf();
-  assert.ok(panAfter.left > panBefore.left && panAfter.top === panBefore.top, JSON.stringify({ panBefore, panAfter }));
-  panBefore = panAfter;
-  await bar.getByRole('button', { name: 'Pan down' }).click();
-  panAfter = await scrollOf();
-  assert.ok(panAfter.top > panBefore.top && panAfter.left === panBefore.left, JSON.stringify({ panBefore, panAfter }));
-  panBefore = panAfter;
-  await bar.getByRole('button', { name: 'Pan left' }).click();
-  await bar.getByRole('button', { name: 'Pan up' }).click();
-  panAfter = await scrollOf();
-  assert.ok(panAfter.left < panBefore.left && panAfter.top < panBefore.top, JSON.stringify({ panBefore, panAfter }));
-  // The arrows form a diamond: up over down in the middle column, left and right either side of the middle row.
-  const arrowBox = async name => bar.getByRole('button', { name }).boundingBox();
-  const [up, down, left, right] = [await arrowBox('Pan up'), await arrowBox('Pan down'), await arrowBox('Pan left'), await arrowBox('Pan right')];
-  const middle = b => b.x + b.width / 2, row = b => b.y + b.height / 2;
-  assert.ok(Math.abs(middle(up) - middle(down)) < 2 && up.y + up.height <= left.y + 1 && left.y + left.height <= down.y + 1);
-  assert.ok(Math.abs(row(left) - row(right)) < 2 && left.x + left.width <= up.x + 1 && up.x + up.width <= right.x + 1);
-  // A track tile already in view: scrolling one into view would redraw the map around it. After the pans the view
-  // may be over open sea, so first bring the train (always drawn, and on track) to the middle and let it redraw.
-  await frame.scrollIntoViewIfNeeded();
-  await frame.evaluate(element => {
-    const box = element.getBoundingClientRect();
-    const tile = element.querySelector('svg.worldmap-debug polygon') || element.querySelector('.debug-teleport-tile');
-    if (!tile) return;
-    const at = tile.getBoundingClientRect();
-    element.scrollLeft += at.left - box.left - element.clientWidth / 2;
-    element.scrollTop += at.top - box.top - element.clientHeight / 2;
+  const opening = await view();
+  await mapSection.getByRole('button', { name: 'Zoom out' }).click();
+  assert.ok((await view()).pxPerKm < opening.pxPerKm * 0.7);
+  await mapSection.getByRole('button', { name: 'Zoom in' }).click();
+  await mapSection.getByRole('button', { name: 'Zoom in' }).click();
+  assert.ok((await view()).pxPerKm > opening.pxPerKm * 1.3);
+  // Zoomed all the way out, the whole globe fits the view.
+  for (let step = 0; step < 12; step++) await mapSection.getByRole('button', { name: 'Zoom out' }).click();
+  const fitted = await page.evaluate(() => {
+    const holder = document.querySelector('#developer-Debug .globe-map'), canvas = holder.querySelector('.globe-map-canvas');
+    return { diameter: 2 * 6371.0088 * holder.globeView.pxPerKm, width: canvas.clientWidth, height: canvas.clientHeight };
   });
-  await page.waitForTimeout(300);
-  const start = await page.evaluate(() => {
-    const frame = document.querySelector('#developer-Debug .debug-map-frame').getBoundingClientRect();
-    const inside = [...document.querySelectorAll('#developer-Debug .debug-teleport-tile')].map(tile => tile.getBoundingClientRect())
-      .filter(box => box.left > frame.left + 20 && box.right < frame.right - 120 && box.top > frame.top + 20 && box.bottom < frame.bottom - 120);
-    return inside.length ? { x: inside[0].x, y: inside[0].y, width: inside[0].width, height: inside[0].height } : null;
-  });
-  assert.ok(start, 'a track tile is drawn in view');
+  assert.ok(fitted.diameter <= Math.min(fitted.width, fitted.height), JSON.stringify(fitted));
+  // The wheel zooms too.
+  const overlay = mapSection.locator('.globe-map-overlay');
+  const box = await overlay.boundingBox();
+  const beforeWheel = await view();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.wheel(0, -400);
+  await page.waitForTimeout(100);
+  assert.ok((await view()).pxPerKm > beforeWheel.pxPerKm);
+  // A drag turns the globe and teleports nobody, even when it starts on the track.
+  await mapSection.getByRole('button', { name: 'Centre on where you are' }).click();
   const before = await page.evaluate(() => JSON.stringify([SugarCube.State.passage, SugarCube.State.variables.currentStation, SugarCube.State.variables.journey]));
-  const scrolled = await frame.evaluate(element => [element.scrollLeft, element.scrollTop].join());
-  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2);
+  const turned = await view();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.down();
-  await page.mouse.move(start.x + 80, start.y + 90, { steps: 6 });
+  await page.mouse.move(box.x + box.width / 2 + 120, box.y + box.height / 2 + 90, { steps: 6 });
   await page.mouse.up();
-  assert.notEqual(await frame.evaluate(element => [element.scrollLeft, element.scrollTop].join()), scrolled);
+  const after = await view();
+  assert.ok(after.lon !== turned.lon && after.lat !== turned.lat, JSON.stringify({ turned, after }));
   assert.equal(await page.evaluate(() => JSON.stringify([SugarCube.State.passage, SugarCube.State.variables.currentStation, SugarCube.State.variables.journey])), before);
 });
 
@@ -2285,13 +2189,15 @@ test('a station at the end of a line has a map of the railways around it', async
   await dialog.locator('canvas.globe-map-canvas').waitFor();
   await page.waitForFunction(() => document.querySelector('canvas.globe-map-canvas').width > 200);
   const globe = await page.evaluate(() => {
-    const canvas = document.querySelector('canvas.globe-map-canvas'), view = document.querySelector('.globe-map').globeView;
+    const canvas = document.querySelector('canvas.globe-map-overlay'), view = document.querySelector('.globe-map').globeView;
     const middle = canvas.getContext('2d').getImageData(Math.floor(canvas.width / 2), Math.floor(canvas.height / 2), 1, 1).data;
     const here = SugarCube.setup.wayfinding.getHereTile().geoCoordinate;
     return { middle: Array.from(middle), view: [view.lon * 180 / Math.PI, view.lat * 180 / Math.PI], here };
   });
   assert.ok(Math.abs(globe.view[0] - globe.here[0]) < 0.01 && Math.abs(globe.view[1] - globe.here[1]) < 0.01, JSON.stringify(globe));
   assert.ok(globe.middle[0] > 180 && globe.middle[1] < 140, 'here is marked in red: ' + JSON.stringify(globe.middle));
+  // The legend says what the marks mean.
+  assert.ok(await dialog.locator('.globe-map-legend li').count() >= 5);
   assert.match(await dialog.innerText(), new RegExp('Maps from ' + terminus.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   await page.evaluate(() => SugarCube.Dialog.close());
   // A station on a through line has none.

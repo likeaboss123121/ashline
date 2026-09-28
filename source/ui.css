@@ -394,53 +394,6 @@
 	color: #e5c58a;
 }
 
-/* The debug map covers the whole routed line, so it scrolls in a box that opens on the playable corridor. */
-.debug-map-frame {
-	max-height: 70vh;
-	overflow: auto;
-	border: 1px solid #3a2a2e;
-	cursor: grab;
-}
-
-.debug-map-frame.debug-map-dragging {
-	cursor: grabbing;
-	user-select: none;
-}
-
-/* The yard's zoom bar, sitting above the map rather than floating over it. */
-.debug-map-zoom.railyard-view-zoom {
-	position: static;
-	width: fit-content;
-	max-width: 100%;
-	flex-wrap: wrap;
-	margin-bottom: 4px;
-}
-
-/* True north at the middle of the debug map's view: the arrow turns, the letter stays upright. */
-.debug-map-north {
-	display: inline-flex;
-	align-items: center;
-	padding: 0 6px;
-	font-weight: bold;
-}
-
-.debug-map-north-needle {
-	display: inline-block;
-	transform-origin: 50% 55%;
-}
-
-/* The pan arrows, in a diamond. */
-.debug-map-pan {
-	display: grid;
-	grid-template-columns: repeat(3, auto);
-	grid-template-areas: ". up ." "left . right" ". down .";
-	gap: 2px;
-}
-
-.debug-map-pan .debug-map-pan-up { grid-area: up; }
-.debug-map-pan .debug-map-pan-left { grid-area: left; }
-.debug-map-pan .debug-map-pan-right { grid-area: right; }
-.debug-map-pan .debug-map-pan-down { grid-area: down; }
 
 /* The station map building at the end of a line: plain until it has its own art. */
 .station-map-holder svg.station-map {
@@ -484,20 +437,39 @@
 }
 .junction-sign p { margin: 0.2em 0; }
 
-/* The Map tab's globe: a canvas the width of the dialog, with its buttons over its top right corner. */
+/* The globe map (Map tab and debug panel): the globe's canvas the width of its holder, the marks' canvas over it taking
+   the pointer, and the buttons over the top right corner. */
 .globe-map {
 	position: relative;
 	width: 100%;
 	border: 1px solid #3a2a2e;
 	background: #0a0d11;
+	overflow: hidden;
 }
 .globe-map-canvas {
 	display: block;
+}
+.globe-map-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
 	cursor: grab;
 	touch-action: none;
 }
-.globe-map-canvas:active { cursor: grabbing; }
+.globe-map-overlay:active { cursor: grabbing; }
+.globe-map-legend {
+	list-style: none;
+	margin: 0.5em 0 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.3em 1.2em;
+	font-size: 0.85em;
+}
+.globe-map-legend li { display: flex; align-items: center; gap: 0.2em; }
+.globe-map-legend svg { flex: none; }
 .globe-map-controls {
+	z-index: 1;
 	position: absolute;
 	top: 8px;
 	right: 8px;

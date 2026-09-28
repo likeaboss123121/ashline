@@ -816,3 +816,20 @@ test('a station stands only where the line runs straight, and every dead end lea
   assert.equal(stationless, 2);
   assert.ok(network.squares.has('5,0') && !network.squares.has('5,1'));
 });
+
+test('the land raster has no row with land and water swapped where a coastline vertex meets a row', () => {
+  const fs = require('node:fs');
+  const { rasterizeLand } = require('../scripts/world/land-mask.cjs');
+  const land = rasterizeLand(JSON.parse(fs.readFileSync(path.join(root, 'world/external/natural-earth-50m-land.geojson'), 'utf8')));
+  const totals = [];
+  for (let row = 0; row < land.rows; row++) {
+    let count = 0;
+    for (let column = 0; column < land.columns; column++) count += land.raster[row * land.columns + column];
+    totals.push(count);
+  }
+  const odd = [];
+  for (let row = 1; row < land.rows - 1; row++) {
+    if (totals[row - 1] > 100 && totals[row] < 0.7 * Math.min(totals[row - 1], totals[row + 1])) odd.push(90 - (row + 0.5) * 0.05);
+  }
+  assert.deepEqual(odd, []);
+});

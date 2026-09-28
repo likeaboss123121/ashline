@@ -1,24 +1,34 @@
-/* The Map tab: the Earth as a globe the player can turn and zoom, with fog of war.
+/* The map: the Earth as a globe that turns and zooms, used by the Map tab and, with everything revealed, by the debug
+   panel.
 
    The land is drawn everywhere from one small texture baked at build time (scripts/world/globe-texture.cjs:
-   greyscale, water 0, land its shaded relief), so the shape of the country can always be read. The railways, the
-   stations and their names are drawn only where the player knows them: round every station map they have read
-   (MAP_KM), every station they have visited and where they are now (NEAR_KM). Elsewhere the land lies under fog.
+   greyscale, water 0, land its shaded relief), with coastlines from a finer land and water layer, so the shape of the
+   country can always be read. On the Map tab the railways, stations and names are drawn only where the player knows
+   them: round every station map they have read (MAP_KM), every station they have visited and where they are now
+   (NEAR_KM). Elsewhere the land lies under fog, and a known line that runs on into it fades out along the track, so
+   the player can see where the lines lead. Stations they have been to are solid, stations they only know of hollow.
+   Where they are is a pulsing red mark, and when it is off the view an arrow at the edge points the way to it.
 
-   The globe is an orthographic projection drawn a pixel at a time into a canvas, the track and names on top.
-   Dragging turns it, the wheel, a pinch or the buttons zoom it, and it opens on the player. While it is moving it is
-   drawn at a third of the resolution, and sharp again once it stops. Nothing here is saved: what the player knows comes from
-   the seen maps and the journal, and the rest from the compiled network. */
+   Two canvases: the globe underneath, drawn a pixel at a time (an orthographic projection) and only when the view
+   moves, a third of the resolution while it is moving; and the track, names and marks on top, which the pulse redraws
+   on its own. With everything revealed (the debug map) the track is too much to draw line by line far out, so it is
+   drawn into the globe's pixels from a raster until the view is close enough, and then as lines, in view only.
+
+   Nothing here is saved: what the player knows comes from the seen maps and the journal, the rest from the compiled
+   network. */
 setup.globe = {
 	MAP_KM: 150,
 	NEAR_KM: 50,
+	HINT_SQUARES: 8, // how far a known line is drawn fading into the fog
 	EARTH_KM: 6371.0088,
 	OPEN_ACROSS_KM: 1500, // how much country the map shows across when it opens
 	// The relief is about 20 km a texel and the coastlines about 5, so the globe stops zooming in before the coast turns
 	// to blocks: closer detail is the station maps' job.
 	MAX_PX_PER_KM: 1.2,
 	NAMES_PX_PER_KM: 0.3, // station names from this close in; cities and here always
+	VECTOR_PX_PER_KM: 0.12, // with everything revealed, track as lines from this close in, as raster further out
 	FLAT_SHADE: 205, // the texture's value for level ground (see globe-texture.cjs)
+	BUCKET_DEGREES: 2,
 
 	// The texture as a byte per texel, decoded once from the embedded PNG. Calls back with it, or null.
 	loadTexture: function(done) {
@@ -71,54 +81,98 @@ setup.globe = {
 		return (1 - fu) * (1 - fv) * cell(u0, v0) + fu * (1 - fv) * cell(u0 + 1, v0) + (1 - fu) * fv * cell(u0, v0 + 1) + fu * fv * cell(u0 + 1, v0 + 1);
 	},
 
-	// What the player knows: [{ place: [longitude, latitude], km }], and the squares of track within it.
-	getKnown: function() {
-		var pilot = setup.realWorldPilot, route = pilot.getGridRoute(), self = this, areas = [];
+	distanceKm: function(a, b) {
+		var radians = Math.PI / 180, dLat = (b[1] - a[1]) * radians, dLon = (b[0] - a[0]) * radians;
+		var h = Math.pow(Math.sin(dLat / 2), 2) + Math.cos(a[1] * radians) * Math.cos(b[1] * radians) * Math.pow(Math.sin(dLon / 2), 2);
+		return 2 * this.EARTH_KM * Math.asin(Math.min(1, Math.sqrt(h)));
+	},
+	bucketOf: function(longitude, latitude) {
+		return Math.floor((latitude + 90) / this.BUCKET_DEGREES) * 1000 + Math.floor((longitude + 180) / this.BUCKET_DEGREES);
+	},
+
+	// What the map shows. revealAll: every square. Otherwise the squares the player knows, and a few beyond them along
+	// the track as hints. Returns { areas, tiles, segments, stations, buckets, here }: segments as { a, b, kind, fade }
+	// in radians, kind 'rail' or 'new' (a new line, told apart only on the debug map), fade 1 for known track and less
+	// along a hint; stations as { tile, visited, city }; buckets group segments and stations by place, so only those
+	// in view are looked at.
+	getKnown: function(revealAll) {
+		var pilot = setup.realWorldPilot, route = pilot.getGridRoute(), self = this, areas = [], radians = Math.PI / 180;
+		var visited = {};
+		var journal = State.variables.journal;
+		(journal && Array.isArray(journal.stations) ? journal.stations : []).forEach(function(stationId) {
+			var tile = pilot.getStationTile(Number(stationId));
+			if (!tile) return;
+			visited[tile.globalPosition] = true;
+			areas.push({ place: tile.geoCoordinate, km: self.NEAR_KM });
+		});
 		setup.wayfinding.getSeenMaps().forEach(function(stationId) {
 			var tile = pilot.getStationTile(stationId);
 			if (tile) areas.push({ place: tile.geoCoordinate, km: self.MAP_KM });
 		});
-		var journal = State.variables.journal;
-		(journal && Array.isArray(journal.stations) ? journal.stations : []).forEach(function(stationId) {
-			var tile = pilot.getStationTile(Number(stationId));
-			if (tile) areas.push({ place: tile.geoCoordinate, km: self.NEAR_KM });
-		});
 		var here = setup.wayfinding.getHereTile();
+		if (here && here.stationIndex) visited[here.globalPosition] = true;
 		if (here && here.geoCoordinate) areas.push({ place: here.geoCoordinate, km: this.NEAR_KM });
-		var radians = Math.PI / 180, R = this.EARTH_KM;
-		var within = function(p, area) {
-			var dLat = (p[1] - area.place[1]) * radians, dLon = (p[0] - area.place[0]) * radians;
-			var h = Math.pow(Math.sin(dLat / 2), 2) + Math.cos(p[1] * radians) * Math.cos(area.place[1] * radians) * Math.pow(Math.sin(dLon / 2), 2);
-			return 2 * R * Math.asin(Math.min(1, Math.sqrt(h))) <= area.km;
-		};
 		var shown = {};
-		route.tiles.forEach(function(tile) {
-			var p = tile.geoCoordinate;
-			if (!p) return;
-			for (var i = 0; i < areas.length; i++) {
-				if (Math.abs(areas[i].place[1] - p[1]) > 3) continue;
-				if (within(p, areas[i])) { shown[tile.globalPosition] = tile; return; }
+		if (revealAll) {
+			route.tiles.forEach(function(tile) { if (tile.geoCoordinate) shown[tile.globalPosition] = 1; });
+		} else {
+			route.tiles.forEach(function(tile) {
+				var p = tile.geoCoordinate;
+				if (!p) return;
+				for (var i = 0; i < areas.length; i++) {
+					if (Math.abs(areas[i].place[1] - p[1]) > 3) continue;
+					if (self.distanceKm(p, areas[i].place) <= areas[i].km) { shown[tile.globalPosition] = 1; return; }
+				}
+			});
+			// Hints: out along the track from the known squares, HINT_SQUARES deep, fading.
+			var frontier = Object.keys(shown).map(Number);
+			for (var depth = 1; depth <= this.HINT_SQUARES && frontier.length; depth++) {
+				var next = [];
+				frontier.forEach(function(index) {
+					var tile = route.tiles[index];
+					tile.ends.forEach(function(end) {
+						var direction = setup.worldmap.DIRECTIONS[end];
+						var other = route.byKey[setup.worldmap.key(tile.x + direction.dx, tile.y + direction.dy)];
+						if (!other || shown[other.globalPosition]) return;
+						shown[other.globalPosition] = 1 - depth / (self.HINT_SQUARES + 1);
+						next.push(other.globalPosition);
+					});
+				});
+				frontier = next;
 			}
-		});
-		// The track as segments between the middles of known squares, each move once; the stations on it.
-		var segments = [], stations = [];
-		Object.keys(shown).forEach(function(index) {
-			var tile = shown[index];
+		}
+		var segments = [], stations = [], buckets = {};
+		var bucket = function(key) { return buckets[key] || (buckets[key] = { segments: [], stations: [], lon: 0, lat: 0 }); };
+		Object.keys(shown).forEach(function(key) {
+			var index = Number(key), tile = route.tiles[index], fade = shown[key];
 			tile.ends.forEach(function(end) {
 				var direction = setup.worldmap.DIRECTIONS[end];
 				var next = route.byKey[setup.worldmap.key(tile.x + direction.dx, tile.y + direction.dy)];
-				if (!next || !shown[next.globalPosition] || next.globalPosition < tile.globalPosition) return;
-				segments.push([tile.geoCoordinate[0] * radians, tile.geoCoordinate[1] * radians, next.geoCoordinate[0] * radians, next.geoCoordinate[1] * radians]);
+				if (!next || !shown[next.globalPosition] || next.globalPosition < index) return;
+				var segment = { a: [tile.geoCoordinate[0] * radians, tile.geoCoordinate[1] * radians],
+					b: [next.geoCoordinate[0] * radians, next.geoCoordinate[1] * radians],
+					kind: tile.gapFill && next.gapFill ? 'new' : 'rail', fade: Math.min(fade, shown[next.globalPosition]), tiles: [tile, next] };
+				segments.push(segment);
+				bucket(self.bucketOf(tile.geoCoordinate[0], tile.geoCoordinate[1])).segments.push(segment);
 			});
-			if (tile.stationIndex) stations.push(tile);
+			if (tile.stationIndex && fade === 1) {
+				var station = { tile: tile, visited: !!visited[index], city: tile.stationStatus === 'city' };
+				stations.push(station);
+				bucket(self.bucketOf(tile.geoCoordinate[0], tile.geoCoordinate[1])).stations.push(station);
+			}
 		});
-		return { areas: areas, segments: segments, stations: stations, here: here };
+		Object.keys(buckets).forEach(function(key) {
+			var row = Math.floor(Number(key) / 1000), column = Number(key) % 1000;
+			buckets[key].lat = ((row + 0.5) * self.BUCKET_DEGREES - 90) * radians;
+			buckets[key].lon = ((column + 0.5) * self.BUCKET_DEGREES - 180) * radians;
+		});
+		return { areas: areas, tiles: shown, segments: segments, stations: stations, buckets: buckets, here: here, revealAll: !!revealAll };
 	},
 
 	// How known each texel of the texture is, 0 to 255, for the fog: full inside each area, fading over its outer fifth.
 	knownTexture: function(texture, areas) {
 		var width = texture.width, height = texture.height, known = new Uint8Array(width * height), radians = Math.PI / 180;
-		var R = this.EARTH_KM;
+		var self = this;
 		areas.forEach(function(area) {
 			var lat0 = area.place[1], reach = area.km * 1.2, dLat = reach / 111.2;
 			var dLon = Math.min(180, reach / (111.2 * Math.max(0.05, Math.cos(lat0 * radians))));
@@ -128,9 +182,7 @@ setup.globe = {
 				var c0 = Math.floor((area.place[0] - dLon + 180) / 360 * width), c1 = Math.ceil((area.place[0] + dLon + 180) / 360 * width);
 				for (var c = c0; c <= c1; c++) {
 					var column = ((c % width) + width) % width, lon = -180 + (column + 0.5) * 360 / width;
-					var a = Math.pow(Math.sin((lat - lat0) * radians / 2), 2) + Math.cos(lat * radians) * Math.cos(lat0 * radians)
-						* Math.pow(Math.sin((lon - area.place[0]) * radians / 2), 2);
-					var km = 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
+					var km = self.distanceKm([lon, lat], area.place);
 					var value = km <= area.km ? 255 : km >= reach ? 0 : Math.round(255 * (reach - km) / (reach - area.km));
 					var at = row * width + column;
 					if (value > known[at]) known[at] = value;
@@ -139,16 +191,35 @@ setup.globe = {
 		});
 		return known;
 	},
+	// With everything revealed: the track as a raster the size of the texture, 1 for mapped railway and 2 for new line,
+	// for drawing it far out.
+	trackTexture: function(texture, known) {
+		var width = texture.width, height = texture.height, track = new Uint8Array(width * height);
+		var route = setup.realWorldPilot.getGridRoute();
+		Object.keys(known.tiles).forEach(function(key) {
+			var tile = route.tiles[Number(key)], p = tile.geoCoordinate;
+			var column = Math.min(width - 1, Math.floor((p[0] + 180) / 360 * width)), row = Math.min(height - 1, Math.floor((90 - p[1]) / 180 * height));
+			var at = row * width + column;
+			if (!track[at] || !tile.gapFill) track[at] = tile.gapFill ? 2 : 1;
+		});
+		return track;
+	},
 
-	// The globe, in a holder: a canvas, and zoom and centre buttons. Returns the holder; draws once the texture is in.
-	build: function() {
-		var self = this, known = this.getKnown(), R = this.EARTH_KM, radians = Math.PI / 180;
+	// The globe, in a holder. options: revealAll (the debug map: everything, no fog), onPick(tile) (a click on the
+	// track, not a drag), onHover(tile, place) (the square nearest the pointer, or null, and the place under it).
+	// Returns the holder; the globe is drawn once its texture is in.
+	build: function(options) {
+		options = options || {};
+		var self = this, known = this.getKnown(options.revealAll), R = this.EARTH_KM, radians = Math.PI / 180;
 		var holder = document.createElement('div');
-		holder.className = 'globe-map';
+		holder.className = 'globe-map' + (options.revealAll ? ' globe-map-debug' : '');
 		var canvas = document.createElement('canvas');
 		canvas.className = 'globe-map-canvas';
 		canvas.setAttribute('role', 'img');
-		canvas.setAttribute('aria-label', 'Map of the railways you have seen');
+		canvas.setAttribute('aria-label', options.revealAll ? 'World railway network' : 'Map of the railways you have seen');
+		var overlay = document.createElement('canvas');
+		overlay.className = 'globe-map-overlay';
+		overlay.setAttribute('aria-hidden', 'true');
 		var bar = document.createElement('div');
 		bar.className = 'globe-map-controls';
 		var button = function(text, label, onClick) {
@@ -162,12 +233,13 @@ setup.globe = {
 			return b;
 		};
 		holder.appendChild(canvas);
+		holder.appendChild(overlay);
 		holder.appendChild(bar);
 
 		// The view: the point at the middle of the globe, and its size in pixels per kilometre.
 		var start = known.here && known.here.geoCoordinate ? known.here.geoCoordinate : [0, 0];
 		var view = { lon: start[0] * radians, lat: start[1] * radians, pxPerKm: null };
-		var texture = null, knownBytes = null, settleTimer = null, pixels = null;
+		var texture = null, knownBytes = null, trackBytes = null, settleTimer = null, pixels = null, lastSize = null;
 		var size = function() {
 			var width = Math.max(260, Math.round(holder.clientWidth || 600));
 			var height = Math.round(Math.min(width * 0.8, (window.innerHeight || 800) * 0.65));
@@ -175,10 +247,9 @@ setup.globe = {
 		};
 		var fitPxPerKm = function(s) { return 0.45 * Math.min(s.width, s.height) / R; };
 		var clampZoom = function() {
-			var s = size();
-			view.pxPerKm = Math.max(fitPxPerKm(s), Math.min(self.MAX_PX_PER_KM, view.pxPerKm));
+			view.pxPerKm = Math.max(fitPxPerKm(size()), Math.min(self.MAX_PX_PER_KM, view.pxPerKm));
 		};
-		// A longitude and latitude (radians) on the canvas, or null on the far side of the globe.
+		// A longitude and latitude (radians) on the view, or null on the far side of the globe.
 		var toScreen = function(lon, lat, s) {
 			var cosC = Math.sin(view.lat) * Math.sin(lat) + Math.cos(view.lat) * Math.cos(lat) * Math.cos(lon - view.lon);
 			if (cosC < 0) return null;
@@ -186,23 +257,50 @@ setup.globe = {
 			return [s.width / 2 + r * Math.cos(lat) * Math.sin(lon - view.lon),
 				s.height / 2 - r * (Math.cos(view.lat) * Math.sin(lat) - Math.sin(view.lat) * Math.cos(lat) * Math.cos(lon - view.lon))];
 		};
+		// A point of the view back to longitude and latitude (degrees), or null off the globe.
+		var fromScreen = function(x, y, s) {
+			var r = R * view.pxPerKm, nx = (x - s.width / 2) / r, ny = (s.height / 2 - y) / r, rho2 = nx * nx + ny * ny;
+			if (rho2 > 1) return null;
+			var z = Math.sqrt(1 - rho2);
+			var lat = Math.asin(z * Math.sin(view.lat) + ny * Math.cos(view.lat));
+			var lon = view.lon + Math.atan2(nx, z * Math.cos(view.lat) - ny * Math.sin(view.lat));
+			return [((lon / radians + 540) % 360) - 180, lat / radians];
+		};
+		// The buckets that can be in view: within the view's reach of its middle, and on the near side.
+		var bucketsInView = function(s) {
+			var reach = Math.min(Math.PI / 2, Math.hypot(s.width, s.height) / 2 / (R * view.pxPerKm)) + self.BUCKET_DEGREES * 1.5 * radians;
+			var sinLat0 = Math.sin(view.lat), cosLat0 = Math.cos(view.lat), limit = Math.cos(reach);
+			return Object.keys(known.buckets).map(function(key) { return known.buckets[key]; }).filter(function(b) {
+				return sinLat0 * Math.sin(b.lat) + cosLat0 * Math.cos(b.lat) * Math.cos(b.lon - view.lon) >= limit;
+			});
+		};
 
-		var draw = function(step) {
+		var resize = function(s, ratio) {
+			[canvas, overlay].forEach(function(c) {
+				if (c.width !== Math.round(s.width * ratio) || c.height !== Math.round(s.height * ratio)) {
+					c.width = Math.round(s.width * ratio);
+					c.height = Math.round(s.height * ratio);
+					c.style.width = s.width + 'px';
+					c.style.height = s.height + 'px';
+					if (c === canvas) pixels = null;
+				}
+			});
+			holder.style.height = s.height + 'px';
+		};
+
+		// The globe itself, a pixel at a time; step > 1 draws coarser while it moves.
+		var drawGlobe = function(step) {
 			if (!texture) return;
 			var s = size(), ratio = Math.min(1.5, window.devicePixelRatio || 1);
-			if (canvas.width !== Math.round(s.width * ratio) || canvas.height !== Math.round(s.height * ratio)) {
-				canvas.width = Math.round(s.width * ratio);
-				canvas.height = Math.round(s.height * ratio);
-				canvas.style.width = s.width + 'px';
-				canvas.style.height = s.height + 'px';
-				pixels = null;
-			}
+			resize(s, ratio);
+			lastSize = s;
 			var context = canvas.getContext('2d');
 			var w = canvas.width, h = canvas.height;
 			if (!pixels) pixels = context.createImageData(w, h);
 			var data = pixels.data, r = R * view.pxPerKm * ratio, cx = w / 2, cy = h / 2;
 			var sinLat0 = Math.sin(view.lat), cosLat0 = Math.cos(view.lat);
 			var tw = texture.width, th = texture.height, bytes = texture.bytes, fine = texture.land;
+			var rasterTrack = trackBytes && view.pxPerKm < self.VECTOR_PX_PER_KM;
 			var landAt = function(column, row) {
 				column = ((column % fine.columns) + fine.columns) % fine.columns;
 				row = Math.max(0, Math.min(fine.rows - 1, row));
@@ -221,7 +319,7 @@ setup.globe = {
 						var z = Math.sqrt(1 - rho2);
 						var lat = Math.asin(z * sinLat0 + ny * cosLat0);
 						var lon = view.lon + Math.atan2(nx, z * cosLat0 - ny * sinLat0);
-						// Bilinear: how much of the four texels round the point is land, and their shading.
+						// Bilinear over the relief texture: its shading, from the land texels round the point.
 						var u = ((lon / (2 * Math.PI) + 0.5) % 1 + 1) % 1 * tw - 0.5, v = (0.5 - lat / Math.PI) * th - 0.5;
 						var u0 = Math.floor(u), v0 = Math.max(0, Math.min(th - 1, Math.floor(v))), fu = u - u0, fv = Math.max(0, Math.min(1, v - v0));
 						var u1 = (u0 + 1) % tw, v1 = Math.min(th - 1, v0 + 1);
@@ -230,7 +328,7 @@ setup.globe = {
 						var wa = (1 - fu) * (1 - fv), wb = fu * (1 - fv), wc = (1 - fu) * fv, wd = fu * fv;
 						var landWeight = (a ? wa : 0) + (b ? wb : 0) + (c ? wc : 0) + (d ? wd : 0);
 						var shadeValue = landWeight > 0 ? ((a ? wa * a : 0) + (b ? wb * b : 0) + (c ? wc * c : 0) + (d ? wd * d : 0)) / landWeight : self.FLAT_SHADE;
-						// Land or water from the finer mask, bilinear too, where there is one.
+						// Land or water from the finer mask, bilinear too.
 						if (fine) {
 							var lu = ((lon / (2 * Math.PI) + 0.5) % 1 + 1) % 1 * fine.columns - 0.5, lv = (0.5 - lat / Math.PI) * fine.rows - 0.5;
 							var lu0 = Math.floor(lu), lv0 = Math.floor(lv), gu = lu - lu0, gv = lv - lv0;
@@ -244,15 +342,22 @@ setup.globe = {
 						var landR = (80 + 50 * polar) * relief, landG = (88 + 46 * polar) * relief, landB = (64 + 70 * polar) * relief;
 						red = 24 + (landR - 24) * land; green = 44 + (landG - 44) * land; blue = 64 + (landB - 64) * land;
 						// Fog: unknown country darker and greyer, its edge as smooth as the land's.
-						var k = (wa * knownBytes[v0 * tw + u0] + wb * knownBytes[v0 * tw + u1] + wc * knownBytes[v1 * tw + u0]
-							+ wd * knownBytes[v1 * tw + u1]) / 255, fog = 0.62 + 0.38 * k, grey = (red + green + blue) / 3;
-						red = (grey + (red - grey) * (0.6 + 0.4 * k)) * fog;
-						green = (grey + (green - grey) * (0.6 + 0.4 * k)) * fog;
-						blue = (grey + (blue - grey) * (0.6 + 0.4 * k)) * fog;
+						if (knownBytes) {
+							var k = (wa * knownBytes[v0 * tw + u0] + wb * knownBytes[v0 * tw + u1] + wc * knownBytes[v1 * tw + u0]
+								+ wd * knownBytes[v1 * tw + u1]) / 255, fog = 0.55 + 0.45 * k, grey = (red + green + blue) / 3;
+							red = (grey + (red - grey) * (0.5 + 0.5 * k)) * fog;
+							green = (grey + (green - grey) * (0.5 + 0.5 * k)) * fog;
+							blue = (grey + (blue - grey) * (0.5 + 0.5 * k)) * fog;
+						}
+						// Far out, with everything revealed, the track from its raster.
+						if (rasterTrack) {
+							var t = trackBytes[Math.round(v) * tw + ((Math.round(u) % tw) + tw) % tw];
+							if (t === 1) { red = 216; green = 210; blue = 196; } else if (t === 2) { red = 217; green = 98; blue = 79; }
+						}
 						// Lines of latitude and longitude every 15 degrees, faintly.
 						var latLine = Math.abs(lat / graticule - Math.round(lat / graticule)) * graticule;
 						var lonLine = Math.abs(lon / graticule - Math.round(lon / graticule)) * graticule * Math.cos(lat);
-						if (latLine < lineWidth * step || lonLine < lineWidth * step) { red += 14; green += 16; blue += 18; }
+						if (latLine < lineWidth * step || lonLine < lineWidth * step) { red += 12; green += 14; blue += 16; }
 						// Darker towards the edge of the disc, so it reads as a ball.
 						var limb = 0.55 + 0.45 * z;
 						red *= limb; green *= limb; blue *= limb;
@@ -266,65 +371,106 @@ setup.globe = {
 				}
 			}
 			context.putImageData(pixels, 0, 0);
-			context.save();
-			context.scale(ratio, ratio);
-			drawTrack(context, s);
-			context.restore();
 		};
 
-		// The known track, stations, names and here, over the globe.
-		var drawTrack = function(context, s) {
-			var zoom = view.pxPerKm, width = Math.max(1, Math.min(3, zoom * 2.2));
-			context.lineCap = 'round';
-			context.lineJoin = 'round';
-			var path = new Path2D();
-			known.segments.forEach(function(segment) {
-				var a = toScreen(segment[0], segment[1], s), b = toScreen(segment[2], segment[3], s);
-				if (!a || !b) return;
-				path.moveTo(a[0], a[1]);
-				path.lineTo(b[0], b[1]);
-			});
-			context.strokeStyle = '#101416';
-			context.lineWidth = width + 2.5;
-			context.stroke(path);
-			context.strokeStyle = '#d8d2c4';
-			context.lineWidth = width;
-			context.stroke(path);
-			var here = known.here, hereTile = here && here.stationIndex ? here : null;
+		// The track, stations, names and marks, on the canvas over the globe. pulse: 0 to 1, the here mark's beat.
+		var drawOverlay = function(pulse) {
+			var s = lastSize || size(), ratio = Math.min(1.5, window.devicePixelRatio || 1);
+			var context = overlay.getContext('2d');
+			context.setTransform(1, 0, 0, 1, 0, 0);
+			context.clearRect(0, 0, overlay.width, overlay.height);
+			context.setTransform(ratio, 0, 0, ratio, 0, 0);
+			var zoom = view.pxPerKm, width = Math.max(1, Math.min(3, zoom * 2.2)), inView = null;
+			var vectors = !known.revealAll || zoom >= self.VECTOR_PX_PER_KM;
+			if (vectors) {
+				inView = bucketsInView(s);
+				// Known track: a dark casing under a light line. New lines red on the debug map. Hints fade out.
+				var paths = { rail: new Path2D(), 'new': new Path2D() }, hints = [];
+				inView.forEach(function(b) {
+					b.segments.forEach(function(segment) {
+						var p = toScreen(segment.a[0], segment.a[1], s), q = toScreen(segment.b[0], segment.b[1], s);
+						if (!p || !q) return;
+						if (segment.fade < 1) { hints.push([p, q, segment.fade]); return; }
+						var path = known.revealAll && segment.kind === 'new' ? paths['new'] : paths.rail;
+						path.moveTo(p[0], p[1]);
+						path.lineTo(q[0], q[1]);
+					});
+				});
+				context.lineCap = 'round';
+				context.lineJoin = 'round';
+				['rail', 'new'].forEach(function(kind) {
+					context.strokeStyle = '#101416';
+					context.lineWidth = width + 2.5;
+					context.stroke(paths[kind]);
+					context.strokeStyle = kind === 'new' ? '#d9624f' : '#d8d2c4';
+					context.lineWidth = width;
+					context.stroke(paths[kind]);
+				});
+				// A line running on into country not seen: dashed, fading as it goes.
+				context.setLineDash([3, 3]);
+				context.lineWidth = Math.max(1, width * 0.8);
+				hints.forEach(function(hint) {
+					context.strokeStyle = 'rgba(216, 210, 196, ' + (0.75 * hint[2]).toFixed(2) + ')';
+					context.beginPath();
+					context.moveTo(hint[0][0], hint[0][1]);
+					context.lineTo(hint[1][0], hint[1][1]);
+					context.stroke();
+				});
+				context.setLineDash([]);
+			}
+			var here = known.here, hereIndex = here && here.stationIndex ? here.globalPosition : null;
 			var placed = [], labels = [];
 			var fits = function(box) {
 				if (box.x0 < 2 || box.y0 < 2 || box.x1 > s.width - 2 || box.y1 > s.height - 2) return false;
 				return !placed.some(function(t) { return box.x0 < t.x1 && box.x1 > t.x0 && box.y0 < t.y1 && box.y1 > t.y0; });
 			};
-			var rank = function(tile) {
-				if (hereTile && tile.globalPosition === hereTile.globalPosition) return 0;
-				if (tile.stationStatus === 'city') return 1;
-				if (tile.stationStatus === 'halt') return 4;
-				return tile.stationStatus === 'active' || tile.stationStatus === 'settlement' ? 2 : 3;
-			};
-			var stations = known.stations.map(function(tile) {
-				var p = toScreen(tile.geoCoordinate[0] * radians, tile.geoCoordinate[1] * radians, s);
-				return p ? { tile: tile, p: p, rank: rank(tile) } : null;
-			}).filter(Boolean).sort(function(a, b) { return a.rank - b.rank || a.tile.globalPosition - b.tile.globalPosition; });
+			// Stations: solid where the player has been, hollow where they only know of one; cities larger. On the
+			// debug map, only once close enough to tell them apart.
 			var dot = Math.max(1.5, Math.min(4.5, zoom * 6));
-			stations.forEach(function(station) {
-				if (station.rank === 0) return;
-				var radius = station.rank === 1 ? dot + 1.2 : dot;
-				context.beginPath();
-				context.arc(station.p[0], station.p[1], radius, 0, 2 * Math.PI);
-				context.fillStyle = station.rank === 1 ? '#f2dcae' : '#e5c58a';
-				context.fill();
-				context.lineWidth = 1.5;
-				context.strokeStyle = '#101416';
-				context.stroke();
-				placed.push({ x0: station.p[0] - radius, x1: station.p[0] + radius, y0: station.p[1] - radius, y1: station.p[1] + radius });
+			var stations = [];
+			if (vectors && (!known.revealAll || zoom >= self.NAMES_PX_PER_KM / 2)) {
+				inView.forEach(function(b) {
+					b.stations.forEach(function(station) {
+						if (station.tile.globalPosition === hereIndex) return;
+						var p = toScreen(station.tile.geoCoordinate[0] * radians, station.tile.geoCoordinate[1] * radians, s);
+						if (p && p[0] > -10 && p[1] > -10 && p[0] < s.width + 10 && p[1] < s.height + 10) stations.push({ station: station, p: p });
+					});
+				});
+			}
+			stations.sort(function(a, b) {
+				return (b.station.city - a.station.city) || (b.station.visited - a.station.visited) || a.station.tile.globalPosition - b.station.tile.globalPosition;
 			});
-			// Here: a red dot in a ring, at the station or out on the line.
+			stations.forEach(function(item) {
+				var radius = item.station.city ? dot + 1.2 : dot, solid = known.revealAll || item.station.visited;
+				context.beginPath();
+				context.arc(item.p[0], item.p[1], radius, 0, 2 * Math.PI);
+				context.lineWidth = 1.5;
+				if (solid) {
+					context.fillStyle = item.station.city ? '#f2dcae' : '#e5c58a';
+					context.fill();
+					context.strokeStyle = '#101416';
+					context.stroke();
+				} else {
+					context.fillStyle = '#101416';
+					context.fill();
+					context.strokeStyle = item.station.city ? '#f2dcae' : '#e5c58a';
+					context.stroke();
+				}
+				placed.push({ x0: item.p[0] - radius, x1: item.p[0] + radius, y0: item.p[1] - radius, y1: item.p[1] + radius });
+			});
+			// Here: a red dot in a ring that beats, or an arrow at the edge pointing the way when it is off the view.
 			var hereAt = here && here.geoCoordinate ? toScreen(here.geoCoordinate[0] * radians, here.geoCoordinate[1] * radians, s) : null;
-			if (hereAt) {
+			var onView = hereAt && hereAt[0] >= 0 && hereAt[1] >= 0 && hereAt[0] <= s.width && hereAt[1] <= s.height;
+			arrowBox = null;
+			if (onView) {
+				context.beginPath();
+				context.arc(hereAt[0], hereAt[1], 9 + 7 * pulse, 0, 2 * Math.PI);
+				context.strokeStyle = 'rgba(224, 98, 92, ' + (0.9 * (1 - pulse)).toFixed(2) + ')';
+				context.lineWidth = 2.5;
+				context.stroke();
 				context.beginPath();
 				context.arc(hereAt[0], hereAt[1], 9, 0, 2 * Math.PI);
-				context.strokeStyle = 'rgba(224, 98, 92, 0.85)';
+				context.strokeStyle = '#e0625c';
 				context.lineWidth = 2;
 				context.stroke();
 				context.beginPath();
@@ -334,28 +480,56 @@ setup.globe = {
 				context.lineWidth = 1.5;
 				context.strokeStyle = '#101416';
 				context.stroke();
-				placed.push({ x0: hereAt[0] - 9, x1: hereAt[0] + 9, y0: hereAt[1] - 9, y1: hereAt[1] + 9 });
-				labels.push({ p: hereAt, gap: 13, text: hereTile ? hereTile.station + ' (you are here)' : 'You are here', size: 12.5, colour: '#f08a84', bold: true });
+				placed.push({ x0: hereAt[0] - 10, x1: hereAt[0] + 10, y0: hereAt[1] - 10, y1: hereAt[1] + 10 });
+				labels.push({ p: hereAt, gap: 13, text: here.stationIndex ? here.station + ' (you are here)' : 'You are here', size: 12.5, colour: '#f08a84', bold: true });
+			} else if (here && here.geoCoordinate) {
+				// The way to here from the middle of the view: straight at it where it is in front, along the great circle
+				// where it is round the back.
+				var angle;
+				if (hereAt) {
+					angle = Math.atan2(hereAt[1] - s.height / 2, hereAt[0] - s.width / 2);
+				} else {
+					var lat2 = here.geoCoordinate[1] * radians, dLon = here.geoCoordinate[0] * radians - view.lon;
+					var bearing = Math.atan2(Math.sin(dLon) * Math.cos(lat2), Math.cos(view.lat) * Math.sin(lat2) - Math.sin(view.lat) * Math.cos(lat2) * Math.cos(dLon));
+					angle = bearing - Math.PI / 2;
+				}
+				var ex = Math.cos(angle), ey = Math.sin(angle), inset = 26;
+				var t = Math.min((s.width / 2 - inset) / Math.max(1e-6, Math.abs(ex)), (s.height / 2 - inset) / Math.max(1e-6, Math.abs(ey)));
+				var ax = s.width / 2 + ex * t, ay = s.height / 2 + ey * t;
+				context.save();
+				context.translate(ax, ay);
+				context.rotate(angle);
+				context.beginPath();
+				context.moveTo(14, 0); context.lineTo(-6, -9); context.lineTo(-2, 0); context.lineTo(-6, 9); context.closePath();
+				context.fillStyle = 'rgba(224, 98, 92, ' + (0.75 + 0.25 * (1 - pulse)).toFixed(2) + ')';
+				context.fill();
+				context.lineWidth = 1.5;
+				context.strokeStyle = '#101416';
+				context.stroke();
+				context.restore();
+				arrowBox = { x: ax, y: ay };
+				placed.push({ x0: ax - 14, x1: ax + 14, y0: ay - 14, y1: ay + 14 });
+				labels.push({ p: [ax, ay], gap: 16, text: 'You are here', size: 12, colour: '#f08a84', bold: true });
 			}
-			stations.forEach(function(station) {
-				if (station.rank === 0) return;
-				if (station.rank > 1 && zoom < self.NAMES_PX_PER_KM) return;
-				labels.push({ p: station.p, gap: (station.rank === 1 ? dot + 1.2 : dot) + 4, text: station.tile.station, size: station.rank === 1 ? 12.5 : 11,
-					colour: station.rank === 1 ? '#f2dcae' : '#e5c58a', bold: station.rank === 1 });
+			stations.forEach(function(item) {
+				if (!item.station.city && zoom < self.NAMES_PX_PER_KM) return;
+				var radius = item.station.city ? dot + 1.2 : dot;
+				labels.push({ p: item.p, gap: radius + 4, text: item.station.tile.station, size: item.station.city ? 12.5 : 11,
+					colour: item.station.city ? '#f2dcae' : '#e5c58a', bold: item.station.city });
 			});
-			// Names placed greedily, on whichever side of the marker is clear, each with a dark halo.
+			// Names placed greedily, on whichever side of the mark is clear, each with a dark halo.
 			context.textBaseline = 'middle';
 			context.lineJoin = 'round';
 			labels.forEach(function(label) {
 				context.font = (label.bold ? 'bold ' : '') + label.size + 'px sans-serif';
 				var w = context.measureText(label.text).width, h = label.size, gap = label.gap;
-				var options = [[label.p[0] + gap, label.p[1], 'left'], [label.p[0] - gap - w, label.p[1], 'left'],
-					[label.p[0] - w / 2, label.p[1] - gap - h / 2, 'left'], [label.p[0] - w / 2, label.p[1] + gap + h / 2, 'left']];
-				for (var i = 0; i < options.length; i++) {
-					var o = options[i], box = { x0: o[0] - 1, x1: o[0] + w + 1, y0: o[1] - h / 2 - 1, y1: o[1] + h / 2 + 1 };
+				var candidates = [[label.p[0] + gap, label.p[1]], [label.p[0] - gap - w, label.p[1]],
+					[label.p[0] - w / 2, label.p[1] - gap - h / 2], [label.p[0] - w / 2, label.p[1] + gap + h / 2]];
+				for (var i = 0; i < candidates.length; i++) {
+					var o = candidates[i], box = { x0: o[0] - 1, x1: o[0] + w + 1, y0: o[1] - h / 2 - 1, y1: o[1] + h / 2 + 1 };
 					if (!fits(box)) continue;
 					placed.push(box);
-					context.textAlign = o[2];
+					context.textAlign = 'left';
 					context.strokeStyle = '#101416';
 					context.lineWidth = 3.5;
 					context.strokeText(label.text, o[0], o[1]);
@@ -364,7 +538,7 @@ setup.globe = {
 					return;
 				}
 			});
-			// A scale bar, bottom left, where the middle of the view is.
+			// A scale bar, bottom left, true at the middle of the view.
 			var steps = [5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000], target = s.width / 5 / zoom, barKm = steps[0];
 			steps.forEach(function(km) { if (km <= target) barKm = km; });
 			var barPx = barKm * zoom, bx = 12, by = s.height - 14;
@@ -378,6 +552,19 @@ setup.globe = {
 			context.strokeText(setup.units.kilometres(barKm), bx, by - 11);
 			context.fillStyle = '#d8d2c4';
 			context.fillText(setup.units.kilometres(barKm), bx, by - 11);
+		};
+		var arrowBox = null;
+
+		// The here mark beats while the map is on the page (not on the debug map, whose overlay is heavy).
+		var beatStart = Date.now(), beating = false;
+		var beat = function() {
+			if (!holder.isConnected) { beating = false; return; }
+			drawOverlay(((Date.now() - beatStart) % 1600) / 1600);
+			requestAnimationFrame(beat);
+		};
+		var draw = function(step) {
+			drawGlobe(step);
+			if (!beating) drawOverlay(0);
 		};
 
 		// Moving: a third of the resolution now, sharp once it has stopped for a moment.
@@ -397,57 +584,106 @@ setup.globe = {
 			view.lat = known.here.geoCoordinate[1] * radians;
 			redraw();
 		};
-		button('+', '[NEEDS WRITING PASS] Zoom in', function() { zoomBy(1.6); });
-		button('−', '[NEEDS WRITING PASS] Zoom out', function() { zoomBy(1 / 1.6); });
-		button('◎', '[NEEDS WRITING PASS] Centre on where you are', centreOnHere);
+		if (options.revealAll) {
+			button('+', 'Zoom in', function() { zoomBy(1.6); });
+			button('−', 'Zoom out', function() { zoomBy(1 / 1.6); });
+			button('◎', 'Centre on where you are', centreOnHere);
+		} else {
+			button('+', '[NEEDS WRITING PASS] Zoom in', function() { zoomBy(1.6); });
+			button('−', '[NEEDS WRITING PASS] Zoom out', function() { zoomBy(1 / 1.6); });
+			button('◎', '[NEEDS WRITING PASS] Centre on where you are', centreOnHere);
+		}
 
-		// Dragging turns the globe under the pointer; two pointers pinch to zoom.
-		var pointers = {}, pinch = null;
-		canvas.addEventListener('pointerdown', function(event) {
+		// The square nearest a point of the view, within a few pixels, from the buckets round it: for picking.
+		var nearestTile = function(x, y) {
+			var s = lastSize || size(), place = fromScreen(x, y, s);
+			if (!place) return { tile: null, place: null };
+			var best = null, limitKm = 10 / view.pxPerKm;
+			for (var dLat = -1; dLat <= 1; dLat++) {
+				for (var dLon = -1; dLon <= 1; dLon++) {
+					var b = known.buckets[self.bucketOf(place[0] + dLon * self.BUCKET_DEGREES, place[1] + dLat * self.BUCKET_DEGREES)];
+					if (!b) continue;
+					b.segments.forEach(function(segment) {
+						segment.tiles.forEach(function(tile) {
+							var km = self.distanceKm(place, tile.geoCoordinate);
+							if (km <= limitKm && (!best || km < best.km)) best = { km: km, tile: tile };
+						});
+					});
+				}
+			}
+			return { tile: best ? best.tile : null, place: place };
+		};
+
+		// Dragging turns the globe under the pointer; two pointers pinch to zoom. A press that does not move is a
+		// click: on the arrow to here it centres on here, on the debug map it picks the square under it.
+		var pointers = {}, pinch = null, moved = false, down = null;
+		overlay.addEventListener('pointerdown', function(event) {
 			pointers[event.pointerId] = [event.clientX, event.clientY];
-			if (canvas.setPointerCapture) canvas.setPointerCapture(event.pointerId);
+			down = [event.clientX, event.clientY];
+			moved = false;
+			if (overlay.setPointerCapture) overlay.setPointerCapture(event.pointerId);
 			var ids = Object.keys(pointers);
 			if (ids.length === 2) {
 				var a = pointers[ids[0]], b = pointers[ids[1]];
 				pinch = { distance: Math.hypot(a[0] - b[0], a[1] - b[1]), zoom: view.pxPerKm };
 			}
 		});
-		canvas.addEventListener('pointermove', function(event) {
+		overlay.addEventListener('pointermove', function(event) {
 			var last = pointers[event.pointerId];
-			if (!last) return;
+			if (!last) {
+				if (options.onHover) {
+					var box = overlay.getBoundingClientRect(), found = nearestTile(event.clientX - box.left, event.clientY - box.top);
+					options.onHover(found.tile, found.place);
+				}
+				return;
+			}
+			if (down && Math.hypot(event.clientX - down[0], event.clientY - down[1]) > 4) moved = true;
 			pointers[event.pointerId] = [event.clientX, event.clientY];
 			var ids = Object.keys(pointers);
 			if (ids.length === 2 && pinch) {
 				var a = pointers[ids[0]], b = pointers[ids[1]];
 				view.pxPerKm = pinch.zoom * Math.hypot(a[0] - b[0], a[1] - b[1]) / Math.max(1, pinch.distance);
 				clampZoom();
-			} else if (ids.length === 1) {
+			} else if (ids.length === 1 && moved) {
 				var perRadian = R * view.pxPerKm;
 				view.lon -= (event.clientX - last[0]) / perRadian / Math.max(0.2, Math.cos(view.lat));
 				view.lat = Math.max(-1.5, Math.min(1.5, view.lat + (event.clientY - last[1]) / perRadian));
+			} else {
+				return;
 			}
 			redraw();
 		});
 		var release = function(event) {
+			var wasClick = pointers[event.pointerId] && !moved && Object.keys(pointers).length === 1 && event.type === 'pointerup';
 			delete pointers[event.pointerId];
 			if (Object.keys(pointers).length < 2) pinch = null;
+			if (!wasClick) return;
+			var box = overlay.getBoundingClientRect(), x = event.clientX - box.left, y = event.clientY - box.top;
+			if (arrowBox && Math.hypot(x - arrowBox.x, y - arrowBox.y) < 20) { centreOnHere(); return; }
+			if (options.onPick) {
+				var found = nearestTile(x, y);
+				if (found.tile) options.onPick(found.tile);
+			}
 		};
-		canvas.addEventListener('pointerup', release);
-		canvas.addEventListener('pointercancel', release);
-		canvas.addEventListener('wheel', function(event) {
+		overlay.addEventListener('pointerup', release);
+		overlay.addEventListener('pointercancel', release);
+		overlay.addEventListener('wheel', function(event) {
 			event.preventDefault();
 			zoomBy(Math.exp(-event.deltaY * 0.0015));
 		}, { passive: false });
-		canvas.style.touchAction = 'none';
 
 		this.loadTexture(function(loaded) {
 			texture = loaded;
 			if (!texture) return;
-			knownBytes = self.knownTexture(texture, known.areas);
-			var s = size();
-			view.pxPerKm = s.width / self.OPEN_ACROSS_KM;
+			if (!options.revealAll) knownBytes = self.knownTexture(texture, known.areas);
+			else trackBytes = self.trackTexture(texture, known);
+			view.pxPerKm = size().width / self.OPEN_ACROSS_KM;
 			clampZoom();
 			draw(1);
+			if (!options.revealAll && typeof requestAnimationFrame === 'function') {
+				beating = true;
+				requestAnimationFrame(beat);
+			}
 			if (typeof ResizeObserver === 'function') {
 				var lastWidth = holder.clientWidth;
 				new ResizeObserver(function() {
@@ -459,7 +695,42 @@ setup.globe = {
 			}
 		});
 		holder.globeView = view;
+		holder.globeKnown = known;
 		holder.redrawGlobe = function() { draw(1); };
+		holder.centreOn = function(longitude, latitude, pxPerKm) {
+			view.lon = longitude * radians;
+			view.lat = latitude * radians;
+			if (pxPerKm) view.pxPerKm = pxPerKm;
+			clampZoom();
+			draw(1);
+		};
+		holder.screenOf = function(longitude, latitude) { return toScreen(longitude * radians, latitude * radians, lastSize || size()); };
 		return holder;
+	},
+
+	// The legend under the Map tab's globe: what each mark means.
+	legend: function() {
+		var list = document.createElement('ul');
+		list.className = 'globe-map-legend';
+		var ns = 'http://www.w3.org/2000/svg';
+		var item = function(draw, text) {
+			var li = document.createElement('li');
+			var swatch = document.createElementNS(ns, 'svg');
+			swatch.setAttribute('viewBox', '0 0 24 14');
+			swatch.setAttribute('width', 24);
+			swatch.setAttribute('height', 14);
+			swatch.setAttribute('aria-hidden', 'true');
+			swatch.innerHTML = draw;
+			li.appendChild(swatch);
+			li.appendChild(document.createTextNode(' ' + text));
+			list.appendChild(li);
+		};
+		item('<circle cx="12" cy="7" r="5.5" fill="none" stroke="#e0625c" stroke-width="1.6"/><circle cx="12" cy="7" r="2.8" fill="#e0625c"/>', 'You are here');
+		item('<circle cx="12" cy="7" r="3.5" fill="#e5c58a" stroke="#101416" stroke-width="1.2"/>', '[NEEDS WRITING PASS] A station you have been to');
+		item('<circle cx="12" cy="7" r="3.5" fill="#101416" stroke="#e5c58a" stroke-width="1.4"/>', '[NEEDS WRITING PASS] A station you know of');
+		item('<path d="M1 7H23" stroke="#101416" stroke-width="4"/><path d="M1 7H23" stroke="#d8d2c4" stroke-width="2"/>', '[NEEDS WRITING PASS] Railway you know');
+		item('<path d="M1 7H23" stroke="#d8d2c4" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.6"/>', '[NEEDS WRITING PASS] The line runs on into country you have not seen');
+		item('<rect x="1" y="1" width="22" height="12" fill="#3a3d38"/>', '[NEEDS WRITING PASS] Fog: country you have not seen');
+		return list;
 	}
 };

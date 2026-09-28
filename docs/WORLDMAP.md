@@ -157,7 +157,12 @@ azimuthal equidistant projection about the station), with land and water, the tr
 names fit without overlapping (cities first), a scale bar, a north arrow, and fog beyond its 150 km.
 
 The **Map** tab in the sidebar is a globe (`source/globe.js`, `setup.globe`) the player can turn by dragging and zoom
-with the wheel, a pinch or its buttons; it opens on the player. The land is drawn everywhere, shaded by its relief, from
+with the wheel, a pinch or its buttons; it opens on the player. Where the player is must always be clear (Likea): a red
+mark that pulses, named, and when it is off the view or round the back of the globe, an arrow at the edge pointing the
+way to it (a click on the arrow centres the map on it). Stations the player has been to are solid, those they only
+know of from a map hollow; a known line that runs on into the fog is drawn a few squares further, dashed and fading,
+so the player can see where the lines lead; a legend under the globe says what each mark means. The globe is drawn
+on one canvas and the marks on another over it, so the pulse redraws only the marks. The land is drawn everywhere, shaded by its relief, from
 a 2048 by 1024 texture baked from Natural Earth's shaded relief (`scripts/world/globe-texture.cjs`, committed as
 `world/external/globe-texture.png`), with coastlines from a finer land and water layer (about 5 km) so they stay
 sharp close in. The track, stations and names are drawn only where the player knows them, under fog of war elsewhere:
@@ -378,24 +383,20 @@ weight limits come from.
 
 ## The debug map
 
-The network is drawn on the grid it was built on, and far from a grid's centre north is seldom up (Europe, Asia and
-Africa lie on a grid turned to meet the Americas). So land and water are drawn underneath, from Natural Earth's
-1:50m land polygons (`scripts/world/land-mask.cjs`, in the compiled data as `network.land`: a block of 2 by 2 squares
-a pixel, each sampled on the grid it lies on), and an arrow above the map points to true north at the middle of the
-view (`setup.worldmap.gridNorthAt`). Pointed at a square with no track, the readout gives its latitude and longitude.
+The debug panel's map is the Map tab's globe (`setup.globe.build({ revealAll: true, ... })`, Likea, September 2026)
+with everything revealed and no fog: every square, new lines in red, every station. Far out, the track is drawn into
+the globe's pixels from a raster of the texture's size; from 0.12 pixels a kilometre in, as lines and markers, only for
+the buckets (2 degrees square) in view. `appendDebugMap(parent, stationId)` builds it once its panel is open, with the
+network's figures above it and a readout under it of the square nearest the pointer (or the latitude and longitude of
+open ground). A click on the track (not a drag) teleports there; the station list is the keyboard way to teleport.
+Teleporting while aboard moves `journey`, so the complete active consist moves; teleporting on foot changes only
+`onFoot`, leaving the train's journey position alone. A trainless teleport creates only the route context walking needs
+and never invents a boardable train. Station squares enter the actual railyard: an on-foot player may inspect the yard
+and use its supplies, then return to the station track without moving the remote consist. Boarding another train is
+disabled until the player returns, because only one off-yard consist can currently be represented safely.
 
-`appendDebugMap(parent, stationId)` draws the network once its panel is open: terrain as coloured cells, mapped
-track and new lines as two paths, every station as a marker with the cities named, and a readout of the square under
-the pointer. 300 km of empty ground surrounds the network so no line sits at the edge. Only what is in view, and a
-screen's worth around it, is drawn, and it is redrawn as the map scrolls and zooms; zoomed out below 3 px a square,
-the cells and station markers are left out and the two track paths are the map. Every track cell is a teleport target by mouse; the station list is the keyboard way to teleport.
-Teleporting while aboard moves `journey`, so the complete active consist moves;
-teleporting on foot changes only `onFoot`, leaving the train's journey position alone. A trainless teleport creates
-only the route context walking needs and never invents a boardable train. Station cells enter the actual railyard:
-an on-foot player may inspect the yard and use its supplies, then return to the station track without moving the
-remote consist. Boarding another train is disabled until the player returns, because only one off-yard consist can
-currently be represented safely. The map is deliberately plain, and is
-there to inspect compiled data rather than to be a player-facing map.
+The grid-space land mask (`scripts/world/land-mask.cjs`, `network.land`) is still compiled: it tells which grid any
+square of the joined map lies on (`setup.worldmap.gridAt`).
 
 ## Not done yet
 

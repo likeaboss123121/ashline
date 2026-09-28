@@ -296,9 +296,11 @@ setup.saveMigrations = {
 	// including every history moment, then persist the converted session snapshot.
 	restoreSession: function() {
 		if (!State.history.length) return;
+		// A moment at the current version with no world identity yet is a game just begun (the new game's first moment
+		// is written before it is stamped), not a save from an older map: it is stamped below, not upgraded.
 		if (State.history.every(function(moment) {
 			return moment.variables && moment.variables.saveSchemaVersion === setup.saveMigrations.CURRENT
-				&& moment.variables.worldIdentity && moment.variables.worldIdentity.revision===setup.worldGraphData.networkRevision;
+				&& (!moment.variables.worldIdentity || moment.variables.worldIdentity.revision===setup.worldGraphData.networkRevision);
 		})) {
 			// SugarCube writes session storage before :historyupdate. Refresh the active
 			// position anchor and write the completed moment as well.

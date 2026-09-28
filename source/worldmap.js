@@ -1145,416 +1145,6 @@ setup.worldmap = {
 		var longitude = ((lambda / radians + 180) % 360 + 360) % 360 - 180;
 		return [Math.round(longitude * 1e5) / 1e5, Math.round(phi / radians * 1e5) / 1e5];
 	},
-	// The network as a drawing: a plain square per grid square, in its terrain's colour and a teleport target; the
-	// track as one path of mapped railway and one of new lines, a fixed width on screen so it shows however far out the
-	// map is zoomed; a marker per station with the authored cities named; and the train and the walker. A continent
-	// is tens of thousands of squares, so there is no tooltip or keyboard stop per square: the readout under the map
-	// names the square under the pointer, and the station list is the keyboard way to teleport.
-	//
-	// Only what is in view is drawn (see redraw), and the squares and station markers only once the map is zoomed in
-	// far enough to click them; zoomed out, the two track paths are the whole map.
-	DEBUG_MAP_MARGIN_CELLS: 60, // 300 km of empty ground around the network, so none of it sits against the edge
-	DEBUG_MAP_DETAIL_PX: 3, // on screen: a square smaller than this is too small to click, and is not drawn
-	DEBUG_MAP_CHUNK_CELLS: 32,
-	DEBUG_MAP_OVERVIEW_BLOCK: 4,
-	buildDebugMap: function(stationId, cellSize) {
-		var route = setup.realWorldPilot.getGridRoute(), network = route.rect, margin = this.DEBUG_MAP_MARGIN_CELLS;
-		var rect = { x0: network.x0 - margin, x1: network.x1 + margin, y0: network.y0 - margin, y1: network.y1 + margin };
-		var leg = { tiles: route.tiles, byKey: route.byKey, corridor: route.corridor, rect: network };
-		var cell = cellSize || 9;
-		var width = (rect.x1 - rect.x0 + 1) * cell;
-		var height = (rect.y1 - rect.y0 + 1) * cell;
-		var ns = 'http://www.w3.org/2000/svg';
-		var svg = document.createElementNS(ns, 'svg');
-		svg.setAttribute('class', 'worldmap-debug');
-		svg.setAttribute('width', width);
-		svg.setAttribute('height', height);
-		svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
-		svg.style.width = 'min(100%, ' + Math.max(280, width) + 'px)';
-		svg.style.height = 'auto';
-		// Screen y grows downwards while map y grows north, so rows are drawn from the top of the rectangle down.
-		var left = function(x) { return (x - rect.x0) * cell; };
-		var top = function(y) { return (rect.y1 - y) * cell; };
-		// One background for the empty ground, rather than a square for every empty cell.
-		var ground = document.createElementNS(ns, 'rect');
-		ground.setAttribute('x', 0);
-		ground.setAttribute('y', 0);
-		ground.setAttribute('width', width);
-		ground.setAttribute('height', height);
-		var landMask = this.getLandMask();
-		// With land drawn, the ground is the sea.
-		ground.setAttribute('fill', landMask ? '#142029' : '#1b1d1f');
-		ground.setAttribute('class', 'debug-map-ground');
-		svg.appendChild(ground);
-		// Land and water, from Natural Earth: a picture made once, a pixel per block, so the lines can be read against
-		// real coastlines on a grid where north is seldom up.
-		if (landMask) {
-			var landImage = document.createElementNS(ns, 'image');
-			landImage.setAttribute('x', left(landMask.x0));
-			landImage.setAttribute('y', top(landMask.y0));
-			landImage.setAttribute('width', landMask.width * landMask.block * cell);
-			landImage.setAttribute('height', landMask.height * landMask.block * cell);
-			landImage.setAttribute('preserveAspectRatio', 'none');
-			landImage.setAttribute('pointer-events', 'none');
-			landImage.setAttribute('class', 'debug-map-land');
-			svg.appendChild(landImage);
-			var landCanvas = document.createElement('canvas');
-			landCanvas.width = landMask.width;
-			landCanvas.height = landMask.height;
-			var landContext = landCanvas.getContext && landCanvas.getContext('2d');
-			if (landContext) {
-				var landPicture = landContext.createImageData(landMask.width, landMask.height);
-				for (var block = 0; block < landMask.isLand.length; block++) {
-					if (!landMask.isLand[block]) continue;
-					landPicture.data[block * 4] = 44; landPicture.data[block * 4 + 1] = 50; landPicture.data[block * 4 + 2] = 40;
-					landPicture.data[block * 4 + 3] = 255;
-				}
-				landContext.putImageData(landPicture, 0, 0);
-				if (landCanvas.toBlob) landCanvas.toBlob(function(blob) { if (blob) landImage.setAttribute('href', URL.createObjectURL(blob)); });
-				else landImage.setAttribute('href', landCanvas.toDataURL());
-			}
-		}
-		var self = this;
-		var squares = document.createElementNS(ns, 'g');
-		squares.setAttribute('class', 'debug-map-squares');
-		svg.appendChild(squares);
-		var paths = [['#d8d2c4', 'debug-map-track'], ['#d9624f', 'debug-map-track debug-map-new-track']].map(function(entry) {
-			var path = document.createElementNS(ns, 'path');
-			path.setAttribute('fill', 'none');
-			path.setAttribute('stroke', entry[0]);
-			path.setAttribute('stroke-width', '1.5');
-			path.setAttribute('vector-effect', 'non-scaling-stroke');
-			path.setAttribute('pointer-events', 'none');
-			path.setAttribute('class', entry[1]);
-			svg.appendChild(path);
-			return path;
-		});
-		var stations = document.createElementNS(ns, 'g');
-		stations.setAttribute('class', 'debug-map-stations');
-		svg.appendChild(stations);
-		// Zoomed out, the network is two pictures drawn once: a pixel per square in the track's colours, and for the
-		// whole continent a coarser one, a pixel per OVERVIEW_BLOCK squares either way lit if any of them has track, so
-		// the lines stay visible when a square is a fraction of a pixel. Drawing tens of thousands of track segments as
-		// vector paths on every scroll was what made a two-continent map crawl.
-		var columns = rect.x1 - rect.x0 + 1, rows = rect.y1 - rect.y0 + 1;
-		var overviews = [1, this.DEBUG_MAP_OVERVIEW_BLOCK].map(function(block) {
-			var image = document.createElementNS(ns, 'image');
-			image.setAttribute('x', 0);
-			image.setAttribute('y', 0);
-			image.setAttribute('width', width);
-			image.setAttribute('height', height);
-			image.setAttribute('preserveAspectRatio', 'none');
-			image.setAttribute('pointer-events', 'none');
-			image.setAttribute('class', 'debug-map-overview');
-			image.style.imageRendering = 'pixelated';
-			svg.insertBefore(image, squares);
-			var canvas = document.createElement('canvas');
-			canvas.width = Math.ceil(columns / block);
-			canvas.height = Math.ceil(rows / block);
-			var context = canvas.getContext && canvas.getContext('2d');
-			if (!context) return image;
-			var picture = context.createImageData(canvas.width, canvas.height);
-			route.tiles.forEach(function(tile) {
-				var at = (Math.floor((rect.y1 - tile.y) / block) * canvas.width + Math.floor((tile.x - rect.x0) / block)) * 4;
-				// New line only where the block has no mapped railway.
-				var colour = tile.gapFill ? [217, 98, 79] : [216, 210, 196];
-				if (picture.data[at + 3] && tile.gapFill) return;
-				picture.data[at] = colour[0]; picture.data[at + 1] = colour[1]; picture.data[at + 2] = colour[2]; picture.data[at + 3] = 255;
-			});
-			context.putImageData(picture, 0, 0);
-			if (canvas.toBlob) {
-				canvas.toBlob(function(blob) { if (blob) image.setAttribute('href', URL.createObjectURL(blob)); });
-			} else {
-				image.setAttribute('href', canvas.toDataURL());
-			}
-			return image;
-		});
-		// The squares in blocks, so drawing a view only looks at the blocks it covers.
-		var chunk = this.DEBUG_MAP_CHUNK_CELLS, chunks = {};
-		route.tiles.forEach(function(tile) {
-			var key = Math.floor(tile.x / chunk) + ',' + Math.floor(tile.y / chunk);
-			(chunks[key] = chunks[key] || []).push(tile);
-		});
-		var drawn = null;
-		// Draws what the frame shows, and a screen more each way so a short scroll needs nothing new. Called on every
-		// scroll and zoom; it does nothing while the view stays inside what is already drawn at the same zoom.
-		// Which way true north lies at the middle of the view: grid north is up, and far from a grid's centre true north
-		// is well off it.
-		var compass = document.createElement('span');
-		compass.className = 'debug-map-north';
-		compass.setAttribute('title', 'True north at the middle of the view');
-		var needle = document.createElement('span');
-		needle.className = 'debug-map-north-needle';
-		needle.textContent = '\u2191';
-		compass.appendChild(needle);
-		compass.appendChild(document.createTextNode(' N'));
-		var redraw = function(frame) {
-			if (!frame || !frame.clientWidth) return;
-			var box = svg.getBoundingClientRect(), frameBox = frame.getBoundingClientRect(), scale = box.width / width;
-			if (!scale) return;
-			var middleX = rect.x0 + Math.floor((frameBox.left + frame.clientWidth / 2 - box.left) / scale / cell);
-			var middleY = rect.y1 - Math.floor((frameBox.top + frame.clientHeight / 2 - box.top) / scale / cell);
-			var north = self.gridNorthAt(middleX, middleY);
-			if (north !== null) needle.style.transform = 'rotate(' + Math.round(-north) + 'deg)';
-			var detail = cell * scale >= self.DEBUG_MAP_DETAIL_PX;
-			// The coarse picture while a square is under a pixel, the fine one until the squares themselves are drawn.
-			var coarse = cell * scale < 1;
-			overviews[0].style.display = coarse || detail ? 'none' : '';
-			overviews[1].style.display = coarse ? '' : 'none';
-			if (!detail) {
-				if (drawn && drawn.detail === false) return;
-				drawn = { detail: false };
-				squares.textContent = '';
-				stations.textContent = '';
-				paths[0].setAttribute('d', '');
-				paths[1].setAttribute('d', '');
-				return;
-			}
-			var spanX = Math.ceil(frame.clientWidth / scale / cell), spanY = Math.ceil(frame.clientHeight / scale / cell);
-			var column = Math.floor((frameBox.left - box.left) / scale / cell), row = Math.floor((frameBox.top - box.top) / scale / cell);
-			var view = { x0: rect.x0 + column, x1: rect.x0 + column + spanX, y0: rect.y1 - row - spanY, y1: rect.y1 - row };
-			if (drawn && drawn.detail && drawn.scale === scale && view.x0 >= drawn.x0 && view.x1 <= drawn.x1 && view.y0 >= drawn.y0
-				&& view.y1 <= drawn.y1) return;
-			drawn = { detail: true, scale: scale, x0: view.x0 - spanX, x1: view.x1 + spanX, y0: view.y0 - spanY, y1: view.y1 + spanY };
-			var tileSquares = document.createDocumentFragment(), stationMarkers = document.createDocumentFragment();
-			var railPath = [], newPath = [];
-			for (var cx = Math.floor(drawn.x0 / chunk); cx <= Math.floor(drawn.x1 / chunk); cx++) {
-				for (var cy = Math.floor(drawn.y0 / chunk); cy <= Math.floor(drawn.y1 / chunk); cy++) {
-					(chunks[cx + ',' + cy] || []).forEach(function(tile) {
-						if (tile.x < drawn.x0 || tile.x > drawn.x1 || tile.y < drawn.y0 || tile.y > drawn.y1) return;
-						var middleX = left(tile.x) + cell / 2, middleY = top(tile.y) + cell / 2;
-						tile.ends.forEach(function(end) {
-							var direction = self.DIRECTIONS[end];
-							(tile.gapFill ? newPath : railPath).push('M' + middleX + ' ' + middleY + 'L'
-								+ (middleX + direction.dx * cell / 2) + ' ' + (middleY - direction.dy * cell / 2));
-						});
-						var square = document.createElementNS(ns, 'rect');
-						square.setAttribute('x', left(tile.x));
-						square.setAttribute('y', top(tile.y));
-						square.setAttribute('width', cell);
-						square.setAttribute('height', cell);
-						square.setAttribute('fill', self.TERRAIN_COLOURS[tile.terrain] || '#000');
-						square.setAttribute('stroke', '#1b1d1f');
-						square.setAttribute('stroke-width', '0.5');
-						square.setAttribute('class', 'debug-teleport-tile' + (tile.gapFill ? ' debug-gap-tile' : ''));
-						square.setAttribute('data-debug-teleport', '0:' + tile.x + ':' + tile.y);
-						if (tile.stationIndex) square.setAttribute('data-station-index', String(tile.stationIndex));
-						tileSquares.appendChild(square);
-						if (!tile.station) return;
-						var marker = document.createElementNS(ns, 'circle');
-						marker.setAttribute('cx', middleX);
-						marker.setAttribute('cy', middleY);
-						marker.setAttribute('r', cell / 3);
-						marker.setAttribute('fill', '#e5c58a');
-						marker.setAttribute('pointer-events', 'none');
-						stationMarkers.appendChild(marker);
-					});
-				}
-			}
-			squares.textContent = '';
-			squares.appendChild(tileSquares);
-			stations.textContent = '';
-			stations.appendChild(stationMarkers);
-			paths[0].setAttribute('d', railPath.join(''));
-			paths[1].setAttribute('d', newPath.join(''));
-		};
-		// Cities are named on the map at every zoom; the other stations are only markers, or the labels would overlap.
-		route.tiles.forEach(function(tile) {
-			if (!tile.station || tile.stationStatus !== 'city') return;
-			var label = document.createElementNS(ns, 'text');
-			label.setAttribute('x', left(tile.x) + cell * 1.5);
-			label.setAttribute('y', top(tile.y) + cell * 5 / 6);
-			label.setAttribute('fill', '#e5c58a');
-			label.setAttribute('font-size', String(cell * 1.4));
-			label.setAttribute('font-family', 'sans-serif');
-			label.setAttribute('pointer-events', 'none');
-			label.setAttribute('class', 'debug-station-label');
-			label.textContent = tile.station;
-			svg.appendChild(label);
-		});
-		// Where the train is standing, and which way it is going, so the map can be read against the journey.
-		var here = this.getJourneyView();
-		var hasTrain = Array.isArray(State.variables.currentTrain) && State.variables.currentTrain.length > 0;
-		if (hasTrain && here && here.realWorld) {
-			var marker = document.createElementNS(ns, 'polygon');
-			var mx = left(here.tile.x) + cell / 2;
-			var my = top(here.tile.y) + cell / 2;
-			var out = here.tile.out >= 0 ? here.tile.out : 0;
-			var facing = here.forward ? out : this.opposite(out);
-			var pointer = this.DIRECTIONS[facing];
-			var angle = Math.atan2(-pointer.dy, pointer.dx);
-			var point = function(distance, spread) {
-				return (mx + Math.cos(angle + spread) * distance) + ',' + (my + Math.sin(angle + spread) * distance);
-			};
-			marker.setAttribute('points', [point(cell * 0.55, 0), point(cell * 0.45, 2.5), point(cell * 0.45, -2.5)].join(' '));
-			marker.setAttribute('fill', '#e0625c');
-			marker.setAttribute('pointer-events', 'none');
-			var markerTitle = document.createElementNS(ns, 'title');
-			markerTitle.textContent = 'Your train, heading ' + this.describeDirection(facing, here.tile);
-			marker.appendChild(markerTitle);
-			svg.appendChild(marker);
-		}
-		// Walking has a position separate from the parked train. Draw it even when there is no active consist, rather
-		// than presenting the route-context journey as a phantom train.
-		var footPosition = setup.onfoot && setup.onfoot.getPosition ? setup.onfoot.getPosition() : null;
-		var footView = footPosition && this.getJourneyView(footPosition);
-		if (footView && footView.realWorld) {
-			var footMarker = document.createElementNS(ns, 'circle');
-			footMarker.setAttribute('cx', left(footView.tile.x) + cell / 2);
-			footMarker.setAttribute('cy', top(footView.tile.y) + cell / 2);
-			footMarker.setAttribute('r', cell * 0.42);
-			footMarker.setAttribute('fill', 'none');
-			footMarker.setAttribute('stroke', '#e0625c');
-			footMarker.setAttribute('stroke-width', '1.5');
-			footMarker.setAttribute('pointer-events', 'none');
-			var footTitle = document.createElementNS(ns, 'title');
-			footTitle.textContent = 'You are here on foot';
-			footMarker.appendChild(footTitle);
-			svg.appendChild(footMarker);
-		}
-		// Where the map should open: the train, else the player on foot, else the station they are in.
-		var focusTile = hasTrain && here && here.realWorld ? here.tile
-			: setup.onfoot && setup.onfoot.isOnFoot() ? setup.onfoot.getTile()
-				: setup.realWorldPilot.getStationTile(Number(State.variables.currentStation) || 1);
-		return { svg: svg, leg: leg, rect: rect, cell: cell, redraw: redraw, compass: compass,
-			corridorCentre: { x: left((leg.rect.x0 + leg.rect.x1) / 2), y: top((leg.rect.y0 + leg.rect.y1) / 2) },
-			focus: focusTile ? { x: left(focusTile.x) + cell / 2, y: top(focusTile.y) + cell / 2 } : null };
-	},
-	// Adds the map plus a line of numbers to a debug panel.
-	// Zoom for the debug map. It opens fitted to the width of the panel, as before; "Whole map" shrinks it until the
-	// entire drawing is in view, and the buttons, Ctrl+wheel or a trackpad pinch zoom from there. Zooming only
-	// resizes the drawing that is already on the page and keeps the point under the pointer (or the middle of the
-	// view) where it was. A mouse can also drag the map around; a drag never counts as a click on a tile.
-	DEBUG_MAP_MAX_SCALE: 4,
-	DEBUG_MAP_START_CELL_PX: 6, // on screen, when the map first opens: big enough to click a tile
-	createDebugMapZoom: function(svg, frame, built) {
-		var self = this;
-		var width = Number(svg.getAttribute('width')), height = Number(svg.getAttribute('height'));
-		var mode = 'width'; // 'width', 'whole' or 'scale'
-		var bar = document.createElement('div');
-		bar.className = 'railyard-view-zoom debug-map-zoom';
-		var readout = document.createElement('span');
-		readout.className = 'debug-map-zoom-readout';
-		var currentScale = function() {
-			return svg.getBoundingClientRect().width / Math.max(1, width);
-		};
-		var wholeScale = function() {
-			var available = Math.max(120, Math.round(window.innerHeight * 0.7) - 2);
-			return Math.min(Math.max(1, frame.clientWidth) / width, available / height);
-		};
-		var show = function() {
-			readout.textContent = mode === 'width' ? 'Fit width' : mode === 'whole' ? 'Whole map'
-				: Math.round(currentScale() * 100) + '%';
-		};
-		// Resizes the drawing and scrolls so the map point at (clientX, clientY) stays under it.
-		var zoomTo = function(scale, clientX, clientY) {
-			if (!frame.clientWidth) return;
-			var frameBox = frame.getBoundingClientRect(), before = svg.getBoundingClientRect(), old = currentScale();
-			if (typeof clientX !== 'number') {
-				clientX = frameBox.left + frame.clientWidth / 2;
-				clientY = frameBox.top + frame.clientHeight / 2;
-			}
-			var unitX = (clientX - before.left) / old, unitY = (clientY - before.top) / old;
-			scale = Math.max(Math.min(wholeScale(), 1), Math.min(self.DEBUG_MAP_MAX_SCALE, scale));
-			svg.style.maxWidth = 'none';
-			svg.style.width = Math.round(width * scale) + 'px';
-			svg.style.height = Math.round(height * scale) + 'px';
-			var after = svg.getBoundingClientRect();
-			frame.scrollLeft += after.left + unitX * scale - clientX;
-			frame.scrollTop += after.top + unitY * scale - clientY;
-			show();
-			built.redraw(frame);
-		};
-		var addButton = function(label, title, onClick, parent) {
-			var button = document.createElement('button');
-			button.type = 'button';
-			button.textContent = label;
-			button.title = title;
-			button.setAttribute('aria-label', title);
-			button.addEventListener('click', onClick);
-			(parent || bar).appendChild(button);
-			return button;
-		};
-		addButton('\u2212', 'Zoom out', function() { mode = 'scale'; zoomTo(currentScale() / 1.5); });
-		addButton('+', 'Zoom in', function() { mode = 'scale'; zoomTo(currentScale() * 1.5); });
-		addButton('Whole map', 'Shrink the map until all of it is in view', function() {
-			mode = 'whole';
-			zoomTo(wholeScale());
-			frame.scrollLeft = 0;
-			frame.scrollTop = 0;
-			show();
-		});
-		addButton('Fit width', 'Fit the map to the width of the panel', function() {
-			mode = 'width';
-			zoomTo(frame.clientWidth / width);
-			show();
-		});
-		// Panning by button: a network map is heavy to drag or scroll, so these jump three quarters of the view at once.
-		// They sit in a diamond, each arrow on the side it moves towards.
-		var pad = document.createElement('div');
-		pad.className = 'debug-map-pan';
-		[['\u2191', 'Pan up', 0, -1], ['\u2190', 'Pan left', -1, 0], ['\u2192', 'Pan right', 1, 0], ['\u2193', 'Pan down', 0, 1]]
-			.forEach(function(pan) {
-				addButton(pan[0], pan[1], function() {
-					frame.scrollLeft += pan[2] * Math.round(frame.clientWidth * 0.75);
-					frame.scrollTop += pan[3] * Math.round(frame.clientHeight * 0.75);
-				}, pad).className = 'debug-map-pan-' + pan[1].slice(4);
-			});
-		bar.appendChild(pad);
-		bar.appendChild(readout);
-		show();
-		// The opening view: close enough to click a tile, centred on the player. A map small enough to fit the panel
-		// at that size simply fits its width, as it always did.
-		bar.openView = function() {
-			if (!frame.clientWidth) return false;
-			var fitWidth = frame.clientWidth / width, scale = self.DEBUG_MAP_START_CELL_PX / built.cell;
-			mode = scale <= fitWidth ? 'width' : 'scale';
-			zoomTo(Math.max(scale, fitWidth));
-			var target = built.focus || built.corridorCentre, applied = currentScale();
-			frame.scrollLeft = Math.max(0, target.x * applied - frame.clientWidth / 2);
-			frame.scrollTop = Math.max(0, target.y * applied - frame.clientHeight / 2);
-			show();
-			built.redraw(frame);
-			return true;
-		};
-		// Ctrl+wheel, and the pinch a trackpad reports as one, zoom around the pointer; a plain wheel still scrolls.
-		frame.addEventListener('wheel', function(event) {
-			if (!event.ctrlKey) return;
-			event.preventDefault();
-			mode = 'scale';
-			// About a fifth per wheel notch; a pinch sends many small steps and comes out smooth.
-			zoomTo(currentScale() * Math.exp(-event.deltaY * 0.002), event.clientX, event.clientY);
-		}, { passive: false });
-		// Dragging with a mouse pans. Touch already scrolls the frame by itself.
-		// The move and release listeners live only as long as the drag, since the panel is rebuilt on every passage.
-		frame.addEventListener('pointerdown', function(event) {
-			if (event.pointerType !== 'mouse' || event.button !== 0) return;
-			var drag = { x: event.clientX, y: event.clientY, left: frame.scrollLeft, top: frame.scrollTop, moved: false };
-			var move = function(moveEvent) {
-				var dx = moveEvent.clientX - drag.x, dy = moveEvent.clientY - drag.y;
-				if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 5) return;
-				drag.moved = true;
-				frame.classList.add('debug-map-dragging');
-				frame.scrollLeft = drag.left - dx;
-				frame.scrollTop = drag.top - dy;
-			};
-			var release = function() {
-				window.removeEventListener('pointermove', move);
-				window.removeEventListener('pointerup', release);
-				frame.classList.remove('debug-map-dragging');
-				if (!drag.moved) return;
-				// The click that ends a drag must not teleport the player to whatever tile the pointer let go over.
-				var swallow = function(clickEvent) { clickEvent.stopPropagation(); clickEvent.preventDefault(); };
-				frame.addEventListener('click', swallow, { capture: true, once: true });
-				setTimeout(function() { frame.removeEventListener('click', swallow, { capture: true }); }, 0);
-			};
-			window.addEventListener('pointermove', move);
-			window.addEventListener('pointerup', release);
-		});
-		return bar;
-	},
-	// The map of a whole network takes a moment to draw, and the debug panel is rebuilt on every passage whether or not
-	// anyone is looking at it. So the map is only drawn once the panel is open and it has room on the page.
 	appendDebugMap: function(parent, stationId) {
 		if (!parent || typeof document === 'undefined') {
 			return;
@@ -1583,24 +1173,25 @@ setup.worldmap = {
 		});
 		watcher.observe(holder);
 	},
+	// The debug panel's map: the same globe as the Map tab (source/globe.js) with everything revealed and no fog. A click
+	// on the track teleports there; the line under the map names the square under the pointer; the station list is
+	// the keyboard way to teleport.
 	buildDebugMapPanel: function(parent, stationId) {
 		if (!parent || typeof document === 'undefined') {
 			return;
 		}
 		try {
-			var built = this.buildDebugMap(stationId);
+			var route = setup.realWorldPilot.getGridRoute();
 			var heading = document.createElement('p');
 			heading.className = 'debug-map-heading';
-			var leg = built.leg, route = setup.realWorldPilot.getGridRoute();
-			var mainLine = leg.tiles;
 			var networkStats = setup.worldGraphData.network.stats;
-			heading.textContent = leg.corridor.label + ': ' + mainLine.length + ' grid squares, '
-				+ Object.keys(route.legs).length + ' legs, ' + leg.corridor.stations.length + ' stations; '
+			heading.textContent = route.corridor.label + ': ' + route.tiles.length + ' grid squares, '
+				+ Object.keys(route.legs).length + ' legs, ' + route.corridor.stations.length + ' stations; '
 				+ networkStats.railKm + ' km of mapped railway joined by ' + networkStats.bridgeCount + ' new lines ('
 				+ networkStats.bridgeKm + ' km). Yard contents still use seed ' + this.getSeed() + '.';
 			parent.appendChild(heading);
 			var instructions = document.createElement('p');
-			instructions.textContent = 'Debug teleport: select a track tile on the map or choose one below. If you are aboard, your entire consist moves with you; on foot, only you move.';
+			instructions.textContent = 'Debug teleport: click the track on the map, or choose a station below. If you are aboard, your entire consist moves with you; on foot, only you move.';
 			var self = this;
 			var teleport = function(legIndex, x, y) {
 				var result = self.debugTeleportToTile(Number(legIndex), Number(x), Number(y));
@@ -1612,69 +1203,20 @@ setup.worldmap = {
 				setup.debugReturnToPanel = true;
 				Engine.play(result.passage);
 			};
-			// One listener for the whole map: the squares come and go as it scrolls.
-			built.svg.addEventListener('click', function(event) {
-				var cellRect = event.target.closest && event.target.closest('[data-debug-teleport]');
-				if (!cellRect) return;
-				var parts = cellRect.getAttribute('data-debug-teleport').split(':');
-				teleport(parts[0], parts[1], parts[2]);
-			});
-			var frame = document.createElement('div');
-			frame.className = 'debug-map-frame';
-			frame.appendChild(built.svg);
-			var pending = false;
-			frame.addEventListener('scroll', function() {
-				if (pending) return;
-				pending = true;
-				requestAnimationFrame(function() { pending = false; built.redraw(frame); });
-			}, { passive: true });
-			var zoomBar = this.createDebugMapZoom(built.svg, frame, built);
-			zoomBar.appendChild(built.compass);
-			parent.appendChild(zoomBar);
-			parent.appendChild(frame);
-			built.redraw(frame);
-			{
-				// One line under the map names the square under the pointer, in place of a tooltip on every square.
-				var readout = document.createElement('p');
-				readout.className = 'small-description debug-map-hover';
-				readout.textContent = 'Point at the map to read a square.';
-				parent.appendChild(readout);
-				built.svg.addEventListener('mousemove', function(event) {
-					var box = built.svg.getBoundingClientRect(), scale = box.width / Number(built.svg.getAttribute('width'));
-					var x = built.rect.x0 + Math.floor((event.clientX - box.left) / scale / built.cell);
-					var y = built.rect.y1 - Math.floor((event.clientY - box.top) / scale / built.cell);
-					var tile = route.byKey[setup.worldmap.key(x, y)];
-					readout.textContent = tile ? ((tile.station ? tile.station + ' (' + (tile.stationRegion || 'rural') + ') | ' : '') + (tile.gapFill ? 'new line | ' : '')
-						+ 'grid ' + x + ',' + y + ' ' + tile.terrain + ' ' + tile.shape + ' | '
-						+ tile.geoCoordinate[1].toFixed(3) + '\u00b0, ' + tile.geoCoordinate[0].toFixed(3) + '\u00b0 | mean '
-						+ Math.round(tile.elevation) + ' m, relief \u03c3 ' + Math.round(tile.elevationStdDevM) + ' m')
-						: 'grid ' + x + ',' + y + ': no track' + (function() {
-							var grid = setup.worldmap.gridAt(x, y), place = grid && setup.worldmap.unprojectGrid(x, y, grid);
-							return place ? ' | ' + place[1].toFixed(2) + '\u00b0, ' + place[0].toFixed(2) + '\u00b0' : '';
-						})();
-				});
-			}
-			// The debug tools are built inside a hidden panel and a folded section, so the map has no size until the
-			// player opens both. Set the opening view the first time it actually appears.
-			if (typeof ResizeObserver === 'function') {
-				var watcher = new ResizeObserver(function() { if (zoomBar.openView()) watcher.disconnect(); });
-				watcher.observe(frame);
-			}
 			parent.appendChild(instructions);
 			var controls = document.createElement('div');
 			controls.className = 'debug-map-teleport-controls';
 			var label = document.createElement('label');
-			label.textContent = 'Exact track tile: ';
+			label.textContent = 'Station: ';
 			var select = document.createElement('select');
-			select.setAttribute('aria-label', 'Exact track tile');
-			// Every station: listing tens of thousands of squares would make the list useless.
-			var listed = mainLine.filter(function(tile) { return tile.stationIndex; })
+			select.setAttribute('aria-label', 'Station to teleport to');
+			// Every station: listing hundreds of thousands of squares would make the list useless.
+			var listed = route.tiles.filter(function(tile) { return tile.stationIndex; })
 				.sort(function(a, b) { return a.stationIndex - b.stationIndex; });
 			listed.forEach(function(tile, index) {
 				var option = document.createElement('option');
 				option.value = '0,' + tile.x + ',' + tile.y;
-				option.textContent = (index + 1) + '/' + listed.length + ' — ' + tile.x + ', ' + tile.y + ' — '
-					+ tile.terrain + (tile.station ? ' — ' + tile.station : '');
+				option.textContent = (index + 1) + '/' + listed.length + ' — ' + tile.station + ' — ' + tile.x + ', ' + tile.y;
 				select.appendChild(option);
 			});
 			label.appendChild(select);
@@ -1688,18 +1230,33 @@ setup.worldmap = {
 			});
 			controls.appendChild(teleportButton);
 			parent.appendChild(controls);
-			// Keep the precision control visible before a tall north-south map on phones.
-			parent.insertBefore(instructions, frame);
-			parent.insertBefore(controls, frame);
 			if (setup.debugTeleportNotice) {
 				var notice = document.createElement('p');
 				notice.className = 'debug-teleport-notice';
 				notice.setAttribute('role', 'status');
 				notice.textContent = setup.debugTeleportNotice;
-				parent.insertBefore(notice, frame);
+				parent.appendChild(notice);
 			}
+			// One line under the map names the square under the pointer.
+			var readout = document.createElement('p');
+			readout.className = 'small-description debug-map-hover';
+			readout.textContent = 'Point at the map to read a square.';
+			var globe = setup.globe.build({
+				revealAll: true,
+				onPick: function(tile) { teleport(0, tile.x, tile.y); },
+				onHover: function(tile, place) {
+					readout.textContent = tile ? ((tile.station ? tile.station + ' (' + (tile.stationRegion || 'rural') + ') | ' : '') + (tile.gapFill ? 'new line | ' : '')
+						+ 'grid ' + tile.x + ',' + tile.y + ' ' + tile.terrain + ' ' + tile.shape + ' | '
+						+ tile.geoCoordinate[1].toFixed(3) + '\u00b0, ' + tile.geoCoordinate[0].toFixed(3) + '\u00b0 | mean '
+						+ Math.round(tile.elevation) + ' m, relief \u03c3 ' + Math.round(tile.elevationStdDevM) + ' m')
+						: place ? 'no track | ' + place[1].toFixed(2) + '\u00b0, ' + place[0].toFixed(2) + '\u00b0' : 'Point at the map to read a square.';
+				}
+			});
+			globe.classList.add('debug-map-globe');
+			parent.appendChild(globe);
+			parent.appendChild(readout);
 			var legend = document.createElement('p');
-			legend.textContent = 'Each outlined cell is one fixed 5 km gameplay move. Hover it for its sourced coordinates, terrain, grade, mean elevation and relief; every rail cell is a teleport target.';
+			legend.textContent = 'Mapped railway is light, new lines red. Far out the track is drawn from a raster; close in, as lines, with every station, and a click on it teleports.';
 			parent.appendChild(legend);
 		} catch (error) {
 			var failure = document.createElement('p');

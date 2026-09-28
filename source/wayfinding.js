@@ -349,6 +349,7 @@ setup.showMapDialog = function() {
 	Dialog.append(body);
 	Dialog.open();
 	body.appendChild(setup.globe.build());
+	body.appendChild(setup.globe.legend());
 	var seen = setup.wayfinding.getSeenMaps();
 	var note = document.createElement('p');
 	note.className = 'small-description';
