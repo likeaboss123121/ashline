@@ -121,7 +121,11 @@ American network were turned into these rules (September 2026); a route is only 
      squares, where going round by the kept track would be more than twice as far plus 100 km
      (`ALTERNATIVE_FACTOR`, `ALTERNATIVE_EXTRA_KM`) — a loop through other country or a cut-off, not a line beside
      another. Everything else is taken up, and dead ends to no station after it.
-   Halts come every 200 km of line with no stop (`MAX_SECTION_KM`). Result: 4,473 stops worldwide (20,597 before),
+   Halts come every 200 km of line with no stop (`MAX_SECTION_KM`), and only at a real place: a town or village
+   within 15 km of the line, or where there is none a named hamlet, farm or estancia (the outposts beside the track,
+   generic names such as a bare "Estancia" left out). Likea did not want invented stops such as "Km 123 from ...", so
+   a stretch with no named place near it has no stop at all; the longest are in the hard regions and the Chinese
+   deserts. Result: 4,473 stops worldwide (20,597 before),
    111,798 squares (196,217 before) and 673 independent loops, each a real alternative route; the page is 8.7 MiB.
 
    The game sizes yards by region (`setup.railyard.YARD_SIZE_BY_REGION`): two or three short tracks in the country,

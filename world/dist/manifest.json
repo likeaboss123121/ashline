@@ -1320,8 +1320,8 @@
     "stats": {
       "squareCount": 111798,
       "moveCount": 112470,
-      "stopCount": 4473,
-      "haltCount": 1133,
+      "stopCount": 4419,
+      "haltCount": 1079,
       "bridgeCount": 56149,
       "bridgeKm": 398336,
       "stubJoinCount": 10294,
@@ -1339,9 +1339,9 @@
       "urbanSquaresRemoved": 8001,
       "urbanMovesRemoved": 11077,
       "stopRegions": {
-        "urban": 582,
-        "industrial": 914,
-        "rural": 2978
+        "urban": 583,
+        "industrial": 912,
+        "rural": 2925
       },
       "stationsWithoutYard": {
         "urban": 4903,

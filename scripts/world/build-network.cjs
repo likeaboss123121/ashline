@@ -2196,13 +2196,41 @@ function stageStops(state, options) {
 
   // 6. Halts, so that outside a hard region no square is more than MAX_SECTION_KM / 2 from a stop by track, junctions
   // or not: a long line through a string of junctions has nowhere to stop just as surely as one without them. Each
-  // halt goes at the square then farthest from any stop, never at a junction or beside a yard, and is named for the
-  // nearest settlement within HALT_NAME_KM or for its distance from the stop it was farthest from.
+  // halt goes at the square then farthest from any stop that has a real place within HALT_NAME_KM, never at a junction
+  // or beside a yard, and is named for that place. Where no place lies near the line there is no halt: a stop is
+  // somewhere that exists (Likea, September 2026: no more "Km 123 from" stops), so a long empty stretch stays empty.
   const adjacent = network.neighbours();
   const edgeKm = (a, b) => network.edges.get(a < b ? a + '|' + b : b + '|' + a).km;
+  // Where no town or village is near, a hamlet, farm or estancia will do (options.haltPlaces: the outposts beside the
+  // track, their too-common names such as a bare "Estancia" left out): the steppe and the outback have few villages
+  // but plenty of named places, and a halt at one is a stop somewhere that exists.
+  let outpostsNear = () => [];
+  if (options.haltPlaces) {
+    const cells = new Set();
+    network.squares.forEach(square => {
+      const centre = projection.centreOf([square.x, square.y], grid);
+      cells.add(Math.floor(centre[0] * 4) + ',' + Math.floor(centre[1] * 4));
+    });
+    const besideTrack = place => {
+      const x = Math.floor(place.coordinates[0] * 4), y = Math.floor(place.coordinates[1] * 4);
+      for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) if (cells.has((x + dx) + ',' + (y + dy))) return true;
+      return false;
+    };
+    const outposts = options.haltPlaces(place => !!place.name && besideTrack(place));
+    const nameCount = new Map();
+    outposts.forEach(place => nameCount.set(place.name, (nameCount.get(place.name) || 0) + 1));
+    const named = outposts.filter(place => nameCount.get(place.name) <= GENERIC_NAME_COUNT && !/^(estancia|farm|puesto|hamlet)$/i.test(place.name.trim()));
+    outpostsNear = nearIndex(named, place => place.coordinates);
+    log(named.length + ' named hamlets, farms and estancias beside the track for halts');
+  }
   const nearestSettlement = point => {
     const near = nearestWithin(point, HALT_NAME_KM, 0.2);
-    return near && near.settlement;
+    if (near) return near.settlement;
+    let best = null;
+    outpostsNear(point, HALT_NAME_KM).forEach(([place, km, order]) => {
+      if (!best || km < best.km || (km === best.km && order < best.order)) best = { place, km, order };
+    });
+    return best && best.place;
   };
   const reach = new Map(), from = new Map();
   const spread = (sources, limit) => {
@@ -2227,9 +2255,10 @@ function stageStops(state, options) {
   let halts = 0;
   wanted.forEach(key => {
     if ((reach.get(key) ?? Infinity) <= halfSection || touchingYard(key)) return;
-    const centre = centreOfKey(key), near = nearestSettlement(centre), km = reach.get(key), startName = from.get(key);
+    const centre = centreOfKey(key), near = nearestSettlement(centre);
+    if (!near) return;
     stopBySquare.set(key, { id: 'halt:' + key, status: 'halt', square: key, coordinates: centre, region: regionOf(centre),
-      name: near ? near.name : (startName && km < Infinity ? 'Km ' + Math.round(km) + ' from ' + startName : 'Halt') });
+      name: near.name });
     halts++;
     spread([[key, stopBySquare.get(key).name]], halfSection);
   });
@@ -2349,6 +2378,34 @@ async function main() {
     else if (stop && Array.isArray(stop.coordinates)) frame(stop.coordinates);
   }));
   const outpostsFile = path.join(root, scope.outposts);
+  // The outposts that pass keep(place), read a line at a time and let go of the rest: on two continents the whole
+  // file is half a million records, and the halts want only those beside the track.
+  const readOutpostsWhere = keep => {
+    if (!fs.existsSync(outpostsFile)) return [];
+    const kept = [], descriptor = fs.openSync(outpostsFile, 'r'), buffer = Buffer.alloc(16 << 20);
+    const decoder = new (require('node:string_decoder').StringDecoder)('utf8');
+    let rest = '', read;
+    const take = line => {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith('{"')) return;
+      const place = JSON.parse(trimmed.endsWith(',') ? trimmed.slice(0, -1) : trimmed);
+      if (!place.coordinates) return;
+      frame(place.coordinates);
+      if (keep(place)) kept.push(place);
+    };
+    try {
+      while ((read = fs.readSync(descriptor, buffer, 0, buffer.length, null)) > 0) {
+        const lines = (rest + decoder.write(buffer.subarray(0, read))).split('\n');
+        rest = lines.pop();
+        lines.forEach(take);
+      }
+      rest += decoder.end();
+      if (rest) take(rest);
+    } finally {
+      fs.closeSync(descriptor);
+    }
+    return kept;
+  };
   const readOutposts = () => {
     if (!fs.existsSync(outpostsFile)) return [];
     const places = read(scope.outposts).places;
@@ -2375,7 +2432,8 @@ async function main() {
   // --keys: print what each stage's checkpoint is keyed by, and stop (to see why a checkpoint is not being used).
   if (checkpoints && args.includes('--keys')) { const { parts, ...keys } = stageKeys({ grid, checkpoints }); console.log(JSON.stringify(keys)); return; }
   const built = buildNetwork({ geometry: readGeometry, stations: stationSet.stations, settlements: settlementSet.places, cities, grid, cache,
-    authoredJoins, outposts: readOutposts, regions, checkpoints, settlementsFile: path.join(root, scope.settlements) });
+    authoredJoins, outposts: readOutposts, regions, checkpoints, settlementsFile: path.join(root, scope.settlements),
+    haltPlaces: keep => readOutpostsWhere(keep) });
   const artifact = {
     formatVersion: 1,
     id: scope.id,
