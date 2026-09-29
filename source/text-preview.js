@@ -27,17 +27,32 @@ setup.textPreview = {
 		var lineAt = function(offset) { return text.slice(0, offset).split('\n').length - 1; };
 		text = text.replace(/\[\[/g, function(found, offset) { return '[[\uE200' + lineAt(offset) + '\uE201'; });
 		var macroLine = 0;
+		// What a link runs: the macros and setup functions inside it, listed after it (data-uses) for the wiki to say
+		// where each is defined.
+		var linkUses = null;
+		var uses = function(list) { return list.length ? '<span data-uses="' + self.escape(list.join(' ')) + '"></span>' : ''; };
 		// Quoted arguments can themselves contain >>. Do not leak the remainder as code.
 		var tokens = /<<((?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`|[^>"'`]|>(?!>))*)>>/g;
 		function macro(body) {
 			var token = /^\s*(\/?[\w-]+|=|-)\s*([\s\S]*)$/.exec(body);
 			if (!token) return '';
-			var name = token[1].toLowerCase(), args = token[2];
+			var name = token[1].toLowerCase(), args = token[2], original = token[1];
+			if (linkUses && !/^\/(link|linkreplace|linkappend|timedlink|button)$/.test(name)) {
+				linkUses.push('macro:' + original);
+				(args.match(/setup\.[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*/g) || []).forEach(function(reference) { linkUses.push(reference); });
+			}
 			if (/^(silently|widget)$/.test(name)) { hidden++; return ''; }
 			if (/^\/(silently|widget)$/.test(name)) { hidden = Math.max(0,hidden-1); return ''; }
 			if (hidden) return '';
-			if (/^(link|linkreplace|linkappend|timedlink|button)$/.test(name)) return '<a data-source-line="' + macroLine + '">' + hole(args,'LINK',literal(args));
-			if (/^\/(link|linkreplace|linkappend|timedlink|button)$/.test(name)) return '</a>';
+			if (/^(link|linkreplace|linkappend|timedlink|button)$/.test(name)) {
+				linkUses = [];
+				return '<a data-source-line="' + macroLine + '">' + hole(args,'LINK',literal(args));
+			}
+			if (/^\/(link|linkreplace|linkappend|timedlink|button)$/.test(name)) {
+				var used = linkUses || [];
+				linkUses = null;
+				return '</a>' + uses(used);
+			}
 			if (/^(print|=|-)$/.test(name)) return hole(args,undefined,/^\s*(["'])(?:\\.|(?!\1)[\s\S])*\1\s*$/.test(args)?literal(args):undefined);
 			if (name === 'uisection') {
 				var rest = args.replace(/^\s*(["'])(?:\\.|(?!\1)[\s\S])*?\1\s*/, '');
@@ -49,7 +64,7 @@ setup.textPreview = {
 			if(name==='playerstats' && setup.stats) return setup.stats.LIST.map(function(stat){
 				return '<div>'+self.escape(stat.label)+': '+hole('','STAT',undefined,['call','setup.stats.getValue',[['literal',stat.key]]])+'</div>';
 			}).join('');
-			return hole(name,'TEXT',undefined,null);
+			return hole(name,'TEXT',undefined,null) + uses(['macro:' + original]);
 		}
 		var output = '', cursor = 0, match;
 		while ((match = tokens.exec(text))) {
@@ -100,8 +115,32 @@ setup.textPreview = {
 			parent.appendChild(document.createTextNode(text.slice(cursor)));
 		}
 		var allowed = /^(P|DIV|SPAN|BR|HR|STRONG|EM|B|I|U|S|DEL|INS|SMALL|SUP|SUB|H[1-6]|UL|OL|LI|BLOCKQUOTE|TABLE|THEAD|TBODY|TFOOT|TR|TD|TH|A|BUTTON|LABEL)$/;
+		// Where the macros and setup functions a link or a macro uses are defined (setup.textDefinitions, from the text
+		// catalogue): a setup reference is matched by its longest defined prefix; anything not defined here is left out.
+		function definedAt(names) {
+			var definitions = setup.textDefinitions || {}, seen = {}, found = [];
+			names.split(' ').forEach(function(name) {
+				var key = name;
+				while (key && !definitions[key] && key.indexOf('.') > 0) key = key.slice(0, key.lastIndexOf('.'));
+				if (!key || !definitions[key] || seen[key] || key === 'setup') return;
+				seen[key] = true;
+				found.push((key.indexOf('macro:') === 0 ? '<<' + key.slice(6) + '>>' : key) + ' ' + definitions[key]);
+			});
+			return found;
+		}
 		function copy(node, parent) {
 			if (node.nodeType === 3) { appendText(node.textContent,parent); return; }
+			if (node.nodeType === 1 && node.hasAttribute('data-uses')) {
+				var found = definedAt(node.getAttribute('data-uses'));
+				if (found.length) {
+					var list = document.createElement('small');
+					list.className = 'text-preview-source';
+					list.dataset.definitions = '';
+					list.textContent = ' [' + found.join(', ') + ']';
+					parent.appendChild(list);
+				}
+				return;
+			}
 			if (node.nodeType !== 1 || /^(SCRIPT|STYLE|IFRAME|OBJECT|EMBED|SVG|MATH|TEMPLATE|NOSCRIPT|TEXTAREA)$/.test(node.tagName)) return;
 			var target = parent;
 			if (allowed.test(node.tagName)) {

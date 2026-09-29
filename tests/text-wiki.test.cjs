@@ -167,3 +167,26 @@ test('preview values read memory without executing game functions, getters or pr
   assert.equal(setup.textValues.evaluate(row[6][0].plan,roots),73,'script concatenations retain live data paths');
   assert.equal(parse('12n'),null,'unsupported BigInt literals never enter JSON plans');
 });
+
+test('macro and setup definitions are indexed with their file and line, for the wiki and the editor', () => {
+  const { definitionsIn, buildDefinitions, editorConfig } = require('../scripts/build-text-catalogue.cjs');
+  const found = definitionsIn([
+    '// Draws the thing.',
+    "Macro.add('plainThing', { handler: function() {} });",
+    "Macro.add('wrapper', { tags: null, handler: function() {} });",
+    'setup.tools = {',
+    '  first: function() {},',
+    '  second: 2',
+    '};',
+    'setup.tools.third = function() {};'
+  ].join('\n'), 'source/example.js');
+  assert.deepEqual(found['macro:plainThing'], { file: 'source/example.js', line: 2, container: false, comment: 'Draws the thing.' });
+  assert.equal(found['macro:wrapper'].container, true);
+  assert.deepEqual([found['setup.tools'].line, found['setup.tools.first'].line, found['setup.tools.third'].line], [4, 5, 8]);
+  // Every macro the game defines is in the editor's config, the containers marked.
+  const all = buildDefinitions(), config = editorConfig(all);
+  assert.match(config, /^sugarcube-2:\n  macros:\n/m);
+  assert.match(config, /    stationMap:\n      container: false\n      description: "Defined in `source\/wayfinding\.js:\d+`/);
+  assert.match(config, /    uiSection:\n      container: true\n/);
+  assert.equal((config.match(/^    \w+:$/gm) || []).length, Object.keys(all).filter(key => key.startsWith('macro:')).length);
+});
