@@ -156,7 +156,7 @@ You step into the railyard. Several trains are parked here, each with its own mi
 <<link "Back">><<run Engine.play($sleepReturn || "TrainInterior")>><</link>>
 <<else>>
 <p>You settle down in the <<print setup.condition.getSleepComfort().label>>.</p>
-<p class="small-description">Fatigue: <<print setup.stats.getValue("fatigue")>>/100. Hunger, thirst, illness and shelter make this rest <<print Math.round(setup.condition.getRestEfficiency() * 100)>>% effective.</p>
+<p class="small-description"><<print setup.condition.describeSleep().join(" ")>></p>
 <<sleepChoices>>
 <<link "Get up again">><<run Engine.play($sleepReturn || "TrainInterior")>><</link>>
 <</if>>

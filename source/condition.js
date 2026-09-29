@@ -82,6 +82,19 @@ setup.condition = {
 			+ 0.3 * this.getNeedPressure('hunger') + 0.3 * this.getNeedPressure('thirst');
 		return Math.max(0.25, 1 - loss) * this.getSleepComfort().multiplier;
 	},
+	// What will spoil the player's sleep, as the sleep screen says it (Likea's wording): an empty stomach, a dry mouth,
+	// a cough, a hard bed; then whether they sleep well. A sleep from 8 pm to 6 am is a night, any other a nap.
+	SLEEP_ILLNESS_BELOW: 60,
+	describeSleep: function() {
+		var hour = new Date(setup.time.getCurrentTimestampMs()).getUTCHours();
+		var lines = [];
+		if (this.getNeedPressure('hunger') > 0) lines.push('Your stomach growls the entire ' + (hour >= 20 || hour < 6 ? 'night' : 'nap') + '.');
+		if (this.getNeedPressure('thirst') > 0) lines.push('Your parched mouth distracts you.');
+		if (setup.stats.getValue('immunity') < this.SLEEP_ILLNESS_BELOW) lines.push('You wake yourself up several times from coughing.');
+		if (/bedroll/.test(this.getSleepComfort().label)) lines.push('The hard sleeping surface was uncomfortable.');
+		lines.push(lines.length ? 'You didn\'t sleep very well.' : 'You awaken rested.');
+		return lines;
+	},
 	getSleepComfort: function() {
 		var v = State.variables, car = !v.onFoot && Array.isArray(v.currentTrain) ? v.currentTrain[v.currentCarIndex] : null;
 		if (car && !car.broken && car.type === 'private car') return { multiplier: 1.5, label: 'private-car bedroom' };
