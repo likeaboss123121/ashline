@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { loadGame } = require('./helpers.cjs');
+const { loadGame, stationRun } = require('./helpers.cjs');
 
 test('raw food can be packed and eaten; ration yield improves only with an intact kitchen', () => {
   const g = game([lead(), road(), lead()]), { setup:s, State:{variables:v} }=g;
@@ -225,7 +225,7 @@ test('diesel and steam can complete multi-station runs on station stores topped 
   for(const model of ['dieselShunter','dieselRoad','steamShunter','steamPrairie']) {
     const {setup:s,State:{variables:v}}=game([lead(),road(),lead()]);v.randomSeed='release-route-'+model;
     v.currentTrain=[s.railyard.createLocomotiveCar(model)];v.currentTrain[0].cargo=[];
-    for(let station=2;station<5;station++) {
+    for(const station of stationRun(s,3).stations) {
       v.currentStation=station;v.stationTracks[station]=s.railyard.generateStationTracks(station,v.randomSeed);
       v.drivingTrackIndex=0;v.enteredTrainIndex=0;v.journey=null;
       const steam=model.startsWith('steam'),engine=v.currentTrain[0];
@@ -430,7 +430,7 @@ test('completed generated yards preserve a usable clear road, accessible reserve
 
 test('station lead headings follow the sourced rail grid', () => {
   const g = loadGame(), world = g.setup.worldmap, yard = g.setup.railyard;
-  for (let station = 2; station <= 5; station++) {
+  for (const station of stationRun(g.setup, 4).stations) {
     const tracks = yard.generateStationTracks(station, 'ignored');
     // Each lead is named for the first line leaving that side of the station.
     assert.equal(tracks[0].direction, yard.getLineHeading(station, 'entry'));

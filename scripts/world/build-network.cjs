@@ -74,7 +74,7 @@ const UNBUILT = new Set(['proposed', 'planned', 'construction']);
 const CITY_REACH_KM = 10;
 const BRIDGE_MIN_KM = 0.2;
 const TUNNEL_MIN_SHARE = 0.5;
-const MAX_SECTION_KM = 100;
+const MAX_SECTION_KM = 200;
 const HALT_NAME_KM = 15;
 // A line that ends within STUB_JOIN_KM of other track is joined to it, where getting there along the track would be
 // a long way round: at least STUB_DETOUR_FACTOR times as far, and more than STUB_DETOUR_MIN_KM. That is a break in the
@@ -148,6 +148,21 @@ const DENSE_SPACING_KM = 35;
 const STATION_SHIFT_SQUARES = 4;
 // In a hard region, where every real town is a stop the player's life can depend on, it may move this far instead.
 const HARD_STATION_SHIFT_SQUARES = 12;
+// A station keeps its yard only if the place it serves has STATION_PEOPLE_PER_TRACK_KM people for every kilometre of
+// track within STATION_DENSITY_RADIUS_KM of it: where the rails are dense, only the larger towns; where they are
+// sparse, villages too. Hard regions keep every real town. Then only the track that joins the stations up is kept
+// (thinTrack): each station's ways to its TRACK_NEIGHBOURS nearest stations by track, within TRACK_NEIGHBOUR_KM.
+// Likea wanted about 5,000 stations and a like cut in the railways, keeping the key corridors and plenty of
+// alternative routes (September 2026).
+const STATION_DENSITY_RADIUS_KM = 50;
+const STATION_PEOPLE_PER_TRACK_KM = 80;
+const TRACK_NEIGHBOURS = 2;
+const TRACK_NEIGHBOUR_KM = 1500;
+// ...and a stretch not kept that would save the way round by ALTERNATIVE_FACTOR times plus ALTERNATIVE_EXTRA_KM goes
+// back in: the network keeps its real alternative routes and cut-offs, not its lines side by side.
+const ALTERNATIVE_FACTOR = 2;
+const ALTERNATIVE_EXTRA_KM = 100;
+const ALTERNATIVE_SEARCH_KM = 600;
 // An authored route's ends must lie within this of the network.
 const AUTHORED_SNAP_KM = 10;
 // In a hard region, a town or a city this near the line is a stop (stageStops).
@@ -1817,6 +1832,167 @@ function pruneDeadEnds(network, isStop) {
   return removed;
 }
 
+// How much track lies near a point: the kilometres of line (mapped or new) in the squares within radiusKm, from an
+// index of the network's squares made once. For the population a station needs where the rails are dense.
+function trackDensity(network, grid, radiusKm) {
+  const squares = Array.from(network.squares.values()).map(square => ({ km: square.km, centre: projection.centreOf([square.x, square.y], grid) }));
+  const near = nearIndex(squares, square => square.centre, 0.25);
+  return point => near(point, radiusKm).reduce((sum, [square]) => sum + square.km, 0);
+}
+
+// Keeps only the track that joins the stations up: from each station, the shortest ways by track to its
+// neighbours nearest by track (up to `neighbours` of them, within limitKm), so each keeps several ways out and the
+// network keeps its loops and alternative routes; then, while the stations fall into pieces, the shortest way from the
+// piece the game starts in to the nearest station of another. Squares in `keep` (the authored routes, the cities)
+// stay, with the moves between them. Everything else is taken up. Returns what was taken up.
+function thinTrack(network, stations, keep, startKey, neighbours, limitKm) {
+  const adjacent = network.neighbours();
+  const edgeKey = (a, b) => a < b ? a + '|' + b : b + '|' + a;
+  const keptEdges = new Set(), keptSquares = new Set(keep);
+  const markPath = (previous, from, to) => {
+    for (let key = to; key !== from; key = previous.get(key)) {
+      const back = previous.get(key);
+      keptEdges.add(edgeKey(key, back));
+      keptSquares.add(key);
+      keptSquares.add(back);
+    }
+  };
+  // Shortest ways out from one square, stopping at `count` stations or limitKm; calls found(key, previous) for each.
+  const searchFrom = (sources, count, limit, isTarget, found) => {
+    const distance = new Map(), previous = new Map(), settled = new Set(), queue = new Heap(), isSource = new Set(sources);
+    sources.forEach(key => { distance.set(key, 0); queue.push(0, key); });
+    let reached = 0;
+    while (queue.size && reached < count) {
+      const key = queue.pop();
+      if (settled.has(key)) continue;
+      settled.add(key);
+      const km = distance.get(key);
+      if (km > limit) break;
+      if (!isSource.has(key) && isTarget(key)) {
+        reached++;
+        found(key, previous);
+        continue;
+      }
+      adjacent.get(key).forEach(next => {
+        const total = km + network.edges.get(edgeKey(key, next)).km;
+        if (total < (distance.get(next) ?? Infinity)) { distance.set(next, total); previous.set(next, key); queue.push(total, next); }
+      });
+    }
+  };
+  const stationSet = new Set(stations);
+  stations.forEach(station => searchFrom([station], neighbours, limitKm, key => stationSet.has(key),
+    (key, previous) => markPath(previous, station, key)));
+  // The authored routes and cities keep the moves between their own squares.
+  network.edges.forEach(edge => { if (keep.has(edge.a) && keep.has(edge.b)) keptEdges.add(edge.key); });
+  // Join the pieces: the kept track's pieces holding stations, joined to the start's one at a time by the shortest
+  // way over the whole network.
+  const pieceOf = () => {
+    const piece = new Map(), keptAdjacent = new Map();
+    keptEdges.forEach(key => {
+      const [a, b] = key.split('|');
+      (keptAdjacent.get(a) || keptAdjacent.set(a, []).get(a)).push(b);
+      (keptAdjacent.get(b) || keptAdjacent.set(b, []).get(b)).push(a);
+    });
+    let count = 0;
+    keptSquares.forEach(start => {
+      if (piece.has(start)) return;
+      const stack = [start];
+      piece.set(start, count);
+      while (stack.length) (keptAdjacent.get(stack.pop()) || []).forEach(next => { if (!piece.has(next)) { piece.set(next, count); stack.push(next); } });
+      count++;
+    });
+    return piece;
+  };
+  for (let joins = 0; joins < 100000; joins++) {
+    const piece = pieceOf(), home = piece.get(startKey);
+    const stranded = stations.filter(key => piece.get(key) !== home);
+    if (!stranded.length) break;
+    const homeSquares = Array.from(keptSquares).filter(key => piece.get(key) === home);
+    let joined = false;
+    searchFrom(homeSquares, 1, Infinity, key => piece.has(key) && piece.get(key) !== home && stationSet.has(key), (key, previous) => {
+      // Back from the station reached to the home piece.
+      for (let at = key; previous.has(at); at = previous.get(at)) {
+        const back = previous.get(at);
+        keptEdges.add(edgeKey(at, back));
+        keptSquares.add(at);
+        keptSquares.add(back);
+      }
+      joined = true;
+    });
+    if (!joined) break;
+  }
+  // Alternatives: a way over track not kept, between two kept squares, goes back in where the way round by the kept
+  // track is far longer (ALTERNATIVE_FACTOR times, and ALTERNATIVE_EXTRA_KM more). A line beside another is not one;
+  // a loop through other country, or a cut-off, is. The ways are found from each kept square with untaken track
+  // leaving it, over that track only (up to ALTERNATIVE_SEARCH_KM), to the kept squares it reaches; shortest first,
+  // each checked against the track kept so far.
+  const alternatives = [];
+  keptSquares.forEach(start => {
+    if (!adjacent.get(start).some(next => !keptEdges.has(edgeKey(start, next)))) return;
+    const distance = new Map([[start, 0]]), previous = new Map(), settled = new Set(), queue = new Heap();
+    queue.push(0, start);
+    while (queue.size) {
+      const key = queue.pop();
+      if (settled.has(key)) continue;
+      settled.add(key);
+      const km = distance.get(key);
+      if (key !== start && keptSquares.has(key)) {
+        if (start < key) {
+          const path = [key], edges = [];
+          for (let at = key; at !== start; at = previous.get(at)) { edges.push(edgeKey(at, previous.get(at))); path.push(previous.get(at)); }
+          alternatives.push({ path: path.reverse(), edges, km });
+        }
+        continue;
+      }
+      adjacent.get(key).forEach(next => {
+        const edge = edgeKey(key, next);
+        if (keptEdges.has(edge)) return;
+        const total = km + network.edges.get(edge).km;
+        if (total <= ALTERNATIVE_SEARCH_KM && total < (distance.get(next) ?? Infinity)) { distance.set(next, total); previous.set(next, key); queue.push(total, next); }
+      });
+    }
+  });
+  const keptAdjacent = new Map();
+  const link = (a, b) => {
+    (keptAdjacent.get(a) || keptAdjacent.set(a, []).get(a)).push(b);
+    (keptAdjacent.get(b) || keptAdjacent.set(b, []).get(b)).push(a);
+  };
+  keptEdges.forEach(key => { const [a, b] = key.split('|'); link(a, b); });
+  const keptDistance = (from, to, limit) => {
+    const distance = new Map([[from, 0]]), settled = new Set(), queue = new Heap();
+    queue.push(0, from);
+    while (queue.size) {
+      const key = queue.pop();
+      if (settled.has(key)) continue;
+      settled.add(key);
+      if (key === to) return distance.get(key);
+      (keptAdjacent.get(key) || []).forEach(next => {
+        const total = distance.get(key) + network.edges.get(edgeKey(key, next)).km;
+        if (total <= limit && total < (distance.get(next) ?? Infinity)) { distance.set(next, total); queue.push(total, next); }
+      });
+    }
+    return Infinity;
+  };
+  let restored = 0, restoredKm = 0;
+  alternatives.sort((a, b) => a.km - b.km || a.edges[0].localeCompare(b.edges[0])).forEach(alternative => {
+    const from = alternative.path[0], to = alternative.path[alternative.path.length - 1];
+    const limit = alternative.km * ALTERNATIVE_FACTOR + ALTERNATIVE_EXTRA_KM;
+    if (keptDistance(from, to, limit) <= limit) return;
+    alternative.edges.forEach(key => { keptEdges.add(key); const [a, b] = key.split('|'); link(a, b); });
+    alternative.path.forEach(key => keptSquares.add(key));
+    restored++;
+    restoredKm += alternative.km;
+  });
+  let squares = 0, moves = 0, km = 0;
+  Array.from(network.edges.keys()).forEach(key => { if (!keptEdges.has(key)) { km += network.edges.get(key).km; network.edges.delete(key); moves++; } });
+  // A kept square left with no track (an authored place off the lines kept) goes too.
+  const touched = new Set();
+  network.edges.forEach(edge => { touched.add(edge.a); touched.add(edge.b); });
+  Array.from(network.squares.keys()).forEach(key => { if (!keptSquares.has(key) || !touched.has(key)) { network.squares.delete(key); squares++; } });
+  network.forgetLive();
+  return { squares, moves, km: Math.round(km), alternatives: restored, alternativeKm: Math.round(restoredKm) };
+}
+
 // 4. Cities simplified, parallel lines taken up, and the stops, yards, halts and points placed: the network as the
 // game gets it. Quick next to the stages before it, so it always runs.
 function stageStops(state, options) {
@@ -1995,18 +2171,25 @@ function stageStops(state, options) {
   };
   maybe.sort((a, b) => b.population - a.population || rank(b.stop) - rank(a.stop) || a.stop.id.localeCompare(b.stop.id));
   const thinned = { urban: 0, industrial: 0, rural: 0 };
+  const densityAt = trackDensity(network, grid, STATION_DENSITY_RADIUS_KM);
+  const busyEnough = (stop, population) => isHard(stop.coordinates)
+    || population >= STATION_PEOPLE_PER_TRACK_KM * densityAt(stop.coordinates);
   maybe.forEach(({ stop, population }) => {
-    let keep = population >= YARD_RULES[stop.region].minPopulation && !touchingYard(stop.square);
+    let keep = population >= YARD_RULES[stop.region].minPopulation && busyEnough(stop, population) && !touchingYard(stop.square);
     const spacing = keep ? spacingFor(stop) : 0;
     if (keep && spacing > 0) {
       for (const key of distancesAlong(network, adjacentStops, stop.square, spacing).keys()) {
         if (key !== stop.square && yards.has(key)) { keep = false; break; }
       }
     }
-    if (keep) yards.set(stop.square, stop);
+    if (keep) { stop.population = population; yards.set(stop.square, stop); }
     else thinned[stop.region]++;
   });
   stopBySquare = yards;
+  const trackTakenUp = thinTrack(network, Array.from(yards.keys()).sort(), new Set(Array.from(mustStay).filter(key => network.squares.has(key))),
+    startKey, TRACK_NEIGHBOURS, TRACK_NEIGHBOUR_KM);
+  log('kept the track joining the stations up: ' + trackTakenUp.squares + ' squares and ' + trackTakenUp.moves + ' moves ('
+    + trackTakenUp.km + ' km) taken up, ' + trackTakenUp.alternatives + ' alternative routes (' + trackTakenUp.alternativeKm + ' km) kept');
   pruned += pruneDeadEnds(network, key => stopBySquare.has(key));
   log(movedOffJunctions + ' stations moved to straight track beside them, ' + noRoomBesideJunction + ' with none near; '
     + (thinned.urban + thinned.industrial + thinned.rural) + ' stops left without a yard: ' + JSON.stringify(thinned));

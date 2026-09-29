@@ -45,4 +45,28 @@ function loadGame() {
   return { ...context, macros };
 }
 
-module.exports = { loadGame };
+// A run of stations one after another on a plain stretch of line: each has a line at both ends and leaves by its exit
+// line, running forward, straight to the next. The network is rebuilt from map data, so tests about a plain run of line
+// find one rather than pinning station numbers. Returns { stations, legs }: the stations in order, and each one's exit
+// leg but the last's.
+function stationRun(setup, length = 3) {
+  const pilot = setup.realWorldPilot, count = pilot.getGridRoute().corridor.stations.length;
+  for (let first = 2; first + length - 1 <= count; first++) {
+    const stations = [], legs = [];
+    let ok = true;
+    for (let i = 0; i < length && ok; i++) {
+      const id = first + i, lines = pilot.getStationLines(id);
+      const exit = lines.find(line => line.side === 'exit'), entry = lines.find(line => line.side === 'entry');
+      if (!exit || !entry) ok = false;
+      else if (i < length - 1) {
+        if (exit.destination !== id + 1 || !exit.forward) ok = false;
+        else legs.push(exit.legIndex);
+      }
+      stations.push(id);
+    }
+    if (ok) return { stations, legs };
+  }
+  throw new Error('No run of ' + length + ' stations on the network');
+}
+
+module.exports = { loadGame, stationRun };

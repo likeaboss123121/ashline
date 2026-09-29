@@ -16,6 +16,27 @@ before(async () => {
 after(async () => { if (browser) await browser.close(); });
 
 const escapeRegExp = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// A run of stations one after another on a plain stretch of line, found in the page as tests/helpers.cjs stationRun
+// finds it: each has a line at both ends and leaves by its exit line, running forward, straight to the next.
+const stationRunIn = (page, length = 3) => page.evaluate(length => {
+  const pilot = SugarCube.setup.realWorldPilot, count = pilot.getGridRoute().corridor.stations.length;
+  for (let first = 2; first + length - 1 <= count; first++) {
+    const stations = [], legs = [];
+    let ok = true;
+    for (let i = 0; i < length && ok; i++) {
+      const id = first + i, lines = pilot.getStationLines(id);
+      const exit = lines.find(line => line.side === 'exit'), entry = lines.find(line => line.side === 'entry');
+      if (!exit || !entry) ok = false;
+      else if (i < length - 1) {
+        if (exit.destination !== id + 1 || !exit.forward) ok = false;
+        else legs.push(exit.legIndex);
+      }
+      stations.push(id);
+    }
+    if (ok) return { stations, legs };
+  }
+  return null;
+}, length);
 // A station's name, and where its exit line leads as its departure link names it: the network is rebuilt from map
 // data, so tests look the names up rather than pinning them.
 const stationName = (page, id) => page.evaluate(id => SugarCube.setup.worldmap.getStationName(id), id);
@@ -450,18 +471,19 @@ test('future save schemas fail safely and incompatible sessions offer the untouc
 
 test('walking the sourced line leads back to the parked train',async t=>{
   const page=await openGame(t);await begin(page);await board(page);
-  await page.evaluate(()=>{
+  const run=await stationRunIn(page,2),[,to]=run.stations;
+  await page.evaluate(legIndex=>{
     const {setup:s,State:{variables:v}}=SugarCube;
-    // One tile short of station 3, so a single walk reaches its yard.
-    v.journey={legIndex:2,tileIndex:s.realWorldPilot.getGridRoute().legs[2].tiles.length-2,forward:true};
+    // One tile short of the next station, so a single walk reaches its yard.
+    v.journey={legIndex,tileIndex:s.realWorldPilot.getGridRoute().legs[legIndex].tiles.length-2,forward:true};
     s.onfoot.climbDown();SugarCube.Engine.play('OnFoot');
-  });
+  },run.legs[0]);
   const leave=await page.evaluate(()=>(()=>{const w=SugarCube.setup.onfoot.getWalk(1);return 'Walk '+SugarCube.setup.units.kilometres(w.distanceKm)+' '+w.heading+' ('+Math.floor(w.minutes/60)+':'+String(w.minutes%60).padStart(2,'0')+')';})());
   await choose(page,leave,'OnFoot');
   assert.equal(await page.locator('#passages a').filter({hasText:/onto the branch/}).count(),0);
   const parked=await page.evaluate(()=>JSON.stringify(SugarCube.State.variables.journey));
-  await choose(page,'Enter '+await stationName(page,3)+' railyard','Railyard');
-  assert.equal(await page.evaluate(()=>SugarCube.State.variables.currentStation),3);
+  await choose(page,'Enter '+await stationName(page,to)+' railyard','Railyard');
+  assert.equal(await page.evaluate(()=>SugarCube.State.variables.currentStation),to);
   assert.equal(await page.evaluate(()=>JSON.stringify(SugarCube.State.variables.journey)),parked);
   assert.equal(await page.evaluate(()=>SugarCube.State.variables.onFoot.inRailyard),true);
   assert.match(await page.locator('#passages').innerText(),/Your train remains parked out on the line/);
@@ -899,11 +921,12 @@ async function openSection(page, name) {
   const section=page.locator('details[data-ui-section="'+name+'"]');
   if(!await section.evaluate(el=>el.open)) await section.locator(':scope > summary').click();
 }
-// Runs a whole leg the way a player does: depart, then one move per tile until the yard at the far end.
-async function travelLeg(page, heading) {
-  await page.locator('#passages').getByText(new RegExp('^Depart ' + heading + ' toward ')).first().click();
+// Runs a whole leg the way a player does: depart, then one move per tile until the yard at the far end. heading is a
+// compass name, or null for any; toward, a place the departure names, or '' for any.
+async function travelLeg(page, heading, toward = '') {
+  await page.locator('#passages').getByText(new RegExp('^Depart ' + (heading || '\\S+') + ' toward ' + escapeRegExp(toward))).first().click();
   await passage(page, 'OnTheLine');
-  for (let guard = 0; guard < 40; guard++) {
+  for (let guard = 0; guard < 400; guard++) {
     if (await page.evaluate(() => !SugarCube.State.variables.journey)) break;
     const turn = await page.evaluate(() => SugarCube.State.turns);
     await page.locator('#passages').getByText(/^Drive [\d.]+ km [a-z-]+ \(/).first().click();
@@ -956,6 +979,8 @@ test('new game: board, drive, travel both ways, leave, and board again', async t
   const page = await openGame(t);
   await begin(page);
   await board(page);
+  // A full tank: the first stop out of Punta Arenas is a long run, and this is about travelling both ways.
+  await page.evaluate(() => { SugarCube.State.variables.currentTrain[0].cargo[0].amount = 1400; });
   await choose(page, 'Start driving', 'DrivingMode');
   const plan = await page.evaluate(() => ({
     fuel: SugarCube.State.variables.currentTrain[0].cargo[0].amount,
@@ -963,7 +988,8 @@ test('new game: board, drive, travel both ways, leave, and board again', async t
   }));
   await travelLeg(page, 'Northbound');
   assert.equal(await page.evaluate(() => SugarCube.State.variables.currentStation), 2);
-  await travelLeg(page, 'Southbound');
+  // The way back is named for the way the line leaves this station, whichever way that is.
+  await travelLeg(page, null, 'Punta Arenas');
   const after = await page.evaluate(() => ({
     station: SugarCube.State.variables.currentStation,
     fuel: SugarCube.State.variables.currentTrain[0].cargo[0].amount,
@@ -1948,6 +1974,8 @@ test('stations without an entry or exit track still leave the player a way out',
     const lead = extra => Object.assign({ length: 999999, infinite: true, trains: [] }, extra);
     v.stationTracks[2] = [lead({ direction: 'south' }), { length: 120, trains: [] },
       lead({ hasLead: false, direction: 'north' })];
+    // A full tank for the long run there and back.
+    v.currentTrain[0].cargo[0].amount = 1400;
   });
   await choose(page, 'Start driving', 'DrivingMode');
   assert.equal(await page.locator('#passages').getByText('Reverse consist to Northbound Track').count(), 0);
@@ -2358,7 +2386,7 @@ test('the sourced corridor exposes real adjacent stations without fictional side
   });
   await passage(page, 'DrivingMode');
   const text = await page.locator('#passages').innerText();
-  assert.match(text, /Depart Southbound toward Punta Arenas/);
+  assert.match(text, /Depart \S+ toward Punta Arenas/);
   assert.match(text, await departTo(page, 2));
   assert.doesNotMatch(text, /side track|branch/i);
   assert.deepEqual(await page.evaluate(() => [1, 2, 3, 4].map(index =>

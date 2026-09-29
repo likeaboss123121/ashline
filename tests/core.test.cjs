@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { loadGame } = require('./helpers.cjs');
+const { loadGame, stationRun } = require('./helpers.cjs');
 
 test('steam initialization terminates and clamps stored pressure', () => {
   const { setup, State } = loadGame();
@@ -234,26 +234,27 @@ test('every station keeps a lead, and trains never land on one the station lacks
 
 test('travel refuses a lead the station or the one it would arrive at does not have', () => {
   const { setup, State } = loadGame();
+  const [a, b, c] = stationRun(setup, 3).stations;
   const lead = extra => Object.assign({ length: 999999, infinite: true, trains: [] }, extra);
   const station = extra => [lead(extra && extra.entry), { length: 120, trains: [] }, lead(extra && extra.exit)];
   State.variables.stationTracks = {
-    1: station({ entry: { hasLead: false } }),
-    2: station(),
-    3: station({ entry: { hasLead: false } })
+    [a]: station({ entry: { hasLead: false } }),
+    [b]: station(),
+    [c]: station({ entry: { hasLead: false } })
   };
   State.variables.enteredTrainIndex = 0;
-  assert.match(setup.railyard.getDepartureBlockReason(1, 1, false), /no Southbound Track/);
-  assert.equal(setup.railyard.getDepartureBlockReason(1, 1, true), '');
-  assert.equal(setup.railyard.getDepartureBlockReason(2, 1, true),
-    setup.worldmap.getStationName(3) + ' has no Southbound Track to arrive on.');
-  assert.equal(setup.railyard.getDepartureBlockReason(2, 1, false), '');
-  State.variables.currentStation = 2;
+  assert.match(setup.railyard.getDepartureBlockReason(a, 1, false), /no \S+ Track/);
+  assert.equal(setup.railyard.getDepartureBlockReason(a, 1, true), '');
+  assert.match(setup.railyard.getDepartureBlockReason(b, 1, true),
+    new RegExp('^' + setup.worldmap.getStationName(c).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ' has no \\S+ Track to arrive on\\.$'));
+  assert.equal(setup.railyard.getDepartureBlockReason(b, 1, false), '');
+  State.variables.currentStation = b;
   State.variables.currentTrain = [{ length: 18 }];
   State.variables.drivingTrackIndex = 1;
   assert.equal(setup.railyard.travelToStation(true), false);
-  assert.equal(State.variables.currentStation, 2);
+  assert.equal(State.variables.currentStation, b);
   assert.equal(setup.railyard.travelToStation(false), true);
-  assert.equal(State.variables.currentStation, 1);
+  assert.equal(State.variables.currentStation, a);
   assert.equal(State.variables.drivingTrackIndex, 2);
 });
 
@@ -277,13 +278,12 @@ test('lead tracks take their names from the route heading, not from entry and ex
   const first = setup.railyard.generateStationTracks(1, 'compass');
   assert.equal(setup.railyard.getTrackLabel(first, 0), 'South Stub');
   assert.equal(setup.railyard.getTrackLabel(first, first.length - 1), 'Northbound Track');
-  // Arriving at a station means its other lead points back down the leg just travelled.
-  const second = setup.railyard.generateStationTracks(2, 'compass');
-  assert.equal(setup.railyard.getLeadDirection(second, 'entry'),
-    setup.railyard.oppositeDirection(setup.railyard.getLegHeading(1, 'compass')));
-  assert.equal(setup.railyard.getLeadDirection(second, 'exit'), setup.railyard.getLegHeading(2, 'compass'));
-  const headings = [1, 2, 3, 4].map(stationId => setup.railyard.getLegHeading(stationId, 'ignored'));
-  assert.deepEqual(headings, ['north', 'north', 'north', 'east']);
+  // A station's leads are named for the way a train leaves by each: the first step of the line out of that side.
+  const [through] = stationRun(setup, 2).stations;
+  const second = setup.railyard.generateStationTracks(through, 'compass');
+  assert.equal(setup.railyard.getLeadDirection(second, 'entry'), setup.railyard.getLineHeading(through, 'entry'));
+  assert.equal(setup.railyard.getLeadDirection(second, 'exit'), setup.railyard.getLineHeading(through, 'exit'));
+  assert.equal(setup.railyard.getLegHeading(1, 'ignored'), 'north');
   // Further up the line the real track turns, and the leads turn with it.
   const stationCount = setup.realWorldPilot.getGridRoute().corridor.stations.length;
   const all = new Set(Array.from({ length: stationCount - 1 }, (_, index) => setup.railyard.getLegHeading(index + 1, 'ignored')));
@@ -307,8 +307,11 @@ test('the world map is the same every time and never enters save data', () => {
   assert.equal(JSON.stringify(setup.worldmap.getLeg('world-b', 1)), first, 'rail geometry is independent of the yard seed');
   // Stations stand where their legs end, so the world is one continuous line from the origin.
   assert.deepEqual([setup.worldmap.getStationTile('world-a', 1).x, setup.worldmap.getStationTile('world-a', 1).y], [0, 0]);
-  assert.deepEqual([setup.worldmap.getStationTile('world-a', 3).x, setup.worldmap.getStationTile('world-a', 3).y],
-    [setup.worldmap.getLeg('world-a', 2).end.x, setup.worldmap.getLeg('world-a', 2).end.y]);
+  const run = stationRun(setup, 2), leg = setup.worldmap.getLeg('world-a', run.legs[0]);
+  assert.deepEqual([setup.worldmap.getStationTile('world-a', run.stations[0]).x, setup.worldmap.getStationTile('world-a', run.stations[0]).y],
+    [leg.start.x, leg.start.y]);
+  assert.deepEqual([setup.worldmap.getStationTile('world-a', run.stations[1]).x, setup.worldmap.getStationTile('world-a', run.stations[1]).y],
+    [leg.end.x, leg.end.y]);
   assert.ok(!JSON.stringify(State.variables).includes('terrain'), 'generated tiles must stay out of the save');
 });
 
@@ -384,14 +387,15 @@ test('debug teleport treats a station cell as the station rather than a line end
 test('a walker can enter a sourced station yard without moving or losing the parked train', () => {
   const { setup, State } = loadGame();setup.startNewRun();
   const v=State.variables,train=[setup.railyard.cloneCar(v.defaultTrains.dieselShunter)];
-  const lastBeforeStation=setup.realWorldPilot.getGridRoute().legs[2].tiles.length-2;
-  v.currentStation=2;v.currentTrain=train;v.journey={legIndex:2,tileIndex:lastBeforeStation,forward:true};
+  const run=stationRun(setup,2),[from,to]=run.stations,legIndex=run.legs[0];
+  const lastBeforeStation=setup.realWorldPilot.getGridRoute().legs[legIndex].tiles.length-2;
+  v.currentStation=from;v.currentTrain=train;v.journey={legIndex,tileIndex:lastBeforeStation,forward:true};
   assert.equal(setup.onfoot.climbDown(),true);
   assert.equal(setup.onfoot.walk(1),true);
-  assert.equal(setup.onfoot.getStationId(),3);
+  assert.equal(setup.onfoot.getStationId(),to);
   const parked=JSON.stringify(v.journey);
   assert.equal(setup.onfoot.enterRailyard(),true);
-  assert.equal(v.currentStation,3);assert.equal(setup.onfoot.isInRailyard(),true);
+  assert.equal(v.currentStation,to);assert.equal(setup.onfoot.isInRailyard(),true);
   assert.equal(JSON.stringify(v.journey),parked);assert.equal(v.currentTrain,train);
   assert.equal(setup.onfoot.getWalk(-1),null,'walking controls are unavailable while inside the yard');
   assert.equal(setup.onfoot.leaveRailyard(),true);assert.equal(setup.onfoot.isInRailyard(),false);
@@ -486,28 +490,29 @@ test('a journey runs tile by tile and ends by arriving at the station at either 
   const loco = setup.railyard.createLocomotiveCar('dieselShunter');
   loco.cargo = [{ type: 'diesel', amount: 400 }];
   const lead = () => ({ length: 999999, infinite: true, trains: [] });
-  State.variables.stationTracks = { 2: [lead(), { length: 400, trains: [] }, lead()] };
-  State.variables.currentStation = 2;
+  const run = stationRun(setup, 2), [from, to] = run.stations, legIndex = run.legs[0];
+  State.variables.stationTracks = { [from]: [lead(), { length: 400, trains: [] }, lead()] };
+  State.variables.currentStation = from;
   State.variables.drivingTrackIndex = 1;
   State.variables.enteredTrainIndex = 0;
   State.variables.currentTrain = [loco];
 
   assert.equal(setup.railyard.departOntoLine(true), true);
-  const tiles = setup.worldmap.getMainLine('journey', 2).length;
-  assert.deepEqual({ ...State.variables.journey }, { legIndex: 2, tileIndex: 0, forward: true });
+  const tiles = setup.worldmap.getMainLine('journey', legIndex).length;
+  assert.deepEqual({ ...State.variables.journey }, { legIndex, tileIndex: 0, forward: true });
   assert.equal(setup.worldmap.getJourneyView().tileCount, tiles);
   // There is nothing behind the first tile: that end is the station the train just left.
   assert.equal(setup.worldmap.getJourneyStep(-1), null);
 
   let guard = 0;
-  while (State.variables.journey && guard++ < 40) {
+  while (State.variables.journey && guard++ < 400) {
     const step = setup.worldmap.getJourneyStep(1);
     assert.ok(step.minutes >= 1, JSON.stringify(step));
     assert.equal(setup.railyard.moveAlongLine(1), true);
   }
   // Running the line out arrives at the next station, and the journey is over.
   assert.equal(State.variables.journey, null);
-  assert.equal(State.variables.currentStation, 3);
+  assert.equal(State.variables.currentStation, to);
   assert.equal(guard, tiles - 1);
   assert.equal(State.variables.drivingTrackIndex, setup.railyard.getEntryTrackIndex());
 });
@@ -518,8 +523,9 @@ test('backing up on the line returns to the tile before, and the grades reverse 
   const loco = setup.railyard.createLocomotiveCar('dieselShunter');
   loco.cargo = [{ type: 'diesel', amount: 400 }];
   const lead = () => ({ length: 999999, infinite: true, trains: [] });
-  State.variables.stationTracks = { 4: [lead(), { length: 400, trains: [] }, lead()] };
-  State.variables.currentStation = 4;
+  const [from] = stationRun(setup, 2).stations;
+  State.variables.stationTracks = { [from]: [lead(), { length: 400, trains: [] }, lead()] };
+  State.variables.currentStation = from;
   State.variables.drivingTrackIndex = 1;
   State.variables.currentTrain = [loco];
   setup.railyard.departOntoLine(true);

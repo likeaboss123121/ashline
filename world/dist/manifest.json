@@ -1154,7 +1154,7 @@
           "cellKm": 5
         },
         "offset": [0, 0],
-        "count": 65069
+        "count": 32095
       },
       {
         "id": "afro-eurasia-network",
@@ -1166,7 +1166,7 @@
         },
         "offset": [-1073, 2709],
         "turn": 2,
-        "count": 131148
+        "count": 79703
       }
     ],
     "joins": [
@@ -1206,7 +1206,7 @@
           "elevation": {
             "sourceId": "copernicus-dem-glo90",
             "aggregation": "mean-and-population-standard-deviation-within-grid-square",
-            "tileCount": 664
+            "tileCount": 600
           }
         }
       }
@@ -1232,7 +1232,7 @@
       "elevation": {
         "sourceId": "copernicus-dem-glo90",
         "aggregation": "mean-and-population-standard-deviation-within-grid-square",
-        "tileCount": 2121
+        "tileCount": 1555
       }
     },
     "parameters": {
@@ -1244,7 +1244,7 @@
       "cityReachKm": 10,
       "bridgeMinKm": 0.2,
       "tunnelMinShare": 0.5,
-      "maxSectionKm": 100,
+      "maxSectionKm": 200,
       "stationShiftSquares": 4,
       "stubJoinKm": 25,
       "stubDetourFactor": 4,
@@ -1318,10 +1318,10 @@
       }
     },
     "stats": {
-      "squareCount": 196217,
-      "moveCount": 199075,
-      "stopCount": 20597,
-      "haltCount": 1743,
+      "squareCount": 111798,
+      "moveCount": 112470,
+      "stopCount": 4473,
+      "haltCount": 1133,
       "bridgeCount": 56149,
       "bridgeKm": 398336,
       "stubJoinCount": 10294,
@@ -1333,28 +1333,28 @@
       "parallelKmRemoved": 411960,
       "onExistingTrackKm": 23733,
       "stationsMovedOffJunctions": 46387,
-      "junctionPoints": 11032,
+      "junctionPoints": 2559,
       "bufferPoints": 0,
       "urbanAreas": 2396,
       "urbanSquaresRemoved": 8001,
       "urbanMovesRemoved": 11077,
       "stopRegions": {
-        "urban": 590,
-        "industrial": 4639,
-        "rural": 15369
+        "urban": 582,
+        "industrial": 914,
+        "rural": 2978
       },
       "stationsWithoutYard": {
-        "urban": 4897,
-        "industrial": 7279,
-        "rural": 18333
+        "urban": 4903,
+        "industrial": 10974,
+        "rural": 30146
       },
-      "railKm": 1664216,
+      "railKm": 992941,
       "leftOutPieces": 246,
       "leftOutKm": 59198,
       "unreachableCities": [],
-      "prunedStubSquares": 48641,
-      "junctionSquares": 11032,
-      "endSquares": 5773
+      "prunedStubSquares": 37669,
+      "junctionSquares": 2559,
+      "endSquares": 1272
     },
     "files": [
       "world/network/americas-network.json",

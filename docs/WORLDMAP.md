@@ -109,6 +109,21 @@ American network were turned into these rules (September 2026); a route is only 
    distance from the section's first stop, never beside a yard. The compiler refuses a network where a stop has more
    than two lines or stands on a bend, a line ends with no station, or two stops touch.
 
+   **Fewer stations and railways** (Likea, September 2026: about 5,000 stations and a like cut in the railways,
+   keeping the key corridors and plenty of alternative routes). Two rules in the stops stage:
+   - *Population against rail density.* A station keeps its yard only if the place it serves has 80 people for every
+     kilometre of track within 50 km (`STATION_PEOPLE_PER_TRACK_KM`, `trackDensity`): a sizeable town where the rails
+     are dense, a village where they are sparse. Cities, authored route ends and every real town in a hard region
+     stay.
+   - *Only the track that joins the stations up* (`thinTrack`). From each station, the shortest ways by track to its
+     two nearest stations are kept; pieces left apart are joined to the start's by their shortest way; the authored
+     routes and cities stay. Then real alternatives go back in: a way over the track not kept, between two kept
+     squares, where going round by the kept track would be more than twice as far plus 100 km
+     (`ALTERNATIVE_FACTOR`, `ALTERNATIVE_EXTRA_KM`) — a loop through other country or a cut-off, not a line beside
+     another. Everything else is taken up, and dead ends to no station after it.
+   Halts come every 200 km of line with no stop (`MAX_SECTION_KM`). Result: 4,473 stops worldwide (20,597 before),
+   111,798 squares (196,217 before) and 673 independent loops, each a real alternative route; the page is 8.7 MiB.
+
    The game sizes yards by region (`setup.railyard.YARD_SIZE_BY_REGION`): two or three short tracks in the country,
    three to five in industrial areas, four or five long ones in the cities.
 10. **Elevation.** Copernicus GLO-90 is resampled onto the grid projection itself in one pass (mean and root mean
