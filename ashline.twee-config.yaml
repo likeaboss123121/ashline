@@ -10,7 +10,7 @@ sugarcube-2:
       description: "Defined in `source/campfire.js:50`."
     conditionControls:
       container: false
-      description: "Defined in `source/condition.js:238`. The eating, drinking and sleeping controls, shown wherever the player is standing in their train."
+      description: "Defined in `source/condition.js:251`. The eating, drinking and sleeping controls, shown wherever the player is standing in their train."
     consistView:
       container: false
       description: "Defined in `source/driving-view.js:383`."
@@ -94,7 +94,7 @@ sugarcube-2:
       description: "Defined in `source/scripts.js:2`. Renders the start/settings screen and seeds a random seed value if the player has not chosen one yet."
     sleepChoices:
       container: false
-      description: "Defined in `source/condition.js:266`. The sleep screen: a handful of hours, or as long as it takes."
+      description: "Defined in `source/condition.js:279`. The sleep screen: a handful of hours, or as long as it takes."
     startNewGame:
       container: false
       description: "Defined in `source/scripts.js:282`."
