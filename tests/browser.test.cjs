@@ -853,6 +853,15 @@ test('push-detach-return is an ordinary validated yard action, including on a sh
 test('debug bug report exports seed, layout and recent actions with a selectable clipboard fallback', async t => {
   const page = await openGame(t);
   await enableDebug(page); await begin(page); await board(page);
+  // An error the page did not catch is kept for the report (dispatched here, so the test itself does not fail on it),
+  // and the same error again is counted rather than listed twice.
+  // SugarCube's own handler, which would show its alert, is set aside while it is dispatched.
+  await page.evaluate(() => {
+    const failure = new Error('Something broke in the yard'), sugarCube = window.onerror;
+    window.onerror = null;
+    for (let i = 0; i < 3; i++) window.dispatchEvent(new ErrorEvent('error', { message: failure.message, error: failure, filename: 'file:///index.html', lineno: 12, colno: 3 }));
+    window.onerror = sugarCube;
+  });
   await page.getByRole('button', { name: 'Debug', exact: true }).click();
   await page.locator('.debug-container').getByRole('button', { name: 'Copy bug report', exact: true }).click();
   const reportText = page.getByRole('textbox', { name: 'Bug report' });
@@ -861,6 +870,16 @@ test('debug bug report exports seed, layout and recent actions with a selectable
   assert.equal(report.station, 1);
   assert.ok(report.tracks.length && report.consist.length && report.build);
   assert.ok(report.recentActions.length);
+  assert.ok(report.recentActions.some(entry => entry.action.kind === 'passage' && entry.action.passage === 'TrainInterior'));
+  const broke = report.errors.filter(error => error.message === 'Something broke in the yard');
+  assert.equal(broke.length, 1, JSON.stringify(report.errors));
+  assert.equal(broke[0].kind, 'uncaught');
+  assert.equal(broke[0].count, 3);
+  assert.equal(broke[0].where, 'index.html:12:3');
+  assert.equal(broke[0].passage, 'TrainInterior');
+  assert.match(broke[0].stack, /Something broke in the yard/);
+  // Nothing unset appears as a revival expression.
+  assert.ok(!(await reportText.inputValue()).includes('(revive:eval)'));
   await page.locator('#ui-dialog').getByRole('button', { name: 'Copy bug report', exact: true }).click();
   assert.equal(await reportText.getAttribute('readonly'), '');
 });

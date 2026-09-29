@@ -745,13 +745,20 @@ setup.globe = {
 				beating = true;
 				requestAnimationFrame(beat);
 			}
+			// A redraw sets the holder's height, so it waits for the next frame: done inside the resize notification it
+			// would resize what is being observed, which the browser reports as a loop (and SugarCube as an error).
 			if (typeof ResizeObserver === 'function') {
-				var lastWidth = holder.clientWidth;
+				var lastWidth = holder.clientWidth, pendingResize = false;
 				new ResizeObserver(function() {
-					if (holder.clientWidth === lastWidth) return;
-					lastWidth = holder.clientWidth;
-					clampZoom();
-					draw(1);
+					if (holder.clientWidth === lastWidth || pendingResize) return;
+					pendingResize = true;
+					requestAnimationFrame(function() {
+						pendingResize = false;
+						if (holder.clientWidth === lastWidth) return;
+						lastWidth = holder.clientWidth;
+						clampZoom();
+						draw(1);
+					});
 				}).observe(holder);
 			}
 		});
