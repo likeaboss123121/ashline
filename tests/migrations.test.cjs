@@ -59,6 +59,12 @@ test('every history moment migrates and a bad or future moment rejects the entir
     assert.equal(JSON.stringify(bad), before);
   }
   assert.throws(()=>s.saveMigrations.upgradeState(input, 100), /newer/);
+  const future=copy(input);future.history[1].variables.lastPlayedReleaseVersion='0.4.2';
+  assert.throws(()=>s.saveMigrations.upgradeState(future, 100), /play in v0\.4\.2 or newer/);
+  future.history[1].variables.saveSchemaVersion=s.saveMigrations.CURRENT+1;
+  assert.throws(()=>s.saveMigrations.upgradeState(future), /play in v0\.4\.2 or newer/);
+  future.history[1].variables.lastPlayedReleaseVersion='<b>';
+  assert.throws(()=>s.saveMigrations.upgradeState(future), /the version it was saved in or newer/);
   assert.throws(()=>s.saveMigrations.upgradeState(input, 1), /disagree/);
   const bad=copy(input);bad.history[1].variables.stationTracks[1][1].trains=[[null]];
   assert.throws(()=>s.saveMigrations.upgradeState(bad), /train/i);

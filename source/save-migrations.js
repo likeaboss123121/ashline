@@ -7,21 +7,25 @@ setup.saveMigrations = {
 	recovery: null,
 	copy: function(value) { return JSON.parse(JSON.stringify(value)); },
 	object: function(value) { return value && typeof value === 'object' && !Array.isArray(value); },
-	checkVersion: function(version) {
+	// release: the lastPlayedReleaseVersion the newer game stamped into the save, which is the release to name.
+	checkVersion: function(version, release) {
 		if (version === undefined) return 0;
 		if (!Number.isInteger(version) || version < 0) throw new Error('Invalid save schema version.');
-		if (version > this.CURRENT) throw new Error('This save needs a newer version of Ashline. Keep it and update the game.');
+		if (version > this.CURRENT) throw new Error('This save is for a newer version of Ashline. Please start a new game to play in this version, or play in '
+			+ (typeof release === 'string' && /^\d+(\.\d+)*$/.test(release) ? 'v' + release : '[NEEDS WRITING PASS] the version it was saved in')
+			+ ' or newer to continue the saved game.');
 		return version;
 	},
 	upgradeState: function(source, envelopeVersion) {
-		this.checkVersion(envelopeVersion);
+		var latest = this.object(source) && Array.isArray(source.history) && source.history[source.index];
+		this.checkVersion(envelopeVersion, latest && this.object(latest.variables) ? latest.variables.lastPlayedReleaseVersion : undefined);
 		if (!this.object(source) || !Array.isArray(source.history) || !source.history.length
 			|| !Number.isInteger(source.index) || source.index < 0 || source.index >= source.history.length)
 			throw new Error('Invalid save history.');
 		var self = this, state = this.copy(source), upgraded = false, relocated = false;
 		state.history.forEach(function(moment) {
 			if (!self.object(moment) || !self.object(moment.variables)) throw new Error('Invalid save history.');
-			var v = moment.variables, version = self.checkVersion(v.saveSchemaVersion);
+			var v = moment.variables, version = self.checkVersion(v.saveSchemaVersion, v.lastPlayedReleaseVersion);
 			if (envelopeVersion !== undefined && version !== envelopeVersion)
 				throw new Error('The save schema markers disagree.');
 			// StoryInit used to be an ordinary introduction. It must never run the new-game initializer on load.
