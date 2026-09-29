@@ -127,9 +127,17 @@ test('preview formatting removes actions and hidden code while preserving link t
     '<<run evil("quoted >> text")>><p>\'\'Bold\'\'</p>[[Go->Yard][$fuel=0]]'+
     '<<link "Continue">><<set $fuel=0>><</link>><<print setup.example()>>');
   assert.match(html,/<strong>Bold<\/strong>/);
-  assert.match(html,/<a>\[LINK\]<\/a>/);
+  assert.match(html,/<a[^>]*>\[LINK\]<\/a>/);
   assert.match(html,/\[VALUE\]/);
   assert.doesNotMatch(html,/evil|secret|nested|fuel|setup\.|<<|>>/);
+});
+
+test('each link in a preview is marked with its line in the text, comments counted, for the wiki to point to the source', () => {
+  const setup={};
+  vm.runInNewContext(fs.readFileSync('source/text-preview.js','utf8'),{setup});
+  const html=setup.textPreview.markup('First line\n/% a comment\nover two lines %/\n[[Go->Yard]]\n<<link "Continue">><</link>>');
+  assert.deepEqual([...html.matchAll(/data-source-line="(\d+)"/g)].map(match=>Number(match[1])),[3,4]);
+  assert.doesNotMatch(html,/\uE200|\uE201/);
 });
 
 test('preview values read memory without executing game functions, getters or prototype chains',()=>{

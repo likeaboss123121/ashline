@@ -489,3 +489,11 @@
 	font-size: 1.1em;
 	line-height: 1;
 }
+
+/* The debug wiki's pointer to where a link is in the source. */
+.text-preview-source {
+	margin-left: 0.25em;
+	color: #8d938f;
+	font-family: monospace;
+	font-size: 0.8em;
+}

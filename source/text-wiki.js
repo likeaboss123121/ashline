@@ -14,7 +14,8 @@ setup.textWiki = {
 	overrides: new Map(),
 	previewContext: function(row,interactive) {
 		if(!this.overrides.has(row)) this.overrides.set(row,Object.create(null));
-		return {mode:this.selection.mode,overrides:this.overrides.get(row),bindings:row[6]||[],interactive:interactive};
+		return {mode:this.selection.mode,overrides:this.overrides.get(row),bindings:row[6]||[],interactive:interactive,
+			source:row[2]?{file:row[1],line:row[2]}:null};
 	},
 	entries: null,
 	categories: {

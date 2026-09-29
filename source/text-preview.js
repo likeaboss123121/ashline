@@ -19,8 +19,14 @@ setup.textPreview = {
 				return setup.textValues.text(setup.textValues.memory(bindings[index]||{}));
 			}) : undefined;
 		}
-		var text = String(source).replace(/\/%[\s\S]*?%\/|<!--([\s\S]*?)-->/g, '')
-			.replace(/<<script\b[^>]*>>[\s\S]*?<<\/script\s*>>/gi, '');
+		// Comments and scripts are blanked to their line breaks rather than cut, so a link's line within the text stays
+		// true: each link is marked with it (data-source-line), for the wiki to say where in the source it is.
+		var blank = function(found) { return found.replace(/[^\n]/g, ''); };
+		var text = String(source).replace(/\/%[\s\S]*?%\/|<!--([\s\S]*?)-->/g, blank)
+			.replace(/<<script\b[^>]*>>[\s\S]*?<<\/script\s*>>/gi, blank);
+		var lineAt = function(offset) { return text.slice(0, offset).split('\n').length - 1; };
+		text = text.replace(/\[\[/g, function(found, offset) { return '[[\uE200' + lineAt(offset) + '\uE201'; });
+		var macroLine = 0;
 		// Quoted arguments can themselves contain >>. Do not leak the remainder as code.
 		var tokens = /<<((?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`|[^>"'`]|>(?!>))*)>>/g;
 		function macro(body) {
@@ -30,7 +36,7 @@ setup.textPreview = {
 			if (/^(silently|widget)$/.test(name)) { hidden++; return ''; }
 			if (/^\/(silently|widget)$/.test(name)) { hidden = Math.max(0,hidden-1); return ''; }
 			if (hidden) return '';
-			if (/^(link|linkreplace|linkappend|timedlink|button)$/.test(name)) return '<a>' + hole(args,'LINK',literal(args));
+			if (/^(link|linkreplace|linkappend|timedlink|button)$/.test(name)) return '<a data-source-line="' + macroLine + '">' + hole(args,'LINK',literal(args));
 			if (/^\/(link|linkreplace|linkappend|timedlink|button)$/.test(name)) return '</a>';
 			if (/^(print|=|-)$/.test(name)) return hole(args,undefined,/^\s*(["'])(?:\\.|(?!\1)[\s\S])*\1\s*$/.test(args)?literal(args):undefined);
 			if (name === 'uisection') {
@@ -48,15 +54,16 @@ setup.textPreview = {
 		var output = '', cursor = 0, match;
 		while ((match = tokens.exec(text))) {
 			if (!hidden) output += text.slice(cursor,match.index);
+			macroLine = lineAt(match.index);
 			output += macro(match[1]); cursor = tokens.lastIndex;
 		}
 		text = output + (hidden ? '' : text.slice(cursor));
-		text = text.replace(/\[\[([\s\S]*?)\]\]/g, function(_, link) {
+		text = text.replace(/\[\[\uE200(\d+)\uE201([\s\S]*?)\]\]/g, function(_, line, link) {
 			link = link.split('][')[0];
 			var label = link.split(/->|\|/)[0];
 			if (link.indexOf('<-') >= 0) label = link.split('<-').pop();
-			return '<a>' + hole('','LINK',label) + '</a>';
-		});
+			return '<a data-source-line="' + line + '">' + hole('','LINK',label) + '</a>';
+		}).replace(/\uE200\d+\uE201/g, '');
 		return text.replace(/<<[\s\S]*$/, '').replace(/\uE000(\d+)\uE001/g,function(_,index){
 			var binding=bindings[index]||{};return hole(binding.expression||'',binding.kind,undefined,binding.plan||null);
 		}).replace(/\{([^{}]*)\}/g,function(_,expression){return hole(expression);})
@@ -114,6 +121,15 @@ setup.textPreview = {
 				if (node.tagName === 'BUTTON') { target.type = 'button'; target.disabled = true; }
 			}
 			Array.from(node.childNodes).forEach(function(child) { copy(child,target); });
+			// Where the link is in the source: the entry's file, and its first line plus the link's line within it.
+			if (node.tagName === 'A' && context.source && node.hasAttribute('data-source-line')) {
+				var where = document.createElement('small');
+				where.className = 'text-preview-source';
+				where.dataset.sourceLocation = '';
+				where.textContent = ' (' + String(context.source.file).split('/').pop() + ':'
+					+ (Number(context.source.line) + Number(node.getAttribute('data-source-line'))) + ')';
+				parent.appendChild(where);
+			}
 		}
 		Array.from(template.content.childNodes).forEach(function(node) { copy(node,result); });
 		return result;
