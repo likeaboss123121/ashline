@@ -141,7 +141,6 @@ You step into the railyard. Several trains are parked here, each with its own mi
 <<initDrivingModeState>>
 <</silently>><<railyardView>><<saveReminder>><<buildIntegrityNotice>>
 <p>You are driving your consist at <<print setup.worldmap.getStationName($currentStation)>>.</p>
-<<if setup.wayfinding.hasStationMap($currentStation)>><p class="small-description">This station has a map. Step down from the train to look at it.</p><</if>>
 <p><<link "Stop driving">><<goto "TrainInterior">><</link>></p>
 <<tutorialHint>>
 <<drivingStatus>>

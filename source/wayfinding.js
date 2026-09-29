@@ -355,6 +355,6 @@ setup.showMapDialog = function() {
 	note.className = 'small-description';
 	note.textContent = seen.length ? 'Maps from ' + seen.map(function(stationId) {
 		return setup.worldmap.getStationName(stationId);
-	}).join(', ') + '.' : 'You have not seen any maps yet. Stations at the end of a line have one.';
+	}).join(', ') + '.' : 'You have not seen any maps yet.';
 	body.appendChild(note);
 };
