@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="76" height="54" viewBox="0 0 76 54" shape-rendering="crispEdges" data-template="railyard-kind-engine-shed" data-anchor-x="-3" data-anchor-y="30">
+<title>Ashline rail yard template: Engine shed</title>
+<g id="apron">
+</g>
+<g id="shed">
+<polygon points="3,16 23,6 67,28 67,39 47,49 3,27" fill="#4e3024"/>
+<polygon points="3,27 47,49 47,38 3,16" fill="#6d4331"/>
+<polygon points="67,39 47,49 47,38 67,28" fill="#4e3024"/>
+<polygon points="23,6 67,28 47,38 3,16" fill="#8d5a44"/>
+<polygon points="2,17 13,1 24,6 69,28 47,39" fill="#3d433f"/>
+<polygon points="1,16 47,39 58,24 12,1" fill="#7a8078"/>
+<polygon points="67,28 47,38 57,23" fill="#4e3024"/>
+<polygon points="6,29 16,34 16,26 11,21 6,21" fill="#3b2a20"/>
+<polygon points="20,36 30,41 30,33 25,28 20,28" fill="#3b2a20"/>
+<polygon points="34,43 44,48 44,40 39,35 34,35" fill="#3b2a20"/>
+</g>
+<g id="turntable">
+<polygon points="55,48 56,45 62,42 66,42 70,43 73,44 75,46 75,47 74,50 72,52 68,53 64,53 60,52 57,51 55,49" fill="#3e3d38"/>
+<polygon points="72,52 68,53 68,52 72,51" fill="#6c6b62"/>
+<polygon points="68,53 64,53 64,52 68,52" fill="#727167"/>
+<polygon points="64,53 60,52 60,51 64,52" fill="#77756b"/>
+<polygon points="60,52 57,51 57,50 60,51" fill="#78766c"/>
+<polygon points="57,51 55,49 55,48 57,50" fill="#77756b"/>
+<polygon points="75,47 74,50 74,49 75,46" fill="#605e57"/>
+<polygon points="74,50 72,52 72,51 74,49" fill="#66645c"/>
+<polygon points="72,51 68,52 64,52 60,51 57,50 55,48 56,45 58,44 62,42 66,42 70,43 73,44 75,46 74,49" fill="#9c998d"/>
+<polygon points="57,43 59,42 73,49 73,50 71,51 57,44" fill="#222a2b"/>
+<polygon points="57,44 71,51 71,50 57,43" fill="#222a2b"/>
+<polygon points="73,50 71,51 71,50 73,49" fill="#222a2b"/>
+<polygon points="59,42 73,49 71,50 57,43" fill="#b8b6a0"/>
+</g>
+</svg>

@@ -500,3 +500,6 @@
 
 /* A place's own name under its English one, as a map shows Moscow over Москва. */
 .local-name { display: block; font-size: 0.6em; font-weight: normal; opacity: 0.8; }
+
+/* The kind of yard, under its station's name. */
+.yard-kind { margin-top: -0.6em; opacity: 0.8; font-style: italic; }

@@ -1091,6 +1091,9 @@ setup.railyard = {
 	},
 	// Private cars are deliberately uncommon; every other ordinary car has five times its weight.
 	randomCarKey: function(rng, locale) {
+		// A kind of yard with cars of its own (a passenger station's coaches) weighs those instead of the local economy's.
+		var kind = locale && locale.yardKind && setup.yardTypes.KINDS[locale.yardKind];
+		if (kind && kind.cars) return setup.locales.choose(this.carKeys, setup.yardTypes.carWeights(locale.yardKind, this.carKeys), rng);
 		if (locale) return setup.locales.choose(this.carKeys, setup.locales.INDUSTRIES[locale.industry].cars, rng, this.carWeights);
 		var self = this;
 		var total = this.carKeys.reduce(function(sum, key) { return sum + (self.carWeights[key] || 1); }, 0);
@@ -1106,8 +1109,9 @@ setup.railyard = {
 		if (this.locomotiveKeys.indexOf(carKey) !== -1) {
 			return [];
 		}
-		// 20% chance to have cargo (for ~3 in 15 cars)
-		if (rng() > 0.2) {
+		// 20% chance to have cargo (for ~3 in 15 cars), more or less at a kind of yard that says so.
+		var kind = locale && locale.yardKind && setup.yardTypes.KINDS[locale.yardKind];
+		if (rng() > 0.2 * (kind && kind.cargo || 1)) {
 			return [];
 		}
 		var carDef = State.variables.defaultTrains[carKey];
@@ -1120,7 +1124,7 @@ setup.railyard = {
 		var cargo = [];
 		for (var i = 0; i < count; i++) {
 			var item = locale ? filteredPresets[setup.locales.choose(filteredPresets.map(function(_, index) { return index; }),
-				filteredPresets.map(function(preset) { return setup.locales.INDUSTRIES[locale.industry].cargo[preset.type] || 1; }), rng)]
+				filteredPresets.map(function(preset) { return (kind && kind.loads || setup.locales.INDUSTRIES[locale.industry].cargo)[preset.type] || 1; }), rng)]
 				: this.randomChoice(rng, filteredPresets);
 			var stack = {
 				type: item.type,
@@ -1135,8 +1139,8 @@ setup.railyard = {
 	},
 	// Now and then a station has a dead car standing in the way. It carries nothing and is worth nothing, so the
 	// only thing to do with it is shift it, which is the point of it.
-	addDerelict: function(tracks, rng) {
-		if (rng() >= this.DERELICT_CHANCE) {
+	addDerelict: function(tracks, rng, certain) {
+		if (!certain && rng() >= this.DERELICT_CHANCE) {
 			return null;
 		}
 		var candidates = [];
@@ -1377,9 +1381,12 @@ setup.railyard = {
 		industrial: { tracks: [3, 5], metres: [220, 300] },
 		urban: { tracks: [4, 5], metres: [260, 300] }
 	},
+	// A railyard is the size of its region's; any other kind of yard the size its kind has (setup.yardTypes).
 	getYardSize: function(stationId) {
 		var tile = setup.realWorldPilot && setup.realWorldPilot.getStationTile ? setup.realWorldPilot.getStationTile(stationId) : null;
-		var size = tile && this.YARD_SIZE_BY_REGION[tile.stationRegion];
+		var kind = setup.yardTypes ? setup.yardTypes.kindOf(stationId) : null;
+		var size = kind && !/^railyard-/.test(kind) ? this.YARD_SIZE_BY_REGION[setup.yardTypes.KINDS[kind].size]
+			: tile && this.YARD_SIZE_BY_REGION[tile.stationRegion];
 		return size || { tracks: [this.MIN_GENERATED_YARD_TRACKS, this.MAX_GENERATED_YARD_TRACKS],
 			metres: [this.MIN_GENERATED_TRACK_METRES, this.MAX_GENERATED_TRACK_METRES] };
 	},
@@ -2149,11 +2156,14 @@ setup.railyard = {
 				var trainLength = 0;
 				var carTarget = this.randomInt(rng, 1, 10);
 				// Occasional locomotive, or force one if none have spawned yet.
-				var shouldStartWithLoco = (!hasLoco && rng() < 0.45) || (hasLoco && rng() < 0.12);
+				var locoBias = locale && locale.yardKind && setup.yardTypes.KINDS[locale.yardKind].loco || 1;
+				var shouldStartWithLoco = (!hasLoco && rng() < 0.45 * locoBias) || (hasLoco && rng() < 0.12 * locoBias);
 				if (shouldStartWithLoco) {
 					var locoKey = locale ? setup.locales.choose(this.locomotiveKeys, setup.stockVariety.fleetWeights(locale), rng)
 						: this.randomChoice(rng, this.locomotiveKeys);
 					var loco = this.createLocomotiveCar(locoKey);
+					// What travellers and crews left aboard, at a passenger station or an engine shed.
+					if (locale && locale.yardKind && setup.yardTypes.KINDS[locale.yardKind].kit) setup.yardTypes.fillKit(loco, rng);
 					if (loco.length <= remaining) {
 						train.push(loco);
 						trainLength += loco.length;
@@ -2198,7 +2208,7 @@ setup.railyard = {
 	},
 	// Builds a full station layout (entry + generated yard + exit), with a fixed tutorial station at id 1.
 	generateStationTracks: function(stationId, baseSeed) {
-		if (setup.yards && setup.yards.parse(stationId) && !setup.yards.isStation(stationId)) {
+		if (setup.yards && setup.yards.parse(stationId) && setup.yards.parse(stationId).kind === 'siding') {
 			return setup.yards.generateTracks(stationId, baseSeed);
 		}
 		if (stationId === 1) {
@@ -2254,7 +2264,9 @@ setup.railyard = {
 		var reserveRow = clearRow === 0 ? 1 : 0;
 		var generationLengths = lengths.slice();
 		generationLengths[reserveRow] -= 9;
-		var yardTracks = this.generateRailyardTracks(baseSeed + stationId, generationLengths, clearRow, setup.locales.forStation(stationId, baseSeed));
+		var locale = setup.locales.forStation(stationId, baseSeed);
+		locale.yardKind = setup.yardTypes.kindOf(stationId);
+		var yardTracks = this.generateRailyardTracks(baseSeed + stationId, generationLengths, clearRow, locale);
 		yardTracks[reserveRow].length = lengths[reserveRow];
 		for (var closed = 1; closed <= yardCount; closed++) {
 			if (closures[closed] === 'exit') {
@@ -2283,7 +2295,10 @@ setup.railyard = {
 			if (!exitHeading) delete track.connectsToEntry;
 		});
 		setup.yardGeneration.reserve(tracks, stationId, baseSeed);
-		this.addDerelict(tracks, shapeRng);
+		// A scrapyard is mostly derelicts: a roll for each of profile.derelict, each a sure one.
+		var derelicts = setup.yardTypes.profile(stationId).derelict || 0;
+		this.addDerelict(tracks, shapeRng, derelicts > 0);
+		for (var extraDerelict = 1; extraDerelict < derelicts; extraDerelict++) this.addDerelict(tracks, shapeRng, true);
 		setup.yardGeneration.validate(tracks);
 		return tracks;
 	},
@@ -2437,6 +2452,9 @@ Macro.add('railyardButtons', {
 		var localName = setup.worldmap.getStationLocalName(State.variables.currentStation);
 		var output = '<h2>' + setup.worldmap.getStationName(State.variables.currentStation)
 			+ (localName ? '<span class="local-name">' + localName + '</span>' : '') + '</h2>';
+		// Which of the yards on the square this is: a railyard, a passenger station, a port (setup.yardTypes).
+		var yardLabel = setup.yardTypes.label(State.variables.currentStation);
+		output += '<p class="yard-kind">' + yardLabel.charAt(0).toUpperCase() + yardLabel.slice(1) + '</p>';
 		output += '<p>There ' + (totalTrains === 1 ? 'is ' : 'are ') + totalTrains + ' train' + (totalTrains === 1 ? '' : 's') + ' staged across ' + trackCount + ' track' + (trackCount === 1 ? '' : 's') + '.</p>';
 		var displayNumber = 1;
 		// Each track is rendered independently so empty tracks, finite length, and train numbering stay readable.

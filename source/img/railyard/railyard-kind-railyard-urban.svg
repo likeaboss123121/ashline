@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="39" height="41" viewBox="0 0 39 41" shape-rendering="crispEdges" data-template="railyard-kind-railyard-urban" data-anchor-x="-6" data-anchor-y="26">
+<title>Ashline rail yard template: Railyard</title>
+<g id="apron">
+</g>
+<g id="box">
+<polygon points="5,17 14,12 28,19 28,27 19,32 5,25" fill="#4e3024"/>
+<polygon points="5,25 19,32 19,24 5,17" fill="#6d4331"/>
+<polygon points="28,27 19,32 19,24 28,19" fill="#4e3024"/>
+<polygon points="14,12 28,19 19,24 5,17" fill="#8d5a44"/>
+<polygon points="5,11 14,6 28,13 28,19 19,24 5,17" fill="#735d42"/>
+<polygon points="5,17 19,24 19,18 5,11" fill="#9a7f5c"/>
+<polygon points="28,19 19,24 19,18 28,13" fill="#735d42"/>
+<polygon points="14,6 28,13 19,18 5,11" fill="#b89f7a"/>
+<polygon points="6,15 8,16 8,14 6,13" fill="#dec38a"/>
+<polygon points="9,17 11,18 11,16 9,15" fill="#dec38a"/>
+<polygon points="12,18 14,19 14,17 12,16" fill="#dec38a"/>
+<polygon points="15,20 17,21 17,19 15,18" fill="#dec38a"/>
+</g>
+<g id="roof">
+<polygon points="3,10 14,5 30,13 19,19 3,11" fill="#735d42"/>
+<polygon points="3,11 19,19 19,18 3,10" fill="#9a7f5c"/>
+<polygon points="30,13 19,19 19,18 30,13" fill="#735d42"/>
+<polygon points="14,5 30,13 19,18 3,10" fill="#b89f7a"/>
+<polygon points="2,11 9,2 15,4 32,13 19,19" fill="#42231d"/>
+<polygon points="1,10 19,19 26,10 8,1" fill="#6e3b30"/>
+<polygon points="30,13 19,18 25,10" fill="#735d42"/>
+</g>
+<g id="relay-cabinets">
+<polygon points="25,30 28,28 32,30 32,35 29,37 25,35" fill="#3d433f"/>
+<polygon points="25,35 29,37 29,32 25,30" fill="#565d57"/>
+<polygon points="32,35 29,37 29,32 32,30" fill="#3d433f"/>
+<polygon points="28,28 32,30 29,32 25,30" fill="#7a8078"/>
+<polygon points="31,33 34,31 38,33 38,38 35,40 31,38" fill="#3d433f"/>
+<polygon points="31,38 35,40 35,35 31,33" fill="#565d57"/>
+<polygon points="38,38 35,40 35,35 38,33" fill="#3d433f"/>
+<polygon points="34,31 38,33 35,35 31,33" fill="#7a8078"/>
+</g>
+</svg>

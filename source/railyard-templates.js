@@ -652,6 +652,162 @@ setup.railyardTemplates = {
 			]
 		},
 		{
+			"file": "railyard-kind-passenger-rural.svg",
+			"passage": "railyard-kind-passenger-rural",
+			"title": "Passenger station",
+			"width": 48,
+			"height": 41,
+			"anchorX": 1,
+			"anchorY": 20,
+			"top": [
+				24,
+				4
+			]
+		},
+		{
+			"file": "railyard-kind-passenger-urban.svg",
+			"passage": "railyard-kind-passenger-urban",
+			"title": "Passenger station",
+			"width": 79,
+			"height": 59,
+			"anchorX": 1,
+			"anchorY": 28,
+			"top": [
+				70,
+				18
+			]
+		},
+		{
+			"file": "railyard-kind-railyard-rural.svg",
+			"passage": "railyard-kind-railyard-rural",
+			"title": "Railyard",
+			"width": 40,
+			"height": 28,
+			"anchorX": -5,
+			"anchorY": 15,
+			"top": [
+				11,
+				3
+			]
+		},
+		{
+			"file": "railyard-kind-railyard-urban.svg",
+			"passage": "railyard-kind-railyard-urban",
+			"title": "Railyard",
+			"width": 39,
+			"height": 41,
+			"anchorX": -6,
+			"anchorY": 26,
+			"top": [
+				16,
+				5
+			]
+		},
+		{
+			"file": "railyard-kind-factory.svg",
+			"passage": "railyard-kind-factory",
+			"title": "Factory",
+			"width": 62,
+			"height": 44,
+			"anchorX": -5,
+			"anchorY": 26,
+			"top": [
+				57,
+				5
+			]
+		},
+		{
+			"file": "railyard-kind-farm.svg",
+			"passage": "railyard-kind-farm",
+			"title": "Farm",
+			"width": 51,
+			"height": 38,
+			"anchorX": -5,
+			"anchorY": 26,
+			"top": [
+				39,
+				9
+			]
+		},
+		{
+			"file": "railyard-kind-port.svg",
+			"passage": "railyard-kind-port",
+			"title": "Port",
+			"width": 90,
+			"height": 46,
+			"anchorX": -3,
+			"anchorY": 26,
+			"top": [
+				56,
+				11
+			]
+		},
+		{
+			"file": "railyard-kind-mine.svg",
+			"passage": "railyard-kind-mine",
+			"title": "Mine",
+			"width": 66,
+			"height": 49,
+			"anchorX": -13,
+			"anchorY": 24,
+			"top": [
+				43,
+				-1
+			]
+		},
+		{
+			"file": "railyard-kind-engine-shed.svg",
+			"passage": "railyard-kind-engine-shed",
+			"title": "Engine shed",
+			"width": 76,
+			"height": 54,
+			"anchorX": -3,
+			"anchorY": 30,
+			"top": [
+				35,
+				12
+			]
+		},
+		{
+			"file": "railyard-kind-oil-terminal.svg",
+			"passage": "railyard-kind-oil-terminal",
+			"title": "Oil terminal",
+			"width": 76,
+			"height": 51,
+			"anchorX": -3,
+			"anchorY": 28,
+			"top": [
+				45,
+				12
+			]
+		},
+		{
+			"file": "railyard-kind-timber-yard.svg",
+			"passage": "railyard-kind-timber-yard",
+			"title": "Timber yard",
+			"width": 68,
+			"height": 47,
+			"anchorX": -5,
+			"anchorY": 25,
+			"top": [
+				21,
+				6
+			]
+		},
+		{
+			"file": "railyard-kind-scrapyard.svg",
+			"passage": "railyard-kind-scrapyard",
+			"title": "Scrapyard",
+			"width": 64,
+			"height": 35,
+			"anchorX": -5,
+			"anchorY": 19,
+			"top": [
+				56,
+				11
+			]
+		},
+		{
 			"file": "railyard-plant-scrub.svg",
 			"passage": "railyard-plant-scrub",
 			"title": "Scrub",

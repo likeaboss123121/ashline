@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="35" viewBox="0 0 64 35" shape-rendering="crispEdges" data-template="railyard-kind-scrapyard" data-anchor-x="-5" data-anchor-y="19">
+<title>Ashline rail yard template: Scrapyard</title>
+<g id="apron">
+</g>
+<g id="heaps">
+<polygon points="5,10 19,3 33,10 33,13 19,20 5,13" fill="#3f2d23"/>
+<polygon points="5,13 19,20 19,17 5,10" fill="#5a4030"/>
+<polygon points="33,13 19,20 19,17 33,10" fill="#3f2d23"/>
+<polygon points="19,3 33,10 19,17 5,10" fill="#7a5a44"/>
+<polygon points="9,7 19,2 29,7 29,10 19,15 9,10" fill="#3f2d23"/>
+<polygon points="9,10 19,15 19,12 9,7" fill="#5a4030"/>
+<polygon points="29,10 19,15 19,12 29,7" fill="#3f2d23"/>
+<polygon points="19,2 29,7 19,12 9,7" fill="#7a5a44"/>
+<polygon points="13,4 19,1 25,4 25,7 19,10 13,7" fill="#3f2d23"/>
+<polygon points="13,7 19,10 19,7 13,4" fill="#5a4030"/>
+<polygon points="25,7 19,10 19,7 25,4" fill="#3f2d23"/>
+<polygon points="19,1 25,4 19,7 13,4" fill="#7a5a44"/>
+<polygon points="17,19 29,13 41,19 41,22 29,28 17,22" fill="#3f2d23"/>
+<polygon points="17,22 29,28 29,25 17,19" fill="#5a4030"/>
+<polygon points="41,22 29,28 29,25 41,19" fill="#3f2d23"/>
+<polygon points="29,13 41,19 29,25 17,19" fill="#7a5a44"/>
+<polygon points="21,16 29,12 37,16 37,19 29,23 21,19" fill="#3f2d23"/>
+<polygon points="21,19 29,23 29,20 21,16" fill="#5a4030"/>
+<polygon points="37,19 29,23 29,20 37,16" fill="#3f2d23"/>
+<polygon points="29,12 37,16 29,20 21,16" fill="#7a5a44"/>
+<polygon points="25,13 29,11 33,13 33,16 29,18 25,16" fill="#3f2d23"/>
+<polygon points="25,16 29,18 29,15 25,13" fill="#5a4030"/>
+<polygon points="33,16 29,18 29,15 33,13" fill="#3f2d23"/>
+<polygon points="29,11 33,13 29,15 25,13" fill="#7a5a44"/>
+<polygon points="31,22 47,14 63,22 63,25 47,33 31,25" fill="#3f2d23"/>
+<polygon points="31,25 47,33 47,30 31,22" fill="#5a4030"/>
+<polygon points="63,25 47,33 47,30 63,22" fill="#3f2d23"/>
+<polygon points="47,14 63,22 47,30 31,22" fill="#7a5a44"/>
+<polygon points="35,19 47,13 59,19 59,22 47,28 35,22" fill="#3f2d23"/>
+<polygon points="35,22 47,28 47,25 35,19" fill="#5a4030"/>
+<polygon points="59,22 47,28 47,25 59,19" fill="#3f2d23"/>
+<polygon points="47,13 59,19 47,25 35,19" fill="#7a5a44"/>
+<polygon points="39,16 47,12 55,16 55,19 47,23 39,19" fill="#3f2d23"/>
+<polygon points="39,19 47,23 47,20 39,16" fill="#5a4030"/>
+<polygon points="55,19 47,23 47,20 55,16" fill="#3f2d23"/>
+<polygon points="47,12 55,16 47,20 39,16" fill="#7a5a44"/>
+</g>
+<g id="wreck">
+<polygon points="1,15 6,13 22,21 22,26 17,28 1,20" fill="#3f2d23"/>
+<polygon points="1,20 17,28 17,23 1,15" fill="#5a4030"/>
+<polygon points="22,26 17,28 17,23 22,21" fill="#3f2d23"/>
+<polygon points="6,13 22,21 17,23 1,15" fill="#8c4a2e"/>
+</g>
+<g id="crane">
+<polygon points="55,13 57,12 59,13 59,33 57,34 55,33" fill="#3d433f"/>
+<polygon points="55,33 57,34 57,14 55,13" fill="#565d57"/>
+<polygon points="59,33 57,34 57,14 59,13" fill="#3d433f"/>
+<polygon points="57,12 59,13 57,14 55,13" fill="#7a8078"/>
+<polygon points="42,4 44,3 61,11 61,13 59,14 42,6" fill="#3d433f"/>
+<polygon points="42,6 59,14 59,12 42,4" fill="#565d57"/>
+<polygon points="61,13 59,14 59,12 61,11" fill="#3d433f"/>
+<polygon points="44,3 61,11 59,12 42,4" fill="#7a8078"/>
+<polygon points="44,6 45,6 45,14 44,14" fill="#232524"/>
+<polygon points="44,14 44,14 44,6 44,6" fill="#2f3230"/>
+<polygon points="45,14 44,14 44,6 45,6" fill="#232524"/>
+<polygon points="44,6 45,6 44,6 44,6" fill="#4d4f4b"/>
+<polygon points="40,14 41,13 43,12 46,12 48,14 48,16 47,17 44,18 41,17 40,16" fill="#2a2f2c"/>
+<polygon points="47,17 45,17 45,15 47,15" fill="#4c534e"/>
+<polygon points="45,17 44,18 44,16 45,15" fill="#515852"/>
+<polygon points="44,18 42,17 42,15 44,16" fill="#555c56"/>
+<polygon points="42,17 41,17 41,15 42,15" fill="#565d57"/>
+<polygon points="41,17 40,16 40,14 41,15" fill="#555c56"/>
+<polygon points="48,16 47,16 47,14 48,14" fill="#424844"/>
+<polygon points="47,16 47,17 47,15 47,14" fill="#474d48"/>
+<polygon points="47,15 45,15 44,16 42,15 41,15 40,14 41,13 42,13 43,12 44,12 46,12 47,13 48,14 47,14" fill="#7a8078"/>
+</g>
+</svg>

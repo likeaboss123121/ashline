@@ -2,8 +2,9 @@
 // yards: a station's, and out on the line a siding, with more kinds of station to come. Arriving on a square with a
 // yard does not put the train in it: the train stands on the line, and entering is the player's choice.
 //
-// Every yard has an id. A station's is its number, the key its tracks have always been saved under; any other yard's
-// is a string naming its kind and its square, as 'siding:x,y'. The tracks of every kind of yard are kept in
+// Every yard has an id. A station's own yard is its number, the key its tracks have always been saved under; another
+// yard on a station's square is 'yard:<station>:<kind>' (its kinds: setup.yardTypes); a siding's names its square, as
+// 'siding:x,y'. The tracks of every kind of yard are kept in
 // $stationTracks under that id, and $currentStation holds the id of the yard the player is in or last left.
 //
 // A train the player leaves out on the line, by walking away and boarding another, stands where it was left, in
@@ -19,14 +20,22 @@ setup.yards = {
 	key: function(x, y) {
 		return x + ',' + y;
 	},
-	// { kind: 'station', station } or { kind: 'siding', x, y }; null for an id that names no kind of yard.
+	// { kind: 'station', station }, { kind: 'extra', station, type } or { kind: 'siding', x, y }; null for an id that
+	// names no kind of yard.
 	parse: function(id) {
 		if (typeof id === 'number' || /^\d+$/.test(String(id))) {
 			var station = Number(id);
 			return Number.isInteger(station) && station >= 1 ? { kind: 'station', station: station } : null;
 		}
+		var extra = /^yard:(\d+):([a-z-]+)$/.exec(String(id));
+		if (extra) return Number(extra[1]) >= 1 ? { kind: 'extra', station: Number(extra[1]), type: extra[2] } : null;
 		var siding = /^siding:(-?\d+),(-?\d+)$/.exec(String(id));
 		return siding ? { kind: 'siding', x: Number(siding[1]), y: Number(siding[2]) } : null;
+	},
+	// The station whose square a yard stands on: its own number, the number in another yard's id; 0 for a siding.
+	stationOf: function(id) {
+		var parsed = this.parse(id);
+		return parsed && parsed.kind !== 'siding' ? parsed.station : 0;
 	},
 	// Station ids are numbers in the game's variables, whatever form they were read in.
 	normalise: function(id) {
@@ -49,17 +58,23 @@ setup.yards = {
 		var parsed = this.parse(id), route = this.route();
 		if (!parsed || !route) return null;
 		if (parsed.kind === 'station') return setup.realWorldPilot.getStationTile(parsed.station);
+		if (parsed.kind === 'extra') {
+			return setup.yardTypes.forStation(parsed.station).indexOf(parsed.type) > 0 ? setup.realWorldPilot.getStationTile(parsed.station) : null;
+		}
 		var tile = route.byKey[this.key(parsed.x, parsed.y)];
 		return tile && this.hasSiding(tile) ? tile : null;
 	},
 	exists: function(id) {
 		return !!this.tile(id);
 	},
-	// The yards on a square: [{ id, kind }], the station's first.
+	// The yards on a square: [{ id, kind, type }], the station's own first, then the others on its square, then a siding.
 	at: function(x, y) {
 		var route = this.route(), tile = route && route.byKey[this.key(x, y)], yards = [];
 		if (!tile) return yards;
-		if (tile.stationIndex) yards.push({ id: tile.stationIndex, kind: 'station' });
+		if (tile.stationIndex) setup.yardTypes.forStation(tile.stationIndex).forEach(function(type, index) {
+			yards.push(index ? { id: 'yard:' + tile.stationIndex + ':' + type, kind: 'extra', type: type }
+				: { id: tile.stationIndex, kind: 'station', type: type });
+		});
 		if (this.hasSiding(tile)) yards.push({ id: 'siding:' + this.key(tile.x, tile.y), kind: 'siding' });
 		return yards;
 	},
@@ -71,17 +86,19 @@ setup.yards = {
 	name: function(id) {
 		var parsed = this.parse(id);
 		if (!parsed) return '';
-		if (parsed.kind === 'station') return setup.worldmap.getStationName(parsed.station);
+		if (parsed.kind !== 'siding') return setup.worldmap.getStationName(parsed.station);
 		var place = this.place(id), near = place && setup.realWorldPilot.getStationsNear(place.legIndex, place.tileIndex)[0];
 		return 'Siding' + (near ? ' near ' + setup.worldmap.getStationName(near.station) : '');
 	},
 	// The label of the link that takes a train or a walker into a yard.
 	enterLabel: function(id) {
-		return this.isStation(id) ? 'Enter ' + this.name(id) + ' railyard' : 'Enter the siding';
+		return this.stationOf(id) ? 'Enter ' + this.name(id) + ' ' + setup.yardTypes.label(id) : 'Enter the siding';
 	},
 	// The lines out of a siding, as realWorldPilot.getStationLines gives them for a station: back along its leg from the
 	// entry end, on along it from the exit end. tileIndex is where on the leg a departure starts.
 	lines: function(id) {
+		// Another yard on a station's square leaves by the station's lines.
+		if (this.stationOf(id)) return setup.realWorldPilot.getStationLines(this.stationOf(id));
 		var place = this.place(id), leg = place && setup.realWorldPilot.getLeg(place.legIndex);
 		if (!leg) return [];
 		var tiles = leg.tiles, index = place.tileIndex;
@@ -108,7 +125,7 @@ setup.yards = {
 	// Which lead a consist standing on the line takes into a yard on its square: for a station, the side its leg meets
 	// the yard; for a siding, the end the train faces from, as it pulls in the way it points.
 	entersOnEntryLead: function(id, journey) {
-		if (this.isStation(id)) return setup.realWorldPilot.getArrivalSide(journey.legIndex, this.normalise(id)) === 'entry';
+		if (this.stationOf(id)) return setup.realWorldPilot.getArrivalSide(journey.legIndex, this.stationOf(id)) === 'entry';
 		return journey.forward !== false;
 	},
 	// Why the consist on the line cannot enter a yard here, or ''.

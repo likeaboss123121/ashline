@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="66" height="49" viewBox="0 0 66 49" shape-rendering="crispEdges" data-template="railyard-kind-mine" data-anchor-x="-13" data-anchor-y="24">
+<title>Ashline rail yard template: Mine</title>
+<g id="apron">
+</g>
+<g id="spoil">
+<polygon points="1,24 25,12 49,24 49,27 25,39 1,27" fill="#353e39"/>
+<polygon points="1,27 25,39 25,36 1,24" fill="#444c46"/>
+<polygon points="49,27 25,39 25,36 49,24" fill="#353e39"/>
+<polygon points="25,12 49,24 25,36 1,24" fill="#5f625a"/>
+<polygon points="5,21 25,11 45,21 45,24 25,34 5,24" fill="#353e39"/>
+<polygon points="5,24 25,34 25,31 5,21" fill="#444c46"/>
+<polygon points="45,24 25,34 25,31 45,21" fill="#353e39"/>
+<polygon points="25,11 45,21 25,31 5,21" fill="#5f625a"/>
+<polygon points="10,18 25,10 40,18 40,21 25,29 10,21" fill="#353e39"/>
+<polygon points="10,21 25,29 25,26 10,18" fill="#444c46"/>
+<polygon points="40,21 25,29 25,26 40,18" fill="#353e39"/>
+<polygon points="25,10 40,18 25,26 10,18" fill="#5f625a"/>
+<polygon points="14,15 25,10 36,15 36,18 25,23 14,18" fill="#353e39"/>
+<polygon points="14,18 25,23 25,20 14,15" fill="#444c46"/>
+<polygon points="36,18 25,23 25,20 36,15" fill="#353e39"/>
+<polygon points="25,10 36,15 25,20 14,15" fill="#5f625a"/>
+<polygon points="19,12 25,9 31,12 31,15 25,18 19,15" fill="#353e39"/>
+<polygon points="19,15 25,18 25,15 19,12" fill="#444c46"/>
+<polygon points="31,15 25,18 25,15 31,12" fill="#353e39"/>
+<polygon points="25,9 31,12 25,15 19,12" fill="#5f625a"/>
+</g>
+<g id="headframe">
+<polygon points="42,5 43,4 45,5 45,31 43,32 42,31" fill="#3d433f"/>
+<polygon points="42,31 43,32 43,6 42,5" fill="#565d57"/>
+<polygon points="45,31 43,32 43,6 45,5" fill="#3d433f"/>
+<polygon points="43,4 45,5 43,6 42,5" fill="#7a8078"/>
+<polygon points="50,9 51,8 53,9 53,35 51,36 50,35" fill="#3d433f"/>
+<polygon points="50,35 51,36 51,10 50,9" fill="#565d57"/>
+<polygon points="53,35 51,36 51,10 53,9" fill="#3d433f"/>
+<polygon points="51,8 53,9 51,10 50,9" fill="#7a8078"/>
+<polygon points="34,9 35,8 37,9 37,35 35,36 34,35" fill="#3d433f"/>
+<polygon points="34,35 35,36 35,10 34,9" fill="#565d57"/>
+<polygon points="37,35 35,36 35,10 37,9" fill="#3d433f"/>
+<polygon points="35,8 37,9 35,10 34,9" fill="#7a8078"/>
+<polygon points="42,13 43,12 45,13 45,39 43,40 42,39" fill="#3d433f"/>
+<polygon points="42,39 43,40 43,14 42,13" fill="#565d57"/>
+<polygon points="45,39 43,40 43,14 45,13" fill="#3d433f"/>
+<polygon points="43,12 45,13 43,14 42,13" fill="#7a8078"/>
+<polygon points="32,7 43,1 54,7 54,9 43,14 32,9" fill="#3d433f"/>
+<polygon points="32,9 43,14 43,12 32,7" fill="#565d57"/>
+<polygon points="54,9 43,14 43,12 54,7" fill="#3d433f"/>
+<polygon points="43,1 54,7 43,12 32,7" fill="#7a8078"/>
+<polygon points="18,13 19,10 20,8 24,6 32,10 33,11 34,13 32,17 30,19 28,19 20,15" fill="#2a2f2c"/>
+<polygon points="18,13 26,17 27,14 19,10" fill="#5c635d"/>
+<polygon points="19,10 27,14 28,12 20,8" fill="#686f68"/>
+<polygon points="20,8 28,12 30,11 22,7" fill="#747a73"/>
+<polygon points="22,7 30,11 32,10 24,6" fill="#7a8078"/>
+<polygon points="19,14 27,18 26,17 18,13" fill="#474e49"/>
+<polygon points="26,17 27,14 28,12 30,11 32,10 33,11 34,13 33,15 32,17 30,19 28,19 27,18" fill="#3d433f"/>
+</g>
+<g id="engine-house">
+<polygon points="41,35 53,29 63,34 63,42 51,48 41,43" fill="#4e3024"/>
+<polygon points="41,43 51,48 51,40 41,35" fill="#6d4331"/>
+<polygon points="63,42 51,48 51,40 63,34" fill="#4e3024"/>
+<polygon points="53,29 63,34 51,40 41,35" fill="#8d5a44"/>
+<polygon points="40,36 47,26 54,29 65,34 51,41" fill="#42231d"/>
+<polygon points="39,35 51,41 58,32 46,26" fill="#6e3b30"/>
+<polygon points="63,34 51,40 57,31" fill="#4e3024"/>
+</g>
+</svg>

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="68" height="47" viewBox="0 0 68 47" shape-rendering="crispEdges" data-template="railyard-kind-timber-yard" data-anchor-x="-5" data-anchor-y="25">
+<title>Ashline rail yard template: Timber yard</title>
+<g id="apron">
+</g>
+<g id="mill">
+<polygon points="3,13 19,5 39,15 39,23 23,31 3,21" fill="#403426"/>
+<polygon points="3,21 23,31 23,23 3,13" fill="#5a4a36"/>
+<polygon points="39,23 23,31 23,23 39,15" fill="#403426"/>
+<polygon points="19,5 39,15 23,23 3,13" fill="#7d6a4f"/>
+<polygon points="2,14 11,1 20,5 41,15 23,24" fill="#42231d"/>
+<polygon points="1,13 23,24 32,12 10,1" fill="#6e3b30"/>
+<polygon points="39,15 23,23 31,11" fill="#403426"/>
+</g>
+<g id="logs">
+<polygon points="37,25 41,23 53,29 53,32 49,34 37,28" fill="#c1a675"/>
+<polygon points="37,28 49,34 49,31 37,25" fill="#6e573a"/>
+<polygon points="53,32 49,34 49,31 53,29" fill="#c1a675"/>
+<polygon points="41,23 53,29 49,31 37,25" fill="#a18c62"/>
+<polygon points="51,32 55,30 67,36 67,39 63,41 51,35" fill="#c1a675"/>
+<polygon points="51,35 63,41 63,38 51,32" fill="#6e573a"/>
+<polygon points="67,39 63,41 63,38 67,36" fill="#c1a675"/>
+<polygon points="55,30 67,36 63,38 51,32" fill="#a18c62"/>
+<polygon points="32,26 36,24 48,30 48,35 44,37 32,31" fill="#c1a675"/>
+<polygon points="32,31 44,37 44,32 32,26" fill="#6e573a"/>
+<polygon points="48,35 44,37 44,32 48,30" fill="#c1a675"/>
+<polygon points="36,24 48,30 44,32 32,26" fill="#a18c62"/>
+<polygon points="46,33 50,31 62,37 62,42 58,44 46,38" fill="#c1a675"/>
+<polygon points="46,38 58,44 58,39 46,33" fill="#6e573a"/>
+<polygon points="62,42 58,44 58,39 62,37" fill="#c1a675"/>
+<polygon points="50,31 62,37 58,39 46,33" fill="#a18c62"/>
+<polygon points="27,30 31,28 43,34 43,37 39,39 27,33" fill="#c1a675"/>
+<polygon points="27,33 39,39 39,36 27,30" fill="#6e573a"/>
+<polygon points="43,37 39,39 39,36 43,34" fill="#c1a675"/>
+<polygon points="31,28 43,34 39,36 27,30" fill="#a18c62"/>
+<polygon points="41,37 45,35 57,41 57,44 53,46 41,40" fill="#c1a675"/>
+<polygon points="41,40 53,46 53,43 41,37" fill="#6e573a"/>
+<polygon points="57,44 53,46 53,43 57,41" fill="#c1a675"/>
+<polygon points="45,35 57,41 53,43 41,37" fill="#a18c62"/>
+</g>
+</svg>

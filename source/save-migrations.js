@@ -189,6 +189,12 @@ setup.saveMigrations = {
 		var route=setup.realWorldPilot.getGridRoute(), stations=route.corridor.stations;
 		// A yard that is not a station's is named by its square, which is its identity.
 		var station=function(index) {
+			// Another yard on a station's square: the station's identity, and which kind of yard.
+			var parsed=setup.yards.parse(index);
+			if(parsed&&parsed.kind==='extra') {
+				var own=stations[parsed.station-1], at=own&&route.tiles[own.square];
+				return own&&at ? {uuid:own.uuid,yardType:parsed.type,coordinate:at.geoCoordinate} : null;
+			}
 			if(!setup.yards.isStation(index)) {
 				var yard=setup.yards.tile(index);
 				return yard ? {siding:index,x:yard.x,y:yard.y,coordinate:yard.geoCoordinate} : null;
@@ -306,12 +312,19 @@ setup.saveMigrations = {
 		if(!old || !old.revision || old.revision===revision) return false;
 		var route=setup.realWorldPilot.getGridRoute(), stations=route.corridor.stations, self=this, byUuid={};
 		stations.forEach(function(item,index){byUuid[item.uuid]=index+1;});
+		// Another yard on a station's square is found again on the station's square, if the station still has that kind.
+		function extraOf(anchor){
+			var at=byUuid[anchor.uuid];
+			return at&&setup.yardTypes.forStation(at).indexOf(anchor.yardType)>0 ? 'yard:'+at+':'+anchor.yardType : null;
+		}
 		function resolve(anchor){
 			if(!self.object(anchor)) return self.startStation(route);
+			if(anchor.yardType) return extraOf(anchor)||byUuid[anchor.uuid]||self.nearestStation(anchor.coordinate,route);
 			if(anchor.siding) return setup.yards.exists(anchor.siding) ? anchor.siding : self.nearestStation(anchor.coordinate,route);
 			return byUuid[anchor.uuid] || self.nearestStation(anchor.coordinate,route);
 		}
 		function kept(anchor){
+			if(self.object(anchor)&&anchor.yardType) return !!extraOf(anchor);
 			return self.object(anchor)&&(anchor.siding ? setup.yards.exists(anchor.siding) : !!byUuid[anchor.uuid]);
 		}
 		// null sends the player to the nearest station to the anchor's coordinates, or Punta Arenas if those are bad too.
@@ -348,9 +361,9 @@ setup.saveMigrations = {
 		Object.keys(v.stationTracks||{}).forEach(function(key){
 			var identity=old.yards&&old.yards[key];
 			if(!identity) throw new Error('A visited yard has no stable identity.');
-			var exact=identity.siding ? (kept(identity) ? identity.siding : null) : byUuid[identity.uuid];
+			var exact=identity.yardType ? extraOf(identity) : identity.siding ? (kept(identity) ? identity.siding : null) : byUuid[identity.uuid];
 			if(exact && !yards[exact]) yards[exact]=v.stationTracks[key];
-			else v.orphanedStationYards[identity.uuid||identity.siding||key]=v.stationTracks[key];
+			else v.orphanedStationYards[(identity.yardType ? identity.yardType+':' : '')+(identity.uuid||identity.siding||key)]=v.stationTracks[key];
 		});
 		v.stationTracks=yards;
 		// A removed yard cannot safely be interpreted as a different yard layout. Keep

@@ -912,6 +912,230 @@ def track_fade(fade_in):
 
 # Output ----------------------------------------------------------------------
 
+# Kinds of yard (source/yard-types.js) --------------------------------------------------------------------------
+# Each kind has a landmark that stands at the end of the station's row of buildings and says what the yard is. Same
+# origin as the buildings: the corner nearest the tracks at its low-u end, spanning u from 0 and v back from 0.
+KIND_COLOURS = {
+    'brick_top': '#8d5a44', 'brick_side': '#6d4331', 'brick_end': '#4e3024',
+    'steel_top': '#7a8078', 'steel_side': '#565d57', 'steel_end': '#3d433f', 'steel_dark': '#2a2f2c',
+    'glass': '#7f9ca0', 'canopy_top': '#5b6360', 'canopy_side': '#3f4543',
+    'silo_top': '#b1b09a', 'silo_side': '#8b917f', 'silo_end': '#727b6b', 'silo_dark': '#5b6356',
+    'barn_top': '#8a3a2e', 'barn_side': '#6c2d24', 'barn_end': '#4f211b',
+    'spoil_top': '#5f625a', 'spoil_side': '#444c46', 'spoil_end': '#353e39',
+    'log_top': '#a18c62', 'log_side': '#6e573a', 'log_end': '#c1a675',
+    'scrap_top': '#7a5a44', 'scrap_side': '#5a4030', 'scrap_end': '#3f2d23', 'rust': '#8c4a2e',
+    'water': '#2c4a5c', 'water_edge': '#3a5d70',
+}
+
+
+def gable(s, u, v_back, v_front, wall, length, walls, roofs, base=0):
+    """A pitched-roof building along the track: walls (top, side, end) from base up to wall, and the roof (top, side,
+    end colours) on them."""
+    ridge_v, ridge_z = (v_back + v_front) / 2, wall + (v_front - v_back) / 2
+    s.box(u, v_back, base, length, v_front - v_back, wall - base, *walls)
+    s.silhouette([(u, v_back - 1, wall), (u + length + 1, v_back - 1, wall), (u, v_front + 1, wall),
+                  (u + length + 1, v_front + 1, wall), (u, ridge_v, ridge_z), (u + length + 1, ridge_v, ridge_z)], roofs[2])
+    s.world_poly([(u - 1, v_front + 1, wall), (u + length + 1, v_front + 1, wall), (u + length + 1, ridge_v, ridge_z),
+                  (u - 1, ridge_v, ridge_z)], roofs[0])
+    s.world_poly([(u + length, v_back, wall), (u + length, v_front, wall), (u + length, ridge_v, ridge_z)], walls[2])
+    return ridge_v, ridge_z
+
+
+def windows(s, u0, u1, v, z, step=5):
+    u = u0
+    while u + 2 <= u1:
+        s.world_poly([(u, v, z), (u + 2, v, z), (u + 2, v, z + 2), (u, v, z + 2)], P['window'])
+        u += step
+
+
+def kind_landmarks():
+    K = KIND_COLOURS
+    walls = (P['wall_top'], P['wall_side'], P['wall_end'])
+    roofs = (P['roof_top'], P['roof_side'], P['roof_end'])
+    brick = (K['brick_top'], K['brick_side'], K['brick_end'])
+    steel = (K['steel_top'], K['steel_side'], K['steel_end'])
+    result = []
+
+    def sprite(kind, title):
+        s = Sprite('railyard-kind-' + kind, title)
+        s.part('apron')
+        return s
+
+    # A country station: a small building and a platform with a canopy, beside the tracks.
+    s = sprite('passenger-rural', 'Passenger station')
+    s.box(0, -6, 0, 40, 6, 1, P['concrete_top'], P['concrete_side'], P['concrete_end'])
+    s.part('building')
+    top_v, top_z = gable(s, 4, -18, -7, 9, 14, walls, roofs)
+    s.world_poly([(9, -7, 0), (12, -7, 0), (12, -7, 6), (9, -7, 6)], P['door'])
+    windows(s, 5, 8, -7, 3, 5)
+    windows(s, 14, 17, -7, 3, 5)
+    s.part('canopy')
+    for u in (22, 30, 38):
+        s.box(u, -3, 1, 1, 1, 7, P['leg_top'], P['leg_side'], P['leg_end'])
+    s.box(20, -6, 8, 20, 6, 1, K['canopy_top'], K['canopy_side'], K['canopy_side'])
+    s.mark('top', 10, top_v, top_z)
+    result.append(s)
+
+    # A city station: a long hall under an arched roof, and a clock tower.
+    s = sprite('passenger-urban', 'Passenger station')
+    s.box(0, -6, 0, 60, 6, 1, P['concrete_top'], P['concrete_side'], P['concrete_end'])
+    s.part('hall')
+    s.box(2, -24, 0, 50, 18, 12, *brick)
+    windows(s, 4, 50, -6, 4, 4)
+    s.part('roof')
+    for step in range(6):
+        z = 12 + 6 * math.sin(math.pi * (step + 1) / 7)
+        v0 = -24 + 18 * step / 6
+        s.box(1, v0, 12, 52, 3, z - 12, K['glass'], K['steel_side'], K['steel_end'])
+    s.part('tower')
+    s.box(52, -18, 0, 7, 7, 26, *brick)
+    s.world_poly([(59, -15, 20), (59, -12, 20), (59, -12, 23), (59, -15, 23)], P['sign'])
+    s.cone(55.5, -14.5, 26, 5, 5, P['roof_top'], P['roof_side'], P['roof_end'])
+    s.mark('top', 55, -14, 31)
+    result.append(s)
+
+    # A country railyard: a platelayers' hut and a stack of sleepers.
+    s = sprite('railyard-rural', 'Railyard')
+    s.part('hut')
+    top_v, top_z = gable(s, 2, -14, -6, 6, 9, (P['timber_top'], P['timber_side'], P['timber_end']), roofs)
+    s.part('sleepers')
+    for row in range(3):
+        s.box(16, -14 + row * 3, 0, 14, 2, 1 + row, P['sleeper_top'], P['sleeper_side'], P['sleeper_end'])
+    s.mark('top', 6, top_v, top_z)
+    result.append(s)
+
+    # A city railyard: a signal box on its brick base.
+    s = sprite('railyard-urban', 'Railyard')
+    s.part('box')
+    s.box(4, -16, 0, 14, 9, 8, *brick)
+    s.box(4, -16, 8, 14, 9, 6, *walls)
+    windows(s, 5, 17, -7, 10, 3)
+    s.part('roof')
+    top_v, top_z = gable(s, 3, -17, -6, 14.5, 16, walls, roofs, base=14)
+    s.part('relay-cabinets')
+    for u in (24, 30):
+        s.box(u, -10, 0, 4, 3, 5, *steel)
+    s.mark('top', 10, top_v, top_z)
+    result.append(s)
+
+    # A factory: a sawtooth-roofed works and its chimney.
+    s = sprite('factory', 'Factory')
+    s.part('works')
+    s.box(0, -26, 0, 40, 20, 10, *brick)
+    windows(s, 2, 38, -6, 4, 5)
+    s.part('roof')
+    for u in range(0, 40, 8):
+        s.world_poly([(u, -6, 10), (u + 8, -6, 10), (u + 8, -6, 16), (u, -6, 10)], K['glass'])
+        s.box(u, -26, 10, 8, 20, 1, P['roof_end'], P['roof_end'], P['roof_end'])
+        s.world_poly([(u, -26, 11), (u + 8, -26, 16), (u + 8, -6, 16), (u, -6, 11)], P['roof_top'])
+    s.part('chimney')
+    s.cylinder_z(44, -18, 0, 34, 2.5, *brick, K['brick_end'])
+    s.mark('top', 44, -18, 34)
+    result.append(s)
+
+    # A farm: a barn and two grain silos.
+    s = sprite('farm', 'Farm')
+    s.part('barn')
+    top_v, top_z = gable(s, 0, -24, -8, 9, 18, (K['barn_top'], K['barn_side'], K['barn_end']),
+                         (P['roof_end'], P['roof_end'], P['roof_end']))
+    s.world_poly([(6, -8, 0), (12, -8, 0), (12, -8, 7), (6, -8, 7)], P['door'])
+    s.part('silos')
+    for u in (24, 33):
+        s.cylinder_z(u, -16, 0, 20, 4, K['silo_top'], K['silo_side'], K['silo_end'], K['silo_dark'])
+        s.cone(u, -16, 20, 4.3, 3, K['silo_top'], K['silo_side'], K['silo_dark'])
+    s.mark('top', 28, -16, 23)
+    result.append(s)
+
+    # A port: a warehouse, a crane, and the quay's edge with water beyond.
+    s = sprite('port', 'Port')
+    s.world_poly([(-2, -34, 0), (58, -34, 0), (58, -26, 0), (-2, -26, 0)], K['water'])
+    s.world_poly([(-2, -26, 0), (58, -26, 0), (58, -25, 0), (-2, -25, 0)], K['water_edge'])
+    s.part('warehouse')
+    top_v, top_z = gable(s, 0, -22, -6, 10, 28, walls, (K['steel_top'], K['steel_side'], K['steel_end']))
+    for u in (4, 14):
+        s.world_poly([(u, -6, 0), (u + 6, -6, 0), (u + 6, -6, 7), (u, -6, 7)], P['door'])
+    s.part('crane')
+    for du in (0, 8):
+        s.box(38 + du, -22, 0, 1.5, 1.5, 22, *steel)
+        s.box(38 + du, -12, 0, 1.5, 1.5, 22, *steel)
+    s.box(37, -23, 22, 11, 12, 4, K['steel_top'], K['steel_side'], K['steel_end'])
+    s.box(40, -34, 26, 3, 30, 2, *steel)
+    s.box(41, -31, 12, 0.5, 0.5, 14, P['leg_top'], P['leg_side'], P['leg_end'])
+    s.mark('top', 42, -17, 28)
+    result.append(s)
+
+    # A mine: a headframe with its winding wheel, and a spoil heap.
+    s = sprite('mine', 'Mine')
+    s.part('spoil')
+    for step in range(5):
+        r = 12 - step * 2.2
+        s.box(22 - r, -16 - r, step * 3, 2 * r, 2 * r, 3, K['spoil_top'], K['spoil_side'], K['spoil_end'])
+    s.part('headframe')
+    for du, dv in ((0, 0), (8, 0), (0, 8), (8, 8)):
+        s.box(34 + du, -22 + dv, 0, 1.5, 1.5, 26, *steel)
+    s.box(33, -23, 26, 11, 11, 2, *steel)
+    s.cylinder_u(35, 43, 31, 4, K['steel_top'], K['steel_side'], K['steel_end'], K['steel_dark'])
+    s.part('engine-house')
+    top_v, top_z = gable(s, 46, -20, -8, 8, 10, brick, roofs)
+    s.mark('top', 38, -18, 35)
+    result.append(s)
+
+    # An engine shed: a long shed with arched doors on the track side, and a turntable pit.
+    s = sprite('engine-shed', 'Engine shed')
+    s.part('shed')
+    top_v, top_z = gable(s, 0, -26, -6, 11, 44, brick, (K['steel_top'], K['steel_side'], K['steel_end']))
+    for u in (3, 17, 31):
+        s.world_poly([(u, -6, 0), (u + 10, -6, 0), (u + 10, -6, 8), (u + 5, -6, 10), (u, -6, 8)], P['door'])
+    s.part('turntable')
+    s.cylinder_z(52, -16, 0, 1, 7, P['concrete_top'], P['concrete_side'], P['concrete_end'], P['concrete_dark'])
+    s.box(45, -17, 1, 14, 2, 1, P['rail_top'], P['rail_dark'], P['rail_dark'])
+    s.mark('top', 22, top_v, top_z)
+    result.append(s)
+
+    # An oil terminal: three storage tanks in a bund, and a loading gantry.
+    s = sprite('oil-terminal', 'Oil terminal')
+    s.box(0, -30, 0, 48, 26, 1, P['concrete_top'], P['concrete_side'], P['concrete_end'])
+    s.part('tanks')
+    for u, v, r, h in ((9, -21, 8, 15), (27, -21, 8, 18), (42, -14, 5, 11)):
+        s.cylinder_z(u, v, 1, h, r, P['oil_top'], P['oil_side'], P['oil_end'], P['oil_dark'])
+        s.cylinder_z(u, v, h - 3, h - 2, r + 0.3, P['oil_band'], P['oil_band'], P['oil_band'], P['oil_band'], band=True)
+    s.part('gantry')
+    for u in (4, 20):
+        s.box(u, -5, 0, 1.5, 1.5, 10, *steel)
+    s.box(3, -6, 10, 19, 3, 1.5, *steel)
+    s.mark('top', 27, -21, 19)
+    result.append(s)
+
+    # A timber yard: a sawmill shed and log stacks.
+    s = sprite('timber-yard', 'Timber yard')
+    s.part('mill')
+    top_v, top_z = gable(s, 0, -24, -8, 8, 20, (P['timber_top'], P['timber_side'], P['timber_end']), roofs)
+    s.part('logs')
+    for row in range(3):
+        for u in (24, 38):
+            s.box(u, -22 + row * 5, 0, 12, 4, 3 + row % 2 * 2, K['log_top'], K['log_side'], K['log_end'])
+    s.mark('top', 10, top_v, top_z)
+    result.append(s)
+
+    # A scrapyard: heaps of scrap, a wrecked car body and a crane with its magnet.
+    s = sprite('scrapyard', 'Scrapyard')
+    s.part('heaps')
+    for u, v, r in ((6, -18, 7), (20, -14, 6), (32, -20, 8)):
+        for step in range(3):
+            w = r - step * 2
+            s.box(u - w, v - w, step * 3, 2 * w, 2 * w, 3, K['scrap_top'], K['scrap_side'], K['scrap_end'])
+    s.part('wreck')
+    s.box(4, -7, 0, 16, 5, 5, K['rust'], K['scrap_side'], K['scrap_end'])
+    s.part('crane')
+    s.box(44, -18, 0, 2, 2, 20, *steel)
+    s.box(30, -19, 20, 17, 2, 2, *steel)
+    s.box(31, -18, 12, 0.5, 0.5, 8, P['leg_top'], P['leg_side'], P['leg_end'])
+    s.cylinder_z(31.3, -17.7, 10, 12, 2.5, K['steel_top'], K['steel_side'], K['steel_end'], K['steel_dark'])
+    s.mark('top', 44, -17, 22)
+    result.append(s)
+    return result
+
+
 def build_all():
     return [
         diesel_shunter('right'), diesel_shunter('left'), diesel_road('right'), diesel_road('left'),
@@ -925,6 +1149,7 @@ def build_all():
         diagonal_track(up=True), y_split_both(), y_merge_both(),
         buffer_stop_start(), track_fade(True), track_fade(False),
         water_tower(), coal_tower(), diesel_tank(), station_hq(),
+        *kind_landmarks(),
         *yard_plants(globals()), *yard_industries(globals()), *rolling_stock(globals(), True), *extra_stock(globals(), True),
     ]
 

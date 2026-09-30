@@ -193,3 +193,58 @@ test('saves keep siding yards and trains on the line, and set aside ones that ar
   assert.throws(() => setup.saves.validateState(state(Object.assign(JSON.parse(JSON.stringify(v)),
     { lineTrains: { x: { train: [{}] } } }))), /train/i);
 });
+
+test('a station has kinds of yard: several in a city, one in the country, each with its own cars, buildings and link', () => {
+  const { setup, State } = fresh();
+  const route = setup.realWorldPilot.getGridRoute(), stations = route.corridor.stations;
+  const index = name => stations.findIndex(station => String(station.id) === name) + 1;
+  // A capital: its railyard and passenger station, then one or two more; the same every time it is asked.
+  const paris = index('place:fr-paris'), kinds = setup.yardTypes.forStation(paris);
+  assert.ok(kinds.length >= 2 && kinds.length <= 4, kinds.join(', '));
+  assert.deepEqual(plain(kinds.slice(0, 2)), ['railyard-urban', 'passenger-urban']);
+  assert.deepEqual(plain(setup.yardTypes.forStation(paris)), plain(kinds));
+  const tile = setup.realWorldPilot.getStationTile(paris);
+  const onSquare = setup.yards.at(tile.x, tile.y);
+  assert.deepEqual(plain(onSquare.map(yard => yard.id)), [paris].concat(kinds.slice(1).map(kind => 'yard:' + paris + ':' + kind)));
+  assert.equal(setup.yards.enterLabel('yard:' + paris + ':passenger-urban'), 'Enter Paris passenger station');
+  assert.equal(setup.yards.exists('yard:' + paris + ':passenger-urban'), true);
+  assert.equal(setup.yards.exists('yard:' + paris + ':oil-terminal'), kinds.includes('oil-terminal'));
+  // Another yard on the square leaves by the station's own lines.
+  assert.deepEqual(plain(setup.realWorldPilot.getStationLines('yard:' + paris + ':passenger-urban').map(line => line.legIndex)),
+    plain(setup.realWorldPilot.getStationLines(paris).map(line => line.legIndex)));
+  // Most stations have one yard; every kind turns up somewhere.
+  const counts = {}, sizes = {};
+  for (let station = 1; station <= stations.length; station++) {
+    const found = setup.yardTypes.forStation(station);
+    sizes[found.length] = (sizes[found.length] || 0) + 1;
+    found.forEach(kind => { counts[kind] = (counts[kind] || 0) + 1; });
+  }
+  assert.ok(sizes[1] > stations.length / 2, JSON.stringify(sizes));
+  Object.keys(setup.yardTypes.KINDS).forEach(kind => assert.ok(counts[kind] > 20, kind + ': ' + counts[kind]));
+
+  // A passenger station holds coaches, and its locomotives what travellers left; a scrapyard is full of derelicts.
+  const passenger = setup.railyard.generateStationTracks('yard:' + paris + ':passenger-urban', 'yards');
+  const cars = passenger.flatMap(track => track.trains.flat()).filter(car => !(car.tractiveCapacity > 0));
+  const coaches = cars.filter(car => /coach|kitchen|observation|private/.test(car.type));
+  assert.ok(coaches.length >= cars.length * 0.7, coaches.length + ' coaches of ' + cars.length);
+  const scrap = stations.map((_, i) => i + 1).find(station => setup.yardTypes.forStation(station)[0] === 'scrapyard');
+  const derelicts = setup.railyard.generateStationTracks(scrap, 'yards').flatMap(track => track.trains.flat()).filter(car => setup.railyard.isDerelictCar(car));
+  assert.ok(derelicts.length >= 2, derelicts.length + ' derelicts');
+  // An engine shed is likelier to keep its fuel than the same station's railyard would be.
+  assert.ok(setup.stationBuildings.get('yard:' + paris + ':passenger-urban').includes('hq'));
+
+  // Saves find another yard on a square again by its station's identity.
+  const v = State.variables;
+  v.currentStation = 'yard:' + paris + ':passenger-urban';
+  v.stationTracks = { [v.currentStation]: passenger };
+  const anchor = setup.saveMigrations.anchorFor(v);
+  assert.equal(anchor.station.yardType, 'passenger-urban');
+  assert.equal(anchor.station.uuid, stations[paris - 1].uuid);
+  assert.equal(setup.saveMigrations.positionValid(v), true);
+});
+
+test('every kind of yard has its landmark drawn', () => {
+  const { setup } = fresh();
+  const templates = new Set(Array.from(setup.railyardTemplates.templates, template => template.passage || template.name));
+  Object.keys(setup.yardTypes.KINDS).forEach(kind => assert.ok(templates.has('railyard-kind-' + kind), kind));
+});

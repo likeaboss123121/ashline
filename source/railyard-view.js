@@ -486,16 +486,23 @@ setup.railyardView = {
 			result.groundSpans.push({ u0: buildingU - 2, u1: buildingU + width + 2, v: -self.BUILDING_OFFSET_UNITS - 12 });
 			buildingU += width + self.BUILDING_GAP_METRES;
 		});
-		// A freight landmark, not another supply container. Existing station stores remain authoritative.
-		var industry = setup.locales.forStation(State.variables.currentStation).industry;
-		result.buildings.push({ name: 'railyard-industry-' + industry, u: buildingU, v: -self.BUILDING_OFFSET_UNITS,
-			title: setup.locales.INDUSTRIES[industry].name + ' loading site (scenery).' });
-		result.groundSpans.push({ u0: buildingU - 2, u1: buildingU + 20, v: -self.BUILDING_OFFSET_UNITS - 12 });
+		// What kind of yard this is (setup.yardTypes), as a landmark at the end of the row: scenery, not another supply
+		// container, since the station's stores remain authoritative. A siding has none.
+		var yardKind = setup.yardTypes.kindOf(State.variables.currentStation);
+		if (yardKind && yardKind !== 'siding') {
+			result.buildings.push({ name: 'railyard-kind-' + yardKind, u: buildingU, v: -self.BUILDING_OFFSET_UNITS,
+				title: setup.yardTypes.KINDS[yardKind].label.charAt(0).toUpperCase() + setup.yardTypes.KINDS[yardKind].label.slice(1) + '.' });
+			result.groundSpans.push({ u0: buildingU - 2, u1: buildingU + (self.KIND_WIDTH_METRES[yardKind] || 40) + 2,
+				v: -self.BUILDING_OFFSET_UNITS - 12 });
+		}
 		result.flipped = flipped;
 		return result;
 	},
 	// How far behind the farthest track the buildings stand, and how much room each takes along it.
 	BUILDING_OFFSET_UNITS: 26,
+	// How much room each kind of yard's landmark takes along the track (scripts/draw-railyard-templates.py).
+	KIND_WIDTH_METRES: { 'passenger-rural': 40, 'passenger-urban': 60, 'railyard-rural': 30, 'railyard-urban': 34, factory: 47,
+		farm: 37, port: 58, mine: 56, 'engine-shed': 59, 'oil-terminal': 48, 'timber-yard': 50, scrapyard: 47 },
 	BUILDING_WIDTH_METRES: { hq: 17, waterTower: 11, coalTower: 12, dieselTank: 17 },
 	BUILDING_GAP_METRES: 5,
 	// The view opens at the drawing's own size where that fits, and fitted where it does not, which is most yards on

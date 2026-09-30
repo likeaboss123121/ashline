@@ -1563,7 +1563,7 @@ test('railyards are sized by their region: small in the country, large in the ci
   State.variables.randomSeed = 'yard-regions';
   const stations = setup.realWorldPilot.getGridRoute().corridor.stations;
   const sample = region => stations.map((station, index) => ({ station, id: index + 1 }))
-    .filter(entry => entry.station.region === region && entry.id > 1).slice(0, 12);
+    .filter(entry => entry.station.region === region && entry.id > 1 && /^railyard-/.test(setup.yardTypes.forStation(entry.id)[0])).slice(0, 12);
   const yardTracks = id => setup.railyard.generateStationTracks(id, 'yard-regions').filter(track => !track.infinite && !track.direction).length;
   const rural = sample('rural'), urban = sample('urban');
   assert.ok(rural.length > 5 && urban.length > 5);
@@ -1571,6 +1571,9 @@ test('railyards are sized by their region: small in the country, large in the ci
   urban.forEach(entry => assert.equal(setup.railyard.getYardSize(entry.id).tracks[0], 4));
   const average = list => list.reduce((sum, entry) => sum + yardTracks(entry.id), 0) / list.length;
   assert.ok(average(urban) > average(rural), average(urban) + ' urban tracks against ' + average(rural) + ' rural');
+  // Any other kind of yard is the size its kind has (setup.yardTypes): a mine is an industrial yard wherever it stands.
+  const mine = stations.map((_, index) => index + 1).find(id => setup.yardTypes.forStation(id)[0] === 'mine');
+  assert.deepEqual(JSON.parse(JSON.stringify(setup.railyard.getYardSize(mine))), JSON.parse(JSON.stringify(setup.railyard.YARD_SIZE_BY_REGION.industrial)));
 });
 
 test('a train out on the line stops at a junction and the driver picks the way on; no yard has more than two lines', () => {

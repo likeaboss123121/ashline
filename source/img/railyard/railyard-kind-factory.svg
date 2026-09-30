@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="62" height="44" viewBox="0 0 62 44" shape-rendering="crispEdges" data-template="railyard-kind-factory" data-anchor-x="-5" data-anchor-y="26">
+<title>Ashline rail yard template: Factory</title>
+<g id="apron">
+</g>
+<g id="works">
+<polygon points="1,13 21,3 61,23 61,33 41,43 1,23" fill="#4e3024"/>
+<polygon points="1,23 41,43 41,33 1,13" fill="#6d4331"/>
+<polygon points="61,33 41,43 41,33 61,23" fill="#4e3024"/>
+<polygon points="21,3 61,23 41,33 1,13" fill="#8d5a44"/>
+<polygon points="3,20 5,21 5,19 3,18" fill="#dec38a"/>
+<polygon points="8,23 10,24 10,22 8,21" fill="#dec38a"/>
+<polygon points="13,25 15,26 15,24 13,23" fill="#dec38a"/>
+<polygon points="18,28 20,29 20,27 18,26" fill="#dec38a"/>
+<polygon points="23,30 25,31 25,29 23,28" fill="#dec38a"/>
+<polygon points="28,33 30,34 30,32 28,31" fill="#dec38a"/>
+<polygon points="33,35 35,36 35,34 33,33" fill="#dec38a"/>
+</g>
+<g id="roof">
+<polygon points="1,13 9,17 9,11 1,13" fill="#7f9ca0"/>
+<polygon points="1,12 21,2 29,6 29,7 9,17 1,13" fill="#42231d"/>
+<polygon points="1,13 9,17 9,16 1,12" fill="#42231d"/>
+<polygon points="29,7 9,17 9,16 29,6" fill="#42231d"/>
+<polygon points="21,2 29,6 9,16 1,12" fill="#42231d"/>
+<polygon points="21,2 29,1 9,11 1,12" fill="#6e3b30"/>
+<polygon points="9,17 17,21 17,15 9,17" fill="#7f9ca0"/>
+<polygon points="9,16 29,6 37,10 37,11 17,21 9,17" fill="#42231d"/>
+<polygon points="9,17 17,21 17,20 9,16" fill="#42231d"/>
+<polygon points="37,11 17,21 17,20 37,10" fill="#42231d"/>
+<polygon points="29,6 37,10 17,20 9,16" fill="#42231d"/>
+<polygon points="29,6 37,5 17,15 9,16" fill="#6e3b30"/>
+<polygon points="17,21 25,25 25,19 17,21" fill="#7f9ca0"/>
+<polygon points="17,20 37,10 45,14 45,15 25,25 17,21" fill="#42231d"/>
+<polygon points="17,21 25,25 25,24 17,20" fill="#42231d"/>
+<polygon points="45,15 25,25 25,24 45,14" fill="#42231d"/>
+<polygon points="37,10 45,14 25,24 17,20" fill="#42231d"/>
+<polygon points="37,10 45,9 25,19 17,20" fill="#6e3b30"/>
+<polygon points="25,25 33,29 33,23 25,25" fill="#7f9ca0"/>
+<polygon points="25,24 45,14 53,18 53,19 33,29 25,25" fill="#42231d"/>
+<polygon points="25,25 33,29 33,28 25,24" fill="#42231d"/>
+<polygon points="53,19 33,29 33,28 53,18" fill="#42231d"/>
+<polygon points="45,14 53,18 33,28 25,24" fill="#42231d"/>
+<polygon points="45,14 53,13 33,23 25,24" fill="#6e3b30"/>
+<polygon points="33,29 41,33 41,27 33,29" fill="#7f9ca0"/>
+<polygon points="33,28 53,18 61,22 61,23 41,33 33,29" fill="#42231d"/>
+<polygon points="33,29 41,33 41,32 33,28" fill="#42231d"/>
+<polygon points="61,23 41,33 41,32 61,22" fill="#42231d"/>
+<polygon points="53,18 61,22 41,32 33,28" fill="#42231d"/>
+<polygon points="53,18 61,17 41,27 33,28" fill="#6e3b30"/>
+</g>
+<g id="chimney">
+<polygon points="53,5 54,4 56,3 57,3 60,4 61,5 61,39 60,40 58,41 57,41 54,40 53,39" fill="#4e3024"/>
+<polygon points="60,40 58,41 58,7 60,6" fill="#613c2c"/>
+<polygon points="58,41 57,41 57,7 58,7" fill="#673f2f"/>
+<polygon points="57,41 55,40 55,6 57,7" fill="#6b4230"/>
+<polygon points="55,40 54,40 54,6 55,6" fill="#6d4331"/>
+<polygon points="54,40 53,39 53,5 54,6" fill="#6b4230"/>
+<polygon points="61,39 60,40 60,6 61,5" fill="#543426"/>
+<polygon points="60,40 60,40 60,6 60,6" fill="#5a3729"/>
+<polygon points="60,6 58,7 57,7 55,6 54,6 53,5 54,4 55,4 56,3 57,3 59,4 60,4 61,5 60,6" fill="#8d5a44"/>
+</g>
+</svg>

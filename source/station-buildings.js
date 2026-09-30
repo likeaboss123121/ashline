@@ -59,17 +59,20 @@ setup.stationBuildings = {
 		return 'closed';
 	},
 
-	// The buildings at a station, as kind keys in ORDER.
+	// The buildings at a yard, as kind keys in ORDER: by its station's class and region, and by the kind of yard it is
+	// (setup.yardTypes: a passenger station keeps its HQ, an engine shed its fuel). A siding has none.
 	get: function(stationId) {
-		var id = Number(stationId);
-		if (id === 1) return this.TUTORIAL.slice();
+		var id = setup.yards ? setup.yards.stationOf(stationId) : Number(stationId);
+		if (!id) return [];
+		if (id === 1 && setup.yards.isStation(stationId)) return this.TUTORIAL.slice();
 		var pilot = setup.realWorldPilot, station = pilot && pilot.getStation ? pilot.getStation(id) : null;
 		if (!station) return [];
 		var chances = this.CHANCES[this.classOf(station)], region = this.REGION[station.region] || {};
+		var bias = setup.yardTypes ? setup.yardTypes.profile(stationId).buildings || {} : {};
 		var yard = setup.railyard, seed = (State.variables && State.variables.randomSeed) || 'ashline';
-		var rng = yard.mulberry32(yard.seedFromString(seed + ':buildings:' + station.id));
+		var rng = yard.mulberry32(yard.seedFromString(seed + ':buildings:' + station.id + (setup.yards.isStation(stationId) ? '' : ':' + stationId)));
 		return this.ORDER.filter(function(kind) {
-			return rng() < Math.min(1, chances[kind] * (region[kind] || 1));
+			return rng() < Math.min(1, chances[kind] * (region[kind] || 1) * (bias[kind] || 1));
 		});
 	},
 	has: function(stationId, kind) {
@@ -83,12 +86,14 @@ setup.stationBuildings = {
 	// A yard's stores when first generated: the emergency reserve, and whatever its buildings hold.
 	initialStock: function(stationId, rng) {
 		var self = this, roll = rng || Math.random;
+		// A kind of yard keeps more of some things (setup.yardTypes stores: a passenger station's food and water).
+		var more = setup.yardTypes && setup.yards.stationOf(stationId) ? setup.yardTypes.profile(stationId).stores || {} : {};
 		var stock = Object.assign({}, this.EMERGENCY, { waterGrade: this.GRADES.emergencyWater, drinkingWater: 0, rations: 0 });
 		this.get(stationId).forEach(function(kind) {
 			var store = self.STORES[kind];
 			Object.keys(store).forEach(function(type) {
 				var range = store[type];
-				stock[type] = (stock[type] || 0) + Math.round(range[0] + (range[1] - range[0]) * roll());
+				stock[type] = (stock[type] || 0) + Math.round((range[0] + (range[1] - range[0]) * roll()) * (more[type] || 1));
 			});
 			if (kind === 'waterTower') stock.waterGrade = self.GRADES.towerWater;
 		});

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="90" height="46" viewBox="0 0 90 46" shape-rendering="crispEdges" data-template="railyard-kind-port" data-anchor-x="-3" data-anchor-y="26">
+<title>Ashline rail yard template: Port</title>
+<g id="apron">
+<polygon points="29,8 89,38 81,42 21,12" fill="#2c4a5c"/>
+<polygon points="21,12 81,42 80,43 20,13" fill="#3a5d70"/>
+</g>
+<g id="warehouse">
+<polygon points="3,13 19,5 47,19 47,29 31,37 3,23" fill="#735d42"/>
+<polygon points="3,23 31,37 31,27 3,13" fill="#9a7f5c"/>
+<polygon points="47,29 31,37 31,27 47,19" fill="#735d42"/>
+<polygon points="19,5 47,19 31,27 3,13" fill="#b89f7a"/>
+<polygon points="2,14 11,1 20,5 49,19 31,28" fill="#3d433f"/>
+<polygon points="1,13 31,28 40,16 10,1" fill="#7a8078"/>
+<polygon points="47,19 31,27 39,15" fill="#735d42"/>
+<polygon points="7,25 13,28 13,21 7,18" fill="#3b2a20"/>
+<polygon points="17,30 23,33 23,26 17,23" fill="#3b2a20"/>
+</g>
+<g id="crane">
+<polygon points="56,13 57,12 59,13 59,35 57,36 56,35" fill="#3d433f"/>
+<polygon points="56,35 57,36 57,14 56,13" fill="#565d57"/>
+<polygon points="59,35 57,36 57,14 59,13" fill="#3d433f"/>
+<polygon points="57,12 59,13 57,14 56,13" fill="#7a8078"/>
+<polygon points="46,18 47,17 49,18 49,40 47,41 46,40" fill="#3d433f"/>
+<polygon points="46,40 47,41 47,19 46,18" fill="#565d57"/>
+<polygon points="49,40 47,41 47,19 49,18" fill="#3d433f"/>
+<polygon points="47,17 49,18 47,19 46,18" fill="#7a8078"/>
+<polygon points="64,17 65,16 67,17 67,39 65,40 64,39" fill="#3d433f"/>
+<polygon points="64,39 65,40 65,18 64,17" fill="#565d57"/>
+<polygon points="67,39 65,40 65,18 67,17" fill="#3d433f"/>
+<polygon points="65,16 67,17 65,18 64,17" fill="#7a8078"/>
+<polygon points="54,22 55,21 57,22 57,44 55,45 54,44" fill="#3d433f"/>
+<polygon points="54,44 55,45 55,23 54,22" fill="#565d57"/>
+<polygon points="57,44 55,45 55,23 57,22" fill="#3d433f"/>
+<polygon points="55,21 57,22 55,23 54,22" fill="#7a8078"/>
+<polygon points="45,13 57,7 68,13 68,17 56,23 45,17" fill="#3d433f"/>
+<polygon points="45,17 56,23 56,19 45,13" fill="#565d57"/>
+<polygon points="68,17 56,23 56,19 68,13" fill="#3d433f"/>
+<polygon points="57,7 68,13 56,19 45,13" fill="#7a8078"/>
+<polygon points="41,16 71,1 74,3 74,5 44,20 41,18" fill="#3d433f"/>
+<polygon points="41,18 44,20 44,18 41,16" fill="#565d57"/>
+<polygon points="74,5 44,20 44,18 74,3" fill="#3d433f"/>
+<polygon points="71,1 74,3 44,18 41,16" fill="#7a8078"/>
+<polygon points="69,5 70,5 70,19 69,20" fill="#232524"/>
+<polygon points="69,19 69,20 69,6 69,5" fill="#2f3230"/>
+<polygon points="70,19 69,20 69,6 70,5" fill="#232524"/>
+<polygon points="69,5 70,5 69,6 69,5" fill="#4d4f4b"/>
+</g>
+</svg>

@@ -40,6 +40,8 @@ const stationRunIn = (page, length = 3) => page.evaluate(length => {
 // A station's name, and where its exit line leads as its departure link names it: the network is rebuilt from map
 // data, so tests look the names up rather than pinning them.
 const stationName = (page, id) => page.evaluate(id => SugarCube.setup.worldmap.getStationName(id), id);
+// The link that pulls into a station's own yard, whatever kind of yard it is (setup.yardTypes).
+const enterLabel = (page, id) => page.evaluate(id => SugarCube.setup.yards.enterLabel(id), id);
 const exitName = (page, id) => page.evaluate(id => {
   const world = SugarCube.setup.worldmap, line = SugarCube.setup.realWorldPilot.getStationLines(id).find(candidate => candidate.side === 'exit');
   return line.destination ? world.getStationName(line.destination) : world.describePoint(line.destinationName, world.getStationName(id));
@@ -270,11 +272,11 @@ test('regional scenery, industry landmarks and new rolling stock render in both 
       const svg = drawn.querySelector('svg');
       results.push({ biome: svg.getAttribute('data-biome'), industry: svg.getAttribute('data-industry'),
         plants: svg.querySelectorAll('use[data-template^="railyard-plant-"]').length,
-        industryArt: svg.querySelectorAll('use[data-template^="railyard-industry-"]').length });
+        kindArt: svg.querySelectorAll('use[data-template^="railyard-kind-"]').length });
     }
     return results;
   });
-  assert.ok(yard.every(row => row.plants > 0 && row.industryArt === 1), JSON.stringify(yard));
+  assert.ok(yard.every(row => row.plants > 0 && row.kindArt === 1), JSON.stringify(yard));
   await page.screenshot({ path: 'test-results/locale-yard-gallery.png', fullPage: true });
 });
 
@@ -482,7 +484,7 @@ test('walking the sourced line leads back to the parked train',async t=>{
   await choose(page,leave,'OnFoot');
   assert.equal(await page.locator('#passages a').filter({hasText:/onto the branch/}).count(),0);
   const parked=await page.evaluate(()=>JSON.stringify(SugarCube.State.variables.journey));
-  await choose(page,'Enter '+await stationName(page,to)+' railyard','Railyard');
+  await choose(page,await enterLabel(page, to),'Railyard');
   assert.equal(await page.evaluate(()=>SugarCube.State.variables.currentStation),to);
   assert.equal(await page.evaluate(()=>JSON.stringify(SugarCube.State.variables.journey)),parked);
   assert.equal(await page.evaluate(()=>SugarCube.State.variables.onFoot.inRailyard),true);
@@ -521,7 +523,7 @@ test('boarding a yard train while the consist is out on the line leaves it stand
     v.journey={legIndex,tileIndex:s.realWorldPilot.getGridRoute().legs[legIndex].tiles.length-1,forward:true};
     s.onfoot.climbDown();SugarCube.Engine.play('OnFoot');
   },run.legs[0]);
-  await choose(page,'Enter '+await stationName(page,to)+' railyard','Railyard');
+  await choose(page,await enterLabel(page, to),'Railyard');
   await page.locator('#passages a').filter({hasText:/^Board Train/}).first().click();
   await passage(page,'TrainInterior');
   const after=await page.evaluate(()=>{const v=SugarCube.State.variables;
@@ -1678,7 +1680,7 @@ test('new games spawn in and drive the sourced network', async t => {
   await page.locator('#passages a').filter({ hasText: /^Reverse [\d.]+ km/ }).first().click();
   // Back on the station's square the train stands on the line; pulling into the yard is a choice.
   await passage(page, 'OnTheLine');
-  await choose(page, 'Enter ' + await stationName(page, 2) + ' railyard', 'DrivingMode');
+  await choose(page, await enterLabel(page, 2), 'DrivingMode');
   assert.equal(await page.evaluate(() => SugarCube.State.variables.journey), null);
   assert.equal(await page.evaluate(() => SugarCube.State.variables.currentStation), 2);
 });
@@ -2436,7 +2438,7 @@ test('driving the line goes one tile at a time, and draws the consist on it', as
   await page.locator('#passages').getByText(/^Reverse [\d.]+ km [a-z-]+ \(/).first().click();
   await passage(page, 'OnTheLine');
   assert.equal(await page.evaluate(() => SugarCube.setup.worldmap.getJourneyView().tileIndex), 0);
-  await choose(page, 'Enter ' + await stationName(page, 2) + ' railyard', 'DrivingMode');
+  await choose(page, await enterLabel(page, 2), 'DrivingMode');
   assert.deepEqual(await page.evaluate(() => ({
     station: SugarCube.State.variables.currentStation,
     journey: SugarCube.State.variables.journey
@@ -2446,7 +2448,7 @@ test('driving the line goes one tile at a time, and draws the consist on it', as
   // consist that sets off without the fuel to get anywhere.
   await page.locator('#passages').getByText(await departTo(page, 2)).first().click();
   await passage(page, 'OnTheLine');
-  await choose(page, 'Enter ' + await stationName(page, 2) + ' railyard', 'DrivingMode');
+  await choose(page, await enterLabel(page, 2), 'DrivingMode');
   assert.equal(await page.evaluate(() => SugarCube.State.variables.journey), null);
 });
 
@@ -2868,7 +2870,7 @@ test('backing into the station you left turns neither the yard nor the train rou
   await passage(page, 'OnTheLine');
   await page.locator('#passages').getByText(/^Reverse [\d.]+ km [a-z-]+ \(/).first().click();
   await passage(page, 'OnTheLine');
-  await choose(page, 'Enter ' + await stationName(page, 2) + ' railyard', 'DrivingMode');
+  await choose(page, await enterLabel(page, 2), 'DrivingMode');
 
   // Still facing the same way, with the same yard orientation and the locomotive not turned round.
   const after = await yardView();

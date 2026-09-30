@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="79" height="59" viewBox="0 0 79 59" shape-rendering="crispEdges" data-template="railyard-kind-passenger-urban" data-anchor-x="1" data-anchor-y="28">
+<title>Ashline rail yard template: Passenger station</title>
+<g id="apron">
+<polygon points="1,27 7,24 67,54 67,55 61,58 1,28" fill="#5a5952"/>
+<polygon points="1,28 61,58 61,57 1,27" fill="#78766c"/>
+<polygon points="67,55 61,58 61,57 67,54" fill="#5a5952"/>
+<polygon points="7,24 67,54 61,57 1,27" fill="#9c998d"/>
+</g>
+<g id="hall">
+<polygon points="9,14 27,5 77,30 77,42 59,51 9,26" fill="#4e3024"/>
+<polygon points="9,26 59,51 59,39 9,14" fill="#6d4331"/>
+<polygon points="77,42 59,51 59,39 77,30" fill="#4e3024"/>
+<polygon points="27,5 77,30 59,39 9,14" fill="#8d5a44"/>
+<polygon points="11,23 13,24 13,22 11,21" fill="#dec38a"/>
+<polygon points="15,25 17,26 17,24 15,23" fill="#dec38a"/>
+<polygon points="19,27 21,28 21,26 19,25" fill="#dec38a"/>
+<polygon points="23,29 25,30 25,28 23,27" fill="#dec38a"/>
+<polygon points="27,31 29,32 29,30 27,29" fill="#dec38a"/>
+<polygon points="31,33 33,34 33,32 31,31" fill="#dec38a"/>
+<polygon points="35,35 37,36 37,34 35,33" fill="#dec38a"/>
+<polygon points="39,37 41,38 41,36 39,35" fill="#dec38a"/>
+<polygon points="43,39 45,40 45,38 43,37" fill="#dec38a"/>
+<polygon points="47,41 49,42 49,40 47,39" fill="#dec38a"/>
+<polygon points="51,43 53,44 53,42 51,41" fill="#dec38a"/>
+<polygon points="55,45 57,46 57,44 55,43" fill="#dec38a"/>
+</g>
+<g id="roof">
+<polygon points="23,3 26,2 78,28 78,31 75,32 23,6" fill="#3d433f"/>
+<polygon points="23,6 75,32 75,29 23,3" fill="#565d57"/>
+<polygon points="78,31 75,32 75,29 78,28" fill="#3d433f"/>
+<polygon points="26,2 78,28 75,29 23,3" fill="#7f9ca0"/>
+<polygon points="20,3 23,1 75,27 75,32 72,34 20,8" fill="#3d433f"/>
+<polygon points="20,8 72,34 72,29 20,3" fill="#565d57"/>
+<polygon points="75,32 72,34 72,29 75,27" fill="#3d433f"/>
+<polygon points="23,1 75,27 72,29 20,3" fill="#7f9ca0"/>
+<polygon points="17,3 20,2 72,28 72,34 69,35 17,9" fill="#3d433f"/>
+<polygon points="17,9 69,35 69,29 17,3" fill="#565d57"/>
+<polygon points="72,34 69,35 69,29 72,28" fill="#3d433f"/>
+<polygon points="20,2 72,28 69,29 17,3" fill="#7f9ca0"/>
+<polygon points="14,5 17,3 69,29 69,35 66,37 14,11" fill="#3d433f"/>
+<polygon points="14,11 66,37 66,31 14,5" fill="#565d57"/>
+<polygon points="69,35 66,37 66,31 69,29" fill="#3d433f"/>
+<polygon points="17,3 69,29 66,31 14,5" fill="#7f9ca0"/>
+<polygon points="11,7 14,6 66,32 66,37 63,38 11,12" fill="#3d433f"/>
+<polygon points="11,12 63,38 63,33 11,7" fill="#565d57"/>
+<polygon points="66,37 63,38 63,33 66,32" fill="#3d433f"/>
+<polygon points="14,6 66,32 63,33 11,7" fill="#7f9ca0"/>
+<polygon points="8,11 11,9 63,35 63,38 60,40 8,14" fill="#3d433f"/>
+<polygon points="8,14 60,40 60,37 8,11" fill="#565d57"/>
+<polygon points="63,38 60,40 60,37 63,35" fill="#3d433f"/>
+<polygon points="11,9 63,35 60,37 8,11" fill="#7f9ca0"/>
+</g>
+<g id="tower">
+<polygon points="64,23 71,19 78,23 78,49 71,52 64,49" fill="#4e3024"/>
+<polygon points="64,49 71,52 71,26 64,23" fill="#6d4331"/>
+<polygon points="78,49 71,52 71,26 78,23" fill="#4e3024"/>
+<polygon points="71,19 78,23 71,26 64,23" fill="#8d5a44"/>
+<polygon points="75,30 72,32 72,29 75,27" fill="#d9c9a0"/>
+<polygon points="64,21 66,20 71,18 77,21 78,22 78,24 76,25 73,26 70,26 67,25 65,24 64,23" fill="#42231d"/>
+<polygon points="76,25 73,26 71,18" fill="#6c3a2f"/>
+<polygon points="73,26 70,26 71,18" fill="#6d3b30"/>
+<polygon points="70,26 67,25 71,18" fill="#6d3a30"/>
+<polygon points="67,25 65,24 71,18" fill="#6b392f"/>
+<polygon points="65,24 64,23 71,18" fill="#67372d"/>
+<polygon points="64,23 64,21 71,18" fill="#63352b"/>
+<polygon points="78,22 78,24 71,18" fill="#65362c"/>
+<polygon points="78,24 76,25 71,18" fill="#69382e"/>
+</g>
+</svg>
