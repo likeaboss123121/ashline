@@ -278,7 +278,7 @@ setup.wayfinding = {
 	zoomControls: function(svg) {
 		var steps = this.MAP_ZOOM_STEPS, level = 0, box = svg.getAttribute('viewBox').split(' ').map(Number);
 		var bar = document.createElement('div');
-		bar.className = 'railyard-view-zoom';
+		bar.className = 'railyard-view-zoom station-map-zoom';
 		var readout = document.createElement('span');
 		var apply = function() {
 			var zoom = steps[level], w = box[2] / zoom, h = box[3] / zoom;

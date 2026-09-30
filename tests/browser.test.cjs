@@ -1320,10 +1320,10 @@ test('on a phone the yard fits the screen, opens readable, and keeps its control
       sidebarRight: Math.round(document.querySelector('#ui-bar').getBoundingClientRect().right),
       passageWidth: Math.round(document.querySelector('#passages').getBoundingClientRect().width),
       wrapper: box(document.querySelector('.railyard-view-wrapper')),
-      zoom: box(document.querySelector('.railyard-view-zoom')),
+      zoom: box(document.querySelector('.railyard-view-wrapper .railyard-view-zoom')),
       compass: box(document.querySelector('.railyard-compass')),
       message: box(document.querySelector('.railyard-view-message')),
-      readout: document.querySelector('.railyard-view-zoom span').textContent,
+      readout: document.querySelector('.railyard-view-wrapper .railyard-view-zoom span').textContent,
       widestBand: Math.max(...bands.map(b => b.width))
     };
   });
@@ -2615,7 +2615,7 @@ test('the credits dialog discloses how AI was used', async t => {
 test('the yard view zooms, and fitting never blows a small yard up', async t => {
   const page = await openGame(t);
   await begin(page);
-  const zoom = page.locator('.railyard-view-zoom');
+  const zoom = page.locator('.railyard-view-wrapper .railyard-view-zoom');
   const svg = page.locator('svg.railyard-view');
   const readout = zoom.locator('span');
   // The view opens fitted so the whole yard is visible without hunting for its far end.
