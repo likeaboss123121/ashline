@@ -531,6 +531,35 @@ test('boarding a yard train while the consist is out on the line leaves it stand
   assert.deepEqual(after,{journey:null,onFoot:null,parked:1,station:to});
 });
 
+test('a player with no train can walk out of a yard on foot, after saying so',async t=>{
+  const page=await openGame(t);await begin(page);
+  assert.equal(await page.evaluate(()=>!(SugarCube.State.variables.currentTrain||[]).length),true);
+  const walkOut=page.locator('#passages a').filter({hasText:/Walk out of the yard on foot/});
+  // Cancelling stays in the yard.
+  await walkOut.click();
+  await page.locator('#ui-dialog-body .saves-button',{hasText:'Cancel'}).click();
+  assert.equal(await page.evaluate(()=>SugarCube.State.passage),'Railyard');
+  await walkOut.click();
+  await page.locator('#ui-dialog-body .saves-button',{hasText:/Walk out/}).click();
+  await passage(page,'OnFoot');
+  const out=await page.evaluate(()=>{const v=SugarCube.State.variables;return {train:(v.currentTrain||[]).length,journey:!!v.journey,onFoot:!!v.onFoot,
+    tile:SugarCube.setup.onfoot.getTile().stationIndex};});
+  assert.deepEqual(out,{train:0,journey:true,onFoot:true,tile:1});
+  assert.match(await page.locator('#passages').innerText(),/walking the track without a train/);
+  // A walk along the line, a save and a load, and back into the yard.
+  await page.locator('#passages a').filter({hasText:/^Walk [\d.]+ km/}).first().click();
+  await passage(page,'OnFoot');
+  assert.equal(await page.evaluate(()=>SugarCube.setup.saves.save(0)),true);
+  assert.equal(await page.evaluate(()=>SugarCube.setup.saves.load(0)),true);
+  await passage(page,'OnFoot');
+  // Back the way they came, to the station's square.
+  await page.evaluate(()=>{SugarCube.setup.onfoot.walk(-1);SugarCube.Engine.play('OnFoot');});
+  await passage(page,'OnFoot');
+  await page.locator('#passages a').filter({hasText:/^Enter .* railyard$/}).first().click();
+  await passage(page,'Railyard');
+  assert.deepEqual(await page.evaluate(()=>[SugarCube.State.variables.journey,SugarCube.State.variables.onFoot]),[null,null]);
+});
+
 test('structurally corrupt imported saves leave the current run untouched',async t=>{
   const page=await openGame(t);await begin(page);await board(page);
   const results=await page.evaluate(()=>{
@@ -628,13 +657,16 @@ test('finished help, deferred journal, separate debug tabs, and same-page scroll
   assert.equal(await page.locator('#developer-Wiki').isVisible(),true);
   assert.equal(await page.locator('#developer-Debug').isVisible(),false);
   await page.keyboard.press('Escape');
-  await page.getByText('Help',{exact:true}).click();await passage(page,'Help');
-  const help=await page.locator('#passages').innerText();
-  assert.match(help,/The goal of this game is to drive a train around the earth/);
-  assert.doesNotMatch(help,/TEMP HELP/);
-  await page.locator('#passages details').nth(1).locator('summary').click();
-  assert.match(await page.locator('#passages').innerText(),/Shunting is the process of moving railcars around in a railyard/);
-  await choose(page,'Back','TrainInterior');
+  // Help opens in a dialog like the sidebar's other menus, and leaves the player where they were.
+  await page.locator('#ui-bar').getByText('Help',{exact:true}).click();
+  const dialog=page.locator('#ui-dialog-body');
+  await dialog.locator('details').first().waitFor();
+  assert.match(await dialog.innerText(),/The goal of this game is to drive a train around the earth/);
+  assert.doesNotMatch(await dialog.innerText(),/TEMP HELP/);
+  await dialog.locator('details').nth(1).locator('summary').click();
+  assert.match(await dialog.innerText(),/Shunting is the process of moving railcars around in a railyard/);
+  await page.evaluate(()=>SugarCube.Dialog.close());
+  assert.equal(await page.evaluate(()=>SugarCube.State.passage),'TrainInterior');
   assert.equal(await page.getByText('Journal',{exact:true}).count(),0);
   assert.equal(await page.evaluate(()=>SugarCube.State.variables.journal),undefined);
   const before=await page.evaluate(()=>{window.scrollTo(0,300);return scrollY;});
@@ -1971,8 +2003,8 @@ test('rail yard view draws dead ends where tracks do not connect to the entry or
   // Entry ladder reaches track 3: Y split at 1, diagonal past 2. Exit ladder starts at track 2: YY merge at 3, Y merge into 4.
   assert.deepEqual(counts, { splits: 1, yySplits: 0, merges: 1, yyMerges: 1, diagonals: 1, startStops: 2, endStops: 1 });
   const trackInfo=await page.locator('#passages h3 + p.small-description').allTextContents();
-  assert.ok(trackInfo.includes('100m long, 100m free, no link to the Northbound Track.'),trackInfo.join(' | '));
-  assert.ok(trackInfo.includes('100m long, 100m free, no link to the Southbound Track.'),trackInfo.join(' | '));
+  assert.ok(trackInfo.includes('100 m long · 100 m free · no link to the Northbound Track.'),trackInfo.join(' | '));
+  assert.ok(trackInfo.includes('100 m long · 100 m free · no link to the Southbound Track.'),trackInfo.join(' | '));
   // A track may not be closed at both ends, or its trains could never leave.
   const rule = await page.evaluate(() => {
     const railyard = SugarCube.setup.railyard;
@@ -2509,7 +2541,7 @@ test('the credits dialog discloses how AI was used', async t => {
   const link = dialog.locator('a[href="https://likea.moe/ashlinegame/about/#ai-generation-disclosure"]');
   await link.waitFor({ state: 'visible' });
   const shown = await dialog.innerText();
-  assert.match(shown, /AI Generated Content Disclosure:/);
+  assert.match(shown, /AI Generated Content Disclosure/);
   assert.match(shown, /AI was used to make code and \.svg art for this game\./);
   assert.match(shown, /Diffusion \(what people commonly refer to as AI Image Generation\) was not used for this game\./);
   // The link reads as words, with the address behind it rather than printed in the sentence.
@@ -2522,8 +2554,8 @@ test('the credits dialog discloses how AI was used', async t => {
 	assert.match(shown, /OpenStreetMap contributors/);
 	assert.match(shown, /Geofabrik/);
 	assert.match(shown, /ODbL 1\.0/);
-	assert.match(shown, /World data: City names/);
-	assert.match(shown, /Elevation data: Produced using Copernicus/);
+	assert.match(shown, /World data\s+City names/);
+	assert.match(shown, /Elevation data\s+Produced using Copernicus/);
 	assert.doesNotMatch(shown, /<\/?(?:strong|p)>/);
   assert.doesNotMatch(shown, /Discord/);
 });

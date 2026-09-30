@@ -36,7 +36,7 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 <<link "Inventory">><<run setup.items.showInventoryDialog()>><</link>><br>
 <<link "Condition">><<run setup.showConditionDialog()>><</link>><br>
 <<link "Map">><<run setup.showMapDialog()>><</link>><br>
-<<link "Help">><<run setup.pages.open("Help")>><</link>><br>
+<<link "Help">><<run setup.showHelpDialog()>><</link>><br>
 <</if>>
 <<link "Options">><<run setup.showOptionsDialog()>><</link>><br>
 <<link "Credits">><<run setup.showCreditsDialog()>><</link>>
@@ -73,6 +73,7 @@ You have entered the railyard on foot. Your train remains parked out on the line
 <p><<link "Return to the station track">><<run setup.onfoot.leaveRailyard()>><<goto "OnFoot">><</link>></p>
 <<else>>
 You step into the railyard. Several trains are parked here, each with its own mix of cars and cargo.
+<p><<link "[NEEDS WRITING PASS] Walk out of the yard on foot">><<run setup.onfoot.confirmWalkOut()>><</link>></p>
 <</if>>
 <<tutorialHint>>
 <<if setup.wayfinding.hasStationMap($currentStation)>><<uiSection "station-map" "Station map" `!setup.tutorial.isActive()`>><<stationMap>><</uiSection>><</if>>
@@ -171,13 +172,12 @@ You step into the railyard. Several trains are parked here, each with its own mi
 <<uiSection "inventory" "Inventory and equipment">><<playerPack>><</uiSection>>
 <<uiSection "supplies" "Station supplies" _needsFuel>><<recoveryControls>><</uiSection>>
 :: Help
-<h2>Help</h2>
+/% The Help dialog's sections (setup.showHelpDialog), opened from the sidebar like the other menus. %/
 <details open><summary>Getting Started</summary><p>This is Ashline. The goal of this game is to drive a train around the earth. You can enter cars in the railyard by clicking on them. From there, you can begin driving if you're in a locomotive, and navigate through the railyard and attach to other cars by clicking on them.</p></details>
 <details><summary>Shunting</summary><p>Shunting is the process of moving railcars around in a railyard. You can couple to the front or rear of a railcar. As well, you can push and pull the entire consist. If a railyard's layout is challenging, remember that you can decouple cars from the consist after pushing it to re-order it. Tracks cannot fit more railcars than the length of the track. Sometimes stub tracks are in a railyard that can only be accessed by a single connecting track.</p></details>
 <details><summary>Fuel</summary><p>Diesel is required to power a Diesel-Electric Locomotive, while coal and water is required to power a Steam Locomotive. In the wilderness, varying qualities of water and fuel can be found, that can adversely affect railcars in varying ways. Mixing two fuels of varying quality will average their qualities out, meaning you can degrade high quality fuel by mixing in low quality fuel. You can usually find fuel at railyards, or inside abandoned tanker cars or gondolas. In order to refuel diesel locomotives, you have to pump it from a tanker car or other diesel locomotive in your consist, or from the station. In order to refuel steam locomotives, you need to shovel coal from a gondola or other steam locomotive. Then, you need to pump water in from railyards or at rivers. You can also find coal and water at railyards. In an emergency, you can chop trees in a forest to fuel a steam locomotive, but wood is heavier and makes less energy than coal.</p></details>
 <details><summary>Survival and Inventory</summary><p>In a situation with complete isolation, survival is a difficult, arduous journey. You have six stats you have to manage. Fatigue is your body's resistance to putting in more work. Be sure to get a good night's sleep to increase the amount of work you can do. Health is your physical state. If you have injuries, you have physical harm done to you. Immunity is your resistance to illness. If you have low immunity, you're more likely to get sick. Sanity is how well you are resisting total isolation in a zombie apocalypse. Feelings of isolation worsen at nighttime. Finally, hunger and thirst are self evident, but in case you're not a human, you can eat food and drink water to survive. You can find food and water in abandoned railcars, or draw water from rivers. If you have raw food, you can eat it raw, or cook it in a kitchen.</p></details>
 <details><summary>Saves</summary><p>Your saves are kept in your browser cache. To avoid loss of save data, remember to take regular backups to your device. By default, your game will autosave whenever you sleep. This behaviour can be disabled in settings.</p></details>
-<<link "Back">><<run Engine.play($utilityReturn || "Railyard")>><</link>>
 :: Blackout
 <p>The exertion is too much. You black out.</p>
 <p>You wake up on the ground, feeling groggy. <<print setup.time.formatDuration($pendingCollapse ? $pendingCollapse.minutes : 0)>> has passed.</p>

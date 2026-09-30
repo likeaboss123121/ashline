@@ -362,10 +362,10 @@ setup.items.showInventoryDialog = function() {
 		return setup.units.kilograms(stack.amount * setup.railyard.getCargoDensityKgPerLiter(stack.type)) + ' of ' + stack.type;
 	});
 	var carriedKg = this.getPlayerCarriedKg();
-	var html = '<p><strong>On you</strong> (' + this.getPlayerPackSquares() + '/' + (this.PLAYER_GRID_WIDTH * this.PLAYER_GRID_HEIGHT) + ' pack squares, '
-		+ setup.units.kilograms(carriedKg) + '/' + setup.units.kilograms(this.PLAYER_CARRY_KG) + ' carried): '
+	var html = '<h3>On you</h3><p>' + this.getPlayerPackSquares() + '/' + (this.PLAYER_GRID_WIDTH * this.PLAYER_GRID_HEIGHT) + ' pack squares, '
+		+ setup.units.kilograms(carriedKg) + '/' + setup.units.kilograms(this.PLAYER_CARRY_KG) + ' carried: '
 		+ (playerItems.concat(playerLoads).join(' · ') || '<em>nothing</em>') + '</p>';
-	html += '<p class="small-description"><strong>Pack (4 × 4)</strong></p>' + this.getPlayerPackGridHtml();
+	html += '<h3>Pack (4 × 4)</h3>' + this.getPlayerPackGridHtml();
 	if (this.getPlayerPackLayout().overflow.length) {
 		html += '<p><em>Some carried items do not fit the pack. Stow them before leaving the train.</em></p>';
 	}

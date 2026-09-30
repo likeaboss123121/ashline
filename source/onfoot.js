@@ -47,6 +47,34 @@ setup.onfoot = {
 		}
 		return true;
 	},
+	// Out of a yard on foot with no train: onto the line at the station's square, along its first line, the way a walker
+	// who climbed down there would stand. The line is only the walker's route; there is no train on it.
+	walkOutOfYard: function() {
+		var v = State.variables, station = setup.yards.stationOf(v.currentStation) || v.currentStation;
+		if ((Array.isArray(v.currentTrain) && v.currentTrain.length) || this.isOnFoot()) return false;
+		var line = setup.realWorldPilot.getStationLines(station)[0] || setup.realWorldPilot.getStationLines(v.currentStation)[0];
+		var leg = line && setup.realWorldPilot.getLeg(line.legIndex);
+		if (!leg) return false;
+		var tileIndex = Number.isInteger(line.tileIndex) ? line.tileIndex : line.forward ? 0 : leg.tiles.length - 1;
+		v.journey = { legIndex: line.legIndex, tileIndex: tileIndex, forward: line.forward };
+		v.onFoot = { legIndex: line.legIndex, tileIndex: tileIndex };
+		return true;
+	},
+	// Asks before the player walks out of a yard with no train, then goes onto the line.
+	confirmWalkOut: function() {
+		if (typeof Dialog === 'undefined') return;
+		Dialog.setup('[NEEDS WRITING PASS] Leave on foot?');
+		var body = document.createElement('div'), text = document.createElement('p');
+		text.textContent = '[NEEDS WRITING PASS] You have no train. Walk out of the yard onto the line on foot?';
+		body.appendChild(text);
+		body.appendChild(setup.saves.button('[NEEDS WRITING PASS] Walk out', 'Leave the yard on foot', function() {
+			Dialog.close();
+			if (setup.onfoot.walkOutOfYard()) Engine.play('OnFoot');
+		}, 'saves-primary'));
+		body.appendChild(setup.saves.button('Cancel', 'Stay in the yard', function() { Dialog.close(); }));
+		Dialog.append(body);
+		Dialog.open();
+	},
 	leaveRailyard: function() {
 		var foot = this.get();
 		if (!foot || !foot.inRailyard) return false;

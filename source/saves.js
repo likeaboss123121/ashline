@@ -148,7 +148,8 @@ setup.saves = {
 			if (['fatigue', 'health', 'immunity', 'sanity', 'hunger', 'thirst'].some(function(key) {
 				return !amount(v.player[key]) || v.player[key] > 100;
 			})) throw new Error('Invalid player data.');
-			if (['TrainInterior', 'DrivingMode', 'OnTheLine', 'OnFoot', 'Sleep', 'WorldPilot'].indexOf(state.title) >= 0
+			// A walker may have no train at all (walked out of a yard on foot).
+			if (['TrainInterior', 'DrivingMode', 'OnTheLine', 'Sleep', 'WorldPilot'].indexOf(state.title) >= 0
 				&& (!Array.isArray(v.currentTrain) || !v.currentTrain.length)) throw new Error('The train is missing.');
 			if ((v.currentTrain != null && !train(v.currentTrain)) || (v.leavingTrain != null && !train(v.leavingTrain)))
 				throw new Error('Invalid train data.');
@@ -345,7 +346,8 @@ setup.saves = {
 		if (typeof Dialog === 'undefined') {
 			return;
 		}
-		Dialog.setup('Saves', 'saves');
+		// No 'saves' class: SugarCube's own stylesheet takes the padding off a dialog with it, which set this menu apart.
+		Dialog.setup('Saves');
 		Dialog.append(this.buildMenu());
 		Dialog.open();
 	}

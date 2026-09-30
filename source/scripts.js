@@ -401,9 +401,9 @@ setup.showCreditsDialog = function() {
 	// the Wikifier makes its URL parser mistake "data:" for the start of a link and
 	// display the remainder of the HTML tags as text.
 	Dialog.body().insertAdjacentHTML('beforeend', '<p><strong>Created by:</strong> likea</p><p><a href="https://likea.moe/" target="_blank" rel="noopener noreferrer">Official Website</a></p><p><a href="https://github.com/likeaboss123121" target="_blank" rel="noopener noreferrer">GitHub</a></p>'
-		+ '<p><strong>World data:</strong> City names, coordinates and population from <a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer">GeoNames</a>, licensed under CC BY 4.0. Railway geometry © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>, provided by <a href="https://download.geofabrik.de/" target="_blank" rel="noopener noreferrer">Geofabrik</a> under ODbL 1.0.</p>'
-		+ '<p><strong>Elevation data:</strong> Produced using Copernicus WorldDEM-90 © DLR e.V. 2010–2014 and © Airbus Defence and Space GmbH 2014–2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.</p>'
-		+ '<p><strong>AI Generated Content Disclosure:</strong></p>'
+		+ '<h3>World data</h3><p>City names, coordinates and population from <a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer">GeoNames</a>, licensed under CC BY 4.0. Railway geometry © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>, provided by <a href="https://download.geofabrik.de/" target="_blank" rel="noopener noreferrer">Geofabrik</a> under ODbL 1.0.</p>'
+		+ '<h3>Elevation data</h3><p>Produced using Copernicus WorldDEM-90 © DLR e.V. 2010–2014 and © Airbus Defence and Space GmbH 2014–2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.</p>'
+		+ '<h3>AI Generated Content Disclosure</h3>'
 		+ '<p>AI was used to make code and .svg art for this game. Diffusion (what people commonly refer to as AI Image Generation) was not used for this game. '
 		+ 'Read more about how AI was used and my opinions about AI in video games at '
 		+ '<a href="https://likea.moe/ashlinegame/about/#ai-generation-disclosure" target="_blank" rel="noopener noreferrer">'
@@ -420,15 +420,15 @@ setup.showOptionsDialog = function() {
 	var formats = setup.time.DATE_FORMATS.map(function(format) {
 		return '<label><<radiobutton "$dateFormat" "' + format[0] + '" autocheck>> ' + format[1] + '</label>';
 	}).join('<br>');
-	Dialog.wiki('<p><strong>Time and date</strong></p>'
+	Dialog.wiki('<h3>Time and date</h3>'
 		+ '<label><<checkbox "$use24HourTime" false true autocheck>> Use 24-hour time</label><br>'
 		+ formats
-		+ '<p><strong>Units</strong></p>'
+		+ '<h3>Units</h3>'
 		+ '<label><<checkbox "$imperialUnits" false true autocheck>> Show distances, weights and temperatures in imperial</label>'
-		+ '<p><strong>The rail yard</strong></p>'
+		+ '<h3>The rail yard</h3>'
 		+ '<label><<checkbox "$showYardTargets" false true autocheck>> Show clickable areas on railyard</label>'
 		+ '<p><label><<checkbox "$preserveScroll" false true autocheck>> Keep page and map position for actions on the same page</label></p>'
-		+ '<p><strong>Saving</strong></p>'
+		+ '<h3>Saving</h3>'
 		+ '<label><<checkbox "$autosaveOnSleep" false true autocheck>> Autosave when you sleep</label><br>'
 		+ '<label><<checkbox "$enableHistoryControls" false true autocheck>> Enable passage back and forward controls</label>');
 	jQuery('#ui-dialog-body input').on('change', function() { setup.applyHistorySetting(true); UIBar.update(); });
@@ -2409,8 +2409,8 @@ setup.railyard = {
 	trainSummaryHtml: function(train, index) {
 		var trainLength = this.getTrainLength(train);
 		var html = '<div class="railyard-train">';
-		html += '<h3>Train ' + (index + 1) + ' · ' + trainLength + ' m</h3>';
-		html += '<p>' + train.slice(0, 2).map(function(car) { return setup.railyard.getCarDescription(car); }).join(', ')
+		html += '<p><strong>Train ' + (index + 1) + '</strong> · ' + setup.units.metres(trainLength) + ': '
+			+ train.slice(0, 2).map(function(car) { return setup.railyard.getCarDescription(car); }).join(', ')
 			+ (train.length > 2 ? ' and ' + (train.length - 2) + ' more' : '') + '.</p>';
 		html += '<details class="loco-panel"><summary>Car details (' + train.length + ')</summary><div class="loco-stats">';
 		html += '<ol>';
@@ -2463,20 +2463,24 @@ Macro.add('railyardButtons', {
 				continue;
 			}
 			var occupied = setup.railyard.getTrackOccupiedLength(tracks[i]);
-			var remaining = tracks[i].infinite ? 'infinite' : Math.max(0, tracks[i].length - occupied) + 'm';
+			var remaining = tracks[i].infinite ? 'infinite' : setup.units.metres(Math.max(0, tracks[i].length - occupied));
 			var trackLabel = setup.railyard.getTrackLabel(tracks, i);
 			var deadEndText = setup.railyard.isYardTrackIndex(tracks, i) ? setup.railyard.getDeadEndText(tracks, i) : '';
-			output += '<h3>' + trackLabel + '</h3><p class="small-description">' + (tracks[i].infinite ? 'Infinite' : tracks[i].length + 'm') + ' long, ' + remaining + ' free' + (deadEndText ? ', ' + deadEndText : '') + '.</p>';
+			output += '<h3>' + trackLabel + '</h3><p class="small-description">' + (tracks[i].infinite ? 'Infinite' : setup.units.metres(tracks[i].length))
+				+ ' long · ' + remaining + ' free' + (deadEndText ? ' · ' + deadEndText : '') + '.</p>';
 			if (!tracks[i].trains.length) {
 				continue;
 			}
-			// Boarding removes the selected train from the yard and turns it into the player's active consist.
+			// Each train on the track is one entry: what it is, its cars, and the way aboard. Boarding removes the
+			// selected train from the yard and turns it into the player's active consist.
+			output += '<ul>';
 			for (var j = 0; j < tracks[i].trains.length; j++) {
-				output += setup.railyard.trainSummaryHtml(tracks[i].trains[j], displayNumber - 1);
+				output += '<li>' + setup.railyard.trainSummaryHtml(tracks[i].trains[j], displayNumber - 1);
 				output += '<span data-yard-action="board:' + i + ':' + j + '">'
-					+ '<<timedlink "Board Train ' + displayNumber + '" 1>><<run setup.railyard.boardTrain($currentStation, ' + i + ', ' + j + ')>><<goto "TrainInterior">><</timedlink>></span><br>';
+					+ '<<timedlink "Board Train ' + displayNumber + '" 1>><<run setup.railyard.boardTrain($currentStation, ' + i + ', ' + j + ')>><<goto "TrainInterior">><</timedlink>></span></li>';
 				displayNumber++;
 			}
+			output += '</ul>';
 		}
 		new Wikifier(this.output, output);
 	}
@@ -2690,11 +2694,11 @@ Macro.add('drivingStatus', {
 		var trackIndex = Math.max(0, Math.min(setup.safeParseInt(variables.drivingTrackIndex, 0), tracks.length - 1));
 		var reverse = variables.travellingForward === false;
 		var fromLabel = setup.railyard.getTrackLabel(tracks, reverse ? tracks.length - 1 : 0);
-		var output = '<h3>Shunting</h3>';
-		output += '<p><strong>Current track:</strong> ' + setup.railyard.getTrackLabel(tracks, trackIndex) + '</p>';
-		output += '<p><strong>Direction:</strong> ' + (reverse ? 'Reversing from the ' : 'Forward from the ') + fromLabel + ' side</p>';
-		output += '<p><strong>Current consist:</strong> ' + setup.railyard.getTrainCarListText(variables.currentTrain) + '</p>';
-		output += setup.railyard.getFuelReadout(variables.currentTrain);
+		var output = '<h3>Shunting</h3><ul>';
+		output += '<li><strong>Current track:</strong> ' + setup.railyard.getTrackLabel(tracks, trackIndex) + '</li>';
+		output += '<li><strong>Direction:</strong> ' + (reverse ? 'Reversing from the ' : 'Forward from the ') + fromLabel + ' side</li>';
+		output += '<li><strong>Current consist:</strong> ' + variables.currentTrain.map(function(car) { return setup.railyard.getCarDescription(car); }).join(', ') + '</li>';
+		output += '</ul>' + setup.railyard.getFuelReadout(variables.currentTrain);
 		new Wikifier(this.output, output);
 	}
 });

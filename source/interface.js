@@ -22,6 +22,15 @@ setup.refreshHistoryControls = function() {
 	jQuery('#history-forward').ariaDisabled(State.length === State.size);
 };
 jQuery(document).on(':historyupdate.ashline-ui', function() { setup.applyHistorySetting(); });
+// Help, in a dialog like the sidebar's other menus: the Help passage's sections.
+setup.showHelpDialog = function() {
+	if (typeof Dialog === 'undefined') return;
+	Dialog.setup('Help');
+	// One section to a line in the passage; the line breaks between them are not part of the text.
+	Dialog.wiki(Story.get('Help').text.replace(/\s*\n\s*/g, ''));
+	setup.pages.disclosures(Dialog.body());
+	Dialog.open();
+};
 setup.pages = {
 	open: function(name) {
 		if (State.passage !== 'Help') State.variables.utilityReturn = State.passage;

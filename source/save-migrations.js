@@ -30,6 +30,8 @@ setup.saveMigrations = {
 				throw new Error('The save schema markers disagree.');
 			// StoryInit used to be an ordinary introduction. It must never run the new-game initializer on load.
 			if (moment.title === 'StoryInit') moment.title = 'Introduction';
+			// Help was a page of its own; it is a dialog now, so a save made on it goes back to where the player was.
+			if (moment.title === 'Help') moment.title = v.utilityReturn || 'Railyard';
 			while (version < self.CURRENT) {
 				self.steps[version](moment);
 				v.saveSchemaVersion = ++version;
