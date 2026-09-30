@@ -118,8 +118,8 @@ test('the sourced grid is the default playable world without copying static data
   game.State.variables.debugMode = true;
   game.State.variables.currentTrain = [{ type: 'test locomotive', length: 10, cargo: [], inventory: [], topSpeedKmh: 60 }];
   const train = game.State.variables.currentTrain;
-  assert.equal(game.setup.realWorldPilot.DEFAULT_CORRIDOR_ID, 'network');
-  assert.equal(game.setup.realWorldPilot.start(), true);
+  const first = game.setup.realWorldPilot.getStationLines(1)[0];
+  game.State.variables.journey = { legIndex: first.legIndex, tileIndex: 0, forward: first.forward };
   assert.deepEqual(JSON.parse(JSON.stringify(game.State.variables.journey)),
     { legIndex: 1, tileIndex: 0, forward: true });
   const route = game.setup.realWorldPilot.getGridRoute();
@@ -146,8 +146,6 @@ test('the sourced grid is the default playable world without copying static data
   assert.equal(game.setup.onfoot.walk(1), true);
   assert.equal(game.setup.onfoot.climbAboard(), true);
   assert.equal(JSON.stringify(game.State.variables).includes('sourceWayIds'), false);
-  assert.equal(game.setup.realWorldPilot.finish(), true);
-  assert.equal(game.State.variables.journey, null);
 });
 
 // A tiny railway made to exercise the routing stage: two lines with a 20 m digitizing break between them, a 12 km

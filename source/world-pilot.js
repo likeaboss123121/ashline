@@ -245,34 +245,6 @@ setup.realWorldPilot = (function () {
 		return route.tiles[route.stationPositions[Math.floor(Number(stationIndex)) - 1]];
 	}
 
-	function getJourneyRoute(position) {
-		var journey = position || (State.variables && State.variables.journey);
-		if (!journey) return null;
-		var leg = getLeg(journey.legIndex);
-		return leg ? { corridor: leg.corridor, tiles: leg.tiles, leg: leg } : null;
-	}
-
-	// Puts the active consist on the first line out of station 1, as debug travel does.
-	function start() {
-		var firstLine = getStationLines(1)[0];
-		if (!firstLine || !State.variables.currentTrain || !State.variables.currentTrain.length || State.variables.journey ||
-			State.variables.onFoot) return false;
-		State.variables.currentStation = 1;
-		State.variables.travellingForward = true;
-		State.variables.journey = { legIndex: firstLine.legIndex, tileIndex: firstLine.forward ? 0 : getLeg(firstLine.legIndex).tiles.length - 1,
-			forward: firstLine.forward };
-		return true;
-	}
-
-	function finish() {
-		if (!getJourneyRoute()) return false;
-		State.variables.journey = null;
-		State.variables.onFoot = null;
-		return true;
-	}
-
-	function endpointForView() { return null; }
-
 	// The node at a journey position: at either end of its leg, the station, junction or buffer standing there.
 	function getNodeAt(legIndex, tileIndex) {
 		var leg = getLeg(legIndex);
@@ -405,13 +377,12 @@ setup.realWorldPilot = (function () {
 	}
 
 	return {
-		NETWORK_ID: NETWORK_ID, DEFAULT_CORRIDOR_ID: NETWORK_ID, hasNetwork: hasNetwork,
+		NETWORK_ID: NETWORK_ID, hasNetwork: hasNetwork,
 		getCorridor: getCorridor, getGridRoute: getGridRoute, getTileAt: getTileAt,
 		getLeg: getLeg, getStation: getStation, getStationTile: getStationTile,
 		getStationLines: getStationLines, getArrivalSide: getArrivalSide, getNodeAt: getNodeAt,
 		getJunctionChoices: getJunctionChoices, getStationsNear: getStationsNear, getNodeDistances: getNodeDistances,
-		getJourneyRoute: getJourneyRoute, start: start, finish: finish,
-		endpointForView: endpointForView, terrainFor: terrainFor, debugTarget: debugTarget,
+		terrainFor: terrainFor, debugTarget: debugTarget,
 		appendDebugControls: appendDebugControls
 	};
 }());
