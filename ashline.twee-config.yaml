@@ -85,7 +85,7 @@ sugarcube-2:
       description: "Defined in `source/refuel.js:305`. The refuelling jobs for the locomotive the player is standing in."
     saveMigrationRecovery:
       container: false
-      description: "Defined in `source/save-migrations.js:485`."
+      description: "Defined in `source/save-migrations.js:506`."
     saveReminder:
       container: false
       description: "Defined in `source/saves.js:356`. The backup reminder, at the top of the screen where it cannot be missed."

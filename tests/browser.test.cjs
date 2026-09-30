@@ -392,30 +392,51 @@ test('empty locomotive menus expose on-foot recovery and return carried fuel to 
   assert.ok(await page.evaluate(()=>SugarCube.setup.railyard.isTrainDriveCapable(SugarCube.State.variables.currentTrain)));
 });
 
-test('actual v0.1.0 exports migrate every passage and preserve stock, cargo and placement',async t=>{
-  function stock(v,title) {
-    const train=cars=>(cars||[]).map(car=>({type:car.type,cargo:car.cargo}));
-    return {station:v.currentStation,track:v.drivingTrackIndex,car:v.currentCarIndex,
-      yards:Object.fromEntries(Object.entries(v.stationTracks).map(([id,tracks])=>[id,tracks.map(t=>({length:t.length,trains:t.trains.map(train)}))])),
-      current:title==='Railyard'?null:train(v.currentTrain)};
-  }
-  for(const name of ['start','introduction','yard-first-entry','interior','driving','arrival','yard-pending-placement']) {
-    const fixture=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/v010',name+'.json')));
+// Every car and every load a save holds, wherever it is: yards, yards set aside, the train aboard or being left.
+function everyCar(v){
+  const cars=[],add=train=>(train||[]).forEach(car=>cars.push(car));
+  const yards=tracks=>(Array.isArray(tracks)?tracks:[]).forEach(track=>(track.trains||[]).forEach(add));
+  Object.values(v.stationTracks||{}).forEach(yards);Object.values(v.orphanedStationYards||{}).forEach(yards);
+  // A train being left is also still the current train in the old releases: count it once.
+  if((v.leavingTrain||[]).length) add(v.leavingTrain); else add(v.currentTrain);
+  const cargo={};cars.forEach(car=>(car.cargo||[]).forEach(stack=>{cargo[stack.type]=(cargo[stack.type]||0)+stack.amount;}));
+  return {cars:cars.length,cargo};
+}
+test('actual v0.1.0 and v0.2.0 saves go to Punta Arenas with the player\'s train, losing nothing',async t=>{
+  const releases={v010:['start','introduction','yard-first-entry','interior','driving','arrival','yard-pending-placement'],
+    v020:['yard-first-entry','interior','driving','line','on-foot','on-foot-away','arrival','yard-left-train']};
+  for(const [release,names] of Object.entries(releases)) for(const name of names) {
+    const label=release+'/'+name,fixture=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures',release,name+'.json')));
     const page=await openGame(t);
-    assert.equal(await page.evaluate(text=>SugarCube.setup.saves.importText(text),fixture.exported),true,name);
-    const title=fixture.passage==='StoryInit'?'Introduction':fixture.passage;
-    await passage(page,title);
-    const migrated=await page.evaluate(()=>JSON.parse(JSON.stringify(SugarCube.State.variables)));
-    assert.deepEqual(stock(migrated,title),stock(fixture.live,fixture.passage),name);
-    assert.equal(migrated.player.health,100);assert.equal(migrated.player.hunger,100);assert.equal(migrated.player.thirst,100);
-    assert.equal(migrated.trains.length,0);assert.equal(migrated.currentCar,undefined);
-    assert.ok(await page.evaluate(()=>SugarCube.State.history.every(m=>m.variables.saveSchemaVersion===SugarCube.setup.saveMigrations.CURRENT)));
-    // Old saves from the title or introduction still load, but nothing can be saved there.
-    const inGame=await page.evaluate(()=>SugarCube.setup.isInGame());
-    assert.equal(await page.evaluate(()=>SugarCube.setup.saves.save(1)),inGame,name);
-    if(!inGame) { await page.closeChecked(); continue; }
-    assert.equal(await page.evaluate(()=>SugarCube.setup.saves.load(1)),true);
-    await passage(page,title);
+    assert.equal(await page.evaluate(text=>SugarCube.setup.saves.importText(text),fixture.exported),true,label);
+    await page.waitForFunction(()=>SugarCube.Engine.isIdle());
+    const migrated=await page.evaluate(()=>({v:JSON.parse(JSON.stringify(SugarCube.State.variables)),title:SugarCube.State.passage,
+      inGame:SugarCube.setup.isInGame(),place:SugarCube.setup.worldmap.getStationName(SugarCube.State.variables.currentStation),
+      all:SugarCube.State.history.every(m=>m.variables.saveSchemaVersion===SugarCube.setup.saveMigrations.CURRENT)}));
+    assert.ok(migrated.all,label);
+    // Nothing is lost: every car and every load of the release's save is still somewhere in the converted one.
+    const before=await page.evaluate(exported=>{
+      const data=JSON.parse(LZString.decompressFromBase64(exported)),history=SugarCube.State.deltaDecode(data.state.delta);
+      return JSON.parse(JSON.stringify(history[data.state.index].variables));
+    },fixture.exported);
+    // (A v0.1.0 yard saved before it was generated is rebuilt by the v0.1.0 generator, so there can be more.)
+    const after=everyCar(migrated.v),had=everyCar(before);
+    assert.ok(after.cars>=had.cars,label+': '+JSON.stringify([after,had]));
+    Object.keys(had.cargo).forEach(type=>assert.ok((after.cargo[type]||0)>=had.cargo[type]-1e-6,label+' '+type));
+    if(!migrated.inGame){ assert.equal(migrated.title,fixture.passage==='StoryInit'?'Introduction':fixture.passage,label); await page.closeChecked(); continue; }
+    assert.equal(migrated.place,'Punta Arenas',label);
+    assert.equal(migrated.v.journey,null,label);assert.equal(migrated.v.onFoot,null,label);
+    const aboard=(before.currentTrain||[]).length&&!(before.leavingTrain||[]).length;
+    assert.equal(migrated.title,aboard?'TrainInterior':'Railyard',label);
+    if(aboard) {
+      const tracks=migrated.v.stationTracks[migrated.v.currentStation];
+      assert.equal(migrated.v.drivingTrackIndex,tracks.length-1,label+': on the northbound track');
+      assert.deepEqual(migrated.v.currentTrain.map(car=>car.type),before.currentTrain.map(car=>car.type),label);
+    }
+    // The converted game saves and loads again.
+    assert.equal(await page.evaluate(()=>SugarCube.setup.saves.save(1)),true,label);
+    assert.equal(await page.evaluate(()=>SugarCube.setup.saves.load(1)),true,label);
+    await passage(page,migrated.title);
     await page.closeChecked();
   }
 });
@@ -445,6 +466,27 @@ test('v0.1.0 browser slots and restored sessions migrate without overwriting the
   assert.equal(await page.evaluate(()=>SugarCube.State.variables.player.hunger),100,'session is not inverted twice');
   assert.equal(await page.evaluate(()=>SugarCube.setup.saves.load('auto')),true);
   await passage(page,'TrainInterior');
+});
+
+test('v0.2.0 browser slots and restored sessions convert, leaving the original slot as it was',async t=>{
+  const fixture=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/v020/on-foot-away.json')));
+  const page=await openGame(t);
+  const result=await page.evaluate(fixture=>{
+    const {Save,storage,setup:s}=SugarCube;
+    storage.set('saves',{autosave:fixture.save,slots:[fixture.save,...Array(7).fill(null)]});
+    const before=JSON.stringify(Save.slots.get(0));
+    const loaded=s.saves.load(0);
+    return {loaded,unchanged:JSON.stringify(Save.slots.get(0))===before};
+  },fixture);
+  assert.deepEqual(result,{loaded:true,unchanged:true});await passage(page,'TrainInterior');
+  assert.equal(await page.evaluate(()=>SugarCube.setup.worldmap.getStationName(SugarCube.State.variables.currentStation)),'Punta Arenas');
+  await page.evaluate(session=>SugarCube.session.set('state',session),fixture.session);
+  await page.reload();await passage(page,'TrainInterior');
+  assert.equal(await page.evaluate(()=>SugarCube.setup.saveMigrations.recovery),null);
+  assert.equal(await page.evaluate(()=>SugarCube.State.variables.saveSchemaVersion),await page.evaluate(()=>SugarCube.setup.saveMigrations.CURRENT));
+  // The converted run carries on: out of Punta Arenas' yard and onto the line.
+  await choose(page,'Start driving','DrivingMode');
+  assert.ok(await page.locator('#passages a').filter({hasText:/^Depart /}).count()>0);
 });
 
 test('future save schemas fail safely and incompatible sessions offer the untouched recovery data',async t=>{

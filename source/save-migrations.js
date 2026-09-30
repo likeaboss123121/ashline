@@ -138,51 +138,72 @@ setup.saveMigrations = {
 		v.defaultTrains = this.copy(setup.currentDefinitions.defaultTrains);
 		v.cargoTypes = Object.assign({}, v.cargoTypes, this.copy(setup.currentDefinitions.cargoTypes));
 	},
-	// Schema 2 removes the seeded fictional world. Keep every train and yard, but translate any active position
-	// onto the sourced Padre Hurtado–Melipilla grid so an old station or branch cannot strand the player.
-	upgradeSourcedWorld: function(moment) {
-		var v = moment.variables;
-		var route = setup.realWorldPilot && setup.realWorldPilot.getGridRoute
-			? setup.realWorldPilot.getGridRoute() : null;
-		if (!route || !route.legs || !route.corridor || !route.corridor.stations.length)
-			throw new Error('The sourced world is unavailable.');
-		function targetAt(position) {
-			var globalIndex = Math.max(0, Math.min(Math.floor(Number(position) || 0), route.tiles.length - 1));
-			var legIndex = 1;
-			while (route.legs[legIndex] && globalIndex > route.legs[legIndex].endPosition) legIndex++;
-			if (!route.legs[legIndex]) legIndex = route.corridor.stations.length - 1;
-			var leg = route.legs[legIndex];
-			return { legIndex: legIndex,
-				tileIndex: Math.max(0, Math.min(globalIndex - leg.startPosition, leg.tiles.length - 1)), forward: true };
-		}
-		var journey = v.journey;
-		if (v.realWorldJourney) {
-			journey = targetAt(v.realWorldJourney.position);
-		} else if (journey && journey.realWorldCorridorId) {
-			journey = targetAt(journey.tileIndex);
-		} else if (journey && Number.isInteger(journey.legIndex) && route.legs[journey.legIndex]) {
-			var leg = route.legs[journey.legIndex];
-			journey = { legIndex: journey.legIndex,
-				tileIndex: Math.max(0, Math.min(Math.floor(Number(journey.tileIndex) || 0), leg.tiles.length - 1)),
-				forward: journey.forward !== false };
-		} else if (journey) {
-			journey = null;
-			v.currentStation = 1;
-		}
-		v.journey = journey || null;
+	// Schema 1 to 2: the invented world of v0.1.0 and v0.2.0 gives way to the real railway network (Likea, decided
+	// 2026-09-27). Its station numbers and legs name nothing in the new world, so the player and the whole train they
+	// have go to Punta Arenas, where both worlds begin, the train standing on the station's infinite northbound track
+	// with the player aboard. Punta Arenas' own yard is kept (it was Punta Arenas then too); every other old yard is set
+	// aside in the save with its stock, under 'v0.2.0:' and its old number, rather than put on some other station.
+	upgradeToNetwork: function(moment) {
+		var v = moment.variables, self = this;
+		var route = setup.realWorldPilot && setup.realWorldPilot.getGridRoute ? setup.realWorldPilot.getGridRoute() : null;
+		if (!route || !route.corridor || !route.corridor.stations.length) throw new Error('The railway network is unavailable.');
+		var start = this.startStation(route);
+		// The whole train: the one aboard, driven or left out on the line. One the player was leaving in a yard stands
+		// there with the others they have used.
+		var train = Array.isArray(v.currentTrain) && v.currentTrain.length && !(Array.isArray(v.leavingTrain) && v.leavingTrain.length)
+			? v.currentTrain : null;
+		var oldYards = v.stationTracks || {}, oldStation = String(v.currentStation);
+		// A player standing in a yard with no train in hand brings the trains they have used there (the visited ones),
+		// unless that yard is Punta Arenas' own, where they already are.
+		var brought = Array.isArray(v.leavingTrain) && v.leavingTrain.length ? [v.leavingTrain] : [];
+		if (!train && oldStation !== '1' && Array.isArray(oldYards[oldStation])) oldYards[oldStation].forEach(function(track) {
+			if (!self.object(track) || !Array.isArray(track.trains)) return;
+			track.trains = track.trains.filter(function(parked) {
+				if (!setup.railyard.isTrainVisited(parked)) return true;
+				brought.push(parked);
+				return false;
+			});
+		});
+		v.orphanedStationYards = v.orphanedStationYards || {};
+		Object.keys(oldYards).forEach(function(key) {
+			if (String(key) !== '1') v.orphanedStationYards['v0.2.0:' + key] = oldYards[key];
+		});
+		v.stationTracks = oldYards[1] ? { 1: oldYards[1] } : {};
+		v.currentStation = start;
+		if (start !== 1 && v.stationTracks[1]) { v.stationTracks[start] = v.stationTracks[1]; delete v.stationTracks[1]; }
+		// The screens before the game (Start, the introduction) stay where they are.
+		var inGame = (setup.OUT_OF_GAME_PASSAGES || []).indexOf(moment.title) === -1;
+		// Punta Arenas' yard is generated here only when a train needs a place in it (every run began there, so it is
+		// nearly always saved already); otherwise the game generates it on arrival, as for any yard. Generation reads the
+		// running game's definitions, which a restored browser tab does not have until its history is converted.
+		if (!v.stationTracks[start] && (train || brought.length)) v.stationTracks[start] = setup.railyard.generateStationTracks(start, v.randomSeed);
+		var tracks = v.stationTracks[start], northbound = tracks ? setup.railyard.getExitTrackIndex(tracks) : 0;
+		v.journey = null;
+		v.onFoot = null;
 		v.realWorldJourney = null;
-		if (!Number.isInteger(v.currentStation) || v.currentStation < 1
-			|| v.currentStation > route.corridor.stations.length)
-			v.currentStation = 1;
-		if (v.onFoot) {
-			if (!v.journey) v.onFoot = null;
-			else v.onFoot = { legIndex: v.journey.legIndex,
-				tileIndex: Math.max(0, Math.min(Math.floor(Number(v.onFoot.tileIndex) || 0),
-					route.legs[v.journey.legIndex].tiles.length - 1)), branch: null };
+		v.campfire = null;
+		v.leavingTrain = null;
+		v.travellingForward = true;
+		v.tutorialDone = true;
+		v.enteredStation = start;
+		delete v.enteredTrackIndex;
+		delete v.enteredTrainIndex;
+		if (train) {
+			// Aboard, on the northbound track, at its end nearest the yard.
+			v.currentTrain = train;
+			v.drivingTrackIndex = northbound;
+			if (tracks) v.enteredTrainIndex = setup.railyard.getDefaultEnteredTrainIndex(tracks, northbound);
+			if (!Number.isInteger(v.currentCarIndex) || v.currentCarIndex < 0 || v.currentCarIndex >= train.length)
+				v.currentCarIndex = setup.railyard.getBoardingCarIndex(train);
+			if (inGame) moment.title = 'TrainInterior';
+		} else {
+			v.currentTrain = null;
+			delete v.drivingTrackIndex;
+			brought.forEach(function(parked) { tracks[northbound].trains.unshift(parked); });
+			if (['OnTheLine', 'OnFoot', 'DrivingMode', 'TrainInterior', 'WorldPilot', 'Sleep'].indexOf(moment.title) >= 0) moment.title = 'Railyard';
 		}
-		if (moment.title === 'WorldPilot') moment.title = v.journey ? 'OnTheLine' : 'TrainInterior';
-		if ((moment.title === 'OnTheLine' || moment.title === 'OnFoot') && !v.journey)
-			moment.title = Array.isArray(v.currentTrain) && v.currentTrain.length ? 'TrainInterior' : 'Railyard';
+		if (moment.title === 'WorldPilot') moment.title = train ? 'TrainInterior' : 'Railyard';
+		return self;
 	},
 	steps: {},
 	// Station UUIDs and grid coordinates are the save identity. Numeric station/leg indexes
@@ -454,7 +475,7 @@ setup.saveMigrations = {
 	}
 };
 setup.saveMigrations.steps[0] = function(moment) { setup.saveMigrations.upgradeUnversioned(moment); };
-setup.saveMigrations.steps[1] = function(moment) { setup.saveMigrations.upgradeSourcedWorld(moment); };
+setup.saveMigrations.steps[1] = function(moment) { setup.saveMigrations.upgradeToNetwork(moment); };
 // Regional generation adds stock/cargo catalogues, not a new world or replacement rolling stock.
 // Refresh definitions only; visited yards, carried cars, positions and cargo are byte-for-byte preserved.
 setup.saveMigrations.steps[2] = function(moment) {

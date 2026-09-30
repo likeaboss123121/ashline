@@ -39,11 +39,15 @@ test('frozen legacy generation reproduces the released yards, not the new genera
     const v = fixture(name).live;
     assert.equal(JSON.stringify(s.saveLegacy010.station(v)), JSON.stringify(v.stationTracks[v.currentStation]), name);
   }
+  // The old station 2 is rebuilt by the frozen generator, then set aside with its stock: it names nothing on the
+  // real network, where the player goes to Punta Arenas.
   const old = fixture('arrival').live, expected = copy(old.stationTracks[2]);
   delete old.stationTracks[2];
   const v = s.saveMigrations.upgradeState(state(old, 'DrivingMode')).state.history[0].variables;
-  assert.deepEqual(Array.from(v.stationTracks[2],t => t.length), expected.map(t => t.length));
-  assert.equal(v.stationTracks[2].flatMap(t=>t.trains).flat().length, expected.flatMap(t=>t.trains).flat().length);
+  const setAside = v.orphanedStationYards['v0.2.0:2'];
+  assert.deepEqual(Array.from(setAside,t => t.length), expected.map(t => t.length));
+  assert.equal(setAside.flatMap(t=>t.trains).flat().length, expected.flatMap(t=>t.trains).flat().length);
+  assert.equal(v.stationTracks[2], undefined);
 });
 
 test('every history moment migrates and a bad or future moment rejects the entire copy', () => {
@@ -70,7 +74,7 @@ test('every history moment migrates and a bad or future moment rejects the entir
   assert.throws(()=>s.saveMigrations.upgradeState(bad), /train/i);
 });
 
-test('v0.2.0 saves retain survival state while old branches move onto the sourced line', () => {
+test('v0.2.0 saves keep survival state, and the player and whole train go to Punta Arenas', () => {
   const { setup:s, State:{variables:v} } = loadGame();s.startNewRun();
   delete v.saveSchemaVersion;v.lastPlayedReleaseVersion='0.2.0';
   v.player.hunger=23;v.player.health=0;v.player.carried=[{item:'jerrycan',count:1}];
@@ -79,19 +83,24 @@ test('v0.2.0 saves retain survival state while old branches move onto the source
   v.currentTrain=[s.railyard.cloneCar(v.defaultTrains.dieselRoad)];v.currentTrain[0].inventory=[];
   v.journey={legIndex:2,branch:'2:5:6',tileIndex:0,forward:false};v.onFoot={branch:null,tileIndex:500};
   v.campfires={test:{expiresAt:12345}};
+  v.currentStation=2;
   v.stationTracks[2]=[{length:999999,infinite:true,trains:[],supplies:{diesel:0,coal:0,water:12}},
     {length:100,trains:[]},{length:999999,infinite:true,trains:[]}];
-  const result=s.saveMigrations.upgradeState(state(v,'OnFoot')).state.history[0].variables;
-  for(const key of ['player','campfires','gameTimeTimestampMs','stationTracks'])
+  const moment=s.saveMigrations.upgradeState(state(v,'OnFoot')).state.history[0], result=moment.variables;
+  for(const key of ['player','campfires','gameTimeTimestampMs'])
     assert.equal(JSON.stringify(result[key]),JSON.stringify(v[key]),key);
-  assert.equal(JSON.stringify(result.journey),JSON.stringify({legIndex:2,tileIndex:0,forward:false}));
-  const lastOfLeg=s.realWorldPilot.getGridRoute().legs[2].tiles.length-1;
-  assert.equal(JSON.stringify(result.onFoot),JSON.stringify({legIndex:2,tileIndex:lastOfLeg,branch:null}));
+  // Aboard the train on Punta Arenas' northbound track; the old yard set aside with its stock.
+  assert.equal(moment.title,'TrainInterior');
+  assert.equal(s.worldmap.getStationName(result.currentStation),'Punta Arenas');
+  assert.equal(result.journey,null);assert.equal(result.onFoot,null);
+  const tracks=result.stationTracks[result.currentStation];
+  assert.equal(result.drivingTrackIndex,tracks.length-1);assert.equal(tracks[tracks.length-1].infinite,true);
+  assert.equal(JSON.stringify(result.orphanedStationYards['v0.2.0:2']),JSON.stringify(v.stationTracks[2]));
   assert.equal(result.currentTrain[0].model,'diesel-road');
   assert.equal(result.currentTrain[0].inventory.length,0,'no gifts to newer or already-depleted kits');
 });
 
-test('v0.2.0 saves outside the sourced corridor keep their train and return safely to the first station', () => {
+test('v0.2.0 saves from anywhere in the old world, even off its map, go to Punta Arenas with their train', () => {
   const {setup:s,State:{variables:v}}=loadGame();s.startNewRun();
   v.saveSchemaVersion=1;v.currentStation=99999;
   v.currentTrain=[s.railyard.cloneCar(v.defaultTrains.dieselShunter)];
@@ -110,10 +119,13 @@ test('legacy steam engines and pending placement retain loads and order while ad
   const steam=copy(v.defaultTrains.steamLoco);steam.cargo=[{type:'coal',amount:8000},{type:'water',amount:5000}];
   v.leavingTrain=[steam,copy(v.defaultTrains.boxcar)];v.currentTrain=copy(v.leavingTrain);
   const result=s.saveMigrations.upgradeState(state(v,'Railyard')).state.history[0].variables;
-  assert.equal(result.currentTrain,null);assert.equal(result.leavingTrain.length,2);
-  assert.equal(result.leavingTrain[0].length,10);assert.equal(result.leavingTrain[0].model,'steam-shunter');
-  assert.equal(result.leavingTrain[0].maxCargoCapacityVolume,13000);
-  assert.equal(result.leavingTrain[0].maxCargoCapacityKg,11400);
-  assert.equal(JSON.stringify(result.leavingTrain[0].cargo),JSON.stringify(steam.cargo));
-  assert.equal(result.leavingTrain[0].steamStoredLiters,0);
+  // The train being left stands on Punta Arenas' northbound track, in order, the player beside it in the yard.
+  assert.equal(result.currentTrain,null);assert.equal(result.leavingTrain,null);
+  const tracks=result.stationTracks[result.currentStation], left=tracks[tracks.length-1].trains[0];
+  assert.equal(left.length,2);
+  assert.equal(left[0].length,10);assert.equal(left[0].model,'steam-shunter');
+  assert.equal(left[0].maxCargoCapacityVolume,13000);
+  assert.equal(left[0].maxCargoCapacityKg,11400);
+  assert.equal(JSON.stringify(left[0].cargo),JSON.stringify(steam.cargo));
+  assert.equal(left[0].steamStoredLiters,0);
 });
