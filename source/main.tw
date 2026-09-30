@@ -24,7 +24,7 @@ Ashline
 :: SaveRecovery
 <h2>Save recovery</h2>
 <<saveMigrationRecovery>>
-<p>Keep a copy before using Restart. Existing save slots and exported files have not been changed.</p>
+<p>Please download a copy of your old save before restarting.</p>
 :: Introduction
 You are a lone train engineer in a world where dangerous zombies called Foamers endlessly expand the railroad. Your goal is to travel from Punta Arenas, Chile, to Cape Town, South Africa, surviving on your train along the way.
 <<link "Begin your journey">><<startNewGame true>><<goto "Railyard">><</link>>
@@ -96,9 +96,9 @@ You step into the railyard. Several trains are parked here, each with its own mi
 <div class="train-primary-controls">
 <<if _currentCar.tractiveCapacity > 0 && !_currentCar.broken>>
 	<<if setup.railyard.isTrainDriveCapable($currentTrain)>><<link "Start driving">><<set _drivingPassage = $journey ? "OnTheLine" : "DrivingMode">><<goto _drivingPassage>><</link>><<else>>
-		<<if setup.railyard.isDieselLocomotiveCar(_currentCar) && setup.railyard.getCargoAmount(_currentCar, "diesel") >= setup.fuel.getDieselLitresPerMinute(_currentCar)>><span class="small-description"><em>Cannot start driving: <<print setup.fuel.describeGrade(setup.fuel.getGrade(_currentCar, "diesel"), "diesel")>> This engine cannot run on diesel in that condition; blend in better fuel.</em></span>
-		<<elseif setup.railyard.isDieselLocomotiveCar(_currentCar)>><span class="small-description"><em>Cannot start driving: this diesel locomotive has <<print setup.railyard.getCargoAmount(_currentCar, "diesel").toFixed(2)>> L of diesel; at least <<print setup.fuel.getDieselLitresPerMinute(_currentCar).toFixed(2)>> L is required.</em></span>
-		<<elseif setup.railyard.isSteamLocomotiveCar(_currentCar)>><span class="small-description"><em>Cannot start driving: boiler pressure is <<print setup.railyard.getSteamPressureBar(_currentCar).toFixed(2)>> bar; at least 10.00 bar is required.</em></span>
+		<<if setup.railyard.isDieselLocomotiveCar(_currentCar) && setup.railyard.getCargoAmount(_currentCar, "diesel") >= setup.fuel.getDieselLitresPerMinute(_currentCar)>><span class="small-description"><em>Cannot start driving: <<print setup.fuel.describeGrade(setup.fuel.getGrade(_currentCar, "diesel"), "diesel")>> The diesel is too degraded for the engine to start.</em></span>
+		<<elseif setup.railyard.isDieselLocomotiveCar(_currentCar)>><span class="small-description"><em>Cannot start driving: this diesel locomotive has <<print setup.railyard.getCargoAmount(_currentCar, "diesel").toFixed(2)>> L of diesel, there's not enough for the engine to start.</em></span>
+		<<elseif setup.railyard.isSteamLocomotiveCar(_currentCar)>><span class="small-description"><em>Cannot start driving: boiler pressure is <<print setup.railyard.getSteamPressureBar(_currentCar).toFixed(2)>> bar, the pressure is insufficient for the wheels to rotate.</em></span>
 		<<else>><span class="small-description"><em>Cannot start driving: this locomotive cannot currently provide traction.</em></span><</if>>
 	<</if>>
 <</if>>
@@ -111,7 +111,7 @@ You step into the railyard. Several trains are parked here, each with its own mi
 	<<run setup.railyard.ensureSteamLocomotiveState(_currentCar)>>
 	<span class="small-description"><strong>Boiler pressure:</strong> <<print setup.railyard.getSteamPressureBar(_currentCar).toFixed(2)>> bar</span><br>
 	<span class="small-description"><em><<print setup.fuel.describeBunker(_currentCar)>>. Water: <<print setup.railyard.getCargoAmount(_currentCar, "water").toFixed(2)>> L. Firebox: <<print _currentCar.fireboxEnabled ? "on" : "off">></em></span><br>
-	<<if setup.fuel.hasSolidFuel(_currentCar) && setup.fuel.getFireboxOutput(_currentCar) < 0.995>><span class="small-description"><em>This fuel is too poor to fire the boiler fully: the grate gives <<print Math.round(setup.fuel.getFireboxOutput(_currentCar) * 100)>>% of the steam.</em></span><br><</if>>
+	<<if setup.fuel.hasSolidFuel(_currentCar) && setup.fuel.getFireboxOutput(_currentCar) < 0.995>><span class="small-description"><em>This fuel runs too cold to fire the boiler.</em></span><br><</if>>
 	<<set _fireboxLabel = _currentCar.fireboxEnabled ? "Let the firebox out" : "Light the firebox">>
 	<<if _currentCar.fireboxEnabled || setup.railyard.canLightFirebox(_currentCar)>><<link _fireboxLabel>><<run setup.railyard.toggleSteamFireboxByIndex($currentTrain, $currentCarIndex)>><<goto "TrainInterior">><</link>><br><</if>>
 	<<if !setup.railyard.isTrainDriveCapable($currentTrain)>>

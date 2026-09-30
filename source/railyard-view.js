@@ -644,7 +644,7 @@ setup.railyardView = {
 		});
 		return {
 			links: links,
-			reason: links.length ? '' : (reason || 'Nothing can be done there from where you are standing.')
+			reason: links.length ? '' : (reason || 'Nothing can be done in that spot from where you are standing.')
 		};
 	},
 	// A click on the drawing runs the text action that matches what was clicked. Nothing is decided here either:

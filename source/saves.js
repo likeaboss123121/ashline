@@ -72,7 +72,7 @@ setup.saves = {
 			detail.automatic = !!automatic;
 			var ok = automatic ? Save.autosave.save('Autosave: ' + detail.place, detail)
 				: slots.save(index, detail.place, detail);
-			if (ok !== true) return this.fail('Save failed. Export a backup to disk; browser storage may be full or unavailable.');
+			if (ok !== true) return this.fail('Save failed. Export a backup to disk. Most likely, the browser storage may be full or unavailable.');
 			this.countSave(); this.error = false; this.message = automatic ? 'Autosaved.' : 'Saved.';
 			return true;
 		} catch (error) { return this.fail('Save failed. Export a backup to disk. ' + error.message); }
@@ -234,11 +234,11 @@ setup.saves = {
 		var days = this.getDaysSinceExport();
 		var saves = this.readNumber(this.SAVES_SINCE_KEY);
 		if (days === null) {
-			return 'You have saved ' + saves + ' time' + (saves === 1 ? '' : 's') + ' and never saved a copy to disk. '
-				+ 'Saves live in this browser only, and clearing its data deletes them.';
+			return 'You have saved ' + saves + ' time' + (saves === 1 ? '' : 's') + ' and never downloaded a copy. '
+				+ 'Saves exist only in your browser\'s cache, and save data may be lost upon a cache clear. Please download a copy.';
 		}
 		return 'It has been ' + Math.floor(days) + ' day' + (Math.floor(days) === 1 ? '' : 's') + ' and ' + saves
-			+ ' save' + (saves === 1 ? '' : 's') + ' since your last backup. Saves live in this browser only.';
+			+ ' save' + (saves === 1 ? '' : 's') + ' since your last backup. Saves exist only in your browser\'s cache, and save data may be lost upon a cache clear. Please download a copy.';
 	},
 	// --- the menu ------------------------------------------------------------------------------------------------
 	button: function(label, title, onClick, className) {

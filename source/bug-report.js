@@ -53,7 +53,7 @@ setup.bugReport = {
 		button.textContent = 'Copy bug report';
 		var status = document.createElement('p');
 		status.setAttribute('role', 'status');
-		status.textContent = 'Includes your current game state, not browser saves or account information.';
+		status.textContent = 'Includes your current game state';
 		button.addEventListener('click', function() {
 			text.focus(); text.select();
 			if (navigator.clipboard && navigator.clipboard.writeText) {

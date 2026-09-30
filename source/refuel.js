@@ -127,10 +127,10 @@ setup.refuel = {
 			return around.onLine ? null : (around.waterTank ? '' : 'this station has no water tank');
 		}
 		if (where === 'beside-water') {
-			return around.onLine ? (around.besideWater ? '' : 'there is no water beside the line here') : null;
+			return around.onLine ? (around.besideWater ? '' : 'there is no water near the track to siphon') : null;
 		}
 		if (where === 'forest') {
-			return around.onLine && around.inForest ? '' : 'there are no trees to fell here; stop in a forest';
+			return around.onLine && around.inForest ? '' : 'there are no trees to chop here';
 		}
 		return null;
 	},

@@ -63,7 +63,7 @@ setup.textWiki = {
 	controls: function(section) {
 		var self = this, state = this.selection, rows = this.catalogue();
 		var note = document.createElement('p');
-		note.textContent = '[NEEDS WRITING PASS] — Choose a default, then override individual values inline. Edits stay in the wiki. Missing current values are null; actions never run. Conditional alternatives are shown together.';
+		note.textContent = '[NEEDS WRITING PASS] — This is the Game Text reader. Use this to find how text appears, and where it\'s located in the code.';
 		section.appendChild(note);
 		function field(labelText, element) {
 			var p = document.createElement('p'), label = document.createElement('label');

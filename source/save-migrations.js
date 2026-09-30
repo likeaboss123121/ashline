@@ -390,8 +390,8 @@ setup.saveMigrations = {
 		if (setup.bugReport) setup.bugReport.recent = [];
 		this.notice = upgraded ? 'Save upgraded to v' + setup.releaseVersion
 			+ '. Your original save has not been overwritten. Export a new backup from Saves.' : '';
-		if(relocated) this.notice += ' [NEEDS WRITING PASS] — The railway map changed. Your location was matched by station UUID or moved to a nearby station. Stock from removed yards remains in the save.';
-		if(repaired) this.notice += ' [NEEDS WRITING PASS] — Your saved location was not on the map, so you have been moved to a station.';
+		if(relocated) this.notice += ' [NEEDS WRITING PASS] — The coordinates in your save no longer exist. You have been moved to a nearby station.';
+		if(repaired) this.notice += ' [NEEDS WRITING PASS] — Your saved location does not exist. You have been moved to a nearby station.';
 	},
 	// Browser-tab restoration bypasses Save.onLoad. Upgrade it before Engine.show(),
 	// including every history moment, then persist the converted session snapshot.
@@ -435,7 +435,7 @@ setup.saveMigrations = {
 		try {
 			if (!session.set('state', snapshot)) throw new Error('Session storage unavailable.');
 		} catch (error) {
-			this.notice += ' Browser session storage is unavailable; export a backup before closing this tab.';
+			this.notice += ' Browser session storage is unavailable, please export your save game before closing the tab or else your save data will be permanently lost.';
 		}
 	}
 };
