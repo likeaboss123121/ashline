@@ -117,7 +117,7 @@ setup.worldGraph = (function () {
 		loadAll();
 		var stats = getStats();
 		var summary = document.createElement('p');
-		summary.textContent = '[NEEDS WRITING PASS] — Planning-only worldwide graph ' + stats.datasetVersion + ': ' + stats.nodeCount +
+		summary.textContent = 'Planning-only worldwide graph ' + stats.datasetVersion + ': ' + stats.nodeCount +
 			' places, ' + stats.linkCount + ' non-navigable links in ' + stats.regionCount +
 			' regional chunks. Straight lines are corridor proposals, not claimed railway geometry.';
 		parent.appendChild(summary);

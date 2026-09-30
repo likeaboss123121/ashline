@@ -73,11 +73,11 @@ setup.yards = {
 		if (!parsed) return '';
 		if (parsed.kind === 'station') return setup.worldmap.getStationName(parsed.station);
 		var place = this.place(id), near = place && setup.realWorldPilot.getStationsNear(place.legIndex, place.tileIndex)[0];
-		return '[NEEDS WRITING PASS] Siding' + (near ? ' near ' + setup.worldmap.getStationName(near.station) : '');
+		return 'Siding' + (near ? ' near ' + setup.worldmap.getStationName(near.station) : '');
 	},
 	// The label of the link that takes a train or a walker into a yard.
 	enterLabel: function(id) {
-		return this.isStation(id) ? 'Enter ' + this.name(id) + ' railyard' : '[NEEDS WRITING PASS] Enter the siding';
+		return this.isStation(id) ? 'Enter ' + this.name(id) + ' railyard' : 'Enter the siding';
 	},
 	// The lines out of a siding, as realWorldPilot.getStationLines gives them for a station: back along its leg from the
 	// entry end, on along it from the exit end. tileIndex is where on the leg a departure starts.
@@ -114,7 +114,7 @@ setup.yards = {
 	// Why the consist on the line cannot enter a yard here, or ''.
 	getEnterBlockReason: function(id) {
 		var v = State.variables, journey = setup.worldmap.getJourney();
-		if (!journey) return '[NEEDS WRITING PASS] You are not out on the line.';
+		if (!journey) return 'You are not out on the line.';
 		var tracks = v.stationTracks[id] || setup.railyard.generateStationTracks(id, v.randomSeed);
 		var onEntry = this.entersOnEntryLead(id, journey);
 		if (!setup.railyard.trackExists(tracks, onEntry ? setup.railyard.getEntryTrackIndex() : setup.railyard.getExitTrackIndex(tracks)))

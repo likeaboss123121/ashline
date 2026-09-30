@@ -12,7 +12,7 @@ setup.saveMigrations = {
 		if (version === undefined) return 0;
 		if (!Number.isInteger(version) || version < 0) throw new Error('Invalid save schema version.');
 		if (version > this.CURRENT) throw new Error('This save is for a newer version of Ashline. Please start a new game to play in this version, or play in '
-			+ (typeof release === 'string' && /^\d+(\.\d+)*$/.test(release) ? 'v' + release : '[NEEDS WRITING PASS] the version it was saved in')
+			+ (typeof release === 'string' && /^\d+(\.\d+)*$/.test(release) ? 'v' + release : 'the version it was saved in')
 			+ ' or newer to continue the saved game.');
 		return version;
 	},
@@ -390,8 +390,8 @@ setup.saveMigrations = {
 		if (setup.bugReport) setup.bugReport.recent = [];
 		this.notice = upgraded ? 'Save upgraded to v' + setup.releaseVersion
 			+ '. Your original save has not been overwritten. Export a new backup from Saves.' : '';
-		if(relocated) this.notice += ' [NEEDS WRITING PASS] — The coordinates in your save no longer exist. You have been moved to a nearby station.';
-		if(repaired) this.notice += ' [NEEDS WRITING PASS] — Your saved location does not exist. You have been moved to a nearby station.';
+		if(relocated) this.notice += ' The coordinates in your save no longer exist. You have been moved to a nearby station.';
+		if(repaired) this.notice += ' Your saved location does not exist. You have been moved to a nearby station.';
 	},
 	// Browser-tab restoration bypasses Save.onLoad. Upgrade it before Engine.show(),
 	// including every history moment, then persist the converted session snapshot.

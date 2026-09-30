@@ -93,15 +93,15 @@ setup.textValues = {
 	control: function(slot, context, index) {
 		var self=this, key=String(index), wrapper=document.createElement('span'); wrapper.dataset.previewValue=key;
 		var select=document.createElement('select');select.style.maxWidth='12em';select.style.width='auto';
-		select.setAttribute('aria-label','[NEEDS WRITING PASS] '+slot.kind+' '+(index+1));
-		var choices=[['inherit',''],['zero','0 / null'],['memory','Current values'],['tokens','['+slot.kind+']'],['custom','[NEEDS WRITING PASS] Manual value']];
+		select.setAttribute('aria-label',''+slot.kind+' '+(index+1));
+		var choices=[['inherit',''],['zero','0 / null'],['memory','Current values'],['tokens','['+slot.kind+']'],['custom','Manual value']];
 		choices.forEach(function(pair){var o=document.createElement('option');o.value=pair[0];o.textContent=pair[1];select.appendChild(o);});
 		var input=document.createElement('input');input.type='text';input.maxLength=2000;input.style.maxWidth='12em';
-		input.setAttribute('aria-label','[NEEDS WRITING PASS] Manual '+slot.kind+' '+(index+1));
+		input.setAttribute('aria-label','Manual '+slot.kind+' '+(index+1));
 		function update() {
 			var override=context.overrides[key], mode=override?override.mode:'inherit';
 			choices.forEach(function(pair,i){select.options[i].textContent=pair[1];});
-			select.options[0].textContent=(mode==='inherit'?'':'[NEEDS WRITING PASS] Use default: ')+self.text(self.value(slot,context.mode,null)).slice(0,80);
+			select.options[0].textContent=(mode==='inherit'?'':'Use default: ')+self.text(self.value(slot,context.mode,null)).slice(0,80);
 			select.value=mode;
 			if(mode!=='inherit') select.selectedOptions[0].textContent=self.text(self.value(slot,context.mode,override)).slice(0,80);
 			input.hidden=mode!=='custom';

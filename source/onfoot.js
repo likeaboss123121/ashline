@@ -220,7 +220,7 @@ Macro.add('onFootControls', {
 		// A train the player left standing on the line can be boarded again from beside it.
 		var tile = onfoot.getTile();
 		if (tile && setup.yards.lineTrainAt(tile.x, tile.y)) {
-			output += '<<timedlink "[NEEDS WRITING PASS] Climb aboard the train you left here" 2 "generic">>'
+			output += '<<timedlink "Climb aboard the train you left here" 2 "generic">>'
 				+ '<<if setup.yards.boardParked(' + tile.x + ', ' + tile.y + ')>><<goto "OnTheLine">><</if>><</timedlink>><br>';
 		}
 		[1, -1].forEach(function(direction) {

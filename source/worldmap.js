@@ -1206,7 +1206,7 @@ setup.worldmap = {
 				+ networkStats.bridgeKm + ' km). Yard contents still use seed ' + this.getSeed() + '.';
 			parent.appendChild(heading);
 			var instructions = document.createElement('p');
-			instructions.textContent = '[NEEDS WRITING PASS] Debug teleport: Click on the map to teleport, or choose a station in the dropdown below.';
+			instructions.textContent = 'Debug teleport: Click on the map to teleport, or choose a station in the dropdown below.';
 			var self = this;
 			var teleport = function(legIndex, x, y) {
 				var result = self.debugTeleportToTile(Number(legIndex), Number(x), Number(y));
@@ -1222,9 +1222,9 @@ setup.worldmap = {
 			var controls = document.createElement('div');
 			controls.className = 'debug-map-teleport-controls';
 			var label = document.createElement('label');
-			label.textContent = '[NEEDS WRITING PASS] Station: ';
+			label.textContent = 'Station: ';
 			var select = document.createElement('select');
-			select.setAttribute('aria-label', '[NEEDS WRITING PASS] Station to teleport to');
+			select.setAttribute('aria-label', 'Station to teleport to');
 			// Every station: listing hundreds of thousands of squares would make the list useless.
 			var listed = route.tiles.filter(function(tile) { return tile.stationIndex; })
 				.sort(function(a, b) { return a.stationIndex - b.stationIndex; });
@@ -1271,7 +1271,7 @@ setup.worldmap = {
 			parent.appendChild(globe);
 			parent.appendChild(readout);
 			var legend = document.createElement('p');
-			legend.textContent = '[NEEDS WRITING PASS] Railways imported from IRL railways appear in white. Programmatically generated railways appear in red. Click on a station or tile in the map to teleport to it with your consist.';
+			legend.textContent = 'Railways imported from IRL railways appear in white. Programmatically generated railways appear in red. Click on a station or tile in the map to teleport to it with your consist.';
 			parent.appendChild(legend);
 		} catch (error) {
 			var failure = document.createElement('p');

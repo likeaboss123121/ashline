@@ -216,7 +216,7 @@ setup.globe = {
 		var canvas = document.createElement('canvas');
 		canvas.className = 'globe-map-canvas';
 		canvas.setAttribute('role', 'img');
-		canvas.setAttribute('aria-label', options.revealAll ? '[NEEDS WRITING PASS] World railway network' : 'Map of the railways you have seen');
+		canvas.setAttribute('aria-label', options.revealAll ? 'World railway network' : 'Map of the railways you have seen');
 		var overlay = document.createElement('canvas');
 		overlay.className = 'globe-map-overlay';
 		overlay.setAttribute('aria-hidden', 'true');
@@ -634,15 +634,15 @@ setup.globe = {
 			pans.push({ element: b.firstChild, bearing: bearing });
 			return b;
 		};
-		button('↺', '[NEEDS WRITING PASS] Turn the map 15 degrees anticlockwise', function() { turnTo(view.rotation - turnStep); });
-		pan('↑', '[NEEDS WRITING PASS] Pan north', 0);
-		button('↻', '[NEEDS WRITING PASS] Turn the map 15 degrees clockwise', function() { turnTo(view.rotation + turnStep); });
-		pan('↑', '[NEEDS WRITING PASS] Pan west', 270);
-		button('◎', '[NEEDS WRITING PASS] Centre on where you are', centreOnHere);
-		pan('↑', '[NEEDS WRITING PASS] Pan east', 90);
-		button('−', '[NEEDS WRITING PASS] Zoom out', function() { zoomBy(1 / 1.6); });
-		pan('↑', '[NEEDS WRITING PASS] Pan south', 180);
-		button('+', '[NEEDS WRITING PASS] Zoom in', function() { zoomBy(1.6); });
+		button('↺', 'Turn the map 15 degrees anticlockwise', function() { turnTo(view.rotation - turnStep); });
+		pan('↑', 'Pan north', 0);
+		button('↻', 'Turn the map 15 degrees clockwise', function() { turnTo(view.rotation + turnStep); });
+		pan('↑', 'Pan west', 270);
+		button('◎', 'Centre on where you are', centreOnHere);
+		pan('↑', 'Pan east', 90);
+		button('−', 'Zoom out', function() { zoomBy(1 / 1.6); });
+		pan('↑', 'Pan south', 180);
+		button('+', 'Zoom in', function() { zoomBy(1.6); });
 		// Each pan arrow points the way it pans, as the map is turned.
 		var turnArrows = function() {
 			pans.forEach(function(item) {
@@ -794,11 +794,11 @@ setup.globe = {
 			list.appendChild(li);
 		};
 		item('<circle cx="12" cy="7" r="5.5" fill="none" stroke="#e0625c" stroke-width="1.6"/><circle cx="12" cy="7" r="2.8" fill="#e0625c"/>', 'You are here');
-		item('<circle cx="12" cy="7" r="3.5" fill="#e5c58a" stroke="#101416" stroke-width="1.2"/>', '[NEEDS WRITING PASS] A station you have been to');
-		item('<circle cx="12" cy="7" r="3.5" fill="#101416" stroke="#e5c58a" stroke-width="1.4"/>', '[NEEDS WRITING PASS] A station you know of');
-		item('<path d="M1 7H23" stroke="#101416" stroke-width="4"/><path d="M1 7H23" stroke="#d8d2c4" stroke-width="2"/>', '[NEEDS WRITING PASS] Railway you know');
-		item('<path d="M1 7H23" stroke="#d8d2c4" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.6"/>', '[NEEDS WRITING PASS] The line runs on into country you have not seen');
-		item('<rect x="1" y="1" width="22" height="12" fill="#3a3d38"/>', '[NEEDS WRITING PASS] Fog: country you have not seen');
+		item('<circle cx="12" cy="7" r="3.5" fill="#e5c58a" stroke="#101416" stroke-width="1.2"/>', 'A station you have been to');
+		item('<circle cx="12" cy="7" r="3.5" fill="#101416" stroke="#e5c58a" stroke-width="1.4"/>', 'A station you know of');
+		item('<path d="M1 7H23" stroke="#101416" stroke-width="4"/><path d="M1 7H23" stroke="#d8d2c4" stroke-width="2"/>', 'Railway you know');
+		item('<path d="M1 7H23" stroke="#d8d2c4" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.6"/>', 'The line runs on into country you have not seen');
+		item('<rect x="1" y="1" width="22" height="12" fill="#3a3d38"/>', 'Fog: country you have not seen');
 		return list;
 	}
 };

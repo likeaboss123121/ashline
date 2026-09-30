@@ -710,9 +710,13 @@ test('wiki text browser safely searches source text, preserves filters and stays
   assert.doesNotMatch(previewCheck.text,/private code|nested|hidden|setup\.|State\.|window\.|<<|<script/);
   await page.getByRole('button',{name:'Wiki',exact:true}).click();
   const text=page.locator('#wiki-text-browser');
-  assert.match(await page.locator('#developer-Wiki [data-writing-warning]').innerText(),/Writing review outstanding: \d+ marked text entries/);
-  assert.equal(await page.locator('#developer-Wiki [data-writing-warning]').getAttribute('role'),'alert');
-  assert.equal(await page.locator('#developer-Debug [data-writing-warning]').count(),1);
+  // The warning shows only while any text still carries a writing-pass tag.
+  const pending=await page.evaluate(()=>SugarCube.setup.textWritingPendingCount||0);
+  if(pending){
+    assert.match(await page.locator('#developer-Wiki [data-writing-warning]').innerText(),/Writing review outstanding: \d+ marked text entries/);
+    assert.equal(await page.locator('#developer-Wiki [data-writing-warning]').getAttribute('role'),'alert');
+    assert.equal(await page.locator('#developer-Debug [data-writing-warning]').count(),1);
+  } else assert.equal(await page.locator('#developer-Wiki [data-writing-warning]').count(),0);
   assert.equal(await page.evaluate(()=>{
     const s=SugarCube.setup,previous=s.textWritingPendingCount,host=document.createElement('div');
     try {s.textWritingPendingCount=0;s.textWiki.appendWarning(host);return host.childElementCount;}
@@ -721,24 +725,24 @@ test('wiki text browser safely searches source text, preserves filters and stays
   assert.equal(await text.locator('input').count(),0,'catalogue controls stay lazy');
   assert.equal(await page.evaluate(()=>SugarCube.setup.textWiki.entries),null);
   await text.locator(':scope > summary').click();
-  const query=text.getByLabel('[NEEDS WRITING PASS] — Search',{exact:true});
+  const query=text.getByLabel('Search',{exact:true});
   await query.waitFor();
   assert.ok(await text.locator('[data-text-results] > details').count()<=25);
-  const status=text.locator('[role=status]'),jump=text.getByLabel('[NEEDS WRITING PASS] — Page number',{exact:true});
+  const status=text.locator('[role=status]'),jump=text.getByLabel('Page number',{exact:true});
   const pages=Number((await status.innerText()).match(/page 1 \/ (\d+)/)[1]);assert.ok(pages>3);
-  await text.getByRole('button',{name:'[NEEDS WRITING PASS] — Last',exact:true}).click();
+  await text.getByRole('button',{name:'Last',exact:true}).click();
   assert.match(await status.innerText(),new RegExp('page '+pages+' / '+pages));
-  assert.equal(await text.getByRole('button',{name:'[NEEDS WRITING PASS] — Next',exact:true}).isDisabled(),true);
+  assert.equal(await text.getByRole('button',{name:'Next',exact:true}).isDisabled(),true);
   await jump.fill('3');await jump.press('Enter');
   assert.match(await status.innerText(),/page 3 \//);
   await jump.fill(String(pages+100));await jump.press('Enter');
   assert.match(await status.innerText(),new RegExp('page '+pages+' /'),'a page past the end shows the last');
-  await text.getByRole('button',{name:'[NEEDS WRITING PASS] — First',exact:true}).click();
+  await text.getByRole('button',{name:'First',exact:true}).click();
   assert.match(await status.innerText(),/page 1 \//);assert.equal(await jump.inputValue(),'1');
-  const defaultMode=text.getByLabel('[NEEDS WRITING PASS] — Preview default',{exact:true});
+  const defaultMode=text.getByLabel('Preview default',{exact:true});
   assert.equal(await defaultMode.locator('option').count(),3);
   await defaultMode.selectOption('memory');
-  await text.getByLabel('[NEEDS WRITING PASS] — Category',{exact:true}).selectOption('passages');
+  await text.getByLabel('Category',{exact:true}).selectOption('passages');
   await query.fill('lone train engineer');
   const result=text.locator('[data-text-results] > details');
   await page.waitForFunction(()=>document.querySelectorAll('#wiki-text-browser [data-text-results] > details').length===1);
@@ -756,7 +760,7 @@ test('wiki text browser safely searches source text, preserves filters and stays
   const statLine=fs.readFileSync(path.join(__dirname,'..','source','scripts.js'),'utf8').split(/\r?\n/)
     .findIndex(line=>line.includes("stat.label + ' (' + setup.stats.getValue(stat.key)"))+1;
   assert.ok(statLine>0);
-  await text.getByLabel('[NEEDS WRITING PASS] — Category',{exact:true}).selectOption('');
+  await text.getByLabel('Category',{exact:true}).selectOption('');
   await query.fill('scripts.js:'+statLine);
   await page.waitForFunction(line=>{const rows=document.querySelectorAll('#wiki-text-browser [data-text-results] > details > summary');
     return rows.length===1&&rows[0].textContent.includes('source/scripts.js:'+line+' ');},statLine);
@@ -782,27 +786,31 @@ test('wiki text browser safely searches source text, preserves filters and stays
   assert.equal(await defaultMode.inputValue(),'memory');
   assert.equal(await page.evaluate(()=>JSON.stringify(SugarCube.State.variables)),before,'wiki edits never change game variables');
   await page.screenshot({path:'test-results/text-wiki-inline-values.png'});
-  await text.getByLabel('[NEEDS WRITING PASS] — Category',{exact:true}).selectOption('');
+  await text.getByLabel('Category',{exact:true}).selectOption('');
   await query.fill('Punta Arenas');
   await page.waitForTimeout(180);
   assert.ok(await result.count()>0);
-  await text.getByLabel('[NEEDS WRITING PASS] — Category',{exact:true}).selectOption('engine');
+  await text.getByLabel('Category',{exact:true}).selectOption('engine');
   await query.fill('');
   await page.waitForTimeout(180);
   assert.ok(await result.count()>0,'SugarCube UI strings are indexed too');
-  await text.getByLabel('[NEEDS WRITING PASS] — Category',{exact:true}).selectOption('scripts');
-  await text.getByLabel('[NEEDS WRITING PASS] — Only marked text',{exact:true}).check();
-  assert.ok(await result.count()>0);
-  await result.first().locator('summary').click();
-  await result.first().locator('[data-text-preview]').waitFor();
-  assert.match(await result.first().locator('[data-text-preview]').innerText(),/NEEDS WRITING PASS/);
+  await text.getByLabel('Category',{exact:true}).selectOption('scripts');
+  await text.getByLabel('View pending unfinished writing passes',{exact:true}).check();
+  await page.waitForTimeout(180);
+  const marked=await page.evaluate(()=>SugarCube.setup.textWiki.find(SugarCube.setup.textWiki.selection).length);
+  assert.equal(await result.count(),Math.min(25,marked));
+  if(marked){
+    await result.first().locator('summary').click();
+    await result.first().locator('[data-text-preview]').waitFor();
+    assert.match(await result.first().locator('[data-text-preview]').innerText(),/NEEDS WRITING PASS/);
+  }
   const overflow=await text.evaluate(el=>el.scrollWidth>el.clientWidth+1);
   assert.equal(overflow,false,'source text wraps inside the mobile panel');
   await page.getByRole('button',{name:'Close Wiki',exact:true}).click();
   await page.getByRole('button',{name:'Wiki',exact:true}).click();
   await query.waitFor();
-  assert.equal(await text.getByLabel('[NEEDS WRITING PASS] — Category',{exact:true}).inputValue(),'scripts');
-  assert.equal(await text.getByLabel('[NEEDS WRITING PASS] — Only marked text',{exact:true}).isChecked(),true);
+  assert.equal(await text.getByLabel('Category',{exact:true}).inputValue(),'scripts');
+  assert.equal(await text.getByLabel('View pending unfinished writing passes',{exact:true}).isChecked(),true);
   await page.screenshot({path:'test-results/text-wiki-mobile.png',fullPage:true});
   await page.setViewportSize({width:1280,height:900});
   await page.screenshot({path:'test-results/text-wiki-desktop.png',fullPage:true});

@@ -7,7 +7,7 @@ setup.textWiki = {
 		var warning=document.createElement('p');
 		warning.setAttribute('role','alert');warning.dataset.writingWarning='';
 		var text=document.createElement('strong');
-		text.textContent='[NEEDS WRITING PASS] — Writing review outstanding: '+count+' marked text entries. See Wiki → Game text → Only marked text.';
+		text.textContent='Writing review outstanding: '+count+' marked text entries. See Wiki → Game text → Only marked text.';
 		warning.appendChild(text);parent.appendChild(warning);
 	},
 	selection: { query: '', category: '', file: '', placeholders: false, page: 0, mode: 'tokens' },
@@ -19,12 +19,12 @@ setup.textWiki = {
 	},
 	entries: null,
 	categories: {
-		passages: '[NEEDS WRITING PASS] — Passages and sidebar text',
-		scripts: '[NEEDS WRITING PASS] — Script text, labels and templates',
-		graphics: '[NEEDS WRITING PASS] — SVG captions and text',
-		styles: '[NEEDS WRITING PASS] — CSS text',
-		world: '[NEEDS WRITING PASS] — Geographic names and data text',
-		engine: '[NEEDS WRITING PASS] — SugarCube interface text'
+		passages: 'Passages and sidebar text',
+		scripts: 'Script text, labels and templates',
+		graphics: 'SVG captions and text',
+		styles: 'CSS text',
+		world: 'Geographic names and data text',
+		engine: 'SugarCube interface text'
 	},
 	catalogue: function() {
 		if (this.entries) return this.entries;
@@ -52,7 +52,7 @@ setup.textWiki = {
 		});
 	},
 	appendBrowser: function(parent) {
-		var self = this, section = setup.svgWiki.folder(parent, '[NEEDS WRITING PASS] — Game text', 'text');
+		var self = this, section = setup.svgWiki.folder(parent, 'Game text', 'text');
 		section.id = 'wiki-text-browser';
 		var loaded = false;
 		section.addEventListener('toggle', function() {
@@ -63,7 +63,7 @@ setup.textWiki = {
 	controls: function(section) {
 		var self = this, state = this.selection, rows = this.catalogue();
 		var note = document.createElement('p');
-		note.textContent = '[NEEDS WRITING PASS] — This is the Game Text reader. Use this to find how text appears, and where it\'s located in the code.';
+		note.textContent = 'This is the Game Text reader. Use this to find how text appears, and where it\'s located in the code.';
 		section.appendChild(note);
 		function field(labelText, element) {
 			var p = document.createElement('p'), label = document.createElement('label');
@@ -71,7 +71,7 @@ setup.textWiki = {
 			label.appendChild(document.createTextNode(labelText + ' ')); label.appendChild(element);
 			p.appendChild(label); section.appendChild(p); element.style.maxWidth = '100%'; return element;
 		}
-		var query = field('[NEEDS WRITING PASS] — Search', document.createElement('input'));
+		var query = field('Search', document.createElement('input'));
 		query.type = 'search'; query.value = state.query;
 		function picker(label, entries, selected) {
 			var select = field(label, document.createElement('select'));
@@ -80,15 +80,15 @@ setup.textWiki = {
 			});
 			select.value = selected; return select;
 		}
-		var category = picker('[NEEDS WRITING PASS] — Category', [['', '[NEEDS WRITING PASS] — All categories']].concat(
+		var category = picker('Category', [['', 'All categories']].concat(
 			Object.keys(this.categories).map(function(key) { return [key, self.categories[key]]; })), state.category);
-		var mode=picker('[NEEDS WRITING PASS] — Preview default',[
+		var mode=picker('Preview default',[
 			['zero','0 / null'],['memory','Current values'],['tokens','[VALUE], [LINK], [STAT]']
 		],state.mode);
-		var file = field('[NEEDS WRITING PASS] — Source', document.createElement('select'));
+		var file = field('Source', document.createElement('select'));
 		function files() {
 			file.replaceChildren();
-			[['', '[NEEDS WRITING PASS] — All sources']].concat(Array.from(new Set(rows.filter(function(row) {
+			[['', 'All sources']].concat(Array.from(new Set(rows.filter(function(row) {
 				return !state.category || row[0] === state.category;
 			}).map(function(row) { return row[1]; }))).sort().map(function(name) { return [name,name]; })).forEach(function(pair) {
 				var option = document.createElement('option'); option.value = pair[0]; option.textContent = pair[1]; file.appendChild(option);
@@ -96,7 +96,7 @@ setup.textWiki = {
 			file.value = state.file;
 		}
 		files();
-		var placeholders = field('[NEEDS WRITING PASS] — View pending unfinished writing passes', document.createElement('input'));
+		var placeholders = field('View pending unfinished writing passes', document.createElement('input'));
 		placeholders.type = 'checkbox'; placeholders.checked = state.placeholders;
 		var count = document.createElement('p'); count.setAttribute('role', 'status'); section.appendChild(count);
 		var results = document.createElement('div'); results.dataset.textResults = ''; section.appendChild(results);
@@ -106,22 +106,22 @@ setup.textWiki = {
 			var b = document.createElement('button'); b.type = 'button'; b.textContent = label;
 			b.addEventListener('click', function() { state.page = target(); show(); }); nav.appendChild(b); return b;
 		}
-		var first = button('[NEEDS WRITING PASS] — First', function() { return 0; });
-		var previous = button('[NEEDS WRITING PASS] — Previous', function() { return state.page - 1; });
+		var first = button('First', function() { return 0; });
+		var previous = button('Previous', function() { return state.page - 1; });
 		var jump = document.createElement('input'); jump.type = 'number'; jump.min = 1; jump.step = 1; jump.style.width = '6em';
-		jump.setAttribute('aria-label', '[NEEDS WRITING PASS] — Page number'); nav.appendChild(jump);
+		jump.setAttribute('aria-label', 'Page number'); nav.appendChild(jump);
 		jump.addEventListener('change', function() {
 			var page = Math.floor(Number(jump.value));
 			if (jump.value !== '' && isFinite(page)) state.page = page - 1;
 			show();
 		});
-		var next = button('[NEEDS WRITING PASS] — Next', function() { return state.page + 1; });
-		var last = button('[NEEDS WRITING PASS] — Last', function() { return Infinity; });
+		var next = button('Next', function() { return state.page + 1; });
+		var last = button('Last', function() { return Infinity; });
 		function show() {
 			var opened=new Set(Array.from(results.children).filter(function(entry){return entry.open;}).map(function(entry){return entry.textRow;}));
 			var matches = self.find(state), pages = Math.max(1, Math.ceil(matches.length / 25));
 			state.page = Math.max(0, Math.min(state.page, pages - 1));
-			count.textContent = '[NEEDS WRITING PASS] — ' + matches.length + ' entries; page ' + (state.page + 1) + ' / ' + pages;
+			count.textContent = '' + matches.length + ' entries; page ' + (state.page + 1) + ' / ' + pages;
 			first.disabled = previous.disabled = state.page === 0; next.disabled = last.disabled = state.page + 1 >= pages;
 			jump.max = pages; jump.value = state.page + 1;
 			results.replaceChildren();
