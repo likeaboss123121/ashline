@@ -1206,7 +1206,7 @@ setup.worldmap = {
 				+ networkStats.bridgeKm + ' km). Yard contents still use seed ' + this.getSeed() + '.';
 			parent.appendChild(heading);
 			var instructions = document.createElement('p');
-			instructions.textContent = '[NEEDS WRITING PASS] Debug teleport: click the track on the map, or choose a station below. If you are aboard, your entire consist moves with you; on foot, only you move.';
+			instructions.textContent = '[NEEDS WRITING PASS] Debug teleport: Click on the map to teleport, or choose a station in the dropdown below.';
 			var self = this;
 			var teleport = function(legIndex, x, y) {
 				var result = self.debugTeleportToTile(Number(legIndex), Number(x), Number(y));

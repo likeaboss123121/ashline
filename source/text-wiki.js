@@ -96,7 +96,7 @@ setup.textWiki = {
 			file.value = state.file;
 		}
 		files();
-		var placeholders = field('[NEEDS WRITING PASS] — Only marked text', document.createElement('input'));
+		var placeholders = field('[NEEDS WRITING PASS] — View pending unfinished writing passes', document.createElement('input'));
 		placeholders.type = 'checkbox'; placeholders.checked = state.placeholders;
 		var count = document.createElement('p'); count.setAttribute('role', 'status'); section.appendChild(count);
 		var results = document.createElement('div'); results.dataset.textResults = ''; section.appendChild(results);
