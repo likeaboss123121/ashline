@@ -692,6 +692,17 @@ test('wiki text browser safely searches source text, preserves filters and stays
   const query=text.getByLabel('[NEEDS WRITING PASS] — Search',{exact:true});
   await query.waitFor();
   assert.ok(await text.locator('[data-text-results] > details').count()<=25);
+  const status=text.locator('[role=status]'),jump=text.getByLabel('[NEEDS WRITING PASS] — Page number',{exact:true});
+  const pages=Number((await status.innerText()).match(/page 1 \/ (\d+)/)[1]);assert.ok(pages>3);
+  await text.getByRole('button',{name:'[NEEDS WRITING PASS] — Last',exact:true}).click();
+  assert.match(await status.innerText(),new RegExp('page '+pages+' / '+pages));
+  assert.equal(await text.getByRole('button',{name:'[NEEDS WRITING PASS] — Next',exact:true}).isDisabled(),true);
+  await jump.fill('3');await jump.press('Enter');
+  assert.match(await status.innerText(),/page 3 \//);
+  await jump.fill(String(pages+100));await jump.press('Enter');
+  assert.match(await status.innerText(),new RegExp('page '+pages+' /'),'a page past the end shows the last');
+  await text.getByRole('button',{name:'[NEEDS WRITING PASS] — First',exact:true}).click();
+  assert.match(await status.innerText(),/page 1 \//);assert.equal(await jump.inputValue(),'1');
   const defaultMode=text.getByLabel('[NEEDS WRITING PASS] — Preview default',{exact:true});
   assert.equal(await defaultMode.locator('option').count(),3);
   await defaultMode.selectOption('memory');
@@ -702,18 +713,26 @@ test('wiki text browser safely searches source text, preserves filters and stays
   await result.locator('summary').click();
   await result.locator('[data-text-preview]').waitFor();
   assert.match(await result.locator('[data-text-preview]').innerText(),/Begin your journey/);
-  assert.doesNotMatch(await result.innerText(),/<<|startNewGame|<\/link>/);
+  // Code may appear only in the source pointers Likea asked for, never in the rendered text itself.
+  assert.doesNotMatch(await result.evaluate(el=>{const c=el.cloneNode(true);c.querySelectorAll('[data-definitions]').forEach(n=>n.remove());return c.innerText||c.textContent;}),/<<|startNewGame|<\/link>/);
+  assert.match(await result.locator('[data-definitions]').first().innerText(),/<<startNewGame>> scripts\.js:\d+/);
   await result.locator('[data-text-preview] a').evaluate(el=>el.click());
   assert.equal(await page.evaluate(()=>JSON.stringify(SugarCube.State.variables)),before);
   await page.screenshot({path:'test-results/text-wiki-rendered.png'});
-  await query.fill('Fatigue:');
-  await page.waitForFunction(()=>document.querySelector('#wiki-text-browser [data-text-results] > details > summary')?.textContent.includes(' — Sleep — '));
+  // No passage prints a stat since the Sleep screen lost its Fatigue line; the debug condition picker's label does.
+  // Searching by file:line finds it.
+  const statLine=fs.readFileSync(path.join(__dirname,'..','source','scripts.js'),'utf8').split(/\r?\n/)
+    .findIndex(line=>line.includes("stat.label + ' (' + setup.stats.getValue(stat.key)"))+1;
+  assert.ok(statLine>0);
+  await text.getByLabel('[NEEDS WRITING PASS] — Category',{exact:true}).selectOption('');
+  await query.fill('scripts.js:'+statLine);
+  await page.waitForFunction(line=>{const rows=document.querySelectorAll('#wiki-text-browser [data-text-results] > details > summary');
+    return rows.length===1&&rows[0].textContent.includes('source/scripts.js:'+line+' ');},statLine);
   await result.locator('summary').click();
   const stat=result.locator('[data-text-preview] select[aria-label*="STAT"]').first();
   await stat.waitFor();
-  const currentFatigue=await page.evaluate(()=>String(SugarCube.State.variables.player.fatigue));
   const displayed=()=>stat.evaluate(el=>el.selectedOptions[0].textContent);
-  assert.equal(await displayed(),currentFatigue);
+  const currentFatigue=await displayed();
   await defaultMode.selectOption('zero');await stat.waitFor();assert.equal(await displayed(),'0');
   await defaultMode.selectOption('tokens');await stat.waitFor();assert.equal(await displayed(),'[STAT]');
   await stat.selectOption('custom');

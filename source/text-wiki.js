@@ -48,7 +48,7 @@ setup.textWiki = {
 		return this.catalogue().filter(function(row) {
 			return (!selection.category || row[0] === selection.category) && (!selection.file || row[1] === selection.file) &&
 				(!selection.placeholders || (typeof row[5] === 'boolean' ? row[5] : /\[NEEDS WRITING PASS\]/.test(row[4]))) &&
-				(!needle || [row[1], row[3], row[4]].join('\n').toLocaleLowerCase().indexOf(needle) !== -1);
+				(!needle || [row[1] + (row[2] ? ':' + row[2] : ''), row[3], row[4]].join('\n').toLocaleLowerCase().indexOf(needle) !== -1);
 		});
 	},
 	appendBrowser: function(parent) {
@@ -101,17 +101,29 @@ setup.textWiki = {
 		var count = document.createElement('p'); count.setAttribute('role', 'status'); section.appendChild(count);
 		var results = document.createElement('div'); results.dataset.textResults = ''; section.appendChild(results);
 		var nav = document.createElement('p'); section.appendChild(nav);
-		function button(label, change) {
+		// show() clamps the page, so Last can ask for any page past the end.
+		function button(label, target) {
 			var b = document.createElement('button'); b.type = 'button'; b.textContent = label;
-			b.addEventListener('click', function() { state.page += change; show(); }); nav.appendChild(b); return b;
+			b.addEventListener('click', function() { state.page = target(); show(); }); nav.appendChild(b); return b;
 		}
-		var previous = button('[NEEDS WRITING PASS] — Previous', -1), next = button('[NEEDS WRITING PASS] — Next', 1);
+		var first = button('[NEEDS WRITING PASS] — First', function() { return 0; });
+		var previous = button('[NEEDS WRITING PASS] — Previous', function() { return state.page - 1; });
+		var jump = document.createElement('input'); jump.type = 'number'; jump.min = 1; jump.step = 1; jump.style.width = '6em';
+		jump.setAttribute('aria-label', '[NEEDS WRITING PASS] — Page number'); nav.appendChild(jump);
+		jump.addEventListener('change', function() {
+			var page = Math.floor(Number(jump.value));
+			if (jump.value !== '' && isFinite(page)) state.page = page - 1;
+			show();
+		});
+		var next = button('[NEEDS WRITING PASS] — Next', function() { return state.page + 1; });
+		var last = button('[NEEDS WRITING PASS] — Last', function() { return Infinity; });
 		function show() {
 			var opened=new Set(Array.from(results.children).filter(function(entry){return entry.open;}).map(function(entry){return entry.textRow;}));
 			var matches = self.find(state), pages = Math.max(1, Math.ceil(matches.length / 25));
 			state.page = Math.max(0, Math.min(state.page, pages - 1));
 			count.textContent = '[NEEDS WRITING PASS] — ' + matches.length + ' entries; page ' + (state.page + 1) + ' / ' + pages;
-			previous.disabled = state.page === 0; next.disabled = state.page + 1 >= pages;
+			first.disabled = previous.disabled = state.page === 0; next.disabled = last.disabled = state.page + 1 >= pages;
+			jump.max = pages; jump.value = state.page + 1;
 			results.replaceChildren();
 			matches.slice(state.page * 25, state.page * 25 + 25).forEach(function(row) {
 				var entry = document.createElement('details'), summary = document.createElement('summary');
