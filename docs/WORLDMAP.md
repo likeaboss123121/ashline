@@ -198,6 +198,19 @@ left along its leg from where it stands (its lines carry the `tileIndex` a depar
 kind of yard are kept in `$stationTracks` under the yard's id, and `$currentStation` holds the id of the yard the
 player is in. More kinds of station will use the same registry.
 
+**Kinds of yard** (`source/yard-types.js`, `setup.yardTypes`; Likea, 2026-09-30). A station's yards are of these kinds:
+rural and urban passenger stations and railyards, factory, farm, port, mine, engine shed, oil terminal, timber yard and
+scrapyard (sidings are their own yards out on the line). Which a station has comes from the world seed, its region, its
+local economy (`setup.locales`) and whether the sea is within 8 km (the land mask): a city (an urban region) has a
+railyard and a passenger station and one or two more (factory, port, engine shed, scrapyard, or its economy's own), a
+small place kept for its importance a railyard, a passenger station and a port by the sea, an industrial station its
+economy's yard and sometimes one more, a halt usually a passenger station, and the country one yard, weighted towards
+railyards, passenger stations and the local economy's. The station's own yard is the first; the others are
+`yard:<station>:<kind>`, found again in a save by the station's identity. A kind sets the yard's size, its cars (its own
+weights, anything else rare) and loads, how often a train has a locomotive, the kit left in them (passenger stations and
+engine sheds), derelicts (scrapyards), and the buildings and stores (`setup.stationBuildings`). About three stations in
+four have one yard.
+
 **Trains left on the line.** A player who walks off and boards another train, in a yard or by climbing aboard one
 left on the line, leaves their consist standing where it was: `$lineTrains`, keyed by its square `x,y`, with its leg,
 position and which way it points (`frontAlongLeg`). It blocks the line. A train that drives, reverses or departs onto
