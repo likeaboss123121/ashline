@@ -22,7 +22,7 @@ setup.saveMigrations = {
 		if (!this.object(source) || !Array.isArray(source.history) || !source.history.length
 			|| !Number.isInteger(source.index) || source.index < 0 || source.index >= source.history.length)
 			throw new Error('Invalid save history.');
-		var self = this, state = this.copy(source), upgraded = false, relocated = false;
+		var self = this, state = this.copy(source), upgraded = false, relocated = false, repaired = false;
 		state.history.forEach(function(moment) {
 			if (!self.object(moment) || !self.object(moment.variables)) throw new Error('Invalid save history.');
 			var v = moment.variables, version = self.checkVersion(v.saveSchemaVersion, v.lastPlayedReleaseVersion);
@@ -37,6 +37,7 @@ setup.saveMigrations = {
 			}
 			if (!v.worldIdentity) { v.worldIdentity=self.anchorFor(v); upgraded=true; }
 			if (self.relocateMoment(moment)) { upgraded = true; relocated = true; }
+			if (self.repairPosition(moment)) repaired = true;
 		});
 		setup.saves.validateState(state);
 		if (upgraded) {
@@ -49,7 +50,7 @@ setup.saveMigrations = {
 				moment.variables.pendingBuildNotice = '';
 			});
 		}
-		return { state: state, upgraded: upgraded, relocated: relocated };
+		return { state: state, upgraded: upgraded, relocated: relocated, repaired: repaired };
 	},
 	// Schema 0 includes the public 0.1.0 release and unversioned 0.2.0 development saves.
 	upgradeUnversioned: function(moment) {
@@ -204,9 +205,64 @@ setup.saveMigrations = {
 				moment.variables.worldIdentity=setup.saveMigrations.anchorFor(moment.variables);
 		});
 	},
+	// No released save has the world map with a bad station number or coordinates, so one is tampering or our bug:
+	// it goes to Punta Arenas. A real point on the globe with no tile under it goes to the nearest yard (Likea, 2026-09-29).
+	START_STATION: 'place:cl-punta-arenas',
+	startStation: function(route) {
+		var self=this, index=route.corridor.stations.findIndex(function(item){return item.id===self.START_STATION;});
+		return index+1 || 1;
+	},
+	validCoordinate: function(coordinate) {
+		return Array.isArray(coordinate)&&coordinate.length===2&&coordinate.every(function(x){return typeof x==='number'&&isFinite(x);})
+			&&Math.abs(coordinate[0])<=180&&Math.abs(coordinate[1])<=90;
+	},
+	validStation: function(station,route) {
+		return Number.isInteger(station)&&station>=1&&station<=route.corridor.stations.length;
+	},
+	validTile: function(position,route) {
+		var leg=this.object(position)&&Number.isInteger(position.legIndex)&&route.legs[position.legIndex];
+		// A branch position indexes the branch's own tiles, so only its leg can be checked here.
+		return !!leg&&Number.isInteger(position.tileIndex)&&position.tileIndex>=0
+			&&(!!position.branch||position.tileIndex<leg.tiles.length);
+	},
+	positionValid: function(v) {
+		var route=setup.realWorldPilot.getGridRoute(), self=this;
+		return this.validStation(v.currentStation,route)&&(v.enteredStation==null||this.validStation(v.enteredStation,route))
+			&&(!v.journey||this.validTile(v.journey,route))&&(!v.onFoot||this.validTile(v.onFoot,route))
+			&&Object.keys(v.stationTracks||{}).every(function(key){return self.validStation(Number(key),route)&&String(Number(key))===key;});
+	},
+	// Leave the line and stand at a station, with the consist if the player is aboard it.
+	moveToStation: function(moment,station) {
+		var v=moment.variables;
+		v.journey=null;v.onFoot=null;v.currentStation=station;v.enteredStation=station;
+		delete v.enteredTrackIndex;delete v.enteredTrainIndex;
+		if(v.leavingTrain && !(v.currentTrain && v.currentTrain.length)) {v.currentTrain=v.leavingTrain;v.leavingTrain=null;}
+		if(['OnTheLine','OnFoot','DrivingMode','Railyard'].indexOf(moment.title)>=0)
+			moment.title=Array.isArray(v.currentTrain)&&v.currentTrain.length?'TrainInterior':'Railyard';
+	},
+	repairPosition: function(moment) {
+		var v=moment.variables;
+		if(this.positionValid(v)) return false;
+		var route=setup.realWorldPilot.getGridRoute(), self=this, identity=this.object(v.worldIdentity)?v.worldIdentity:{};
+		if(!this.validStation(v.currentStation,route)) this.moveToStation(moment,this.startStation(route));
+		else if((v.journey&&!this.validTile(v.journey,route))||(v.onFoot&&!this.validTile(v.onFoot,route))) {
+			var anchor=v.onFoot&&identity.onFoot||identity.journey;
+			this.moveToStation(moment,this.nearestStation(anchor&&anchor.coordinate,route));
+		}
+		if(v.enteredStation!=null&&!this.validStation(v.enteredStation,route)) {
+			v.enteredStation=v.currentStation;delete v.enteredTrackIndex;delete v.enteredTrainIndex;
+		}
+		// Keep the stock of a yard filed under a bad station number, as removed yards are kept.
+		v.orphanedStationYards=v.orphanedStationYards||{};
+		Object.keys(v.stationTracks||{}).forEach(function(key){
+			if(self.validStation(Number(key),route)&&String(Number(key))===key) return;
+			v.orphanedStationYards['invalid:'+key]=v.stationTracks[key];delete v.stationTracks[key];
+		});
+		v.worldIdentity=this.anchorFor(v);
+		return true;
+	},
 	nearestStation: function(coordinate,route) {
-		if(!Array.isArray(coordinate)||coordinate.length!==2||!coordinate.every(function(x){return typeof x==='number'&&isFinite(x);}))
-			throw new Error('A removed location has no valid coordinates for relocation.');
+		if(!this.validCoordinate(coordinate)) return this.startStation(route);
 		var best=0,score=Infinity;
 		route.corridor.stations.forEach(function(item,index){
 			var point=route.tiles[item.square].geoCoordinate;
@@ -224,14 +280,13 @@ setup.saveMigrations = {
 		var route=setup.realWorldPilot.getGridRoute(), stations=route.corridor.stations, self=this, byUuid={};
 		stations.forEach(function(item,index){byUuid[item.uuid]=index+1;});
 		function resolve(anchor){
-			if(!anchor) throw new Error('A saved station has no stable identity.');
+			if(!self.object(anchor)) return self.startStation(route);
 			return byUuid[anchor.uuid] || self.nearestStation(anchor.coordinate,route);
 		}
+		// null sends the player to the nearest station to the anchor's coordinates, or Punta Arenas if those are bad too.
 		function locate(anchor){
-			if(!anchor) return null;
-			if(!Number.isInteger(anchor.x)||!Number.isInteger(anchor.y)) throw new Error('A saved tile has invalid grid coordinates.');
-			if(!Array.isArray(anchor.coordinate)||anchor.coordinate.length!==2||!anchor.coordinate.every(function(x){return typeof x==='number'&&isFinite(x);}))
-				throw new Error('A saved tile has invalid fallback coordinates.');
+			if(!self.object(anchor)||!Number.isInteger(anchor.x)||!Number.isInteger(anchor.y)
+				||!self.validCoordinate(anchor.coordinate)) return null;
 			var square=route.byKey[anchor.x+','+anchor.y], place=square && route.place[square.globalPosition];
 			if(square) {
 				var dlon=((square.geoCoordinate[0]-anchor.coordinate[0]+540)%360)-180;
@@ -269,7 +324,7 @@ setup.saveMigrations = {
 		v.stationTracks=yards;
 		// A removed yard cannot safely be interpreted as a different yard layout. Keep
 		// its stock in the save and put the player/consist at the nearest live station.
-		if(!byUuid[old.station.uuid]) moved=true;
+		if(!self.object(old.station)||!byUuid[old.station.uuid]) moved=true;
 		if(moved) {
 			if(!v.currentTrain || !v.currentTrain.length) {
 				var selected=null;
@@ -287,7 +342,7 @@ setup.saveMigrations = {
 		v.worldIdentity=this.anchorFor(v);
 		return true;
 	},
-	afterUpgrade: function(upgraded,relocated) {
+	afterUpgrade: function(upgraded,relocated,repaired) {
 		this.recovery = null;
 		setup.buildCheckDone = false;
 		if (setup.worldmap) setup.worldmap.clearCache();
@@ -295,6 +350,7 @@ setup.saveMigrations = {
 		this.notice = upgraded ? 'Save upgraded to v' + setup.releaseVersion
 			+ '. Your original save has not been overwritten. Export a new backup from Saves.' : '';
 		if(relocated) this.notice += ' [NEEDS WRITING PASS] — The railway map changed. Your location was matched by station UUID or moved to a nearby station. Stock from removed yards remains in the save.';
+		if(repaired) this.notice += ' [NEEDS WRITING PASS] — Your saved location was not on the map, so you have been moved to a station.';
 	},
 	// Browser-tab restoration bypasses Save.onLoad. Upgrade it before Engine.show(),
 	// including every history moment, then persist the converted session snapshot.
@@ -304,7 +360,8 @@ setup.saveMigrations = {
 		// is written before it is stamped), not a save from an older map: it is stamped below, not upgraded.
 		if (State.history.every(function(moment) {
 			return moment.variables && moment.variables.saveSchemaVersion === setup.saveMigrations.CURRENT
-				&& (!moment.variables.worldIdentity || moment.variables.worldIdentity.revision===setup.worldGraphData.networkRevision);
+				&& (!moment.variables.worldIdentity || moment.variables.worldIdentity.revision===setup.worldGraphData.networkRevision)
+				&& setup.saveMigrations.positionValid(moment.variables);
 		})) {
 			// SugarCube writes session storage before :historyupdate. Refresh the active
 			// position anchor and write the completed moment as well.
@@ -326,7 +383,7 @@ setup.saveMigrations = {
 		State.history.splice.apply(State.history, [0, State.history.length].concat(result.state.history));
 		var active = this.copy(result.state.history[result.state.index]);
 		State.active.title = active.title; State.active.variables = active.variables;
-		this.afterUpgrade(result.upgraded,result.relocated);
+		this.afterUpgrade(result.upgraded,result.relocated,result.repaired);
 		setup.applyHistorySetting();
 		this.persistSession();
 	},
@@ -367,7 +424,7 @@ Save.onLoad.add(function(save) {
 	var result = setup.saveMigrations.upgradeState(save.state, save.version);
 	save.state = result.state;
 	save.version = setup.saveMigrations.CURRENT;
-	setup.saveMigrations.afterUpgrade(result.upgraded,result.relocated);
+	setup.saveMigrations.afterUpgrade(result.upgraded,result.relocated,result.repaired);
 });
 jQuery(document).on(':historyupdate.ashline-migrations', function() { setup.saveMigrations.restoreSession(); });
 Macro.add('saveMigrationRecovery', {
