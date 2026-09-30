@@ -63,11 +63,11 @@ setup.onfoot = {
 	// Asks before the player walks out of a yard with no train, then goes onto the line.
 	confirmWalkOut: function() {
 		if (typeof Dialog === 'undefined') return;
-		Dialog.setup('[NEEDS WRITING PASS] Leave on foot?');
+		Dialog.setup('Leave on foot?');
 		var body = document.createElement('div'), text = document.createElement('p');
-		text.textContent = '[NEEDS WRITING PASS] You have no train. Walk out of the yard onto the line on foot?';
+		text.textContent = 'You have no train. Walk out of the yard onto the line on foot?';
 		body.appendChild(text);
-		body.appendChild(setup.saves.button('[NEEDS WRITING PASS] Walk out', 'Leave the yard on foot', function() {
+		body.appendChild(setup.saves.button('Walk out', 'Leave the yard on foot', function() {
 			Dialog.close();
 			if (setup.onfoot.walkOutOfYard()) Engine.play('OnFoot');
 		}, 'saves-primary'));

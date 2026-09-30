@@ -689,7 +689,7 @@ setup.worldmap = {
 				chooser = document.createElement('div');
 				chooser.className = 'debug-map-chooser';
 				var title = document.createElement('p');
-				title.textContent = '[NEEDS WRITING PASS] Teleport to square ' + tile.x + ', ' + tile.y + ':';
+				title.textContent = 'Teleport to square ' + tile.x + ', ' + tile.y + ':';
 				var pick = document.createElement('select');
 				pick.setAttribute('aria-label', 'Yard to teleport to');
 				yards.forEach(function(entry) {
@@ -700,7 +700,7 @@ setup.worldmap = {
 				});
 				var line = document.createElement('option');
 				line.value = 'line';
-				line.textContent = '[NEEDS WRITING PASS] The track on this square';
+				line.textContent = 'The track on this square';
 				pick.appendChild(line);
 				var go = document.createElement('button');
 				go.type = 'button';
@@ -754,7 +754,7 @@ setup.worldmap = {
 			gridBox.className = 'debug-map-grid-toggle';
 			gridBox.addEventListener('change', function() { globe.setGrid(gridBox.checked); });
 			gridLabel.appendChild(gridBox);
-			gridLabel.appendChild(document.createTextNode(' [NEEDS WRITING PASS] Show grid squares (zoom in to see them)'));
+			gridLabel.appendChild(document.createTextNode(' Show grid squares (zoom in to see them)'));
 			parent.appendChild(gridLabel);
 			var legend = document.createElement('p');
 			legend.textContent = 'Railways imported from IRL railways appear in white. Programmatically generated railways appear in red. Click on a station or tile in the map to teleport to it with your consist.';

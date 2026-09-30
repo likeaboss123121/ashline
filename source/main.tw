@@ -73,7 +73,7 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 <p><<link "Return to the station track">><<run setup.onfoot.leaveRailyard()>><<goto "OnFoot">><</link>></p>
 <<else>>
 You step into the railyard. Several trains are parked here, each with its own mix of cars and cargo.
-<p><<link "[NEEDS WRITING PASS] Walk out of the yard on foot">><<run setup.onfoot.confirmWalkOut()>><</link>></p>
+<p><<link "Walk out of the yard on foot">><<run setup.onfoot.confirmWalkOut()>><</link>></p>
 <</if>>
 <<tutorialHint>>
 <<if setup.wayfinding.hasStationMap($currentStation)>><<uiSection "station-map" "Station map" `!setup.tutorial.isActive()`>><<stationMap>><</uiSection>><</if>>
