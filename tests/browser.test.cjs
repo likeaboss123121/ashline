@@ -488,7 +488,6 @@ test('walking the sourced line leads back to the parked train',async t=>{
   assert.equal(await page.evaluate(()=>SugarCube.State.variables.onFoot.inRailyard),true);
   assert.match(await page.locator('#passages').innerText(),/Your train remains parked out on the line/);
   // Boarding here is allowed: the train out on the line stays where it was left (setup.yards).
-  assert.match(await page.locator('#passages').innerText(),/Board another here and it stays where you left it/);
   assert.ok(await page.locator('#passages a').filter({hasText:/^Board Train/}).count()>0);
   assert.equal(await page.locator('.railyard-player-marker').count(),0,'the remote train is not drawn inside the yard');
   await choose(page,'Return to the station track','OnFoot');

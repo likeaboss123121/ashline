@@ -2505,10 +2505,6 @@ Macro.add('railyardButtons', {
 		}
 		var output = '<h2>' + setup.worldmap.getStationName(State.variables.currentStation) + '</h2>';
 		output += '<p>There ' + (totalTrains === 1 ? 'is ' : 'are ') + totalTrains + ' train' + (totalTrains === 1 ? '' : 's') + ' staged across ' + trackCount + ' track' + (trackCount === 1 ? '' : 's') + '.</p>';
-		var remoteTrain = setup.onfoot && setup.onfoot.isInRailyard() && Array.isArray(State.variables.currentTrain)
-			&& State.variables.currentTrain.length > 0;
-		if (remoteTrain) output += '<p class="small-description">[NEEDS WRITING PASS] Your train is parked out on the line. '
-			+ 'Board another here and it stays where you left it, blocking the line until a train couples to it.</p>';
 		var displayNumber = 1;
 		// Each track is rendered independently so empty tracks, finite length, and train numbering stay readable.
 		for (var i = 0; i < tracks.length; i++) {
