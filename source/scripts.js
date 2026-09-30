@@ -275,7 +275,6 @@ setup.startNewRun = function() {
 		trains: [], currentStation: 1, stationTracks: {}, lineTrains: {}, travellingForward: true,
 		gameTimeTimestampMs: setup.time.startTimestampMs, debugSelectedTrackIndex: 0,
 		debugSelectedTrainIndex: 0, debugSelectedCarIndex: -1 });
-	if (setup.worldmap) setup.worldmap.clearCache();
 	if (setup.railyardView) setup.railyardView.zoomLevel = 'fit';
 	if (setup.bugReport) setup.bugReport.recent = [];
 	if (setup.saveMigrations) { setup.saveMigrations.notice = ''; setup.saveMigrations.recovery = null; }
@@ -1668,9 +1667,6 @@ setup.railyard = {
 	// junction has several lines on a side; legIndex says which one.
 	departOntoLine: function(towardExit, legIndex) {
 		var variables = State.variables;
-		if (setup.worldmap.isBranchStation(variables.currentStation)) {
-			return this.departFromBranchTerminus();
-		}
 		var stationId = setup.yards.normalise(variables.currentStation);
 		var line = setup.worldmap.getLine(stationId, towardExit, legIndex);
 		if (!line || this.getDepartureBlockReason(stationId, variables.drivingTrackIndex, towardExit, line.legIndex)) {
@@ -1690,52 +1686,24 @@ setup.railyard = {
 		}
 		return true;
 	},
-	// Leaving a branch terminus: back onto the branch at its far end, facing the junction it came from.
-	departFromBranchTerminus: function() {
-		var variables = State.variables;
-		var branch = setup.worldmap.getBranchForStation(setup.worldmap.getSeed(), variables.currentStation);
-		if (!branch || !branch.tiles.length) {
-			return false;
-		}
-		if (this.getDepartureBlockReason(variables.currentStation, variables.drivingTrackIndex, false)) {
-			return false;
-		}
-		variables.journey = {
-			legIndex: branch.legIndex, branch: branch.id, tileIndex: branch.tiles.length - 1,
-			forward: variables.travellingForward !== false
-		};
-		return true;
-	},
-	// One 5 km step: direction 1 carries on toward the destination, -1 backs up the way the train came. Reaching
-	// either end of the line arrives at the station standing there and ends the journey.
-	// Turning off the main line onto a branch. The branch is then the line the train is running on.
+	// Taking one of the other lines at a junction, or through a station (worldmap.getBranchChoices): onto the chosen
+	// line, facing away from the node, and one step along it.
 	takeBranch: function(branchId) {
 		var step = setup.worldmap.getBranchStep(branchId);
 		if (!step || step.blocked) {
 			return false;
 		}
-		var journey = setup.worldmap.getJourney();
-		// At a junction on the network: onto the chosen line, facing away from the junction, and one step along it.
-		if (step.realWorld) {
-			var legIndex = Number(String(branchId).replace('leg:', ''));
-			State.variables.journey = { legIndex: legIndex, tileIndex: step.fromIndex, forward: step.toIndex > step.fromIndex };
-			return this.moveAlongLine(1);
-		}
-		journey.branch = branchId;
-		journey.tileIndex = 0;
-		State.variables.journey = journey;
-		return true;
+		var legIndex = Number(String(branchId).replace('leg:', ''));
+		State.variables.journey = { legIndex: legIndex, tileIndex: step.fromIndex, forward: step.toIndex > step.fromIndex };
+		return this.moveAlongLine(1);
 	},
+	// One step: direction 1 carries on the way the journey faces, -1 backs up the way the train came.
 	moveAlongLine: function(direction) {
 		var step = setup.worldmap.getJourneyStep(direction);
 		if (!step || step.blocked) {
 			return false;
 		}
 		var journey = setup.worldmap.getJourney();
-		// A branch can end on the main line at either end: back at its junction, or further along where it rejoins.
-		if (step.toMain !== null && typeof step.toMain !== 'undefined') {
-			journey.branch = null;
-		}
 		// Driving up to a train left on the line couples to it, with whichever end of the consist is leading: the
 		// first car when driving the way it was sent off ($travellingForward), the last when reversing.
 		if (step.couples) {
@@ -1746,7 +1714,6 @@ setup.railyard = {
 		journey.tileIndex = step.toIndex;
 		State.variables.journey = journey;
 		// Reaching a station stops on the line outside its yard; entering it is the player's choice (setup.yards).
-		if (step.arrivesAt && setup.worldmap.isBranchStation(step.arrivesAt)) this.arriveAtStation(step.arrivesAt, true);
 		return true;
 	},
 	// Counts how many leading cars can fit inside a finite remaining track length.
@@ -2254,9 +2221,6 @@ setup.railyard = {
 				{ length: 999999, infinite: true, trains: [[tutorialFlatcar]], direction: this.getLegHeading(1, baseSeed) }
 			];
 		}
-		if (setup.worldmap.isBranchStation(stationId)) {
-			return this.generateBranchTerminus(stationId, baseSeed);
-		}
 		// The yard's shape is settled first: how many tracks it has, which track each lead runs along, and how
 		// long its longest track is. Every other length follows from that geometry, so no track is drawn at a
 		// length its switches could not give it.
@@ -2320,39 +2284,6 @@ setup.railyard = {
 		});
 		setup.yardGeneration.reserve(tracks, stationId, baseSeed);
 		this.addDerelict(tracks, shapeRng);
-		setup.yardGeneration.validate(tracks);
-		return tracks;
-	},
-	// A station must not strand a player who arrived with an empty tank.  Keep enough usable diesel on one
-	// locomotive to run the next leg plus a five-percent margin; this is calculated from the same travel clock
-	// that burns fuel, rather than from a fixed distance guess.
-	// The end of a branch: a couple of short roads and one way out, the way the train came in. Shunting here is
-	// the whole point of the place, so it gets no second lead to escape through.
-	generateBranchTerminus: function(stationId, baseSeed) {
-		var branch = setup.worldmap.getBranchForStation(baseSeed, stationId);
-		var rng = this.mulberry32(this.seedFromString(baseSeed + stationId + ':terminus'));
-		var yardCount = this.randomInt(rng, 2, 3);
-		var lengths = [];
-		for (var row = 0; row < yardCount; row++) {
-			lengths.push(this.randomInt(rng, 8, 18) * 10);
-		}
-		var generationLengths = lengths.slice();
-		generationLengths[1] -= 9;
-		var yardTracks = this.generateRailyardTracks(baseSeed + stationId, generationLengths, 0, setup.locales.forStation(stationId, baseSeed));
-		yardTracks[1].length = lengths[1];
-		var tracks = [{ length: 999999, infinite: true, trains: [] }]
-			.concat(yardTracks)
-			.concat([{ length: 999999, infinite: true, trains: [], hasLead: false }]);
-		tracks[0].leadTrack = 1;
-		tracks[tracks.length - 1].leadTrack = yardCount;
-		// The way in is the way the branch runs, so the lead is named for the direction a train leaves by.
-		var last = branch && branch.tiles.length ? branch.tiles[branch.tiles.length - 1] : null;
-		var back = last && last.ends.length ? last.ends[0] : 0;
-		// Preserve all eight headings, including the diagonal route back to the junction.
-		var heading = setup.worldmap.DIRECTIONS[back].name;
-		var cardinal = { n: 'north', ne: 'northeast', nw: 'northwest', s: 'south', se: 'southeast', sw: 'southwest', e: 'east', w: 'west' };
-		tracks[0].direction = cardinal[heading] || 'north';
-		setup.yardGeneration.reserve(tracks, stationId, baseSeed);
 		setup.yardGeneration.validate(tracks);
 		return tracks;
 	},
@@ -2556,13 +2487,12 @@ Macro.add('lineStatus', {
 		var slope = grade > 0 ? 'climbing ' + grade.toFixed(1) + '%'
 			: grade < 0 ? 'descending ' + Math.abs(grade).toFixed(1) + '%' : 'level';
 		var output = '<h2>On the line</h2>';
-		if (view.realWorld) output += '<p><strong>' + view.fromStation + ' to ' + view.toStation + '</strong></p>';
+		output += '<p><strong>' + view.fromStation + ' to ' + view.toStation + '</strong></p>';
 		output += '<p>Tile ' + (Math.min(view.tileIndex, view.tileCount - 1) + 1) + ' of ' + view.tileCount
 			+ ' &middot; ' + view.terrain + ' &middot; ' + slope + '</p>';
-		output += '<p class="small-description">' + (view.branch
-			? setup.units.kilometres(view.kilometresDone) + ' from the junction.'
-			: setup.units.kilometres(view.kilometresDone) + ' behind you, ' + setup.units.kilometres(view.kilometresLeft) + ' to run.') + '</p>';
-		if (view.realWorld && State.variables.debugMode) output += '<p class="small-description">Mean elevation '
+		output += '<p class="small-description">' + setup.units.kilometres(view.kilometresDone) + ' behind you, '
+			+ setup.units.kilometres(view.kilometresLeft) + ' to run.</p>';
+		if (State.variables.debugMode) output += '<p class="small-description">Mean elevation '
 			+ view.tile.elevation.toFixed(1) + ' m &middot; within-tile relief &sigma; '
 			+ view.tile.elevationStdDevM.toFixed(1) + ' m.</p>';
 		output += setup.railyard.getFuelReadout(State.variables.currentTrain);
@@ -2619,7 +2549,7 @@ Macro.add('lineControls', {
 		// At a junction the player knows only which way the rails immediately run. Whether a track reconnects or
 		// ends is deliberately not exposed: there is no map to consult out here.
 		var choices = setup.worldmap.getBranchChoices();
-		var node = view.realWorld && setup.realWorldPilot.getNodeAt(view.legIndex, view.tileIndex);
+		var node = setup.realWorldPilot.getNodeAt(view.legIndex, view.tileIndex);
 		if (choices.length && node && node.kind === 'junction') {
 			output += '<p class="small-description">The line divides here.</p>';
 			output += setup.wayfinding.signMarkup(setup.worldmap.getJourney());
@@ -2642,7 +2572,7 @@ Macro.add('lineControls', {
 				+ choice.terrain + (step.arrivesAt ? ', arriving at ' + setup.worldmap.getStationName(step.arrivesAt) : '')
 				+ '.</span><br>';
 		});
-		if (view.realWorld && !setup.worldmap.getJourneyStep(1) && !choices.length && !view.toStationIndex) {
+		if (!setup.worldmap.getJourneyStep(1) && !choices.length && !view.toStationIndex) {
 			output += '<p class="small-description">The line ends here at a buffer stop.</p>';
 		}
 		output += escapeLink;
@@ -2694,23 +2624,6 @@ Macro.add('drivingTravelButtons', {
 		}
 		var trackIndex = State.variables.drivingTrackIndex;
 		var output = '';
-		if (setup.worldmap.isBranchStation(stationId)) {
-			var terminus = setup.worldmap.getBranchForStation(setup.worldmap.getSeed(), stationId);
-			var terminusReason = setup.railyard.getDepartureBlockReason(stationId, trackIndex, false);
-			var terminusHeading = setup.railyard.getDirectionName(setup.railyard.getLeadDirection(tracks, 'entry'));
-			var terminusLabel = 'Depart ' + terminusHeading;
-			if (terminusReason) {
-				output += '<span class="yard-reason" data-yard-reason="depart:entry"><em>' + terminusLabel
-					+ ' unavailable: ' + terminusReason + '</em></span>';
-			} else {
-				output += '<span data-yard-action="depart:entry"><<link "' + terminusLabel + '">>'
-					+ '<<run setup.railyard.departOntoLine(false)>><<goto "OnTheLine">><</link>></span><br>';
-				output += '<span class="small-description">'
-					+ 'the only track back from this station.</span><br>';
-			}
-			new Wikifier(this.output, output);
-			return;
-		}
 		// One departure per line leaving the station. A plain station has one line each side; a junction can have
 		// several from one side, each named for the heading it leaves in.
 		var lines = setup.realWorldPilot.getStationLines(stationId);
@@ -3088,9 +3001,8 @@ Macro.add('debugTools', {
 		// The complete sourced gameplay grid, with every cell available as a teleport target.
 		startSection('World rail grid', true);
 		setup.worldmap.appendDebugMap(wrapper, State.variables.currentStation);
-		// Worldwide planning chords and the underlying imported geometry remain useful pipeline diagnostics.
+		// What the network is made of.
 		startSection('Global rail data');
-		setup.worldGraph.appendDebugOverview(wrapper);
 		setup.realWorldPilot.appendDebugControls(wrapper);
 		// TrainInterior debug mode focuses on cargo editing for the active consist and current car.
 		if (currentPassage === 'TrainInterior') {

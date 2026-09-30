@@ -15,65 +15,22 @@ test('compiled world artifacts are deterministic and current', () => {
   }));
 });
 
-test('world graph loads all regional chunks without entering save state', () => {
-  const game = loadGame();
-  const graph = game.setup.worldGraph;
-  const stats = graph.getStats();
-  const { networkSquareCount, networkStopCount, networkRailKm, networkNewLineKm, ...planning } = JSON.parse(JSON.stringify(stats));
-  assert.deepEqual(planning, { datasetVersion: 'sa-spike-0.2.0', regionCount: 24, nodeCount: 35, linkCount: 40, corridorCount: 3 });
-  assert.ok(networkSquareCount > 20000 && networkStopCount > 3000, JSON.stringify(stats));
-  assert.ok(networkRailKm > 100000 && networkNewLineKm > 15000, JSON.stringify(stats));
-  assert.equal(graph.loadAll(), true);
-  assert.equal(graph.getNode('cl-punta-arenas').name, 'Punta Arenas');
-  assert.equal(graph.getNode('pa-panama-city').name, 'Panama City');
-  assert.equal(JSON.stringify(game.State.variables).includes('sa-spike-0.2.0'), false);
-});
+// The planning graph (the authored Punta Arenas to Panama corridors) is a pipeline product in world/dist; the game ships
+// only the network and the data credits.
+const fs = require('node:fs');
+const dist = file => JSON.parse(fs.readFileSync(path.join(root, 'world/dist', file), 'utf8'));
 
-test('prototype routes remain explicitly non-navigable planning links', () => {
-  const { setup } = loadGame();
-  const graph = setup.worldGraph;
-  const data = graph.getData();
-  const seenNodes = new Set();
-  const seenLinks = new Set();
-  for (const region of data.regions) {
-    const chunk = graph.loadRegion(region.id);
-    assert.equal(chunk.nodes.length, region.nodeCount);
-    assert.equal(chunk.portals.length, region.portalCount);
-    assert.equal(chunk.links.length, region.linkCount);
-	const resolvable = new Set(chunk.nodes.concat(chunk.portals).map(node => node.id));
-    chunk.nodes.forEach(node => {
-      assert.equal(seenNodes.has(node.id), false);
-      seenNodes.add(node.id);
-    });
-    chunk.links.forEach(link => {
-      assert.equal(seenLinks.has(link.id), false);
-      seenLinks.add(link.id);
-      assert.equal(link.status, 'planning');
-      assert.equal(link.navigable, false);
-      assert.equal(link.reviewRequired, true);
-      assert.equal(link.geometrySource, 'authored-waypoint-chord');
-      assert.equal(link.estimatedSlices, Math.ceil(link.distanceKm / data.tileKm));
-	  assert.equal(resolvable.has(link.from) && resolvable.has(link.to), true);
-    });
-  }
-  assert.equal(seenNodes.size, 35);
-  assert.equal(seenLinks.size, 40);
-});
-
-test('three authored Punta Arenas to Panama corridors are independently queryable', () => {
-  const { setup } = loadGame();
-  const graph = setup.worldGraph;
-  const routes = ['pacific', 'central-amazon', 'atlantic'].map(id => graph.getCorridorRoute(id));
-  routes.forEach(route => {
-    assert.equal(route.waypoints[0].id, 'cl-punta-arenas');
-    assert.equal(route.waypoints.at(-1).id, 'pa-panama-city');
-    assert.equal(route.links.length, route.waypoints.length - 1);
-    assert.equal(route.navigable, false);
-  });
-  assert.notDeepEqual(routes[0].waypoints.map(node => node.id), routes[1].waypoints.map(node => node.id));
-  assert.notDeepEqual(routes[1].waypoints.map(node => node.id), routes[2].waypoints.map(node => node.id));
+test('the game ships the network and the data credits, not the planning graph, and none of it enters saves', () => {
+  const game = loadGame(), data = game.setup.worldGraphData;
+  assert.deepEqual(Object.keys(data).sort(),
+    ['datasetVersion', 'formatVersion', 'globe', 'network', 'networkRevision', 'sources', 'tileKm']);
+  assert.ok(data.network.squares.x.length > 20000 && data.network.stops.name.length > 3000);
+  assert.equal(game.setup.worldGraph, undefined);
+  game.setup.startNewRun();
+  assert.equal(JSON.stringify(game.State.variables).includes(data.datasetVersion), false);
   // Both OSM extracts carry the same attribution line, so it appears once per ingested source.
-  assert.deepEqual([...new Set(JSON.parse(JSON.stringify(graph.getAttributions())))], [
+  assert.deepEqual([...new Set(JSON.parse(JSON.stringify(data.sources.filter(source => source.status === 'ingested')
+    .map(source => source.attribution))))], [
     'City names, coordinates and population: GeoNames (https://www.geonames.org/)',
     '© OpenStreetMap contributors; extract provided by Geofabrik',
     '© OpenStreetMap contributors; extracts provided by Geofabrik',
@@ -81,6 +38,49 @@ test('three authored Punta Arenas to Panama corridors are independently queryabl
     'Land outlines made with Natural Earth',
     'Relief made with Natural Earth'
   ]);
+});
+
+test('prototype routes remain explicitly non-navigable planning links', () => {
+  const manifest = dist('manifest.json');
+  assert.equal(manifest.datasetVersion, 'sa-spike-0.2.0');
+  assert.equal(manifest.regions.length, 24);
+  const seenNodes = new Set(), seenLinks = new Set(), nodes = new Map(), links = new Map();
+  for (const region of manifest.regions) {
+    const chunk = dist(region.file);
+    assert.equal(chunk.nodes.length, region.nodeCount);
+    assert.equal(chunk.portals.length, region.portalCount);
+    assert.equal(chunk.links.length, region.linkCount);
+    const resolvable = new Set(chunk.nodes.concat(chunk.portals).map(node => node.id));
+    chunk.nodes.forEach(node => {
+      assert.equal(seenNodes.has(node.id), false);
+      seenNodes.add(node.id); nodes.set(node.id, node);
+    });
+    chunk.links.forEach(link => {
+      assert.equal(seenLinks.has(link.id), false);
+      seenLinks.add(link.id); links.set(link.id, link);
+      assert.equal(link.status, 'planning');
+      assert.equal(link.navigable, false);
+      assert.equal(link.reviewRequired, true);
+      assert.equal(link.geometrySource, 'authored-waypoint-chord');
+      assert.equal(link.estimatedSlices, Math.ceil(link.distanceKm / manifest.tileKm));
+      assert.equal(resolvable.has(link.from) && resolvable.has(link.to), true);
+    });
+  }
+  assert.equal(seenNodes.size, 35);
+  assert.equal(seenLinks.size, 40);
+  assert.equal(nodes.get('cl-punta-arenas').name, 'Punta Arenas');
+  assert.equal(nodes.get('pa-panama-city').name, 'Panama City');
+
+  // Three authored corridors from Punta Arenas to Panama, each its own way.
+  const routes = ['pacific', 'central-amazon', 'atlantic'].map(id => manifest.corridors.find(corridor => corridor.id === id));
+  routes.forEach(route => {
+    assert.equal(route.waypoints[0], 'cl-punta-arenas');
+    assert.equal(route.waypoints.at(-1), 'pa-panama-city');
+    assert.equal(route.planningLinkIds.length, route.waypoints.length - 1);
+    assert.ok(route.planningLinkIds.every(id => links.has(id)));
+  });
+  assert.notDeepEqual(routes[0].waypoints, routes[1].waypoints);
+  assert.notDeepEqual(routes[1].waypoints, routes[2].waypoints);
 });
 
 test('OSM importer retains provenance and operational tags while refusing navigation', () => {
@@ -224,22 +224,21 @@ test('planning links are routed over real rail, with breaks snapped and gaps pro
 });
 
 test('the planning corridors are routed over the continent for comparison, and never played', () => {
-  const game = loadGame();
-  const data = game.setup.worldGraphData;
-  const routes = [...data.routedLinks];
+  const manifest = dist('manifest.json');
+  const routes = manifest.routedLinks;
   // All three corridors: 40 planning links, 38 distinct pairs of cities.
   assert.equal(routes.length, 38);
   routes.forEach(route => {
     assert.equal(route.proposalSetId, 'south-america-routed-links');
     assert.equal(route.navigable, false);
     assert.equal(route.reviewRequired, true);
-    assert.ok(route.runs.length > 0 && route.runs.every(run => run.coordinates.length >= 2));
+    assert.ok(route.sliceCount > 0);
   });
   // Puerto Montt to Santiago runs almost entirely on mapped rail.
   const south = routes.find(route => route.id === 'route:cl-puerto-montt>cl-santiago');
   assert.ok(south.railKm / south.routedKm > 0.95, JSON.stringify(south));
   // Every chunked planning link knows which route replaced it.
-  const links = Object.values(data.chunks).flatMap(chunk => [...chunk.links]);
+  const links = manifest.regions.flatMap(region => dist(region.file).links);
   assert.ok(links.every(link => Array.isArray(link.routedBy) && link.routedBy.length === 1), 'every link routed once');
 });
 

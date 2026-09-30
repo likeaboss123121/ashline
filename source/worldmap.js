@@ -1,8 +1,7 @@
-// The playable world between stations: sourced rail geometry resampled into fixed 5 km grid moves.
+// The playable world between stations: the compiled railway network, a square of the grid at a time.
 //
-// setup.realWorldPilot owns the active route and station topology. This module supplies the common movement,
-// grade, rendering and debug-map APIs used by the passages. The older seeded generator helpers remain below only
-// as compatibility code for old saves and tests; getLeg() and getStationTile() always select the sourced route.
+// setup.realWorldPilot builds the network and owns its stations, legs and junctions. This module supplies movement
+// along it, grades and travel times, compass directions, and the debug map.
 setup.worldmap = {
 	TILE_KM: 5,
 	TILE_METRES: 5000,
@@ -11,22 +10,6 @@ setup.worldmap = {
 	GRADE_STEP: 0.5,
 	GRADE_LIMIT: 5,
 	ROLLING_RESISTANCE: 0.004, // fraction of weight, as a grade the train is always fighting
-	MIN_LEG_TILES: 8,
-	MAX_LEG_TILES: 20,
-	BRANCH_CHANCE: 0.12,
-	REJOIN_CHANCE: 0.45, // of branches that try to find their way back to the main line rather than stopping dead
-	MOUNTAIN_METRES: 1150,
-	// Where the world sits, and what its climate does with that. Station 1 is Punta Arenas.
-	BASE_LATITUDE: -53.2,
-	BASE_LONGITUDE: -70.9,
-	KM_PER_DEGREE: 111,
-	ARCTIC_TEMPERATURE: 0, // degrees C, below which the ground stays frozen
-	DESERT_HUMIDITY: 0.32,
-	FOREST_HUMIDITY: 0.68,
-	// Humidity by how far a tile lies from the equator: wet on the equator, dry under the trade winds, wet again
-	// under the westerlies, and dry over the poles.
-	HUMIDITY_BY_LATITUDE: [[0, 0.88], [12, 0.72], [25, 0.3], [33, 0.28], [45, 0.62], [58, 0.7], [70, 0.45], [90, 0.3]],
-	TUNNEL_METRES: 1450,
 	// Compass directions, 45 degrees apart, so index arithmetic gives turns: a step of 1 is 45 degrees.
 	DIRECTIONS: [
 		{ name: 'n', dx: 0, dy: 1 }, { name: 'ne', dx: 1, dy: 1 },
@@ -36,22 +19,6 @@ setup.worldmap = {
 	],
 	SHAPES: ['straight-ns', 'straight-ew', 'straight-nwse', 'straight-nesw',
 		'turn-45', 'turn-90', 't-junction', 'y-junction', 'cross', 'dead-end'],
-	// What each terrain will carry. Mountains are too tight for a three or four way junction, a bridge or a
-	// tunnel holds one straight track and nothing else, and water carries no track at all: the line bridges it.
-	TERRAIN_RULES: {
-		plains: {},
-		desert: {},
-		arctic: {},
-		forest: {},
-		mountain: { forbidden: ['t-junction', 'y-junction', 'cross'] },
-		bridge: { straightOnly: true },
-		tunnel: { straightOnly: true },
-		water: { noTrack: true }
-	},
-	TERRAIN_COLOURS: {
-		plains: '#3f4a36', forest: '#2c4a2e', desert: '#6b5a36', arctic: '#5d6a72', mountain: '#4a4340',
-		bridge: '#5a4a3a', tunnel: '#332f2c', water: '#24384a'
-	},
 	// --- seeded values -------------------------------------------------------------------------------------
 	getSeed: function() {
 		return String((State.variables && State.variables.randomSeed) || 'ashline');
@@ -59,115 +26,19 @@ setup.worldmap = {
 	rngFor: function() {
 		return setup.railyard.mulberry32(setup.railyard.seedFromString(Array.prototype.slice.call(arguments).join(':')));
 	},
-	noise: function(seed, channel, x, y) {
-		return this.rngFor(seed, channel, x, y)();
-	},
-	// Value noise: one random number per lattice corner, smoothly blended, so neighbouring tiles agree with each
-	// other. Terrain and elevation both need that: a mountain is a range, not a scatter of unrelated peaks.
-	smoothNoise: function(seed, channel, x, y, scale) {
-		var gx = Math.floor(x / scale);
-		var gy = Math.floor(y / scale);
-		var fx = x / scale - gx;
-		var fy = y / scale - gy;
-		var sx = fx * fx * (3 - 2 * fx);
-		var sy = fy * fy * (3 - 2 * fy);
-		var v00 = this.noise(seed, channel, gx, gy);
-		var v10 = this.noise(seed, channel, gx + 1, gy);
-		var v01 = this.noise(seed, channel, gx, gy + 1);
-		var v11 = this.noise(seed, channel, gx + 1, gy + 1);
-		return (v00 * (1 - sx) + v10 * sx) * (1 - sy) + (v01 * (1 - sx) + v11 * sx) * sy;
-	},
-	getElevationMetres: function(seed, x, y) {
-		var broad = this.smoothNoise(seed, 'elev', x, y, 9);
-		var ridge = this.smoothNoise(seed, 'ridge', x, y, 4);
-		return Math.round(broad * 900 + ridge * ridge * 900);
-	},
-	// The grade of the step out of one tile in a given direction, as a percentage of the run, quantised to half a
-	// percent and capped at 5%. Travelling the other way is the same number negated, so a climb one way is a
-	// descent the other.
-	getGradePercent: function(seed, x, y, directionIndex) {
-		var direction = this.DIRECTIONS[directionIndex];
-		var target = this.step(x, y, directionIndex);
-		var run = this.TILE_METRES * (direction.dx && direction.dy ? Math.SQRT2 : 1);
-		var rise = this.getElevationMetres(seed, target.x, target.y) - this.getElevationMetres(seed, x, y);
-		var percent = Math.max(-this.GRADE_LIMIT, Math.min(this.GRADE_LIMIT, (rise / run) * 100));
-		return Math.round(percent / this.GRADE_STEP) * this.GRADE_STEP;
-	},
-	// The land before any track is laid on it. y counts tiles north of Punta Arenas, so the far south is subpolar
-	// and the dry belt sits well up the continent.
-	// The climate of a tile: where it is, how high it stands, how warm it is and how wet. Terrain is read off these
-	// numbers rather than rolled separately, so the world makes sense as you cross it: the dry belt sits where the
-	// dry belt belongs, forests follow the rain, and it gets colder as you climb or leave the temperate latitudes.
+	// The climate of a square of the network: where it is, how high it stands, and how warm that makes it, colder
+	// away from the equator and higher up. null off the network.
 	getClimate: function(seed, x, y) {
-		var sourced = setup.realWorldPilot && setup.realWorldPilot.getTileAt ? setup.realWorldPilot.getTileAt(x, y) : null;
-		if (sourced) {
-			var sourcedLatitude = sourced.geoCoordinate[1], sourcedElevation = sourced.elevation;
-			return { latitude: sourcedLatitude, longitude: sourced.geoCoordinate[0], elevation: sourcedElevation,
-				temperature: 34 - 0.48 * Math.abs(sourcedLatitude) - sourcedElevation * 0.0065, humidity: 0.5 };
-		}
-		var latitude = this.BASE_LATITUDE + (y * this.TILE_KM) / this.KM_PER_DEGREE;
-		// A degree of longitude is shorter the further from the equator you stand.
-		var shrink = Math.max(0.25, Math.cos(latitude * Math.PI / 180));
-		var longitude = this.BASE_LONGITUDE + (x * this.TILE_KM) / (this.KM_PER_DEGREE * shrink);
-		var elevation = this.getElevationMetres(seed, x, y);
-		var away = Math.abs(latitude);
-		// Warm at the equator, colder toward the poles, and colder still with height, give or take the weather.
-		var temperature = 34 - 0.48 * away - elevation * 0.0065
-			+ (this.smoothNoise(seed, 'temp', x, y, 12) - 0.5) * 8;
-		// Wet on the equator, dry in the trade wind belts, wet again under the westerlies, dry at the poles.
-		var humidity = Math.max(0, Math.min(1, this.interpolateBand(away, this.HUMIDITY_BY_LATITUDE)
-			+ (this.smoothNoise(seed, 'humid', x, y, 9) - 0.5) * 0.45));
-		return {
-			latitude: latitude, longitude: longitude, elevation: elevation,
-			temperature: temperature, humidity: humidity
-		};
+		var tile = setup.realWorldPilot.getTileAt(x, y);
+		if (!tile) return null;
+		var latitude = tile.geoCoordinate[1];
+		return { latitude: latitude, longitude: tile.geoCoordinate[0], elevation: tile.elevation,
+			temperature: 34 - 0.48 * Math.abs(latitude) - tile.elevation * 0.0065, humidity: 0.5 };
 	},
-	// Reads a value off a table of [degrees, value] anchors, sloping smoothly between them.
-	interpolateBand: function(degrees, band) {
-		for (var i = 1; i < band.length; i++) {
-			if (degrees <= band[i][0]) {
-				var span = band[i][0] - band[i - 1][0];
-				var along = span > 0 ? (degrees - band[i - 1][0]) / span : 0;
-				return band[i - 1][1] + (band[i][1] - band[i - 1][1]) * along;
-			}
-		}
-		return band[band.length - 1][1];
-	},
-	getBaseTerrain: function(seed, x, y) {
-		var sourced = setup.realWorldPilot && setup.realWorldPilot.getTileAt ? setup.realWorldPilot.getTileAt(x, y) : null;
-		if (sourced) return sourced.terrain;
-		// Water is where the land is not, and is decided before any climate question.
-		if (this.smoothNoise(seed, 'water', x, y, 7) > 0.74) {
-			return 'water';
-		}
-		var climate = this.getClimate(seed, x, y);
-		if (climate.elevation > this.MOUNTAIN_METRES) {
-			return 'mountain';
-		}
-		if (climate.temperature < this.ARCTIC_TEMPERATURE) {
-			return 'arctic';
-		}
-		if (climate.humidity < this.DESERT_HUMIDITY) {
-			return 'desert';
-		}
-		if (climate.humidity > this.FOREST_HUMIDITY) {
-			return 'forest';
-		}
-		return 'plains';
-	},
-	// Whether there is water to pump from: the tile itself is water (the line is bridging it), or one of the eight
-	// tiles around it is.
+	// Whether there is water to pump from: the line is bridging it.
 	isBesideWater: function(seed, x, y) {
-		var sourced = setup.realWorldPilot && setup.realWorldPilot.getTileAt ? setup.realWorldPilot.getTileAt(x, y) : null;
-		if (sourced) return sourced.terrain === 'bridge';
-		for (var dx = -1; dx <= 1; dx++) {
-			for (var dy = -1; dy <= 1; dy++) {
-				if (this.getBaseTerrain(seed, x + dx, y + dy) === 'water') {
-					return true;
-				}
-			}
-		}
-		return false;
+		var tile = setup.realWorldPilot.getTileAt(x, y);
+		return !!tile && tile.terrain === 'bridge';
 	},
 	// --- directions and track shapes ----------------------------------------------------------------------
 	// The compass name a player would use for a direction, rather than the two letters the map stores.
@@ -196,12 +67,6 @@ setup.worldmap = {
 			Math.cos(a[1] * radians) * Math.sin(b[1] * radians) - Math.sin(a[1] * radians) * Math.cos(b[1] * radians) * Math.cos(dLon)) / radians;
 		return ((bearing % 360) + 360) % 360;
 	},
-	directionIndex: function(name) {
-		for (var i = 0; i < this.DIRECTIONS.length; i++) {
-			if (this.DIRECTIONS[i].name === name) return i;
-		}
-		return 0;
-	},
 	opposite: function(index) {
 		return (index + 4) % 8;
 	},
@@ -217,12 +82,6 @@ setup.worldmap = {
 	},
 	isStraight: function(shape) {
 		return shape.indexOf('straight-') === 0;
-	},
-	canPlace: function(terrain, shape) {
-		var rules = this.TERRAIN_RULES[terrain] || {};
-		if (rules.noTrack) return false;
-		if (rules.straightOnly) return this.isStraight(shape);
-		return !(rules.forbidden && rules.forbidden.indexOf(shape) !== -1);
 	},
 	// Names the piece of track that joins a tile's ends: two opposite ends are a straight, ends three apart are a
 	// 45 degree bend and two apart a right angle, three ends are a T or a Y, and four are a crossing.
@@ -249,217 +108,12 @@ setup.worldmap = {
 		}
 		return 'dead-end';
 	},
-	// --- generation ---------------------------------------------------------------------------------------
-	cache: {},
-	cacheFor: function(seed) {
-		if (!this.cache[seed]) {
-			this.cache[seed] = { legs: {}, stations: {} };
-		}
-		return this.cache[seed];
-	},
-	clearCache: function() {
-		this.cache = {};
-	},
-	// Station 1 sits at the origin; every station after it stands at the end of the leg that reaches it.
+	// --- stations and legs -------------------------------------------------------------------------------
 	getStationTile: function(seed, stationId) {
-		if (setup.realWorldPilot && setup.realWorldPilot.getStationTile) {
-			return setup.realWorldPilot.getStationTile(stationId) || { x: 0, y: 0 };
-		}
-		if (this.isBranchStation(stationId)) {
-			var branch = this.getBranchForStation(seed, stationId);
-			return branch ? branch.tiles[branch.tiles.length - 1] : { x: 0, y: 0 };
-		}
-		var id = Math.floor(Number(stationId));
-		if (!isFinite(id) || id < 1) {
-			return { x: 0, y: 0 }; // a station id the map does not place, such as one from a branch it cannot find
-		}
-		var cache = this.cacheFor(seed);
-		if (cache.stations[id]) {
-			return cache.stations[id];
-		}
-		cache.stations[id] = id === 1 ? { x: 0, y: 0 } : this.getLeg(seed, id - 1).end;
-		return cache.stations[id];
+		return setup.realWorldPilot.getStationTile(stationId) || { x: 0, y: 0 };
 	},
 	getLeg: function(seed, legIndex) {
-		if (setup.realWorldPilot && setup.realWorldPilot.getLeg) return setup.realWorldPilot.getLeg(legIndex);
-		var cache = this.cacheFor(seed);
-		if (!cache.legs[legIndex]) {
-			cache.legs[legIndex] = this.buildLeg(seed, legIndex);
-		}
-		return cache.legs[legIndex];
-	},
-	// The terrain a tile ends up with once track is laid: water is bridged, and a straight run under a high
-	// enough mountain is tunnelled.
-	trackTerrain: function(seed, x, y, straight) {
-		var base = this.getBaseTerrain(seed, x, y);
-		if (base === 'water') {
-			return straight ? 'bridge' : null; // a bridge carries a straight track only, so a bend cannot cross
-		}
-		if (base === 'mountain' && straight && this.getElevationMetres(seed, x, y) > this.TUNNEL_METRES) {
-			return 'tunnel';
-		}
-		return base;
-	},
-	// Builds one leg: a walk from its station towards the leg's heading, mostly straight on, bending where the
-	// land makes it easier, and dropping abandoned branches along the way.
-	buildLeg: function(seed, legIndex) {
-		var self = this;
-		var headingName = { north: 'n', northeast: 'ne', east: 'e', southeast: 'se', south: 's', southwest: 'sw',
-			west: 'w', northwest: 'nw' }[setup.railyard.getLegHeading(legIndex, seed)] || 'n';
-		var start = this.getStationTile(seed, legIndex);
-		var rng = this.rngFor(seed, 'leg', legIndex);
-		var count = this.MIN_LEG_TILES + Math.floor(rng() * (this.MAX_LEG_TILES - this.MIN_LEG_TILES + 1));
-		var tiles = [];
-		var byKey = {};
-		var travel = this.directionIndex(headingName);
-		var x = start.x;
-		var y = start.y;
-		var addTile = function(tile) {
-			tiles.push(tile);
-			byKey[self.key(tile.x, tile.y)] = tile;
-		};
-		for (var i = 0; i < count; i++) {
-			// Candidates in order of preference: straight on, then a 45 degree bend, then a right angle.
-			var candidates = [travel, (travel + 1) % 8, (travel + 7) % 8, (travel + 2) % 8, (travel + 6) % 8];
-			if (rng() < 0.5) {
-				var swapA = candidates[1];
-				candidates[1] = candidates[2];
-				candidates[2] = swapA;
-			}
-			var chosen = null;
-			var terrain = null;
-			for (var c = 0; c < candidates.length && chosen === null; c++) {
-				var out = candidates[c];
-				var ends = [this.opposite(travel), out].sort(function(a, b) { return a - b; });
-				var candidateTerrain = this.trackTerrain(seed, x, y, this.isStraight(this.getShape(ends)));
-				var nextTile = this.step(x, y, out);
-				if (candidateTerrain === null || !this.canPlace(candidateTerrain, this.getShape(ends))) {
-					continue;
-				}
-				if (byKey[this.key(nextTile.x, nextTile.y)]) {
-					continue; // never cross the line the leg has already laid
-				}
-				// Prefer not to bridge, but take the crossing rather than double back.
-				if (this.getBaseTerrain(seed, nextTile.x, nextTile.y) === 'water' && c < candidates.length - 1 && rng() < 0.8) {
-					continue;
-				}
-				chosen = out;
-				terrain = candidateTerrain;
-			}
-			if (chosen === null) {
-				chosen = travel;
-				terrain = this.trackTerrain(seed, x, y, true) || 'bridge';
-			}
-			var tileEnds = [this.opposite(travel), chosen].sort(function(a, b) { return a - b; });
-			addTile({
-				x: x, y: y, ends: tileEnds, shape: this.getShape(tileEnds), terrain: terrain,
-				elevation: this.getElevationMetres(seed, x, y),
-				grade: this.getGradePercent(seed, x, y, chosen),
-				out: chosen, station: i === 0 ? legIndex : 0
-			});
-			var moved = this.step(x, y, chosen);
-			x = moved.x;
-			y = moved.y;
-			travel = chosen;
-		}
-		// The last tile is where the next station stands, so its track simply ends there.
-		var endEnds = [this.opposite(travel)];
-		addTile({
-			x: x, y: y, ends: endEnds, shape: this.getShape(endEnds), terrain: this.trackTerrain(seed, x, y, true) || 'bridge',
-			elevation: this.getElevationMetres(seed, x, y), grade: 0, out: -1, station: legIndex + 1
-		});
-		var branches = this.addBranches(seed, legIndex, tiles, byKey, rng);
-		return {
-			index: legIndex, tiles: tiles, byKey: byKey, branches: branches,
-			start: { x: start.x, y: start.y }, end: { x: x, y: y },
-			rect: this.rectFor(tiles)
-		};
-	},
-	// Abandoned branches: a junction on the main line and a few tiles of track that stop at a dead end. They go
-	// nowhere yet, and become real routes once the world has somewhere to put them.
-	addBranches: function(seed, legIndex, tiles, byKey, rng) {
-		var self = this;
-		var mainLine = tiles.slice();
-		var branches = [];
-		var mainIndexByKey = {};
-		mainLine.forEach(function(tile, index) { mainIndexByKey[self.key(tile.x, tile.y)] = index; });
-		for (var i = 1; i < mainLine.length - 1; i++) {
-			var tile = mainLine[i];
-			if (rng() > this.BRANCH_CHANCE || tile.station) {
-				continue;
-			}
-			var options = [];
-			for (var d = 0; d < 8; d++) {
-				if (tile.ends.indexOf(d) !== -1) continue;
-				// 45 degrees off an end makes a Y and a right angle makes a T. Both are junctions a train can take.
-				var turn = Math.min(this.turnBetween(d, tile.ends[0]), this.turnBetween(d, tile.ends[1]));
-				if (turn >= 1 && turn <= 3) options.push(d);
-			}
-			if (!options.length) {
-				continue;
-			}
-			var branchDirection = options[Math.floor(rng() * options.length)];
-			var junctionEnds = tile.ends.concat([branchDirection]).sort(function(a, b) { return a - b; });
-			var junctionShape = this.getShape(junctionEnds);
-			if (!this.canPlace(tile.terrain, junctionShape)) {
-				continue; // mountains, bridges and tunnels have no room for a junction
-			}
-			var branch = this.buildBranch(seed, legIndex, i, tile, branchDirection, byKey, rng, mainIndexByKey, mainLine);
-			if (!branch.tiles.length) {
-				continue;
-			}
-			tile.ends = junctionEnds;
-			tile.shape = junctionShape;
-			branch.tiles.forEach(function(branchTile) {
-				tiles.push(branchTile);
-				byKey[self.key(branchTile.x, branchTile.y)] = branchTile;
-			});
-			branches.push(this.finishBranch(legIndex, branches.length, i, branchDirection, branch));
-			// Now and then a second branch leaves the far side of the same tile, and the lines cross there.
-			var acrossDirection = this.opposite(branchDirection);
-			if (rng() < 0.2 && tile.ends.indexOf(acrossDirection) === -1) {
-				var crossEnds = tile.ends.concat([acrossDirection]).sort(function(a, b) { return a - b; });
-				var crossShape = this.getShape(crossEnds);
-				if (this.canPlace(tile.terrain, crossShape)) {
-					var across = this.buildBranch(seed, legIndex, i, tile, acrossDirection, byKey, rng, mainIndexByKey, mainLine);
-					if (across.tiles.length) {
-						tile.ends = crossEnds;
-						tile.shape = crossShape;
-						across.tiles.forEach(function(branchTile) {
-							tiles.push(branchTile);
-							byKey[self.key(branchTile.x, branchTile.y)] = branchTile;
-						});
-						branches.push(this.finishBranch(legIndex, branches.length, i, acrossDirection, across));
-					}
-				}
-			}
-		}
-		return branches;
-	},
-	// A branch, as the rest of the game sees it. One that does not find the main line again ends at a station of
-	// its own, so every track the player can take leads somewhere they can stop, shunt and turn round.
-	finishBranch: function(legIndex, ordinal, fromIndex, direction, built) {
-		var branch = {
-			id: legIndex + ':' + fromIndex + ':' + direction, legIndex: legIndex, fromIndex: fromIndex,
-			direction: direction, tiles: built.tiles, rejoinIndex: built.rejoinIndex, stationId: null
-		};
-		if (built.rejoinIndex === null && built.tiles.length) {
-			branch.stationId = 'L' + legIndex + 'B' + (ordinal + 1);
-			built.tiles[built.tiles.length - 1].station = branch.stationId;
-		}
-		return branch;
-	},
-	// Station ids are numbers along the main line, and 'L3B1' for the terminus of a branch off leg 3.
-	isBranchStation: function(stationId) {
-		return /^L\d+B\d+$/.test(String(stationId));
-	},
-	getBranchForStation: function(seed, stationId) {
-		var match = /^L(\d+)B(\d+)$/.exec(String(stationId));
-		if (!match) {
-			return null;
-		}
-		var branches = this.getLeg(seed, Number(match[1])).branches || [];
-		return branches.filter(function(branch) { return branch.stationId === stationId; })[0] || null;
+		return setup.realWorldPilot.getLeg(legIndex);
 	},
 	// What the player calls a station.
 	// A junction or buffer as seen from a station: one named for the very place the player stands in is "outside" it.
@@ -467,95 +121,13 @@ setup.worldmap = {
 		return stationName && name.slice(-(' near ' + stationName).length) === ' near ' + stationName
 			? name.slice(0, -(' near ' + stationName).length) + ' outside ' + stationName : name;
 	},
-	// The names at the two ends of a leg: stations, or on the network a junction or the end of a line.
-	getLegEndNames: function(legIndex) {
-		var leg = this.getLeg(this.getSeed(), legIndex);
-		if (leg && leg.realWorld) return [leg.fromStation.name, leg.toStation.name];
-		return [this.getStationName(legIndex), this.getStationName(legIndex + 1)];
-	},
 	getStationName: function(stationId) {
 		if (setup.yards && setup.yards.parse(stationId) && !setup.yards.isStation(stationId)) return setup.yards.name(stationId);
 		if (setup.realWorldPilot && setup.realWorldPilot.getStation) {
 			var station = setup.realWorldPilot.getStation(stationId);
 			if (station) return station.name;
 		}
-		return 'Station ' + String(stationId).replace(/^L/, '').replace('B', 'B');
-	},
-	// One branch off the main line. Most wander a few tiles and stop at a buffer stop; some bend back and meet the
-	// main line again further along, which makes them a real alternative route rather than a dead end with a view.
-	buildBranch: function(seed, legIndex, tileIndex, junction, direction, byKey, rng, mainIndexByKey, mainLine) {
-		var wantsRejoin = rng() < this.REJOIN_CHANCE;
-		var length = wantsRejoin ? 6 : 2 + Math.floor(rng() * 4);
-		// A branch meant to rejoin curves steadily back toward the line it left, turning the shorter way round.
-		var turnSign = ((direction - (junction.out >= 0 ? junction.out : direction) + 8) % 8) < 4 ? -1 : 1;
-		var made = [];
-		var rejoinIndex = null;
-		var travel = direction;
-		var position = this.step(junction.x, junction.y, direction);
-		for (var i = 0; i < length; i++) {
-			var occupied = byKey[this.key(position.x, position.y)];
-			if (occupied) {
-				// Running into the main line further along is how a branch rejoins it, if the junction fits there.
-				var meetIndex = mainIndexByKey ? mainIndexByKey[this.key(position.x, position.y)] : undefined;
-				if (wantsRejoin && made.length && typeof meetIndex === 'number' && meetIndex > tileIndex + 1
-					&& !occupied.station) {
-					var meetEnds = occupied.ends.concat([this.opposite(travel)]).sort(function(a, b) { return a - b; });
-					var meetShape = this.getShape(meetEnds);
-					if (occupied.ends.indexOf(this.opposite(travel)) === -1 && this.canPlace(occupied.terrain, meetShape)) {
-						occupied.ends = meetEnds;
-						occupied.shape = meetShape;
-						rejoinIndex = meetIndex;
-					}
-				}
-				break;
-			}
-			var last = i === length - 1;
-			var out = last ? -1
-				: wantsRejoin ? (travel + turnSign + 8) % 8
-				: (rng() < 0.75 ? travel : (rng() < 0.5 ? (travel + 1) % 8 : (travel + 7) % 8));
-			var ends = last ? [this.opposite(travel)] : [this.opposite(travel), out].sort(function(a, b) { return a - b; });
-			var shape = this.getShape(ends);
-			var terrain = this.trackTerrain(seed, position.x, position.y, this.isStraight(shape) || last);
-			if (terrain === null || !this.canPlace(terrain, shape)) {
-				break;
-			}
-			made.push({
-				x: position.x, y: position.y, ends: ends, shape: shape, terrain: terrain,
-				elevation: this.getElevationMetres(seed, position.x, position.y),
-				grade: out === -1 ? 0 : this.getGradePercent(seed, position.x, position.y, out),
-				out: out, incoming: this.opposite(travel), station: 0, branch: true
-			});
-			if (out === -1) {
-				break;
-			}
-			position = this.step(position.x, position.y, out);
-			travel = out;
-		}
-		if (made.length && rejoinIndex === null) {
-			var end = made[made.length - 1];
-			end.ends = [end.incoming];
-			end.shape = 'dead-end';
-			end.out = -1;
-			end.grade = 0;
-		} else if (made.length) {
-			// The last tile of a rejoining branch points at the main line tile it meets.
-			var last = made[made.length - 1];
-			var meetTile = mainLine[rejoinIndex];
-			var toward = this.directionBetween(last, meetTile);
-			if (toward === -1) {
-				rejoinIndex = null;
-				last.ends = [last.incoming];
-				last.shape = 'dead-end';
-				last.out = -1;
-				last.grade = 0;
-			} else {
-				last.ends = [last.incoming, toward].sort(function(a, b) { return a - b; });
-				last.shape = this.getShape(last.ends);
-				last.out = toward;
-				last.grade = this.getGradePercent(seed, last.x, last.y, toward);
-			}
-		}
-		return { tiles: made, rejoinIndex: rejoinIndex };
+		return 'Station ' + stationId;
 	},
 	// Which of the eight directions leads from one tile to its neighbour, or -1 if they are not neighbours.
 	directionBetween: function(from, to) {
@@ -578,19 +150,10 @@ setup.worldmap = {
 		return { x0: x0 - pad, y0: y0 - pad, x1: x1 + pad, y1: y1 + pad };
 	},
 	// --- driving the line ---------------------------------------------------------------------------------
-	// The leg's main line, station tile to station tile, as the positions a train can stand on. Branch tiles are
-	// not part of it: they lead nowhere yet.
+	// The leg's squares, node to node, as the positions a train can stand on.
 	getMainLine: function(seed, legIndex) {
-		var sourcedLeg = this.getLeg(seed, legIndex);
-		if (sourcedLeg && sourcedLeg.realWorld) return sourcedLeg.tiles;
-		var cache = this.cacheFor(seed);
-		if (!cache.mainLines) {
-			cache.mainLines = {};
-		}
-		if (!cache.mainLines[legIndex]) {
-			cache.mainLines[legIndex] = this.getLeg(seed, legIndex).tiles.filter(function(tile) { return !tile.branch; });
-		}
-		return cache.mainLines[legIndex];
+		var leg = this.getLeg(seed, legIndex);
+		return leg ? leg.tiles : null;
 	},
 	// What one step costs: five minutes per 5 km on the flat, more up a grade, a little less down, and more again
 	// for a heavy consist. Fuel follows, because the time system burns it by the minute while travelling. A step on the
@@ -610,123 +173,62 @@ setup.worldmap = {
 		var loco = setup.railyard.getControllingLocomotive(train);
 		return loco && Number(loco.topSpeedKmh) > 0 ? Number(loco.topSpeedKmh) : this.REFERENCE_SPEED_KMH;
 	},
-	// The grade of the step between two neighbouring positions, in the direction it is taken.
-	getStepGrade: function(tiles, fromIndex, toIndex) {
-		return toIndex > fromIndex ? tiles[fromIndex].grade : -tiles[toIndex].grade;
-	},
 	// --- a journey in progress -----------------------------------------------------------------------------
 	getJourney: function() {
 		var journey = State.variables && State.variables.journey;
-		return journey && (typeof journey.legIndex === 'number' || journey.realWorldCorridorId) ? journey : null;
+		return journey && typeof journey.legIndex === 'number' ? journey : null;
 	},
-	// The run of tiles the train is standing on: the leg's main line, or a branch off it if the player took one.
+	// The leg the train is standing on, and its squares.
 	getJourneyPath: function(position) {
 		var journey = position || this.getJourney();
-		if (!journey) {
-			return null;
-		}
-		var leg = this.getLeg(this.getSeed(), journey.legIndex);
-		if (!leg) return null;
-		if (journey.branch) {
-			var taken = (leg.branches || []).filter(function(branch) { return branch.id === journey.branch; })[0];
-			if (taken) {
-				return { tiles: taken.tiles, branch: taken, leg: leg };
-			}
-		}
-		return { tiles: this.getMainLine(this.getSeed(), journey.legIndex), branch: null, leg: leg };
+		var leg = journey && this.getLeg(this.getSeed(), journey.legIndex);
+		return leg ? { tiles: leg.tiles, leg: leg } : null;
 	},
-	// The branches leaving the tile the train is standing on, for the player to choose between. A train passes through
-	// a station only facing into it, onto a line leaving the far end; a walker (anyFacing) can go either way.
+	// The other lines leaving the node the train stands at, for the player to choose between: every line at a junction,
+	// named for the way it leaves. A train passes through a station only facing into it, onto a line leaving the far end;
+	// a walker (anyFacing) can go either way.
 	getBranchChoices: function(position, anyFacing) {
 		var journey = position || this.getJourney();
 		var path = this.getJourneyPath(journey);
-		if (!journey || !path || path.branch) {
-			return [];
-		}
-		var self = this;
-		// On the network the choices are at a junction: every other line that meets it, named for the way it leaves.
-		if (path.leg.realWorld) {
-			var node = setup.realWorldPilot.getNodeAt(journey.legIndex, journey.tileIndex);
-			if (node && node.kind === 'station' && !anyFacing
-				&& (journey.forward !== false) !== (journey.tileIndex >= path.tiles.length - 1)) return [];
-			return setup.realWorldPilot.getJunctionChoices(journey.legIndex, journey.tileIndex).map(function(line) {
-				var step = self.getLineChoiceStep(line);
-				return { id: 'leg:' + line.legIndex, legIndex: line.legIndex, direction: self.describeDirection(line.direction, path.tiles[journey.tileIndex]),
-					tiles: step.tileCount, terrain: step.terrain, rejoins: false, grade: step.grade };
-			});
-		}
-		return (path.leg.branches || []).filter(function(branch) {
-			return branch.fromIndex === journey.tileIndex && branch.tiles.length;
-		}).map(function(branch) {
-			return {
-				id: branch.id, direction: self.describeDirection(branch.direction),
-				tiles: branch.tiles.length, terrain: branch.tiles[0].terrain,
-				rejoins: branch.rejoinIndex !== null,
-				grade: self.getGradePercent(self.getSeed(), path.tiles[journey.tileIndex].x,
-					path.tiles[journey.tileIndex].y, branch.direction)
-			};
+		if (!path) return [];
+		var self = this, node = setup.realWorldPilot.getNodeAt(journey.legIndex, journey.tileIndex);
+		if (node && node.kind === 'station' && !anyFacing
+			&& (journey.forward !== false) !== (journey.tileIndex >= path.tiles.length - 1)) return [];
+		return setup.realWorldPilot.getJunctionChoices(journey.legIndex, journey.tileIndex).map(function(line) {
+			var step = self.getLineChoiceStep(line);
+			return { id: 'leg:' + line.legIndex, legIndex: line.legIndex, direction: self.describeDirection(line.direction, path.tiles[journey.tileIndex]),
+				tiles: step.tileCount, terrain: step.terrain, grade: step.grade };
 		});
 	},
-	// Where the consist stands, for the driving view and the status line.
-	// The track between a tile and the next one along: a fixed 5 km on the old grid, whatever lies between two squares
-	// on the geographic one.
+	// The track between a square and the next one along the leg.
 	getStepKm: function(tiles, index) {
 		var tile = tiles[index];
 		return tile && Number(tile.distanceKm) > 0 ? Number(tile.distanceKm) : this.TILE_KM;
 	},
+	// Where the consist stands, for the driving view and the status line.
 	getJourneyView: function(position) {
 		var journey = position || this.getJourney();
-		if (!journey) {
-			return null;
-		}
-		var path = this.getJourneyPath(journey);
-		var tiles = path.tiles;
-		if (path.leg.realWorld) {
-			var realIndex = Math.max(0, Math.min(journey.tileIndex, tiles.length - 1));
-			var travelled = journey.forward !== false ? realIndex : tiles.length - 1 - realIndex;
-			var behind = 0, total = 0;
-			for (var stepIndex = 0; stepIndex < tiles.length - 1; stepIndex++) {
-				var stepKm = this.getStepKm(tiles, stepIndex);
-				total += stepKm;
-				if (journey.forward !== false ? stepIndex < realIndex : stepIndex >= realIndex) behind += stepKm;
-			}
-			return {
-				realWorld: true, corridorId: path.leg.corridorId, legIndex: journey.legIndex,
-				tileIndex: realIndex, tileCount: tiles.length, forward: journey.forward !== false,
-				tile: tiles[realIndex], terrain: tiles[realIndex].terrain, shape: tiles[realIndex].shape,
-				grade: journey.forward !== false ? tiles[realIndex].grade : -tiles[Math.max(0, realIndex - 1)].grade,
-				kilometresDone: Math.round(behind),
-				kilometresLeft: Math.round(total - behind),
-				fromStation: journey.forward !== false ? path.leg.fromStation.name : path.leg.toStation.name,
-				toStation: journey.forward !== false ? path.leg.toStation.name : path.leg.fromStation.name,
-				fromStationIndex: journey.forward !== false ? path.leg.fromStationIndex : path.leg.toStationIndex,
-				toStationIndex: journey.forward !== false ? path.leg.toStationIndex : path.leg.fromStationIndex
-			};
-		}
-		if (path.branch) {
-			var onBranch = Math.max(0, Math.min(journey.tileIndex, tiles.length - 1));
-			var branchTile = tiles[onBranch];
-			return {
-				legIndex: journey.legIndex, tileIndex: onBranch, tileCount: tiles.length, forward: journey.forward,
-				tile: branchTile, terrain: branchTile.terrain, shape: branchTile.shape,
-				grade: branchTile.grade, branch: path.branch.id, rejoins: path.branch.rejoinIndex !== null,
-				kilometresDone: onBranch * this.TILE_KM,
-				kilometresLeft: (tiles.length - 1 - onBranch) * this.TILE_KM,
-				fromStation: journey.legIndex, toStation: journey.legIndex + 1
-			};
-		}
+		var path = journey && this.getJourneyPath(journey);
+		if (!path) return null;
+		var tiles = path.tiles, leg = path.leg, forward = journey.forward !== false;
 		var index = Math.max(0, Math.min(journey.tileIndex, tiles.length - 1));
-		var tile = tiles[index];
-		var travelled = journey.forward ? index : tiles.length - 1 - index;
+		var behind = 0, total = 0;
+		for (var stepIndex = 0; stepIndex < tiles.length - 1; stepIndex++) {
+			var stepKm = this.getStepKm(tiles, stepIndex);
+			total += stepKm;
+			if (forward ? stepIndex < index : stepIndex >= index) behind += stepKm;
+		}
 		return {
-			legIndex: journey.legIndex, tileIndex: index, tileCount: tiles.length, forward: journey.forward,
-			tile: tile, terrain: tile.terrain, shape: tile.shape,
+			legIndex: journey.legIndex, tileIndex: index, tileCount: tiles.length, forward: forward,
+			tile: tiles[index], terrain: tiles[index].terrain, shape: tiles[index].shape,
 			// The drawing tilts by the grade as the train faces it, not as the leg stores it.
-			grade: journey.forward ? tile.grade : -tile.grade,
-			kilometresDone: travelled * this.TILE_KM,
-			kilometresLeft: (tiles.length - 1 - travelled) * this.TILE_KM,
-			fromStation: journey.forward ? journey.legIndex : journey.legIndex + 1,
-			toStation: journey.forward ? journey.legIndex + 1 : journey.legIndex
+			grade: forward ? tiles[index].grade : -tiles[Math.max(0, index - 1)].grade,
+			kilometresDone: Math.round(behind),
+			kilometresLeft: Math.round(total - behind),
+			fromStation: forward ? leg.fromStation.name : leg.toStation.name,
+			toStation: forward ? leg.toStation.name : leg.fromStation.name,
+			fromStationIndex: forward ? leg.fromStationIndex : leg.toStationIndex,
+			toStationIndex: forward ? leg.toStationIndex : leg.fromStationIndex
 		};
 	},
 	// What a step would cost, wherever it ends up, and why it cannot be taken.
@@ -739,7 +241,7 @@ setup.worldmap = {
 			blocked: (this.getTrainTractiveKN(train) > 0 && grade > limit)
 				? 'The grade ahead is ' + grade.toFixed(1) + '%, and your consist can pull ' + limit.toFixed(1) + '%.'
 				: '',
-			arrivesAt: 0, toBranch: null, toMain: null
+			arrivesAt: 0
 		};
 		for (var key in extra) {
 			if (Object.prototype.hasOwnProperty.call(extra, key)) {
@@ -748,63 +250,22 @@ setup.worldmap = {
 		}
 		return step;
 	},
-	// One step along the line: direction 1 carries on, -1 backs up. On a branch, 1 runs further out and -1 comes
-	// back toward the junction, and either end of a branch may put the train back on the main line. Returns null
-	// where there is nowhere to go.
+	// One step along the leg: direction 1 carries on the way the journey faces, -1 backs up. Returns null at either
+	// end of the leg, where the ways on are line choices (getBranchChoices).
 	getJourneyStep: function(direction, position) {
 		var journey = position || this.getJourney();
-		var path = this.getJourneyPath(journey);
-		if (!journey || !path) {
-			return null;
-		}
-		var tiles = path.tiles;
-		var from = Math.max(0, Math.min(journey.tileIndex, tiles.length - 1));
-		if (path.leg.realWorld) {
-			var realTo = from + (journey.forward !== false ? 1 : -1) * (direction >= 0 ? 1 : -1);
-			if (realTo < 0 || realTo >= tiles.length) return null;
-			var forwardStep = realTo > from;
-			var realStep = this.describeStep(forwardStep ? tiles[from].grade : -tiles[realTo].grade, tiles[realTo].terrain, {
-				fromIndex: from, toIndex: realTo, realWorld: true, couples: this.parkedOn(tiles[realTo]),
-				distanceKm: this.getStepKm(tiles, Math.min(from, realTo)),
-				heading: this.describeDirection(forwardStep ? tiles[from].out : this.opposite(tiles[realTo].out), forwardStep ? tiles[from] : tiles[realTo]),
-				destinationName: tiles[realTo].station || '',
-				arrivesAt: realTo === 0 ? path.leg.fromStationIndex : (realTo === tiles.length - 1 ? path.leg.toStationIndex : 0)
-			});
-			return realStep;
-		}
-		if (path.branch) {
-			var branch = path.branch;
-			var out = from + (direction >= 0 ? 1 : -1);
-			if (out < 0) {
-				// Back out of the branch onto the main line tile the junction stands on.
-				var mainTiles = this.getMainLine(this.getSeed(), journey.legIndex);
-				return this.describeStep(-tiles[0].grade, mainTiles[branch.fromIndex].terrain,
-					{ fromIndex: from, toIndex: branch.fromIndex, toMain: branch.fromIndex,
-						heading: this.describeDirection(this.opposite(branch.direction)) });
-			}
-			if (out >= tiles.length) {
-				if (branch.rejoinIndex === null) {
-					return null; // the branch stops here
-				}
-				var rejoinTiles = this.getMainLine(this.getSeed(), journey.legIndex);
-				return this.describeStep(tiles[tiles.length - 1].grade, rejoinTiles[branch.rejoinIndex].terrain,
-					{ fromIndex: from, toIndex: branch.rejoinIndex, toMain: branch.rejoinIndex,
-						heading: this.describeDirection(tiles[tiles.length - 1].out) });
-			}
-			return this.describeStep(this.getStepGrade(tiles, from, out), tiles[out].terrain,
-				{ fromIndex: from, toIndex: out,
-					arrivesAt: (out === tiles.length - 1 && branch.stationId) ? branch.stationId : 0,
-					heading: this.describeDirection(out > from ? tiles[from].out : this.opposite(tiles[out].out)) });
-		}
-		var to = from + (journey.forward ? 1 : -1) * (direction >= 0 ? 1 : -1);
-		if (to < 0 || to >= tiles.length) {
-			return null;
-		}
-		return this.describeStep(this.getStepGrade(tiles, from, to), tiles[to].terrain, {
-			fromIndex: from, toIndex: to,
-			heading: this.describeDirection(to > from ? tiles[from].out : this.opposite(tiles[to].out)),
-			// Reaching either end of the line means arriving at the station standing there.
-			arrivesAt: to === 0 ? journey.legIndex : (to === tiles.length - 1 ? journey.legIndex + 1 : 0)
+		var path = journey && this.getJourneyPath(journey);
+		if (!path) return null;
+		var tiles = path.tiles, from = Math.max(0, Math.min(journey.tileIndex, tiles.length - 1));
+		var to = from + (journey.forward !== false ? 1 : -1) * (direction >= 0 ? 1 : -1);
+		if (to < 0 || to >= tiles.length) return null;
+		var forwardStep = to > from;
+		return this.describeStep(forwardStep ? tiles[from].grade : -tiles[to].grade, tiles[to].terrain, {
+			fromIndex: from, toIndex: to, couples: this.parkedOn(tiles[to]),
+			distanceKm: this.getStepKm(tiles, Math.min(from, to)),
+			heading: this.describeDirection(forwardStep ? tiles[from].out : this.opposite(tiles[to].out), forwardStep ? tiles[from] : tiles[to]),
+			destinationName: tiles[to].station || '',
+			arrivesAt: to === 0 ? path.leg.fromStationIndex : (to === tiles.length - 1 ? path.leg.toStationIndex : 0)
 		});
 	},
 	// The first step along a line leaving a junction: where it goes and what it costs. line is one of
@@ -814,7 +275,7 @@ setup.worldmap = {
 		var from = line.forward ? 0 : last, to = line.forward ? 1 : last - 1;
 		var leg = setup.realWorldPilot.getLeg(line.legIndex);
 		return this.describeStep(line.forward ? tiles[from].grade : -tiles[to].grade, tiles[to].terrain, {
-			fromIndex: from, toIndex: to, realWorld: true, toBranch: 'leg:' + line.legIndex, tileCount: tiles.length,
+			fromIndex: from, toIndex: to, tileCount: tiles.length,
 			couples: this.parkedOn(tiles[to]),
 			distanceKm: this.getStepKm(tiles, Math.min(from, to)), heading: this.describeDirection(line.direction, tiles[from]),
 			destinationName: tiles[to].station || '',
@@ -825,27 +286,14 @@ setup.worldmap = {
 	parkedOn: function(tile) {
 		return !!(tile && setup.yards && setup.yards.lineTrainAt(tile.x, tile.y));
 	},
-	// What turning off onto a branch would cost.
+	// What taking one of the line choices at a node would cost, by its id ('leg:' and the leg's number).
 	getBranchStep: function(branchId, position) {
 		var journey = position || this.getJourney();
-		var path = this.getJourneyPath(journey);
-		if (!journey || !path || path.branch) {
-			return null;
-		}
-		if (path.leg.realWorld) {
-			var line = setup.realWorldPilot.getJunctionChoices(journey.legIndex, journey.tileIndex).filter(function(candidate) {
-				return 'leg:' + candidate.legIndex === branchId;
-			})[0];
-			return line ? this.getLineChoiceStep(line) : null;
-		}
-		var branch = (path.leg.branches || []).filter(function(candidate) { return candidate.id === branchId; })[0];
-		if (!branch || branch.fromIndex !== journey.tileIndex || !branch.tiles.length) {
-			return null;
-		}
-		var junction = path.tiles[journey.tileIndex];
-		return this.describeStep(this.getGradePercent(this.getSeed(), junction.x, junction.y, branch.direction),
-			branch.tiles[0].terrain, { fromIndex: journey.tileIndex, toIndex: 0, toBranch: branch.id,
-				heading: this.describeDirection(branch.direction) });
+		if (!journey) return null;
+		var line = setup.realWorldPilot.getJunctionChoices(journey.legIndex, journey.tileIndex).filter(function(candidate) {
+			return 'leg:' + candidate.legIndex === branchId;
+		})[0];
+		return line ? this.getLineChoiceStep(line) : null;
 	},
 	getTrainWeightKg: function(train) {
 		if (!Array.isArray(train)) return 0;
@@ -878,12 +326,6 @@ setup.worldmap = {
 		var limit = ((tractive * 1000) / (weight * 9.81) - this.ROLLING_RESISTANCE) * 100;
 		return Math.round(limit / this.GRADE_STEP) * this.GRADE_STEP;
 	},
-	// Which leg a departure uses: heading on takes the leg ahead of the station, turning back takes the one behind.
-	// A branch terminus is on no leg of its own; leaving one is handled by the branch it stands at the end of.
-	getLegIndexFor: function(stationId, towardExit, legIndex) {
-		var line = this.getLine(stationId, towardExit, legIndex);
-		return line ? line.legIndex : 0;
-	},
 	// A line out of a station, on the side a departure is made from: the given leg, or the first line that side.
 	// On the corridor each side has one line; at a junction a side can have several. See realWorldPilot.getStationLines.
 	getLine: function(stationId, towardExit, legIndex) {
@@ -900,20 +342,17 @@ setup.worldmap = {
 		var leg = this.getLeg(seed, legIndex);
 		if (!leg) return { minutes: 0, tiles: 0, kilometres: 0, steepestClimb: 0,
 			climbLimit: this.getClimbLimitPercent(train) };
-		// Every tile but the last carries one step to its neighbour, and that step's grade. The same steps are
+		// Every square but the last carries one step to its neighbour, and that step's grade. The same steps are
 		// travelled either way round, so running the leg backwards is the same list of grades negated.
 		var first = 0, last = leg.tiles.length - 1;
-		if (leg.realWorld && Number.isInteger(fromIndex)) {
+		if (Number.isInteger(fromIndex)) {
 			if (reverse) last = fromIndex; else first = fromIndex;
 		}
-		var steps = leg.realWorld ? leg.tiles.slice(first, last)
-			: leg.tiles.filter(function(tile) { return !tile.branch && tile.out !== -1; });
-		var minutes = 0;
-		var steepestClimb = 0;
-		var kilometres = 0;
+		var steps = leg.tiles.slice(first, last);
+		var minutes = 0, steepestClimb = 0, kilometres = 0;
 		for (var i = 0; i < steps.length; i++) {
 			var grade = reverse ? -steps[i].grade : steps[i].grade;
-			var stepKm = leg.realWorld ? this.getStepKm(leg.tiles, first + i) : this.TILE_KM;
+			var stepKm = this.getStepKm(leg.tiles, first + i);
 			steepestClimb = Math.max(steepestClimb, grade);
 			minutes += this.getTileMinutes(grade, train, stepKm);
 			kilometres += stepKm;
@@ -960,26 +399,10 @@ setup.worldmap = {
 		}
 		return '';
 	},
-	// Resolves one generated track tile into the journey coordinates used by trains and walkers. Debug tools use
+	// Resolves one square of track into the journey coordinates used by trains and walkers. Debug tools use
 	// coordinates rather than array offsets so the map remains the source of truth for what was clicked.
 	getDebugTeleportTarget: function(legIndex, x, y) {
-		if (setup.realWorldPilot && setup.realWorldPilot.debugTarget) return setup.realWorldPilot.debugTarget(x, y);
-		var leg = this.getLeg(this.getSeed(), legIndex);
-		var mainLine = this.getMainLine(this.getSeed(), legIndex);
-		for (var mainIndex = 0; mainIndex < mainLine.length; mainIndex++) {
-			if (mainLine[mainIndex].x === x && mainLine[mainIndex].y === y) {
-				return { legIndex: legIndex, tileIndex: mainIndex, branch: null, tile: mainLine[mainIndex] };
-			}
-		}
-		for (var branchIndex = 0; branchIndex < leg.branches.length; branchIndex++) {
-			var branch = leg.branches[branchIndex];
-			for (var tileIndex = 0; tileIndex < branch.tiles.length; tileIndex++) {
-				if (branch.tiles[tileIndex].x === x && branch.tiles[tileIndex].y === y) {
-					return { legIndex: legIndex, tileIndex: tileIndex, branch: branch.id, tile: branch.tiles[tileIndex] };
-				}
-			}
-		}
-		return null;
+		return setup.realWorldPilot.debugTarget(x, y);
 	},
 	// Debug-only, zero-time movement. An onboard player takes the active consist; a player on foot moves alone and
 	// leaves its journey position untouched. With no active train, journey supplies the walking route context only.
@@ -997,7 +420,7 @@ setup.worldmap = {
 			// Walkers keep their remote train parked; an onboard consist enters an available station lead.
 			if (activeTrain && onFoot) {
 				variables.currentStation = stationId;
-				variables.onFoot = { legIndex: target.legIndex, tileIndex: target.tileIndex, branch: null, inRailyard: true };
+				variables.onFoot = { legIndex: target.legIndex, tileIndex: target.tileIndex, inRailyard: true };
 				return { mode: 'player', passage: 'Railyard', target: target, stationId: stationId };
 			}
 			if (activeTrain) {
@@ -1016,32 +439,29 @@ setup.worldmap = {
 			return { mode: 'player', passage: 'Railyard', target: target, stationId: stationId };
 		}
 		if (activeTrain && onFoot) {
-			variables.onFoot = { legIndex: target.legIndex, tileIndex: target.tileIndex, branch: target.branch };
+			variables.onFoot = { legIndex: target.legIndex, tileIndex: target.tileIndex };
 			return { mode: 'player', passage: 'OnFoot', target: target };
 		}
 		var forward = currentJourney && currentJourney.legIndex === target.legIndex
 			? currentJourney.forward !== false : variables.travellingForward !== false;
 		var targetLeg = this.getLeg(this.getSeed(), target.legIndex);
-		// The station the train last left: the one behind it on this leg, or on the network, where a leg can run between
-		// two junctions, whichever end has a station, else the one it was at.
-		variables.currentStation = targetLeg && targetLeg.realWorld
+		// The station the train last left: the one behind it on this leg, or, where a leg runs between two junctions,
+		// whichever end has a station, else the one it was at.
+		variables.currentStation = targetLeg
 			? (forward ? targetLeg.fromStationIndex || targetLeg.toStationIndex : targetLeg.toStationIndex || targetLeg.fromStationIndex)
 				|| variables.currentStation
-			: forward ? target.legIndex : target.legIndex + 1;
+			: variables.currentStation;
 		variables.journey = {
 			legIndex: target.legIndex, tileIndex: target.tileIndex, forward: forward
 		};
-		if (target.branch) variables.journey.branch = target.branch;
 		if (activeTrain) {
 			variables.onFoot = null;
 			return { mode: 'consist', passage: State.passage === 'TrainInterior' ? 'TrainInterior' : 'OnTheLine', target: target };
 		}
-		variables.onFoot = { legIndex: target.legIndex, tileIndex: target.tileIndex, branch: target.branch };
+		variables.onFoot = { legIndex: target.legIndex, tileIndex: target.tileIndex };
 		return { mode: 'player', passage: 'OnFoot', target: target };
 	},
 	// --- debug map ----------------------------------------------------------------------------------------
-	// A deliberately plain top-down map for debug mode: terrain as coloured cells and track as lines through
-	// them. It is a look at what the network builder produced, not a player-facing map.
 	// The grid a square of the network is on. The world is two grids joined at Wales, Alaska (the Americas, and Europe,
 	// Asia and Africa: one projection cannot hold both), each chart holding a run of the squares; a square on the
 	// second is given with the offset the compiler moved its grid by. Takes a tile or a square's index.
@@ -1093,16 +513,6 @@ setup.worldmap = {
 		column = Math.max(0, Math.min(mask.width - 1, column));
 		row = Math.max(0, Math.min(mask.height - 1, row));
 		return data.charts[mask.chart[row * mask.width + column]].grid;
-	},
-	// The true bearing of grid north at a square of the joined map, in degrees clockwise from north.
-	gridNorthAt: function(x, y) {
-		var grid = this.gridAt(x, y);
-		if (!grid) return null;
-		var a = this.unprojectGrid(x, y, grid), b = this.unprojectGrid(x, y + 1, grid);
-		var radians = Math.PI / 180, dLon = (b[0] - a[0]) * radians;
-		var bearing = Math.atan2(Math.sin(dLon) * Math.cos(b[1] * radians),
-			Math.cos(a[1] * radians) * Math.sin(b[1] * radians) - Math.sin(a[1] * radians) * Math.cos(b[1] * radians) * Math.cos(dLon)) / radians;
-		return ((bearing % 360) + 360) % 360;
 	},
 	// Where a longitude and latitude falls on a grid of the joined map, as unrounded square coordinates: the grid's own
 	// projection, then its quarter turns and offset (the reverse of unprojectGrid).

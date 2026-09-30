@@ -386,7 +386,6 @@ setup.saveMigrations = {
 	afterUpgrade: function(upgraded,relocated,repaired) {
 		this.recovery = null;
 		setup.buildCheckDone = false;
-		if (setup.worldmap) setup.worldmap.clearCache();
 		if (setup.bugReport) setup.bugReport.recent = [];
 		this.notice = upgraded ? 'Save upgraded to v' + setup.releaseVersion
 			+ '. Your original save has not been overwritten. Export a new backup from Saves.' : '';

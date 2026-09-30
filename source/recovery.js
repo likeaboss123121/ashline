@@ -24,32 +24,14 @@ setup.recovery = {
 		var stock = this.stock(station);
 		return stock.waterGrade == null ? setup.stationBuildings.GRADES.emergencyWater : stock.waterGrade;
 	},
-	// Distances follow rail connections, including either exit of a rejoining branch.
+	// The stations a player can reach supplies from: the yard they are in, or on foot the nearest by track, through any
+	// junctions.
 	stations: function() {
 		var v = State.variables, world = setup.worldmap, j = world.getJourney();
 		if (!j) return [{ station: v.currentStation, distance: 0 }];
 		if (!v.onFoot) return [];
 		var foot = setup.onfoot.get(), leg = world.getLeg(world.getSeed(), foot.legIndex || j.legIndex);
-		// On the network, by track through any junctions to the nearest stations.
-		if (leg && leg.realWorld) return setup.realWorldPilot.getStationsNear(leg.index, foot.tileIndex);
-		var main = world.getMainLine(world.getSeed(), j.legIndex);
-		var branch = foot.branch && leg.branches.find(function(b) { return b.id === foot.branch; });
-		var index = foot.tileIndex, distances;
-		// A leg knows the stations at its two ends; on the corridor they are the leg's own number and the next.
-		var fromStation = leg.fromStationIndex || j.legIndex, toStation = leg.toStationIndex || j.legIndex + 1;
-		if (!branch) distances = [{ station: fromStation, distance: index }, { station: toStation, distance: main.length - 1 - index }];
-		else {
-			var back = index + 1;
-			distances = [{ station: j.legIndex, distance: back + branch.fromIndex },
-				{ station: j.legIndex + 1, distance: back + main.length - 1 - branch.fromIndex }];
-			if (branch.stationId) distances.push({ station: branch.stationId, distance: branch.tiles.length - 1 - index });
-			if (branch.rejoinIndex !== null) {
-				var ahead = branch.tiles.length - index;
-				distances[0].distance = Math.min(distances[0].distance, ahead + branch.rejoinIndex);
-				distances[1].distance = Math.min(distances[1].distance, ahead + main.length - 1 - branch.rejoinIndex);
-			}
-		}
-		return distances.sort(function(a, b) { return a.distance - b.distance; });
+		return leg ? setup.realWorldPilot.getStationsNear(leg.index, foot.tileIndex) : [];
 	},
 	supplyRoutes: function(type) {
 		var self = this;

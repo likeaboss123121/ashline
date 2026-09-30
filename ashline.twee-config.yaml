@@ -4,10 +4,10 @@ sugarcube-2:
   macros:
     buildIntegrityNotice:
       container: false
-      description: "Defined in `source/scripts.js:385`. Save loading, schema upgrades and build-check reset live in save-migrations.js. Forces the build-integrity check to run when a passage asks for it, but leaves the warning popup-only."
+      description: "Defined in `source/scripts.js:384`. Save loading, schema upgrades and build-check reset live in save-migrations.js. Forces the build-integrity check to run when a passage asks for it, but leaves the warning popup-only."
     campfireControls:
       container: false
-      description: "Defined in `source/campfire.js:50`."
+      description: "Defined in `source/campfire.js:49`."
     conditionControls:
       container: false
       description: "Defined in `source/condition.js:251`. The eating, drinking and sleeping controls, shown wherever the player is standing in their train."
@@ -16,19 +16,19 @@ sugarcube-2:
       description: "Defined in `source/driving-view.js:383`."
     debugTools:
       container: false
-      description: "Defined in `source/scripts.js:2782`. Debug tools are passage-aware: each passage gets only the controls that make sense for its current state."
+      description: "Defined in `source/scripts.js:2695`. Debug tools are passage-aware: each passage gets only the controls that make sense for its current state."
     drivingMergeButtons:
       container: false
-      description: "Defined in `source/scripts.js:2534`. Builds the full shunting UI from the player's current gap: cross-track moves, coupling, and push options."
+      description: "Defined in `source/scripts.js:2465`. Builds the full shunting UI from the player's current gap: cross-track moves, coupling, and push options."
     drivingShuntingControls:
       container: false
-      description: "Defined in `source/scripts.js:2768`."
+      description: "Defined in `source/scripts.js:2681`."
     drivingStatus:
       container: false
-      description: "Defined in `source/scripts.js:2750`. Lets the player split their current consist around the occupied car/gap and leave each section on the track layout. Where the consist stands, which way it faces, and what it has left to burn."
+      description: "Defined in `source/scripts.js:2663`. Lets the player split their current consist around the occupied car/gap and leave each section on the track layout. Where the consist stands, which way it faces, and what it has left to burn."
     drivingTravelButtons:
       container: false
-      description: "Defined in `source/scripts.js:2685`. Renders inter-station travel controls and explains why departure is blocked when the yard state forbids it."
+      description: "Defined in `source/scripts.js:2615`. Renders inter-station travel controls and explains why departure is blocked when the yard state forbids it."
     drivingView:
       container: false
       description: "Defined in `source/driving-view.js:365`. Draws the consist where it stands on the line. Reads game state only; it never changes it."
@@ -37,7 +37,7 @@ sugarcube-2:
       description: "Defined in `source/food.js:107`."
     initDrivingModeState:
       container: false
-      description: "Defined in `source/scripts.js:2654`. Ensures driving mode always has a valid station, track, and player gap before any driving UI renders."
+      description: "Defined in `source/scripts.js:2584`. Ensures driving mode always has a valid station, track, and player gap before any driving UI renders."
     initsettings:
       container: false
       description: "Defined in `source/scripts.js:246`. Normalizes persistent settings variables so every new session starts from a known state."
@@ -46,10 +46,10 @@ sugarcube-2:
       description: "Defined in `source/journal.js:13`."
     lineControls:
       container: false
-      description: "Defined in `source/scripts.js:2573`. The moves available on the line: one 5 km tile at a time, onward or back the way you came."
+      description: "Defined in `source/scripts.js:2503`. The moves available on the line: one 5 km tile at a time, onward or back the way you came."
     lineStatus:
       container: false
-      description: "Defined in `source/scripts.js:2548`. Says where the consist stands on the line: how far along the leg, on what ground, and facing what grade."
+      description: "Defined in `source/scripts.js:2479`. Says where the consist stands on the line: how far along the leg, on what ground, and facing what grade."
     locomotiveKit:
       container: false
       description: "Defined in `source/items.js:109`. Lists the kit of the locomotive the player is standing in."
@@ -58,10 +58,10 @@ sugarcube-2:
       description: "Defined in `source/items.js:128`. The locomotive's own numbers, folded away in the cab until the player wants them."
     onFootControls:
       container: false
-      description: "Defined in `source/onfoot.js:209`. What the player can do standing on the ballast."
+      description: "Defined in `source/onfoot.js:188`. What the player can do standing on the ballast."
     onFootStatus:
       container: false
-      description: "Defined in `source/onfoot.js:261`. Where the player is standing, and what they have on them."
+      description: "Defined in `source/onfoot.js:240`. Where the player is standing, and what they have on them."
     outsideTemperature:
       container: false
       description: "Defined in `source/units.js:54`. The outside temperature, under the clock in the sidebar."
@@ -73,22 +73,22 @@ sugarcube-2:
       description: "Defined in `source/stats.js:216`. The sidebar's condition panel, under the clock."
     railyardButtons:
       container: false
-      description: "Defined in `source/scripts.js:2496`. Presents the current station as a browseable list of tracks and trains, and lets the player board one."
+      description: "Defined in `source/scripts.js:2427`. Presents the current station as a browseable list of tracks and trains, and lets the player board one."
     railyardView:
       container: false
       description: "Defined in `source/railyard-view.js:1179`. Draws the current station's rail yard. Reads game state only; it never changes it."
     recoveryControls:
       container: false
-      description: "Defined in `source/recovery.js:182`."
+      description: "Defined in `source/recovery.js:164`."
     refuelControls:
       container: false
       description: "Defined in `source/refuel.js:305`. The refuelling jobs for the locomotive the player is standing in."
     saveMigrationRecovery:
       container: false
-      description: "Defined in `source/save-migrations.js:471`."
+      description: "Defined in `source/save-migrations.js:470`."
     saveReminder:
       container: false
-      description: "Defined in `source/saves.js:365`. The backup reminder, at the top of the screen where it cannot be missed."
+      description: "Defined in `source/saves.js:354`. The backup reminder, at the top of the screen where it cannot be missed."
     settingsStart:
       container: false
       description: "Defined in `source/scripts.js:2`. Renders the start/settings screen and seeds a random seed value if the player has not chosen one yet."
@@ -97,7 +97,7 @@ sugarcube-2:
       description: "Defined in `source/condition.js:279`. The sleep screen: a handful of hours, or as long as it takes."
     startNewGame:
       container: false
-      description: "Defined in `source/scripts.js:285`."
+      description: "Defined in `source/scripts.js:284`."
     stationMap:
       container: false
       description: "Defined in `source/wayfinding.js:323`. The station map building's contents, for the railyard."

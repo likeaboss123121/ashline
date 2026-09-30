@@ -151,7 +151,7 @@ setup.realWorldPilot = (function () {
 					return tile;
 				});
 				var leg = {
-					index: legIndex, tiles: legTiles, byKey: {}, branches: [], realWorld: true, corridor: corridor, corridorId: NETWORK_ID,
+					index: legIndex, tiles: legTiles, byKey: {},
 					fromStation: from.station || { name: from.name }, toStation: to.station || { name: to.name },
 					fromStationIndex: from.stationIndex, toStationIndex: to.stationIndex, fromNode: from, toNode: to,
 					start: { x: legTiles[0].x, y: legTiles[0].y }, end: { x: legTiles[legTiles.length - 1].x, y: legTiles[legTiles.length - 1].y },

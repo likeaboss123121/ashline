@@ -309,7 +309,6 @@ test('the world map is the same every time and never enters save data', () => {
   const { setup, State } = loadGame();
   State.variables.randomSeed = 'world-a';
   const first = JSON.stringify(setup.worldmap.getLeg('world-a', 1));
-  setup.worldmap.clearCache();
   assert.equal(JSON.stringify(setup.worldmap.getLeg('world-a', 1)), first);
   assert.equal(JSON.stringify(setup.worldmap.getLeg('world-b', 1)), first, 'rail geometry is independent of the yard seed');
   // Stations stand where their legs end, so the world is one continuous line from the origin.
@@ -839,7 +838,7 @@ test('water for a steam engine can come from a station tank or from beside the l
   }
   assert.ok(found.wet && found.dry, 'the line passes both water and dry land');
   State.variables.journey = found.dry;
-  assert.match(job('water-from-river').reason, /no water beside the line/);
+  assert.match(job('water-from-river').reason, /no water near the track/);
   assert.equal(job('water-from-tank'), undefined);
   State.variables.journey = found.wet;
   assert.equal(job('water-from-river').reason, '');
@@ -1011,18 +1010,11 @@ test('the locomotives differ in pull, speed and art, and a consist runs at its s
   assert.ok(prairie.steamStoredLiters > small.steamStoredLiters * 2);
 });
 
-test('forests grow on the map, carry any track, and are drawn', () => {
+test('forests grow on the map and are drawn', () => {
   const { setup } = loadGame();
-  const counts = {};
-  for (let x = -40; x < 40; x++) {
-    for (let y = 0; y < 400; y += 2) {
-      const terrain = setup.worldmap.getBaseTerrain('forests', x, y);
-      counts[terrain] = (counts[terrain] || 0) + 1;
-    }
-  }
-  const land = Object.values(counts).reduce((a, b) => a + b, 0);
-  assert.ok(counts.forest / land > 0.08 && counts.forest / land < 0.35, JSON.stringify(counts));
-  assert.equal(setup.worldmap.canPlace('forest', 'cross'), true);
+  const tiles = setup.realWorldPilot.getGridRoute().tiles;
+  const forest = tiles.filter(tile => tile.terrain === 'forest').length;
+  assert.ok(forest / tiles.length > 0.02 && forest / tiles.length < 0.9, forest + ' of ' + tiles.length);
   assert.ok([...setup.drivingTemplates.templates].some(t => t.passage === 'driving-terrain-forest'));
 });
 
@@ -1254,12 +1246,10 @@ test('a cold boiler reaches working pressure in the time a real one would', () =
   assert.equal(old.boilerSteamVolumeLiters, 5000);
 });
 
-test('the playable world contains only sourced rail and no fictional generated branches', () => {
+test('the playable world contains only sourced rail', () => {
   const { setup, State } = loadGame();
   for (let legIndex = 1; legIndex <= 4; legIndex++) {
     const leg = setup.worldmap.getLeg('ignored', legIndex);
-    assert.equal(leg.realWorld, true);
-    assert.deepEqual([...leg.branches], []);
     assert.ok(leg.tiles.every(tile => tile.sourceSliceId && tile.geoCoordinate));
   }
   State.variables.journey = { legIndex: 2, tileIndex: 1, forward: true };
@@ -1273,7 +1263,7 @@ test('sourced tiles report their real coordinates and sampled elevation', () => 
   assert.ok(Math.abs(home.latitude - (-53.16472)) < 0.00001);
   assert.ok(Math.abs(home.longitude - (-70.90114)) < 0.00001);
   assert.ok(home.elevation >= 0 && home.elevation < 50, 'Punta Arenas is by the sea: ' + home.elevation);
-  assert.equal(world.getBaseTerrain('climate', 0, 0), 'plains');
+  assert.equal(setup.realWorldPilot.getTileAt(0, 0).terrain, 'plains');
   const stations = setup.realWorldPilot.getGridRoute().corridor.stations;
   const arica = setup.realWorldPilot.getStationTile(stations.findIndex(station => station.name === 'Arica' && station.status === 'city') + 1);
   assert.equal(arica.station, 'Arica');
@@ -1568,7 +1558,7 @@ test('railyards are sized by their region: small in the country, large in the ci
   State.variables.randomSeed = 'yard-regions';
   const stations = setup.realWorldPilot.getGridRoute().corridor.stations;
   const sample = region => stations.map((station, index) => ({ station, id: index + 1 }))
-    .filter(entry => entry.station.region === region && entry.id > 1 && !setup.worldmap.isBranchStation(entry.id)).slice(0, 12);
+    .filter(entry => entry.station.region === region && entry.id > 1).slice(0, 12);
   const yardTracks = id => setup.railyard.generateStationTracks(id, 'yard-regions').filter(track => !track.infinite && !track.direction).length;
   const rural = sample('rural'), urban = sample('urban');
   assert.ok(rural.length > 5 && urban.length > 5);

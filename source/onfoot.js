@@ -58,23 +58,21 @@ setup.onfoot = {
 	getTrainPosition: function() {
 		if (!Array.isArray(State.variables.currentTrain) || !State.variables.currentTrain.length) return null;
 		var journey = setup.worldmap.getJourney();
-		return journey ? { legIndex: journey.legIndex, tileIndex: journey.tileIndex, branch: journey.branch || null } : null;
+		return journey ? { legIndex: journey.legIndex, tileIndex: journey.tileIndex } : null;
 	},
 	isBesideTrain: function() {
 		var foot = this.get();
 		var train = this.getTrainPosition();
 		if (!foot || !train) return false;
-		if ((foot.legIndex || train.legIndex) === train.legIndex && foot.tileIndex === train.tileIndex
-			&& (foot.branch || null) === train.branch) return true;
+		if ((foot.legIndex || train.legIndex) === train.legIndex && foot.tileIndex === train.tileIndex) return true;
 		// At a junction the same square ends several legs, so compare where each actually stands.
 		var world = setup.worldmap, here = world.getJourneyView(this.getPosition()), there = world.getJourneyView();
-		return !!here && !!there && !!here.realWorld && here.tile.x === there.tile.x && here.tile.y === there.tile.y;
+		return !!here && !!there && here.tile.x === there.tile.x && here.tile.y === there.tile.y;
 	},
 	// Query the walker's route without temporarily moving the parked train.
 	getPosition: function() {
 		var foot = this.get(), journey = setup.worldmap.getJourney();
-		return foot && journey ? { legIndex: foot.legIndex || journey.legIndex, tileIndex: foot.tileIndex,
-			branch: foot.branch || null, forward: true, realWorldCorridorId: journey.realWorldCorridorId } : null;
+		return foot && journey ? { legIndex: foot.legIndex || journey.legIndex, tileIndex: foot.tileIndex, forward: true } : null;
 	},
 	// The tile the player is standing on, which is not always the one the train is on.
 	getTile: function() {
@@ -87,7 +85,7 @@ setup.onfoot = {
 		if (!train || this.isOnFoot()) {
 			return false;
 		}
-		State.variables.onFoot = { legIndex: train.legIndex, tileIndex: train.tileIndex, branch: train.branch };
+		State.variables.onFoot = { legIndex: train.legIndex, tileIndex: train.tileIndex };
 		return true;
 	},
 	climbAboard: function() {
@@ -97,50 +95,31 @@ setup.onfoot = {
 		State.variables.onFoot = null;
 		return true;
 	},
-	// One tile up or down the line. The walk is the cost: an hour, and the legs to go with it.
+	// One square up or down the line, or onto another line at a node (branchId, one of worldmap.getBranchChoices). The walk
+	// is the cost: an hour for 5 km, and the legs to go with it. Walking reuses the rails' connections but never a
+	// train's power or grade limits.
 	getWalk: function(direction, branchId) {
 		var position = this.getPosition(), world = setup.worldmap;
 		if (!position || this.isInRailyard()) return null;
-		var step, legIndex = position.legIndex;
-		if (branchId != null && world.getJourneyPath(position).leg.realWorld) {
-			// A line leaving the junction the walker stands at.
+		var legIndex = position.legIndex, step;
+		if (branchId != null) {
 			step = world.getBranchStep(branchId, position);
 			if (step) legIndex = Number(String(branchId).replace('leg:', ''));
-		} else if (branchId != null) {
-			if (position.branch) return null;
-			var branch = (world.getJourneyPath(position).leg.branches || []).filter(function(candidate) {
-				return candidate.id === branchId && candidate.tiles.length
-					&& (candidate.fromIndex === position.tileIndex || candidate.rejoinIndex === position.tileIndex);
-			})[0];
-			if (!branch) return null;
-			var atStart = branch.fromIndex === position.tileIndex;
-			var index = atStart ? 0 : branch.tiles.length - 1;
-			step = { toIndex: index, toBranch: branch.id, toMain: null, terrain: branch.tiles[index].terrain,
-				heading: world.describeDirection(atStart ? branch.direction : world.opposite(branch.tiles[index].out)) };
 		} else {
-			// Reuse rail connectivity, but never apply train power/grade restrictions to walking.
 			step = world.getJourneyStep(direction, position);
 		}
-		var distanceKm = step && step.distanceKm ? step.distanceKm : setup.worldmap.TILE_KM;
-		if (step && step.realWorld) return { legIndex: legIndex, toIndex: step.toIndex, branch: null, terrain: step.terrain,
-			heading: step.heading, distanceKm: distanceKm,
-			minutes: Math.max(1, Math.round(this.MINUTES_PER_TILE * distanceKm / setup.worldmap.TILE_KM)) };
-		return step ? { toIndex: step.toIndex, branch: step.toMain != null ? null : (step.toBranch || position.branch),
-			terrain: step.terrain, heading: step.heading, distanceKm: distanceKm,
-			minutes: Math.max(1, Math.round(this.MINUTES_PER_TILE * distanceKm / setup.worldmap.TILE_KM)) } : null;
+		if (!step) return null;
+		var distanceKm = step.distanceKm || world.TILE_KM;
+		return { legIndex: legIndex, toIndex: step.toIndex, terrain: step.terrain, heading: step.heading, distanceKm: distanceKm,
+			minutes: Math.max(1, Math.round(this.MINUTES_PER_TILE * distanceKm / world.TILE_KM)) };
 	},
 	getBranchWalks: function() {
 		var position = this.getPosition(), self = this;
-		if (!position || position.branch) return [];
-		if (setup.worldmap.getJourneyPath(position).leg.realWorld) {
-			return setup.worldmap.getBranchChoices(position, true).map(function(choice) {
-				var walk = self.getWalk(1, choice.id);
-				if (walk) walk.choice = choice.id;
-				return walk;
-			}).filter(function(walk) { return !!walk; });
-		}
-		return (setup.worldmap.getJourneyPath(position).leg.branches || []).map(function(branch) {
-			return self.getWalk(1, branch.id);
+		if (!position) return [];
+		return setup.worldmap.getBranchChoices(position, true).map(function(choice) {
+			var walk = self.getWalk(1, choice.id);
+			if (walk) walk.choice = choice.id;
+			return walk;
 		}).filter(function(walk) { return !!walk; });
 	},
 	walk: function(direction, branchId) {
@@ -148,7 +127,7 @@ setup.onfoot = {
 		if (!walk) {
 			return false;
 		}
-		State.variables.onFoot = { legIndex: walk.legIndex || this.getPosition().legIndex, tileIndex: walk.toIndex, branch: walk.branch };
+		State.variables.onFoot = { legIndex: walk.legIndex, tileIndex: walk.toIndex };
 		return true;
 	},
 	// A tool counts as to hand if the player is carrying it, or if the train is right there to fetch it from.
@@ -234,9 +213,9 @@ Macro.add('onFootControls', {
 		});
 		output += setup.wayfinding.signMarkup(onfoot.getPosition());
 		onfoot.getBranchWalks().forEach(function(walk) {
-			output += '<<timedlink "Walk ' + setup.units.kilometres(walk.distanceKm || setup.worldmap.TILE_KM) + ' ' + walk.heading
-				+ (walk.choice ? '' : ' onto the branch') + '" ' + walk.minutes + ' "walk" "fatigue:+3">><<run setup.onfoot.walk(1, '
-				+ JSON.stringify(walk.choice || walk.branch) + ')>><<goto "OnFoot">><</timedlink>><br>';
+			output += '<<timedlink "Walk ' + setup.units.kilometres(walk.distanceKm) + ' ' + walk.heading
+				+ '" ' + walk.minutes + ' "walk" "fatigue:+3">><<run setup.onfoot.walk(1, '
+				+ JSON.stringify(walk.choice) + ')>><<goto "OnFoot">><</timedlink>><br>';
 		});
 		var chopReason = onfoot.canChop();
 		if (!chopReason) {

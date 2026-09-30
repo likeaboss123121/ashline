@@ -7,13 +7,12 @@ setup.campfire = {
 		var journey = setup.worldmap.getJourney();
 		if (!journey) return null;
 		var foot = setup.onfoot && setup.onfoot.get();
-		return { legIndex: journey.legIndex, branch: (foot ? foot.branch : journey.branch) || null,
-			tileIndex: foot ? foot.tileIndex : journey.tileIndex };
+		return { legIndex: foot && foot.legIndex || journey.legIndex, tileIndex: foot ? foot.tileIndex : journey.tileIndex };
 	},
 	isHere: function() {
 		var fire = State.variables.campfire, here = this.location();
 		return !!fire && !!here && fire.expiresAt > setup.time.getCurrentTimestampMs()
-			&& fire.legIndex === here.legIndex && (fire.branch || null) === here.branch && fire.tileIndex === here.tileIndex;
+			&& fire.legIndex === here.legIndex && fire.tileIndex === here.tileIndex;
 	},
 	sources: function() {
 		var sources = [], carried = setup.items.getPlayerCargo().find(function(s) { return s.type === 'firewood'; });
@@ -42,7 +41,7 @@ setup.campfire = {
 			remaining -= take;
 		});
 		var here = this.location();
-		State.variables.campfire = { legIndex: here.legIndex, branch: here.branch, tileIndex: here.tileIndex,
+		State.variables.campfire = { legIndex: here.legIndex, tileIndex: here.tileIndex,
 			expiresAt: setup.time.getCurrentTimestampMs() + this.DURATION_MINUTES * 60000 };
 		return true;
 	}

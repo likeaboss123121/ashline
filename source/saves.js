@@ -50,11 +50,8 @@ setup.saves = {
 		var variables = State.variables;
 		var parts = setup.time.getCurrentDateParts();
 		var station = variables.currentStation || 1;
-		var realCorridor = variables.journey && variables.journey.realWorldCorridorId
-			? setup.realWorldPilot.getCorridor(variables.journey.realWorldCorridorId) : null;
-		var place = realCorridor ? 'On ' + realCorridor.label
-			: variables.journey ? 'On the line past ' + setup.worldmap.getStationName(station)
-				: setup.worldmap.getStationName(station);
+		var place = variables.journey ? 'On the line past ' + setup.worldmap.getStationName(station)
+			: setup.worldmap.getStationName(station);
 		return {
 			place: place,
 			when: setup.time.formatDate(parts) + ', ' + setup.time.formatClock(parts),
@@ -155,14 +152,6 @@ setup.saves = {
 				&& (!Array.isArray(v.currentTrain) || !v.currentTrain.length)) throw new Error('The train is missing.');
 			if ((v.currentTrain != null && !train(v.currentTrain)) || (v.leavingTrain != null && !train(v.leavingTrain)))
 				throw new Error('Invalid train data.');
-			if (v.realWorldJourney != null && (!object(v.realWorldJourney) ||
-				typeof v.realWorldJourney.corridorId !== 'string' || !Number.isInteger(v.realWorldJourney.position) ||
-				v.realWorldJourney.position < 0)) throw new Error('Invalid real-world journey data.');
-			if (v.journey && v.journey.realWorldCorridorId && (typeof v.journey.realWorldCorridorId !== 'string' ||
-				!Number.isInteger(v.journey.tileIndex) || v.journey.tileIndex < 0 ||
-				!setup.realWorldPilot.getGridRoute(v.journey.realWorldCorridorId) ||
-				v.journey.tileIndex >= setup.realWorldPilot.getGridRoute(v.journey.realWorldCorridorId).tiles.length))
-				throw new Error('Invalid sourced-route journey data.');
 			if (!stacks(v.player.carried, false) || !stacks(v.player.carriedCargo, true)) throw new Error('Invalid inventory data.');
 			if (v.lineTrains != null && (!object(v.lineTrains) || !Object.keys(v.lineTrains).every(function(key) {
 				return object(v.lineTrains[key]) && train(v.lineTrains[key].train);

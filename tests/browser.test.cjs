@@ -1490,7 +1490,7 @@ test('the saves menu shows what each slot holds, and asks for a backup when one 
   await passage(page, 'Railyard');
   const reminder = page.locator('.save-reminder');
   await reminder.waitFor({ state: 'visible' });
-  assert.match(await reminder.innerText(), /9 saves since your last backup|never saved a copy to disk/);
+  assert.match(await reminder.innerText(), /9 saves since your last backup|never downloaded a copy/);
 
   // Dismissing it keeps it away for the rest of the session.
   await reminder.getByText('Later', { exact: true }).click();
@@ -2133,15 +2133,9 @@ test('debug mode draws the whole world network on the globe, and names the squar
 		has: page.getByText('Global rail data', { exact: true })
   });
   if (!await prototype.evaluate(element => element.open)) await prototype.locator(':scope > summary').click();
-  assert.match(await prototype.innerText(), /35 places, 40 non-navigable links in 24 regional chunks/);
-  assert.match(await prototype.innerText(), /not claimed railway geometry/);
-  // The three planning chords, with every one of their links routed over the continent's mapped rail drawn on top:
-  // real track solid, gap fills dashed, and none of it the playable network.
-  assert.equal(await prototype.locator('svg.world-graph-debug polyline:not(.world-route-rail):not(.world-route-gap)').count(), 3);
-  assert.ok(await prototype.locator('svg.world-graph-debug polyline.world-route-rail').count() > 50);
-  assert.ok(await prototype.locator('svg.world-graph-debug polyline.world-route-gap').count() > 50);
-  assert.match(await prototype.innerText(), /38 planning links routed over mapped rail: [\d,]+ km on real track \(solid\) and [\d,]+ km of gap fill \(dashed\)\. The playable world is the network in the World rail grid section/);
-  assert.equal(await prototype.locator('svg.world-graph-debug circle').count(), 35);
+  // The section summarises the playable network; the old planning corridors are no longer drawn.
+  assert.match(await prototype.innerText(), /is the active gameplay world: \d+ grid squares, \d+ legs and \d+ stations/);
+  assert.equal(await prototype.locator('svg.world-graph-debug').count(), 0);
   const reference = page.locator('details.debug-section').filter({ has: page.getByText('Reference data', { exact: true }) });
   await page.getByRole('button', { name: 'Wiki', exact: true }).click();
   await reference.getByText('Railcars', { exact: true }).click();
@@ -2457,8 +2451,6 @@ test('the sourced corridor exposes real adjacent stations without fictional side
   assert.match(text, /Depart \S+ toward Punta Arenas/);
   assert.match(text, await departTo(page, 2));
   assert.doesNotMatch(text, /side track|branch/i);
-  assert.deepEqual(await page.evaluate(() => [1, 2, 3, 4].map(index =>
-    SugarCube.setup.worldmap.getLeg(SugarCube.setup.worldmap.getSeed(), index).branches.length)), [0, 0, 0, 0]);
 });
 
 test('a yard has one line out of each end, and a line into a junction says so', async t => {

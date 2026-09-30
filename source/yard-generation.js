@@ -31,23 +31,18 @@ setup.yardGeneration = {
 		var freight = yard.cloneCar(State.variables.defaultTrains.flatcar);
 		freight.cargo = [{ type: 'timber', amount: 20000, grade: 60 }];
 		var train = [engine, freight], minutes;
-		if (world.isBranchStation(stationId)) {
-			var branch = world.getBranchForStation(seed, stationId);
-			minutes = branch.tiles.reduce(function(total, tile) { return total + world.getTileMinutes(-tile.grade, train); }, 0);
-		} else {
-			// The way out: the station's first exit line, or its only line when every line leaves the other side. The
-			// line may run to a junction rather than a station, or be far longer than the way to a station in the other
-			// direction, so the tank is sized for the way to the nearest other station by track, at the pace of that
-			// first line.
-			var line = world.getLine(stationId, true) || world.getLine(stationId, false);
-			minutes = line ? world.getLegTravel(seed, line.legIndex, train, !line.forward).minutes : 0;
-			var pilot = setup.realWorldPilot, here = line && pilot.getStationTile ? pilot.getStationTile(stationId) : null;
-			if (here && pilot.getNodeDistances) {
-				var leg = pilot.getLeg(line.legIndex), route = pilot.getGridRoute(), distances = pilot.getNodeDistances(here.globalPosition, 2000);
-				var nearest = Object.keys(distances).filter(function(square) { return route.nodes[square].kind === 'station'; })
-					.reduce(function(best, square) { return Math.min(best, distances[square]); }, Infinity);
-				if (nearest < Infinity && leg.km > 0) minutes = minutes / leg.km * nearest;
-			}
+		// The way out: the station's first exit line, or its only line when every line leaves the other side. The
+		// line may run to a junction rather than a station, or be far longer than the way to a station in the other
+		// direction, so the tank is sized for the way to the nearest other station by track, at the pace of that
+		// first line.
+		var line = world.getLine(stationId, true) || world.getLine(stationId, false);
+		minutes = line ? world.getLegTravel(seed, line.legIndex, train, !line.forward).minutes : 0;
+		var pilot = setup.realWorldPilot, here = line && pilot.getStationTile ? pilot.getStationTile(stationId) : null;
+		if (here && pilot.getNodeDistances) {
+			var leg = pilot.getLeg(line.legIndex), route = pilot.getGridRoute(), distances = pilot.getNodeDistances(here.globalPosition, 2000);
+			var nearest = Object.keys(distances).filter(function(square) { return route.nodes[square].kind === 'station'; })
+				.reduce(function(best, square) { return Math.min(best, distances[square]); }, Infinity);
+			if (nearest < Infinity && leg.km > 0) minutes = minutes / leg.km * nearest;
 		}
 		// Include yard work before departure and five percent beyond the route cost.
 		var required = Math.ceil(minutes * 1.05) + 20;

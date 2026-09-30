@@ -17,9 +17,9 @@ There are two layers:
 - **The planning corridors**: 35 GeoNames cities and three authored Punta Arenas–Panama corridors, 40 geodesic
   chords marked `navigable: false`. `scripts/world/route-planning-links.cjs` routes each over the continent's mapped
   rail (`npm run world:route:south-america`) into `world/proposals/south-america-routed-links.json`, repairing
-  digitizing breaks under 50 m and proposing gap joins where the networks break. The debug overview draws the chords
-  with their routes over them, mapped rail solid and gap fills dashed, for comparison with the network. They are
-  never played.
+  digitizing breaks under 50 m and proposing gap joins where the networks break. They are a pipeline product only,
+  written to `world/dist`: the game ships just the network and the data credits (`source/world-data.js`), and they
+  are never played.
 
 For elevation, Copernicus GLO-90 is aggregated over each 5 km square: the mean is the square's elevation, and the
 population standard deviation within it is its relief; 120 m of relief separates plains from mountain, so a high,

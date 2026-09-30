@@ -1,7 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const { simplify } = require('./route-planning-links.cjs');
 const { parseCsv } = require('./csv.cjs');
 const { readRecords } = require('./records.cjs');
 const { landMask, rasterizeLand } = require('./land-mask.cjs');
@@ -489,24 +488,6 @@ function validateBundle(bundle) {
   });
 }
 
-// Consecutive slices of the same kind merged into one polyline, simplified to about 200 m: the browser only draws these
-// on a continent-sized debug overview, so the full slice geometry stays in the committed proposal file.
-function runsOf(slices) {
-  const runs = [];
-  slices.forEach(slice => {
-    const last = runs[runs.length - 1];
-    if (last && last.gapFill === slice.gapFill) {
-      last.coordinates.push(...slice.coordinates.slice(1));
-    } else {
-      runs.push({ gapFill: slice.gapFill, coordinates: slice.coordinates.slice() });
-    }
-  });
-  return runs.map(run => ({
-    gapFill: run.gapFill,
-    coordinates: simplify(run.coordinates, 0.002).map(point => [Math.round(point[0] * 1e3) / 1e3, Math.round(point[1] * 1e3) / 1e3])
-  }));
-}
-
 // The Map tab's globe: a greyscale picture of the whole Earth, water 0 and land its shaded relief (globe-texture.cjs),
 // embedded as a PNG so it ships inside the game; and land and water alone, finer (the 1:50m land polygons filled at
 // land-mask.cjs's raster size), as run lengths row by row from the north, water first, so coastlines stay sharp when
@@ -535,7 +516,10 @@ function globeTexture() {
 function outputsFor(bundle) {
   const manifest = { ...bundle };
   delete manifest.chunks;
-  const browserBundle = { ...bundle, network: undefined };
+  // The game needs only the network (added below) and the credits for the data it was made from; the planning graph
+  // stays in world/dist for the pipeline.
+  const browserBundle = { formatVersion: bundle.formatVersion, datasetVersion: bundle.datasetVersion, tileKm: bundle.tileKm,
+    sources: bundle.sources };
   const networkFiles = JSON.parse(read('world/imports.json')).network.map(entry => entry.file);
   manifest.network = { id: bundle.network.id, label: bundle.network.label, grid: bundle.network.grid,
     ...(bundle.network.charts ? { charts: bundle.network.charts.map(chart => ({ id: chart.id, grid: chart.grid, offset: chart.offset,
@@ -548,13 +532,6 @@ function outputsFor(bundle) {
     planningLinkIds: route.planningLinkIds, status: route.status, chordKm: route.chordKm, routedKm: route.routedKm,
     railKm: route.railKm, gapKm: route.gapKm, gapCount: route.gaps.length, sliceCount: route.sliceCount,
     stationCount: route.stations.length, navigable: route.navigable, reviewRequired: route.reviewRequired
-  }));
-  browserBundle.routedLinks = bundle.routedLinks.map(route => ({
-    id: route.id, proposalSetId: route.proposalSetId, from: route.from, to: route.to, status: route.status,
-    ...(route.detour ? { detour: true } : {}), chordKm: route.chordKm,
-    routedKm: route.routedKm, railKm: route.railKm, gapKm: route.gapKm, gapCount: route.gaps.length,
-    sliceCount: route.sliceCount, navigable: route.navigable, reviewRequired: route.reviewRequired,
-    runs: runsOf(route.slices)
   }));
   const compact = compactNetwork(bundle.network);
   const revision = crypto.createHash('sha256').update(JSON.stringify(compact)).digest('hex').slice(0,24);
