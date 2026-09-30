@@ -84,7 +84,7 @@ setup.realWorldPilot = (function () {
 		data.stops.square.forEach(function(square) { if (!queued[square]) { queued[square] = true; order.push(square); } });
 		var stations = order.filter(function(square) { return stopAtSquare[square] !== undefined; }).map(function(square) {
 			var stop = stopAtSquare[square];
-			return { id: data.stops.id ? data.stops.id[stop] : 'stop:' + data.stops.square[stop], uuid: data.stops.uuid && data.stops.uuid[stop], name: data.stops.name[stop], status: data.stops.status[stop],
+			return { id: data.stops.id ? data.stops.id[stop] : 'stop:' + data.stops.square[stop], uuid: data.stops.uuid && data.stops.uuid[stop], name: data.stops.name[stop], localName: data.stops.localName ? data.stops.localName[stop] : '', status: data.stops.status[stop],
 				region: data.stops.region ? data.stops.region[stop] : 'rural', square: data.stops.square[stop], lines: [] };
 		});
 		var stationAt = {};

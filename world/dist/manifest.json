@@ -1154,7 +1154,7 @@
           "cellKm": 5
         },
         "offset": [0, 0],
-        "count": 32095
+        "count": 33862
       },
       {
         "id": "afro-eurasia-network",
@@ -1166,7 +1166,7 @@
         },
         "offset": [-1073, 2709],
         "turn": 2,
-        "count": 79703
+        "count": 83305
       }
     ],
     "joins": [
@@ -1206,7 +1206,7 @@
           "elevation": {
             "sourceId": "copernicus-dem-glo90",
             "aggregation": "mean-and-population-standard-deviation-within-grid-square",
-            "tileCount": 600
+            "tileCount": 882
           }
         }
       }
@@ -1232,7 +1232,7 @@
       "elevation": {
         "sourceId": "copernicus-dem-glo90",
         "aggregation": "mean-and-population-standard-deviation-within-grid-square",
-        "tileCount": 1555
+        "tileCount": 1657
       }
     },
     "parameters": {
@@ -1318,43 +1318,51 @@
       }
     },
     "stats": {
-      "squareCount": 111798,
-      "moveCount": 112470,
-      "stopCount": 4419,
-      "haltCount": 1079,
-      "bridgeCount": 56149,
-      "bridgeKm": 398336,
+      "squareCount": 117167,
+      "moveCount": 117888,
+      "stopCount": 4676,
+      "haltCount": 1067,
+      "bridgeCount": 56158,
+      "bridgeKm": 405961,
       "stubJoinCount": 10294,
       "authoredJoinCount": 8,
+      "editLineCount": 9,
+      "significantStops": 534,
+      "terminusStops": 33,
+      "stationNames": {
+        "town": 2595,
+        "own": 32,
+        "shared": 7
+      },
       "endJoinCount": 61,
       "spurCount": 470,
       "shortcutCount": 32,
-      "parallelStretchesRemoved": 17006,
-      "parallelKmRemoved": 411960,
-      "onExistingTrackKm": 23733,
-      "stationsMovedOffJunctions": 46387,
-      "junctionPoints": 2559,
+      "parallelStretchesRemoved": 16981,
+      "parallelKmRemoved": 409516,
+      "onExistingTrackKm": 24271,
+      "stationsMovedOffJunctions": 46848,
+      "junctionPoints": 2758,
       "bufferPoints": 0,
       "urbanAreas": 2396,
-      "urbanSquaresRemoved": 8001,
-      "urbanMovesRemoved": 11077,
+      "urbanSquaresRemoved": 7844,
+      "urbanMovesRemoved": 10920,
       "stopRegions": {
-        "urban": 583,
-        "industrial": 912,
-        "rural": 2925
+        "urban": 800,
+        "industrial": 923,
+        "rural": 2954
       },
       "stationsWithoutYard": {
-        "urban": 4903,
-        "industrial": 10974,
-        "rural": 30146
+        "urban": 4866,
+        "industrial": 10973,
+        "rural": 30442
       },
-      "railKm": 992941,
+      "railKm": 1038713,
       "leftOutPieces": 246,
       "leftOutKm": 59198,
       "unreachableCities": [],
-      "prunedStubSquares": 37669,
-      "junctionSquares": 2559,
-      "endSquares": 1272
+      "prunedStubSquares": 37347,
+      "junctionSquares": 2758,
+      "endSquares": 1378
     },
     "files": [
       "world/network/americas-network.json",

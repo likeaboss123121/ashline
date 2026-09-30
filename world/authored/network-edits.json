@@ -1,0 +1,28 @@
+{
+  "about": "Changes made by hand to the network the build keeps, after its new lines are laid and before its stations are chosen and its track thinned (scripts/world/build-network.cjs, the stops stage). Each entry is a route in the stop format of network-joins.json (a place name, [longitude, latitude], { \"name\": ..., \"near\": [...] }, { \"name\": ..., \"coordinates\": [...] }, with \"tunnel\": true on a stop reached under water), and \"scope\" limits it to some builds. \"keep\": the track between each stop and the next stays, and every stop on the route is a station. Where no track joins two stops, or only a way round more than KEEP_DETOUR_FACTOR times as long as the straight line, a new line is laid between them over the terrain; a stop with no track near it becomes a new terminus. \"remove\": the track between each stop and the next is taken up, from the last junction or station before it to the first after. Then run the scope's network build and npm run world:build.",
+  "keep": [
+    { "note": "Warnes, Bolivia, to Porto Velho: the eastern Bolivian network to the Madeira", "scope": ["south-america", "americas"],
+      "route": [{ "name": "Warnes", "near": [-63.16, -17.51] }, "Porto Velho"] },
+    { "note": "Miami to Key West: the Overseas Railroad", "scope": ["americas"], "route": ["Miami", "Key West"] },
+    { "note": "Thompson to Churchill: the Hudson Bay Railway", "scope": ["americas"],
+      "route": [{ "name": "Thompson", "near": [-97.86, 55.74] }, { "name": "Churchill", "near": [-94.17, 58.77] }] },
+    { "note": "Huangyuan to Damxung: the Qinghai-Tibet railway", "scope": ["afro-eurasia"], "route": ["Huangyuan", "Damxung"] },
+    { "note": "Mangnai to Damxung", "scope": ["afro-eurasia"], "route": [{ "name": "Mangnai", "near": [90.85, 38.25] }, "Damxung"] },
+    { "note": "Yima, Xinjiang, over the Karakoram to Sopore, Kashmir", "scope": ["afro-eurasia"],
+      "route": [{ "name": "Yima", "near": [77.33, 38.24] }, "Sopore"] },
+    { "note": "Algeciras under the Strait of Gibraltar to Tangier", "scope": ["afro-eurasia"],
+      "route": ["Algeciras", { "name": "Tangier", "tunnel": true }] },
+    { "note": "Koulikoro, the end of the Dakar-Niger railway, to Bokui-Ouest", "scope": ["afro-eurasia"],
+      "route": [{ "name": "Koulikoro", "near": [-7.56, 12.86] }, "Bokui-Ouest"] },
+    { "note": "Ngaoundéré to Buni Yadi, and on to Yassin by Nyala: Cameroon, Nigeria and Sudan", "scope": ["afro-eurasia"],
+      "route": ["Ngaoundéré", "Buni Yadi", { "name": "Yassin", "near": [25.55, 11.54] }] },
+    { "note": "Doube, on the Trans-Cameroon railway, to Bumba, Kinshasa and Ilebo", "scope": ["afro-eurasia"],
+      "route": [{ "name": "Doube", "near": [13.32, 5.01] }, { "name": "Bumba", "near": [22.47, 2.18] }, "Kinshasa",
+        { "name": "Ilebo", "near": [20.59, -4.33] }] }
+  ],
+  "remove": [
+    { "note": "Suez to Aqaba across Sinai", "scope": ["afro-eurasia"], "route": ["Suez", { "name": "Aqaba", "near": [35.0, 29.53] }] },
+    { "note": "Zyryanka to Palatka", "scope": ["afro-eurasia"],
+      "route": [{ "name": "Zyryanka", "near": [150.89, 65.73] }, "Palatka"] }
+  ]
+}

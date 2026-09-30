@@ -121,6 +121,11 @@ setup.worldmap = {
 		return stationName && name.slice(-(' near ' + stationName).length) === ' near ' + stationName
 			? name.slice(0, -(' near ' + stationName).length) + ' outside ' + stationName : name;
 	},
+	// The name the station's place gives itself, where it is not the English name (Москва for Moscow); '' otherwise.
+	getStationLocalName: function(stationId) {
+		var station = setup.realWorldPilot.getStation(stationId);
+		return station && station.localName && station.localName !== station.name ? station.localName : '';
+	},
 	getStationName: function(stationId) {
 		if (setup.yards && setup.yards.parse(stationId) && !setup.yards.isStation(stationId)) return setup.yards.name(stationId);
 		if (setup.realWorldPilot && setup.realWorldPilot.getStation) {
@@ -623,7 +628,8 @@ setup.worldmap = {
 				if (!result) return;
 				setup.debugTeleportNotice = 'Teleported ' + (result.mode === 'consist' ? 'the complete consist' : 'you')
 					+ (result.stationId ? ' to ' + setup.worldmap.getStationName(result.stationId) + ' station.'
-						: ' to ' + self.getLegEndNames(result.target.legIndex).join('–') + ', tile '
+						: ' to ' + [self.getLeg(self.getSeed(), result.target.legIndex)].map(function(leg) {
+							return leg.fromStation.name + '–' + leg.toStation.name; })[0] + ', tile '
 							+ (result.target.tileIndex + 1) + ' at ' + result.target.tile.x + ', ' + result.target.tile.y + '.');
 				setup.debugReturnToPanel = true;
 				Engine.play(result.passage);
@@ -680,6 +686,14 @@ setup.worldmap = {
 			globe.classList.add('debug-map-globe');
 			parent.appendChild(globe);
 			parent.appendChild(readout);
+			// The squares of the grid, outlined round the track when zoomed in: the debug map only.
+			var gridLabel = document.createElement('label'), gridBox = document.createElement('input');
+			gridBox.type = 'checkbox';
+			gridBox.className = 'debug-map-grid-toggle';
+			gridBox.addEventListener('change', function() { globe.setGrid(gridBox.checked); });
+			gridLabel.appendChild(gridBox);
+			gridLabel.appendChild(document.createTextNode(' [NEEDS WRITING PASS] Show grid squares (zoom in to see them)'));
+			parent.appendChild(gridLabel);
 			var legend = document.createElement('p');
 			legend.textContent = 'Railways imported from IRL railways appear in white. Programmatically generated railways appear in red. Click on a station or tile in the map to teleport to it with your consist.';
 			parent.appendChild(legend);

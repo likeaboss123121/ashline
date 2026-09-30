@@ -100,7 +100,7 @@ async function main() {
       const kind = value === 'halt' ? 'halt' : 'station';
       // EFE grades its stations 1 (major) to 3; the category settles which of two close stations is the stop.
       const category = Number(tags['railway:station_category']);
-      stations.push({ id: osmId(feature.id), name: named.name, status, kind,
+      stations.push({ id: osmId(feature.id), name: named.name, ...(named.local ? { localName: named.local } : {}), status, kind,
         ...(category >= 1 && category <= 3 ? { category } : {}),
         coordinates: [Math.round(point[0] * 1e7) / 1e7, Math.round(point[1] * 1e7) / 1e7] });
     }

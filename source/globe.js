@@ -11,8 +11,10 @@
 
    Two canvases: the globe underneath, drawn a pixel at a time (an orthographic projection) and only when the view
    moves, a third of the resolution while it is moving; and the track, names and marks on top, which the pulse redraws
-   on its own. With everything revealed (the debug map) the track is too much to draw line by line far out, so it is
-   drawn into the globe's pixels from a raster until the view is close enough, and then as lines, in view only.
+   on its own. The track is too much to draw line by line many times a second, so while the view moves it is drawn into
+   the globe's pixels from a coarse raster, and as lines, with the stations and names, once it stops (Likea,
+   2026-09-30). With everything revealed (the debug map) the raster is used far out even when still, and the lines
+   only in view from close enough. The debug map can outline the squares of the grid round the track (setGrid).
 
    Nothing here is saved: what the player knows comes from the seen maps and the journal, the rest from the compiled
    network. */
@@ -27,6 +29,7 @@ setup.globe = {
 	MAX_PX_PER_KM: 1.2,
 	NAMES_PX_PER_KM: 0.3, // station names from this close in; cities and here always
 	VECTOR_PX_PER_KM: 0.12, // with everything revealed, track as lines from this close in, as raster further out
+	GRID_PX_PER_KM: 0.6, // the debug map's grid squares from this close in (a 5 km square 3 pixels across)
 	FLAT_SHADE: 205, // the texture's value for level ground (see globe-texture.cjs)
 	BUCKET_DEGREES: 2,
 
@@ -191,16 +194,18 @@ setup.globe = {
 		});
 		return known;
 	},
-	// With everything revealed: the track as a raster the size of the texture, 1 for mapped railway and 2 for new line,
-	// for drawing it far out.
+	// The track as a raster the size of the texture, for drawing it far out and while the view moves: 1 for mapped
+	// railway and, with everything revealed, 2 for new line (on the Map tab all track is the same).
 	trackTexture: function(texture, known) {
 		var width = texture.width, height = texture.height, track = new Uint8Array(width * height);
 		var route = setup.realWorldPilot.getGridRoute();
 		Object.keys(known.tiles).forEach(function(key) {
+			// The track fading into the fog is only hinted at: not in the raster.
+			if (!known.revealAll && known.tiles[key] < 1) return;
 			var tile = route.tiles[Number(key)], p = tile.geoCoordinate;
 			var column = Math.min(width - 1, Math.floor((p[0] + 180) / 360 * width)), row = Math.min(height - 1, Math.floor((90 - p[1]) / 180 * height));
 			var at = row * width + column;
-			if (!track[at] || !tile.gapFill) track[at] = tile.gapFill ? 2 : 1;
+			if (!track[at] || !tile.gapFill) track[at] = tile.gapFill && known.revealAll ? 2 : 1;
 		});
 		return track;
 	},
@@ -246,6 +251,9 @@ setup.globe = {
 		// rotation: the bearing at the top of the view, in radians; 0 is north up.
 		var view = { lon: start[0] * radians, lat: start[1] * radians, pxPerKm: null, rotation: 0 };
 		var texture = null, knownBytes = null, trackBytes = null, settleTimer = null, pixels = null, lastSize = null;
+		// moving: the view is being dragged, turned or zoomed, and is drawn the quick way until it settles. showGrid: the
+		// debug map's outlines of the squares.
+		var moving = false, showGrid = false;
 		var size = function() {
 			var width = Math.max(260, Math.round(holder.clientWidth || 600));
 			var height = Math.round(Math.min(width * 0.8, (window.innerHeight || 800) * 0.65));
@@ -310,7 +318,7 @@ setup.globe = {
 			var data = pixels.data, r = R * view.pxPerKm * ratio, cx = w / 2, cy = h / 2;
 			var sinLat0 = Math.sin(view.lat), cosLat0 = Math.cos(view.lat);
 			var tw = texture.width, th = texture.height, bytes = texture.bytes, fine = texture.land;
-			var rasterTrack = trackBytes && view.pxPerKm < self.VECTOR_PX_PER_KM;
+			var rasterTrack = trackBytes && (moving || (known.revealAll && view.pxPerKm < self.VECTOR_PX_PER_KM));
 			var landAt = function(column, row) {
 				column = ((column % fine.columns) + fine.columns) % fine.columns;
 				row = Math.max(0, Math.min(fine.rows - 1, row));
@@ -393,7 +401,7 @@ setup.globe = {
 			context.clearRect(0, 0, overlay.width, overlay.height);
 			context.setTransform(ratio, 0, 0, ratio, 0, 0);
 			var zoom = view.pxPerKm, width = Math.max(1, Math.min(3, zoom * 2.2)), inView = null;
-			var vectors = !known.revealAll || zoom >= self.VECTOR_PX_PER_KM;
+			var vectors = !moving && (!known.revealAll || zoom >= self.VECTOR_PX_PER_KM);
 			if (vectors) {
 				inView = bucketsInView(s);
 				// Known track: a dark casing under a light line. New lines red on the debug map. Hints fade out.
@@ -430,6 +438,8 @@ setup.globe = {
 				});
 				context.setLineDash([]);
 			}
+			// The squares of the grid round the track, outlined, close in on the debug map.
+			if (vectors && showGrid && zoom >= self.GRID_PX_PER_KM) drawGrid(context, s, inView);
 			var here = known.here, hereIndex = here && here.stationIndex ? here.globalPosition : null;
 			var placed = [], labels = [];
 			var fits = function(box) {
@@ -596,11 +606,38 @@ setup.globe = {
 			if (typeof turnArrows === 'function') turnArrows();
 		};
 
-		// Moving: a third of the resolution now, sharp once it has stopped for a moment.
+		// Moving: a third of the resolution and the track from its raster now, sharp and in lines once it has stopped for a
+		// moment.
 		var redraw = function() {
+			moving = true;
 			draw(3);
 			clearTimeout(settleTimer);
-			settleTimer = setTimeout(function() { draw(1); }, 160);
+			settleTimer = setTimeout(function() { moving = false; draw(1); }, 160);
+		};
+		// The outline of every square of the track in view: its corners, from the grid it is on, joined.
+		var drawGrid = function(context, s, inView) {
+			var world = setup.worldmap, path = new Path2D(), seen = {};
+			inView.forEach(function(b) {
+				b.segments.forEach(function(segment) {
+					segment.tiles.forEach(function(tile) {
+						var index = tile.globalPosition;
+						if (seen[index]) return;
+						seen[index] = true;
+						var grid = world.gridFor(index);
+						var corners = [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]].map(function(d) {
+							var c = world.unprojectGrid(tile.x + d[0], tile.y + d[1], grid);
+							return toScreen(c[0] * radians, c[1] * radians, s);
+						});
+						if (corners.some(function(c) { return !c; })) return;
+						path.moveTo(corners[0][0], corners[0][1]);
+						for (var i = 1; i < 4; i++) path.lineTo(corners[i][0], corners[i][1]);
+						path.closePath();
+					});
+				});
+			});
+			context.strokeStyle = 'rgba(120, 190, 230, 0.7)';
+			context.lineWidth = 1;
+			context.stroke(path);
 		};
 		var zoomBy = function(factor) {
 			view.pxPerKm *= factor;
@@ -737,7 +774,7 @@ setup.globe = {
 			texture = loaded;
 			if (!texture) return;
 			if (!options.revealAll) knownBytes = self.knownTexture(texture, known.areas);
-			else trackBytes = self.trackTexture(texture, known);
+			trackBytes = self.trackTexture(texture, known);
 			view.pxPerKm = size().width / self.OPEN_ACROSS_KM;
 			clampZoom();
 			draw(1);
@@ -773,6 +810,8 @@ setup.globe = {
 			draw(1);
 		};
 		holder.screenOf = function(longitude, latitude) { return toScreen(longitude * radians, latitude * radians, lastSize || size()); };
+		// The debug map's grid squares, on or off.
+		holder.setGrid = function(on) { showGrid = !!on; draw(1); };
 		return holder;
 	},
 

@@ -71,7 +71,7 @@ async function main() {
       if (!named || !KINDS.includes(tags.place)) continue;
       nameSources[named.from] = (nameSources[named.from] || 0) + 1;
       const population = Number(String(tags.population || '').replace(/[^\d]/g, ''));
-      places.push({ id: 'osm-node:' + String(feature.id).slice(1), name: named.name, kind: tags.place,
+      places.push({ id: 'osm-node:' + String(feature.id).slice(1), name: named.name, ...(named.local ? { localName: named.local } : {}), kind: tags.place,
         ...(population > 0 ? { population } : {}),
         coordinates: feature.geometry.coordinates.map(value => Math.round(value * 1e5) / 1e5) });
     }

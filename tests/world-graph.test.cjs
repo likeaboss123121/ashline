@@ -417,10 +417,12 @@ test('longitudes are kept in each grid\'s frame, so Chukotka lies east of the 18
 
 test('place and station names are given in the Latin alphabet', () => {
   const { displayName } = require('../scripts/world/names.cjs');
-  assert.deepEqual(displayName({ name: 'München', 'name:en': 'Munich' }), { name: 'München', from: 'name' });
-  assert.deepEqual(displayName({ name: 'Москва', 'name:en': 'Moscow' }), { name: 'Moscow', from: 'name:en' });
-  assert.deepEqual(displayName({ name: '北京市', 'name:zh_pinyin': 'Běijīng Shì' }), { name: 'Běijīng Shì', from: 'name:zh_pinyin' });
-  assert.deepEqual(displayName({ name: 'Комсомольск-на-Амуре' }), { name: 'Komsomolsk-na-Amure', from: 'transliterated' });
+  // English inside the game, with the local name kept beside it (Likea, 2026-09-30).
+  assert.deepEqual(displayName({ name: 'München', 'name:en': 'Munich' }), { name: 'Munich', from: 'name:en', local: 'München' });
+  assert.deepEqual(displayName({ name: 'Bogotá' }), { name: 'Bogotá', from: 'name' });
+  assert.deepEqual(displayName({ name: 'Москва', 'name:en': 'Moscow' }), { name: 'Moscow', from: 'name:en', local: 'Москва' });
+  assert.deepEqual(displayName({ name: '北京市', 'name:zh_pinyin': 'Běijīng Shì' }), { name: 'Běijīng Shì', from: 'name:zh_pinyin', local: '北京市' });
+  assert.deepEqual(displayName({ name: 'Комсомольск-на-Амуре' }), { name: 'Komsomolsk-na-Amure', from: 'transliterated', local: 'Комсомольск-на-Амуре' });
   assert.equal(displayName({ name: '北京' }).name, 'Beijing');
   assert.equal(displayName({}), null);
 });
@@ -816,6 +818,67 @@ test('a station stands only where the line runs straight, and every dead end lea
   const stationless = pruneDeadEnds(network, key => key === '0,0' || key === '10,0');
   assert.equal(stationless, 2);
   assert.ok(network.squares.has('5,0') && !network.squares.has('5,1'));
+});
+
+test('hand-made edits take up a route, but not the track in the towns at its ends', () => {
+  const { applyEdits, trackPath, placeIndex, traceLine, Network } = require('../scripts/world/build-network.cjs');
+  const projection = require('../scripts/world/projection.cjs');
+  const grid = projection.GRID;
+  const at = (eastKm, northKm) => [-62 + eastKm / (111.32 * Math.cos(-35 * Math.PI / 180)), -35 + northKm / 110.57];
+  const network = new Network();
+  const add = (id, points) => network.add(traceLine(points.map(point => at(...point)), grid, {}), { id, status: 'current', bridgeShare: 0, tunnelShare: 0 });
+  // A town at 0 with a line west out of it, and a line east from it to a town 100 km away.
+  add('west', [[0, 0], [-60, 0]]);
+  add('east', [[0, 0], [100, 0]]);
+  const settlements = [{ name: 'Alpha', kind: 'town', coordinates: at(0, 0) }, { name: 'Beta', kind: 'town', coordinates: at(100, 0) },
+    { name: 'Gamma', kind: 'town', coordinates: at(-60, 0) }];
+  const places = placeIndex([], settlements);
+  const edited = applyEdits(network, { grid, settlements, edits: { remove: [{ route: ['Alpha', 'Beta'] }] } }, places);
+  assert.equal(edited.stops.length, 0);
+  const square = point => { const cell = projection.cellOf(point, grid); return cell[0] + ',' + cell[1]; };
+  // The line west still reaches the town; the line east is gone beyond 10 km of either end.
+  assert.ok(trackPath(network, square(at(-60, 0)), square(at(0, 0))), 'the town keeps its other line');
+  assert.equal(trackPath(network, square(at(0, 0)), square(at(100, 0))), null);
+  // A kept route along track already there keeps its squares and makes its stops stations.
+  const again = new Network();
+  const addAgain = (id, points) => again.add(traceLine(points.map(point => at(...point)), grid, {}), { id, status: 'current', bridgeShare: 0, tunnelShare: 0 });
+  addAgain('line', [[-60, 0], [100, 0]]);
+  const kept = applyEdits(again, { grid, settlements, edits: { keep: [{ route: ['Gamma', 'Beta'] }] } }, places);
+  assert.equal(kept.laid.length, 0, 'no new line where the track already runs');
+  assert.deepEqual(kept.stops.map(stop => stop.name), ['Gamma', 'Beta']);
+  assert.ok(kept.stops.every(stop => stop.status === 'city'));
+  assert.ok(kept.keep.size >= 30, kept.keep.size + ' squares kept');
+});
+
+test('a long branch of real track keeps a station at the town at its end, and stations are named for their town', () => {
+  const { terminusStops, townFinder, Network } = require('../scripts/world/build-network.cjs');
+  const projection = require('../scripts/world/projection.cjs');
+  const grid = projection.GRID;
+  const network = new Network();
+  const add = (from, to, gap) => network.add([{ x: from[0], y: from[1], km: 2.5 }, { x: to[0], y: to[1], km: 2.5 }],
+    { id: 'w', status: 'current', bridgeShare: 0, tunnelShare: 0, gap });
+  // A main line with a junction at 0,0: a short branch south (3 squares) and a long one north (40 squares, 200 km).
+  for (let x = -5; x < 5; x++) add([x, 0], [x + 1, 0]);
+  for (let y = 0; y < 3; y++) add([0, -y], [0, -y - 1]);
+  for (let y = 0; y < 40; y++) add([0, y], [0, y + 1]);
+  const end = projection.centreOf([0, 40], grid);
+  const town = { id: 'town', name: 'Endtown', localName: 'Fin', kind: 'town', coordinates: end };
+  const stops = terminusStops(network, grid, point => (Math.hypot(point[0] - end[0], point[1] - end[1]) < 0.01 ? town : null));
+  assert.deepEqual(stops.map(stop => [stop.square, stop.name, stop.localName, stop.terminus]), [['0,40', 'Endtown', 'Fin', true]]);
+  // The same branch laid as new line is not a long branch of real track.
+  const invented = new Network();
+  for (let y = 0; y < 40; y++) invented.add([{ x: 0, y, km: 2.5 }, { x: 0, y: y + 1, km: 2.5 }], { id: 'n', status: 'current', bridgeShare: 0, tunnelShare: 0, gap: true });
+  invented.add([{ x: 0, y: 0, km: 2.5 }, { x: 1, y: 0, km: 2.5 }], { id: 'n', status: 'current', bridgeShare: 0, tunnelShare: 0, gap: true });
+  invented.add([{ x: 0, y: 0, km: 2.5 }, { x: -1, y: 0, km: 2.5 }], { id: 'n', status: 'current', bridgeShare: 0, tunnelShare: 0, gap: true });
+  assert.equal(terminusStops(invented, grid, () => town).length, 0);
+
+  // A station 3 km from the middle of a city of 800,000 is in it; one 3 km from a village of 500 is not.
+  const city = { id: 'c', name: 'Bigcity', kind: 'city', population: 800000, coordinates: [0, 0] };
+  const small = { id: 's', name: 'Smallton', kind: 'town', population: 500, coordinates: [1, 0] };
+  const townOf = townFinder([city, small]);
+  assert.equal(townOf([0.027, 0]).name, 'Bigcity');
+  assert.equal(townOf([1.027, 0]), null);
+  assert.equal(townOf([1.005, 0]).name, 'Smallton');
 });
 
 test('the land raster has no row with land and water swapped where a coastline vertex meets a row', () => {

@@ -120,13 +120,38 @@ American network were turned into these rules (September 2026); a route is only 
      routes and cities stay. Then real alternatives go back in: a way over the track not kept, between two kept
      squares, where going round by the kept track would be more than twice as far plus 100 km
      (`ALTERNATIVE_FACTOR`, `ALTERNATIVE_EXTRA_KM`) — a loop through other country or a cut-off, not a line beside
-     another. Everything else is taken up, and dead ends to no station after it.
+     another. Everything else is taken up, and dead ends to no station after it. That search reaches 600 km
+     (`ALTERNATIVE_SEARCH_KM`), so a plain run of mapped railway between two kept stations with no junction on it
+     (at least 80% mapped, `MAPPED_RUN_SHARE`) goes back in on the same test however long it is: a line across a
+     plateau outruns the search.
+   - *Places that always have a station* (Likea, 2026-09-30: "there's no reason Chicago or Amsterdam shouldn't
+     appear", and a city of a million can never be purged). `scripts/world/significant-places.cjs` takes from Natural
+     Earth's populated places every national capital, every city of a million (metro), every "world city" and every
+     place ranked 3 or better, Natural Earth's measure of importance, which takes in historically and culturally
+     significant places of any size (Samarkand, Lhasa, Churchill), into `world/external/significant-places.json`.
+     Each within 15 km of the track (`SIGNIFICANT_REACH_KM`) is a station named for it, kept through the thinning,
+     unless an authored city or a kept route's stop already stands for it within 20 km.
+   - *Termini of long branches.* A line end at least 150 km of mostly mapped track from the nearest junction
+     (`TERMINUS_BRANCH_KM`, `TERMINUS_MAPPED_SHARE`) keeps a station at the town or city within 15 km of it: the
+     end of a long line (the Hudson Bay Railway to Churchill) is a destination in itself.
+   - *Hand-made edits* (`world/authored/network-edits.json`), made at the start of this stage on the network the
+     stages before left: "keep" routes, whose track stays and whose stops are all stations, with a new line laid over
+     the terrain where no track joins two stops or only a way round 1.6 times the straight line and 50 km more
+     (`KEEP_DETOUR_FACTOR`, `KEEP_DETOUR_EXTRA_KM`), under water where a stop is marked `"tunnel": true` (Algeciras
+     to Tangier); and "remove" routes, whose track is taken up except within 10 km of their ends
+     (`REMOVE_CLEAR_KM`). Being made in this stage, they need no rebuild of the slow stages before it.
+   - *Names* (Likea, 2026-09-30). A station is named for the town or city it stands in (within 2 km, and more for a
+     bigger place, up to 25 km: `TOWN_NAME_*`), so a stop is San Francisco rather than 22nd Street, unless the town
+     already has a stop of its name or a station nearer its middle took it; one in no town keeps its own name. Names
+     are English inside the game: the extractors take a place's English name (`name:en`) first (`names.cjs`), and
+     keep the local name beside it (`localName`, as München for Munich or Москва for Moscow), which the game shows
+     under the English one.
    Halts come every 200 km of line with no stop (`MAX_SECTION_KM`), and only at a real place: a town or village
    within 15 km of the line, or where there is none a named hamlet, farm or estancia (the outposts beside the track,
    generic names such as a bare "Estancia" left out). Likea did not want invented stops such as "Km 123 from ...", so
    a stretch with no named place near it has no stop at all; the longest are in the hard regions and the Chinese
-   deserts. Result: 4,473 stops worldwide (20,597 before),
-   111,798 squares (196,217 before) and 673 independent loops, each a real alternative route; the page is 8.7 MiB.
+   deserts. Result: 4,676 stops worldwide (4,419 before the significant places, termini and hand-made edits of
+   2026-09-30; 20,597 before the thinning), 117,167 squares (196,217 before) and 673 independent loops, each a real alternative route; the page is 8.7 MiB.
 
    The game sizes yards by region (`setup.railyard.YARD_SIZE_BY_REGION`): two or three short tracks in the country,
    three to five in industrial areas, four or five long ones in the cities.

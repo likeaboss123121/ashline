@@ -1404,7 +1404,12 @@ test('all playable stations come from the sourced network', () => {
   assert.equal(setup.worldmap.getStationName(1), 'Punta Arenas');
   // Every authored city is a stop, spurs to termini included: South America's 35 and Europe, Asia and Africa's 47.
   const cities = route.corridor.stations.filter(station => station.status === 'city').map(station => station.name);
-  assert.equal(cities.length, 35 + 47);
+  assert.equal(route.corridor.stations.filter(station => String(station.id).startsWith('place:')).length, 35 + 47);
+  // Capitals, cities of a million and the world's important places are stations too, as are the stops of the routes
+  // kept by hand (world/external/significant-places.json, world/authored/network-edits.json).
+  for (const place of ['Chicago', 'Amsterdam', 'Key West', 'Churchill', 'Tangier', 'Kinshasa', 'Porto Velho']) {
+    assert.ok(cities.includes(place), place + ' is a station');
+  }
   for (const city of ['Puerto Montt', 'Santiago', 'Arica', 'Lima', 'Quito', 'Bogotá', 'Caracas', 'Manaus', 'São Paulo', 'Buenos Aires',
     'Moscow', 'Beijing', 'Tokyo', 'London', 'Casablanca', 'Algiers', 'Cairo', 'Cape Town']) {
     assert.ok(cities.includes(city), city + ' is a stop');

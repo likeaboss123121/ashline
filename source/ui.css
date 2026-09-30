@@ -497,3 +497,6 @@
 	font-family: monospace;
 	font-size: 0.8em;
 }
+
+/* A place's own name under its English one, as a map shows Moscow over Москва. */
+.local-name { display: block; font-size: 0.6em; font-weight: normal; opacity: 0.8; }

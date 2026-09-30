@@ -1162,7 +1162,7 @@ test('a Prairie is drawn as itself, shows its graded fuel, and cuts timber from 
   assert.ok(stats.some(row => /Pull.*170 kN/.test(row)), stats.join(' | '));
   assert.ok(stats.some(row => /Top speed.*90 km\/h/.test(row)), stats.join(' | '));
   assert.match(text, /Coal: 500 L, grade 30% \(very poor\)/);
-  assert.match(text, /the grate gives 60% of the steam/);
+  assert.match(text, /This fuel runs too cold to fire the boiler/);
   await openSection(page,'refuelling');
   await choose(page, 'Cut timber into firewood, 150 kg (0:10)', 'TrainInterior');
   text = await page.locator('#passages').innerText();
@@ -1676,7 +1676,9 @@ test('new games spawn in and drive the sourced network', async t => {
     return JSON.stringify(current) === JSON.stringify(original);
   }, before.train), true, 'the same consist and car order enter the sourced grid');
   await page.locator('#passages a').filter({ hasText: /^Reverse [\d.]+ km/ }).first().click();
-  await passage(page, 'DrivingMode');
+  // Back on the station's square the train stands on the line; pulling into the yard is a choice.
+  await passage(page, 'OnTheLine');
+  await choose(page, 'Enter ' + await stationName(page, 2) + ' railyard', 'DrivingMode');
   assert.equal(await page.evaluate(() => SugarCube.State.variables.journey), null);
   assert.equal(await page.evaluate(() => SugarCube.State.variables.currentStation), 2);
 });
@@ -2129,6 +2131,16 @@ test('debug mode draws the whole world network on the globe, and names the squar
   });
   await page.mouse.move(at.x + 1, at.y + 1);
   assert.match(await page.locator('#developer-Debug .debug-map-hover').innerText(), /^(.+ \| )?grid -?\d+,-?\d+/);
+  // The debug map can outline its grid squares, close in; dragging draws the quick way and settles without error.
+  const gridToggle = page.locator('#developer-Debug .debug-map-grid-toggle');
+  assert.equal(await gridToggle.count(), 1);
+  await gridToggle.check();
+  await page.mouse.move(at.x + 1, at.y + 1);
+  await page.mouse.down();
+  await page.mouse.move(at.x + 60, at.y + 30, { steps: 6 });
+  await page.mouse.up();
+  await page.waitForTimeout(300);
+  await gridToggle.uncheck();
   const prototype = page.locator('details.debug-section').filter({
 		has: page.getByText('Global rail data', { exact: true })
   });
@@ -2319,6 +2331,7 @@ test('a station at the end of a line has a map of the railways around it', async
   });
   assert.ok(Math.abs(globe.view[0] - globe.here[0]) < 0.01 && Math.abs(globe.view[1] - globe.here[1]) < 0.01, JSON.stringify(globe));
   assert.ok(globe.middle[0] > 180 && globe.middle[1] < 140, 'here is marked in red: ' + JSON.stringify(globe.middle));
+  assert.equal(await dialog.locator('.debug-map-grid-toggle').count(), 0, 'the grid squares are the debug map\'s alone');
   // The legend says what the marks mean.
   assert.ok(await dialog.locator('.globe-map-legend li').count() >= 5);
   assert.match(await dialog.innerText(), new RegExp('Maps from ' + terminus.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
@@ -2854,7 +2867,8 @@ test('backing into the station you left turns neither the yard nor the train rou
   await page.locator('#passages').getByText(/^Drive [\d.]+ km [a-z-]+ \(/).first().click();
   await passage(page, 'OnTheLine');
   await page.locator('#passages').getByText(/^Reverse [\d.]+ km [a-z-]+ \(/).first().click();
-  await passage(page, 'DrivingMode');
+  await passage(page, 'OnTheLine');
+  await choose(page, 'Enter ' + await stationName(page, 2) + ' railyard', 'DrivingMode');
 
   // Still facing the same way, with the same yard orientation and the locomotive not turned round.
   const after = await yardView();

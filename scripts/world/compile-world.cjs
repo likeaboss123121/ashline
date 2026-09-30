@@ -387,7 +387,8 @@ function compactNetwork(network) {
   });
   // Each stop's id is the builder's own (an OSM node, an authored place, or a halt's grid square): it outlasts a
   // rebuild of the network, where the stops' order and numbering do not, so saves refer to stops by it.
-  const stops = { id: [], uuid: [], name: [], square: [], status: [], region: [] };
+  // localName: the name the place gives itself, where that is not the English name ('' where it is).
+  const stops = { id: [], uuid: [], name: [], localName: [], square: [], status: [], region: [] };
   const namespace = Buffer.from('4ada4312a7cc45109a61902f70fe704c','hex');
   const uuids = new Set();
   network.stops.forEach(stop => {
@@ -397,7 +398,7 @@ function compactNetwork(network) {
     const uuid = hex.slice(0,8)+'-'+hex.slice(8,12)+'-'+hex.slice(12,16)+'-'+hex.slice(16,20)+'-'+hex.slice(20);
     assert(!uuids.has(uuid), 'Duplicate stable station UUID: ' + stop.id);
     uuids.add(uuid); stops.uuid.push(uuid);
-    stops.id.push(stop.id); stops.name.push(stop.name); stops.square.push(byKey.get(stop.square)); stops.status.push(stop.status);
+    stops.id.push(stop.id); stops.name.push(stop.name); stops.localName.push(stop.localName || ''); stops.square.push(byKey.get(stop.square)); stops.status.push(stop.status);
     stops.region.push(stop.region);
   });
   // The junctions and buffers out on the line, named for the nearest place.

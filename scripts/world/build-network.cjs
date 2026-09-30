@@ -169,6 +169,30 @@ const AUTHORED_SNAP_KM = 10;
 const HARD_TOWN_KM = 10;
 // Two places of the same name and size further apart than this are different places, and the route must say which.
 const SAME_PLACE_KM = 20;
+// Hand-made edits (world/authored/network-edits.json). A kept route follows the track already there unless the way by
+// track between two of its stops is more than KEEP_DETOUR_FACTOR times the straight line and KEEP_DETOUR_EXTRA_KM more,
+// when a new line is laid between them. A removed route leaves the track within REMOVE_CLEAR_KM of its ends, so the
+// towns there keep their other lines.
+const KEEP_DETOUR_FACTOR = 1.6;
+const KEEP_DETOUR_EXTRA_KM = 50;
+const REMOVE_CLEAR_KM = 10;
+// Significant places (world/external/significant-places.json: capitals, cities of a million, the world's most important
+// places) are stations whenever track passes within SIGNIFICANT_REACH_KM of them, and are never thinned away.
+const SIGNIFICANT_REACH_KM = 15;
+// A long branch of real track to the end of the line (the Hudson Bay Railway to Churchill, the Overseas Railroad to
+// Key West) is a destination in itself: a line end at least TERMINUS_BRANCH_KM from the nearest junction, mostly mapped
+// railway (TERMINUS_MAPPED_SHARE), keeps a station at a town or city within HALT_NAME_KM of its end.
+const TERMINUS_BRANCH_KM = 150;
+const TERMINUS_MAPPED_SHARE = 0.5;
+// A plain run of mapped railway between two stations kept, with no junction on it, goes back in however long it is when
+// the way round by the track kept is ALTERNATIVE_FACTOR times as long (the Qinghai-Tibet railway): the alternatives
+// search stops at ALTERNATIVE_SEARCH_KM, which one line across a plateau outruns. Mostly mapped: MAPPED_RUN_SHARE.
+const MAPPED_RUN_SHARE = 0.8;
+// A station is named for the town or city it stands in (Likea, 2026-09-30: San Francisco, not 22nd Street), within
+// TOWN_NAME_BASE_KM plus a kilometre for each TOWN_NAME_PEOPLE_PER_KM squared people, and no more than TOWN_NAME_MAX_KM.
+const TOWN_NAME_BASE_KM = 2;
+const TOWN_NAME_PEOPLE_PER_KM = 45;
+const TOWN_NAME_MAX_KM = 25;
 const NODATA = -32768;
 const BUILDER_VERSION = 1;
 const AREA = require('./scopes.cjs').scopeFromArguments();
@@ -1327,7 +1351,9 @@ function sampleElevation(network, grid, cache) {
 // --- stops --------------------------------------------------------------------------------------------------------
 
 function rank(stop) {
-  if (stop.status === 'city') return 100;
+  // The authored cities first of all, then the other places that always have a station (routes kept by hand, the
+  // significant places).
+  if (stop.status === 'city') return String(stop.id).startsWith('place:') ? 101 : 100;
   if (stop.status === 'halt' || stop.status === 'junction' || stop.status === 'end') return 0;
   if (stop.status === 'settlement') return { city: 38, town: 28, village: 15, hamlet: 10, isolated_dwelling: 8, farm: 8 }[stop.kind] || 15;
   const working = stop.status === 'active';
@@ -1983,6 +2009,32 @@ function thinTrack(network, stations, keep, startKey, neighbours, limitKm) {
     restored++;
     restoredKm += alternative.km;
   });
+  // Long real railways: a plain run of mapped track (MAPPED_RUN_SHARE) from one kept square to another, with no junction
+  // on it, longer than the alternatives search reaches, goes back in on the same test (the Qinghai-Tibet railway).
+  let runs = 0, runsKm = 0;
+  Array.from(keptSquares).sort().forEach(start => adjacent.get(start).forEach(first => {
+    if (keptEdges.has(edgeKey(start, first))) return;
+    let previous = start, current = first, runKm = 0, mappedKm = 0;
+    const edges = [], path = [start];
+    for (;;) {
+      const key = edgeKey(previous, current), edge = network.edges.get(key);
+      runKm += edge.km;
+      if (!edge.gap) mappedKm += edge.km;
+      edges.push(key);
+      path.push(current);
+      if (keptSquares.has(current) || adjacent.get(current).length !== 2) break;
+      const next = adjacent.get(current).find(other => other !== previous);
+      previous = current;
+      current = next;
+    }
+    if (!keptSquares.has(current) || !(start < current) || runKm <= ALTERNATIVE_SEARCH_KM || mappedKm < runKm * MAPPED_RUN_SHARE) return;
+    const limit = runKm * ALTERNATIVE_FACTOR + ALTERNATIVE_EXTRA_KM;
+    if (keptDistance(start, current, limit) <= limit) return;
+    edges.forEach(key => { keptEdges.add(key); const [a, b] = key.split('|'); link(a, b); });
+    path.forEach(key => keptSquares.add(key));
+    runs++;
+    runsKm += runKm;
+  }));
   let squares = 0, moves = 0, km = 0;
   Array.from(network.edges.keys()).forEach(key => { if (!keptEdges.has(key)) { km += network.edges.get(key).km; network.edges.delete(key); moves++; } });
   // A kept square left with no track (an authored place off the lines kept) goes too.
@@ -1990,23 +2042,184 @@ function thinTrack(network, stations, keep, startKey, neighbours, limitKm) {
   network.edges.forEach(edge => { touched.add(edge.a); touched.add(edge.b); });
   Array.from(network.squares.keys()).forEach(key => { if (!keptSquares.has(key) || !touched.has(key)) { network.squares.delete(key); squares++; } });
   network.forgetLive();
-  return { squares, moves, km: Math.round(km), alternatives: restored, alternativeKm: Math.round(restoredKm) };
+  return { squares, moves, km: Math.round(km), alternatives: restored, alternativeKm: Math.round(restoredKm), runs, runsKm: Math.round(runsKm) };
+}
+
+// The shortest way by track between two squares, no longer than limitKm: { keys, edges, km }, or null.
+function trackPath(network, from, to, limitKm = Infinity) {
+  if (!network.squares.has(from) || !network.squares.has(to)) return null;
+  const adjacent = network.neighbours(), distance = new Map([[from, 0]]), previous = new Map(), settled = new Set(), queue = new Heap();
+  queue.push(0, from);
+  while (queue.size) {
+    const key = queue.pop();
+    if (settled.has(key)) continue;
+    settled.add(key);
+    if (key === to) {
+      const keys = [to], edges = [];
+      for (let at = to; at !== from; at = previous.get(at)) { const back = previous.get(at); edges.push(back < at ? back + '|' + at : at + '|' + back); keys.push(back); }
+      return { keys: keys.reverse(), edges, km: distance.get(to) };
+    }
+    (adjacent.get(key) || []).forEach(next => {
+      const total = distance.get(key) + network.edges.get(key < next ? key + '|' + next : next + '|' + key).km;
+      if (total <= limitKm && total < (distance.get(next) ?? Infinity)) { distance.set(next, total); previous.set(next, key); queue.push(total, next); }
+    });
+  }
+  return null;
+}
+
+// The network square nearest a point within reachKm, or null.
+function nearestSquare(network, point, grid, reachKm) {
+  const [cx, cy] = projection.cellOf(point, grid), reach = Math.ceil(reachKm / grid.cellKm) + 1;
+  let best = null;
+  for (let dx = -reach; dx <= reach; dx++) for (let dy = -reach; dy <= reach; dy++) {
+    const key = keyOf(cx + dx, cy + dy);
+    if (!network.squares.has(key)) continue;
+    const km = haversineKm(point, projection.centreOf([cx + dx, cy + dy], grid));
+    if (km <= reachKm && (!best || km < best.km || (km === best.km && key < best.key))) best = { key, km };
+  }
+  return best && best.key;
+}
+
+// The hand-made edits (world/authored/network-edits.json), made on the network before its stations are chosen. Returns
+// the squares the kept routes run through (kept through the thinning), a station for every stop of a kept route, and
+// the lines laid.
+function applyEdits(network, options, places) {
+  const { grid } = options, edits = options.edits || {};
+  const context = { grid, settlements: options.settlements, cache: options.cache, network, settlementsFile: options.settlementsFile };
+  const keep = new Set(), stops = [], laid = [];
+  (edits.remove || []).forEach(edit => {
+    const route = resolveRoute(edit, places), label = edit.note || route.map(stop => stop.name).join(' - ');
+    let moves = 0, km = 0;
+    for (let index = 1; index < route.length; index++) {
+      const [a, b] = [route[index - 1], route[index]];
+      const [from, to] = [a, b].map(stop => nearestSquare(network, stop.coordinates, grid, AUTHORED_SNAP_KM));
+      assert(from && to, 'Removed route "' + label + '": ' + (from ? b : a).name + ' is not within ' + AUTHORED_SNAP_KM + ' km of the network');
+      const path = trackPath(network, from, to);
+      assert(path, 'Removed route "' + label + '": no track joins ' + a.name + ' and ' + b.name);
+      const clear = key => { const centre = projection.centreOf(key.split(',').map(Number), grid);
+        return haversineKm(centre, a.coordinates) > REMOVE_CLEAR_KM && haversineKm(centre, b.coordinates) > REMOVE_CLEAR_KM; };
+      path.edges.forEach(key => {
+        const edge = network.edges.get(key);
+        if (!clear(edge.a) && !clear(edge.b)) return;
+        km += edge.km; moves++;
+        network.edges.delete(key);
+      });
+      network.forgetLive();
+    }
+    log('took up the track of "' + label + '": ' + moves + ' moves (' + Math.round(km) + ' km)');
+  });
+  (edits.keep || []).forEach(edit => {
+    const route = resolveRoute(edit, places), label = edit.note || route.map(stop => stop.name).join(' - ');
+    // Each stop at the track nearest it, or, with none near, at a new terminus on its own square.
+    const squares = route.map(stop => {
+      const found = nearestSquare(network, stop.coordinates, grid, AUTHORED_SNAP_KM);
+      if (found) return found;
+      const cell = projection.cellOf(stop.coordinates, grid);
+      return keyOf(cell[0], cell[1]);
+    });
+    for (let index = 1; index < route.length; index++) {
+      let [from, to] = [squares[index - 1], squares[index]];
+      const straightKm = haversineKm(route[index - 1].coordinates, route[index].coordinates);
+      let path = route[index].tunnel ? null : trackPath(network, from, to, straightKm * KEEP_DETOUR_FACTOR + KEEP_DETOUR_EXTRA_KM);
+      if (!path) {
+        // A new line needs a square of the network to start from.
+        if (!network.squares.has(from)) [from, to] = [to, from];
+        assert(network.squares.has(from), 'Kept route "' + label + '": neither ' + route[index - 1].name + ' nor ' + route[index].name + ' is near the network');
+        const line = layLine(network, { from, to, toTunnel: route[index].tunnel, kind: 'edit', note: label }, context);
+        laid.push(line);
+        network.forgetLive();
+        path = trackPath(network, squares[index - 1], squares[index]);
+        assert(path, 'Kept route "' + label + '": the new line between ' + route[index - 1].name + ' and ' + route[index].name + ' does not join them');
+        log('laid a new line for "' + label + '": ' + route[index - 1].name + ' to ' + route[index].name + ', ' + Math.round(line.km) + ' km'
+          + (line.waterKm ? ', ' + line.waterKm + ' km over water' : '') + (line.tunnelKm ? ', ' + Math.round(line.tunnelKm) + ' km in tunnel' : ''));
+      }
+      path.keys.forEach(key => keep.add(key));
+    }
+    route.forEach((stop, index) => stops.push({ id: 'edit:' + squares[index], name: stop.name, status: 'city', square: squares[index],
+      coordinates: stop.coordinates }));
+    log('kept route "' + label + '"');
+  });
+  return { keep, stops, laid };
+}
+
+// A station for every significant place track passes near (world/external/significant-places.json), at the square of
+// the network nearest it, named for it.
+function significantStops(network, options) {
+  const stops = [];
+  (options.significant || []).forEach(place => {
+    const square = nearestSquare(network, place.coordinates, options.grid, SIGNIFICANT_REACH_KM);
+    if (square) stops.push({ id: 'significant:' + place.id, name: place.name, status: 'city', square, coordinates: place.coordinates,
+      population: place.population, significant: place.reasons });
+  });
+  return stops;
+}
+
+// Stations at the ends of long branches of real track (TERMINUS_BRANCH_KM): for each line end, the way back to the first
+// junction, and the town or city nearest the end within HALT_NAME_KM, made a station that keeps its yard.
+function terminusStops(network, grid, nearestTown) {
+  const adjacent = network.neighbours(), stops = [];
+  Array.from(network.squares.keys()).sort().forEach(end => {
+    if (adjacent.get(end).length !== 1) return;
+    let previous = null, current = end, km = 0, mappedKm = 0;
+    while (adjacent.get(current).length <= 2) {
+      const next = adjacent.get(current).find(key => key !== previous);
+      if (!next) break;
+      const edge = network.edges.get(current < next ? current + '|' + next : next + '|' + current);
+      km += edge.km;
+      if (!edge.gap) mappedKm += edge.km;
+      previous = current;
+      current = next;
+      if (current === end) break;
+    }
+    if (km < TERMINUS_BRANCH_KM || mappedKm < km * TERMINUS_MAPPED_SHARE) return;
+    const square = network.squares.get(end), town = nearestTown(projection.centreOf([square.x, square.y], grid));
+    if (town) stops.push({ id: 'terminus:' + end, name: town.name, ...(town.localName ? { localName: town.localName } : {}),
+      status: 'settlement', kind: town.kind, square: end, coordinates: town.coordinates, population: town.population, terminus: true });
+  });
+  return stops;
+}
+
+// The town or city a point stands in: of those whose reach (TOWN_NAME_BASE_KM, and more for a bigger place) takes in the
+// point, the one it lies deepest inside. null when it is in none.
+function townFinder(settlements) {
+  const towns = settlements.filter(place => place.kind === 'city' || place.kind === 'town');
+  const near = nearIndex(towns, place => place.coordinates, 0.25);
+  const reachOf = place => Math.min(TOWN_NAME_MAX_KM, TOWN_NAME_BASE_KM
+    + Math.sqrt(place.population || DEFAULT_POPULATION[place.kind] || 0) / TOWN_NAME_PEOPLE_PER_KM);
+  return point => {
+    let best = null;
+    near(point, TOWN_NAME_MAX_KM).forEach(([place, km, order]) => {
+      const depth = km / reachOf(place);
+      if (depth <= 1 && (!best || depth < best.depth || (depth === best.depth && order < best.order))) best = { place, depth, order };
+    });
+    return best && best.place;
+  };
 }
 
 // 4. Cities simplified, parallel lines taken up, and the stops, yards, halts and points placed: the network as the
 // game gets it. Quick next to the stages before it, so it always runs.
 function stageStops(state, options) {
-  const { network, cityStops, laidLines, spurLines, authoredEnds, startKey } = state;
+  const { network, cityStops, spurLines, authoredEnds, startKey } = state;
   const kept = new Set(state.kept);
   const { stations, settlements, grid } = options;
   const isHard = hardRegionTest(options.regions);
+  // The hand-made edits first, then the significant places on the network they leave: both are stations the rest of
+  // the stage keeps, with the track to them.
+  const edited = applyEdits(network, options, placeIndex(options.cities, settlements));
+  const laidLines = state.laidLines.concat(edited.laid);
+  // A significant place an authored city or a kept route's stop already stands for is not a second station there.
+  const covered = cityStops.concat(edited.stops);
+  const significant = significantStops(network, options)
+    .filter(stop => !covered.some(other => haversineKm(other.coordinates, stop.coordinates) <= SAME_PLACE_KM));
+  log(significant.length + ' significant places near the track: ' + significant.map(stop => stop.name).join(', '));
   // The regions from the mapped track, which the new lines of the stage before did not change.
   const regionOf = regionClassifier(network, settlements, grid);
-  const simplified = simplifyUrban(network, grid, regionOf, new Set(cityStops.map(stop => stop.square)));
+  const simplified = simplifyUrban(network, grid, regionOf, new Set(cityStops.map(stop => stop.square)
+    .concat(edited.stops.map(stop => stop.square), significant.map(stop => stop.square))));
   log('cities reduced to a hub and the lines into it: ' + simplified.areas + ' urban areas, ' + simplified.squares +
     ' squares and ' + simplified.moves + ' moves of track taken up');
   // Lines side by side: the authored routes and the cities stay.
-  const mustStay = new Set(cityStops.map(stop => stop.square));
+  const mustStay = new Set(cityStops.map(stop => stop.square).concat(Array.from(edited.keep), significant.map(stop => stop.square)));
   laidLines.filter(line => line.kind === 'authored').forEach(line => line.parts.forEach(part =>
     traceLine(part.coordinates, grid, {}).forEach(visit => mustStay.add(keyOf(visit.x, visit.y)))));
   const stationSquares = new Set();
@@ -2020,12 +2233,15 @@ function stageStops(state, options) {
   stations.forEach(station => {
     const found = squareFor(network, station.coordinates, grid);
     if (!found) return;
-    candidates.push({ id: station.id, name: station.name, status: station.status, kind: station.kind,
+    candidates.push({ id: station.id, name: station.name, localName: station.localName, status: station.status, kind: station.kind,
       category: station.category, square: found.square.key, coordinates: station.coordinates });
   });
+  // The stops of the kept routes, and the significant places, where an authored city does not already stand for them.
+  edited.stops.filter(stop => !cityStops.some(city => haversineKm(city.coordinates, stop.coordinates) <= SAME_PLACE_KM))
+    .concat(significant).forEach(stop => { if (network.squares.has(stop.square)) candidates.push(stop); });
   // The new termini of authored routes, and the place at the end of each spur.
   authoredEnds.forEach(stop => candidates.push(stop));
-  spurLines.forEach(spur => candidates.push({ id: spur.place.id, name: spur.place.name, status: 'settlement', kind: spur.place.kind,
+  spurLines.forEach(spur => candidates.push({ id: spur.place.id, name: spur.place.name, localName: spur.place.localName, status: 'settlement', kind: spur.place.kind,
     square: spur.square, coordinates: spur.place.coordinates, population: spur.place.population }));
   // Settlements on new lines, where no station was ever mapped.
   const newSquares = new Set();
@@ -2034,7 +2250,7 @@ function stageStops(state, options) {
     const cell = projection.cellOf(settlement.coordinates, grid), key = keyOf(cell[0], cell[1]);
     if (!newSquares.has(key)) return;
     if (isHard(settlement.coordinates) && settlement.kind === 'village') return;
-    candidates.push({ id: settlement.id, name: settlement.name, status: 'settlement', kind: settlement.kind, square: key,
+    candidates.push({ id: settlement.id, name: settlement.name, localName: settlement.localName, status: 'settlement', kind: settlement.kind, square: key,
       population: settlement.population,
       coordinates: settlement.coordinates });
   });
@@ -2053,9 +2269,19 @@ function stageStops(state, options) {
       const km = haversineKm(settlement.coordinates, projection.centreOf([cx + dx, cy + dy], grid));
       if (km <= HARD_TOWN_KM && (!best || km < best.km || (km === best.km && key < best.key))) best = { key, km };
     }
-    if (best) candidates.push({ id: settlement.id, name: settlement.name, status: 'settlement', kind: settlement.kind, square: best.key,
+    if (best) candidates.push({ id: settlement.id, name: settlement.name, localName: settlement.localName, status: 'settlement', kind: settlement.kind, square: best.key,
       population: settlement.population, coordinates: settlement.coordinates });
   });
+  // The ends of long branches of real track, at the town there.
+  const townOf = townFinder(settlements);
+  const townsNear = nearIndex(settlements.filter(place => place.kind === 'city' || place.kind === 'town'), place => place.coordinates, 0.25);
+  const termini = terminusStops(network, grid, point => {
+    let best = null;
+    townsNear(point, HALT_NAME_KM).forEach(([place, km, order]) => { if (!best || km < best.km || (km === best.km && order < best.order)) best = { place, km, order }; });
+    return best && best.place;
+  });
+  termini.forEach(stop => candidates.push(stop));
+  log(termini.length + ' long branches of real track keep a station at the town at their end');
   const pickStops = () => {
     const chosen = new Map();
     candidates.forEach(candidate => {
@@ -2157,11 +2383,6 @@ function stageStops(state, options) {
     return people < SPARSE_POPULATION ? SPARSE_SPACING_KM : people < DENSE_POPULATION ? RURAL_SPACING_KM : DENSE_SPACING_KM;
   };
   const yards = new Map(), maybe = [];
-  onePerSquare.forEach(stop => {
-    stop.region = regionOf(stop.coordinates);
-    if (stop.status === 'city' || String(stop.id).startsWith('authored-end:')) yards.set(stop.square, stop);
-    else maybe.push({ stop, population: populationOf(stop) });
-  });
   const touchingYard = key => {
     const [x, y] = key.split(',').map(Number);
     for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
@@ -2169,6 +2390,18 @@ function stageStops(state, options) {
     }
     return false;
   };
+  // The stations that always keep their yard, in order (the authored cities, the routes kept by hand, the significant
+  // places, the ends of routes and long branches), each unless one before it stands in a square touching it.
+  const forcedOrder = stop => String(stop.id).startsWith('place:') ? 0 : String(stop.id).startsWith('edit:') ? 1
+    : String(stop.id).startsWith('significant:') ? 2 : 3;
+  const forced = [];
+  onePerSquare.forEach(stop => {
+    stop.region = regionOf(stop.coordinates);
+    if (stop.status === 'city' || stop.terminus || String(stop.id).startsWith('authored-end:')) forced.push(stop);
+    else maybe.push({ stop, population: populationOf(stop) });
+  });
+  forced.sort((a, b) => forcedOrder(a) - forcedOrder(b) || a.square.localeCompare(b.square))
+    .forEach(stop => { if (!touchingYard(stop.square)) yards.set(stop.square, stop); });
   maybe.sort((a, b) => b.population - a.population || rank(b.stop) - rank(a.stop) || a.stop.id.localeCompare(b.stop.id));
   const thinned = { urban: 0, industrial: 0, rural: 0 };
   const densityAt = trackDensity(network, grid, STATION_DENSITY_RADIUS_KM);
@@ -2189,8 +2422,21 @@ function stageStops(state, options) {
   const trackTakenUp = thinTrack(network, Array.from(yards.keys()).sort(), new Set(Array.from(mustStay).filter(key => network.squares.has(key))),
     startKey, TRACK_NEIGHBOURS, TRACK_NEIGHBOUR_KM);
   log('kept the track joining the stations up: ' + trackTakenUp.squares + ' squares and ' + trackTakenUp.moves + ' moves ('
-    + trackTakenUp.km + ' km) taken up, ' + trackTakenUp.alternatives + ' alternative routes (' + trackTakenUp.alternativeKm + ' km) kept');
+    + trackTakenUp.km + ' km) taken up, ' + trackTakenUp.alternatives + ' alternative routes (' + trackTakenUp.alternativeKm + ' km) kept, and '
+    + trackTakenUp.runs + ' long runs of real railway (' + trackTakenUp.runsKm + ' km)');
   pruned += pruneDeadEnds(network, key => stopBySquare.has(key));
+  // Track the edits cut off from the rest (the Sinai line past Nekhel, the Kolyma lines beyond Zyryanka) goes, and a
+  // station whose square is gone, or on such a piece, is not a station.
+  const home = network.pieces().find(piece => piece.keys.includes(startKey));
+  const homeKeys = new Set(home ? home.keys : []);
+  const cutOff = Array.from(network.squares.keys()).filter(key => !homeKeys.has(key));
+  cutOff.forEach(key => network.squares.delete(key));
+  Array.from(network.edges.keys()).forEach(key => { const edge = network.edges.get(key); if (!homeKeys.has(edge.a)) network.edges.delete(key); });
+  network.forgetLive();
+  if (cutOff.length) log('took up ' + cutOff.length + ' squares of track cut off from the rest');
+  const stranded = Array.from(stopBySquare.keys()).filter(key => !network.squares.has(key));
+  if (stranded.length) log(stranded.length + ' stations left with no track: ' + stranded.map(key => stopBySquare.get(key).name).join(', '));
+  stranded.forEach(key => stopBySquare.delete(key));
   log(movedOffJunctions + ' stations moved to straight track beside them, ' + noRoomBesideJunction + ' with none near; '
     + (thinned.urban + thinned.industrial + thinned.rural) + ' stops left without a yard: ' + JSON.stringify(thinned));
 
@@ -2258,7 +2504,7 @@ function stageStops(state, options) {
     const centre = centreOfKey(key), near = nearestSettlement(centre);
     if (!near) return;
     stopBySquare.set(key, { id: 'halt:' + key, status: 'halt', square: key, coordinates: centre, region: regionOf(centre),
-      name: near.name });
+      name: near.name, localName: near.localName });
     halts++;
     spread([[key, stopBySquare.get(key).name]], halfSection);
   });
@@ -2295,8 +2541,38 @@ function stageStops(state, options) {
       statuses: Array.from(square.statuses).sort(), sourceWayCount: square.wayIds.size, ends
     };
   });
+  // 8. Names. A station is named for the town or city it stands in, not for itself (Likea, 2026-09-30: San Francisco,
+  // not 22nd Street or Union Station), unless another station nearer the middle of the same town already has its name;
+  // a station in no town keeps its own. Every stop carries the local name of its place where that differs from the
+  // English one, found by name among the towns near it for the stops named some other way.
+  const nameStats = { town: 0, own: 0, shared: 0 };
+  const byTownName = new Map();
+  // A town that already has a stop of its own name (a city, a settlement, a halt) keeps it to itself.
+  const namedStops = Array.from(stopBySquare.values()).filter(stop => ['city', 'settlement', 'halt'].includes(stop.status));
+  const alreadyNamed = (name, point) => namedStops.some(stop => stop.name === name && haversineKm(stop.coordinates, point) <= 2 * TOWN_NAME_MAX_KM);
+  stopBySquare.forEach(stop => {
+    if (['city', 'settlement', 'halt'].includes(stop.status)) return;
+    const town = townOf(stop.coordinates);
+    if (!town || alreadyNamed(town.name, stop.coordinates)) { nameStats.own++; return; }
+    const km = haversineKm(stop.coordinates, town.coordinates);
+    const claimed = byTownName.get(town.id || town.name);
+    if (claimed && claimed.km <= km) { nameStats.shared++; return; }
+    if (claimed) { claimed.stop.name = claimed.ownName; claimed.stop.localName = claimed.ownLocal; nameStats.shared++; nameStats.town--; }
+    byTownName.set(town.id || town.name, { stop, km, ownName: stop.name, ownLocal: stop.localName });
+    stop.name = town.name;
+    stop.localName = town.localName;
+    nameStats.town++;
+  });
+  stopBySquare.forEach(stop => {
+    if (stop.localName) return;
+    const same = townsNear(stop.coordinates, TOWN_NAME_MAX_KM).find(([place]) => place.name === stop.name && place.localName);
+    if (same) stop.localName = same[0].localName;
+  });
+  log('stations named for the town they are in: ' + nameStats.town + '; ' + nameStats.shared + ' sharing a town with a station nearer its middle and '
+    + nameStats.own + ' in no town keep their own names');
   const stops = Array.from(stopBySquare.values()).sort((a, b) => a.square.localeCompare(b.square)).map(stop => ({
-    id: stop.id, name: stop.name, status: stop.status, ...(stop.kind ? { kind: stop.kind } : {}),
+    id: stop.id, name: stop.name, ...(stop.localName && stop.localName !== stop.name ? { localName: stop.localName } : {}),
+    status: stop.status, ...(stop.kind ? { kind: stop.kind } : {}),
     region: stop.region || regionOf(stop.coordinates),
     square: stop.square, coordinates: stop.coordinates.map(value => Math.round(value * 1e7) / 1e7)
   }));
@@ -2313,6 +2589,7 @@ function stageStops(state, options) {
       bridgeCount: laidLines.length, bridgeKm: Math.round(laidLines.reduce((sum, line) => sum + line.km, 0)),
       stubJoinCount: laidLines.filter(line => line.kind === 'stub').length,
       authoredJoinCount: laidLines.filter(line => line.kind === 'authored').length,
+      editLineCount: edited.laid.length, significantStops: significant.length, terminusStops: termini.length, stationNames: nameStats,
       endJoinCount: state.facingCount, spurCount: spurLines.length, shortcutCount: state.shortcutCount,
       parallelStretchesRemoved: parallel.stretches, parallelKmRemoved: parallel.km,
       onExistingTrackKm: Math.round(laidLines.reduce((sum, line) => sum + (line.onExistingTrackKm || 0), 0)),
@@ -2377,6 +2654,19 @@ async function main() {
     if (Array.isArray(stop)) frame(stop);
     else if (stop && Array.isArray(stop.coordinates)) frame(stop.coordinates);
   }));
+  // Hand-made edits made in the stops stage (world/authored/network-edits.json), in the scope's builds only.
+  const editsFile = path.join(root, 'world/authored/network-edits.json');
+  const editsRead = fs.existsSync(editsFile) ? JSON.parse(fs.readFileSync(editsFile, 'utf8')) : {};
+  const edits = { keep: (editsRead.keep || []).filter(edit => inScope(edit, AREA.name)), remove: (editsRead.remove || []).filter(edit => inScope(edit, AREA.name)) };
+  edits.keep.concat(edits.remove).forEach(edit => edit.route.forEach(stop => {
+    if (Array.isArray(stop)) frame(stop);
+    else if (stop && Array.isArray(stop.coordinates)) frame(stop.coordinates);
+    if (stop && Array.isArray(stop.near)) frame(stop.near);
+  }));
+  // The places every build gives a station (world/external/significant-places.json: scripts/world/significant-places.cjs).
+  const significantFile = path.join(root, 'world/external/significant-places.json');
+  const significant = fs.existsSync(significantFile) ? JSON.parse(fs.readFileSync(significantFile, 'utf8')).places : [];
+  significant.forEach(place => frame(place.coordinates));
   const outpostsFile = path.join(root, scope.outposts);
   // The outposts that pass keep(place), read a line at a time and let go of the rest: on two continents the whole
   // file is half a million records, and the halts want only those beside the track.
@@ -2432,7 +2722,7 @@ async function main() {
   // --keys: print what each stage's checkpoint is keyed by, and stop (to see why a checkpoint is not being used).
   if (checkpoints && args.includes('--keys')) { const { parts, ...keys } = stageKeys({ grid, checkpoints }); console.log(JSON.stringify(keys)); return; }
   const built = buildNetwork({ geometry: readGeometry, stations: stationSet.stations, settlements: settlementSet.places, cities, grid, cache,
-    authoredJoins, outposts: readOutposts, regions, checkpoints, settlementsFile: path.join(root, scope.settlements),
+    authoredJoins, edits, significant, outposts: readOutposts, regions, checkpoints, settlementsFile: path.join(root, scope.settlements),
     haltPlaces: keep => readOutpostsWhere(keep) });
   const artifact = {
     formatVersion: 1,
@@ -2497,4 +2787,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { isStraightSquare, pruneDeadEnds, distancesAlong, distancesTo, dependenciesOf, stageTrace, stageJoins, stageOutskirts, stageStops, hardRegionTest, longJoins, buildNetwork, stubJoins, endJoins, cityShortcuts, pruneParallel, spliceOntoTrack, spurs, regionClassifier, simplifyUrban, traceLine, Network, placeIndex, resolveRoute, planLine, addLine };
+module.exports = { trackPath, applyEdits, significantStops, terminusStops, townFinder, thinTrack, isStraightSquare, pruneDeadEnds, distancesAlong, distancesTo, dependenciesOf, stageTrace, stageJoins, stageOutskirts, stageStops, hardRegionTest, longJoins, buildNetwork, stubJoins, endJoins, cityShortcuts, pruneParallel, spliceOntoTrack, spurs, regionClassifier, simplifyUrban, traceLine, Network, placeIndex, resolveRoute, planLine, addLine };

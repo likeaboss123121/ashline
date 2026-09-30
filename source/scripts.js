@@ -2434,7 +2434,9 @@ Macro.add('railyardButtons', {
 			totalTrains += tracks[t].trains.length;
 			trackCount += setup.railyard.trackExists(tracks, t) ? 1 : 0;
 		}
-		var output = '<h2>' + setup.worldmap.getStationName(State.variables.currentStation) + '</h2>';
+		var localName = setup.worldmap.getStationLocalName(State.variables.currentStation);
+		var output = '<h2>' + setup.worldmap.getStationName(State.variables.currentStation)
+			+ (localName ? '<span class="local-name">' + localName + '</span>' : '') + '</h2>';
 		output += '<p>There ' + (totalTrains === 1 ? 'is ' : 'are ') + totalTrains + ' train' + (totalTrains === 1 ? '' : 's') + ' staged across ' + trackCount + ' track' + (trackCount === 1 ? '' : 's') + '.</p>';
 		var displayNumber = 1;
 		// Each track is rendered independently so empty tracks, finite length, and train numbering stay readable.
