@@ -24,9 +24,9 @@ setup.globe = {
 	HINT_SQUARES: 8, // how far a known line is drawn fading into the fog
 	EARTH_KM: 6371.0088,
 	OPEN_ACROSS_KM: 1500, // how much country the map shows across when it opens
-	// The relief is about 20 km a texel and the coastlines about 5, so the globe stops zooming in before the coast turns
-	// to blocks: closer detail is the station maps' job.
-	MAX_PX_PER_KM: 1.2,
+	// The relief is about 20 km a texel and the coastlines about 5, so the globe stops zooming in not far past where the
+	// coast turns to blocks: one zoom step (1.6 times) past 1.2, which Likea asked for (2026-09-30).
+	MAX_PX_PER_KM: 1.92,
 	NAMES_PX_PER_KM: 0.3, // station names from this close in; cities and here always
 	VECTOR_PX_PER_KM: 0.12, // with everything revealed, track as lines from this close in, as raster further out
 	GRID_PX_PER_KM: 0.6, // the debug map's grid squares from this close in (a 5 km square 3 pixels across)

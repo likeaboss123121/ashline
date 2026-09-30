@@ -1166,7 +1166,7 @@
         },
         "offset": [-1073, 2709],
         "turn": 2,
-        "count": 83305
+        "count": 83367
       }
     ],
     "joins": [
@@ -1318,10 +1318,10 @@
       }
     },
     "stats": {
-      "squareCount": 117167,
-      "moveCount": 117888,
-      "stopCount": 4676,
-      "haltCount": 1067,
+      "squareCount": 117229,
+      "moveCount": 117951,
+      "stopCount": 4679,
+      "haltCount": 1068,
       "bridgeCount": 56158,
       "bridgeKm": 405961,
       "stubJoinCount": 10294,
@@ -1330,39 +1330,39 @@
       "significantStops": 534,
       "terminusStops": 33,
       "stationNames": {
-        "town": 2595,
-        "own": 32,
+        "town": 2598,
+        "own": 31,
         "shared": 7
       },
       "endJoinCount": 61,
       "spurCount": 470,
       "shortcutCount": 32,
-      "parallelStretchesRemoved": 16981,
-      "parallelKmRemoved": 409516,
+      "parallelStretchesRemoved": 16979,
+      "parallelKmRemoved": 409410,
       "onExistingTrackKm": 24271,
-      "stationsMovedOffJunctions": 46848,
-      "junctionPoints": 2758,
+      "stationsMovedOffJunctions": 46881,
+      "junctionPoints": 2761,
       "bufferPoints": 0,
       "urbanAreas": 2396,
-      "urbanSquaresRemoved": 7844,
-      "urbanMovesRemoved": 10920,
+      "urbanSquaresRemoved": 7847,
+      "urbanMovesRemoved": 10924,
       "stopRegions": {
         "urban": 800,
         "industrial": 923,
-        "rural": 2954
+        "rural": 2957
       },
       "stationsWithoutYard": {
-        "urban": 4866,
-        "industrial": 10973,
-        "rural": 30442
+        "urban": 4870,
+        "industrial": 10972,
+        "rural": 30461
       },
-      "railKm": 1038713,
+      "railKm": 1038743,
       "leftOutPieces": 246,
       "leftOutKm": 59198,
       "unreachableCities": [],
-      "prunedStubSquares": 37347,
-      "junctionSquares": 2758,
-      "endSquares": 1378
+      "prunedStubSquares": 37342,
+      "junctionSquares": 2761,
+      "endSquares": 1379
     },
     "files": [
       "world/network/americas-network.json",
