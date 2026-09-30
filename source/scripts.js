@@ -2608,7 +2608,6 @@ Macro.add('lineControls', {
 			if (step.blocked) {
 				return;
 			}
-			if (step.couples) label += ' [NEEDS WRITING PASS] and couple to the train standing there';
 			output += '<<timedlink "' + label + '" ' + step.minutes + ' "travel">>'
 				+ '<<run setup.railyard.moveAlongLine(' + direction + ')>>'
 				+ '<<set _linePassage = State.variables.journey ? "OnTheLine" : "DrivingMode">>'
@@ -2630,8 +2629,7 @@ Macro.add('lineControls', {
 			if (!step) {
 				return;
 			}
-			var label = 'Drive ' + setup.units.kilometres(step.distanceKm || setup.worldmap.TILE_KM) + ' ' + choice.direction
-				+ (step.couples ? ' [NEEDS WRITING PASS] and couple to the train standing there' : '');
+			var label = 'Drive ' + setup.units.kilometres(step.distanceKm || setup.worldmap.TILE_KM) + ' ' + choice.direction;
 			if (step.blocked) {
 				output += '<span class="small-description"><em>' + label + ': ' + step.blocked + '</em></span><br>';
 				return;
@@ -2740,9 +2738,7 @@ Macro.add('drivingTravelButtons', {
 						+ '<<link "' + label + '">>'
 						+ '<<if setup.tutorial.requestExit(' + towardExit + ')>><<run setup.railyard.departOntoLine(' + towardExit + ', '
 						+ line.legIndex + ')>><<goto "OnTheLine">><</if>><</link>></span><br>';
-					output += '<span class="small-description">' + summary + ' About ' + setup.time.formatDuration(minutes) + ' at this weight.'
-						+ (setup.worldmap.parkedOn(setup.realWorldPilot.getStationTile(stationId))
-							? ' [NEEDS WRITING PASS] A train you left stands on the line here; leaving couples to it.' : '') + '</span><br>';
+					output += '<span class="small-description">' + summary + ' About ' + setup.time.formatDuration(minutes) + ' at this weight.</span><br>';
 				}
 			});
 		});
