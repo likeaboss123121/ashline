@@ -9,6 +9,7 @@ Ashline
 :: Start {"position":"101,100"}
 /% Entry splash and pre-game setup passage: initializes settings state and renders the settings macro UI. %/
 <h2>Welcome to Ashline v<<print setup.releaseVersion>></h2>
+<p><em><<print setup.releaseName>></em></p>
 <div class="small-description">
 - Saves are stored in this browser. Use Save to disk in the Saves menu to keep a backup.
 <br>
@@ -69,7 +70,6 @@ You are a lone train engineer in a world where dangerous zombies called Foamers 
 <<if $debugMode>><<run (function () { if (typeof console !== 'undefined' && typeof console.log === 'function') { console.log('[Ashline Debug] Station ' + State.variables.currentStation + ' railyard tracks:', State.variables.stationTracks[State.variables.currentStation]); } })()>><</if>>
 <</silently>><<railyardView>><<saveReminder>><<buildIntegrityNotice>>
 <<if $onFoot && $onFoot.inRailyard>>
-You have entered the railyard on foot. Your train remains parked out on the line.
 <p><<link "Return to the station track">><<run setup.onfoot.leaveRailyard()>><<goto "OnFoot">><</link>></p>
 <<else>>
 You step into the railyard. Several trains are parked here, each with its own mix of cars and cargo.

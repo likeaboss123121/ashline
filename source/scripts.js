@@ -290,6 +290,8 @@ setup.isInGame = function(passage) {
 };
 // Release metadata is used both for the title screen and build-integrity popup.
 setup.releaseVersion = '0.3.0';
+// The release's name, under the version on the title screen.
+setup.releaseName = "The Update heard 'round the World";
 setup.buildCheckDone = false;
 setup.enableBuildChangeAlert = true;
 setup.buildCacheStorageKey = 'ashline.buildMeta';
@@ -2724,11 +2726,6 @@ Macro.add('debugTools', {
 		var panel = document.createElement('div');
 		panel.className = 'debug-container';
 		this.output.appendChild(panel);
-		var reportButton = document.createElement('button');
-		reportButton.className = 'saves-button';
-		reportButton.textContent = 'Copy bug report';
-		reportButton.addEventListener('click', function() { setup.bugReport.show(); });
-		panel.appendChild(reportButton);
 		// Running a debug tool replays the passage. Without this the page would jump back to the top every time,
 		// which makes the tools unusable at the bottom of a long yard.
 		setup.debugReturnToPanel = false;
@@ -2881,6 +2878,11 @@ Macro.add('debugTools', {
 			+ (cachedBuild && cachedBuild.checksum && cachedBuild.checksum !== currentBuildChecksum
 				? ' (last played ' + cachedBuild.checksum.slice(0, 8) + ')' : '');
 		panel.appendChild(status);
+		var reportButton = document.createElement('button');
+		reportButton.className = 'saves-button';
+		reportButton.textContent = 'Copy bug report';
+		reportButton.addEventListener('click', function() { setup.bugReport.show(); });
+		panel.appendChild(reportButton);
 		// A live reference sheet for balancing and debugging. Every value comes straight from the definitions the game
 		// is using, so it cannot drift from the train, fuel or pack systems as a separately written wiki would.
 		startSection('Reference data');

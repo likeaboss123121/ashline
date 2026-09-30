@@ -204,6 +204,8 @@ setup.sideTabs = {
 		setup.textWiki.appendWarning(debug);
 		setup.textWiki.appendWarning(wiki);
 		new Wikifier(debug, '<<debugTools>>');
+		var wikiHeading = document.createElement('h3'); wikiHeading.className = 'debug-heading'; wikiHeading.textContent = 'Wiki';
+		wiki.appendChild(wikiHeading);
 		var reference = debug.querySelector('.procedural-wiki');
 		if (reference) { reference.open = true; wiki.appendChild(reference); }
 		setup.svgWiki.appendBrowser(wiki);

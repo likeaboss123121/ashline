@@ -390,6 +390,26 @@ test('debug teleport treats a station cell as the station rather than a line end
   assert.equal(v.currentStation,5);assert.equal(v.journey,null);assert.equal(v.onFoot,null);
 });
 
+test('debug teleport can pick any yard on a square, or the track on it', () => {
+  const { setup, State } = loadGame();
+  setup.startNewRun();
+  const v = State.variables, route = setup.realWorldPilot.getGridRoute();
+  Object.assign(v, { debugMode: true, currentTrain: null, onFoot: null, journey: null });
+  const city = route.tiles.find(tile => tile.stationIndex && setup.yards.at(tile.x, tile.y).length > 1);
+  const extra = setup.yards.at(city.x, city.y)[1];
+  let result = setup.worldmap.debugTeleportToTile(0, city.x, city.y, extra.id);
+  assert.equal(result.passage, 'Railyard');
+  assert.equal(v.currentStation, extra.id);
+  result = setup.worldmap.debugTeleportToTile(0, city.x, city.y, 'line');
+  assert.equal(result.passage, 'OnFoot');
+  assert.ok(v.onFoot && !v.onFoot.inRailyard);
+  const siding = route.tiles.find(tile => setup.yards.hasSiding(tile));
+  v.onFoot = null;
+  result = setup.worldmap.debugTeleportToTile(0, siding.x, siding.y, 'siding:' + siding.x + ',' + siding.y);
+  assert.equal(v.currentStation, 'siding:' + siding.x + ',' + siding.y);
+  assert.equal(setup.worldmap.debugTeleportToTile(0, city.x, city.y, 'yard:' + city.stationIndex + ':nonsense'), null);
+});
+
 test('a walker can enter a sourced station yard without moving or losing the parked train', () => {
   const { setup, State } = loadGame();setup.startNewRun();
   const v=State.variables,train=[setup.railyard.cloneCar(v.defaultTrains.dieselShunter)];

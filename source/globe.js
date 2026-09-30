@@ -210,8 +210,9 @@ setup.globe = {
 		return track;
 	},
 
-	// The globe, in a holder. options: revealAll (the debug map: everything, no fog), onPick(tile) (a click on the
-	// track, not a drag), onHover(tile, place) (the square nearest the pointer, or null, and the place under it).
+	// The globe, in a holder. options: revealAll (the debug map: everything, no fog), onPick(tile, x, y) (a click on the
+	// track, not a drag, and where in the view), onHover(tile, place) (the square nearest the pointer, or null, and the
+	// place under it), describe(tile) (lines drawn beside the square a click would pick).
 	// Returns the holder; the globe is drawn once its texture is in.
 	build: function(options) {
 		options = options || {};
@@ -253,7 +254,7 @@ setup.globe = {
 		var texture = null, knownBytes = null, trackBytes = null, settleTimer = null, pixels = null, lastSize = null;
 		// moving: the view is being dragged, turned or zoomed, and is drawn the quick way until it settles. showGrid: the
 		// debug map's outlines of the squares.
-		var moving = false, showGrid = false;
+		var moving = false, showGrid = false, picked = null;
 		var size = function() {
 			var width = Math.max(260, Math.round(holder.clientWidth || 600));
 			var height = Math.round(Math.min(width * 0.8, (window.innerHeight || 800) * 0.65));
@@ -560,6 +561,8 @@ setup.globe = {
 					return;
 				}
 			});
+			// The square a click would pick, outlined, with what stands on it (options.describe) beside it.
+			if (picked && !moving) drawPicked(context, s);
 			// A compass needle, top left, pointing north; a click on it turns the map back to north up.
 			var nx0 = 20, ny0 = 22;
 			context.save();
@@ -638,6 +641,48 @@ setup.globe = {
 			context.strokeStyle = 'rgba(120, 190, 230, 0.7)';
 			context.lineWidth = 1;
 			context.stroke(path);
+		};
+		// The picked square's outline, at least a small ring where the square is too small to see, and its lines.
+		var drawPicked = function(context, s) {
+			var world = setup.worldmap, tile = picked, grid = world.gridFor(tile.globalPosition);
+			var corners = [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]].map(function(d) {
+				var c = world.unprojectGrid(tile.x + d[0], tile.y + d[1], grid);
+				return toScreen(c[0] * radians, c[1] * radians, s);
+			});
+			var middle = toScreen(tile.geoCoordinate[0] * radians, tile.geoCoordinate[1] * radians, s);
+			if (!middle) return;
+			context.lineWidth = 2;
+			context.strokeStyle = '#7fd0ff';
+			if (corners.every(Boolean) && view.pxPerKm * grid.cellKm >= 8) {
+				context.beginPath();
+				context.moveTo(corners[0][0], corners[0][1]);
+				for (var i = 1; i < 4; i++) context.lineTo(corners[i][0], corners[i][1]);
+				context.closePath();
+				context.stroke();
+			} else {
+				context.beginPath();
+				context.arc(middle[0], middle[1], 7, 0, 2 * Math.PI);
+				context.stroke();
+			}
+			var lines = options.describe ? options.describe(tile) : [];
+			if (!lines.length) return;
+			context.font = '11px sans-serif';
+			context.textBaseline = 'middle';
+			context.textAlign = 'left';
+			var widest = Math.max.apply(null, lines.map(function(line) { return context.measureText(line).width; }));
+			var x = middle[0] + 16, y = middle[1] - (lines.length - 1) * 7;
+			if (x + widest > s.width - 4) x = Math.max(8, middle[0] - 16 - widest);
+			y = Math.max(8, Math.min(s.height - 8 - (lines.length - 1) * 14, y));
+			// On a backing of its own, so it reads over the names it covers.
+			context.fillStyle = 'rgba(16, 20, 22, 0.92)';
+			context.fillRect(x - 4, y - 9, widest + 8, lines.length * 14 + 4);
+			context.lineWidth = 1;
+			context.strokeStyle = '#7fd0ff';
+			context.strokeRect(x - 4, y - 9, widest + 8, lines.length * 14 + 4);
+			lines.forEach(function(line, index) {
+				context.fillStyle = '#bfe6ff';
+				context.fillText(line, x, y + index * 14);
+			});
 		};
 		var zoomBy = function(factor) {
 			view.pxPerKm *= factor;
@@ -724,13 +769,22 @@ setup.globe = {
 		overlay.addEventListener('pointermove', function(event) {
 			var last = pointers[event.pointerId];
 			if (!last) {
-				if (options.onHover) {
+				if (options.onHover || options.onPick) {
 					var box = overlay.getBoundingClientRect(), found = nearestTile(event.clientX - box.left, event.clientY - box.top);
-					options.onHover(found.tile, found.place);
+					if (options.onHover) options.onHover(found.tile, found.place);
+					// Where a click would pick a square: a pointing hand instead of the drag hand, and the square outlined.
+					if (options.onPick) {
+						overlay.style.cursor = found.tile ? 'pointer' : '';
+						if (found.tile !== picked) { picked = found.tile; if (!beating) drawOverlay(0); }
+					}
 				}
 				return;
 			}
-			if (down && Math.hypot(event.clientX - down[0], event.clientY - down[1]) > 4) moved = true;
+			if (down && Math.hypot(event.clientX - down[0], event.clientY - down[1]) > 4) {
+				moved = true;
+				overlay.style.cursor = '';
+				picked = null;
+			}
 			pointers[event.pointerId] = [event.clientX, event.clientY];
 			var ids = Object.keys(pointers);
 			if (ids.length === 2 && pinch) {
@@ -760,11 +814,18 @@ setup.globe = {
 			if (compassBox && Math.hypot(x - compassBox.x, y - compassBox.y) < 16) { turnTo(0); return; }
 			if (options.onPick) {
 				var found = nearestTile(x, y);
-				if (found.tile) options.onPick(found.tile);
+				if (found.tile) options.onPick(found.tile, x, y);
 			}
 		};
 		overlay.addEventListener('pointerup', release);
 		overlay.addEventListener('pointercancel', release);
+		overlay.addEventListener('pointerleave', function() {
+			if (!picked) return;
+			picked = null;
+			overlay.style.cursor = '';
+			if (options.onHover) options.onHover(null, null);
+			if (!beating) drawOverlay(0);
+		});
 		overlay.addEventListener('wheel', function(event) {
 			event.preventDefault();
 			zoomBy(Math.exp(-event.deltaY * 0.0015));

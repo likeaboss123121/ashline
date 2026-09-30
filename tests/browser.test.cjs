@@ -530,7 +530,7 @@ test('walking the sourced line leads back to the parked train',async t=>{
   assert.equal(await page.evaluate(()=>SugarCube.State.variables.currentStation),to);
   assert.equal(await page.evaluate(()=>JSON.stringify(SugarCube.State.variables.journey)),parked);
   assert.equal(await page.evaluate(()=>SugarCube.State.variables.onFoot.inRailyard),true);
-  assert.match(await page.locator('#passages').innerText(),/Your train remains parked out on the line/);
+  assert.doesNotMatch(await page.locator("#passages").innerText(),/remains parked out on the line/);
   // Boarding here is allowed: the train out on the line stays where it was left (setup.yards).
   assert.ok(await page.locator('#passages a').filter({hasText:/^Board Train/}).count()>0);
   assert.equal(await page.locator('.railyard-player-marker').count(),0,'the remote train is not drawn inside the yard');
@@ -2263,7 +2263,17 @@ test('debug map teleport carries an onboard consist into a station clicked on th
     const p = holder.screenOf(place[0], place[1]), box = holder.querySelector('.globe-map-overlay').getBoundingClientRect();
     return { x: box.left + p[0], y: box.top + p[1] };
   });
+  // Over a square a click would pick: a pointing cursor, and the yards on it listed.
+  await page.mouse.move(at.x, at.y);
+  assert.equal(await page.locator('#developer-Debug .globe-map-overlay').evaluate(element => element.style.cursor), 'pointer');
+  assert.match(await page.locator('.debug-map-hover').innerText(), /yards: /);
+  // A click asks which yard on the square, or the track itself.
   await page.mouse.click(at.x, at.y);
+  const chooser = page.locator('.debug-map-chooser');
+  const yards = await page.evaluate(() => { const t = SugarCube.setup.realWorldPilot.getStationTile(3); return SugarCube.setup.yards.at(t.x, t.y).length; });
+  assert.equal(await chooser.locator('option').count(), yards + 1);
+  await chooser.locator('select').selectOption('3');
+  await chooser.getByRole('button', { name: 'Teleport', exact: true }).click();
   await passage(page, 'TrainInterior');
   const moved = await page.evaluate(() => ({
     consist: JSON.stringify(SugarCube.State.variables.currentTrain),
@@ -2276,7 +2286,7 @@ test('debug map teleport carries an onboard consist into a station clicked on th
   assert.equal(moved.journey, null);
   assert.equal(moved.onFoot, null);
   assert.match(await page.locator('.debug-teleport-notice').innerText(),
-    new RegExp('Teleported the complete consist to ' + escapeRegExp(await stationName(page, 3)) + ' station'));
+    new RegExp('Teleported the complete consist to ' + escapeRegExp(await stationName(page, 3)) + ' '));
 });
 
 test('the debug globe zooms with its buttons and the wheel, and a drag turns it without teleporting', async t => {

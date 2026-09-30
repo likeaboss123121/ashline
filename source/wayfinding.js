@@ -272,6 +272,35 @@ setup.wayfinding = {
 		return svg;
 	},
 
+	// Zoom buttons over a station map: the drawing magnified about its middle, where the station is. The steps are how
+	// many times closer than the whole map.
+	MAP_ZOOM_STEPS: [1, 1.5, 2, 3, 4],
+	zoomControls: function(svg) {
+		var steps = this.MAP_ZOOM_STEPS, level = 0, box = svg.getAttribute('viewBox').split(' ').map(Number);
+		var bar = document.createElement('div');
+		bar.className = 'railyard-view-zoom';
+		var readout = document.createElement('span');
+		var apply = function() {
+			var zoom = steps[level], w = box[2] / zoom, h = box[3] / zoom;
+			svg.setAttribute('viewBox', [(box[2] - w) / 2, (box[3] - h) / 2, w, h].map(function(n) { return Math.round(n * 10) / 10; }).join(' '));
+			readout.textContent = zoom + '\u00d7';
+		};
+		[['\u2212', 'Zoom out', -1], ['+', 'Zoom in', 1]].forEach(function(spec) {
+			var button = document.createElement('button');
+			button.type = 'button';
+			button.textContent = spec[0];
+			button.title = spec[1];
+			button.addEventListener('click', function() {
+				level = Math.max(0, Math.min(steps.length - 1, level + spec[2]));
+				apply();
+			});
+			bar.appendChild(button);
+		});
+		bar.appendChild(readout);
+		apply();
+		return bar;
+	},
+
 	// For each way on from the junction at a journey position, the signpost's line: the heading, then the next towns
 	// that way and the first city beyond them, each with its distance by track. [] away from a junction.
 	getSign: function(position) {
@@ -327,7 +356,12 @@ Macro.add('stationMap', {
 		setup.wayfinding.rememberMap(stationId);
 		var holder = document.createElement('div');
 		holder.className = 'station-map-holder';
-		holder.appendChild(setup.wayfinding.buildStationMap(stationId));
+		var frame = document.createElement('div');
+		frame.className = 'station-map-frame';
+		var map = setup.wayfinding.buildStationMap(stationId);
+		frame.appendChild(map);
+		frame.appendChild(setup.wayfinding.zoomControls(map));
+		holder.appendChild(frame);
 		var list = document.createElement('ul');
 		list.className = 'station-map-list';
 		setup.wayfinding.getNearbyStations(stationId).forEach(function(station) {

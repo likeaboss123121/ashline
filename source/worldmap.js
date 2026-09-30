@@ -411,7 +411,9 @@ setup.worldmap = {
 	},
 	// Debug-only, zero-time movement. An onboard player takes the active consist; a player on foot moves alone and
 	// leaves its journey position untouched. With no active train, journey supplies the walking route context only.
-	debugTeleportToTile: function(legIndex, x, y) {
+	// yardId picks a yard on the square (setup.yards.at), or 'line' for the track on it; left out, a station's square
+	// means its own yard.
+	debugTeleportToTile: function(legIndex, x, y, yardId) {
 		var variables = State.variables;
 		if (!variables.debugMode || !setup.isInGame()) return null;
 		var target = this.getDebugTeleportTarget(Number(legIndex), Number(x), Number(y));
@@ -419,7 +421,9 @@ setup.worldmap = {
 		var activeTrain = Array.isArray(variables.currentTrain) && variables.currentTrain.length > 0;
 		var onFoot = !!variables.onFoot;
 		var currentJourney = this.getJourney();
-		var stationId = target.tile && Number(target.tile.stationIndex) || 0;
+		var stationId = yardId === 'line' ? 0 : yardId !== undefined && yardId !== null ? setup.yards.normalise(yardId)
+			: target.tile && Number(target.tile.stationIndex) || 0;
+		if (stationId && !setup.yards.exists(stationId)) return null;
 		if (stationId) {
 			// A station marker is an arrival, not a train standing on an endpoint which only happens to share its cell.
 			// Walkers keep their remote train parked; an onboard consist enters an available station lead.
@@ -623,11 +627,14 @@ setup.worldmap = {
 			var instructions = document.createElement('p');
 			instructions.textContent = 'Debug teleport: Click on the map to teleport, or choose a station in the dropdown below.';
 			var self = this;
-			var teleport = function(legIndex, x, y) {
-				var result = self.debugTeleportToTile(Number(legIndex), Number(x), Number(y));
+			var yardName = function(entry) {
+				return entry.kind === 'siding' ? setup.yards.name(entry.id) : setup.yards.name(entry.id) + ' ' + setup.yardTypes.label(entry.id);
+			};
+			var teleport = function(legIndex, x, y, yardId) {
+				var result = self.debugTeleportToTile(Number(legIndex), Number(x), Number(y), yardId);
 				if (!result) return;
 				setup.debugTeleportNotice = 'Teleported ' + (result.mode === 'consist' ? 'the complete consist' : 'you')
-					+ (result.stationId ? ' to ' + setup.worldmap.getStationName(result.stationId) + ' station.'
+					+ (result.stationId ? ' to ' + yardName({ id: result.stationId, kind: setup.yards.parse(result.stationId).kind }) + '.'
 						: ' to ' + [self.getLeg(self.getSeed(), result.target.legIndex)].map(function(leg) {
 							return leg.fromStation.name + '–' + leg.toStation.name; })[0] + ', tile '
 							+ (result.target.tileIndex + 1) + ' at ' + result.target.tile.x + ', ' + result.target.tile.y + '.');
@@ -646,7 +653,7 @@ setup.worldmap = {
 				.sort(function(a, b) { return a.stationIndex - b.stationIndex; });
 			listed.forEach(function(tile, index) {
 				var option = document.createElement('option');
-				option.value = '0,' + tile.x + ',' + tile.y;
+				option.value = '0,' + tile.x + ',' + tile.y + ',' + tile.stationIndex;
 				option.textContent = (index + 1) + '/' + listed.length + ' — ' + tile.station + ' — ' + tile.x + ', ' + tile.y;
 				select.appendChild(option);
 			});
@@ -657,7 +664,7 @@ setup.worldmap = {
 			teleportButton.textContent = 'Teleport';
 			teleportButton.addEventListener('click', function() {
 				var address = select.value.split(',');
-				teleport(address[0], address[1], address[2]);
+				teleport(address[0], address[1], address[2], Number(address[3]));
 			});
 			controls.appendChild(teleportButton);
 			parent.appendChild(controls);
@@ -672,11 +679,66 @@ setup.worldmap = {
 			var readout = document.createElement('p');
 			readout.className = 'small-description debug-map-hover';
 			readout.textContent = 'Point at the map to read a square.';
+			// A click on a square with yards on it asks which: each yard, or the track itself.
+			var chooser = null;
+			var closeChooser = function() { if (chooser) chooser.remove(); chooser = null; };
+			var choose = function(tile, x, y) {
+				closeChooser();
+				var yards = setup.yards.at(tile.x, tile.y);
+				if (!yards.length) { teleport(0, tile.x, tile.y, 'line'); return; }
+				chooser = document.createElement('div');
+				chooser.className = 'debug-map-chooser';
+				var title = document.createElement('p');
+				title.textContent = '[NEEDS WRITING PASS] Teleport to square ' + tile.x + ', ' + tile.y + ':';
+				var pick = document.createElement('select');
+				pick.setAttribute('aria-label', 'Yard to teleport to');
+				yards.forEach(function(entry) {
+					var option = document.createElement('option');
+					option.value = String(entry.id);
+					option.textContent = yardName(entry);
+					pick.appendChild(option);
+				});
+				var line = document.createElement('option');
+				line.value = 'line';
+				line.textContent = '[NEEDS WRITING PASS] The track on this square';
+				pick.appendChild(line);
+				var go = document.createElement('button');
+				go.type = 'button';
+				go.textContent = 'Teleport';
+				go.addEventListener('click', function() {
+					var chosen = pick.value === 'line' ? 'line' : /^\d+$/.test(pick.value) ? Number(pick.value) : pick.value;
+					closeChooser();
+					teleport(0, tile.x, tile.y, chosen);
+				});
+				var cancel = document.createElement('button');
+				cancel.type = 'button';
+				cancel.textContent = 'Cancel';
+				cancel.addEventListener('click', closeChooser);
+				chooser.appendChild(title);
+				chooser.appendChild(pick);
+				chooser.appendChild(go);
+				chooser.appendChild(cancel);
+				chooser.addEventListener('keydown', function(event) {
+					if (event.key === 'Escape') { event.stopPropagation(); closeChooser(); }
+				});
+				globe.appendChild(chooser);
+				// By the click, kept inside the map.
+				var left = Math.max(4, Math.min(globe.clientWidth - chooser.offsetWidth - 4, x + 12));
+				var top = Math.max(4, Math.min(globe.clientHeight - chooser.offsetHeight - 4, y + 12));
+				chooser.style.left = left + 'px';
+				chooser.style.top = top + 'px';
+				pick.focus();
+			};
 			var globe = setup.globe.build({
 				revealAll: true,
-				onPick: function(tile) { teleport(0, tile.x, tile.y); },
+				onPick: choose,
+				describe: function(tile) {
+					return setup.yards.at(tile.x, tile.y).map(yardName);
+				},
 				onHover: function(tile, place) {
-					readout.textContent = tile ? ((tile.station ? tile.station + ' (' + (tile.stationRegion || 'rural') + ') | ' : '') + (tile.gapFill ? 'new line | ' : '')
+					var yards = tile ? setup.yards.at(tile.x, tile.y) : [];
+					readout.textContent = tile ? ((tile.station ? tile.station + ' (' + (tile.stationRegion || 'rural') + ') | ' : '')
+						+ (yards.length ? 'yards: ' + yards.map(yardName).join(', ') + ' | ' : '') + (tile.gapFill ? 'new line | ' : '')
 						+ 'grid ' + tile.x + ',' + tile.y + ' ' + tile.terrain + ' ' + tile.shape + ' | '
 						+ tile.geoCoordinate[1].toFixed(3) + '\u00b0, ' + tile.geoCoordinate[0].toFixed(3) + '\u00b0 | mean '
 						+ Math.round(tile.elevation) + ' m, relief \u03c3 ' + Math.round(tile.elevationStdDevM) + ' m')

@@ -396,9 +396,10 @@
 
 
 /* The station map building at the end of a line: plain until it has its own art. */
+.station-map-frame { position: relative; width: min(100%, 480px); }
 .station-map-holder svg.station-map {
 	display: block;
-	width: min(100%, 480px);
+	width: 100%;
 	height: auto;
 	border: 1px solid #3a2a2e;
 }
@@ -503,3 +504,13 @@
 
 /* The kind of yard, under its station's name. */
 .yard-kind { margin-top: -0.6em; opacity: 0.8; font-style: italic; }
+/* The debug map's question after a click on a square with yards: which yard, or the track. */
+.debug-map-chooser {
+	position: absolute;
+	z-index: 2;
+	padding: 0.4em 0.6em;
+	background: #191b1c;
+	border: 1px solid #777;
+}
+.debug-map-chooser p { margin: 0 0 0.3em; }
+.debug-map-chooser button { margin-left: 0.3em; }
