@@ -487,14 +487,47 @@ test('walking the sourced line leads back to the parked train',async t=>{
   assert.equal(await page.evaluate(()=>JSON.stringify(SugarCube.State.variables.journey)),parked);
   assert.equal(await page.evaluate(()=>SugarCube.State.variables.onFoot.inRailyard),true);
   assert.match(await page.locator('#passages').innerText(),/Your train remains parked out on the line/);
-  assert.match(await page.locator('#passages').innerText(),/Return to your train before boarding another/);
-  assert.equal(await page.locator('#passages a').filter({hasText:/^Board Train/}).count(),0);
+  // Boarding here is allowed: the train out on the line stays where it was left (setup.yards).
+  assert.match(await page.locator('#passages').innerText(),/Board another here and it stays where you left it/);
+  assert.ok(await page.locator('#passages a').filter({hasText:/^Board Train/}).count()>0);
   assert.equal(await page.locator('.railyard-player-marker').count(),0,'the remote train is not drawn inside the yard');
   await choose(page,'Return to the station track','OnFoot');
   const returnToTrain=await page.evaluate(()=>(()=>{const w=SugarCube.setup.onfoot.getWalk(-1);return 'Walk '+SugarCube.setup.units.kilometres(w.distanceKm)+' '+w.heading+' ('+Math.floor(w.minutes/60)+':'+String(w.minutes%60).padStart(2,'0')+')';})());
   await choose(page,returnToTrain,'OnFoot');
   assert.equal(await page.evaluate(()=>SugarCube.setup.onfoot.isBesideTrain()),true);
   await choose(page,'Climb back aboard (0:02)','OnTheLine');
+});
+
+test('a siding on the line is a yard of its own, entered and left by choice',async t=>{
+  const page=await openGame(t);await begin(page);await board(page);
+  const label=await page.evaluate(()=>{
+    const {setup:s,State:{variables:v}}=SugarCube,route=s.realWorldPilot.getGridRoute();
+    const tile=route.tiles.find(candidate=>s.yards.hasSiding(candidate)),place=route.place[tile.globalPosition];
+    v.journey={legIndex:place.legIndex,tileIndex:place.tileIndex,forward:true};v.travellingForward=true;
+    SugarCube.Engine.play('OnTheLine');
+    return s.yards.enterLabel('siding:'+tile.x+','+tile.y);
+  });
+  await choose(page,label,'DrivingMode');
+  assert.match(await page.evaluate(()=>String(SugarCube.State.variables.currentStation)),/^siding:-?\d+,-?\d+$/);
+  assert.match(await page.locator('#passages').innerText(),/Siding near /);
+  assert.equal(await page.locator('#passages svg.railyard-view, #passages .railyard-view svg').count()>0,true,'the siding is drawn as a yard');
+  assert.ok(await page.locator('#passages a').filter({hasText:/^Depart /}).count()>0,'a siding can be left along its line');
+});
+
+test('boarding a yard train while the consist is out on the line leaves it standing there',async t=>{
+  const page=await openGame(t);await begin(page);await board(page);
+  const run=await stationRunIn(page,2),[,to]=run.stations;
+  await page.evaluate(legIndex=>{
+    const {setup:s,State:{variables:v}}=SugarCube;
+    v.journey={legIndex,tileIndex:s.realWorldPilot.getGridRoute().legs[legIndex].tiles.length-1,forward:true};
+    s.onfoot.climbDown();SugarCube.Engine.play('OnFoot');
+  },run.legs[0]);
+  await choose(page,'Enter '+await stationName(page,to)+' railyard','Railyard');
+  await page.locator('#passages a').filter({hasText:/^Board Train/}).first().click();
+  await passage(page,'TrainInterior');
+  const after=await page.evaluate(()=>{const v=SugarCube.State.variables;
+    return {journey:v.journey,onFoot:v.onFoot,parked:Object.keys(v.lineTrains||{}).length,station:v.currentStation};});
+  assert.deepEqual(after,{journey:null,onFoot:null,parked:1,station:to});
 });
 
 test('structurally corrupt imported saves leave the current run untouched',async t=>{
@@ -946,7 +979,14 @@ async function travelLeg(page, heading, toward = '') {
   await page.locator('#passages').getByText(new RegExp('^Depart ' + (heading || '\\S+') + ' toward ' + escapeRegExp(toward))).first().click();
   await passage(page, 'OnTheLine');
   for (let guard = 0; guard < 400; guard++) {
-    if (await page.evaluate(() => !SugarCube.State.variables.journey)) break;
+    // The line runs out outside the next station's yard, and the driver pulls in.
+    const enter = await page.evaluate(() => {
+      const s = SugarCube.setup, view = s.worldmap.getJourneyView();
+      if (s.worldmap.getJourneyStep(1)) return '';
+      const yard = s.yards.at(view.tile.x, view.tile.y).find(item => item.kind === 'station');
+      return yard ? s.yards.enterLabel(yard.id) : '';
+    });
+    if (enter) { await page.locator('#passages').getByText(enter, { exact: true }).click(); break; }
     const turn = await page.evaluate(() => SugarCube.State.turns);
     await page.locator('#passages').getByText(/^Drive [\d.]+ km [a-z-]+ \(/).first().click();
     await page.waitForFunction(previous => SugarCube.State.turns > previous, turn);
@@ -2378,9 +2418,11 @@ test('driving the line goes one tile at a time, and draws the consist on it', as
   assert.doesNotMatch(interior, /Leave Train/);
   await choose(page, 'Start driving', 'OnTheLine');
 
-  // Backing onto the station's own tile is arriving back in its yard, and the journey is over.
+  // Backing onto the station's own square stops on the line outside its yard; pulling in is a choice.
   await page.locator('#passages').getByText(/^Reverse [\d.]+ km [a-z-]+ \(/).first().click();
-  await passage(page, 'DrivingMode');
+  await passage(page, 'OnTheLine');
+  assert.equal(await page.evaluate(() => SugarCube.setup.worldmap.getJourneyView().tileIndex), 0);
+  await choose(page, 'Enter ' + await stationName(page, 2) + ' railyard', 'DrivingMode');
   assert.deepEqual(await page.evaluate(() => ({
     station: SugarCube.State.variables.currentStation,
     journey: SugarCube.State.variables.journey
@@ -2390,7 +2432,7 @@ test('driving the line goes one tile at a time, and draws the consist on it', as
   // consist that sets off without the fuel to get anywhere.
   await page.locator('#passages').getByText(await departTo(page, 2)).first().click();
   await passage(page, 'OnTheLine');
-  await choose(page, 'Back into ' + await stationName(page, 2), 'DrivingMode');
+  await choose(page, 'Enter ' + await stationName(page, 2) + ' railyard', 'DrivingMode');
   assert.equal(await page.evaluate(() => SugarCube.State.variables.journey), null);
 });
 

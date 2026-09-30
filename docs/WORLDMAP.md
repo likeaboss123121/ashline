@@ -161,6 +161,26 @@ driver picks one of the other lines (`getJunctionChoices`, offered through `getB
 step along it. A walker picks the same way. At a buffer the line simply ends. `getStationsNear` finds the nearest
 stations by track through junctions, for supplies and recovery.
 
+**Yards apart from squares** (`source/yards.js`, `setup.yards`; Likea, 2026-09-30). A square can hold any number of
+railyards, and reaching one does not put the train in it: the train stops on the line on that square, and the
+player chooses to enter a yard there (`setup.yards.at`, `enter`), drive on, or reverse. Facing into a station, the
+ways on through it are the lines leaving the far end of its yard (`getJunctionChoices` treats a station like a
+junction for this); a walker can go through either way. A station's yard keeps its number as its id, the key its
+tracks are saved under. Out on the line, about one straight, plain square in ten (not bridges or tunnels) has a
+siding, placed from the run's seed: an empty road beside the running line, whose two leads are the line itself
+either way, with the id `siding:x,y`. A siding is a yard like any other: entered from the line, shunted in, and
+left along its leg from where it stands (its lines carry the `tileIndex` a departure starts at). Tracks of every
+kind of yard are kept in `$stationTracks` under the yard's id, and `$currentStation` holds the id of the yard the
+player is in. More kinds of station will use the same registry.
+
+**Trains left on the line.** A player who walks off and boards another train, in a yard or by climbing aboard one
+left on the line, leaves their consist standing where it was: `$lineTrains`, keyed by its square `x,y`, with its leg,
+position and which way it points (`frontAlongLeg`). It blocks the line. A train that drives, reverses or departs onto
+its square couples to it with whichever end is leading, by the same rule as coupling in a yard, and a train that
+meets it end-first turns it end for end with every car in it. A train put into a siding is in a yard and blocks
+nothing. For now a train left on the line stays as it was left (its firebox burns on, as in a yard), and the globe
+does not show it.
+
 **Finding the way** (`source/wayfinding.js`, `setup.wayfinding`). A station at the end of a line, with one line out
 of its yard, has a building with a map of the railways within 150 km and the nearest stations by track: a reason to
 go down a branch. Its art is still to come; for now the railyard has a "Station map" section with a plain drawing.
@@ -343,7 +363,9 @@ version-5 station UUIDs derived from stop source IDs, tile grid coordinates, geo
 the world revision alongside the runtime numeric indexes. On a rebuilt network, loading resolves UUIDs to the new
 indexes; a removed player station or tile sends the player and active consist to the geographically nearest
 surviving station. Removed visited yards remain in `orphanedStationYards` in the save so their cars and depleted
-stores are not silently treated as a different yard. New games do not carry a copy of the whole world in saves.
+stores are not silently treated as a different yard. A siding is identified by its square; one no longer there sends
+the player to the nearest station, and a train left on the line whose square has gone is kept in the same way, under
+`line:x,y`. New games do not carry a copy of the whole world in saves.
 Public v0.2.0 saves have no map; their explicit Punta Arenas placement is a separate future conversion task.
 
 ## Coordinates and legs

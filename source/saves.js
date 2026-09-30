@@ -164,6 +164,9 @@ setup.saves = {
 				v.journey.tileIndex >= setup.realWorldPilot.getGridRoute(v.journey.realWorldCorridorId).tiles.length))
 				throw new Error('Invalid sourced-route journey data.');
 			if (!stacks(v.player.carried, false) || !stacks(v.player.carriedCargo, true)) throw new Error('Invalid inventory data.');
+			if (v.lineTrains != null && (!object(v.lineTrains) || !Object.keys(v.lineTrains).every(function(key) {
+				return object(v.lineTrains[key]) && train(v.lineTrains[key].train);
+			}))) throw new Error('Invalid train data.');
 			Object.keys(v.stationTracks).forEach(function(station) {
 				var tracks = v.stationTracks[station];
 				if (!Array.isArray(tracks) || !tracks.length || !tracks.every(function(track) {

@@ -245,8 +245,15 @@ test('travel refuses a lead the station or the one it would arrive at does not h
   State.variables.enteredTrainIndex = 0;
   assert.match(setup.railyard.getDepartureBlockReason(a, 1, false), /no \S+ Track/);
   assert.equal(setup.railyard.getDepartureBlockReason(a, 1, true), '');
-  assert.match(setup.railyard.getDepartureBlockReason(b, 1, true),
+  // The far yard's missing lead does not stop a departure: the train can stop on the line outside it. It is refused
+  // only on entering.
+  assert.equal(setup.railyard.getDepartureBlockReason(b, 1, true), '');
+  const leg = setup.worldmap.getLine(b, true).legIndex, legTiles = setup.realWorldPilot.getLeg(leg).tiles.length;
+  State.variables.journey = { legIndex: leg, tileIndex: legTiles - 1, forward: true };
+  assert.match(setup.yards.getEnterBlockReason(c),
     new RegExp('^' + setup.worldmap.getStationName(c).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ' has no \\S+ Track to arrive on\\.$'));
+  assert.equal(setup.yards.enter(c), false);
+  State.variables.journey = null;
   assert.equal(setup.railyard.getDepartureBlockReason(b, 1, false), '');
   State.variables.currentStation = b;
   State.variables.currentTrain = [{ length: 18 }];
@@ -505,15 +512,21 @@ test('a journey runs tile by tile and ends by arriving at the station at either 
   assert.equal(setup.worldmap.getJourneyStep(-1), null);
 
   let guard = 0;
-  while (State.variables.journey && guard++ < 400) {
+  while (setup.worldmap.getJourneyStep(1) && guard++ < 400) {
     const step = setup.worldmap.getJourneyStep(1);
     assert.ok(step.minutes >= 1, JSON.stringify(step));
     assert.equal(setup.railyard.moveAlongLine(1), true);
   }
-  // Running the line out arrives at the next station, and the journey is over.
+  // Running the line out stops on the line at the next station, outside its yard.
+  assert.equal(guard, tiles - 1);
+  assert.equal(State.variables.journey.tileIndex, tiles - 1);
+  assert.equal(State.variables.currentStation, from);
+  assert.ok(setup.yards.at(setup.worldmap.getJourneyView().tile.x, setup.worldmap.getJourneyView().tile.y)
+    .some(yard => yard.id === to && yard.kind === 'station'));
+  // Entering the yard ends the journey, on the lead the leg comes in on.
+  assert.equal(setup.yards.enter(to), true);
   assert.equal(State.variables.journey, null);
   assert.equal(State.variables.currentStation, to);
-  assert.equal(guard, tiles - 1);
   assert.equal(State.variables.drivingTrackIndex, setup.railyard.getEntryTrackIndex());
 });
 

@@ -579,7 +579,11 @@ function driveTo(game, goalName) {
       steps.push({ terrain: step.terrain, heading: step.heading, arrives: step.destinationName || '' });
       assert.equal(setup.railyard.moveAlongLine(1), true, 'leg ' + line.legIndex);
     }
-    if (line.destination) assert.equal(State.variables.currentStation, line.destination);
+    // The line runs out on the line outside the station's yard, and the driver pulls in.
+    if (line.destination) {
+      assert.equal(setup.yards.enter(line.destination), true, 'enter ' + line.destination);
+      assert.equal(State.variables.currentStation, line.destination);
+    }
   });
   assert.equal(setup.worldmap.getStationName(State.variables.currentStation), goalName);
   return { km, junctions, legs: path.length, steps };

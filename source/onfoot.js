@@ -27,9 +27,16 @@ setup.onfoot = {
 		var tile = this.getTile();
 		return tile && Number(tile.stationIndex) > 0 ? Number(tile.stationIndex) : 0;
 	},
-	enterRailyard: function() {
-		var foot = this.get(), stationId = this.getStationId();
-		if (!foot || !stationId) return false;
+	// The yards on the square the walker stands on (setup.yards.at).
+	getYards: function() {
+		var tile = this.getTile();
+		return tile ? setup.yards.at(tile.x, tile.y) : [];
+	},
+	// Into a yard on this square: the station's, unless another is named.
+	enterRailyard: function(yardId) {
+		var foot = this.get(), yards = this.getYards(), stationId = yardId === undefined ? this.getStationId() : yardId;
+		if (!foot || !stationId || !yards.some(function(yard) { return String(yard.id) === String(stationId); })) return false;
+		stationId = setup.yards.normalise(stationId);
 		State.variables.currentStation = stationId;
 		if (this.getTrainPosition()) {
 			foot.inRailyard = true;
@@ -126,7 +133,7 @@ setup.onfoot = {
 		var position = this.getPosition(), self = this;
 		if (!position || position.branch) return [];
 		if (setup.worldmap.getJourneyPath(position).leg.realWorld) {
-			return setup.worldmap.getBranchChoices(position).map(function(choice) {
+			return setup.worldmap.getBranchChoices(position, true).map(function(choice) {
 				var walk = self.getWalk(1, choice.id);
 				if (walk) walk.choice = choice.id;
 				return walk;
@@ -206,10 +213,15 @@ Macro.add('onFootControls', {
 			return;
 		}
 		var output = '';
-		var stationId = onfoot.getStationId();
-		if (stationId) {
-			output += '<<link "Enter ' + setup.worldmap.getStationName(stationId) + ' railyard">>'
-				+ '<<if setup.onfoot.enterRailyard()>><<goto "Railyard">><</if>><</link>><br>';
+		onfoot.getYards().forEach(function(yard) {
+			output += '<<link "' + setup.yards.enterLabel(yard.id) + '">>'
+				+ '<<if setup.onfoot.enterRailyard(' + JSON.stringify(yard.id) + ')>><<goto "Railyard">><</if>><</link>><br>';
+		});
+		// A train the player left standing on the line can be boarded again from beside it.
+		var tile = onfoot.getTile();
+		if (tile && setup.yards.lineTrainAt(tile.x, tile.y)) {
+			output += '<<timedlink "[NEEDS WRITING PASS] Climb aboard the train you left here" 2 "generic">>'
+				+ '<<if setup.yards.boardParked(' + tile.x + ', ' + tile.y + ')>><<goto "OnTheLine">><</if>><</timedlink>><br>';
 		}
 		[1, -1].forEach(function(direction) {
 			var walk = onfoot.getWalk(direction);

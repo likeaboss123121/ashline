@@ -103,6 +103,7 @@ setup.refuel = {
 	},
 	// Whether a station has a water tank. A fact about the world, so it comes from the seed and is never saved.
 	stationHasWaterTank: function(stationId) {
+		if (!setup.yards.isStation(stationId)) return false; // a siding has only the running line and its road
 		var worldmap = setup.worldmap;
 		return worldmap.rngFor(worldmap.getSeed(), 'water-tank', Math.floor(Number(stationId) || 1))() < this.WATER_TANK_CHANCE;
 	},
@@ -117,7 +118,7 @@ setup.refuel = {
 				besideWater: worldmap.isBesideWater(worldmap.getSeed(), view.tile.x, view.tile.y)
 			};
 		}
-		var stationId = Number(State.variables.currentStation) || 1;
+		var stationId = setup.yards.normalise(State.variables.currentStation || 1);
 		return { onLine: false, stationId: stationId, waterTank: this.stationHasWaterTank(stationId) };
 	},
 	// Why a job's source in the world is not here, or '' if it is. null means the job does not apply here at all.

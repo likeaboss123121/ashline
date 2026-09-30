@@ -251,6 +251,9 @@ test('diesel and steam can complete multi-station runs on station stores topped 
       let guard=0;
       while(v.journey && guard++<100) {
         let step=s.worldmap.getJourneyStep(1);
+        // At the next station the driver pulls into the yard rather than passing through.
+        const node=!step&&s.realWorldPilot.getNodeAt(v.journey.legIndex,v.journey.tileIndex);
+        if(node&&node.kind==='station') { assert.equal(s.yards.enter(node.stationIndex),true); break; }
         // At a junction out on the line the driver picks a way on, as a player would.
         const choice=!step&&s.worldmap.getBranchChoices().find(candidate=>!s.worldmap.getBranchStep(candidate.id).blocked);
         if(choice) step=s.worldmap.getBranchStep(choice.id);

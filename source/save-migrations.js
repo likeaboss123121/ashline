@@ -187,7 +187,12 @@ setup.saveMigrations = {
 	// are only lookup indexes for this particular compiled network.
 	anchorFor: function(v) {
 		var route=setup.realWorldPilot.getGridRoute(), stations=route.corridor.stations;
+		// A yard that is not a station's is named by its square, which is its identity.
 		var station=function(index) {
+			if(!setup.yards.isStation(index)) {
+				var yard=setup.yards.tile(index);
+				return yard ? {siding:index,x:yard.x,y:yard.y,coordinate:yard.geoCoordinate} : null;
+			}
 			var item=stations[Number(index)-1], tile=item && route.tiles[item.square];
 			return item && tile ? {uuid:item.uuid,coordinate:tile.geoCoordinate} : null;
 		};
@@ -219,6 +224,20 @@ setup.saveMigrations = {
 	validStation: function(station,route) {
 		return Number.isInteger(station)&&station>=1&&station<=route.corridor.stations.length;
 	},
+	// Any yard: a station by its number, or another kind by its id (setup.yards).
+	validYard: function(id,route) {
+		return this.validStation(id,route)||(typeof id==='string'&&!setup.yards.isStation(id)&&setup.yards.exists(id));
+	},
+	// A key of $stationTracks: a station's number as written by JavaScript, or another yard's id.
+	validYardKey: function(key,route) {
+		return setup.yards.isStation(key) ? this.validStation(Number(key),route)&&String(Number(key))===key : this.validYard(key,route);
+	},
+	// A train left on the line: whole, on a real position, filed under that position's square.
+	validLineTrain: function(key,entry,route) {
+		if(!this.object(entry)||!Array.isArray(entry.train)||!entry.train.length||!this.validTile(entry,route)) return false;
+		var tile=route.legs[entry.legIndex].tiles[entry.tileIndex];
+		return tile.x===entry.x&&tile.y===entry.y&&key===tile.x+','+tile.y;
+	},
 	validTile: function(position,route) {
 		var leg=this.object(position)&&Number.isInteger(position.legIndex)&&route.legs[position.legIndex];
 		// A branch position indexes the branch's own tiles, so only its leg can be checked here.
@@ -227,9 +246,10 @@ setup.saveMigrations = {
 	},
 	positionValid: function(v) {
 		var route=setup.realWorldPilot.getGridRoute(), self=this;
-		return this.validStation(v.currentStation,route)&&(v.enteredStation==null||this.validStation(v.enteredStation,route))
+		return this.validYard(v.currentStation,route)&&(v.enteredStation==null||this.validYard(v.enteredStation,route))
 			&&(!v.journey||this.validTile(v.journey,route))&&(!v.onFoot||this.validTile(v.onFoot,route))
-			&&Object.keys(v.stationTracks||{}).every(function(key){return self.validStation(Number(key),route)&&String(Number(key))===key;});
+			&&Object.keys(v.stationTracks||{}).every(function(key){return self.validYardKey(key,route);})
+			&&Object.keys(v.lineTrains||{}).every(function(key){return self.validLineTrain(key,v.lineTrains[key],route);});
 	},
 	// Leave the line and stand at a station, with the consist if the player is aboard it.
 	moveToStation: function(moment,station) {
@@ -244,19 +264,26 @@ setup.saveMigrations = {
 		var v=moment.variables;
 		if(this.positionValid(v)) return false;
 		var route=setup.realWorldPilot.getGridRoute(), self=this, identity=this.object(v.worldIdentity)?v.worldIdentity:{};
-		if(!this.validStation(v.currentStation,route)) this.moveToStation(moment,this.startStation(route));
-		else if((v.journey&&!this.validTile(v.journey,route))||(v.onFoot&&!this.validTile(v.onFoot,route))) {
+		if(!this.validYard(v.currentStation,route)) {
+			// A siding's id names a square: if that square is a real place, the nearest station to it.
+			var named=setup.yards.parse(v.currentStation), square=named&&named.kind==='siding'&&route.byKey[named.x+','+named.y];
+			this.moveToStation(moment,square?this.nearestStation(square.geoCoordinate,route):this.startStation(route));
+		} else if((v.journey&&!this.validTile(v.journey,route))||(v.onFoot&&!this.validTile(v.onFoot,route))) {
 			var anchor=v.onFoot&&identity.onFoot||identity.journey;
 			this.moveToStation(moment,this.nearestStation(anchor&&anchor.coordinate,route));
 		}
-		if(v.enteredStation!=null&&!this.validStation(v.enteredStation,route)) {
+		if(v.enteredStation!=null&&!this.validYard(v.enteredStation,route)) {
 			v.enteredStation=v.currentStation;delete v.enteredTrackIndex;delete v.enteredTrainIndex;
 		}
 		// Keep the stock of a yard filed under a bad station number, as removed yards are kept.
 		v.orphanedStationYards=v.orphanedStationYards||{};
 		Object.keys(v.stationTracks||{}).forEach(function(key){
-			if(self.validStation(Number(key),route)&&String(Number(key))===key) return;
+			if(self.validYardKey(key,route)) return;
 			v.orphanedStationYards['invalid:'+key]=v.stationTracks[key];delete v.stationTracks[key];
+		});
+		Object.keys(v.lineTrains||{}).forEach(function(key){
+			if(self.validLineTrain(key,v.lineTrains[key],route)) return;
+			v.orphanedStationYards['line:'+key]=v.lineTrains[key];delete v.lineTrains[key];
 		});
 		v.worldIdentity=this.anchorFor(v);
 		return true;
@@ -281,7 +308,11 @@ setup.saveMigrations = {
 		stations.forEach(function(item,index){byUuid[item.uuid]=index+1;});
 		function resolve(anchor){
 			if(!self.object(anchor)) return self.startStation(route);
+			if(anchor.siding) return setup.yards.exists(anchor.siding) ? anchor.siding : self.nearestStation(anchor.coordinate,route);
 			return byUuid[anchor.uuid] || self.nearestStation(anchor.coordinate,route);
+		}
+		function kept(anchor){
+			return self.object(anchor)&&(anchor.siding ? setup.yards.exists(anchor.siding) : !!byUuid[anchor.uuid]);
 		}
 		// null sends the player to the nearest station to the anchor's coordinates, or Punta Arenas if those are bad too.
 		function locate(anchor){
@@ -317,14 +348,24 @@ setup.saveMigrations = {
 		Object.keys(v.stationTracks||{}).forEach(function(key){
 			var identity=old.yards&&old.yards[key];
 			if(!identity) throw new Error('A visited yard has no stable identity.');
-			var exact=byUuid[identity.uuid];
+			var exact=identity.siding ? (kept(identity) ? identity.siding : null) : byUuid[identity.uuid];
 			if(exact && !yards[exact]) yards[exact]=v.stationTracks[key];
-			else v.orphanedStationYards[identity.uuid||key]=v.stationTracks[key];
+			else v.orphanedStationYards[identity.uuid||identity.siding||key]=v.stationTracks[key];
 		});
 		v.stationTracks=yards;
 		// A removed yard cannot safely be interpreted as a different yard layout. Keep
 		// its stock in the save and put the player/consist at the nearest live station.
-		if(!self.object(old.station)||!byUuid[old.station.uuid]) moved=true;
+		if(!kept(old.station)) moved=true;
+		// Trains left on the line keep their squares; one whose square has gone is kept aside with its stock.
+		var lineTrains={};
+		Object.keys(v.lineTrains||{}).forEach(function(key){
+			var entry=v.lineTrains[key], square=self.object(entry)&&route.byKey[key], place=square&&route.place[square.globalPosition];
+			var node=square&&!place&&route.nodes[square.globalPosition], line=node&&node.lines[0];
+			if(line) place={legIndex:line.legIndex,tileIndex:line.forward?0:route.legs[line.legIndex].tiles.length-1};
+			if(place) lineTrains[key]=Object.assign(entry,{legIndex:place.legIndex,tileIndex:place.tileIndex,coordinate:square.geoCoordinate});
+			else v.orphanedStationYards['line:'+key]=entry;
+		});
+		if(v.lineTrains) v.lineTrains=lineTrains;
 		if(moved) {
 			if(!v.currentTrain || !v.currentTrain.length) {
 				var selected=null;

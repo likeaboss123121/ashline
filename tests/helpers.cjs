@@ -24,6 +24,7 @@ function loadGame() {
   vm.runInContext(fs.readFileSync(path.join(root, 'source/world-graph.js'), 'utf8'), context, { filename: 'world-graph.js' });
   vm.runInContext(fs.readFileSync(path.join(root, 'source/worldmap.js'), 'utf8'), context, { filename: 'worldmap.js' });
 	vm.runInContext(fs.readFileSync(path.join(root, 'source/world-pilot.js'), 'utf8'), context, { filename: 'world-pilot.js' });
+  vm.runInContext(fs.readFileSync(path.join(root, 'source/yards.js'), 'utf8'), context, { filename: 'yards.js' });
   vm.runInContext(fs.readFileSync(path.join(root, 'source/stats.js'), 'utf8'), context, { filename: 'stats.js' });
   vm.runInContext(fs.readFileSync(path.join(root, 'source/items.js'), 'utf8'), context, { filename: 'items.js' });
   vm.runInContext(fs.readFileSync(path.join(root, 'source/fuel.js'), 'utf8'), context, { filename: 'fuel.js' });

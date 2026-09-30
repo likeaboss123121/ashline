@@ -474,6 +474,7 @@ setup.worldmap = {
 		return [this.getStationName(legIndex), this.getStationName(legIndex + 1)];
 	},
 	getStationName: function(stationId) {
+		if (setup.yards && setup.yards.parse(stationId) && !setup.yards.isStation(stationId)) return setup.yards.name(stationId);
 		if (setup.realWorldPilot && setup.realWorldPilot.getStation) {
 			var station = setup.realWorldPilot.getStation(stationId);
 			if (station) return station.name;
@@ -634,8 +635,9 @@ setup.worldmap = {
 		}
 		return { tiles: this.getMainLine(this.getSeed(), journey.legIndex), branch: null, leg: leg };
 	},
-	// The branches leaving the tile the train is standing on, for the player to choose between.
-	getBranchChoices: function(position) {
+	// The branches leaving the tile the train is standing on, for the player to choose between. A train passes through
+	// a station only facing into it, onto a line leaving the far end; a walker (anyFacing) can go either way.
+	getBranchChoices: function(position, anyFacing) {
 		var journey = position || this.getJourney();
 		var path = this.getJourneyPath(journey);
 		if (!journey || !path || path.branch) {
@@ -644,6 +646,9 @@ setup.worldmap = {
 		var self = this;
 		// On the network the choices are at a junction: every other line that meets it, named for the way it leaves.
 		if (path.leg.realWorld) {
+			var node = setup.realWorldPilot.getNodeAt(journey.legIndex, journey.tileIndex);
+			if (node && node.kind === 'station' && !anyFacing
+				&& (journey.forward !== false) !== (journey.tileIndex >= path.tiles.length - 1)) return [];
 			return setup.realWorldPilot.getJunctionChoices(journey.legIndex, journey.tileIndex).map(function(line) {
 				var step = self.getLineChoiceStep(line);
 				return { id: 'leg:' + line.legIndex, legIndex: line.legIndex, direction: self.describeDirection(line.direction, path.tiles[journey.tileIndex]),
@@ -759,7 +764,7 @@ setup.worldmap = {
 			if (realTo < 0 || realTo >= tiles.length) return null;
 			var forwardStep = realTo > from;
 			var realStep = this.describeStep(forwardStep ? tiles[from].grade : -tiles[realTo].grade, tiles[realTo].terrain, {
-				fromIndex: from, toIndex: realTo, realWorld: true,
+				fromIndex: from, toIndex: realTo, realWorld: true, couples: this.parkedOn(tiles[realTo]),
 				distanceKm: this.getStepKm(tiles, Math.min(from, realTo)),
 				heading: this.describeDirection(forwardStep ? tiles[from].out : this.opposite(tiles[realTo].out), forwardStep ? tiles[from] : tiles[realTo]),
 				destinationName: tiles[realTo].station || '',
@@ -810,10 +815,15 @@ setup.worldmap = {
 		var leg = setup.realWorldPilot.getLeg(line.legIndex);
 		return this.describeStep(line.forward ? tiles[from].grade : -tiles[to].grade, tiles[to].terrain, {
 			fromIndex: from, toIndex: to, realWorld: true, toBranch: 'leg:' + line.legIndex, tileCount: tiles.length,
+			couples: this.parkedOn(tiles[to]),
 			distanceKm: this.getStepKm(tiles, Math.min(from, to)), heading: this.describeDirection(line.direction, tiles[from]),
 			destinationName: tiles[to].station || '',
 			arrivesAt: to === 0 ? leg.fromStationIndex : (to === last ? leg.toStationIndex : 0)
 		});
+	},
+	// Whether a train left on the line stands on a square: a step onto it couples to it (setup.yards).
+	parkedOn: function(tile) {
+		return !!(tile && setup.yards && setup.yards.lineTrainAt(tile.x, tile.y));
 	},
 	// What turning off onto a branch would cost.
 	getBranchStep: function(branchId, position) {
@@ -885,20 +895,25 @@ setup.worldmap = {
 	},
 	// Time over a leg, tile by tile. Climbing is slow and a heavy train is slower still; running downhill saves a
 	// little. Fuel follows from the clock, because the time system burns fuel by the minute while travelling.
-	getLegTravel: function(seed, legIndex, train, reverse) {
+	// fromIndex starts part way along the leg, as a departure from a siding does.
+	getLegTravel: function(seed, legIndex, train, reverse, fromIndex) {
 		var leg = this.getLeg(seed, legIndex);
 		if (!leg) return { minutes: 0, tiles: 0, kilometres: 0, steepestClimb: 0,
 			climbLimit: this.getClimbLimitPercent(train) };
 		// Every tile but the last carries one step to its neighbour, and that step's grade. The same steps are
 		// travelled either way round, so running the leg backwards is the same list of grades negated.
-		var steps = leg.realWorld ? leg.tiles.slice(0, -1)
+		var first = 0, last = leg.tiles.length - 1;
+		if (leg.realWorld && Number.isInteger(fromIndex)) {
+			if (reverse) last = fromIndex; else first = fromIndex;
+		}
+		var steps = leg.realWorld ? leg.tiles.slice(first, last)
 			: leg.tiles.filter(function(tile) { return !tile.branch && tile.out !== -1; });
 		var minutes = 0;
 		var steepestClimb = 0;
 		var kilometres = 0;
 		for (var i = 0; i < steps.length; i++) {
 			var grade = reverse ? -steps[i].grade : steps[i].grade;
-			var stepKm = leg.realWorld ? this.getStepKm(leg.tiles, i) : this.TILE_KM;
+			var stepKm = leg.realWorld ? this.getStepKm(leg.tiles, first + i) : this.TILE_KM;
 			steepestClimb = Math.max(steepestClimb, grade);
 			minutes += this.getTileMinutes(grade, train, stepKm);
 			kilometres += stepKm;
@@ -916,7 +931,7 @@ setup.worldmap = {
 		if (!line) {
 			return 5;
 		}
-		return this.getLegTravel(this.getSeed(), line.legIndex, train, !line.forward).minutes;
+		return this.getLegTravel(this.getSeed(), line.legIndex, train, !line.forward, line.tileIndex).minutes;
 	},
 	// A short line for the travel UI: how far the leg runs, how steep it gets, and what the consist can pull.
 	getTravelSummary: function(stationId, towardExit, train, legIndex) {
@@ -924,7 +939,7 @@ setup.worldmap = {
 		if (!line) {
 			return '';
 		}
-		var travel = this.getLegTravel(this.getSeed(), line.legIndex, train, !line.forward);
+		var travel = this.getLegTravel(this.getSeed(), line.legIndex, train, !line.forward, line.tileIndex);
 		return setup.units.kilometres(travel.kilometres) + ', steepest climb ' + travel.steepestClimb.toFixed(1) + '%'
 			+ (travel.climbLimit > 0 ? ', your consist pulls ' + travel.climbLimit.toFixed(1) + '%' : '') + '.';
 	},
@@ -938,7 +953,7 @@ setup.worldmap = {
 		if (!line) {
 			return '';
 		}
-		var travel = this.getLegTravel(this.getSeed(), line.legIndex, train, !line.forward);
+		var travel = this.getLegTravel(this.getSeed(), line.legIndex, train, !line.forward, line.tileIndex);
 		if (travel.steepestClimb > travel.climbLimit) {
 			return 'The line climbs ' + travel.steepestClimb.toFixed(1) + '% on the way, and your consist can pull '
 				+ travel.climbLimit.toFixed(1) + '% at this weight.';
@@ -1256,7 +1271,7 @@ setup.worldmap = {
 			parent.appendChild(globe);
 			parent.appendChild(readout);
 			var legend = document.createElement('p');
-			legend.textContent = '[NEEDS WRITING PASS] Mapped railway is light, new lines red. Far out the track is drawn from a raster; close in, as lines, with every station, and a click on it teleports.';
+			legend.textContent = '[NEEDS WRITING PASS] Railways imported from IRL railways appear in white. Programmatically generated railways appear in red. Click on a station or tile in the map to teleport to it with your consist.';
 			parent.appendChild(legend);
 		} catch (error) {
 			var failure = document.createElement('p');

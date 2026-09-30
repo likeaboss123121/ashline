@@ -202,7 +202,9 @@ setup.realWorldPilot = (function () {
 
 	// The lines leaving a station: { legIndex, side ('entry' or 'exit'), forward (the journey's direction along the
 	// leg), destination (the station at the far end), direction (the heading out of the station) }.
+	// Any yard's lines: a siding's are its two ways along its leg (setup.yards.lines).
 	function getStationLines(stationIndex) {
+		if (setup.yards && !setup.yards.isStation(stationIndex)) return setup.yards.lines(stationIndex);
 		var route = getGridRoute(), id = Math.floor(Number(stationIndex));
 		if (!route || !getStation(id)) return [];
 		return route.corridor.stations[id - 1].lines.slice();
@@ -237,6 +239,7 @@ setup.realWorldPilot = (function () {
 	}
 
 	function getStationTile(stationIndex) {
+		if (setup.yards && !setup.yards.isStation(stationIndex)) return setup.yards.tile(stationIndex);
 		var route = getGridRoute(), station = getStation(stationIndex);
 		if (!route || !station) return null;
 		return route.tiles[route.stationPositions[Math.floor(Number(stationIndex)) - 1]];
@@ -281,8 +284,16 @@ setup.realWorldPilot = (function () {
 
 	// The ways on from a junction a journey position stands at, other than the leg it is on: { legIndex, forward,
 	// destination, destinationName, direction } each, forward saying which way the leg runs away from the junction.
+	// A station is passed through on the line, without entering its yard: the ways on are the lines leaving the far end
+	// of the yard from the one the leg comes in at.
 	function getJunctionChoices(legIndex, tileIndex) {
 		var node = getNodeAt(legIndex, tileIndex);
+		if (node && node.kind === 'station') {
+			var side = getArrivalSide(legIndex, node.stationIndex);
+			return getStationLines(node.stationIndex).filter(function(line) {
+				return line.legIndex !== Number(legIndex) && line.side !== side;
+			});
+		}
 		if (!node || node.kind !== 'junction') return [];
 		return node.lines.filter(function(line) { return line.legIndex !== Number(legIndex); });
 	}

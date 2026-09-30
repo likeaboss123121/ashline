@@ -60,7 +60,7 @@ setup.wayfinding = {
 		var view = setup.onfoot && setup.onfoot.isOnFoot && setup.onfoot.isOnFoot() && setup.onfoot.getTile
 			? { tile: setup.onfoot.getTile() } : setup.worldmap.getJourneyView();
 		if (view && view.tile) return view.tile;
-		return setup.realWorldPilot.getStationTile(Number(State.variables.currentStation) || 1);
+		return setup.realWorldPilot.getStationTile(setup.yards.normalise(State.variables.currentStation || 1));
 	},
 
 	// The map as the player sees it: the country within MAP_RADIUS_KM of any of centres, drawn from where each square

@@ -105,6 +105,9 @@ setup.time = {
 				}
 			}
 		}
+		// Trains left out on the line keep burning whatever their fireboxes hold, as they would in a yard.
+		var lineTrains = State.variables.lineTrains || {};
+		Object.keys(lineTrains).forEach(function(key) { addTrain(lineTrains[key] && lineTrains[key].train); });
 		// SugarCube clones aliases separately; $trains may contain stale copies.
 		addTrain(State.variables.currentTrain);
 		return tracked;
@@ -269,7 +272,7 @@ setup.startNewRun = function() {
 	Object.keys(v).forEach(function(key) { if (keep.indexOf(key) === -1) delete v[key]; });
 	Object.assign(v, { player: { fatigue: 0, health: 100, immunity: 100, sanity: 100, hunger: 100, thirst: 100 },
 		saveSchemaVersion: setup.saveMigrations ? setup.saveMigrations.CURRENT : 1,
-		trains: [], currentStation: 1, stationTracks: {}, travellingForward: true,
+		trains: [], currentStation: 1, stationTracks: {}, lineTrains: {}, travellingForward: true,
 		gameTimeTimestampMs: setup.time.startTimestampMs, debugSelectedTrackIndex: 0,
 		debugSelectedTrainIndex: 0, debugSelectedCarIndex: -1 });
 	if (setup.worldmap) setup.worldmap.clearCache();
@@ -653,6 +656,11 @@ setup.railyard = {
 	},
 	boardTrain: function(stationId, trackIndex, trainIndex) {
 		var variables = State.variables;
+		// A player who walked into the yard from their train leaves that train standing out on the line (setup.yards).
+		if (Array.isArray(variables.currentTrain) && variables.currentTrain.length && setup.worldmap.getJourney()
+			&& !setup.yards.parkCurrentTrain()) return false;
+		variables.journey = null;
+		variables.onFoot = null;
 		var train = variables.stationTracks[stationId][trackIndex].trains.splice(trainIndex, 1)[0];
 		variables.enteredStation = stationId;
 		variables.enteredTrackIndex = trackIndex;
@@ -661,6 +669,7 @@ setup.railyard = {
 		variables.currentTrain = train;
 		variables.currentCarIndex = this.getBoardingCarIndex(train);
 		this.markTrainVisited(train);
+		return true;
 	},
 	leaveCurrentTrain: function() {
 		var variables = State.variables;
@@ -1591,15 +1600,7 @@ setup.railyard = {
 		if (!line) {
 			return 'There is no railway beyond ' + setup.worldmap.getStationName(stationId) + ' in that direction.';
 		}
-		var destination = line.destination;
-		// A station not generated yet always has the lead the player arrives on.
-		var arriveOnEntry = setup.realWorldPilot.getArrivalSide(line.legIndex, destination) === 'entry';
-		var destinationTracks = State.variables.stationTracks[destination];
-		if (destinationTracks && !(arriveOnEntry ? this.getLeads(destinationTracks).entry : this.getLeads(destinationTracks).exit)) {
-			return setup.worldmap.getStationName(destination) + ' has no '
-				+ this.getTrackLabel(destinationTracks, arriveOnEntry ? this.getEntryTrackIndex() : this.getExitTrackIndex(destinationTracks))
-				+ ' to arrive on.';
-		}
+		// Whether the yard at the far end can be entered is asked there: a train can always stop on the line outside it.
 		// The world between the stations has the last word: a heavy consist cannot pull the steepest grade there.
 		var climbReason = setup.worldmap.getClimbBlockReason(stationId, towardExit, State.variables.currentTrain, line.legIndex);
 		if (climbReason) {
@@ -1670,7 +1671,7 @@ setup.railyard = {
 		if (setup.worldmap.isBranchStation(variables.currentStation)) {
 			return this.departFromBranchTerminus();
 		}
-		var stationId = Number(variables.currentStation);
+		var stationId = setup.yards.normalise(variables.currentStation);
 		var line = setup.worldmap.getLine(stationId, towardExit, legIndex);
 		if (!line || this.getDepartureBlockReason(stationId, variables.drivingTrackIndex, towardExit, line.legIndex)) {
 			return false;
@@ -1679,7 +1680,14 @@ setup.railyard = {
 		var tiles = setup.worldmap.getMainLine(setup.worldmap.getSeed(), line.legIndex);
 		if (!tiles || tiles.length < 2) return false;
 		variables.travellingForward = !!towardExit;
-		variables.journey = { legIndex: line.legIndex, tileIndex: line.forward ? 0 : tiles.length - 1, forward: line.forward };
+		// A station's lines start at the end of their leg; a siding's part way along it.
+		var start = Number.isInteger(line.tileIndex) ? line.tileIndex : line.forward ? 0 : tiles.length - 1;
+		variables.journey = { legIndex: line.legIndex, tileIndex: start, forward: line.forward };
+		// A train left on the line outside the yard is coupled to on the way out. The consist leaves exit first
+		// toward the exit, so it meets it with its first car.
+		if (setup.yards.lineTrainAt(tiles[start].x, tiles[start].y)) {
+			setup.yards.coupleParked(tiles[start].x, tiles[start].y, line.legIndex, line.forward, !!towardExit);
+		}
 		return true;
 	},
 	// Leaving a branch terminus: back onto the branch at its far end, facing the junction it came from.
@@ -1728,15 +1736,17 @@ setup.railyard = {
 		if (step.toMain !== null && typeof step.toMain !== 'undefined') {
 			journey.branch = null;
 		}
+		// Driving up to a train left on the line couples to it, with whichever end of the consist is leading: the
+		// first car when driving the way it was sent off ($travellingForward), the last when reversing.
+		if (step.couples) {
+			var tile = setup.worldmap.getJourneyPath(journey).tiles[step.toIndex];
+			setup.yards.coupleParked(tile.x, tile.y, journey.legIndex, step.toIndex > step.fromIndex,
+				(State.variables.travellingForward !== false) === (direction > 0));
+		}
 		journey.tileIndex = step.toIndex;
 		State.variables.journey = journey;
-		if (step.arrivesAt) {
-			// Arriving forward means coming in on the next station's entry lead, and backing in means its exit lead.
-			// A branch terminus has only the one lead, so a train always arrives on it.
-			var onEntryLead = setup.worldmap.isBranchStation(step.arrivesAt)
-				|| setup.realWorldPilot.getArrivalSide(journey.legIndex, step.arrivesAt) === 'entry';
-			this.arriveAtStation(step.arrivesAt, onEntryLead);
-		}
+		// Reaching a station stops on the line outside its yard; entering it is the player's choice (setup.yards).
+		if (step.arrivesAt && setup.worldmap.isBranchStation(step.arrivesAt)) this.arriveAtStation(step.arrivesAt, true);
 		return true;
 	},
 	// Counts how many leading cars can fit inside a finite remaining track length.
@@ -2221,6 +2231,9 @@ setup.railyard = {
 	},
 	// Builds a full station layout (entry + generated yard + exit), with a fixed tutorial station at id 1.
 	generateStationTracks: function(stationId, baseSeed) {
+		if (setup.yards && setup.yards.parse(stationId) && !setup.yards.isStation(stationId)) {
+			return setup.yards.generateTracks(stationId, baseSeed);
+		}
 		if (stationId === 1) {
 			// Station 1 is a fixed layout that teaches shunting by making the player do it: the locomotive stands on
 			// a short stub, and a flatcar sits on the through track between it and the way out. Getting out of the
@@ -2494,8 +2507,8 @@ Macro.add('railyardButtons', {
 		output += '<p>There ' + (totalTrains === 1 ? 'is ' : 'are ') + totalTrains + ' train' + (totalTrains === 1 ? '' : 's') + ' staged across ' + trackCount + ' track' + (trackCount === 1 ? '' : 's') + '.</p>';
 		var remoteTrain = setup.onfoot && setup.onfoot.isInRailyard() && Array.isArray(State.variables.currentTrain)
 			&& State.variables.currentTrain.length > 0;
-		if (remoteTrain) output += '<p class="small-description">Return to your train before boarding another; '
-			+ 'the active consist is still parked on the line.</p>';
+		if (remoteTrain) output += '<p class="small-description">[NEEDS WRITING PASS] Your train is parked out on the line. '
+			+ 'Board another here and it stays where you left it, blocking the line until a train couples to it.</p>';
 		var displayNumber = 1;
 		// Each track is rendered independently so empty tracks, finite length, and train numbering stay readable.
 		for (var i = 0; i < tracks.length; i++) {
@@ -2513,9 +2526,7 @@ Macro.add('railyardButtons', {
 			// Boarding removes the selected train from the yard and turns it into the player's active consist.
 			for (var j = 0; j < tracks[i].trains.length; j++) {
 				output += setup.railyard.trainSummaryHtml(tracks[i].trains[j], displayNumber - 1);
-				if (remoteTrain) output += '<span class="yard-reason" data-yard-reason="board:' + i + ':' + j
-					+ '"><em>Your train is still parked on the line.</em></span><br>';
-				else output += '<span data-yard-action="board:' + i + ':' + j + '">'
+				output += '<span data-yard-action="board:' + i + ':' + j + '">'
 					+ '<<timedlink "Board Train ' + displayNumber + '" 1>><<run setup.railyard.boardTrain($currentStation, ' + i + ', ' + j + ')>><<goto "TrainInterior">><</timedlink>></span><br>';
 				displayNumber++;
 			}
@@ -2570,16 +2581,16 @@ Macro.add('lineControls', {
 			return;
 		}
 		var output = '';
-		// On a station's own tile the yard is right there, so backing in ends the journey at no cost. It is also
-		// the way out for a consist that cannot move at all, which is why it is offered before anything else.
+		// The yards on this square: a station's, a siding. Pulling into one costs nothing, and it is also the way out
+		// for a consist that cannot move at all, which is why it is offered before anything else.
 		var escapeLink = '';
-		if (!setup.worldmap.getJourneyStep(-1) && (!view.realWorld || view.fromStationIndex)) {
-			var backStation = view.fromStationIndex || (view.forward ? view.legIndex : view.legIndex + 1);
-			var backOnEntry = setup.realWorldPilot.getArrivalSide(view.legIndex, backStation) === 'entry';
-			escapeLink = '<<link "Back into ' + setup.worldmap.getStationName(backStation) + '">>'
-				+ '<<run setup.railyard.arriveAtStation(' + backStation + ', ' + backOnEntry + ')>>'
-				+ '<<goto "DrivingMode">><</link>><br>';
-		}
+		setup.yards.at(view.tile.x, view.tile.y).forEach(function(yard) {
+			var reason = setup.yards.getEnterBlockReason(yard.id);
+			escapeLink += reason
+				? '<span class="small-description"><em>' + setup.yards.enterLabel(yard.id) + ': ' + reason + '</em></span><br>'
+				: '<<link "' + setup.yards.enterLabel(yard.id) + '">><<if setup.yards.enter(' + JSON.stringify(yard.id)
+					+ ')>><<goto "DrivingMode">><</if>><</link>><br>';
+		});
 		if (!setup.railyard.isTrainDriveCapable(State.variables.currentTrain)) {
 			output += '<p class="small-description"><em>Your train cannot move: it has no diesel or steam pressure. '
 				+ 'Enter the train and work the firebox.</em></p>';
@@ -2601,7 +2612,7 @@ Macro.add('lineControls', {
 			if (step.blocked) {
 				return;
 			}
-			// Arriving ends the journey, so the link lands back in the yard rather than on the line.
+			if (step.couples) label += ' [NEEDS WRITING PASS] and couple to the train standing there';
 			output += '<<timedlink "' + label + '" ' + step.minutes + ' "travel">>'
 				+ '<<run setup.railyard.moveAlongLine(' + direction + ')>>'
 				+ '<<set _linePassage = State.variables.journey ? "OnTheLine" : "DrivingMode">>'
@@ -2613,7 +2624,8 @@ Macro.add('lineControls', {
 		// At a junction the player knows only which way the rails immediately run. Whether a track reconnects or
 		// ends is deliberately not exposed: there is no map to consult out here.
 		var choices = setup.worldmap.getBranchChoices();
-		if (view.realWorld && choices.length) {
+		var node = view.realWorld && setup.realWorldPilot.getNodeAt(view.legIndex, view.tileIndex);
+		if (choices.length && node && node.kind === 'junction') {
 			output += '<p class="small-description">The line divides here.</p>';
 			output += setup.wayfinding.signMarkup(setup.worldmap.getJourney());
 		}
@@ -2622,7 +2634,8 @@ Macro.add('lineControls', {
 			if (!step) {
 				return;
 			}
-			var label = 'Drive ' + setup.units.kilometres(step.distanceKm || setup.worldmap.TILE_KM) + ' ' + choice.direction;
+			var label = 'Drive ' + setup.units.kilometres(step.distanceKm || setup.worldmap.TILE_KM) + ' ' + choice.direction
+				+ (step.couples ? ' [NEEDS WRITING PASS] and couple to the train standing there' : '');
 			if (step.blocked) {
 				output += '<span class="small-description"><em>' + label + ': ' + step.blocked + '</em></span><br>';
 				return;
@@ -2731,7 +2744,9 @@ Macro.add('drivingTravelButtons', {
 						+ '<<link "' + label + '">>'
 						+ '<<if setup.tutorial.requestExit(' + towardExit + ')>><<run setup.railyard.departOntoLine(' + towardExit + ', '
 						+ line.legIndex + ')>><<goto "OnTheLine">><</if>><</link>></span><br>';
-					output += '<span class="small-description">' + summary + ' About ' + setup.time.formatDuration(minutes) + ' at this weight.</span><br>';
+					output += '<span class="small-description">' + summary + ' About ' + setup.time.formatDuration(minutes) + ' at this weight.'
+						+ (setup.worldmap.parkedOn(setup.realWorldPilot.getStationTile(stationId))
+							? ' [NEEDS WRITING PASS] A train you left stands on the line here; leaving couples to it.' : '') + '</span><br>';
 				}
 			});
 		});

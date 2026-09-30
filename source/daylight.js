@@ -32,7 +32,7 @@ setup.daylight = {
 		var worldmap = setup.worldmap;
 		var view = worldmap && worldmap.getJourneyView ? worldmap.getJourneyView() : null;
 		var tile = view ? view.tile : worldmap && State.variables && State.variables.currentStation
-			? worldmap.getStationTile(worldmap.getSeed(), Number(State.variables.currentStation) || 1) : null;
+			? worldmap.getStationTile(worldmap.getSeed(), setup.yards.normalise(State.variables.currentStation || 1)) : null;
 		if (tile && Array.isArray(tile.geoCoordinate) && isFinite(Number(tile.geoCoordinate[1]))) {
 			return Math.max(-66, Math.min(66, Number(tile.geoCoordinate[1])));
 		}

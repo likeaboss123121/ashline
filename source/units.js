@@ -46,7 +46,7 @@ setup.units = {
 	getOutsideTemperature: function() {
 		var worldmap = setup.worldmap;
 		var view = worldmap.getJourneyView();
-		var tile = view ? view.tile : worldmap.getStationTile(worldmap.getSeed(), Number(State.variables.currentStation) || 1);
+		var tile = view ? view.tile : worldmap.getStationTile(worldmap.getSeed(), setup.yards.normalise(State.variables.currentStation || 1));
 		return worldmap.getClimate(worldmap.getSeed(), tile.x, tile.y).temperature;
 	}
 };
